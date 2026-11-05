@@ -95,7 +95,7 @@ export class Fight {
     this.passive = !!o.passive;
     this.respawn = o.respawn ?? true;
     this.player.x = this.arena.w * 0.4;
-    this.player.y = this.arena.h * 0.55;
+    this.player.y = this.arena.h * 0.6;
     this.spawnWolf(-1);
     this.lastBeat = Math.floor((this.t0 - this.t0) / this.period) - 1;
     this.now = this.t0;
@@ -159,7 +159,7 @@ export class Fight {
         p.x += (move.x / Math.max(1, len)) * s * dt;
         p.y += (move.y / Math.max(1, len)) * s * dt;
         p.x = clamp(p.x, 40, this.arena.w - 40);
-        p.y = clamp(p.y, 40, this.arena.h - 40);
+        p.y = clamp(p.y, TOP, this.arena.h - 40);
       }
       p.facing = Math.atan2(this.wolf.y - p.y, this.wolf.x - p.x);
     }
@@ -221,7 +221,7 @@ export class Fight {
 
   private clampWolf() {
     this.wolf.x = clamp(this.wolf.x, 40, this.arena.w - 40);
-    this.wolf.y = clamp(this.wolf.y, 40, this.arena.h - 40);
+    this.wolf.y = clamp(this.wolf.y, TOP, this.arena.h - 40);
   }
 
   private onBeat(k: number) {
@@ -305,7 +305,7 @@ export class Fight {
       if (!p.stance) {
         const a = Math.atan2(p.y - w.y, p.x - w.x);
         p.x = clamp(p.x + Math.cos(a) * this.beast.knockback, 40, this.arena.w - 40);
-        p.y = clamp(p.y + Math.sin(a) * this.beast.knockback, 40, this.arena.h - 40);
+        p.y = clamp(p.y + Math.sin(a) * this.beast.knockback, TOP, this.arena.h - 40);
       }
     }
     p.chain = 0;
@@ -409,4 +409,6 @@ export class Fight {
   }
 }
 
+/** The top of the arena is under the HUD and the tutorial box; bodies stay below it. */
+const TOP = 200;
 function clamp(x: number, a: number, b: number) { return Math.max(a, Math.min(b, x)); }

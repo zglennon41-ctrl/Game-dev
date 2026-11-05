@@ -114,7 +114,7 @@ function results(reason: 'time' | 'down') {
   const avg = s.offsets.length ? s.offsets.reduce((a, b) => a + b, 0) / s.offsets.length : 0;
   showScreen(`
     <h1>${reason === 'down' ? 'DOWN' : 'TWO MINUTES'}</h1>
-    <h2>${reason === 'down' ? 'The wolf put you on the ties. On the line, the party would have sixty seconds to stand on you.' : `${s.wolvesDown} cut-wolf${s.wolvesDown === 1 ? '' : 's'} felled.`}</h2>
+    <h2>${reason === 'down' ? 'The wolf put you on the ties. On the line, the party would have sixty seconds to stand on you.' : `${s.wolvesDown} cut-${s.wolvesDown === 1 ? 'wolf' : 'wolves'} felled.`}</h2>
     <table>
       <tr><td>On the beat</td><td>${pct}% of ${s.inputs} inputs</td></tr>
       <tr><td>Your timing</td><td>${Math.abs(Math.round(avg))} ms ${avg >= 0 ? 'late' : 'early'} on average</td></tr>
