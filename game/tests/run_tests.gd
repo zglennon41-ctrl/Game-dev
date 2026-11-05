@@ -34,6 +34,8 @@ func _run() -> void:
 	test_genius_parity()
 	test_genius_life()
 	test_genius_fights()
+	test_genius_assembly()
+	test_genius_art()
 	test_shape_kits()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
@@ -660,3 +662,57 @@ func test_genius_fights() -> void:
 	biting_wolf(n, 0.1)
 	evs = run_for(n, 0.5)
 	check(not types(evs).has("genius-guard") and n.genius == null, "no genius, no guard")
+
+## Every form in the lattice assembles, with a part for every feature it has a socket for.
+func test_genius_assembly() -> void:
+	var bad: Array = []
+	for f in Data.forms():
+		var info := { "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": f["features"] }
+		var b := GeniusBody.build(info, Color.ORANGE, 1)
+		var meshes := b.find_children("*", "MeshInstance3D", true, false).size() + b.find_children("*", "CPUParticles3D", true, false).size()
+		if meshes == 0 or b.sockets.is_empty():
+			bad.append(f["id"])
+		b.free()
+	check(bad.is_empty(), "every form in the lattice assembles (%d forms; failed: %s)" % [Data.forms().size(), str(bad)])
+
+## Art files follow the art bible: named for a silhouette, feature or form; sockets on bodies;
+## within budget; cards in portrait 3:4.
+func test_genius_art() -> void:
+	var sils := {}
+	for f in Data.forms():
+		sils[f["silhouette"]] = true
+	var feats := {}
+	for f in Data.features():
+		feats[f["id"]] = true
+	var forms := {}
+	for f in Data.forms():
+		forms[f["id"]] = true
+	var n := 0
+	for pair in [["bodies", sils, 8000], ["parts", feats, 1500]]:
+		var dir := "res://game/assets/genius/%s/" % pair[0]
+		for file in DirAccess.get_files_at(dir):
+			if not file.ends_with(".glb"):
+				continue
+			n += 1
+			var id := file.get_basename()
+			check((pair[1] as Dictionary).has(id), "%s/%s is named for a %s" % [pair[0], file, "silhouette" if pair[0] == "bodies" else "feature"])
+			var scene: Node3D = load(dir + file).instantiate()
+			var tris := 0
+			for m in scene.find_children("*", "MeshInstance3D", true, false):
+				var mesh: Mesh = (m as MeshInstance3D).mesh
+				for si in mesh.get_surface_count():
+					var arr := mesh.surface_get_arrays(si)
+					tris += (arr[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3 if arr[Mesh.ARRAY_INDEX] != null else (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+			check(tris <= int(pair[2]), "%s/%s is within budget (%d of %d triangles)" % [pair[0], file, tris, int(pair[2])])
+			if pair[0] == "bodies":
+				var socks := scene.find_children("socket_*", "", true, false).map(func(x): return String(x.name))
+				check(socks.has("socket_body") and socks.size() >= 4, "bodies/%s carries its sockets (%s)" % [file, ", ".join(socks)])
+			scene.free()
+	for file in DirAccess.get_files_at("res://game/assets/genius/cards/"):
+		if not file.ends_with(".png"):
+			continue
+		n += 1
+		check(forms.has(file.get_basename()), "cards/%s is named for a form" % file)
+		var tex: Texture2D = load("res://game/assets/genius/cards/" + file)
+		check(absf(float(tex.get_width()) / tex.get_height() - 0.75) < 0.01, "cards/%s is a 3:4 portrait" % file)
+	check(n > 0, "there is genius art to check (%d files)" % n)

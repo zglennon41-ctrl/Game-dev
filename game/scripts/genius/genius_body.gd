@@ -77,6 +77,7 @@ func _assemble(instar: int) -> void:
 		for n in _model.find_children("socket_*", "", true, false):
 			sockets[String(n.name)] = n
 		anim = _model.find_child("AnimationPlayer", true, false)
+		_adopt_art(_model)
 	else:
 		_placeholder_body(cfg["kinds"][kind], spec)
 	var sc: Array = spec.get("scale", [1, 1, 1])
@@ -92,8 +93,14 @@ func _assemble(instar: int) -> void:
 		var i: int = slot_count.get(slot, 0)
 		slot_count[slot] = i + 1
 		if ResourceLoader.exists(PART_DIR % f):
-			var art: Node3D = load(PART_DIR % f).instantiate()
-			_socket(socks[i % socks.size()]).add_child(art)
+			# A part made for a paired slot (limbs, arms) goes on every socket the body has for it.
+			var targets: Array = socks.filter(func(sn): return sockets.has(sn)) if socks.size() > 1 else [socks[0]]
+			if targets.is_empty():
+				targets = [socks[i % socks.size()]]
+			for sn in targets:
+				var art: Node3D = load(PART_DIR % f).instantiate()
+				_socket(sn).add_child(art)
+				_adopt_art(art)
 			parts_from_art.append(f)
 		else:
 			_placeholder_part(f, slot, socks)
@@ -102,6 +109,26 @@ func _assemble(instar: int) -> void:
 			if anim.has_animation(anim_names[k]):
 				anim.get_animation(anim_names[k]).loop_mode = Animation.LOOP_LINEAR
 		anim.play(anim_names["idle"])
+
+## Art follows the bible's conventions: materials named field* glow in the partner's Shape
+## colour; wing_l and wing_r beat.
+func _adopt_art(n: Node) -> void:
+	for m in n.find_children("*", "MeshInstance3D", true, false):
+		var mi := m as MeshInstance3D
+		for i in mi.get_surface_override_material_count():
+			var mat: Material = mi.mesh.surface_get_material(i)
+			if mat and mat.resource_name.begins_with("field") and mat is StandardMaterial3D:
+				var t := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
+				t.emission_enabled = true
+				t.emission = color
+				t.emission_energy_multiplier = maxf(2.0, t.emission_energy_multiplier)
+				t.albedo_color = color.darkened(0.6)
+				mi.set_surface_override_material(i, t)
+	for side in [["wing_l", -1.0], ["wing_r", 1.0]]:
+		var w: Node = n.find_child(side[0], true, false)
+		if w:
+			w.set_meta("wing", side[1])
+			_wings.append(w)
 
 ## Whether it walks (and so follows at the heel) or floats and flies (at the shoulder).
 func walks() -> bool:

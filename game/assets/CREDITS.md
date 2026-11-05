@@ -8,3 +8,9 @@ All placeholder art is CC0 (public domain): free for any use, credit not require
   (`quaternius/`)
 - **Cinzel** (Natanael Gama), **Alegreya** and **Alegreya Sans** (Huerta Tipográfica), from
   Google Fonts, under the SIL Open Font License 1.1. (`fonts/`; licenses alongside.)
+
+## Genius art (made for WILDLINE)
+
+`game/assets/genius/` (bodies, parts and cards) is built by `tools/blender/genius_kit.py`
+in Blender and owned by the project. Placeholder quality: a proof of the pipeline in
+`docs/art-bible.md`, section 8.

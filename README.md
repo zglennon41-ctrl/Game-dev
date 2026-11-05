@@ -33,6 +33,8 @@ will stand beside you, and your Pattern), then the night your field wakes. After
 | Tab, middle click | R3 | lock-on on or off |
 | Esc | Start | menu |
 | E | X | talk, open a door, rest (at the Academy) |
+| G | D-pad left | your genius's order: Guard or Hunt |
+| J | Back | your genius's page |
 
 The feel numbers are in `data/combat-room.json` and `data/beasts.json`. Change one, press
 F5 again, and the room plays differently.

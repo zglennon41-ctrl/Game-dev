@@ -176,6 +176,32 @@ desktop Blender later.
 10. **Credit**: every file's source and licence goes in `game/assets/CREDITS.md`. Check each AI
     tool's terms for commercial use and ownership before its output ships.
 
+### Conventions the game relies on
+
+- **Facing and scale**: Blender is Z up with the model facing -Y; the glTF export turns that
+  into the game's Y up, +Z forward. Model in metres; the game scales each genius to its
+  instar's height (`data/genius.json`, "size").
+- **Sockets**: empties named `socket_<name>` on every body (section 4).
+- **The field's colour**: any material whose name begins with `field` glows in the partner's
+  Shape colour in the game (eyes, feather tips, a core). Everything else keeps its own colour.
+- **Wings**: a wings part is two objects named `wing_l` and `wing_r`, pivoting at the
+  shoulder; the game beats them.
+- **Paired parts** (limbs, arms) are modelled once; the game hangs a copy on every socket the
+  body has for that slot.
+- **The asset test** (`npm run test:game`) checks every file: named for a silhouette, feature
+  or form; sockets on bodies; within budget; cards in 3:4.
+
+### The Blender kit
+
+`tools/blender/genius_kit.py` builds geniuses by script and exports them where the game looks.
+It needs Blender's Python module (`pip install bpy` in a Python 3.13 environment):
+
+    python tools/blender/genius_kit.py hawk
+
+The hawk (body, wings, beak, talons, far eyes, and its card) is the first form built this
+way: placeholder quality, proving the pipeline. Each new form is a function in that file;
+the same steps take an AI-made or hand-made model through cleanup, sockets and export.
+
 ### Prompt template (concept art)
 
 > Concept art for a video game, painted, visible brush strokes, lamplight gothic: [subject].

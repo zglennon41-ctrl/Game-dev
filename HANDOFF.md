@@ -356,6 +356,13 @@ cosmetics; any art pipeline.
   the questions. It plays as a slow, anticipatory reveal (a monster-breeding game's disc
   reading): pour, the Shapes' lights spinning and slowing, the landing, then the genius made
   in the fire.
+- **Art** (owner, 2026-11-05): AI-assisted, cleaned up by hand, with Blender as the workbench;
+  grounded proportions (not chibi); a painted card for every genius form, shown at the rite.
+  The art bible is `docs/art-bible.md`.
+- **The genius system is built first, whole** (owner, 2026-11-05), so everything after it has
+  the same scaffolding: the Reading, Resonance, instars, the Tally, orders, adaptations, grafts,
+  secondary forms, shadows and falls, in the game and matching the tools; and geniuses
+  assembled from bodies and socketed parts that art files replace by name.
 - **No one dies at the Academy** (owner, 2026-11-05). Its wards make training safe, and on
   expeditions a rescue team stands by: a downed student is pulled out, and failing costs the
   run something but never the character.

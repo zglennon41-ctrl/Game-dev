@@ -152,3 +152,13 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
     reveal, "Another life, same answers" draws a new spark.
 46. **Graphics**: options and a recommendation are in `docs/art-direction.md`, with four
     questions for you.
+47. **The genius in a fight** (`data/genius.json`, mine): Guard spends 12 Will and half the
+    bite, every 6 seconds; Hunt strikes every 2.2 seconds for 5, scaled by its Expression and
+    Resonance, only at a foe you are locked on to and within 7 metres. In the practice yard a
+    fallen genius stands again after 20 seconds; on the line it will wait for the post.
+48. **Order key**: G (pad: D-pad left) cycles Guard and Hunt; J opens the genius page.
+49. **The First Form is settled at the rite** (the bowl picks the best fit, with a little
+    chance); from the Second Form on, the Reading offers three and you choose. Say if the rite
+    should offer a choice too.
+50. **The genius page shows the whole Tally** (the systems doc's open question): I chose to
+    show it.
