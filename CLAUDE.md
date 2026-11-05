@@ -31,10 +31,14 @@ If step 2 is not fun with one Shape and one zone, nothing added later fixes it.
   breach detection, Mark counting, and canonization are pure functions with tests. The
   headless simulator runs a character through a year of play in seconds and prints what
   the genius became; `docs/three-lives.md` is the acceptance test for it.
-- **The pulse is the game.** Combat work goes to input timing, beat windows, and
-  feedback before anything else. Placeholder art is fine; placeholder feel is not.
-- **Placeholders are shapes with tags.** No art pipeline yet. A genius form is a
-  silhouette primitive plus feature tags rendered as labels. The lattice is data.
+- **Real-time feel is the game.** WILDLINE is a real-time MMORPG first; it should feel
+  like a AAA action MMO. Combat work goes to responsiveness, animation, hit feedback,
+  readable enemy telegraphs, and the camera before anything else. The beat is secondary:
+  it lives only in the parry (timed against an enemy's wind-up) and in the Pattern's
+  chain (owner's decision, 2026-11-05). Placeholder art is fine; placeholder feel is not.
+- **Placeholder art is CC0.** Until the game has its own art direction, characters,
+  creatures and environments come from CC0 libraries (KayKit, Quaternius), credited in
+  `game/assets/CREDITS.md`. A genius form may still be a silhouette plus feature tags.
 - **Small, playable, often.** Every PR leaves the Godot project playable. No branches that
   go dark for a week.
 - **Explain in plain language.** The owner does not code. When you report, say what

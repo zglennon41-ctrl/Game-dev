@@ -57,31 +57,28 @@ reads loosely. Kept as written in Systems.
 13. **Chain length isn't capped.** Systems says "to six"; the Bible says "three to seven"; with
    verses it reaches 9 here.
 
-# Step 1 — the pulse room
+# Step 1 — the combat room (real-time, 2026-11-05)
 
-Calls I made to get a fight on the beat. All are numbers in `data/combat-room.json` or
-`data/beasts.json` unless noted.
+Calls I made building real-time combat. Every number is in `data/combat-room.json` or
+`data/beasts.json`.
 
-14. **The cut-wolf is Read-shaped, not Bind.** Breaks come from the Shape opposite the beast's,
-    and the slice has only the Anchor, whose opposite is Read. A Bind wolf could never be broken
-    by the one Shape in the slice. (`beasts.json → cut-wolf.shape`)
-15. **The wolf bites on your beat.** Beasts have their own pulse in the sketch (500 ms). Here
-    the wolf winds up and strikes on the Anchor's beats, so a parry is always on the beat you
-    hear. A beast on its own tempo is a second-molt idea, maybe.
-16. **Only techniques break.** A saber strike is a weapon, not an Anchor technique, so it does
-    damage but fills no break pips. Ground Strike (18 Will) breaks. Three on the beat, in a row,
-    open the 3-beat stagger. A hit taken or an off-beat input resets the pips.
-17. **One Project per beat.** A second press in the same beat is a fumble: no hit, and the chain
-    and the break pips reset. This is what stops mashing.
-18. **The chain**: each on-beat Project in a row adds 5% damage, up to 6 links. (Combat says
-    "techniques chain" without a number.)
-19. **Anchor stance**: hits ×1.5, no knockback, moves at 70%, drains 2 Will/s. Off the beat, it
-    comes a beat late.
-20. **Hold**: holding guard drains 3 Will/s. A block takes half the hit and 5 Will. A parry
-    (Hold pressed on the strike beat) takes nothing, refunds 10 Will, and the wolf reels a beat
-    before it recovers.
-21. **Timing calibration** happens in the tutorial's first step: eight taps with the click, and
-    the game shifts the beat by your median offset. Reset on the menu.
-22. **There is a tutorial.** The slice's acceptance test says a new player should get the beat
-    "with no explanation". The fight can be started from the menu without it, so both can be
-    tested.
+14. **The cut-wolf is Read-shaped, not Bind.** Breaks come from techniques of the Shape
+    opposite the beast's, and the slice has only the Anchor, whose opposite is Read.
+15. **Dodge exists and costs 8 Will.** The design docs have no dodge. A real-time action
+    game needs one; it has a moment of invulnerability in the middle.
+16. **Block takes 30% of a blow and some Will; a parry is a block tapped in the last 0.2 s
+    before the blow lands.** No damage, 10 Will back, the wolf reels for 1.4 s.
+17. **The sword combo is three swings** (Chop, Diagonal, Sweep), with presses buffered, and
+    can be cancelled into a dodge or a block from its recovery. Swords do damage but do
+    not break; only techniques break.
+18. **Ground Strike** (the one technique): 18 Will, 3.5 s cooldown, heavy, knocks back, breaks.
+19. **The wolf** circles, then bites (fast) or pounces (from range). Light hits do not make it
+    flinch; every second light hit while it is circling or recovering, it snaps back with a
+    quick bite. Heavy hits make it flinch. Its wind-up shows as a red glow, a "!", and its
+    reach on the ground.
+20. **The starting Pattern is "Breaking Ground"**: Form anchor.weight; Trigger "Only after a
+    perfect Hold" (×1.5), Toll "All my Will" (×2), ×3 in all. After a parry it can be fired
+    for 3 s. Its chain is five strikes on the Anchor's pulse; each landed strike hits, and
+    all five pay base 14 × Stage 4 × 3 = 168 on top. One missed fizzles it; the Toll is taken.
+21. **Anchor stance**: hits ×1.5, cannot be knocked back or flinched, moves at 75%, 2 Will/s.
+22. **Hit-stop and the parry's slow motion** are part of the feel; both are numbers in `feel`.

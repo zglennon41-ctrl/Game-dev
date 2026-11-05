@@ -90,12 +90,17 @@ matter, and what it depends on. Detail lives in `docs/`.
 
 ### 3.3 Combat
 - **Purpose.** Third-person, real time, on the pulse.
-- **Rule.** Four verbs = four Stages: Hold, Shape, Project, Pattern. Inputs on the beat
-  are perfect; off-beat is 70%. Beasts have a Shape and a molt; three breaks from the
-  opposite Shape open a 3-beat stagger. Party of three plus three geniuses; eight shared
-  perfect beats enter Chord (3 beats of all-perfect, Patterns ×2).
-- **Numbers.** Beat window 150 ms (200 on Green). Health 100. Down timer 60 s; revive by
-  3 beats on the body. No player death except Sworn characters.
+- **Rule.** Real-time action (owner's decision, 2026-11-05: the beat is secondary to good
+  real-time gameplay). The four Stages are the verbs: Hold (block; a block tapped just
+  before a blow lands is a parry), Shape (the stance), Project (strikes, combos and
+  techniques, which always work fully when pressed), Pattern (the signature). Dodge is a
+  fifth input. The timing layer lives only in the parry and in the Pattern's chain, which
+  plays on the character's pulse. Beasts have a Shape and a molt and telegraph their
+  attacks; three breaks from techniques of the opposite Shape stagger them. Party of three
+  plus three geniuses; Chord (shared perfect timing) is to be redesigned for this model.
+- **Numbers.** Parry window 0.2 s; Pattern cue window 200 ms on Green (150 above). Health
+  100. Down timer 60 s. No player death except Sworn characters. Feel numbers in
+  `data/combat-room.json`.
 - **Depends on.** Field, Terms.
 
 ### 3.4 Genius
@@ -341,7 +346,8 @@ cosmetics; any art pipeline.
 
 **Decided** (do not ask again):
 - Rules are data; the Reading and Ledgers are deterministic and tested.
-- Beat window 150 ms, 200 ms on Green. Off-beat output 70%.
+- Combat is real-time action; the beat lives only in the parry and the Pattern
+  (2026-11-05). Online play stays at Step 7 of the slice. Placeholder art is CC0.
 - Terms are a flat grammar (no severity tiers). ×9 is the ceiling.
 - One Pattern per character, rebuilt at the Thaw.
 - Resonance is the higher of instar and tier; each milestone unlocks the other side's

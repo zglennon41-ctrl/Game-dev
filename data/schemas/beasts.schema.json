@@ -10,16 +10,15 @@
       "shape",
       "molt",
       "health",
-      "breakWindowBeats",
-      "strikeDamage",
-      "strikeReach",
-      "telegraphBeats",
-      "recoverBeats",
-      "circleBeats",
+      "radius",
+      "walkSpeed",
+      "gallopSpeed",
       "circleRadius",
-      "approachSpeed",
-      "moveSpeed",
-      "knockback"
+      "prowl",
+      "attacks",
+      "flinchEvery",
+      "flinchTime",
+      "respawnSeconds"
     ],
     "properties": {
       "shape": {
@@ -40,9 +39,20 @@
       "health": {
         "type": "number"
       },
-      "telegraphBeats": {
-        "type": "integer",
-        "minimum": 1
+      "attacks": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": [
+            "id",
+            "range",
+            "windup",
+            "active",
+            "recover",
+            "damage"
+          ]
+        }
       }
     }
   }
