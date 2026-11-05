@@ -100,7 +100,7 @@ func _build_environment() -> void:
 	env.fog_light_color = Color(0.06, 0.05, 0.06)
 	env.fog_density = 0.022
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_exposure = 1.05
+	env.tonemap_exposure = 0.9
 	env.glow_enabled = true
 	env.glow_intensity = 0.7
 	env.glow_bloom = 0.08
@@ -114,7 +114,7 @@ func _build_environment() -> void:
 	var moon := DirectionalLight3D.new()
 	moon.rotation_degrees = Vector3(-62, -35, 0)
 	moon.light_color = Color(0.6, 0.68, 0.95)
-	moon.light_energy = 0.55
+	moon.light_energy = 0.4
 	moon.shadow_enabled = true
 	moon.directional_shadow_max_distance = 40.0
 	add_child(moon)
@@ -170,8 +170,9 @@ func _build_chamber() -> void:
 				var t := _piece("torch_mounted", Vector3(wx, 2.4, side * (hd - 0.45)), 0.0 if side < 0 else 180.0)
 				var light := OmniLight3D.new()
 				light.light_color = Color(1.0, 0.6, 0.3)
-				light.light_energy = 2.2
-				light.omni_range = 9.0
+				light.light_energy = 1.5
+				light.omni_range = 7.5
+				light.omni_attenuation = 1.6
 				light.shadow_enabled = false
 				light.position = Vector3(0, 0.6, 0.25)
 				t.add_child(light)
@@ -239,7 +240,9 @@ func _build_wolf() -> void:
 		l.outline_size = 10
 		l.outline_modulate = Color(0, 0, 0, 0.85)
 		add_child(l)
-	_wolf_label.font_size = 40
+	_wolf_label.font_size = 28
+	_wolf_label.fixed_size = true
+	_wolf_label.pixel_size = 0.0012
 	_wolf_label.modulate = C_DIM
 	_alert.font_size = 120
 	_alert.text = "!"
@@ -362,7 +365,6 @@ func _ring_wave(at: Vector3, color: Color, radius: float) -> void:
 	mi.material_override = m
 	add_child(mi)
 	var tw: Tween = create_tween()
-	tw.set_ignore_time_scale(true)
 	tw.set_parallel(true)
 	tw.tween_property(mi, "scale", Vector3(radius, 0.05, radius), 0.35).set_ease(Tween.EASE_OUT)
 	tw.tween_property(m, "albedo_color:a", 0.0, 0.35)
@@ -568,7 +570,7 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 	# Torches flicker.
 	for idx in _torches.size():
 		var l: OmniLight3D = _torches[idx]
-		l.light_energy = 2.0 + 0.35 * sin(_clock * 9.0 + idx * 1.7) + 0.2 * sin(_clock * 23.0 + idx)
+		l.light_energy = 1.4 + 0.25 * sin(_clock * 9.0 + idx * 1.7) + 0.15 * sin(_clock * 23.0 + idx)
 
 	# Floaters rise and fade (in real time, so they read during hit-stop).
 	for fl in _floaters.duplicate():

@@ -21,8 +21,8 @@ func _init(f: Fight, w: World) -> void:
 	steps = [
 		{ "title": "Move", "text": "[b]WASD[/b] moves; the [b]mouse[/b] turns the camera. [b]Tab[/b] locks on to a foe and back off. Walk to the yard-wolf on its chain.",
 		  "enter": _enter_move, "on": _on_move, "frame": _frame_move },
-		{ "title": "Strike", "text": "[b]Left click[/b] swings the sword. Keep pressing and the swings chain into a three-hit combo; the third hits hardest. Land a full combo.",
-		  "on": _on_combo, "progress": _prog_combo },
+		{ "title": "Strike", "text": "You are locked on to the wolf now ([b]Tab[/b] toggles it). [b]Left click[/b] swings the sword. Keep pressing and the swings chain into a three-hit combo; the third hits hardest. Land a full combo.",
+		  "enter": _enter_lock, "on": _on_combo, "progress": _prog_combo },
 		{ "title": "Dodge", "text": "[b]Space[/b] dodges in the direction you are moving (backward if you are still). For a moment in the middle of it, nothing can touch you. It costs 8 Will. Dodge twice.",
 		  "on": _on_dodge, "progress": _prog_n2 },
 		{ "title": "Block and parry", "text": "Now it bites. When it winds up it glows red, a [b]![/b] rises over it, and its reach shows on the ground. [b]Hold right click[/b] to block (most of the bite, and some Will). [b]Tap right click just before the bite lands[/b] to parry: no damage, Will back, and the wolf reels. Parry it twice.",
@@ -45,6 +45,10 @@ func _enter_move() -> void:
 	fight.w_pos = fight.p_pos + Vector2(6.0, -2.0)
 	fight.p_lock = false
 	world.lock_on = false
+
+func _enter_lock() -> void:
+	fight.p_lock = true
+	world.lock_on = true
 
 func _enter_bite() -> void:
 	fight.passive = true
