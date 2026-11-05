@@ -33,6 +33,7 @@ func _run() -> void:
 	test_spark()
 	test_genius_parity()
 	test_genius_life()
+	test_genius_fights()
 	test_shape_kits()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
@@ -595,3 +596,67 @@ func test_genius_life() -> void:
 	check(hb.size() >= 2, "features sort into slots (%s)" % str(hb.keys()))
 	g.fall(); g.fall(); g.develop_secondary("night"); g.fall()
 	check(g.secondary.is_empty() and g.fallen, "three falls in a season cost the newest secondary form")
+
+func _born_genius() -> Genius:
+	var h := Fight.default_hero()
+	h["seed"] = "stands-between"
+	h["blood"] = "ridgefolk"
+	var g := Genius.for_hero(h)
+	g.read(1)
+	g.take()
+	g.milestone("rite")
+	return g
+
+## The genius in a fight: Guard, Hunt, falling, getting up, orders, and what it learns.
+func test_genius_fights() -> void:
+	var g := _born_genius()
+	g.order = "guard"
+	var f := Fight.new({ "seed": 1, "genius": g })
+	check(is_equal_approx(f.g_will, 40.0), "a First Form starts a fight with 40 Will")
+	biting_wolf(f, 0.1)
+	var evs := run_for(f, 0.5)
+	check(types(evs).has("genius-guard") and f.p_hp == 100.0 and f.g_will < 40.0, "on Guard, it takes the bite you did not see")
+	biting_wolf(f, 0.1)
+	evs = run_for(f, 0.5)
+	check(types(evs).has("hurt"), "but not twice in a row: Guard has a cooldown")
+	# Guarding until it falls.
+	var falls := 0
+	for i in 12:
+		f.g_guard_ready_at = 0.0
+		biting_wolf(f, 0.1)
+		evs = run_for(f, 0.5)
+		if types(evs).has("genius-fall"):
+			falls += 1
+			break
+	check(falls == 1 and g.fallen and f.g_will == 0.0, "emptied of Will, it falls")
+	run_for(f, 21.0)
+	check(not g.fallen, "in the practice yard it gets up again")
+	# Hunt: only when locked on, and only near.
+	g.order = "hunt"
+	var h := Fight.new({ "seed": 2, "genius": g, "passive": true })
+	h.w_state = "idle"
+	h.w_pos = h.p_pos + Vector2(3, 0)
+	var hp0 := h.w_hp
+	h.p_lock = false
+	run_for(h, 3.0)
+	check(h.w_hp == hp0, "unlocked, it does not hunt")
+	h.p_lock = true
+	evs = run_for(h, 5.0)
+	check(types(evs).has("genius-hunt") and h.w_hp < hp0, "locked on, it hunts")
+	check(float(g.tally["orders"].get("hunt", 0)) >= 1.0, "and the Tally counts the order")
+	# Orders cycle among those it knows.
+	h.input("order")
+	check(g.order == "guard", "G changes the order")
+	# What it learns from the player's own hits.
+	var k := Fight.new({ "seed": 3, "genius": g, "passive": true })
+	k.w_state = "idle"
+	k.w_pos = k.p_pos + Vector2(1.6, 0)
+	k.p_facing = 0.0
+	k.input("attack")
+	run_for(k, 1.0)
+	check(float(g.tally["range"].get("close", 0)) >= 1.0, "a hit up close is counted as close")
+	# Without a genius, nothing changes.
+	var n := Fight.new({ "seed": 1 })
+	biting_wolf(n, 0.1)
+	evs = run_for(n, 0.5)
+	check(not types(evs).has("genius-guard") and n.genius == null, "no genius, no guard")

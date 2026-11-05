@@ -89,6 +89,13 @@ var crit_until := -9.0
 var ward_until := -9.0
 var second_heart_used := false
 var w_shouted := false
+var genius: Genius = null   # the hero's genius, if the rite has given it a body
+var g_will := 0.0
+var g_will_max := 0.0
+var g_guard_ready_at := 0.0
+var g_hunt_at := 0.0
+var g_regen_from := 0.0
+var g_up_at := -1.0
 var obstacles: Array = []    # Vector3(x, z, radius): pillars and people the hero walks round
 var allowed: Array = []      # a lesson may allow only some actions (empty: all)
 var mercy := false           # the prologue: the hero cannot fall
@@ -124,6 +131,13 @@ func _init(opts: Dictionary = {}) -> void:
 	p_hp = room["player"]["health"]
 	p_will = rules["field"]["willMax"]
 	p_pos = Vector2(-2.0, 1.0)
+	var gn: Variant = opts.get("genius", null)
+	if gn is Genius and (gn as Genius).is_born():
+		genius = gn
+		g_will_max = genius.will_max()
+		g_will = 0.0 if genius.fallen else g_will_max
+		if genius.fallen:
+			g_up_at = float(Data.genius()["fall"]["roomRecoverSeconds"])
 	_spawn_wolf()
 
 func _emit(e: Dictionary) -> void:
@@ -133,7 +147,90 @@ func _emit(e: Dictionary) -> void:
 func drain() -> Array:
 	var e := events
 	events = []
+	if genius:
+		_record(e)
 	return e
+
+# ===================================================================== the genius
+
+## Guard: it takes the hit you did not see, out of its own Will.
+func _genius_guards(dmg: float) -> bool:
+	if not genius or genius.fallen or genius.order != "guard" or now < g_guard_ready_at:
+		return false
+	var o := _order("guard")
+	var cost := float(o["guard"]["willCost"])
+	# It guards with whatever Will it has left; emptied by the blow, it falls.
+	if g_will <= 0.0:
+		return false
+	g_will = maxf(0.0, g_will - cost - dmg * 0.5)
+	g_guard_ready_at = now + float(o["guard"]["cooldown"])
+	g_regen_from = now + float(Data.genius()["will"]["regenDelayAfterHit"])
+	_emit({ "type": "genius-guard", "damage": dmg })
+	if g_will <= 0.0:
+		_genius_fall()
+	return true
+
+## Hunt: every so often it strikes the foe you are locked on to, if the foe is near.
+func _update_genius(dt: float) -> void:
+	if not genius:
+		return
+	if genius.fallen:
+		if g_up_at > 0.0 and now >= g_up_at:
+			genius.recover()
+			g_will = g_will_max * 0.5
+			g_up_at = -1.0
+			_emit({ "type": "genius-up" })
+		return
+	if now >= g_regen_from:
+		g_will = minf(g_will_max, g_will + float(Data.genius()["will"]["regenPerSecond"]) * dt)
+	if genius.order != "hunt" or w_state in ["down", "absent"] or not p_lock:
+		return
+	var o := _order("hunt")
+	var h: Dictionary = o["hunt"]
+	var ex: Dictionary = Data.genius()["byExpression"].get(genius.body.get("expression", ""), { "damage": 1.0, "interval": 1.0 })
+	if now < g_hunt_at or dist() > float(h["reach"]) or g_will < float(h["willCost"]):
+		return
+	g_hunt_at = now + float(h["interval"]) * float(ex["interval"])
+	g_will -= float(h["willCost"])
+	var dmg := roundf(float(h["damage"]) * float(ex["damage"]) * float(Data.genius()["byResonance"][str(genius.resonance())]))
+	if w_state == "stagger":
+		dmg = roundf(dmg * float(room["break"]["staggerDamageFactor"]))
+	w_hp = maxf(w_floor, w_hp - dmg)
+	stats["damage_dealt"] += dmg
+	_emit({ "type": "genius-hunt", "damage": dmg, "at": w_pos })
+	if w_hp == 0.0:
+		stats["wolves_down"] += 1
+		_wolf_set("down", float(beast["respawnSeconds"]))
+		_emit({ "type": "wolf-down" })
+		_emit({ "type": "anim", "who": "wolf", "name": "Death", "speed": 1.0 })
+
+func _genius_fall() -> void:
+	genius.fall()
+	g_will = 0.0
+	g_up_at = now + float(Data.genius()["fall"]["roomRecoverSeconds"]) if respawn else -1.0
+	_emit({ "type": "genius-fall" })
+
+func _order(id: String) -> Dictionary:
+	for o in Data.genius()["orders"]:
+		if o["id"] == id:
+			return o
+	return {}
+
+## What the genius learns from the fight: where hits land, the families used, the orders
+## it carried out, the Pattern fired.
+func _record(evs: Array) -> void:
+	for e in evs:
+		match String(e["type"]):
+			"hit":
+				if not e.get("pattern", false):
+					genius.hit_at(float(e.get("dist", 2.0)))
+			"technique":
+				genius.used_family("%s.%s" % [player_shape, String(tech.get("family", ""))])
+			"pattern-start":
+				genius.pattern_fired()
+				genius.used_family(String(pattern["form"]))
+			"genius-guard": genius.gave_order("guard")
+			"genius-hunt": genius.gave_order("hunt")
 
 func dist() -> float:
 	return p_pos.distance_to(w_pos)
@@ -185,6 +282,11 @@ func input(action: String) -> void:
 	if p_state == "down":
 		return
 	if not allowed.is_empty() and action not in allowed:
+		return
+	if action == "order":
+		if genius:
+			genius.order = genius.next_order()
+			_emit({ "type": "order", "order": genius.order })
 		return
 	# Pressed a little early (mid-swing, mid-dodge, mid-flinch): remember it briefly and fire
 	# it the moment it is allowed, so no press is lost.
@@ -487,6 +589,7 @@ func update(dt: float, move: Vector2 = Vector2.ZERO) -> void:
 	_try_queued()
 	_update_wolf(dt * _wolf_time_scale())
 	_update_burn(dt)
+	_update_genius(dt)
 	_separate()
 	for o in obstacles:
 		var c := Vector2(o.x, o.y)
@@ -696,7 +799,7 @@ func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
 	stats["damage_dealt"] += dmg
 	p_combo_count += 1
 	stats["longest_combo"] = maxi(stats["longest_combo"], p_combo_count)
-	_emit({ "type": "hit", "damage": dmg, "pattern": from_pattern, "heavy": heavy, "staggered": w_state == "stagger", "combo": p_combo, "crit": crit })
+	_emit({ "type": "hit", "damage": dmg, "pattern": from_pattern, "heavy": heavy, "staggered": w_state == "stagger", "combo": p_combo, "crit": crit, "dist": dist() })
 	if w_hp == 0.0:
 		stats["wolves_down"] += 1
 		_wolf_set("down", float(beast["respawnSeconds"]))
@@ -880,6 +983,8 @@ func _resolve_bite() -> void:
 		_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 0.8 })
 		return
 	var dmg := float(a["damage"]) * _b("damageTaken", 1.0)
+	if not (_blocking() and facing_wolf) and _genius_guards(dmg):
+		return
 	if _blocking() and facing_wolf:
 		dmg *= float(room["block"]["damageFactor"])
 		p_will = maxf(0.0, p_will - float(room["block"]["willPerBlockedHit"]))

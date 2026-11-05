@@ -125,13 +125,19 @@ func enter(h: Dictionary) -> void:
 			"place": "quad", "record": { "parries": 0, "blocks": 0, "hurts": 0, "dodges": 0, "talks": 0 } }
 		hero["academy"] = progress
 	cohort = Academy.make_cohort(int(progress["seed"]), hero)
+	genius = Genius.for_hero(hero)
 	visible = true
 	go(String(progress.get("place", "quad")), not bool(progress["arrived"]))
 	if not progress["arrived"]:
 		var a: Dictionary = Data.academy["arrival"]
 		say(a["speaker"], a["lines"], func(): progress["arrived"] = true; save())
 
+var genius: Genius = null
+
 func save() -> void:
+	if genius and genius.is_born():
+		genius.update_adaptations()
+		genius.save_to(hero)
 	hero["academy"] = progress
 	Settings.save_hero(hero)
 
@@ -196,6 +202,8 @@ func go(place_id: String, quiet := false, from := "") -> void:
 	# The hero walks the grounds in a fight with no foe in it; in the yard, Millstone sits by Bask.
 	var opts := { "hero": hero, "beast": "millstone", "passive": true, "respawn": true, "mercy": true, "allow_breach": false,
 		"arena": Vector2(spec["size"][0], spec["size"][1]) }
+	if genius and genius.is_born():
+		opts["genius"] = genius
 	fight = Fight.new(opts)
 	fight.p_pos = spawn
 	fight.p_facing = (-spawn).angle() if spawn.length() > 0.1 else -PI / 2.0
@@ -505,7 +513,7 @@ func _start_lesson(lesson: Dictionary) -> void:
 	var spec: Dictionary = Data.academy["places"][lesson["place"]]
 	var ins: Dictionary = Data.by_id(Data.academy["instructors"], lesson["instructor"])
 	var p := fight.p_pos
-	fight = Fight.new({ "hero": hero, "beast": ins.get("genius", {}).get("beast", "millstone"), "passive": true, "respawn": true,
+	fight = Fight.new({ "hero": hero, "beast": ins.get("genius", {}).get("beast", "millstone"), "passive": true, "respawn": true, "genius": genius if genius and genius.is_born() else null,
 		"mercy": true, "allow_breach": false, "arena": Vector2(spec["size"][0], spec["size"][1]), "seed": randi() })
 	fight.allowed = lesson.get("allow", [])
 	fight.obstacles = world.obstacles

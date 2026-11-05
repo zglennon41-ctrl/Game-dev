@@ -860,6 +860,32 @@ func feedback(f: Fight, events: Array) -> void:
 				floater(P, "your Pattern is lost", C_WINDUP, 44)
 			"stance-locked":
 				floater(P, "no stance this season (your Toll)", C_DIM, 40)
+			"genius-hunt":
+				_g_dart_at = _v3(f.w_pos, 1.0)
+				_g_dart_until = _clock + 0.28
+				impact(_v3(f.w_pos, 1.0), _g_tint, 0.6)
+				burst(_v3(f.w_pos, 1.0), _g_tint, 10, 4.0)
+				floater(W + Vector3(0.4, 0.4, 0), "%d" % int(e["damage"]), _g_tint.lightened(0.3), 46, 0.8)
+				_wolf_flash = maxf(_wolf_flash, 0.5)
+			"genius-guard":
+				var mid := _v3(f.p_pos.lerp(f.w_pos, 0.35), 1.2)
+				_g_dart_at = mid
+				_g_dart_until = _clock + 0.35
+				impact(mid, _g_tint, 1.0)
+				_ring_wave(_v3(f.p_pos), _g_tint, 1.6)
+				floater(P, "GUARDED", _g_tint.lightened(0.3), 52, 1.0)
+				genius_react("parry")
+			"genius-fall":
+				genius_down = true
+				floater(P + Vector3(0, 0.4, 0), "YOUR GENIUS FALLS", Color(0.8, 0.75, 0.7), 56, 1.6)
+				_g_flicker = 1.5
+			"genius-up":
+				genius_down = false
+				floater(P, "IT STANDS AGAIN", _g_tint.lightened(0.3), 48, 1.2)
+				genius_react("stance")
+			"order":
+				floater(P + Vector3(0, 0.3, 0), "ORDER: %s" % String(e["order"]).to_upper(), _g_tint.lightened(0.3), 44, 1.0)
+				genius_react("cue")
 			"named":
 				floater(_v3(f.p_pos, 2.6), "%s!" % String(e["who"]).to_upper(), C_TEXT, 64, 1.0)
 			"bar-warning":
@@ -1204,6 +1230,7 @@ func snap_camera(f: Fight) -> void:
 
 func reset_feedback() -> void:
 	Engine.time_scale = 1.0
+	genius_down = false
 	_hitstop_until = 0
 	_slowmo_until = 0
 	_p_oneshot_until = 0.0
@@ -1352,6 +1379,9 @@ var _g_spin := 0.0
 var _g_born := 1.0
 var _g_pos := Vector3.ZERO
 var genius_goal := Vector3.INF     # where a scene has called the genius to
+var genius_down := false           # fallen in a fight: it lies where it fell
+var _g_dart_at := Vector3.ZERO
+var _g_dart_until := 0.0
 var genius_goal_radius := 0.0
 var _g_form: Node3D = null         # the First Form, once the rite has given it one
 var _g_form_info: Dictionary = {}
@@ -1478,6 +1508,10 @@ func _update_genius(f: Fight, dt: float) -> void:
 	var off := Vector3(cos(_g_angle) * radius, sin(_g_angle * 1.0 + 0.7) * 0.09 + 0.04 * sin(_clock * 2.3), sin(_g_angle) * radius)
 	var born_k := _g_born * _g_born * (3.0 - 2.0 * _g_born)
 	var want := centre + off * born_k
+	if _clock < _g_dart_until:
+		want = _g_dart_at
+	if genius_down:
+		want = _player.global_position + Vector3(0.6, 0.15, 0.4)
 	var k := 1.0 - exp(-dt * 16.0)
 	_g_pos = want if _g_pos == Vector3.ZERO else _g_pos.lerp(want, k)
 	_genius.global_position = _g_pos
@@ -2090,6 +2124,8 @@ func _update_form(f: Fight, dt: float) -> void:
 	var want := _v3(f.p_pos + side * (1.1 if walker else 0.8), 0.0 if walker else 1.5 + 0.08 * sin(_clock * 2.4))
 	if genius_goal != Vector3.INF:
 		want = genius_goal
+	if _clock < _g_dart_until:
+		want = _g_dart_at
 	var before := _g_form_pos
 	_g_form_pos = _g_form_pos.lerp(want, 1.0 - exp(-dt * (4.0 if walker else 6.0)))
 	_g_form.global_position = _g_form_pos
@@ -2100,6 +2136,11 @@ func _update_form(f: Fight, dt: float) -> void:
 	else:
 		_g_form_facing = lerp_angle(_g_form_facing, f.p_facing, 1.0 - exp(-dt * 3.0))
 	_g_form.rotation.y = _yaw(_g_form_facing)
+	# Fallen, it lies on its side where it fell.
+	_g_form.rotation.z = lerpf(_g_form.rotation.z, PI / 2.0 if genius_down else 0.0, 1.0 - exp(-dt * 6.0))
+	if genius_down:
+		_g_form_pos = _g_form_pos.lerp(Vector3(_g_form_pos.x, 0.15, _g_form_pos.z), 1.0 - exp(-dt * 4.0))
+		_g_form.global_position = _g_form_pos
 	if walker and is_instance_valid(_g_form_anim):
 		var want_anim := WA + ("Gallop" if flat.length() > 4.0 else ("Walk" if flat.length() > 0.4 else "Idle"))
 		if _g_form_anim.current_animation != want_anim:

@@ -241,6 +241,7 @@ func _form(dt: float) -> void:
 
 func _named(n: String) -> void:
 	var gn := Rite.birth(hero, form["reading"], n if n.strip_edges() != "" else form["name"])
+	ac.genius = gn
 	var g := gn.to_dict()
 	# It comes down to its partner, small, and stays.
 	var tw := _form_node.create_tween()

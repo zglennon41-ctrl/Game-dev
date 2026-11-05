@@ -23,6 +23,10 @@ var hp_ghost := ProgressBar.new()
 var will_bar := ProgressBar.new()
 var hp_text := Label.new()
 var will_text := Label.new()
+var _g_row := VBoxContainer.new()
+var _g_label := Label.new()
+var _g_order := Label.new()
+var g_bar := ProgressBar.new()
 var status := Label.new()
 var target := PanelContainer.new()
 var target_name := Label.new()
@@ -119,6 +123,19 @@ func _ready() -> void:
 	srow.add_child(status)
 	Style.label(will_text, 13, BLUE.lightened(0.3), "ui", 3)
 	srow.add_child(will_text)
+	# The genius: its name and form, its Will, its order (G changes it).
+	_g_row.add_theme_constant_override("separation", 3)
+	var grow := HBoxContainer.new()
+	grow.add_theme_constant_override("separation", 10)
+	_g_row.add_child(grow)
+	Style.label(_g_label, 15, FG, "title", 3)
+	_g_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grow.add_child(_g_label)
+	Style.label(_g_order, 13, GOLD, "ui_bold", 3)
+	grow.add_child(_g_order)
+	_g_row.add_child(_meter(g_bar, null, null, Style.GOLD, 7, 376))
+	_g_row.visible = false
+	me.add_child(_g_row)
 
 	# The target frame.
 	target.set_anchors_preset(Control.PRESET_CENTER_TOP)
@@ -319,6 +336,9 @@ func configure(f: Fight, hero_name: String) -> void:
 	_last_hp = -1.0
 	_last_t = -1.0
 	_play_time = 0.0
+	_g_row.visible = f.genius != null
+	if f.genius:
+		(g_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color = _accent.lightened(0.15)
 
 # --- Screens ----------------------------------------------------------------
 
@@ -441,6 +461,13 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	_hurt_flash = maxf(0.0, _hurt_flash - dt * 3.0)
 	(_frame.get_theme_stylebox("panel") as StyleBoxFlat).border_color = Style.BRASS_DIM.lerp(Style.EMBER, _hurt_flash)
 	will_bar.value = f.p_will
+	if f.genius:
+		var gn: Genius = f.genius
+		_g_label.text = gn.form_name() if gn.name == "" or gn.name == gn.form_name() else "%s  ·  %s" % [gn.name, gn.form_name()]
+		g_bar.max_value = f.g_will_max
+		g_bar.value = f.g_will
+		_g_order.text = "FALLEN" if gn.fallen else "%s   [G]" % gn.order.to_upper()
+		_g_order.add_theme_color_override("font_color", Style.EMBER if gn.fallen else GOLD)
 	will_text.text = "Will %d" % roundi(f.p_will)
 	var low := f.p_hp <= hp_max * 0.3 and f.p_state != "down"
 	(hp_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color = RED.lerp(Color(1, 0.42, 0.3), (0.5 + 0.5 * sin(_play_time * 8.0)) * 0.5) if low else RED

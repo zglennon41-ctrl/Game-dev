@@ -30,11 +30,11 @@ var _bot_move := Vector2.ZERO
 const ACTIONS := {
 	"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN],
 	"attack": [KEY_J], "block": [KEY_K], "dodge": [KEY_SPACE, KEY_SHIFT], "technique": [KEY_Q, KEY_1],
-	"stance": [KEY_F, KEY_L], "pattern": [KEY_R], "name_foe": [KEY_N], "lock_on": [KEY_TAB], "menu": [KEY_ESCAPE], "interact": [KEY_E],
+	"stance": [KEY_F, KEY_L], "pattern": [KEY_R], "name_foe": [KEY_N], "lock_on": [KEY_TAB], "menu": [KEY_ESCAPE], "interact": [KEY_E], "order": [KEY_G],
 }
 const MOUSE := { "attack": MOUSE_BUTTON_LEFT, "block": MOUSE_BUTTON_RIGHT, "lock_on": MOUSE_BUTTON_MIDDLE }
 const PAD := { "attack": JOY_BUTTON_X, "block": JOY_BUTTON_RIGHT_SHOULDER, "dodge": JOY_BUTTON_A, "technique": JOY_BUTTON_Y,
-	"stance": JOY_BUTTON_LEFT_SHOULDER, "pattern": JOY_BUTTON_B, "lock_on": JOY_BUTTON_RIGHT_STICK, "menu": JOY_BUTTON_START, "name_foe": JOY_BUTTON_DPAD_UP, "interact": JOY_BUTTON_X }
+	"stance": JOY_BUTTON_LEFT_SHOULDER, "pattern": JOY_BUTTON_B, "lock_on": JOY_BUTTON_RIGHT_STICK, "menu": JOY_BUTTON_START, "name_foe": JOY_BUTTON_DPAD_UP, "interact": JOY_BUTTON_X, "order": JOY_BUTTON_DPAD_LEFT }
 
 func _ready() -> void:
 	Style.apply_global()
@@ -129,6 +129,8 @@ func _ready() -> void:
 	elif _args.has("tutorial"):
 		start("tutorial")
 	elif _args.has("fight"):
+		if _args.has("saved"):
+			hero = Settings.hero()
 		start("fight")
 	else:
 		menu()
@@ -355,7 +357,8 @@ func start(which: String) -> void:
 	var h: Dictionary = Fight.default_hero() if which == "tutorial" or hero.is_empty() else hero
 	fight = Fight.new({ "hero": h, "beast": "yard-wolf" if which == "tutorial" else "cut-wolf", "seed": randi(),
 		"passive": which == "tutorial", "respawn": true,
-		"pattern_lost": false if which == "tutorial" else Settings.pattern_lost() })
+		"pattern_lost": false if which == "tutorial" else Settings.pattern_lost(),
+		"genius": Genius.for_hero(h) if h.has("genius") else null })
 	world.build_hero(h)
 	hud.configure(fight, h.get("name", ""))
 	_breached = false
@@ -398,6 +401,12 @@ func _tutorial_done() -> void:
 
 func _results(reason: String) -> void:
 	sfx.play("done")
+	# What the genius learned in the yard goes home with the hero.
+	if fight.genius and not hero.is_empty() and hero.has("genius"):
+		fight.genius.recover()
+		fight.genius.update_adaptations()
+		fight.genius.save_to(hero)
+		Settings.save_hero(hero)
 	mode = "results"
 	Engine.time_scale = 1.0
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -452,7 +461,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("lock_on"):
 		fight.input("lock")
 		world.lock_on = fight.p_lock
-	for pair in [["attack", "attack"], ["technique", "technique"], ["dodge", "dodge"], ["stance", "stance"], ["pattern", "pattern"], ["block", "block-down"], ["name_foe", "name"]]:
+	for pair in [["attack", "attack"], ["technique", "technique"], ["dodge", "dodge"], ["stance", "stance"], ["pattern", "pattern"], ["block", "block-down"], ["name_foe", "name"], ["order", "order"]]:
 		if event.is_action_pressed(pair[0], false, true):
 			fight.input(pair[1])
 	if event.is_action_released("block", true):
@@ -546,6 +555,11 @@ func _sounds(events: Array) -> void:
 			"turned": sfx.play("block", 1.3)
 			"mend": sfx.play("cue-hit", 0.8)
 			"pattern-lost", "stance-locked": sfx.play("deny")
+			"genius-guard": sfx.play("block", 1.5)
+			"genius-hunt": sfx.play("hit", 1.6, -3.0)
+			"genius-fall": sfx.play("fizzle", 0.6)
+			"genius-up": sfx.play("cue-hit", 0.7)
+			"order": sfx.play("stance", 1.7, -4.0)
 
 func _shot(label: String) -> void:
 	if not _args.has("shots"):
