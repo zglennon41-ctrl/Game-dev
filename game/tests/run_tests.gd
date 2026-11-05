@@ -31,6 +31,8 @@ func _run() -> void:
 	test_academy()
 	test_rite()
 	test_spark()
+	test_genius_parity()
+	test_genius_life()
 	test_shape_kits()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
@@ -493,3 +495,103 @@ func test_spark() -> void:
 	for s in 40:
 		names[Creation.name_for("columbia", s + 1)] = true
 	check(names.size() >= 20, "a spark names people many ways (%d names in 40)" % names.size())
+
+## The game's Reading and Resonance give the tools' answers (fixtures written by
+## tools/genius-fixtures.ts from src/rules).
+func test_genius_parity() -> void:
+	var fx: Dictionary = JSON.parse_string(FileAccess.open("res://game/tests/fixtures/readings.json", FileAccess.READ).get_as_text())
+	for r in fx["readings"]:
+		var cur: Dictionary = r["current"] if r["current"] is Dictionary else {}
+		var got := GeniusReading.read(int(r["instar"]), r["tally"] if r["tally"]["intention"] != null else _no_null(r["tally"]), r["origin"], cur)
+		var want: Array = r["result"]["candidates"]
+		var ok: bool = got["candidates"].size() == want.size() and got["crossingAllowed"] == r["result"]["crossingAllowed"]
+		for i in mini(want.size(), got["candidates"].size()):
+			var a: Dictionary = got["candidates"][i]
+			var b: Dictionary = want[i]
+			ok = ok and a["form"] == b["form"] and absf(float(a["score"]) - float(b["score"])) < 0.002 and str(a["heritage"]) == str(b["heritage"]) and str(a["features"]) == str(b["features"])
+		check(ok, "the Reading matches the tools: %s (%s)" % [r["name"], ", ".join(got["candidates"].map(func(c): return c["form"]))])
+	for x in fx["resonance"]:
+		var res := GeniusResonance.resonance(int(x["instar"]), int(x["tier"]))
+		check(res == int(x["resonance"]) and GeniusResonance.paying_tier(res, int(x["tier"])) == int(x["paying"]) and GeniusResonance.verses(GeniusResonance.paying_tier(res, int(x["tier"]))) == int(x["verses"]) and GeniusResonance.shadow_cap(res) == int(x["shadowCap"]) and is_equal_approx(GeniusResonance.genius_will(res), float(x["will"])), "Resonance matches the tools at instar %d, tier %d" % [int(x["instar"]), int(x["tier"])])
+	for x in fx["tiers"]:
+		check(GeniusResonance.tier_for({ "uses": x["uses"], "built": true }) == int(x["tier"]), "Intention tier at %d uses" % int(x["uses"]))
+
+func _no_null(t: Dictionary) -> Dictionary:
+	var d := t.duplicate(true)
+	d["intention"] = null
+	return d
+
+## A genius's life, start to finish of what exists: born, learns, adapts, reads, inherits.
+func test_genius_life() -> void:
+	var h := Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
+	h["seed"] = "watches-from-above"
+	h["blood"] = "aerie-born"
+	h["shape"] = "cast"
+	var g := Genius.for_hero(h)
+	check(not g.is_born(), "a genius before the rite has no body")
+	g.read(1)
+	var c := g.take()
+	g.milestone("rite")
+	check(g.is_born() and g.instar == 1 and c["form"] == "hawk", "the rite gives a First Form (%s)" % c["form"])
+	check(g.features().has("far-eyes"), "the Seed-mark is on it")
+	check(is_equal_approx(g.will_max(), 40.0) and g.orders_available().size() == 2, "a First Form has 40 Will and two orders")
+	# Saved and loaded, it is the same genius.
+	var g2 := Genius.from_dict(g.to_dict())
+	check(str(g2.to_dict()) == str(g.to_dict()), "a genius survives saving")
+	# Play: close fighting with Guard and Hold.
+	for i in 30: g.hit_at(1.5)
+	for i in 6: g.hit_at(5.0)
+	for i in 14: g.used_family("cast.reach")
+	for i in 6: g.used_family("anchor.wall")
+	for i in 12: g.gave_order("hold")
+	for i in 9: g.gave_order("guard")
+	for i in 6: g.fought_beside("anchor")
+	for i in 4: g.fought_beside("read")
+	for i in 8: g.ran("tunnel")
+	for i in 3: g.ran("ruin")
+	g.studied("marshal", 10)
+	check(g.reading_due() == 0, "no Second Form before the Gate")
+	g.milestone("gate")
+	check(g.reading_due() == 0, "nor before its seventh day")
+	g.day = 7
+	check(g.reading_due() == 2, "the Gate and a week: the Second Form may be read")
+	var rd := g.read(2)
+	check(rd["candidates"].size() == 3, "a Reading offers three")
+	var forms: Array = rd["candidates"].map(func(x): return x["form"])
+	check(forms.has("talon-relic") and forms.has("stooping-kith"), "the Guide's hawk that fights close is offered a Talon Relic and a Stooping Kith (%s)" % str(forms))
+	for cand in rd["candidates"]:
+		check(cand["features"].has("far-eyes") and cand["heritage"].size() >= 1, "%s carries the Seed-mark and heritage" % cand["form"])
+	g.take(1)
+	check(g.instar == 2 and g.history.size() == 2 and float(g.tally["range"].get("close", 0.0)) == 0.0, "taking a form starts a new Tally, and history remembers")
+	check(is_equal_approx(g.will_max(), 50.0) and g.orders_available().size() == 4, "a Second Form has 50 Will and four orders")
+	# Adaptations come from play and fade unfed.
+	for i in 50: g.hit_at(1.0)
+	var ch := g.update_adaptations()
+	check(ch.size() == 1 and ch[0]["id"] == "set-feet" and g.features().has("set-feet"), "fifty close fights grow set feet")
+	g.day += 100
+	ch = g.update_adaptations()
+	check(ch.size() == 1 and ch[0]["change"] == "faded" and not g.features().has("set-feet"), "unfed for a season, it fades")
+	# Shadows: ten witnessed uses, within the cap.
+	var p := { "name": "Last Post", "form": "anchor.endurance", "terms": ["struck-first", "below-half", "never-twice-one-foe"] }
+	var made := {}
+	for i in 10: made = g.witness(p)
+	check(not made.is_empty() and g.shadows.size() == 1 and made["terms"].all(func(t): return Genius._kind(t) == "trigger") and made["terms"].size() >= 1, "ten witnessed uses make a shadow, Triggers kept, the rest gone (%s)" % str(made.get("terms", [])))
+	var p2 := { "name": "Other", "form": "cast.reach", "terms": [] }
+	for i in 10: g.witness(p2)
+	check(g.shadows.size() == 1, "a Second Form carries one shadow")
+	# Grafts wait for the next Reading; secondary forms from the Third.
+	g.offer_graft({ "id": "shade:old-marshal", "feature": "lantern", "source": "shade" })
+	check(g.secondary_ready().is_empty(), "no secondary forms before the Third")
+	g.milestone("pattern-built")
+	g.day = 40
+	check(g.reading_due() == 3, "a built Pattern and thirty days: the Third Form")
+	g.read(3)
+	g.take()
+	check(g.features().has("lantern"), "the graft is on the Third Form")
+	for i in 60: g.gave_order("hunt")
+	var ready: Array = g.secondary_ready().map(func(s): return s["id"])
+	check(ready.has("arms") == (g.body["expression"] in ["relic", "engine"]), "Arms needs a Relic or Engine and fifty Hunts (%s, %s)" % [g.body["expression"], str(ready)])
+	var hb := g.features_by_slot()
+	check(hb.size() >= 2, "features sort into slots (%s)" % str(hb.keys()))
+	g.fall(); g.fall(); g.develop_secondary("night"); g.fall()
+	check(g.secondary.is_empty() and g.fallen, "three falls in a season cost the newest secondary form")

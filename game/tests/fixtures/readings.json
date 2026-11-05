@@ -1,0 +1,1386 @@
+{
+ "readings": [
+  {
+   "name": "first watches-from-above aerie-born cast",
+   "instar": 1,
+   "origin": {
+    "seed": "watches-from-above",
+    "blood": "aerie-born",
+    "shape": "cast"
+   },
+   "tally": {
+    "families": {},
+    "range": {},
+    "orders": {},
+    "company": {},
+    "ground": {},
+    "discipline": {},
+    "bonds": {},
+    "intention": null,
+    "runsWith": {},
+    "counters": {}
+   },
+   "current": null,
+   "result": {
+    "instar": 1,
+    "crossingAllowed": true,
+    "lineLeads": [
+     {
+      "line": "seed",
+      "expression": "beast",
+      "weight": 0.6
+     },
+     {
+      "line": "shape",
+      "expression": "beast",
+      "weight": 0.3
+     }
+    ],
+    "candidates": [
+     {
+      "form": "hawk",
+      "name": "Hawk",
+      "expression": "beast",
+      "silhouette": "beast-flier",
+      "score": 2.12,
+      "own": [
+       "wings",
+       "talons",
+       "beak"
+      ],
+      "heritage": [],
+      "seedMark": "far-eyes",
+      "features": [
+       "far-eyes",
+       "wings",
+       "talons",
+       "beak"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "watches-from-above",
+        "share": 1,
+        "contribution": 1.7
+       },
+       {
+        "line": "shape",
+        "key": "cast",
+        "share": 1,
+        "contribution": 0.42
+       }
+      ]
+     },
+     {
+      "form": "field-wolf",
+      "name": "Field-wolf",
+      "expression": "beast",
+      "silhouette": "beast-runner",
+      "score": 1.02,
+      "own": [
+       "long-legs",
+       "fangs",
+       "ruff"
+      ],
+      "heritage": [],
+      "seedMark": "far-eyes",
+      "features": [
+       "far-eyes",
+       "long-legs",
+       "fangs",
+       "ruff"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "watches-from-above",
+        "share": 1,
+        "contribution": 0.6
+       },
+       {
+        "line": "shape",
+        "key": "cast",
+        "share": 1,
+        "contribution": 0.42
+       }
+      ]
+     },
+     {
+      "form": "otter",
+      "name": "River-otter",
+      "expression": "beast",
+      "silhouette": "beast-swimmer",
+      "score": 0.9,
+      "own": [
+       "fins",
+       "sleek-coat",
+       "small-hands"
+      ],
+      "heritage": [],
+      "seedMark": "far-eyes",
+      "features": [
+       "far-eyes",
+       "fins",
+       "sleek-coat",
+       "small-hands"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "watches-from-above",
+        "share": 1,
+        "contribution": 0.6
+       },
+       {
+        "line": "shape",
+        "key": "cast",
+        "share": 1,
+        "contribution": 0.3
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "first stands-between ridgefolk anchor",
+   "instar": 1,
+   "origin": {
+    "seed": "stands-between",
+    "blood": "ridgefolk",
+    "shape": "anchor"
+   },
+   "tally": {
+    "families": {},
+    "range": {},
+    "orders": {},
+    "company": {},
+    "ground": {},
+    "discipline": {},
+    "bonds": {},
+    "intention": null,
+    "runsWith": {},
+    "counters": {}
+   },
+   "current": null,
+   "result": {
+    "instar": 1,
+    "crossingAllowed": true,
+    "lineLeads": [
+     {
+      "line": "seed",
+      "expression": "engine",
+      "weight": 0.6
+     },
+     {
+      "line": "blood",
+      "expression": "engine",
+      "weight": 0.3
+     },
+     {
+      "line": "shape",
+      "expression": "beast",
+      "weight": 0.18
+     }
+    ],
+    "candidates": [
+     {
+      "form": "iron-hound",
+      "name": "Iron Hound",
+      "expression": "engine",
+      "silhouette": "engine-quadruped",
+      "score": 2.42,
+      "own": [
+       "broad-chest",
+       "iron-hide",
+       "lantern"
+      ],
+      "heritage": [],
+      "seedMark": "broad-guard",
+      "features": [
+       "broad-guard",
+       "broad-chest",
+       "iron-hide",
+       "lantern"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "stands-between",
+        "share": 1,
+        "contribution": 1.4
+       },
+       {
+        "line": "blood",
+        "key": "ridgefolk",
+        "share": 1,
+        "contribution": 0.6
+       },
+       {
+        "line": "shape",
+        "key": "anchor",
+        "share": 1,
+        "contribution": 0.42
+       }
+      ]
+     },
+     {
+      "form": "ram",
+      "name": "Ram",
+      "expression": "beast",
+      "silhouette": "beast-grazer",
+      "score": 2.02,
+      "own": [
+       "horn-brow",
+       "broad-chest",
+       "stone-skin"
+      ],
+      "heritage": [],
+      "seedMark": "broad-guard",
+      "features": [
+       "broad-guard",
+       "horn-brow",
+       "broad-chest",
+       "stone-skin"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "stands-between",
+        "share": 1,
+        "contribution": 0.9
+       },
+       {
+        "line": "blood",
+        "key": "ridgefolk",
+        "share": 1,
+        "contribution": 0.7
+       },
+       {
+        "line": "shape",
+        "key": "anchor",
+        "share": 1,
+        "contribution": 0.42
+       }
+      ]
+     },
+     {
+      "form": "walking-lantern",
+      "name": "Walking Lantern",
+      "expression": "engine",
+      "silhouette": "engine-lantern",
+      "score": 1.08,
+      "own": [
+       "lantern",
+       "roots",
+       "cold-core"
+      ],
+      "heritage": [],
+      "seedMark": "broad-guard",
+      "features": [
+       "broad-guard",
+       "lantern",
+       "roots",
+       "cold-core"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "stands-between",
+        "share": 1,
+        "contribution": 0.6
+       },
+       {
+        "line": "blood",
+        "key": "ridgefolk",
+        "share": 1,
+        "contribution": 0.3
+       },
+       {
+        "line": "shape",
+        "key": "anchor",
+        "share": 1,
+        "contribution": 0.18
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "first owes-me demon-blooded bind",
+   "instar": 1,
+   "origin": {
+    "seed": "owes-me",
+    "blood": "demon-blooded",
+    "shape": "bind"
+   },
+   "tally": {
+    "families": {},
+    "range": {},
+    "orders": {},
+    "company": {},
+    "ground": {},
+    "discipline": {},
+    "bonds": {},
+    "intention": null,
+    "runsWith": {},
+    "counters": {}
+   },
+   "current": null,
+   "result": {
+    "instar": 1,
+    "crossingAllowed": true,
+    "lineLeads": [
+     {
+      "line": "seed",
+      "expression": "daemon",
+      "weight": 1
+     },
+     {
+      "line": "blood",
+      "expression": "daemon",
+      "weight": 0.7
+     },
+     {
+      "line": "shape",
+      "expression": "kith",
+      "weight": 0.18
+     }
+    ],
+    "candidates": [
+     {
+      "form": "ledger-imp",
+      "name": "Ledger-imp",
+      "expression": "daemon",
+      "silhouette": "daemon-small",
+      "score": 2.88,
+      "own": [
+       "horns",
+       "ledger",
+       "tail"
+      ],
+      "heritage": [],
+      "seedMark": "ledger",
+      "features": [
+       "ledger",
+       "horns",
+       "tail"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "owes-me",
+        "share": 1,
+        "contribution": 1.6
+       },
+       {
+        "line": "blood",
+        "key": "demon-blooded",
+        "share": 1,
+        "contribution": 1.1
+       },
+       {
+        "line": "shape",
+        "key": "bind",
+        "share": 1,
+        "contribution": 0.18
+       }
+      ]
+     },
+     {
+      "form": "homunculus",
+      "name": "Homunculus",
+      "expression": "kith",
+      "silhouette": "kith-homunculus",
+      "score": 0.18,
+      "own": [
+       "small-hands",
+       "brush",
+       "old-eyes"
+      ],
+      "heritage": [],
+      "seedMark": "ledger",
+      "features": [
+       "ledger",
+       "small-hands",
+       "brush",
+       "old-eyes"
+      ],
+      "reasons": [
+       {
+        "line": "shape",
+        "key": "bind",
+        "share": 1,
+        "contribution": 0.18
+       }
+      ]
+     },
+     {
+      "form": "lantern-sprite",
+      "name": "Lantern-sprite",
+      "expression": "kith",
+      "silhouette": "kith-fey",
+      "score": 0.18,
+      "own": [
+       "lantern",
+       "voice",
+       "small-hands"
+      ],
+      "heritage": [],
+      "seedMark": "ledger",
+      "features": [
+       "ledger",
+       "lantern",
+       "voice",
+       "small-hands"
+      ],
+      "reasons": [
+       {
+        "line": "shape",
+        "key": "bind",
+        "share": 1,
+        "contribution": 0.18
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "first that-burns fogborn turn",
+   "instar": 1,
+   "origin": {
+    "seed": "that-burns",
+    "blood": "fogborn",
+    "shape": "turn"
+   },
+   "tally": {
+    "families": {},
+    "range": {},
+    "orders": {},
+    "company": {},
+    "ground": {},
+    "discipline": {},
+    "bonds": {},
+    "intention": null,
+    "runsWith": {},
+    "counters": {}
+   },
+   "current": null,
+   "result": {
+    "instar": 1,
+    "crossingAllowed": true,
+    "lineLeads": [
+     {
+      "line": "seed",
+      "expression": "aspect",
+      "weight": 0.6
+     },
+     {
+      "line": "shape",
+      "expression": "aspect",
+      "weight": 0.24
+     }
+    ],
+    "candidates": [
+     {
+      "form": "ember",
+      "name": "Ember",
+      "expression": "aspect",
+      "silhouette": "aspect-flame",
+      "score": 1.36,
+      "own": [
+       "ember",
+       "glow",
+       "smoke"
+      ],
+      "heritage": [],
+      "seedMark": "ember",
+      "features": [
+       "ember",
+       "glow",
+       "smoke"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "that-burns",
+        "share": 1,
+        "contribution": 1
+       },
+       {
+        "line": "shape",
+        "key": "turn",
+        "share": 1,
+        "contribution": 0.36
+       }
+      ]
+     },
+     {
+      "form": "shadow",
+      "name": "Shadow",
+      "expression": "aspect",
+      "silhouette": "aspect-shadow",
+      "score": 0.84,
+      "own": [
+       "shadow-cloak",
+       "glow",
+       "smoke"
+      ],
+      "heritage": [],
+      "seedMark": "ember",
+      "features": [
+       "ember",
+       "shadow-cloak",
+       "glow",
+       "smoke"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "that-burns",
+        "share": 1,
+        "contribution": 0.6
+       },
+       {
+        "line": "shape",
+        "key": "turn",
+        "share": 1,
+        "contribution": 0.24
+       }
+      ]
+     },
+     {
+      "form": "ledger-imp",
+      "name": "Ledger-imp",
+      "expression": "daemon",
+      "silhouette": "daemon-small",
+      "score": 0.4,
+      "own": [
+       "horns",
+       "ledger",
+       "tail"
+      ],
+      "heritage": [],
+      "seedMark": "ember",
+      "features": [
+       "ember",
+       "horns",
+       "ledger",
+       "tail"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "that-burns",
+        "share": 1,
+        "contribution": 0.4
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "first remembers eyes-heat read",
+   "instar": 1,
+   "origin": {
+    "seed": "remembers",
+    "blood": "eyes-heat",
+    "shape": "read"
+   },
+   "tally": {
+    "families": {},
+    "range": {},
+    "orders": {},
+    "company": {},
+    "ground": {},
+    "discipline": {},
+    "bonds": {},
+    "intention": null,
+    "runsWith": {},
+    "counters": {}
+   },
+   "current": null,
+   "result": {
+    "instar": 1,
+    "crossingAllowed": true,
+    "lineLeads": [
+     {
+      "line": "seed",
+      "expression": "kith",
+      "weight": 0.8
+     },
+     {
+      "line": "shape",
+      "expression": "kith",
+      "weight": 0.18
+     }
+    ],
+    "candidates": [
+     {
+      "form": "homunculus",
+      "name": "Homunculus",
+      "expression": "kith",
+      "silhouette": "kith-homunculus",
+      "score": 1.5,
+      "own": [
+       "small-hands",
+       "brush",
+       "old-eyes"
+      ],
+      "heritage": [],
+      "seedMark": "old-eyes",
+      "features": [
+       "old-eyes",
+       "small-hands",
+       "brush"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "remembers",
+        "share": 1,
+        "contribution": 1.2
+       },
+       {
+        "line": "shape",
+        "key": "read",
+        "share": 1,
+        "contribution": 0.3
+       }
+      ]
+     },
+     {
+      "form": "lantern-sprite",
+      "name": "Lantern-sprite",
+      "expression": "kith",
+      "silhouette": "kith-fey",
+      "score": 0.98,
+      "own": [
+       "lantern",
+       "voice",
+       "small-hands"
+      ],
+      "heritage": [],
+      "seedMark": "old-eyes",
+      "features": [
+       "old-eyes",
+       "lantern",
+       "voice",
+       "small-hands"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "remembers",
+        "share": 1,
+        "contribution": 0.8
+       },
+       {
+        "line": "shape",
+        "key": "read",
+        "share": 1,
+        "contribution": 0.18
+       }
+      ]
+     },
+     {
+      "form": "ember",
+      "name": "Ember",
+      "expression": "aspect",
+      "silhouette": "aspect-flame",
+      "score": 0,
+      "own": [
+       "ember",
+       "glow",
+       "smoke"
+      ],
+      "heritage": [],
+      "seedMark": "old-eyes",
+      "features": [
+       "old-eyes",
+       "ember",
+       "glow",
+       "smoke"
+      ],
+      "reasons": []
+     }
+    ]
+   }
+  },
+  {
+   "name": "first never-alive forgeborn make",
+   "instar": 1,
+   "origin": {
+    "seed": "never-alive",
+    "blood": "forgeborn",
+    "shape": "make"
+   },
+   "tally": {
+    "families": {},
+    "range": {},
+    "orders": {},
+    "company": {},
+    "ground": {},
+    "discipline": {},
+    "bonds": {},
+    "intention": null,
+    "runsWith": {},
+    "counters": {}
+   },
+   "current": null,
+   "result": {
+    "instar": 1,
+    "crossingAllowed": true,
+    "lineLeads": [
+     {
+      "line": "seed",
+      "expression": "engine",
+      "weight": 0.6
+     },
+     {
+      "line": "shape",
+      "expression": "engine",
+      "weight": 0.3
+     }
+    ],
+    "candidates": [
+     {
+      "form": "walking-lantern",
+      "name": "Walking Lantern",
+      "expression": "engine",
+      "silhouette": "engine-lantern",
+      "score": 1.3,
+      "own": [
+       "lantern",
+       "roots",
+       "cold-core"
+      ],
+      "heritage": [],
+      "seedMark": "cold-core",
+      "features": [
+       "cold-core",
+       "lantern",
+       "roots"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "never-alive",
+        "share": 1,
+        "contribution": 1
+       },
+       {
+        "line": "shape",
+        "key": "make",
+        "share": 1,
+        "contribution": 0.3
+       }
+      ]
+     },
+     {
+      "form": "iron-hound",
+      "name": "Iron Hound",
+      "expression": "engine",
+      "silhouette": "engine-quadruped",
+      "score": 0.9,
+      "own": [
+       "broad-chest",
+       "iron-hide",
+       "lantern"
+      ],
+      "heritage": [],
+      "seedMark": "cold-core",
+      "features": [
+       "cold-core",
+       "broad-chest",
+       "iron-hide",
+       "lantern"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "never-alive",
+        "share": 1,
+        "contribution": 0.6
+       },
+       {
+        "line": "shape",
+        "key": "make",
+        "share": 1,
+        "contribution": 0.3
+       }
+      ]
+     },
+     {
+      "form": "ember",
+      "name": "Ember",
+      "expression": "aspect",
+      "silhouette": "aspect-flame",
+      "score": 0.4,
+      "own": [
+       "ember",
+       "glow",
+       "smoke"
+      ],
+      "heritage": [],
+      "seedMark": "cold-core",
+      "features": [
+       "cold-core",
+       "ember",
+       "glow",
+       "smoke"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "never-alive",
+        "share": 1,
+        "contribution": 0.4
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "gate: the hawk that fights close",
+   "instar": 2,
+   "origin": {
+    "seed": "watches-from-above",
+    "blood": "aerie-born",
+    "shape": "cast"
+   },
+   "tally": {
+    "families": {
+     "cast.reach": 14,
+     "anchor.wall": 6
+    },
+    "range": {
+     "close": 30,
+     "mid": 6
+    },
+    "orders": {
+     "hold": 12,
+     "guard": 9
+    },
+    "company": {
+     "anchor": 6,
+     "read": 4
+    },
+    "ground": {
+     "tunnel": 8,
+     "ruin": 3
+    },
+    "discipline": {
+     "marshal": 10
+    },
+    "bonds": {},
+    "intention": null,
+    "runsWith": {},
+    "counters": {}
+   },
+   "current": {
+    "form": "hawk",
+    "expression": "beast",
+    "own": [
+     "wings",
+     "talons",
+     "beak"
+    ],
+    "heritage": [],
+    "seedMark": "far-eyes",
+    "grafts": [],
+    "adaptations": []
+   },
+   "result": {
+    "instar": 2,
+    "crossingAllowed": true,
+    "lineLeads": [
+     {
+      "line": "range",
+      "expression": "relic",
+      "weight": 0.33333333333333337
+     },
+     {
+      "line": "families",
+      "expression": "relic",
+      "weight": 0.26399999999999996
+     },
+     {
+      "line": "discipline",
+      "expression": "relic",
+      "weight": 0.18000000000000002
+     },
+     {
+      "line": "orders",
+      "expression": "engine",
+      "weight": 0.14285714285714285
+     },
+     {
+      "line": "ground",
+      "expression": "engine",
+      "weight": 0.11363636363636365
+     },
+     {
+      "line": "seed",
+      "expression": "beast",
+      "weight": 0.09
+     },
+     {
+      "line": "company",
+      "expression": "kith",
+      "weight": 0.06
+     },
+     {
+      "line": "shape",
+      "expression": "beast",
+      "weight": 0.05
+     }
+    ],
+    "candidates": [
+     {
+      "form": "talon-relic",
+      "name": "Talon Relic",
+      "expression": "relic",
+      "silhouette": "relic-gauntlet",
+      "score": 1.217,
+      "own": [
+       "talon-grip",
+       "brass-plate",
+       "grip"
+      ],
+      "heritage": [
+       "talons",
+       "wings"
+      ],
+      "seedMark": "far-eyes",
+      "features": [
+       "far-eyes",
+       "talon-grip",
+       "brass-plate",
+       "grip",
+       "talons",
+       "wings"
+      ],
+      "reasons": [
+       {
+        "line": "range",
+        "key": "close",
+        "share": 0.833,
+        "contribution": 0.467
+       },
+       {
+        "line": "families",
+        "key": "cast.reach",
+        "share": 0.7,
+        "contribution": 0.336
+       },
+       {
+        "line": "discipline",
+        "key": "marshal",
+        "share": 1,
+        "contribution": 0.18
+       }
+      ]
+     },
+     {
+      "form": "stooping-kith",
+      "name": "Stooping Kith",
+      "expression": "kith",
+      "silhouette": "kith-small-warrior",
+      "score": 1,
+      "own": [
+       "wing-cloak",
+       "short-blade",
+       "beak"
+      ],
+      "heritage": [
+       "talons",
+       "wings"
+      ],
+      "seedMark": "far-eyes",
+      "features": [
+       "far-eyes",
+       "wing-cloak",
+       "short-blade",
+       "beak",
+       "talons",
+       "wings"
+      ],
+      "reasons": [
+       {
+        "line": "range",
+        "key": "close",
+        "share": 0.833,
+        "contribution": 0.4
+       },
+       {
+        "line": "families",
+        "key": "cast.reach",
+        "share": 0.7,
+        "contribution": 0.28
+       },
+       {
+        "line": "seed",
+        "key": "watches-from-above",
+        "share": 1,
+        "contribution": 0.165
+       }
+      ]
+     },
+     {
+      "form": "living-blade",
+      "name": "Living Blade",
+      "expression": "relic",
+      "silhouette": "relic-blade",
+      "score": 1.116,
+      "own": [
+       "edge",
+       "grip",
+       "sheath"
+      ],
+      "heritage": [
+       "talons",
+       "wings"
+      ],
+      "seedMark": "far-eyes",
+      "features": [
+       "far-eyes",
+       "edge",
+       "grip",
+       "sheath",
+       "talons",
+       "wings"
+      ],
+      "reasons": [
+       {
+        "line": "range",
+        "key": "close",
+        "share": 0.833,
+        "contribution": 0.533
+       },
+       {
+        "line": "discipline",
+        "key": "marshal",
+        "share": 1,
+        "contribution": 0.18
+       },
+       {
+        "line": "families",
+        "key": "cast.reach",
+        "share": 0.7,
+        "contribution": 0.168
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "third: a contract Pattern",
+   "instar": 3,
+   "origin": {
+    "seed": "owes-me",
+    "blood": "demon-blooded",
+    "shape": "bind"
+   },
+   "tally": {
+    "families": {
+     "bind.contract": 20
+    },
+    "range": {
+     "mid": 12,
+     "far": 8
+    },
+    "orders": {
+     "hunt": 20
+    },
+    "company": {},
+    "ground": {},
+    "discipline": {},
+    "bonds": {
+     "shade": 1
+    },
+    "intention": {
+     "form": "bind.contract",
+     "terms": [
+      "struck-first",
+      "below-half"
+     ],
+     "fires": 60
+    },
+    "runsWith": {},
+    "counters": {}
+   },
+   "current": {
+    "form": "hawk",
+    "expression": "beast",
+    "own": [
+     "wings",
+     "talons",
+     "beak"
+    ],
+    "heritage": [],
+    "seedMark": "far-eyes",
+    "grafts": [],
+    "adaptations": []
+   },
+   "result": {
+    "instar": 3,
+    "crossingAllowed": true,
+    "lineLeads": [
+     {
+      "line": "intention",
+      "expression": "daemon",
+      "weight": 0.8
+     },
+     {
+      "line": "families",
+      "expression": "daemon",
+      "weight": 0.48
+     },
+     {
+      "line": "range",
+      "expression": "beast",
+      "weight": 0.272
+     },
+     {
+      "line": "orders",
+      "expression": "beast",
+      "weight": 0.2
+     },
+     {
+      "line": "seed",
+      "expression": "daemon",
+      "weight": 0.15
+     },
+     {
+      "line": "blood",
+      "expression": "daemon",
+      "weight": 0.13999999999999999
+     },
+     {
+      "line": "bonds",
+      "expression": "kith",
+      "weight": 0.12
+     },
+     {
+      "line": "shape",
+      "expression": "kith",
+      "weight": 0.03
+     }
+    ],
+    "candidates": [
+     {
+      "form": "contract-daemon",
+      "name": "Contract Daemon",
+      "expression": "daemon",
+      "silhouette": "daemon-tall",
+      "score": 3.06,
+      "own": [
+       "horns",
+       "ledger",
+       "chain"
+      ],
+      "heritage": [
+       "talons"
+      ],
+      "seedMark": "ledger",
+      "features": [
+       "ledger",
+       "horns",
+       "chain",
+       "talons"
+      ],
+      "reasons": [
+       {
+        "line": "intention",
+        "key": "family:bind.contract",
+        "share": 1,
+        "contribution": 1.28
+       },
+       {
+        "line": "families",
+        "key": "bind.contract",
+        "share": 1,
+        "contribution": 1.04
+       },
+       {
+        "line": "seed",
+        "key": "owes-me",
+        "share": 1,
+        "contribution": 0.24
+       }
+      ]
+     },
+     {
+      "form": "ledger-imp",
+      "name": "Ledger-imp",
+      "expression": "daemon",
+      "silhouette": "daemon-small",
+      "score": 2.55,
+      "own": [
+       "horns",
+       "ledger",
+       "tail"
+      ],
+      "heritage": [
+       "talons"
+      ],
+      "seedMark": "ledger",
+      "features": [
+       "ledger",
+       "horns",
+       "tail",
+       "talons"
+      ],
+      "reasons": [
+       {
+        "line": "intention",
+        "key": "family:bind.contract",
+        "share": 1,
+        "contribution": 1.04
+       },
+       {
+        "line": "families",
+        "key": "bind.contract",
+        "share": 1,
+        "contribution": 0.8
+       },
+       {
+        "line": "seed",
+        "key": "owes-me",
+        "share": 1,
+        "contribution": 0.24
+       }
+      ]
+     },
+     {
+      "form": "daemon-behind",
+      "name": "The One Behind",
+      "expression": "daemon",
+      "silhouette": "daemon-shadow",
+      "score": 1.77,
+      "own": [
+       "shadow-cloak",
+       "horns",
+       "broad-chest"
+      ],
+      "heritage": [
+       "talons"
+      ],
+      "seedMark": "ledger",
+      "features": [
+       "ledger",
+       "shadow-cloak",
+       "horns",
+       "broad-chest",
+       "talons"
+      ],
+      "reasons": [
+       {
+        "line": "intention",
+        "key": "family:bind.contract",
+        "share": 1,
+        "contribution": 0.64
+       },
+       {
+        "line": "families",
+        "key": "bind.contract",
+        "share": 1,
+        "contribution": 0.48
+       },
+       {
+        "line": "blood",
+        "key": "demon-blooded",
+        "share": 1,
+        "contribution": 0.22
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ],
+ "resonance": [
+  {
+   "instar": 1,
+   "tier": 0,
+   "resonance": 1,
+   "paying": 0,
+   "verses": 0,
+   "shadowCap": 0,
+   "will": 40
+  },
+  {
+   "instar": 1,
+   "tier": 2,
+   "resonance": 3,
+   "paying": 2,
+   "verses": 1,
+   "shadowCap": 2,
+   "will": 60
+  },
+  {
+   "instar": 2,
+   "tier": 1,
+   "resonance": 2,
+   "paying": 1,
+   "verses": 0,
+   "shadowCap": 1,
+   "will": 50
+  },
+  {
+   "instar": 3,
+   "tier": 3,
+   "resonance": 4,
+   "paying": 3,
+   "verses": 2,
+   "shadowCap": 3,
+   "will": 70
+  },
+  {
+   "instar": 5,
+   "tier": 5,
+   "resonance": 6,
+   "paying": 5,
+   "verses": 3,
+   "shadowCap": 3,
+   "will": 90
+  },
+  {
+   "instar": 6,
+   "tier": 1,
+   "resonance": 6,
+   "paying": 5,
+   "verses": 3,
+   "shadowCap": 3,
+   "will": 90
+  }
+ ],
+ "tiers": [
+  {
+   "uses": 0,
+   "tier": 1
+  },
+  {
+   "uses": 49,
+   "tier": 1
+  },
+  {
+   "uses": 50,
+   "tier": 2
+  },
+  {
+   "uses": 150,
+   "tier": 3
+  },
+  {
+   "uses": 400,
+   "tier": 3
+  }
+ ]
+}

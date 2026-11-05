@@ -17,6 +17,10 @@ var _reading: Dictionary
 var _forms: Array
 var _seeds: Array
 var _features: Array
+var _genius: Dictionary
+var _adaptations: Array
+var _secondary: Array
+var _shades: Array
 
 func _init() -> void:
 	rules = _load("res://data/rules.json")
@@ -35,11 +39,19 @@ func _init() -> void:
 	_forms = _load("res://data/forms.json")
 	_seeds = _load("res://data/seeds.json")
 	_features = _load("res://data/features.json")
+	_genius = _load("res://data/genius.json")
+	_adaptations = _load("res://data/adaptations.json")
+	_secondary = _load("res://data/secondary-forms.json")
+	_shades = _load("res://data/shades.json")
 
 func rules_reading() -> Dictionary: return _reading
 func forms() -> Array: return _forms
 func seeds() -> Array: return _seeds
 func features() -> Array: return _features
+func genius() -> Dictionary: return _genius
+func adaptations() -> Array: return _adaptations
+func secondary_forms() -> Array: return _secondary
+func shades() -> Array: return _shades
 
 func _load(path: String) -> Variant:
 	var f := FileAccess.open(path, FileAccess.READ)

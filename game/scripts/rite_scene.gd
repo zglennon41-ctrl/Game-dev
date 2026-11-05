@@ -240,10 +240,8 @@ func _form(dt: float) -> void:
 		_go("name")
 
 func _named(n: String) -> void:
-	var g := form.duplicate(true)
-	g["name"] = n if n.strip_edges() != "" else form["name"]
-	g["form_name"] = form["name"]
-	hero["genius"] = g
+	var gn := Rite.birth(hero, form["reading"], n if n.strip_edges() != "" else form["name"])
+	var g := gn.to_dict()
 	# It comes down to its partner, small, and stays.
 	var tw := _form_node.create_tween()
 	tw.tween_property(_form_node, "scale", Vector3.ONE, 0.8).set_trans(Tween.TRANS_SINE)

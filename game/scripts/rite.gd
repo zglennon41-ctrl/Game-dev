@@ -40,43 +40,25 @@ static func read_shape(hero: Dictionary, record: Dictionary, seed_value: int) ->
 			best = s
 	return { "shape": best, "was": was, "surprise": best != was, "scores": scores }
 
-## The First Form: every form a first instar can take, scored by the Seed, the blood and the
-## Shape's leans toward its Expression and its features, plus a little of the bowl's noise.
+## The First Form: the Reading of the Seed, the blood and the Shape (genius_reading.gd), with
+## a little of the bowl's chance (rite.formNoise), settled on the best fit.
 static func first_form(hero: Dictionary, shape: String, seed_value: int) -> Dictionary:
-	var reading: Dictionary = Data.rules_reading()
-	var w: Dictionary = reading["firstFormWeights"]
-	var leans: Dictionary = reading["leans"]
-	var keys := { "seed": String(hero.get("seed", "")), "blood": String(hero.get("blood", "")), "shape": shape }
-	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_value * 31 + 7
-	var noise := float(Data.academy["rite"]["formNoise"])
-	var best: Dictionary = {}
-	var best_score := -INF
-	var forms: Array = Data.forms().filter(func(f): return int(f["instars"]["min"]) == 1)
-	forms.sort_custom(func(a, b): return a["id"] < b["id"])
-	for f in forms:
-		var score := 0.0
-		for line in keys:
-			var lean: Dictionary = leans.get(line, {}).get(keys[line], {})
-			if lean.is_empty():
-				continue
-			var s := float(lean.get("expression", {}).get(f["expression"], 0.0))
-			for feat in f["features"]:
-				s += float(lean.get("features", {}).get(feat, 0.0))
-			score += float(w.get(line, 0.0)) * s
-		score += rng.randf() * noise
-		if score > best_score:
-			best_score = score
-			best = f
-	var feats: Array = best["features"].duplicate()
-	var seed_mark := ""
-	for sd in Data.seeds():
-		if sd["id"] == keys["seed"]:
-			seed_mark = sd["seedMark"]
-	if seed_mark != "" and not feats.has(seed_mark):
-		feats.append(seed_mark)
-	return { "form": best["id"], "name": best["name"], "expression": best["expression"], "silhouette": best["silhouette"],
-		"features": feats, "score": best_score }
+	var origin := { "seed": String(hero.get("seed", "")), "blood": String(hero.get("blood", "")), "shape": shape }
+	var r := GeniusReading.read(1, GeniusReading.empty_tally(), origin, {}, float(Data.academy["rite"]["formNoise"]), seed_value * 31 + 7)
+	var c: Dictionary = r["candidates"][0]
+	return { "form": c["form"], "name": c["name"], "expression": c["expression"], "silhouette": c["silhouette"],
+		"features": c["features"], "score": c["score"], "reading": r }
+
+## The hero's genius after the rite: born in the First Form the bowl read, and named.
+static func birth(hero: Dictionary, reading: Dictionary, genius_name: String) -> Genius:
+	var g := Genius.for_hero(hero)
+	g.pending_reading = reading.duplicate(true)
+	g.pending_reading["unlockedBy"] = "rite"
+	g.take()
+	g.milestone("rite")
+	g.name = genius_name
+	g.save_to(hero)
+	return g
 
 ## Apply a new Shape to the hero: the kit changes, and the Pattern's Form becomes the new
 ## Shape's Form with the same effect (strikes, guard, mend), keeping its Terms.
