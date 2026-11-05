@@ -102,20 +102,6 @@
     "staggerSeconds": 2.4,
     "staggerDamageFactor": 1.5
   },
-  "pattern": {
-    "$comment": "The Anchor's starting Pattern. Form: anchor.weight. Terms: Trigger 'Only after a perfect Hold', Toll 'All my Will'. The chain plays on the Anchor's pulse; every cue landed pays the multiplier, one missed fizzles it.",
-    "name": "Breaking Ground",
-    "form": "anchor.weight",
-    "terms": [
-      "after-perfect-hold",
-      "all-will"
-    ],
-    "sworn": false,
-    "availableSeconds": 3.0,
-    "baseDamage": 14,
-    "cueWindowMs": 200,
-    "leadIn": 0.6
-  },
   "feel": {
     "hitstop": 0.06,
     "heavyHitstop": 0.11,
@@ -124,5 +110,50 @@
     "shakeOnHit": 0.06,
     "shakeOnHurt": 0.16
   },
-  "inputBufferSeconds": 0.25
+  "inputBufferSeconds": 0.25,
+  "pattern": {
+    "$comment": "The Pattern in the combat room. A Pattern is a Form (one technique of the character's own Shape) and up to three Terms, one of each kind; swearing doubles it; x9 is the ceiling (data/rules.json). The chain is three cues for the Form and one per Term, on the Anchor's pulse.",
+    "cueWindowMs": 200,
+    "leadIn": 0.6,
+    "afterParrySeconds": 3.0,
+    "breachConfirmSeconds": 2.0,
+    "seasonDays": 91,
+    "default": {
+      "name": "Breaking Ground",
+      "form": "anchor.weight",
+      "terms": [
+        "after-perfect-hold",
+        "all-will"
+      ],
+      "sworn": false
+    },
+    "forms": {
+      "anchor.weight": {
+        "technique": "ground-strike",
+        "name": "Ground Strike",
+        "family": "Weight",
+        "effect": "strikes",
+        "base": 14,
+        "text": "A chain of blows that ends in one that splits the floor. Each cue landed strikes; all of them pay the Terms."
+      },
+      "anchor.wall": {
+        "technique": "cannot-be-moved",
+        "name": "Cannot Be Moved",
+        "family": "Wall",
+        "effect": "guard",
+        "base": 12,
+        "staggerSeconds": 2.5,
+        "text": "Nothing moves you while it holds: every blow on you is turned aside. It ends in a shockwave that staggers the foe."
+      },
+      "anchor.endurance": {
+        "technique": "second-wind",
+        "name": "Second Wind",
+        "family": "Endurance",
+        "effect": "mend",
+        "base": 3,
+        "healFactor": 0.75,
+        "text": "The field sets itself right. Each cue landed heals you; all of them pay the Terms in health."
+      }
+    }
+  }
 }

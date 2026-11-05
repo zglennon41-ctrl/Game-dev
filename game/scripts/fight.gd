@@ -42,8 +42,17 @@ var p_lock := true         # facing the wolf (lock-on)
 var p_vel := Vector2.ZERO  # movement, eased so starts and stops have a little weight
 var p_queued := ""         # an action pressed while busy, fired as soon as it is allowed
 var p_queued_until := 0.0
-var pattern_until := -9.0  # the Pattern's Trigger is met until this time
-var chain: Dictionary = {} # the Pattern in flight
+var pattern: Dictionary = {}  # the character's Pattern: name, form, terms, sworn
+var pattern_lost := false     # lost to a breach (for a season, or for good if sworn)
+var parried_until := -9.0     # "after a perfect Hold" holds until this time
+var breach_armed_until := -9.0 # a Bar warned; pressing again before this is the breach
+var chain: Dictionary = {}    # the Pattern in flight
+var p_struck_this_foe := false
+var p_disarmed := false       # Toll: no weapon for the rest of the run
+var p_stance_locked := false  # Toll: a season without my stance
+var p_double_cost := 0        # Toll: my next three techniques at double cost
+var p_leaking := false        # Toll: leaking for the rest of the run
+var p_scars := 0              # Toll: a scar, permanent and visible
 
 # --- The wolf ---
 var w_pos := Vector2.ZERO
@@ -58,6 +67,8 @@ var w_angle := 0.0
 var w_hits_taken := 0
 var w_break := 0
 var w_dir := 1.0
+var w_named := false         # the foe has been named aloud
+var w_pattern_hits := 0      # times the Pattern has been used on this foe
 var respawn_from_arch := false
 
 func _init(opts: Dictionary = {}) -> void:
@@ -69,6 +80,8 @@ func _init(opts: Dictionary = {}) -> void:
 	passive = opts.get("passive", false)
 	respawn = opts.get("respawn", true)
 	rng.seed = opts.get("seed", 7)
+	pattern = opts.get("pattern", room["pattern"]["default"]).duplicate(true)
+	pattern_lost = opts.get("pattern_lost", false)
 	p_hp = room["player"]["health"]
 	p_will = rules["field"]["willMax"]
 	p_pos = Vector2(-2.0, 1.0)
@@ -89,8 +102,14 @@ func dist() -> float:
 func breaks_beast() -> bool:
 	return Data.opposite(player_shape) == beast["shape"]
 
+## Can the Pattern fire now (every Trigger met)? Bars are checked when it is pressed.
 func pattern_ready() -> bool:
-	return now <= pattern_until and p_state != "pattern" and p_state != "down"
+	if pattern_lost or p_state == "pattern" or p_state == "down" or w_state in ["down", "absent"]:
+		return false
+	return PatternTerms.unmet_trigger(self, pattern["terms"]) == ""
+
+func pattern_form() -> Dictionary:
+	return room["pattern"]["forms"][pattern["form"]]
 
 func _clamp_in(v: Vector2) -> Vector2:
 	var h := arena / 2.0 - Vector2(0.8, 0.8)
@@ -138,10 +157,16 @@ func input(action: String) -> void:
 			if p_stance:
 				p_stance = false
 				_emit({ "type": "stance", "on": false })
+			elif p_stance_locked:
+				_emit({ "type": "stance-locked" })
 			elif not p_fainted:
 				p_stance = true
 				_emit({ "type": "stance", "on": true })
 		"pattern": _press_pattern()
+		"name":
+			if w_state not in ["down", "absent"]:
+				w_named = true
+				_emit({ "type": "named", "who": beast["name"] })
 		"lock":
 			p_lock = not p_lock
 
@@ -224,10 +249,12 @@ func _press_technique(id: String) -> void:
 	if now < float(p_cooldowns.get(id, 0.0)):
 		_emit({ "type": "not-ready", "what": t["name"] })
 		return
-	if p_fainted or p_will < float(t["will"]):
+	var cost := float(t["will"]) * (2.0 if p_double_cost > 0 else 1.0)
+	if p_fainted or p_will < cost:
 		_emit({ "type": "no-will" })
 		return
-	p_will -= float(t["will"])
+	p_will -= cost
+	p_double_cost = maxi(0, p_double_cost - 1)
 	p_cooldowns[id] = now + float(t["cooldown"])
 	p_state = "technique"
 	p_technique = id
@@ -260,42 +287,68 @@ func _press_dodge() -> void:
 
 func _press_pattern() -> void:
 	var P: Dictionary = room["pattern"]
-	if not pattern_ready():
-		_emit({ "type": "pattern-locked" })
+	if pattern_lost:
+		_emit({ "type": "pattern-lost" })
+		return
+	var unmet := PatternTerms.unmet_trigger(self, pattern["terms"])
+	if unmet != "":
+		_emit({ "type": "pattern-locked", "trigger": unmet })
+		return
+	if w_state in ["down", "absent"]:
 		return
 	if not _can_start_action() and p_state != "flinch":
 		return
-	var terms: Array = P["terms"]
+	# A Bar that covers this moment: the Pattern refuses, with a warning. Pressing again
+	# while the warning stands fires it anyway, and that is the breach.
+	var bars := PatternTerms.covering_bars(self, pattern["terms"])
+	var breach := false
+	if bars.size() > 0:
+		if now > breach_armed_until:
+			breach_armed_until = now + float(P["breachConfirmSeconds"])
+			_emit({ "type": "bar-warning", "bars": bars, "sworn": pattern["sworn"] })
+			return
+		breach = true
+	breach_armed_until = -9.0
+	var terms: Array = pattern["terms"]
 	var n: int = int(rules["pattern"]["chainBaseBeats"]) + int(rules["pattern"]["beatsPerTerm"]) * terms.size()
 	var period := float(Data.shape(player_shape)["pulseMs"]) / 1000.0
 	var cues: Array = []
 	for k in n:
 		cues.append(now + float(P["leadIn"]) + k * period)
-	# The Toll is taken when the Pattern is fired, whether it lands or not.
-	var toll_will := "all-will" in terms
-	if toll_will:
-		p_will = 0.0
-	chain = { "cues": cues, "next": 0, "hit": 0, "period": period, "window": float(P["cueWindowMs"]) / 1000.0, "multiplier": _pattern_multiplier() }
+	# The Tolls are taken when the Pattern fires, whether it lands or not.
+	var tolls := PatternTerms.take_tolls(self, terms)
+	chain = { "cues": cues, "next": 0, "hit": 0, "period": period, "window": float(P["cueWindowMs"]) / 1000.0,
+		"multiplier": pattern_multiplier(), "effect": pattern_form()["effect"] }
 	p_state = "pattern"
 	p_timer = 0.0
-	pattern_until = -9.0
+	parried_until = -9.0
+	w_pattern_hits += 1
 	_face_target_if_near()
-	if w_state != "down" and w_state != "absent":
+	if w_state != "down" and w_state != "absent" and chain["effect"] != "guard":
 		w_state = "pinned"
 		w_timer = 0.0
 		w_duration = float(cues[-1] - now) + 0.6
 	stats["patterns"] += 1
-	_emit({ "type": "pattern-start", "cues": cues, "name": P["name"], "multiplier": chain["multiplier"] })
+	_emit({ "type": "pattern-start", "cues": cues, "name": pattern["name"], "multiplier": chain["multiplier"], "effect": chain["effect"], "tolls": tolls })
 	_emit({ "type": "anim", "who": "player", "name": "Block_Attack", "speed": 1.0 })
+	if breach:
+		pattern_lost = true
+		_emit({ "type": "breach", "bars": bars, "sworn": pattern["sworn"] })
 
-func _pattern_multiplier() -> float:
-	var P: Dictionary = room["pattern"]
+## The Terms' multiplier, doubled if sworn, capped at the ceiling.
+func pattern_multiplier() -> float:
+	return multiplier_of(pattern)
+
+static func multiplier_of(spec: Dictionary) -> float:
 	var m := 1.0
-	for id in P["terms"]:
+	for id in spec["terms"]:
 		m *= float(Data.by_id(Data.terms, id)["multiplier"])
-	if P["sworn"]:
-		m *= float(rules["pattern"]["swornMultiplier"])
-	return minf(m, float(rules["pattern"]["multiplierCeiling"]))
+	if spec.get("sworn", false):
+		m *= float(Data.rules["pattern"]["swornMultiplier"])
+	return minf(m, float(Data.rules["pattern"]["multiplierCeiling"]))
+
+static func chain_length(spec: Dictionary) -> int:
+	return int(Data.rules["pattern"]["chainBaseBeats"]) + int(Data.rules["pattern"]["beatsPerTerm"]) * spec["terms"].size()
 
 func _pattern_press() -> void:
 	var cues: Array = chain["cues"]
@@ -306,8 +359,15 @@ func _pattern_press() -> void:
 	if absf(off) <= chain["window"] / 2.0:
 		chain["next"] = i + 1
 		chain["hit"] = int(chain["hit"]) + 1
-		var dmg := roundf(float(room["pattern"]["baseDamage"]) * (1.5 if p_stance else 1.0))
-		_damage_wolf(dmg, true, false)
+		var form := pattern_form()
+		match chain["effect"]:
+			"strikes":
+				_damage_wolf(roundf(float(form["base"]) * (1.5 if p_stance else 1.0)), true, false)
+			"guard":
+				_emit({ "type": "ward-pulse" })
+			"mend":
+				p_hp = minf(float(room["player"]["health"]), p_hp + float(form["base"]))
+				_emit({ "type": "mend", "amount": float(form["base"]) })
 		_emit({ "type": "pattern-cue", "k": i, "hit": true, "offset_ms": off * 1000.0 })
 		_emit({ "type": "anim", "who": "player", "name": room["combo"][i % room["combo"].size()]["anim"], "speed": 1.6 })
 		if chain["next"] >= cues.size():
@@ -316,12 +376,26 @@ func _pattern_press() -> void:
 		_emit({ "type": "pattern-cue", "k": i, "hit": false, "offset_ms": off * 1000.0 })
 		_finish_pattern(false)
 
+## Every cue landed: the Form pays at Stage 4 times the Terms' multiplier.
 func _finish_pattern(landed: bool) -> void:
+	var form := pattern_form()
 	if landed:
 		var stage := float(rules["field"]["stageOutput"][3])
-		var dmg := roundf(float(room["pattern"]["baseDamage"]) * stage * float(chain["multiplier"]))
-		_damage_wolf(dmg, true, false)
-		_emit({ "type": "pattern-done", "damage": dmg })
+		var pay := float(form["base"]) * stage * float(chain["multiplier"])
+		match chain["effect"]:
+			"strikes":
+				_damage_wolf(roundf(pay), true, false)
+				_emit({ "type": "pattern-done", "damage": roundf(pay), "effect": "strikes" })
+			"guard":
+				_damage_wolf(roundf(pay), true, true)
+				if w_state not in ["down", "absent"]:
+					_wolf_set("stagger", float(form.get("staggerSeconds", 2.0)))
+					_emit({ "type": "stagger", "seconds": float(form.get("staggerSeconds", 2.0)), "cause": "pattern" })
+				_emit({ "type": "pattern-done", "damage": roundf(pay), "effect": "guard" })
+			"mend":
+				var heal := roundf(pay * float(form.get("healFactor", 1.0)))
+				p_hp = minf(float(room["player"]["health"]), p_hp + heal)
+				_emit({ "type": "pattern-done", "heal": heal, "effect": "mend" })
 	else:
 		stats["pattern_fizzles"] += 1
 		_emit({ "type": "pattern-fizzle" })
@@ -352,7 +426,7 @@ func _update_will(dt: float) -> void:
 	var dw := 0.0
 	if p_stance: dw -= float(room["stance"]["willPerSecond"])
 	if blocking: dw -= float(room["block"]["willPerSecond"])
-	if not p_stance and not blocking and p_state != "pattern": dw += float(F["regenOpen"])
+	if not p_stance and not blocking and p_state != "pattern": dw += float(F["regenOpen"]) * (0.5 if p_leaking else 1.0)
 	p_will = clampf(p_will + dw * dt, 0.0, float(F["willMax"]))
 	if p_will == 0.0 and not p_fainted and (p_stance or blocking):
 		p_fainted = true
@@ -435,6 +509,7 @@ func _resolve_swing(damage: float, reach: float, arc: float, breaks: bool, knock
 		return
 	var heavy := breaks or knockback > 0.0
 	if p_stance: damage *= float(room["stance"]["damageFactor"])
+	if p_disarmed and not breaks: damage *= 0.4
 	_damage_wolf(roundf(damage), false, heavy)
 	if knockback > 0.0 and w_state not in ["down", "pinned"]:
 		w_pos = _clamp_in(w_pos + (w_pos - p_pos).normalized() * knockback)
@@ -497,6 +572,9 @@ func _spawn_wolf() -> void:
 	w_facing = _angle_to(w_pos, p_pos)
 	w_break = 0
 	w_hits_taken = 0
+	w_named = false
+	w_pattern_hits = 0
+	p_struck_this_foe = false
 	_wolf_prowl()
 
 func _wolf_set(state: String, duration: float) -> void:
@@ -614,6 +692,10 @@ func _resolve_bite() -> void:
 		stats["evades"] += 1
 		_emit({ "type": "evade", "how": "dodged" })
 		return
+	if p_state == "pattern" and not chain.is_empty() and chain["effect"] == "guard":
+		_emit({ "type": "turned" })
+		_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 1.0 })
+		return
 	var facing_wolf := absf(angle_difference(p_facing, _angle_to(p_pos, w_pos))) <= deg_to_rad(float(room["block"]["arc"])) / 2.0
 	if now <= p_parry_until and facing_wolf:
 		var pr: Dictionary = room["parry"]
@@ -621,7 +703,7 @@ func _resolve_bite() -> void:
 		p_parry_until = -9.0
 		stats["parries"] += 1
 		_wolf_set("stagger", float(pr["staggerSeconds"]))
-		pattern_until = now + float(room["pattern"]["availableSeconds"])
+		parried_until = now + float(room["pattern"]["afterParrySeconds"])
 		_emit({ "type": "parry" })
 		_emit({ "type": "anim", "who": "player", "name": "Block_Hit", "speed": 1.3 })
 		_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 0.8 })
@@ -635,6 +717,7 @@ func _resolve_bite() -> void:
 		_emit({ "type": "anim", "who": "player", "name": "Block_Hit", "speed": 1.2 })
 	else:
 		stats["hurts"] += 1
+		p_struck_this_foe = true
 		_emit({ "type": "hurt", "damage": dmg })
 		p_combo_count = 0
 		if not p_stance:

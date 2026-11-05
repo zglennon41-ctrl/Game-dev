@@ -82,3 +82,23 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
     all five pay base 14 × Stage 4 × 3 = 168 on top. One missed fizzles it; the Toll is taken.
 21. **Anchor stance**: hits ×1.5, cannot be knocked back or flinched, moves at 75%, 2 Will/s.
 22. **Hit-stop and the parry's slow motion** are part of the feel; both are numbers in `feel`.
+
+# Step 3 — the Pattern builder (2026-11-05)
+
+23. **Three Forms for the Anchor**, one per family: Weight (Ground Strike: a chain of blows,
+    then a heavy finisher), Wall (Cannot Be Moved: untouchable while it runs, then a shockwave
+    that staggers), Endurance (Second Wind: heals). Their effects and numbers are mine
+    (`data/combat-room.json → pattern.forms`).
+24. **20 of the 55 Terms work in the combat room.** The rest are shown greyed, with what they
+    need (the genius, a party, the hall, the calendar). "Only on the seventh beat" has no
+    meaning in real-time combat and needs redesigning.
+25. **"After I have named the foe aloud"** is a key (N): the Anchor shouts the beast's name.
+    "Never in silence" uses the same naming as its declaration.
+26. **The Pattern can be rebuilt any time** in the prototype. The design says once a year, at
+    the Thaw; that comes with the calendar.
+27. **Swearing happens in the builder** for now. The design puts it at the hall's hearth, on a
+    Sunday, before three witnesses (Step 6).
+28. **A breach is real time**: unsworn, the Pattern is lost for 91 days; sworn, for good. The
+    builder has a "testing only: restore" button so you can keep playing.
+29. **Two Bars always forbid in this room** (never against a beast, never on a Green line):
+    every use is a breach. They are allowed, and labelled, because a vow can be impossible.

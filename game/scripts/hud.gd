@@ -42,7 +42,7 @@ const SLOTS := [
 	["dodge", "Space", "Dodge", "8"],
 	["technique", "Q", "Ground Strike", "18"],
 	["stance", "F", "Anchor Stance", "2/s"],
-	["pattern", "R", "Pattern", "all"],
+	["pattern", "R", "Pattern", ""],
 ]
 
 func _ready() -> void:
@@ -126,7 +126,7 @@ func _ready() -> void:
 	hint.position = Vector2(-450, -28)
 	hint.custom_minimum_size = Vector2(900, 0)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.text = "WASD move  ·  mouse look  ·  Tab lock-on  ·  Esc menu     |     pad: X strike · RB block · A dodge · Y Ground Strike · LB stance · B Pattern"
+	hint.text = "WASD move  ·  mouse look  ·  Tab lock-on  ·  N name the foe  ·  Esc menu     |     pad: X strike · RB block · A dodge · Y Ground Strike · LB stance · B Pattern · Up name"
 	play_ui.add_child(hint)
 
 	# The tutorial box.
@@ -312,14 +312,17 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	_set_slot("stance", 0.0, not f.p_fainted, f.p_stance)
 	_set_slot("attack", 0.0, true, f.p_state == "attack")
 	var ready := f.pattern_ready()
-	var left := maxf(0.0, f.pattern_until - f.now)
 	_set_slot("pattern", 0.0 if ready else 1.0, ready, f.p_state == "pattern", Color(GOLD, 0.35 + 0.35 * sin(Time.get_ticks_msec() / 90.0)) if ready else Color(0, 0, 0, 0))
-	slots["pattern"]["name"].text = ("Breaking Ground  %.1fs" % left) if ready else "Pattern"
+	var pname: String = f.pattern["name"]
+	slots["pattern"]["name"].text = "LOST" if f.pattern_lost else (pname if pname.length() <= 15 else pname.substr(0, 14) + ".")
+	_set_slot("stance", 0.0, not f.p_fainted and not f.p_stance_locked, f.p_stance)
 	if f.p_state == "pattern" and not f.chain.is_empty():
 		var n: int = f.chain["cues"].size()
-		pattern_banner.text = "%s  x%s\nstrike as the gold ring closes     %d / %d" % [String(Data.room["pattern"]["name"]).to_upper(), str(f.chain["multiplier"]), int(f.chain["next"]), n]
+		pattern_banner.text = "%s  x%s\nstrike as the gold ring closes     %d / %d" % [pname.to_upper(), str(f.chain["multiplier"]), int(f.chain["next"]), n]
+	elif f.now <= f.breach_armed_until:
+		pattern_banner.text = "A BAR FORBIDS THIS: press R again to break your Term" + ("  (sworn: lost for good)" if f.pattern["sworn"] else "  (lost for a season)")
 	elif ready:
-		pattern_banner.text = "PARRIED - the Pattern's Trigger is met: press R"
+		pattern_banner.text = "%s is ready: press R" % pname
 	else:
 		pattern_banner.text = ""
 

@@ -24,6 +24,9 @@ func _run() -> void:
 	test_dodge()
 	test_break()
 	test_pattern()
+	test_builder_rules()
+	test_forms()
+	test_triggers_tolls_bars()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -198,3 +201,90 @@ func test_bots() -> void:
 	check(good.stats["hurts"] / maxf(1.0, good.now) < mash.stats["hurts"] / maxf(1.0, mash.now), "the skilled bot is bitten less often")
 	check(good.stats["wolves_down"] >= mash.stats["wolves_down"], "the skilled bot fells at least as many wolves")
 	check(good.stats["wolves_down"] <= 12, "a wolf takes real work, even played perfectly (%d felled)" % good.stats["wolves_down"])
+
+## Fire a Pattern from a fresh parry and land every cue.
+func land_pattern(f: Fight) -> Array:
+	biting_wolf(f, 0.1)
+	f.input("block-down")
+	run_for(f, 0.3)
+	f.input("block-up")
+	f.input("pattern")
+	var evs: Array = f.drain()
+	if f.chain.is_empty():
+		return evs
+	for c in f.chain["cues"].duplicate():
+		evs.append_array(run_for(f, maxf(0.0, float(c) - f.now)))
+		f.input("attack")
+		evs.append_array(f.drain())
+	evs.append_array(run_for(f, 0.2))
+	return evs
+
+func test_builder_rules() -> void:
+	var base := { "name": "x", "form": "anchor.weight", "terms": [], "sworn": false }
+	check(Fight.multiplier_of(base) == 1.0 and Fight.chain_length(base) == 3, "a bare Form: x1, chain of 3")
+	var three := { "name": "x", "form": "anchor.weight", "terms": ["below-half", "half-health", "never-twice-one-foe"], "sworn": false }
+	check(is_equal_approx(Fight.multiplier_of(three), 4.5) and Fight.chain_length(three) == 6, "three Terms: x4.5, chain of 6")
+	three["sworn"] = true
+	check(is_equal_approx(Fight.multiplier_of(three), 9.0), "sworn doubles it, to the x9 ceiling")
+	check(not PatternTerms.available("genius-sits-out") and PatternTerms.reason("genius-sits-out").contains("genius"), "Terms the room cannot judge are unavailable, with a reason")
+	var n := 0
+	for t in Data.terms:
+		if PatternTerms.available(t["id"]): n += 1
+	print("  Terms available in the combat room: %d of %d" % [n, Data.terms.size()])
+	check(n >= 15, "at least fifteen Terms can be taken in the combat room")
+
+func test_forms() -> void:
+	var g := Fight.new({ "seed": 1, "pattern": { "name": "Wall", "form": "anchor.wall", "terms": ["after-perfect-hold"], "sworn": false } })
+	biting_wolf(g, 0.1)
+	g.input("block-down")
+	run_for(g, 0.3)
+	g.input("block-up")
+	g.input("pattern")
+	# A second bite lands mid-chain: the guard Form turns it aside.
+	biting_wolf(g, 0.05)
+	g.p_state = "pattern"
+	var evs := run_for(g, 0.3)
+	check(types(evs).has("turned") and g.p_hp == 100, "the Wall Form turns a bite aside while it holds")
+	var m := Fight.new({ "seed": 1, "pattern": { "name": "Mend", "form": "anchor.endurance", "terms": ["after-perfect-hold"], "sworn": false } })
+	m.p_hp = 40
+	var mevs := land_pattern(m)
+	check(types(mevs).has("pattern-done") and m.p_hp > 40 + 3 * 4, "the Endurance Form heals (to %d)" % m.p_hp)
+
+func test_triggers_tolls_bars() -> void:
+	# Trigger: only below half health.
+	var f := Fight.new({ "seed": 1, "pattern": { "name": "x", "form": "anchor.weight", "terms": ["below-half"], "sworn": false } })
+	f.w_state = "idle"
+	f.input("pattern")
+	check(types(f.drain()).has("pattern-locked") and f.p_state != "pattern", "an unmet Trigger keeps it locked")
+	f.p_hp = 40
+	f.input("pattern")
+	check(f.p_state == "pattern", "below half health, it fires")
+	# Trigger: only after I have named the foe aloud.
+	var nf := Fight.new({ "seed": 1, "pattern": { "name": "x", "form": "anchor.weight", "terms": ["named-aloud"], "sworn": false } })
+	nf.w_state = "idle"
+	check(not nf.pattern_ready(), "unnamed foe: not ready")
+	nf.input("name")
+	check(nf.pattern_ready(), "named aloud: ready")
+	# Toll: half my health.
+	var t := Fight.new({ "seed": 1, "pattern": { "name": "x", "form": "anchor.weight", "terms": ["full-will", "half-health"], "sworn": false } })
+	t.w_state = "idle"
+	t.input("pattern")
+	check(t.p_hp == 50, "the Toll takes half my health when it fires")
+	# Bar: never twice on one foe. The second use warns; pressing again is the breach.
+	var b := Fight.new({ "seed": 1, "pattern": { "name": "x", "form": "anchor.weight", "terms": ["full-will", "never-twice-one-foe"], "sworn": false } })
+	b.w_state = "idle"
+	b.input("pattern")
+	run_for(b, 3.0)
+	b.p_will = 100
+	b.p_state = "free"
+	b.input("pattern")
+	var bevs := b.drain()
+	check(types(bevs).has("bar-warning") and b.p_state != "pattern", "a covering Bar refuses, with a warning")
+	b.input("pattern")
+	bevs = b.drain()
+	check(types(bevs).has("breach") and b.pattern_lost, "pressing again is the breach: the Pattern is lost")
+	var sworn_breach: Array = bevs.filter(func(e): return e["type"] == "breach")
+	check(not sworn_breach[0]["sworn"], "unsworn: lost for a season (the game records the date)")
+	b.p_state = "free"
+	b.input("pattern")
+	check(types(b.drain()).has("pattern-lost"), "a lost Pattern will not fire")

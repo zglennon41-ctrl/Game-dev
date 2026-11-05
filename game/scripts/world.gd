@@ -577,9 +577,33 @@ func feedback(f: Fight, events: Array) -> void:
 			"not-ready":
 				floater(P, "%s is not ready" % e["what"], C_DIM, 40)
 			"pattern-locked":
-				floater(P, "the Pattern needs a perfect Hold first", C_DIM, 40)
+				floater(P, "not yet: %s" % String(e.get("trigger", "")).to_lower(), C_DIM, 40)
+			"pattern-lost":
+				floater(P, "your Pattern is lost", C_WINDUP, 44)
+			"stance-locked":
+				floater(P, "no stance this season (your Toll)", C_DIM, 40)
+			"named":
+				floater(_v3(f.p_pos, 2.6), "%s!" % String(e["who"]).to_upper(), C_TEXT, 64, 1.0)
+			"bar-warning":
+				floater(P + Vector3(0, 0.5, 0), String(e["bars"][0]).to_upper(), C_WINDUP, 60, 1.6)
+				floater(P, "press R again to break your Term", C_WINDUP, 40, 1.6)
+				flash_screen(Color(0.8, 0.1, 0.05), 0.25)
+			"breach":
+				floater(P + Vector3(0, 0.8, 0), "TERM BROKEN", C_WINDUP, 110, 2.2)
+				floater(P + Vector3(0, 0.2, 0), "the Pattern is lost for good" if e["sworn"] else "the Pattern is lost for a season", C_WINDUP, 48, 2.2)
+				flash_screen(Color(0.6, 0.0, 0.0), 0.8)
+				_shake = 0.35
+			"turned":
+				floater(P, "TURNED ASIDE", C_GUARD, 56)
+				impact(_v3(f.p_pos, 1.2) + _v3(Vector2.from_angle(f.p_facing) * 0.6), C_GUARD, 1.0)
+			"ward-pulse":
+				_ring_wave(_v3(f.p_pos), C_GUARD, 2.2)
+			"mend":
+				floater(P, "+%d" % int(e["amount"]), Color(0.5, 1.0, 0.55), 56)
 			"pattern-start":
 				floater(P + Vector3(0, 0.5, 0), String(e["name"]).to_upper(), C_GOLD, 96, 1.4)
+				for i in e["tolls"].size():
+					floater(P - Vector3(0, 0.4 + 0.3 * i, 0), "Toll: %s" % String(e["tolls"][i]).to_lower(), C_DIM, 36, 1.6)
 				_ring_wave(_v3(f.p_pos), C_GOLD, 4.0)
 			"pattern-cue":
 				if e["hit"]:
@@ -587,7 +611,10 @@ func feedback(f: Fight, events: Array) -> void:
 				else:
 					floater(P, "%s" % ("too early" if e["offset_ms"] < 0 else "late"), C_DIM, 44)
 			"pattern-done":
-				floater(W + Vector3(0, 1.0, 0), "%d" % int(e["damage"]), C_GOLD, 140, 1.6, 0.6)
+				if e.has("heal"):
+					floater(P + Vector3(0, 0.6, 0), "+%d" % int(e["heal"]), Color(0.5, 1.0, 0.55), 140, 1.6, 0.6)
+				else:
+					floater(W + Vector3(0, 1.0, 0), "%d" % int(e["damage"]), C_GOLD, 140, 1.6, 0.6)
 				_ring_wave(_v3(f.w_pos), C_GOLD, 5.0)
 				burst(_v3(f.w_pos, 1.0), C_GOLD, 80, 10.0)
 				_shake = 0.3

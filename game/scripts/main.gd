@@ -7,6 +7,8 @@ extends Node3D
 var world := World.new()
 var hud := Hud.new()
 var sfx := Sfx.new()
+var builder := Builder.new()
+var _breached := false
 var fight: Fight
 var tutorial: Tutorial
 var mode := "menu"   # menu, tutorial, fight, results
@@ -22,11 +24,11 @@ var _bot_move := Vector2.ZERO
 const ACTIONS := {
 	"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN],
 	"attack": [KEY_J], "block": [KEY_K], "dodge": [KEY_SPACE, KEY_SHIFT], "technique": [KEY_Q, KEY_1],
-	"stance": [KEY_F, KEY_L], "pattern": [KEY_R], "lock_on": [KEY_TAB], "menu": [KEY_ESCAPE],
+	"stance": [KEY_F, KEY_L], "pattern": [KEY_R], "name_foe": [KEY_N], "lock_on": [KEY_TAB], "menu": [KEY_ESCAPE],
 }
 const MOUSE := { "attack": MOUSE_BUTTON_LEFT, "block": MOUSE_BUTTON_RIGHT, "lock_on": MOUSE_BUTTON_MIDDLE }
 const PAD := { "attack": JOY_BUTTON_X, "block": JOY_BUTTON_RIGHT_SHOULDER, "dodge": JOY_BUTTON_A, "technique": JOY_BUTTON_Y,
-	"stance": JOY_BUTTON_LEFT_SHOULDER, "pattern": JOY_BUTTON_B, "lock_on": JOY_BUTTON_RIGHT_STICK, "menu": JOY_BUTTON_START }
+	"stance": JOY_BUTTON_LEFT_SHOULDER, "pattern": JOY_BUTTON_B, "lock_on": JOY_BUTTON_RIGHT_STICK, "menu": JOY_BUTTON_START, "name_foe": JOY_BUTTON_DPAD_UP }
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
@@ -37,9 +39,26 @@ func _ready() -> void:
 	add_child(world)
 	add_child(hud)
 	add_child(sfx)
+	add_child(builder)
+	builder.visible = false
+	builder.done.connect(_pattern_built)
+	builder.cancelled.connect(func(): builder.visible = false; menu())
 	_last_ticks = Time.get_ticks_usec()
 	if _args.has("shots"):
 		DirAccess.make_dir_recursive_absolute(_args["shots"])
+	if _args.has("builder"):
+		menu()
+		_open_builder()
+		if _args.has("shots"):
+			await get_tree().create_timer(0.5).timeout
+			builder.spec["terms"] = ["after-perfect-hold", "half-health", "never-twice-one-foe"]
+			builder.spec["sworn"] = true
+			builder._refresh()
+			await get_tree().create_timer(0.3).timeout
+			_shot("builder")
+			await get_tree().create_timer(0.5).timeout
+			get_tree().quit()
+		return
 	if _args.has("tutorial"):
 		start("tutorial")
 	elif _args.has("fight"):
@@ -76,16 +95,32 @@ func menu() -> void:
 	Engine.time_scale = 1.0
 	sfx.stop_ambience()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	var spec := Settings.pattern()
+	var lost := Settings.pattern_lost_text()
 	hud.show_screen("WILDLINE", "The Cumberland Cut  ·  an Anchor and a cut-wolf",
-		"Mouse and keyboard, or a gamepad. Sound on.", [
+		"Mouse and keyboard, or a gamepad. Sound on.\n\nYour Pattern: %s   [color=#f5c95a]x%s[/color]%s" % [Builder.sentence(spec), str(snappedf(Fight.multiplier_of(spec), 0.01)), ("\n[color=#e65a4d]%s[/color]" % lost) if lost != "" else ""], [
 		["Learn to fight  (tutorial, about five minutes)", func(): start("tutorial")],
 		["Fight the cut-wolf  (two minutes)", func(): start("fight")],
+		["Build your Pattern", _open_builder],
 		["Quit", func(): get_tree().quit()],
 	])
 
+func _open_builder() -> void:
+	hud.screen.visible = false
+	builder.open(Settings.pattern(), Settings.pattern_lost_text(), func(): Settings.restore_pattern())
+
+func _pattern_built(spec: Dictionary) -> void:
+	Settings.save_pattern(spec)
+	builder.visible = false
+	menu()
+
 func start(which: String) -> void:
+	# The tutorial teaches with the starting Pattern; the fight uses the one you built.
+	var spec: Dictionary = Data.room["pattern"]["default"] if which == "tutorial" else Settings.pattern()
 	fight = Fight.new({ "beast": "yard-wolf" if which == "tutorial" else "cut-wolf", "seed": randi(),
-		"passive": which == "tutorial", "respawn": true })
+		"passive": which == "tutorial", "respawn": true, "pattern": spec,
+		"pattern_lost": false if which == "tutorial" else Settings.pattern_lost() })
+	_breached = false
 	world.show_wolf = true
 	world.reset_feedback()
 	world.snap_camera(fight)
@@ -128,7 +163,10 @@ func _results(reason: String) -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var s := fight.stats
 	var sub := "The wolf put you on the stones. On the line, your party would have sixty seconds to stand you up." if reason == "down" else "%d cut-%s felled." % [s["wolves_down"], "wolf" if s["wolves_down"] == 1 else "wolves"]
-	var body := "[table=2]"
+	var body := ""
+	if _breached:
+		body += "[color=#e65a4d]You broke a Term. %s[/color]\n\n" % Settings.pattern_lost_text()
+	body += "[table=2]"
 	for row in [["Damage dealt", str(int(s["damage_dealt"]))], ["Parries / blocks / bitten / evaded", "%d / %d / %d / %d" % [s["parries"], s["blocks"], s["hurts"], s["evades"]]],
 			["Breaks into stagger", str(s["staggers"])], ["Patterns landed / fizzled", "%d / %d" % [s["patterns"] - s["pattern_fizzles"], s["pattern_fizzles"]]],
 			["Longest run of hits", str(s["longest_combo"])], ["Health left", str(roundi(fight.p_hp))]]:
@@ -161,7 +199,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("lock_on"):
 		fight.input("lock")
 		world.lock_on = fight.p_lock
-	for pair in [["attack", "attack"], ["technique", "technique"], ["dodge", "dodge"], ["stance", "stance"], ["pattern", "pattern"], ["block", "block-down"]]:
+	for pair in [["attack", "attack"], ["technique", "technique"], ["dodge", "dodge"], ["stance", "stance"], ["pattern", "pattern"], ["block", "block-down"], ["name_foe", "name"]]:
 		if event.is_action_pressed(pair[0], false, true):
 			fight.input(pair[1])
 	if event.is_action_released("block", true):
@@ -181,6 +219,10 @@ func _process(delta: float) -> void:
 		move = _bot()
 	fight.update(minf(delta, 0.1), move)
 	var events := fight.drain()
+	for e in events:
+		if e["type"] == "breach" and mode == "fight":
+			_breached = true
+			Settings.lose_pattern(e["sworn"])
 	_sounds(events)
 	world.feedback(fight, events)
 	if tutorial:
@@ -233,6 +275,12 @@ func _sounds(events: Array) -> void:
 			"pattern-cue": sfx.play("cue-hit" if e["hit"] else "fizzle")
 			"pattern-done": sfx.play("heavy", 0.7)
 			"pattern-fizzle": sfx.play("fizzle", 0.8)
+			"named": sfx.play("stance", 1.4)
+			"bar-warning": sfx.play("deny", 0.7)
+			"breach": sfx.play("stagger", 0.6)
+			"turned": sfx.play("block", 1.3)
+			"mend": sfx.play("cue-hit", 0.8)
+			"pattern-lost", "stance-locked": sfx.play("deny")
 
 func _shot(label: String) -> void:
 	if not _args.has("shots"):
