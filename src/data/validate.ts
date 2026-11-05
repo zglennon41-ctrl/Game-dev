@@ -51,6 +51,11 @@ export function validateData(dir = 'data'): Problem[] {
     const count = forms.filter((f: { instars: { min: number; max: number } }) => f.instars.min <= n && n <= f.instars.max).length;
     if (count < 4) problems.push({ file: 'forms.json', message: `only ${count} forms for instar ${n}; a Reading needs three besides the current form` });
   }
+  // Every silhouette in the lattice can be assembled, and every slot has sockets.
+  const bodies = D('genius-bodies');
+  for (const f of forms) if (!bodies.silhouettes[f.silhouette]) problems.push({ file: 'genius-bodies.json', message: `no body for silhouette ${f.silhouette} (form ${f.id})` });
+  for (const ft of D('features')) if (ft.slot !== 'surface' && !bodies.slotSockets[ft.slot]) problems.push({ file: 'genius-bodies.json', message: `no sockets for slot ${ft.slot}` });
+  for (const [sil, sp] of Object.entries(bodies.silhouettes as Record<string, { kind: string }>)) if (!bodies.kinds[sp.kind]) problems.push({ file: 'genius-bodies.json', message: `${sil}: unknown kind ${sp.kind}` });
   const archetypes = ids('archetypes');
   const shades = ids('shades');
   const terms = ids('terms');

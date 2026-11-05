@@ -767,3 +767,22 @@ func ask_name(default_name: String, then: Callable) -> void:
 	e.call_deferred("select_all")
 	if auto:
 		get_tree().create_timer(1.0).timeout.connect(finish)
+
+var _card: GeniusCard = null
+
+## The genius's card, at the left of the screen.
+func show_card(info: Dictionary, color: Color, title: String) -> void:
+	hide_card()
+	_card = GeniusCard.make(info, color, title)
+	_card.position = Vector2(60, 70)
+	get_child(0).add_child(_card)
+	_card.modulate.a = 0.0
+	_card.position.x -= 40
+	var tw := _card.create_tween().set_parallel(true)
+	tw.tween_property(_card, "modulate:a", 1.0, 0.5)
+	tw.tween_property(_card, "position:x", 60.0, 0.6).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+func hide_card() -> void:
+	if _card:
+		_card.queue_free()
+		_card = null

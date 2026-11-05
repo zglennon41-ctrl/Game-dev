@@ -1386,6 +1386,7 @@ var genius_goal_radius := 0.0
 var _g_form: Node3D = null         # the First Form, once the rite has given it one
 var _g_form_info: Dictionary = {}
 var _g_form_anim: AnimationPlayer
+var _g_body: GeniusBody = null
 var _g_form_pos := Vector3.ZERO
 var _g_form_facing := 0.0
 
@@ -1953,126 +1954,13 @@ void fragment() {
 }
 """
 
-## A First Form from its silhouette and features: shadow bodies, lit at the edges in the
-## genius's colour, with glowing eyes. Placeholder until there is art for every form.
+## The genius's body, from its silhouette and features (genius_body.gd: art if there is any,
+## placeholders if not).
 func make_form(info: Dictionary, color: Color) -> Node3D:
-	var root := Node3D.new()
-	var mat := _shader_mat(SILHOUETTE)
-	mat.set_shader_parameter("glow", color)
-	var sil: String = info["silhouette"]
-	var feats: Array = info["features"]
-	var eye_h := 0.6
-	var add_part := func(mesh: Mesh, pos: Vector3, rot := Vector3.ZERO, scl := Vector3.ONE) -> MeshInstance3D:
-		var m := MeshInstance3D.new()
-		m.mesh = mesh
-		m.position = pos
-		m.rotation = rot
-		m.scale = scl
-		m.material_override = mat
-		root.add_child(m)
-		return m
-	match sil:
-		"beast-runner", "beast-grazer", "engine-quadruped", "beast-swimmer":
-			var w: Node3D = load("res://game/assets/quaternius/Wolf.glb").instantiate()
-			var sc := { "beast-runner": Vector3(0.42, 0.42, 0.42), "beast-grazer": Vector3(0.5, 0.46, 0.42),
-				"engine-quadruped": Vector3(0.46, 0.4, 0.46), "beast-swimmer": Vector3(0.36, 0.28, 0.5) }
-			w.scale = sc[sil]
-			root.add_child(w)
-			for m in w.find_children("*", "MeshInstance3D", true, false):
-				m.material_override = mat
-				m.material_overlay = _ink(1.6)
-			_g_form_anim = w.find_child("AnimationPlayer", true, false)
-			for a in ["Idle", "Walk", "Gallop"]:
-				if _g_form_anim.has_animation(WA + a):
-					_g_form_anim.get_animation(WA + a).loop_mode = Animation.LOOP_LINEAR
-			_g_form_anim.play(WA + "Idle")
-			eye_h = -1.0
-			if sil == "beast-grazer":
-				for side in [-1, 1]:
-					add_part.call(_cone(0.07, 0.3), Vector3(side * 0.12, 0.62, 0.42), Vector3(-0.6, 0, side * 0.6))
-		"beast-flier":
-			add_part.call(_sphere(0.16), Vector3(0, 0.5, 0), Vector3.ZERO, Vector3(1, 1, 1.5))
-			add_part.call(_sphere(0.11), Vector3(0, 0.64, 0.2))
-			add_part.call(_cone(0.05, 0.16), Vector3(0, 0.62, 0.34), Vector3(PI / 2, 0, 0))
-			for side in [-1, 1]:
-				var wing: MeshInstance3D = add_part.call(_box(Vector3(0.62, 0.03, 0.28)), Vector3(side * 0.4, 0.58, -0.02), Vector3(0, 0, side * 0.35))
-				wing.set_meta("wing", side)
-			eye_h = 0.68
-		"kith-fey":
-			add_part.call(_sphere(0.14), Vector3(0, 0.72, 0))
-			add_part.call(_cone(0.12, 0.4), Vector3(0, 0.45, 0), Vector3(PI, 0, 0))
-			for side in [-1, 1]:
-				var wing: MeshInstance3D = add_part.call(_box(Vector3(0.3, 0.02, 0.18)), Vector3(side * 0.2, 0.62, -0.08), Vector3(0.3, 0, side * 0.6))
-				wing.set_meta("wing", side)
-			eye_h = 0.74
-		"engine-lantern":
-			add_part.call(_box(Vector3(0.34, 0.42, 0.34)), Vector3(0, 0.62, 0))
-			add_part.call(_cone(0.26, 0.2), Vector3(0, 0.92, 0))
-			for side in [-1, 1]:
-				add_part.call(_box(Vector3(0.06, 0.42, 0.06)), Vector3(side * 0.1, 0.2, 0))
-			var core := MeshInstance3D.new()
-			core.mesh = _sphere(0.1)
-			core.material_override = _mat(color, 5.0, true)
-			core.position = Vector3(0, 0.62, 0)
-			root.add_child(core)
-			eye_h = -1.0
-		"kith-homunculus", "daemon-small":
-			add_part.call(_sphere(0.17), Vector3(0, 0.62, 0))
-			add_part.call(_cone(0.17, 0.4), Vector3(0, 0.3, 0))
-			for side in [-1, 1]:
-				add_part.call(_box(Vector3(0.05, 0.28, 0.05)), Vector3(side * 0.2, 0.36, 0), Vector3(0, 0, side * 0.4))
-			if sil == "daemon-small" or feats.has("horns"):
-				for side in [-1, 1]:
-					add_part.call(_cone(0.04, 0.18), Vector3(side * 0.09, 0.8, 0), Vector3(0, 0, -side * 0.4))
-			eye_h = 0.66
-		"aspect-flame", "aspect-shadow":
-			var core := MeshInstance3D.new()
-			core.mesh = _sphere(0.2)
-			var cm := _mat(color if sil == "aspect-flame" else Color(0.05, 0.03, 0.08), 3.0 if sil == "aspect-flame" else 0.0, true, 0.9)
-			core.material_override = cm
-			core.position = Vector3(0, 0.55, 0)
-			root.add_child(core)
-			var p := CPUParticles3D.new()
-			p.amount = 40
-			p.lifetime = 0.8
-			p.local_coords = false
-			p.direction = Vector3(0, 1, 0)
-			p.spread = 25.0
-			p.initial_velocity_min = 0.3
-			p.initial_velocity_max = 0.8
-			p.gravity = Vector3(0, 0.6, 0)
-			var q := QuadMesh.new()
-			q.size = Vector2(0.16, 0.16)
-			p.mesh = q
-			var pm := StandardMaterial3D.new()
-			pm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-			pm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD if sil == "aspect-flame" else BaseMaterial3D.BLEND_MODE_MIX
-			pm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-			pm.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-			pm.vertex_color_use_as_albedo = true
-			pm.albedo_texture = _soft_dot()
-			p.material_override = pm
-			var g := Gradient.new()
-			g.set_color(0, Color(color.lightened(0.3), 0.9) if sil == "aspect-flame" else Color(0.08, 0.04, 0.12, 0.8))
-			g.set_color(1, Color(color, 0.0))
-			p.color_ramp = g
-			p.position = Vector3(0, 0.5, 0)
-			root.add_child(p)
-			eye_h = 0.6
-		_:
-			add_part.call(_sphere(0.25), Vector3(0, 0.5, 0))
-	if feats.has("wings") and sil not in ["beast-flier", "kith-fey"]:
-		for side in [-1, 1]:
-			var wing: MeshInstance3D = add_part.call(_box(Vector3(0.4, 0.02, 0.2)), Vector3(side * 0.28, 0.7, -0.1), Vector3(0, 0, side * 0.4))
-			wing.set_meta("wing", side)
-	if eye_h > 0.0:
-		for side in [-1, 1]:
-			var eye := MeshInstance3D.new()
-			eye.mesh = _sphere(0.028)
-			eye.material_override = _mat(color.lightened(0.5), 6.0, true)
-			eye.position = Vector3(side * 0.06, eye_h, 0.14)
-			root.add_child(eye)
-	return root
+	var gb := GeniusBody.build(info, color, int(info.get("instar", 1)))
+	for m in gb.find_children("*", "MeshInstance3D", true, false):
+		(m as MeshInstance3D).material_overlay = _ink(1.6)
+	return gb
 
 func _sphere(r: float) -> SphereMesh:
 	var m := SphereMesh.new()
@@ -2100,6 +1988,7 @@ func set_form(info: Dictionary, form: Node3D) -> void:
 		_g_form.queue_free()
 	_g_form = form
 	_g_form_info = info
+	_g_body = form as GeniusBody
 	if form.get_parent() == null:
 		add_child(form)
 	elif form.get_parent() != self:
@@ -2114,12 +2003,13 @@ func clear_form() -> void:
 	_g_form = null
 	_g_form_info = {}
 	_g_form_anim = null
+	_g_body = null
 
 ## The First Form follows: fliers and fey and flames at the shoulder, walkers at the heel.
 func _update_form(f: Fight, dt: float) -> void:
 	_genius.visible = false
 	_g_trail.emitting = false
-	var walker := _g_form_anim != null
+	var walker := _g_body != null and _g_body.walks()
 	var side := Vector2.from_angle(f.p_facing + (2.2 if walker else 1.9))
 	var want := _v3(f.p_pos + side * (1.1 if walker else 0.8), 0.0 if walker else 1.5 + 0.08 * sin(_clock * 2.4))
 	if genius_goal != Vector3.INF:
@@ -2141,10 +2031,5 @@ func _update_form(f: Fight, dt: float) -> void:
 	if genius_down:
 		_g_form_pos = _g_form_pos.lerp(Vector3(_g_form_pos.x, 0.15, _g_form_pos.z), 1.0 - exp(-dt * 4.0))
 		_g_form.global_position = _g_form_pos
-	if walker and is_instance_valid(_g_form_anim):
-		var want_anim := WA + ("Gallop" if flat.length() > 4.0 else ("Walk" if flat.length() > 0.4 else "Idle"))
-		if _g_form_anim.current_animation != want_anim:
-			_g_form_anim.play(want_anim, 0.2)
-	for c in _g_form.get_children():
-		if c.has_meta("wing"):
-			(c as Node3D).rotation.z = float(c.get_meta("wing")) * (0.35 + 0.45 * sin(_clock * 14.0))
+	if _g_body:
+		_g_body.move_at(flat.length())

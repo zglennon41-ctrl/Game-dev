@@ -75,6 +75,7 @@ func _go(p: String) -> void:
 			world.genius_goal_radius = 1.2
 			sfx.play("pattern", 0.7)
 		"name":
+			ac.show_card(form, World.SHAPE_COLORS[hero["shape"]], "FIRST FORM")
 			ac.ask_name(form["name"], func(n: String): _named(n))
 
 func Rite_fill(s: String) -> String:
@@ -256,4 +257,5 @@ func _named(n: String) -> void:
 	d.tween_method(func(k: float): world.dim(k), 0.85, 0.0, 2.0)
 	world.cine = false
 	world.sigils(false)
-	ac.say(cfg["instructor"], lines, func(): done.emit())
+	ac.show_card(g, World.SHAPE_COLORS[hero["shape"]], "YOUR GENIUS")
+	ac.say(cfg["instructor"], lines, func(): ac.hide_card(); done.emit())

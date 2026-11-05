@@ -11,6 +11,7 @@ var sfx := Sfx.new()
 var builder := Builder.new()
 var creator := Creator.new()
 var academy := Academy.new()
+var page := GeniusPage.new()
 var prologue: Prologue
 var hero: Dictionary = {}
 var preview: Fight
@@ -30,11 +31,11 @@ var _bot_move := Vector2.ZERO
 const ACTIONS := {
 	"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN],
 	"attack": [KEY_J], "block": [KEY_K], "dodge": [KEY_SPACE, KEY_SHIFT], "technique": [KEY_Q, KEY_1],
-	"stance": [KEY_F, KEY_L], "pattern": [KEY_R], "name_foe": [KEY_N], "lock_on": [KEY_TAB], "menu": [KEY_ESCAPE], "interact": [KEY_E], "order": [KEY_G],
+	"stance": [KEY_F, KEY_L], "pattern": [KEY_R], "name_foe": [KEY_N], "lock_on": [KEY_TAB], "menu": [KEY_ESCAPE], "interact": [KEY_E], "order": [KEY_G], "genius_page": [KEY_J],
 }
 const MOUSE := { "attack": MOUSE_BUTTON_LEFT, "block": MOUSE_BUTTON_RIGHT, "lock_on": MOUSE_BUTTON_MIDDLE }
 const PAD := { "attack": JOY_BUTTON_X, "block": JOY_BUTTON_RIGHT_SHOULDER, "dodge": JOY_BUTTON_A, "technique": JOY_BUTTON_Y,
-	"stance": JOY_BUTTON_LEFT_SHOULDER, "pattern": JOY_BUTTON_B, "lock_on": JOY_BUTTON_RIGHT_STICK, "menu": JOY_BUTTON_START, "name_foe": JOY_BUTTON_DPAD_UP, "interact": JOY_BUTTON_X, "order": JOY_BUTTON_DPAD_LEFT }
+	"stance": JOY_BUTTON_LEFT_SHOULDER, "pattern": JOY_BUTTON_B, "lock_on": JOY_BUTTON_RIGHT_STICK, "menu": JOY_BUTTON_START, "name_foe": JOY_BUTTON_DPAD_UP, "interact": JOY_BUTTON_X, "order": JOY_BUTTON_DPAD_LEFT, "genius_page": JOY_BUTTON_BACK }
 
 func _ready() -> void:
 	Style.apply_global()
@@ -55,6 +56,8 @@ func _ready() -> void:
 	academy.sfx = sfx
 	add_child(academy)
 	academy.visible = false
+	add_child(page)
+	page.closed.connect(func(): if mode == "academy" and not _args.has("bot"): Input.mouse_mode = Input.MOUSE_MODE_CAPTURED)
 	creator.changed.connect(_preview_hero)
 	creator.finished.connect(_hero_made)
 	creator.cancelled.connect(func(): creator.visible = false; menu())
@@ -103,6 +106,52 @@ func _ready() -> void:
 		var h := Creation.generate(ans)
 		h["name"] = "Test"
 		_hero_made(h)
+		return
+	if _args.has("page"):
+		var ph := Settings.hero()
+		menu()
+		page.open(Genius.for_hero(ph), World.SHAPE_COLORS.get(ph.get("shape", "anchor"), Color.WHITE))
+		if _args.has("shots"):
+			await get_tree().create_timer(1.5).timeout
+			_shot("page")
+			get_tree().quit()
+		return
+	if _args.has("gallery"):
+		# Every form in the lattice, assembled, in rows: a check of the genius bodies.
+		mode = "gallery"
+		hud.hide_screen()
+		hud.play_ui.visible = false
+		world.show_wolf = false
+		world.genius_visible = false
+		world._player.visible = false
+		var only: String = str(_args.get("gallery", ""))
+		var forms: Array = Data.forms().filter(func(f): return only == "true" or only == "" or int(f["instars"]["min"]) <= int(only))
+		var cols := 7
+		for i in forms.size():
+			var f: Dictionary = forms[i]
+			var col: Color = World.SHAPE_COLORS.values()[i % 6]
+			var info := { "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": f["features"], "instar": 3 }
+			var b := world.make_form(info, col)
+			world.add_child(b)
+			b.position = Vector3((i % cols - cols / 2.0 + 0.5) * 2.4, 0, (i / cols) * 2.6 - 4.0)
+			b.rotation.y = 0.5
+			var l := Label3D.new()
+			l.text = String(f["name"]).to_upper() + "\n" + String(f["silhouette"])
+			l.font = Style.font("title")
+			l.font_size = 30
+			l.pixel_size = 0.005
+			l.position = b.position + Vector3(0, -0.15, 0.9)
+			l.rotation.x = -0.6
+			world.add_child(l)
+		world.cine = true
+		world.cine_pos = Vector3(0, 7.5, 6.8)
+		world.cine_look = Vector3(0, 0.2, -0.6)
+		world._cam_pos = world.cine_pos
+		world._cam_look = world.cine_look
+		if _args.has("shots"):
+			await get_tree().create_timer(1.5).timeout
+			_shot("gallery")
+			get_tree().quit()
 		return
 	if _args.has("academy"):
 		# Automated checks: walk into the Academy with the saved hero (or a made one), fresh.
@@ -184,6 +233,9 @@ func menu() -> void:
 		var where := "at the Academy" if saved.has("academy") else "at the Academy's gate"
 		buttons.append(["Continue as %s  (%s, %s, %s)" % [saved["name"], Data.by_id(Data.bloods, saved["blood"])["name"], String(saved["shape"]).capitalize(), where], func(): hero = saved; enter_academy() if saved.has("academy") else _academy_gate()])
 		buttons.append(["Practice yard: fight cut-wolves as %s  (two minutes)" % saved["name"], func(): hero = saved; start("fight")])
+	if saved.has("genius") and Genius.from_dict(saved["genius"]).is_born():
+		var sg := Genius.for_hero(saved)
+		buttons.append(["Your genius: %s" % (sg.name if sg.name != "" else sg.form_name()), func(): page.open(sg, World.SHAPE_COLORS.get(saved["shape"], Color.WHITE))])
 	buttons.append(["Combat tutorial  (as an Anchor)", func(): hero = {}; start("tutorial")])
 	buttons.append(["Quit", func(): get_tree().quit()])
 	hud.show_screen("WILDLINE", "The Cumberland Cut", body, buttons, "title")
@@ -296,7 +348,7 @@ func enter_academy() -> void:
 func _academy_frame(delta: float, real_dt: float) -> void:
 	var stick := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var move := world.move_from_stick(stick)
-	if academy.busy():
+	if academy.busy() or page.visible:
 		move = Vector2.ZERO
 	fight = academy.fight
 	if _args.has("bot"):
@@ -437,7 +489,14 @@ func _results(reason: String) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_cam_mouse += event.relative
+	if page.visible:
+		if event.is_action_pressed("genius_page") or event.is_action_pressed("menu"):
+			page.hide_page()
+		return
 	if mode == "academy":
+		if event.is_action_pressed("genius_page") and not academy.busy() and not academy.in_lesson() and academy.genius and academy.genius.is_born():
+			page.open(academy.genius, World.SHAPE_COLORS.get(academy.hero["shape"], Color.WHITE))
+			return
 		if event.is_action_pressed("menu"):
 			academy.save()
 			menu()
@@ -475,6 +534,9 @@ func _process(delta: float) -> void:
 	_last_ticks = t
 	if mode == "academy":
 		_academy_frame(delta, real_dt)
+		return
+	if mode == "gallery":
+		world.draw(Fight.new({ "passive": true }), real_dt, Vector2.ZERO, Vector2.ZERO)
 		return
 	if (mode == "creator" or mode == "menu") and preview:
 		world.draw(preview, real_dt, Vector2.ZERO, Vector2.ZERO)

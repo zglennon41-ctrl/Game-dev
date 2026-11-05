@@ -47,7 +47,7 @@ static func first_form(hero: Dictionary, shape: String, seed_value: int) -> Dict
 	var r := GeniusReading.read(1, GeniusReading.empty_tally(), origin, {}, float(Data.academy["rite"]["formNoise"]), seed_value * 31 + 7)
 	var c: Dictionary = r["candidates"][0]
 	return { "form": c["form"], "name": c["name"], "expression": c["expression"], "silhouette": c["silhouette"],
-		"features": c["features"], "score": c["score"], "reading": r }
+		"features": c["features"], "score": c["score"], "seedMark": c["seedMark"], "reading": r }
 
 ## The hero's genius after the rite: born in the First Form the bowl read, and named.
 static func birth(hero: Dictionary, reading: Dictionary, genius_name: String) -> Genius:
