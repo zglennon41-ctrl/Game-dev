@@ -3,44 +3,51 @@
 A real-time party RPG with guild management. Read `HANDOFF.md` for what the game is and
 `CLAUDE.md` for how it is built.
 
-## Run it
+## Play it
+
+1. Download **Godot 4.3** (the standard version, not .NET) from
+   https://godotengine.org/download/archive/4.3-stable/ and unzip it. There is nothing
+   to install; the unzipped file is the program.
+2. Download this repository (on GitHub: **Code → Download ZIP**, branch
+   `claude/new-session-izp0bs`) and unzip it.
+3. Open Godot, click **Import**, and pick `project.godot` in the unzipped folder.
+4. Press **F5** (or the ▶ button, top right). The first open takes a minute while Godot
+   imports the project.
+
+Turn the sound on. Start with **Learn the pulse**: six short steps, about three minutes.
+The first step tunes the beat to your screen and speakers. Then **Fight the cut-wolf**
+for two minutes.
+
+| Keyboard and mouse | Gamepad | Verb |
+| --- | --- | --- |
+| WASD / arrows | left stick | move |
+| mouse | right stick | look around (when lock-on is off) |
+| J, Space, left click | A | strike (Project) |
+| I, E | X | Ground Strike: an Anchor technique, 18 Will; it breaks the wolf |
+| K, Shift, right click | B, RB | Hold: tap on the wolf's strike beat to parry, hold to block |
+| L, F | Y | Anchor stance (Shape) |
+| Tab, middle click | R3 | lock-on on or off |
+| Esc | Start | menu |
+
+The feel numbers are in `data/combat-room.json` and `data/beasts.json`. Change one, press
+F5 again, and the room plays differently.
+
+## The rules simulator (Step 0)
+
+Needs Node.js 18 or newer.
 
 ```
 npm install
-npm run dev        # the pulse room: open the address it prints (http://localhost:5173)
-npm run sim        # all three lives in the terminal
-npm run sim -- --life data/lives/mira.json --log   # one life, with the day-by-day log
-npm test           # rules tests + the three-lives acceptance test
-npm run validate   # schema-check data/
+npm run sim                                         # three scripted lives, three years each
+npm run sim -- --life data/lives/mira.json --log    # one life, day by day
+npm test                                            # rules and simulator tests
+npm run validate                                    # schema-check data/
+npm run test:game                                   # the game's own tests (needs godot on your PATH)
 ```
-
-## Playing the pulse room (Step 1)
-
-Turn the sound on. Start with **Learn the pulse**: six short steps, about three minutes, and
-the first one tunes the beat to your screen and speakers. Then **Fight the cut-wolf** for two
-minutes.
-
-| Key | Verb |
-| --- | --- |
-| WASD / arrows | move |
-| J or Space | strike (Project) |
-| I | Ground Strike, an Anchor technique: 18 Will, breaks the wolf |
-| K or Shift | Hold: tap on the wolf's strike beat to parry, hold to block |
-| L | Anchor stance (Shape) |
-| Esc | menu |
-
-A gamepad works too: A strike, X Ground Strike, B or RB Hold, Y stance. The feel numbers
-are in `data/combat-room.json` and `data/beasts.json`.
-
-The rules simulator from Step 0 is at `/sim.html`.
 
 ## Where things are
 
-- `data/` — the rules as JSON. Change a number here, rerun `npm run sim`, see what changed.
-  - `rules.json` — Will, Terms, tiers, instars, Resonance, Marks
-  - `reading.json` — how the Reading weighs play (the knob to tune what geniuses become)
-  - `forms.json`, `features.json` — the lattice
-  - `lives/` — Mira, Tobiah, Sable, scripted
-- `src/rules/` — pure rules: field, terms, resonance, marks, reading
-- `src/sim/` — the simulator and its report
-- `docs/decisions-needed.md` — open questions for the owner
+- `project.godot`, `game/`: the game (Godot 4.3)
+- `data/`: the rules as JSON, read by both the game and the simulator
+- `src/`: the rules simulator (TypeScript)
+- `docs/`: the design docs, and `decisions-needed.md` (open questions for the owner)

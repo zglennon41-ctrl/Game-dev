@@ -339,7 +339,10 @@ func feedback(events: Array) -> void:
 				_swing = 1.0
 				_recoil = 1.0
 			"whiff":
-				floater(P, "out of reach", C_DIM, 32)
+				if show_wolf:
+					floater(P, "out of reach", C_DIM, 32)
+				elif e["perfect"]:
+					floater(P + Vector3(0, 0.3, 0), "ON THE BEAT", C_PERFECT, 44)
 				_swing = 1.0
 			"fumble":
 				floater(P, "fumble — %s" % e["reason"], C_OFF, 34)
@@ -482,23 +485,26 @@ func draw(f: Fight, t: float, dt: float, cam_input: Vector2) -> void:
 
 func _update_camera(dt: float, cam_input: Vector2, can_lock: bool) -> void:
 	var focus := _last_p + Vector3(0, 1.3, 0)
-	var back: Vector3
+	var want: Vector3
 	if lock_on and can_lock:
-		var to_w := (_last_w - _last_p)
+		# Over the shoulder: behind the Anchor, up, and to the right, so the Anchor stands
+		# to one side of the frame and the wolf stays in view past it.
+		var to_w := _last_w - _last_p
 		to_w.y = 0
 		if to_w.length() < 0.1:
 			to_w = Vector3(0, 0, -1)
 		to_w = to_w.normalized()
 		cam_yaw = atan2(-to_w.x, -to_w.z)
-		back = -to_w
-		focus = _last_p.lerp(_last_w, 0.35) + Vector3(0, 1.1, 0)
+		var side := Vector3(-to_w.z, 0, to_w.x)
+		want = _last_p - to_w * 4.6 + side * 1.5 + Vector3(0, 3.4, 0)
+		focus = _last_p.lerp(_last_w, 0.6) + Vector3(0, 0.7, 0)
 	else:
 		cam_yaw -= cam_input.x * dt * 2.6
 		cam_pitch = clampf(cam_pitch - cam_input.y * dt * 1.6, -1.1, -0.15)
-		back = Vector3(sin(cam_yaw), 0, cos(cam_yaw))
-	var dist := 6.2
-	var want := _last_p + back * dist * cos(cam_pitch) + Vector3(0, 1.4 + dist * sin(-cam_pitch), 0)
-	var k := 1.0 - exp(-dt * 7.0)
+		var back := Vector3(sin(cam_yaw), 0, cos(cam_yaw))
+		var dist := 6.2
+		want = _last_p + back * dist * cos(cam_pitch) + Vector3(0, 1.4 + dist * sin(-cam_pitch), 0)
+	var k := 1.0 - exp(-dt * 6.0)
 	_cam_pos = _cam_pos.lerp(want, k)
 	_cam_look = _cam_look.lerp(focus, k)
 	_shake = maxf(0.0, _shake - dt * 0.8)

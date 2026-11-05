@@ -44,6 +44,7 @@ func _init(f: Fight, w: World, p: Pulse) -> void:
 func _enter_listen() -> void:
 	world.show_wolf = false
 	world.lock_on = false
+	fight.w_mode = "absent"
 
 func _enter_wolf() -> void:
 	world.show_wolf = true

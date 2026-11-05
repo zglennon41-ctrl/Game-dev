@@ -37,7 +37,7 @@ var p_facing := 0.0
 # The wolf.
 var w_pos := Vector2.ZERO
 var w_hp: float
-var w_mode := "circle"   # circle, approach, windup, recover, stagger, down, idle
+var w_mode := "circle"   # circle, approach, windup, recover, stagger, down, idle, absent
 var w_until := 0
 var w_strike_beat := -1
 var w_angle := 0.0
@@ -158,6 +158,8 @@ func _move_wolf(dt: float) -> void:
 
 ## Bodies do not overlap: the wolf is pushed out of the Anchor's space.
 func _separate() -> void:
+	if w_mode == "absent":
+		return
 	var m := float(room["player"]["radius"]) + 0.55
 	var d := dist()
 	if d >= m:
@@ -300,7 +302,7 @@ func input(action: String, t: float) -> void:
 	p_last_action_beat = int(j["beat"]) + int(a["recoveryBeats"])
 	var staggered := w_mode == "stagger"
 	var perfect: bool = j["perfect"] or staggered
-	if w_mode == "down" or dist() > float(room["player"]["reach"]) + 0.6:
+	if w_mode == "down" or w_mode == "absent" or dist() > float(room["player"]["reach"]) + 0.6:
 		if not perfect:
 			p_chain = 0
 		_emit({ "type": "whiff", "action": action, "perfect": perfect, "t": t })

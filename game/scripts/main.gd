@@ -109,6 +109,7 @@ func start(which: String) -> void:
 	hud.track.marks.clear()
 	_queue.clear()
 	_bot_last_beat = -1
+	_next_shot = 0.0
 	if not _args.has("bot"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	if which == "tutorial":
