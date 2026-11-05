@@ -13,7 +13,7 @@ const C_GUARD := Color(0.55, 0.8, 1.0)
 const C_TEXT := Color(0.95, 0.92, 0.85)
 const C_DIM := Color(0.7, 0.66, 0.6)
 const C_GOLD := Color(1.0, 0.8, 0.35)
-const WOLF_SCALE := 0.62
+const WOLF_SCALE := 0.8
 const WA := "AnimalArmature|"
 
 var camera := Camera3D.new()
@@ -187,12 +187,10 @@ func _build_chamber() -> void:
 			_piece(kind, Vector3(side * hw, 0, ez), 90.0 if side < 0 else -90.0)
 			ez += 4.0
 	# Props along the walls, kept out of the fighting floor.
-	_piece("pillar_decorated", Vector3(-hw + 1.6, 0, -hd + 1.6))
-	_piece("pillar", Vector3(hw - 1.6, 0, hd - 1.6))
-	_piece("barrel_large", Vector3(-6.5, 0, hd - 1.3), 20.0, 0.7)
-	_piece("barrel_small_stack", Vector3(7.5, 0, -hd + 1.2), 0.0, 0.8)
-	_piece("crates_stacked", Vector3(hw - 2.0, 0, -hd + 1.8), 15.0, 0.8)
-	_piece("rubble_half", Vector3(2.0, 0, hd - 0.8), 180.0, 0.6)
+	_piece("barrel_large", Vector3(-6.5, 0, hd - 0.95), 20.0, 0.6)
+	_piece("barrel_small_stack", Vector3(7.5, 0, -hd + 0.85), 0.0, 0.7)
+	_piece("crates_stacked", Vector3(hw - 1.6, 0, -hd + 1.0), 15.0, 0.6)
+	_piece("rubble_half", Vector3(2.0, 0, hd - 0.6), 180.0, 0.45)
 	_piece("banner_patternA_red", Vector3(-2.0, 0.6, -hd + 0.55), 0.0)
 	_piece("banner_patternA_red", Vector3(6.0, 0.6, hd - 0.55), 180.0)
 
@@ -320,7 +318,8 @@ func floater(at: Vector3, text: String, color: Color, size := 56, life := 0.9, r
 	var l := Label3D.new()
 	l.text = text
 	l.font_size = size
-	l.pixel_size = 0.004
+	l.fixed_size = true
+	l.pixel_size = 0.0009
 	l.modulate = color
 	l.outline_size = 12
 	l.outline_modulate = Color(0, 0, 0, 0.85)
@@ -417,11 +416,11 @@ func feedback(f: Fight, events: Array) -> void:
 				_shake = 0.12
 				slowmo(float(feel["parrySlowmo"]), 0.3)
 			"block":
-				floater(P, "BLOCKED  −%d" % int(e["damage"]), C_GUARD, 48)
+				floater(P, "BLOCKED  -%d" % int(e["damage"]), C_GUARD, 48)
 				burst(_v3(f.p_pos, 1.2) + _v3(Vector2.from_angle(f.p_facing) * 0.5), C_GUARD, 12, 4.0)
 				_shake = 0.07
 			"hurt":
-				floater(P, "−%d" % int(e["damage"]), C_WINDUP, 80)
+				floater(P, "-%d" % int(e["damage"]), C_WINDUP, 80)
 				_player_flash = 1.0
 				_shake = float(feel["shakeOnHurt"])
 				hitstop(0.08)
@@ -535,10 +534,10 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 		var r := reach * 0.55 * (0.6 + 0.4 * glow)
 		_telegraph.scale = Vector3(r, 1, r)
 		_telegraph_mat.albedo_color = Color(C_WINDUP, 0.12 + 0.3 * glow)
-		_alert.position = _v3(f.w_pos, 2.0 + 0.15 * sin(_clock * 20.0))
+		_alert.position = _v3(f.w_pos, 2.5 + 0.15 * sin(_clock * 20.0))
 		_alert.modulate = Color(C_WINDUP, 0.5 + 0.5 * glow)
 	_wolf_label.visible = _wolf.visible and f.w_state != "down"
-	_wolf_label.position = _v3(f.w_pos, 1.75)
+	_wolf_label.position = _v3(f.w_pos, 2.1)
 	var state_text := ""
 	match f.w_state:
 		"stagger": state_text = "  ·  STAGGERED"
@@ -608,22 +607,44 @@ func _update_camera(dt: float, cam_input: Vector2, f: Fight) -> void:
 		var back := Vector3(sin(cam_yaw), 0, cos(cam_yaw))
 		var side := Vector3(cos(cam_yaw), 0, -sin(cam_yaw))
 		var d := clampf(p.distance_to(w), 2.0, 8.0)
-		want = p + back * (5.0 + d * 0.25) + side * 1.2 + Vector3(0, 2.8 + d * 0.12, 0)
-		focus = p.lerp(w, 0.45) + Vector3(0, 1.0, 0)
+		# Over the right shoulder and wide, so the wolf is never hidden behind the Anchor.
+		want = p + back * (4.3 + d * 0.3) + side * 3.3 + Vector3(0, 5.0 + d * 0.15, 0)
+		focus = p.lerp(w, 0.7) + Vector3(0, 0.5, 0)
 	else:
 		cam_yaw -= cam_input.x * dt * 2.6
 		cam_pitch = clampf(cam_pitch - cam_input.y * dt * 1.6, -1.0, 0.05)
 		var back := Vector3(sin(cam_yaw), 0, cos(cam_yaw))
 		var dist := 6.0
 		want = p + back * dist * cos(cam_pitch) + Vector3(0, 1.6 + dist * sin(-cam_pitch), 0)
+	want = _keep_in_chamber(focus, want)
 	var k := 1.0 - exp(-dt * 8.0)
 	_cam_pos = _cam_pos.lerp(want, k)
+	_cam_pos = _keep_in_chamber(focus, _cam_pos)
 	_cam_look = _cam_look.lerp(focus, 1.0 - exp(-dt * 10.0))
 	_shake = maxf(0.0, _shake - dt * 0.9)
 	var jitter := Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)) * _shake
 	camera.position = _cam_pos + jitter
 	if camera.position.distance_to(_cam_look) > 0.01:
 		camera.look_at(_cam_look + jitter * 0.4, Vector3.UP)
+
+## Like a spring arm: if the camera would sit inside a wall, pull it in along the line to
+## the focus and lift it, so it looks down over the Anchor instead of through stone.
+func _keep_in_chamber(focus: Vector3, want: Vector3) -> Vector3:
+	var a: Dictionary = Data.room["arena"]
+	var hx := float(a["width"]) / 2.0 + 0.2
+	var hz := float(a["depth"]) / 2.0 + 0.2
+	if absf(want.x) <= hx and absf(want.z) <= hz:
+		return want
+	var d := want - focus
+	var t := 1.0
+	if absf(want.x) > hx and absf(d.x) > 1e-4:
+		t = minf(t, (signf(d.x) * hx - focus.x) / d.x)
+	if absf(want.z) > hz and absf(d.z) > 1e-4:
+		t = minf(t, (signf(d.z) * hz - focus.z) / d.z)
+	t = clampf(t, 0.0, 1.0)
+	var p := focus + d * t
+	p.y = maxf(p.y, focus.y + 1.5 + (1.0 - t) * 3.5)
+	return p
 
 ## The ground-plane direction the stick means, given the camera.
 func move_from_stick(stick: Vector2) -> Vector2:

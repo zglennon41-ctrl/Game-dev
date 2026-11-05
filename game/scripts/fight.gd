@@ -524,7 +524,7 @@ func _update_wolf(dt: float) -> void:
 				w_pos = _clamp_in(w_pos + Vector2.from_angle(w_facing) * lunge)
 			if not w_hit_done:
 				var mouth := w_pos + Vector2.from_angle(w_facing) * (float(b["radius"]) + 0.4)
-				if mouth.distance_to(p_pos) <= float(room["player"]["radius"]) + 0.7:
+				if mouth.distance_to(p_pos) <= float(room["player"]["radius"]) + 1.0:
 					w_hit_done = true
 					_resolve_bite()
 			if w_timer >= w_duration:
@@ -602,7 +602,8 @@ func _resolve_bite() -> void:
 func _separate() -> void:
 	if w_state in ["absent", "down"]:
 		return
-	var m := float(room["player"]["radius"]) + float(beast["radius"])
+	# A little personal space, so the wolf reads clearly beside the Anchor.
+	var m := float(room["player"]["radius"]) + float(beast["radius"]) + 0.3
 	var d := dist()
 	if d >= m:
 		return

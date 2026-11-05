@@ -300,10 +300,7 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	target_bar.max_value = float(f.beast["health"])
 	target_bar.value = f.w_hp
 	target_bar.visible = float(f.beast["health"]) < 50000
-	var pips := ""
-	for i in int(Data.room["break"]["needed"]):
-		pips += "◆ " if i < f.w_break else "◇ "
-	target_pips.text = ("BREAK  " + pips.strip_edges()) if f.breaks_beast() else ""
+	target_pips.text = ("BREAK  %d / %d" % [f.w_break, int(Data.room["break"]["needed"])]) if f.breaks_beast() else ""
 	timer_label.text = timer_text
 	score_label.text = score_text
 	# Ability bar state.
@@ -320,12 +317,9 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	slots["pattern"]["name"].text = ("Breaking Ground  %.1fs" % left) if ready else "Pattern"
 	if f.p_state == "pattern" and not f.chain.is_empty():
 		var n: int = f.chain["cues"].size()
-		var marks := ""
-		for i in n:
-			marks += "● " if i < int(f.chain["next"]) else "○ "
-		pattern_banner.text = "%s  ×%s\nstrike as the gold ring closes     %s" % [String(Data.room["pattern"]["name"]).to_upper(), str(f.chain["multiplier"]), marks.strip_edges()]
+		pattern_banner.text = "%s  x%s\nstrike as the gold ring closes     %d / %d" % [String(Data.room["pattern"]["name"]).to_upper(), str(f.chain["multiplier"]), int(f.chain["next"]), n]
 	elif ready:
-		pattern_banner.text = "PARRIED — the Pattern's Trigger is met: press R"
+		pattern_banner.text = "PARRIED - the Pattern's Trigger is met: press R"
 	else:
 		pattern_banner.text = ""
 
