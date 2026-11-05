@@ -304,8 +304,8 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	timer_label.text = timer_text
 	score_label.text = score_text
 	# Ability bar state.
-	var tech: Dictionary = Data.room["techniques"]["ground-strike"]
-	var cd_left := maxf(0.0, float(f.p_cooldowns.get("ground-strike", 0.0)) - f.now)
+	var tech: Dictionary = f.tech
+	var cd_left := maxf(0.0, float(f.p_cooldowns.get(tech["id"], 0.0)) - f.now)
 	_set_slot("technique", cd_left / float(tech["cooldown"]), f.p_will >= float(tech["will"]) and not f.p_fainted, false)
 	_set_slot("dodge", 0.0, f.p_will >= float(Data.room["dodge"]["will"]), f.p_state == "dodge")
 	_set_slot("block", 0.0, not f.p_fainted, f.p_block_held)

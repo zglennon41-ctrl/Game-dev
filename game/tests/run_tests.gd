@@ -28,6 +28,7 @@ func _run() -> void:
 	test_forms()
 	test_triggers_tolls_bars()
 	test_creation()
+	test_shape_kits()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -151,8 +152,11 @@ func test_pattern() -> void:
 	check(types(h.drain()).has("pattern-locked"), "the Pattern is unavailable without its Trigger")
 
 ## Two bots: one plays well (parries telegraphs, punishes, breaks, fires the Pattern), one mashes.
-func run_bot(seconds: float, smart: bool) -> Fight:
-	var f := Fight.new({ "seed": 5 })
+func run_bot(seconds: float, smart: bool, hero := {}) -> Fight:
+	var opts := { "seed": 5 }
+	if not hero.is_empty():
+		opts["hero"] = hero
+	var f := Fight.new(opts)
 	var frame := 0
 	for i in int(seconds / DT):
 		frame += 1
@@ -170,7 +174,7 @@ func run_bot(seconds: float, smart: bool) -> Fight:
 				if absf(f.now - c) < DT / 2.0:
 					f.input("attack")
 			elif f.w_state in ["recover", "stagger", "flinch"] and to_w.length() < 2.4 and (f.w_state != "recover" or f.w_duration - f.w_timer > 0.45):
-				if f.p_will > 40 and f.now >= float(f.p_cooldowns.get("ground-strike", 0.0)):
+				if f.p_will > 40 and f.now >= float(f.p_cooldowns.get(f.tech["id"], 0.0)):
 					f.input("technique")
 				else:
 					f.input("attack")
@@ -332,3 +336,67 @@ func test_creation() -> void:
 			check(false, "a generated Pattern is legal (%s)" % str(c["pattern"]))
 			return
 	check(true, "forty random characters all have legal Patterns")
+
+func hero_of(shape: String, weapon: String) -> Dictionary:
+	return { "name": shape, "shape": shape, "weapon": weapon, "blood": "", "city": "columbia", "body": "Knight",
+		"pattern": { "name": "p", "form": Data.kits[shape]["forms"].keys()[0], "terms": ["after-perfect-hold"], "sworn": false } }
+
+func idle_wolf_at(f: Fight, d: float) -> void:
+	f.w_state = "idle"
+	f.passive = true
+	f.w_pos = f.p_pos + Vector2(d, 0)
+	f.p_facing = 0.0
+
+func test_shape_kits() -> void:
+	# A shot reaches a wolf eight paces off; a sword does not.
+	var gun := Fight.new({ "seed": 1, "hero": hero_of("cast", "pistol"), "passive": true })
+	idle_wolf_at(gun, 8.0)
+	gun.input("attack")
+	var evs := run_for(gun, 0.6)
+	check(types(evs).has("hit") and types(evs).has("shot"), "a pistol shot lands at eight paces")
+	# Cast: Closing Strike throws you at the foe.
+	var cast := Fight.new({ "seed": 1, "hero": hero_of("cast", "pistol"), "passive": true })
+	idle_wolf_at(cast, 5.0)
+	var before := cast.dist()
+	cast.input("technique")
+	run_for(cast, 0.5)
+	check(cast.dist() < before - 2.0, "Closing Strike closes the distance (%.1f to %.1f)" % [before, cast.dist()])
+	# Turn: Kindle sets it burning.
+	var turn := Fight.new({ "seed": 1, "hero": hero_of("turn", "hatchet"), "passive": true })
+	idle_wolf_at(turn, 1.4)
+	turn.input("technique")
+	var tevs := run_for(turn, 2.0)
+	check(types(tevs).has("burn-tick"), "Kindle burns")
+	# Read: Read the Break makes the next hits critical.
+	var read := Fight.new({ "seed": 1, "hero": hero_of("read", "pistol"), "passive": true })
+	idle_wolf_at(read, 6.0)
+	read.input("technique")
+	run_for(read, 0.7)
+	read.input("attack")
+	var revs := run_for(read, 0.6)
+	check(revs.any(func(e): return e["type"] == "hit" and e["crit"]), "after Read the Break, hits are critical")
+	# Bind: the Leash slows the beast.
+	var bind := Fight.new({ "seed": 1, "hero": hero_of("bind", "pistol"), "passive": true })
+	idle_wolf_at(bind, 6.0)
+	bind.input("technique")
+	run_for(bind, 0.6)
+	check(bind._wolf_time_scale() < 0.9, "the Leash slows it")
+	# Make: the Ward takes the next bite.
+	var make := Fight.new({ "seed": 1, "hero": hero_of("make", "saber") })
+	make.input("technique")
+	run_for(make, 0.8)
+	biting_wolf(make, 0.1)
+	var mevs := run_for(make, 0.4)
+	check(types(mevs).has("ward-broken") and make.p_hp == 100, "the Ward takes the next bite")
+	# Every Shape's technique breaks the beast the room sets against it.
+	for shape in ["anchor", "turn", "cast", "read", "bind", "make"]:
+		var f := Fight.new({ "seed": 1, "hero": hero_of(shape, "pistol" if shape in ["read", "bind"] else "saber"), "passive": true })
+		check(f.breaks_beast(), "%s breaks the beast it faces" % shape)
+	# And every Shape can win a fight played well.
+	var line := ""
+	for shape in ["anchor", "turn", "cast", "read", "bind", "make"]:
+		var weapon: String = { "anchor": "saber", "turn": "hatchet", "cast": "pistol", "read": "pistol", "bind": "grapple", "make": "oar-staff" }[shape]
+		var f := run_bot(60, true, hero_of(shape, weapon))
+		line += "%s %d, " % [shape, f.stats["wolves_down"]]
+		check(f.stats["wolves_down"] >= 1, "a %s with a %s fells a wolf in a minute" % [shape, weapon])
+	print("  wolves felled in a minute by Shape: ", line)

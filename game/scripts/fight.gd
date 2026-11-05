@@ -70,17 +70,46 @@ var w_dir := 1.0
 var w_named := false         # the foe has been named aloud
 var w_pattern_hits := 0      # times the Pattern has been used on this foe
 var respawn_from_arch := false
+var w_shape := ""            # the beast's Shape: the room makes it the one the hero counters
+
+# --- The hero: who the character creator made ---
+var hero: Dictionary = {}
+var kit: Dictionary = {}     # data/shape-kits.json for the hero's Shape
+var weapon: Dictionary = {}
+var style: Dictionary = {}   # how the weapon fights: a melee combo, or shots
+var combo: Array = []
+var ranged := false
+var tech: Dictionary = {}    # the Shape's technique
+var bc: Dictionary = {}      # the blood's combat passives
+var w_burn_until := -9.0
+var w_burn_tick := 0.0
+var w_slow_until := -9.0
+var w_slow := 1.0
+var crit_until := -9.0
+var ward_until := -9.0
+var second_heart_used := false
+var w_shouted := false
 
 func _init(opts: Dictionary = {}) -> void:
 	room = Data.room
 	rules = Data.rules
 	beast = Data.beast(opts.get("beast", "cut-wolf"))
-	player_shape = room["player"]["shape"]
+	hero = opts.get("hero", default_hero())
+	player_shape = hero["shape"]
+	kit = Data.kits[player_shape]
+	weapon = Data.by_id(Data.weapons, hero["weapon"])
+	style = room["styles"][weapon["style"]]
+	ranged = style["kind"] == "ranged"
+	combo = style.get("combo", [style.get("shot", {})])
+	tech = kit["technique"]
+	if hero.get("blood", "") != "":
+		bc = Data.by_id(Data.bloods, hero["blood"]).get("combat", {})
+	w_shape = opts.get("beast_shape", Data.opposite(player_shape))
 	arena = Vector2(room["arena"]["width"], room["arena"]["depth"])
 	passive = opts.get("passive", false)
 	respawn = opts.get("respawn", true)
 	rng.seed = opts.get("seed", 7)
-	pattern = opts.get("pattern", room["pattern"]["default"]).duplicate(true)
+	pattern = opts.get("pattern", hero.get("pattern", room["pattern"]["default"])).duplicate(true)
 	pattern_lost = opts.get("pattern_lost", false)
 	p_hp = room["player"]["health"]
 	p_will = rules["field"]["willMax"]
@@ -99,8 +128,17 @@ func drain() -> Array:
 func dist() -> float:
 	return p_pos.distance_to(w_pos)
 
+## Bloods with a sense for the break need one fewer.
+func breaks_needed() -> int:
+	return int(room["break"]["needed"]) - (1 if bc.get("breakSense", false) else 0)
+
+## The Anchor the room started with, for the tests and the practice yard.
+static func default_hero() -> Dictionary:
+	return { "name": "Anchor", "shape": "anchor", "weapon": "saber", "blood": "", "city": "columbia", "body": "Knight",
+		"pattern": Data.room["pattern"]["default"] }
+
 func breaks_beast() -> bool:
-	return Data.opposite(player_shape) == beast["shape"]
+	return Data.opposite(player_shape) == w_shape
 
 ## Can the Pattern fire now (every Trigger met)? Bars are checked when it is pressed.
 func pattern_ready() -> bool:
@@ -109,7 +147,12 @@ func pattern_ready() -> bool:
 	return PatternTerms.unmet_trigger(self, pattern["terms"]) == ""
 
 func pattern_form() -> Dictionary:
+	if kit["forms"].has(pattern["form"]):
+		return kit["forms"][pattern["form"]]
 	return room["pattern"]["forms"][pattern["form"]]
+
+func _b(key: String, default_value: float) -> float:
+	return float(bc.get(key, default_value))
 
 func _clamp_in(v: Vector2) -> Vector2:
 	var h := arena / 2.0 - Vector2(0.8, 0.8)
@@ -141,7 +184,7 @@ func input(action: String) -> void:
 		return
 	match action:
 		"attack": _press_attack()
-		"technique": _press_technique("ground-strike")
+		"technique": _press_technique()
 		"dodge": _press_dodge()
 		"block-down":
 			p_block_held = true
@@ -167,6 +210,10 @@ func input(action: String) -> void:
 			if w_state not in ["down", "absent"]:
 				w_named = true
 				_emit({ "type": "named", "who": beast["name"] })
+				if bc.get("shoutStagger", false) and not w_shouted and w_state in ["windup", "approach", "prowl"]:
+					w_shouted = true
+					_wolf_set("flinch", 0.8)
+					_emit({ "type": "hesitates" })
 		"lock":
 			p_lock = not p_lock
 
@@ -176,6 +223,8 @@ func _busy(action: String) -> bool:
 			return action == "dodge" and now < p_dodge_ready_at
 		"attack":
 			# Attack presses chain into the combo; everything else waits for the recovery.
+			if ranged:
+				return not _can_start_action()
 			return action != "attack" and not _can_start_action()
 		"pattern":
 			return action != "attack"
@@ -200,7 +249,7 @@ func _can_start_action() -> bool:
 		return true
 	# Swings can be cancelled from their recovery.
 	if p_state == "attack":
-		var s: Dictionary = room["combo"][p_combo]
+		var s: Dictionary = combo[p_combo]
 		return p_timer >= float(s["startup"]) + float(s["active"])
 	return false
 
@@ -208,18 +257,24 @@ func _press_attack() -> void:
 	if p_state == "pattern":
 		_pattern_press()
 		return
+	if ranged:
+		if p_state == "free" or (p_state == "attack" and _can_start_action()):
+			_start_swing(0)
+		elif p_state == "attack":
+			p_buffer = true
+		return
 	if p_state == "attack":
-		var s: Dictionary = room["combo"][p_combo]
+		var s: Dictionary = combo[p_combo]
 		if p_timer < float(s["startup"]) + float(s["active"]):
 			p_buffer = true
 			return
-		if p_combo < room["combo"].size() - 1:
+		if p_combo < combo.size() - 1:
 			_start_swing(p_combo + 1)
 		return
 	if p_state != "free":
 		return
 	var next := 0
-	if now - p_last_attack_end <= float(room["comboBufferSeconds"]) and p_combo < room["combo"].size() - 1:
+	if now - p_last_attack_end <= float(room["comboBufferSeconds"]) and p_combo < combo.size() - 1:
 		next = p_combo + 1
 	_start_swing(next)
 
@@ -231,8 +286,8 @@ func _start_swing(i: int) -> void:
 	p_hit_done = false
 	_face_target_if_near()
 	stats["attacks"] += 1
-	var sw: Dictionary = room["combo"][i]
-	_emit({ "type": "anim", "who": "player", "name": sw["anim"], "duration": float(sw["startup"]) + float(sw["active"]) + float(sw["recovery"]) })
+	var sw: Dictionary = combo[i]
+	_emit({ "type": "anim", "who": "player", "name": sw["anim"], "duration": float(sw["startup"]) + float(sw.get("active", 0.0)) + float(sw["recovery"]) })
 
 ## Swings go toward the wolf when locked on or when it is close; otherwise where you steer.
 func _face_target_if_near() -> void:
@@ -242,14 +297,15 @@ func _face_target_if_near() -> void:
 	elif p_dodge_dir.length() > 0.3:
 		p_facing = p_dodge_dir.angle()
 
-func _press_technique(id: String) -> void:
-	var t: Dictionary = room["techniques"][id]
+func _press_technique() -> void:
+	var t := tech
+	var id: String = t["id"]
 	if not _can_start_action():
 		return
 	if now < float(p_cooldowns.get(id, 0.0)):
 		_emit({ "type": "not-ready", "what": t["name"] })
 		return
-	var cost := float(t["will"]) * (2.0 if p_double_cost > 0 else 1.0)
+	var cost := float(t["will"]) * (2.0 if p_double_cost > 0 else 1.0) * _b("techniqueCost", 1.0)
 	if p_fainted or p_will < cost:
 		_emit({ "type": "no-will" })
 		return
@@ -262,16 +318,17 @@ func _press_technique(id: String) -> void:
 	p_hit_done = false
 	_face_target_if_near()
 	_emit({ "type": "anim", "who": "player", "name": t["anim"], "duration": float(t["startup"]) + float(t["active"]) + float(t["recovery"]) })
-	_emit({ "type": "technique", "id": id })
+	_emit({ "type": "technique", "id": id, "effect": t["effect"] })
 
 func _press_dodge() -> void:
 	var d: Dictionary = room["dodge"]
 	if now < p_dodge_ready_at or not (p_state == "free" or _can_start_action()):
 		return
-	if p_fainted or p_will < float(d["will"]):
+	var dcost := float(d["will"]) * _b("dodgeCost", 1.0) * (float(kit["stance"].get("dodgeCost", 1.0)) if p_stance else 1.0)
+	if p_fainted or p_will < dcost:
 		_emit({ "type": "no-will" })
 		return
-	p_will -= float(d["will"])
+	p_will -= dcost
 	p_state = "dodge"
 	p_timer = 0.0
 	if p_dodge_dir.length() < 0.1:
@@ -366,10 +423,10 @@ func _pattern_press() -> void:
 			"guard":
 				_emit({ "type": "ward-pulse" })
 			"mend":
-				p_hp = minf(float(room["player"]["health"]), p_hp + float(form["base"]))
+				p_hp = minf(float(room["player"]["health"]), p_hp + float(form["base"]) * _b("healFactor", 1.0))
 				_emit({ "type": "mend", "amount": float(form["base"]) })
 		_emit({ "type": "pattern-cue", "k": i, "hit": true, "offset_ms": off * 1000.0 })
-		_emit({ "type": "anim", "who": "player", "name": room["combo"][i % room["combo"].size()]["anim"], "speed": 1.6 })
+		_emit({ "type": "anim", "who": "player", "name": combo[i % combo.size()]["anim"], "speed": 1.6 })
 		if chain["next"] >= cues.size():
 			_finish_pattern(true)
 	else:
@@ -393,7 +450,7 @@ func _finish_pattern(landed: bool) -> void:
 					_emit({ "type": "stagger", "seconds": float(form.get("staggerSeconds", 2.0)), "cause": "pattern" })
 				_emit({ "type": "pattern-done", "damage": roundf(pay), "effect": "guard" })
 			"mend":
-				var heal := roundf(pay * float(form.get("healFactor", 1.0)))
+				var heal := roundf(pay * float(form.get("healFactor", 1.0)) * _b("healFactor", 1.0))
 				p_hp = minf(float(room["player"]["health"]), p_hp + heal)
 				_emit({ "type": "pattern-done", "heal": heal, "effect": "mend" })
 	else:
@@ -415,8 +472,36 @@ func update(dt: float, move: Vector2 = Vector2.ZERO) -> void:
 	if p_state != "free":
 		p_vel = Vector2.ZERO
 	_try_queued()
-	_update_wolf(dt)
+	_update_wolf(dt * _wolf_time_scale())
+	_update_burn(dt)
 	_separate()
+
+## The Shapes that slow the world: Read's stance, Bind's stance near you, Bind's Leash.
+func _wolf_time_scale() -> float:
+	var k := 1.0
+	if now < w_slow_until:
+		k *= w_slow
+	if p_stance:
+		match kit["stance"]["effect"]:
+			"slow-world": k *= float(kit["stance"]["factor"])
+			"slow-near":
+				if dist() < float(kit["stance"]["radius"]): k *= float(kit["stance"]["factor"])
+	return k
+
+func _update_burn(dt: float) -> void:
+	if now >= w_burn_until or w_state in ["down", "absent"]:
+		return
+	w_burn_tick += dt
+	if w_burn_tick >= 0.5:
+		w_burn_tick = 0.0
+		w_hp = maxf(0.0, w_hp - 2.0)
+		stats["damage_dealt"] += 2
+		_emit({ "type": "burn-tick", "damage": 2 })
+		if w_hp == 0.0:
+			stats["wolves_down"] += 1
+			_wolf_set("down", float(beast["respawnSeconds"]))
+			_emit({ "type": "wolf-down" })
+			_emit({ "type": "anim", "who": "wolf", "name": "Death", "speed": 1.0 })
 
 func _update_will(dt: float) -> void:
 	if p_state == "down":
@@ -425,8 +510,11 @@ func _update_will(dt: float) -> void:
 	var blocking := _blocking()
 	var dw := 0.0
 	if p_stance: dw -= float(room["stance"]["willPerSecond"])
+	var regen_factor := _b("willRegen", 1.0)
 	if blocking: dw -= float(room["block"]["willPerSecond"])
-	if not p_stance and not blocking and p_state != "pattern": dw += float(F["regenOpen"]) * (0.5 if p_leaking else 1.0)
+	if not p_stance and not blocking and p_state != "pattern": dw += float(F["regenOpen"]) * (0.5 if p_leaking else 1.0) * regen_factor
+	if _b("regenHealth", 0.0) > 0.0 and p_hp > 0.0:
+		p_hp = minf(float(room["player"]["health"]), p_hp + _b("regenHealth", 0.0) * dt)
 	p_will = clampf(p_will + dw * dt, 0.0, float(F["willMax"]))
 	if p_will == 0.0 and not p_fainted and (p_stance or blocking):
 		p_fainted = true
@@ -445,7 +533,7 @@ func _update_player(dt: float, move: Vector2) -> void:
 		"free":
 			var speed := float(P["runSpeed"])
 			if _blocking(): speed = float(P["blockMoveSpeed"])
-			if p_stance: speed *= float(P["stanceMoveFactor"])
+			if p_stance: speed *= float(kit["stance"].get("move", P["stanceMoveFactor"] if kit["stance"]["effect"] == "power" else 1.0))
 			var target_vel := move.limit_length(1.0) * speed
 			var accel := float(P.get("acceleration", 20.0))
 			p_vel = p_vel.move_toward(target_vel, accel * speed * dt)
@@ -457,32 +545,39 @@ func _update_player(dt: float, move: Vector2) -> void:
 				want = move.angle()
 			p_facing = lerp_angle(p_facing, want, 1.0 - exp(-float(P["turnSpeed"]) * dt))
 		"attack":
-			var s: Dictionary = room["combo"][p_combo]
+			var s: Dictionary = combo[p_combo]
 			var st := float(s["startup"])
-			var ac := float(s["active"])
-			if p_timer < st + ac and dist() > float(P["radius"]) + float(beast["radius"]) + 0.3:
+			var ac := float(s.get("active", 0.0))
+			if not ranged and p_timer < st + ac and dist() > float(P["radius"]) + float(beast["radius"]) + 0.3:
 				p_pos = _clamp_in(p_pos + Vector2.from_angle(p_facing) * float(s["lunge"]) / (st + ac) * dt)
 			if not p_hit_done and p_timer >= st:
 				p_hit_done = true
-				_resolve_swing(float(s["damage"]), float(s["reach"]), float(s["arc"]), false, 0.0)
-			if p_buffer and p_timer >= st + ac and p_combo < room["combo"].size() - 1:
-				_start_swing(p_combo + 1)
+				if ranged:
+					_resolve_shot(float(s["damage"]), float(s["range"]), float(s["arc"]))
+				else:
+					_resolve_swing(float(s["damage"]), float(s["reach"]), float(s["arc"]), false, 0.0)
+			if p_buffer and p_timer >= st + ac and (ranged or p_combo < combo.size() - 1):
+				_start_swing(0 if ranged else p_combo + 1)
 			elif p_timer >= st + ac + float(s["recovery"]):
 				p_state = "free"
 				p_last_attack_end = now
 		"technique":
-			var t: Dictionary = room["techniques"][p_technique]
+			var t := tech
+			if t["effect"] == "dash" and p_timer < float(t["startup"]) + float(t["active"]) and w_state not in ["down", "absent"]:
+				# Closing Strike: the field throws you at the foe.
+				if dist() > float(t["reach"]) * 0.7:
+					p_facing = _angle_to(p_pos, w_pos)
+					p_pos = _clamp_in(p_pos + Vector2.from_angle(p_facing) * float(t["dash"]) / (float(t["startup"]) + float(t["active"])) * dt)
 			if not p_hit_done and p_timer >= float(t["startup"]):
 				p_hit_done = true
-				_resolve_swing(float(t["damage"]), float(t["reach"]), float(t["arc"]), t.get("breaks", false), float(t.get("knockback", 0.0)))
-				_emit({ "type": "quake", "at": p_pos + Vector2.from_angle(p_facing) * 1.2 })
+				_resolve_technique(t)
 			if p_timer >= float(t["startup"]) + float(t["active"]) + float(t["recovery"]):
 				p_state = "free"
 		"dodge":
 			var d: Dictionary = room["dodge"]
 			var dur := float(d["duration"])
 			var k := clampf(1.0 - p_timer / dur, 0.0, 1.0)
-			p_pos = _clamp_in(p_pos + p_dodge_dir * float(d["distance"]) / dur * 1.6 * k * dt)
+			p_pos = _clamp_in(p_pos + p_dodge_dir * float(d["distance"]) * _b("dodgeDistance", 1.0) / dur * 1.6 * k * dt)
 			if p_timer >= dur:
 				p_state = "free"
 				p_dodge_ready_at = now + float(d["cooldown"])
@@ -497,18 +592,63 @@ func _update_player(dt: float, move: Vector2) -> void:
 					_emit({ "type": "pattern-cue", "k": i, "hit": false, "offset_ms": 999.0 })
 					_finish_pattern(false)
 
+## The Shape's technique lands. Every technique breaks a beast of the opposite Shape.
+func _resolve_technique(t: Dictionary) -> void:
+	match t["effect"]:
+		"heavy":
+			_resolve_swing(float(t["damage"]), float(t["reach"]), float(t["arc"]), true, float(t.get("knockback", 0.0)))
+			_emit({ "type": "quake", "at": p_pos + Vector2.from_angle(p_facing) * 1.2 })
+		"burst":
+			if _resolve_swing(float(t["damage"]), float(t["reach"]), float(t["arc"]), true, 0.0):
+				w_burn_until = maxf(w_burn_until, now + float(t["burnSeconds"]))
+			_emit({ "type": "burst", "at": p_pos + Vector2.from_angle(p_facing) * 1.4 })
+		"dash":
+			_resolve_swing(float(t["damage"]), float(t["reach"]), float(t["arc"]), true, 0.0)
+		"bolt-crit":
+			if _resolve_shot(float(t["damage"]), float(t["range"]), 40.0, true):
+				crit_until = now + float(t["critSeconds"])
+				_emit({ "type": "crit-open", "seconds": float(t["critSeconds"]) })
+		"tether":
+			if _resolve_shot(float(t["damage"]), float(t["range"]), 40.0, true):
+				w_slow_until = now + float(t["slowSeconds"])
+				w_slow = float(t["slow"])
+				_emit({ "type": "tether", "seconds": float(t["slowSeconds"]) })
+		"ward":
+			ward_until = now + float(t["wardSeconds"])
+			_emit({ "type": "ward-up", "at": p_pos, "seconds": float(t["wardSeconds"]) })
+			_resolve_swing(float(t["damage"]), float(t["reach"]), float(t["arc"]), true, 0.0)
+
+## A shot: straight at the foe if it is in range and roughly in front.
+func _resolve_shot(damage: float, rng_m: float, arc: float, breaks := false) -> bool:
+	if w_state not in ["down", "absent"] and (p_lock or dist() < rng_m):
+		p_facing = _angle_to(p_pos, w_pos)
+	var to := p_pos + Vector2.from_angle(p_facing) * rng_m
+	var hit := w_state not in ["down", "absent"] and _in_arc(p_pos, p_facing, w_pos, rng_m + float(beast["radius"]), arc)
+	if hit:
+		to = w_pos
+	_emit({ "type": "shot", "from": p_pos, "to": to, "hit": hit })
+	if not hit:
+		_emit({ "type": "whiff" })
+		return false
+	_resolve_swing(damage, rng_m + 1.0, 360.0, breaks, 0.0)
+	return true
+
 func p_invulnerable() -> bool:
 	if p_state != "dodge":
 		return false
 	var d: Dictionary = room["dodge"]
 	return p_timer >= float(d["iframeStart"]) and p_timer <= float(d["iframeEnd"])
 
-func _resolve_swing(damage: float, reach: float, arc: float, breaks: bool, knockback: float) -> void:
+func _resolve_swing(damage: float, reach: float, arc: float, breaks: bool, knockback: float) -> bool:
 	if w_state in ["down", "absent"] or not _in_arc(p_pos, p_facing, w_pos, reach + float(beast["radius"]), arc):
 		_emit({ "type": "whiff" })
-		return
+		return false
 	var heavy := breaks or knockback > 0.0
-	if p_stance: damage *= float(room["stance"]["damageFactor"])
+	if p_stance:
+		match kit["stance"]["effect"]:
+			"power": damage *= float(kit["stance"]["damage"])
+			"blade": damage += float(kit["stance"]["extraDamage"])
+			"burn": w_burn_until = maxf(w_burn_until, now) + float(kit["stance"]["burnSeconds"])
 	if p_disarmed and not breaks: damage *= 0.4
 	_damage_wolf(roundf(damage), false, heavy)
 	if knockback > 0.0 and w_state not in ["down", "pinned"]:
@@ -516,24 +656,28 @@ func _resolve_swing(damage: float, reach: float, arc: float, breaks: bool, knock
 	if breaks and breaks_beast() and w_state != "stagger" and w_state != "down":
 		w_break += 1
 		stats["breaks"] += 1
-		_emit({ "type": "break", "count": w_break, "needed": int(room["break"]["needed"]) })
-		if w_break >= int(room["break"]["needed"]):
+		_emit({ "type": "break", "count": w_break, "needed": breaks_needed() })
+		if w_break >= breaks_needed():
 			w_break = 0
 			stats["staggers"] += 1
 			_wolf_set("stagger", float(room["break"]["staggerSeconds"]))
 			_emit({ "type": "stagger", "seconds": float(room["break"]["staggerSeconds"]), "cause": "break" })
+	return true
 
 func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
 	if w_state in ["down", "absent"]:
 		return
 	if w_state == "stagger":
 		dmg = roundf(dmg * float(room["break"]["staggerDamageFactor"]))
+	var crit := now < crit_until and not from_pattern
+	if crit:
+		dmg = roundf(dmg * float(tech.get("crit", 1.5)))
 	w_hp = maxf(0.0, w_hp - dmg)
 	stats["hits"] += 1
 	stats["damage_dealt"] += dmg
 	p_combo_count += 1
 	stats["longest_combo"] = maxi(stats["longest_combo"], p_combo_count)
-	_emit({ "type": "hit", "damage": dmg, "pattern": from_pattern, "heavy": heavy, "staggered": w_state == "stagger", "combo": p_combo })
+	_emit({ "type": "hit", "damage": dmg, "pattern": from_pattern, "heavy": heavy, "staggered": w_state == "stagger", "combo": p_combo, "crit": crit })
 	if w_hp == 0.0:
 		stats["wolves_down"] += 1
 		_wolf_set("down", float(beast["respawnSeconds"]))
@@ -573,6 +717,9 @@ func _spawn_wolf() -> void:
 	w_break = 0
 	w_hits_taken = 0
 	w_named = false
+	w_shouted = false
+	w_burn_until = -9.0
+	w_slow_until = -9.0
 	w_pattern_hits = 0
 	p_struck_this_foe = false
 	_wolf_prowl()
@@ -692,6 +839,11 @@ func _resolve_bite() -> void:
 		stats["evades"] += 1
 		_emit({ "type": "evade", "how": "dodged" })
 		return
+	if now < ward_until:
+		ward_until = -9.0
+		_emit({ "type": "ward-broken" })
+		_emit({ "type": "turned" })
+		return
 	if p_state == "pattern" and not chain.is_empty() and chain["effect"] == "guard":
 		_emit({ "type": "turned" })
 		_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 1.0 })
@@ -708,7 +860,7 @@ func _resolve_bite() -> void:
 		_emit({ "type": "anim", "who": "player", "name": "Block_Hit", "speed": 1.3 })
 		_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 0.8 })
 		return
-	var dmg := float(a["damage"])
+	var dmg := float(a["damage"]) * _b("damageTaken", 1.0)
 	if _blocking() and facing_wolf:
 		dmg *= float(room["block"]["damageFactor"])
 		p_will = maxf(0.0, p_will - float(room["block"]["willPerBlockedHit"]))
@@ -720,13 +872,17 @@ func _resolve_bite() -> void:
 		p_struck_this_foe = true
 		_emit({ "type": "hurt", "damage": dmg })
 		p_combo_count = 0
-		if not p_stance:
+		if not (p_stance and kit["stance"].get("noFlinch", false)):
 			p_pos = _clamp_in(p_pos + (p_pos - w_pos).normalized() * float(a["knockback"]))
 			if p_state != "pattern":
 				p_state = "flinch"
 				p_timer = 0.0
 				_emit({ "type": "anim", "who": "player", "name": "Hit_A", "speed": 1.2 })
 	p_hp = maxf(0.0, p_hp - dmg)
+	if p_hp == 0.0 and bc.get("secondHeart", false) and not second_heart_used:
+		second_heart_used = true
+		p_hp = 1.0
+		_emit({ "type": "second-heart" })
 	if p_hp == 0.0:
 		p_state = "down"
 		p_stance = false

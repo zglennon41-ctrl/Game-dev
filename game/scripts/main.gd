@@ -318,7 +318,7 @@ func _bot() -> Vector2:
 				f.input("stance")
 	var punish := f.w_state in ["recover", "stagger", "flinch", "idle"] and (f.w_state != "recover" or f.w_duration - f.w_timer > 0.45)
 	if to_w.length() < 2.3 and punish and f.p_state in ["free", "attack"]:
-		if (step == 4 or step == 99) and f.p_will > 40 and f.now >= float(f.p_cooldowns.get("ground-strike", 0.0)):
+		if (step == 4 or step == 99) and f.p_will > 40 and f.now >= float(f.p_cooldowns.get(f.tech["id"], 0.0)):
 			f.input("technique")
 		elif step != 4:
 			f.input("attack")
