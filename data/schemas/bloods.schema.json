@@ -37,6 +37,35 @@
       "graft": {
         "type": "string",
         "pattern": "^[a-z0-9-]+$"
+      },
+      "where": {
+        "type": "string"
+      },
+      "shows": {
+        "type": "string"
+      },
+      "fear": {
+        "type": "string"
+      },
+      "combat": {
+        "type": "object"
+      },
+      "home": {
+        "enum": [
+          "columbia",
+          "cahokia",
+          "lunden"
+        ]
+      },
+      "look": {
+        "enum": [
+          "wings",
+          "scales",
+          "none",
+          "horns",
+          "glow",
+          "fur"
+        ]
       }
     },
     "required": [

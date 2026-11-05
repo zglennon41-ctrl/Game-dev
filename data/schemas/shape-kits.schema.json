@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "shape-kits",
+  "type": "object",
+  "required": [
+    "anchor",
+    "turn",
+    "cast",
+    "read",
+    "bind",
+    "make"
+  ],
+  "additionalProperties": {
+    "type": "object",
+    "required": [
+      "stance",
+      "technique",
+      "forms",
+      "styles"
+    ]
+  }
+}

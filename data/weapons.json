@@ -1,0 +1,12 @@
+[
+  {"id": "saber", "name": "Saber", "city": "columbia", "style": "blade", "model": "sword_1handed", "offhand": "shield_round_color", "text": "A marshal's saber and a round shield."},
+  {"id": "hatchet", "name": "Hatchet", "city": "columbia", "style": "blade", "model": "axe_1handed", "text": "A frontier hatchet, balanced for the hand and the throw."},
+  {"id": "pistol", "name": "Pistol", "city": "columbia", "style": "gun", "model": "crossbow_1handed", "text": "A Columbia service pistol. Fast, loud, short."},
+  {"id": "musket", "name": "Musket", "city": "columbia", "style": "gun-heavy", "model": "crossbow_2handed", "text": "A long Columbia musket: slow, and it does not miss twice."},
+  {"id": "harpoon", "name": "Harpoon", "city": "cahokia", "style": "hook", "model": "staff", "text": "A river harpoon on a line, for things that live under barges."},
+  {"id": "boat-hook", "name": "Boat-hook", "city": "cahokia", "style": "hook", "model": "axe_2handed", "text": "A pilot's boat-hook: pull the thing close, then decide."},
+  {"id": "oar-staff", "name": "Oar-staff", "city": "cahokia", "style": "heavy", "model": "staff", "text": "An ironwood oar-staff, heavy at both ends."},
+  {"id": "rapier", "name": "Rapier", "city": "lunden", "style": "blade", "model": "sword_1handed", "text": "A Lunden rapier: quick, narrow, and polite until it is not."},
+  {"id": "air-pistol", "name": "Air-pistol", "city": "lunden", "style": "gun", "model": "crossbow_1handed", "text": "A compressed-air pistol from the dock-yards. Quiet."},
+  {"id": "grapple", "name": "Grapple", "city": "lunden", "style": "hook", "model": "dagger", "text": "An aeronaut's grapple and line, and the knife that cuts it."}
+]

@@ -27,6 +27,7 @@ func _run() -> void:
 	test_builder_rules()
 	test_forms()
 	test_triggers_tolls_bars()
+	test_creation()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -288,3 +289,46 @@ func test_triggers_tolls_bars() -> void:
 	b.p_state = "free"
 	b.input("pattern")
 	check(types(b.drain()).has("pattern-lost"), "a lost Pattern will not fire")
+
+func test_creation() -> void:
+	var qs: Array = Data.creation["questions"]
+	check(qs.size() >= 8, "the creator asks at least eight questions")
+	# Every answer to the door question makes its own Shape, all six reachable.
+	var shapes := {}
+	for ai in qs[2]["answers"].size():
+		var answers: Array = []
+		for qi in qs.size():
+			answers.append(ai if qi == 2 else 0)
+		var c := Creation.generate(answers)
+		shapes[c["shape"]] = true
+	check(shapes.size() == 6, "all six Shapes can be made (%s)" % str(shapes.keys()))
+	# Determinism, and a full character.
+	var a := [1, 2, 4, 7, 2, 0, 3, 4, 0, 8]
+	var c1 := Creation.generate(a)
+	var c2 := Creation.generate(a)
+	check(c1 == c2, "the same answers make the same character")
+	check(c1["blood"] == "demon-blooded", "bloodline + 'nothing with a name' + 'owes me': demon-blooded (got %s)" % c1["blood"])
+	check(c1["shape"] == "bind" and c1["city"] == "cahokia", "Sable's answers: a Bind from Cahokia (got %s, %s)" % [c1["shape"], c1["city"]])
+	check(c1["pattern"]["terms"] == ["named-aloud", "half-health", "never-silence"], "the Pattern carries the Terms she named (%s)" % str(c1["pattern"]["terms"]))
+	check(Creation.weapon(c1["weapon"])["city"] == "cahokia", "a Cahokia weapon")
+	check(c1["why"]["shape"].size() > 0, "the Shape comes with its reasons")
+	# The player may pick another blood; the Shape is re-read with it.
+	var sug := Creation.suggest_bloods(Creation.tally(a))
+	check(sug.size() == 3 and sug[0]["id"] == "demon-blooded", "three bloods suggested, best first")
+	var c3 := Creation.generate(a, "ridgefolk")
+	check(c3["blood"] == "ridgefolk", "a picked blood is honoured")
+	# Every generated Pattern is legal: its Form is of its own Shape, one Term of each kind.
+	for i in 40:
+		var r := RandomNumberGenerator.new()
+		r.seed = i
+		var ans: Array = []
+		for q in qs:
+			ans.append(r.randi_range(0, q["answers"].size() - 1))
+		var c := Creation.generate(ans)
+		var kinds := {}
+		for id in c["pattern"]["terms"]:
+			kinds[PatternTerms.term(id)["kind"]] = true
+		if not (String(c["pattern"]["form"]).begins_with(c["shape"] + ".") and kinds.size() == c["pattern"]["terms"].size()):
+			check(false, "a generated Pattern is legal (%s)" % str(c["pattern"]))
+			return
+	check(true, "forty random characters all have legal Patterns")

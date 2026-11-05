@@ -7,6 +7,10 @@ var beasts: Array
 var shapes: Array
 var wheel: Array
 var terms: Array
+var bloods: Array
+var weapons: Array
+var kits: Dictionary
+var creation: Dictionary
 
 func _init() -> void:
 	rules = _load("res://data/rules.json")
@@ -15,6 +19,10 @@ func _init() -> void:
 	shapes = _load("res://data/shapes.json")
 	wheel = _load("res://data/wheel.json")["order"]
 	terms = _load("res://data/terms.json")
+	bloods = _load("res://data/bloods.json")
+	weapons = _load("res://data/weapons.json")
+	kits = _load("res://data/shape-kits.json")
+	creation = _load("res://data/creation.json")
 
 func _load(path: String) -> Variant:
 	var f := FileAccess.open(path, FileAccess.READ)

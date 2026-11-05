@@ -1,0 +1,346 @@
+{
+  "anchor": {
+    "stance": {
+      "name": "Anchor stance",
+      "effect": "power",
+      "damage": 1.5,
+      "noFlinch": true,
+      "text": "hit half again as hard; nothing knocks you back"
+    },
+    "technique": {
+      "id": "ground-strike",
+      "name": "Ground Strike",
+      "family": "weight",
+      "effect": "heavy",
+      "will": 18,
+      "cooldown": 3.5,
+      "damage": 24,
+      "startup": 0.35,
+      "active": 0.12,
+      "recovery": 0.45,
+      "reach": 2.6,
+      "arc": 200,
+      "knockback": 1.6,
+      "anim": "2H_Melee_Attack_Chop",
+      "text": "A blow that splits the floor and knocks the foe back."
+    },
+    "forms": {
+      "anchor.wall": {
+        "name": "Cannot Be Moved",
+        "family": "Wall",
+        "effect": "guard",
+        "base": 12,
+        "staggerSeconds": 2.5,
+        "text": "Nothing moves you while it holds: every blow is turned aside. It ends in a shockwave that staggers."
+      },
+      "anchor.weight": {
+        "name": "Ground Strike",
+        "family": "Weight",
+        "effect": "strikes",
+        "base": 14,
+        "text": "A chain of blows that ends in one that splits the floor."
+      },
+      "anchor.endurance": {
+        "name": "Second Wind",
+        "family": "Endurance",
+        "effect": "mend",
+        "base": 3,
+        "healFactor": 0.75,
+        "text": "The field sets itself right: each cue heals; all of them pay the Terms in health."
+      }
+    },
+    "styles": {
+      "blade": 0.6,
+      "heavy": 0.7,
+      "hook": 0.2,
+      "gun": 0.1,
+      "gun-heavy": 0.1
+    }
+  },
+  "turn": {
+    "stance": {
+      "name": "Element stance",
+      "effect": "burn",
+      "burnSeconds": 2.0,
+      "text": "every hit sets the foe burning"
+    },
+    "technique": {
+      "id": "kindle",
+      "name": "Kindle",
+      "family": "element",
+      "effect": "burst",
+      "will": 16,
+      "cooldown": 4.0,
+      "damage": 14,
+      "burnSeconds": 4.0,
+      "startup": 0.3,
+      "active": 0.12,
+      "recovery": 0.4,
+      "reach": 2.8,
+      "arc": 170,
+      "anim": "Spellcast_Shoot",
+      "text": "Fire out of the field, in an arc: it burns for a while after."
+    },
+    "forms": {
+      "turn.element": {
+        "name": "Wildfire",
+        "family": "Element",
+        "effect": "strikes",
+        "base": 13,
+        "burn": true,
+        "text": "A chain of burning blows; all of them pay the Terms in fire."
+      },
+      "turn.property": {
+        "name": "Hardened",
+        "family": "Property",
+        "effect": "guard",
+        "base": 11,
+        "staggerSeconds": 2.0,
+        "text": "The field turns your skin to iron while it holds; it ends in a blast that staggers."
+      },
+      "turn.conversion": {
+        "name": "Wound into Heat",
+        "family": "Conversion",
+        "effect": "mend",
+        "base": 3,
+        "healFactor": 0.8,
+        "text": "Every wound becomes heat, and the heat becomes you again."
+      }
+    },
+    "styles": {
+      "blade": 0.6,
+      "heavy": 0.5,
+      "hook": 0.3,
+      "gun": 0.2,
+      "gun-heavy": 0.1
+    }
+  },
+  "cast": {
+    "stance": {
+      "name": "Speed stance",
+      "effect": "speed",
+      "move": 1.35,
+      "dodgeCost": 0.5,
+      "text": "you move a third again as fast and dodge for half the Will"
+    },
+    "technique": {
+      "id": "closing-strike",
+      "name": "Closing Strike",
+      "family": "reach",
+      "effect": "dash",
+      "will": 14,
+      "cooldown": 3.0,
+      "damage": 18,
+      "dash": 6.0,
+      "startup": 0.15,
+      "active": 0.15,
+      "recovery": 0.35,
+      "reach": 2.4,
+      "arc": 140,
+      "anim": "1H_Melee_Attack_Stab",
+      "text": "The field throws you forward and the blow comes with you."
+    },
+    "forms": {
+      "cast.shot": {
+        "name": "Last Word",
+        "family": "Shot",
+        "effect": "strikes",
+        "base": 14,
+        "text": "A volley that does not miss; every cue a shot, then the one that counts."
+      },
+      "cast.reach": {
+        "name": "Stoop",
+        "family": "Reach",
+        "effect": "strikes",
+        "base": 13,
+        "text": "A chain of closing strikes from wherever you stand."
+      },
+      "cast.speed": {
+        "name": "Never There",
+        "family": "Speed",
+        "effect": "guard",
+        "base": 10,
+        "staggerSeconds": 1.8,
+        "text": "Too fast to touch while it holds; it ends in a blow from behind."
+      }
+    },
+    "styles": {
+      "gun": 1.0,
+      "gun-heavy": 0.8,
+      "blade": 0.3,
+      "hook": 0.2,
+      "heavy": 0.1
+    }
+  },
+  "read": {
+    "stance": {
+      "name": "Foresight stance",
+      "effect": "slow-world",
+      "factor": 0.8,
+      "text": "the world slows: the foe moves at four-fifths speed"
+    },
+    "technique": {
+      "id": "read-the-break",
+      "name": "Read the Break",
+      "family": "sense",
+      "effect": "bolt-crit",
+      "will": 12,
+      "cooldown": 6.0,
+      "damage": 10,
+      "range": 11.0,
+      "critSeconds": 5.0,
+      "crit": 1.6,
+      "startup": 0.2,
+      "active": 0.1,
+      "recovery": 0.3,
+      "anim": "Spellcast_Shoot",
+      "text": "Find the break in the foe's field: a bolt, and for a while every hit lands on the break."
+    },
+    "forms": {
+      "read.sense": {
+        "name": "The Break",
+        "family": "Sense",
+        "effect": "strikes",
+        "base": 14,
+        "text": "Every cue lands on the break; the last one opens it."
+      },
+      "read.foresight": {
+        "name": "The Next Beat",
+        "family": "Foresight",
+        "effect": "guard",
+        "base": 10,
+        "staggerSeconds": 2.2,
+        "text": "You are where the blow is not, every time, while it holds."
+      },
+      "read.mending": {
+        "name": "Set Right",
+        "family": "Mending",
+        "effect": "mend",
+        "base": 4,
+        "healFactor": 0.85,
+        "text": "The field set right, cue by cue."
+      }
+    },
+    "styles": {
+      "gun": 0.6,
+      "hook": 0.5,
+      "heavy": 0.4,
+      "blade": 0.3,
+      "gun-heavy": 0.4
+    }
+  },
+  "bind": {
+    "stance": {
+      "name": "Leash stance",
+      "effect": "slow-near",
+      "factor": 0.75,
+      "radius": 5.0,
+      "text": "anything within five paces moves at three-quarters speed"
+    },
+    "technique": {
+      "id": "leash",
+      "name": "Leash",
+      "family": "leash",
+      "effect": "tether",
+      "will": 16,
+      "cooldown": 6.0,
+      "damage": 8,
+      "range": 9.0,
+      "slowSeconds": 4.0,
+      "slow": 0.5,
+      "startup": 0.2,
+      "active": 0.1,
+      "recovery": 0.3,
+      "anim": "1H_Ranged_Shoot",
+      "text": "A line of field to the foe: it slows, and its bites come late."
+    },
+    "forms": {
+      "bind.leash": {
+        "name": "Short Leash",
+        "family": "Leash",
+        "effect": "strikes",
+        "base": 13,
+        "text": "Reel it in and strike, cue after cue."
+      },
+      "bind.puppet": {
+        "name": "Strings",
+        "family": "Puppet",
+        "effect": "guard",
+        "base": 10,
+        "staggerSeconds": 2.4,
+        "text": "Its body is yours while it holds: it cannot bite you. It ends with it on the floor."
+      },
+      "bind.contract": {
+        "name": "Collection",
+        "family": "Contract",
+        "effect": "mend",
+        "base": 4,
+        "healFactor": 0.8,
+        "text": "The foe pays: what it loses, you gain."
+      }
+    },
+    "styles": {
+      "hook": 1.0,
+      "gun": 0.4,
+      "blade": 0.3,
+      "heavy": 0.2,
+      "gun-heavy": 0.2
+    }
+  },
+  "make": {
+    "stance": {
+      "name": "Summon stance",
+      "effect": "blade",
+      "extraDamage": 5,
+      "text": "a conjured blade strikes beside every hit you land"
+    },
+    "technique": {
+      "id": "ward",
+      "name": "Ward",
+      "family": "ward",
+      "effect": "ward",
+      "will": 20,
+      "cooldown": 8.0,
+      "damage": 10,
+      "wardSeconds": 6.0,
+      "startup": 0.25,
+      "active": 0.1,
+      "recovery": 0.3,
+      "reach": 2.4,
+      "arc": 360,
+      "anim": "Spellcast_Raise",
+      "text": "A post of field rises at your side and takes the next bite meant for you."
+    },
+    "forms": {
+      "make.form": {
+        "name": "Forged",
+        "family": "Form",
+        "effect": "strikes",
+        "base": 14,
+        "text": "A conjured weapon for every cue, and the last one the size of a door."
+      },
+      "make.ward": {
+        "name": "Bulwark",
+        "family": "Ward",
+        "effect": "guard",
+        "base": 11,
+        "staggerSeconds": 2.4,
+        "text": "Walls of field around you while it holds; they fall outward."
+      },
+      "make.summon": {
+        "name": "Second Pair of Hands",
+        "family": "Summon",
+        "effect": "strikes",
+        "base": 13,
+        "text": "A construct strikes beside you on every cue."
+      }
+    },
+    "styles": {
+      "heavy": 0.6,
+      "blade": 0.5,
+      "hook": 0.3,
+      "gun": 0.3,
+      "gun-heavy": 0.2
+    }
+  }
+}

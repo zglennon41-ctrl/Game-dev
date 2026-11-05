@@ -155,5 +155,134 @@
         "text": "The field sets itself right. Each cue landed heals you; all of them pay the Terms in health."
       }
     }
+  },
+  "styles": {
+    "blade": {
+      "kind": "melee",
+      "combo": [
+        {
+          "name": "Chop",
+          "anim": "1H_Melee_Attack_Chop",
+          "damage": 9,
+          "startup": 0.18,
+          "active": 0.12,
+          "recovery": 0.32,
+          "lunge": 0.7,
+          "reach": 1.9,
+          "arc": 110
+        },
+        {
+          "name": "Diagonal",
+          "anim": "1H_Melee_Attack_Slice_Diagonal",
+          "damage": 10,
+          "startup": 0.16,
+          "active": 0.12,
+          "recovery": 0.3,
+          "lunge": 0.6,
+          "reach": 1.9,
+          "arc": 120
+        },
+        {
+          "name": "Sweep",
+          "anim": "1H_Melee_Attack_Slice_Horizontal",
+          "damage": 15,
+          "startup": 0.22,
+          "active": 0.14,
+          "recovery": 0.5,
+          "lunge": 0.9,
+          "reach": 2.1,
+          "arc": 160
+        }
+      ]
+    },
+    "heavy": {
+      "kind": "melee",
+      "combo": [
+        {
+          "name": "Overhead",
+          "anim": "2H_Melee_Attack_Chop",
+          "damage": 16,
+          "startup": 0.32,
+          "active": 0.14,
+          "recovery": 0.5,
+          "lunge": 0.6,
+          "reach": 2.3,
+          "arc": 150
+        },
+        {
+          "name": "Sweep",
+          "anim": "2H_Melee_Attack_Slice",
+          "damage": 19,
+          "startup": 0.3,
+          "active": 0.16,
+          "recovery": 0.6,
+          "lunge": 0.7,
+          "reach": 2.4,
+          "arc": 190
+        }
+      ]
+    },
+    "hook": {
+      "kind": "melee",
+      "combo": [
+        {
+          "name": "Reach",
+          "anim": "2H_Melee_Attack_Stab",
+          "damage": 8,
+          "startup": 0.2,
+          "active": 0.12,
+          "recovery": 0.32,
+          "lunge": 0.3,
+          "reach": 3.2,
+          "arc": 60
+        },
+        {
+          "name": "Rake",
+          "anim": "2H_Melee_Attack_Slice",
+          "damage": 10,
+          "startup": 0.22,
+          "active": 0.12,
+          "recovery": 0.38,
+          "lunge": 0.3,
+          "reach": 3.0,
+          "arc": 130
+        },
+        {
+          "name": "Wheel",
+          "anim": "2H_Melee_Attack_Spin",
+          "damage": 13,
+          "startup": 0.28,
+          "active": 0.2,
+          "recovery": 0.5,
+          "lunge": 0.2,
+          "reach": 2.9,
+          "arc": 360
+        }
+      ]
+    },
+    "gun": {
+      "kind": "ranged",
+      "shot": {
+        "name": "Shot",
+        "anim": "1H_Ranged_Shoot",
+        "damage": 10,
+        "startup": 0.1,
+        "recovery": 0.38,
+        "range": 13.0,
+        "arc": 40
+      }
+    },
+    "gun-heavy": {
+      "kind": "ranged",
+      "shot": {
+        "name": "Shot",
+        "anim": "2H_Ranged_Shoot",
+        "damage": 22,
+        "startup": 0.22,
+        "recovery": 0.9,
+        "range": 16.0,
+        "arc": 30
+      }
+    }
   }
 }
