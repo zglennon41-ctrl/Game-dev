@@ -122,7 +122,7 @@ func start(which: String) -> void:
 		tutorial = null
 		hud.set_prompt("", "")
 		hud.set_prompt_status("", "")
-		fight_end = pulse.t0 + float(Data.room["sessionSeconds"])
+		fight_end = pulse.t0 + float(_args.get("session", Data.room["sessionSeconds"]))
 	world.draw(fight, 0.0, 0.016, Vector2.ZERO)
 	world.snap_camera()
 
@@ -266,7 +266,8 @@ func _bot() -> void:
 	var t := pulse.now()
 	var k := roundi((t - fight.t0) / fight.period)
 	var to_beat := fight.beat_time(k) - t
-	if k <= _bot_last_beat or to_beat > 0.006 or to_beat < -0.03:
+	# Act on the first frame inside the window around beat k (frames can be slow off-screen).
+	if k <= _bot_last_beat or to_beat > 0.004 or to_beat < -0.07:
 		return
 	_bot_last_beat = k
 	var step := tutorial.i if tutorial else 99

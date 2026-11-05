@@ -268,10 +268,10 @@ func _build_wolf() -> void:
 		_wolf.add_child(l)
 	_wolf_label.font_size = 34
 	_wolf_label.modulate = C_DIM
-	_wolf_label.position = Vector3(0, 1.9, 0)
+	_wolf_label.position = Vector3(0, 2.25, 0)
 	_wolf_pips.font_size = 44
 	_wolf_pips.modulate = C_STAGGER
-	_wolf_pips.position = Vector3(0, 1.6, 0)
+	_wolf_pips.position = Vector3(0, 1.85, 0)
 
 # --- Feedback ---------------------------------------------------------------
 
@@ -402,7 +402,7 @@ func draw(f: Fight, t: float, dt: float, cam_input: Vector2) -> void:
 	_guard.visible = f.p_guard
 	_aura.visible = f.p_stance
 	_player_body_mat.albedo_color = Color(0.25, 0.2, 0.16) if f.p_down else (C_PLAYER.lerp(C_STANCE, 0.25) if f.p_stance else C_PLAYER)
-	_player_label.text = "DOWN" if f.p_down else ("ANCHOR · fainted" if f.p_fainted else "ANCHOR")
+	_player_label.text = "DOWN" if f.p_down else ("FAINTED" if f.p_fainted else "")
 	_swing = maxf(0.0, _swing - dt * 6.0)
 	_saber.rotation.y = lerpf(0.0, 1.6, sin(_swing * PI)) if _swing > 0.0 else 0.0
 
@@ -459,13 +459,12 @@ func draw(f: Fight, t: float, dt: float, cam_input: Vector2) -> void:
 		_wolf_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA if mode == "down" else BaseMaterial3D.TRANSPARENCY_DISABLED
 		_wolf_mat.emission_energy_multiplier = 2.5 * glow
 		_wolf.scale = Vector3(1, 0.4, 1) if mode == "down" else Vector3.ONE
-		var molt := "first molt"
 		var state := ""
 		match mode:
 			"stagger": state = " · STAGGERED"
 			"windup": state = " · winding up"
 			"down": state = " · down"
-		_wolf_label.text = "%s · %s · %s%s" % [String(f.beast["name"]).to_upper(), String(f.beast["shape"]).capitalize(), molt, state]
+		_wolf_label.text = "%s · %s%s" % [String(f.beast["name"]).to_upper(), String(f.beast["shape"]).capitalize(), state]
 		var pips := ""
 		for i in f.breaks.needed:
 			pips += "● " if i < f.breaks.count else "○ "
@@ -496,7 +495,7 @@ func _update_camera(dt: float, cam_input: Vector2, can_lock: bool) -> void:
 		to_w = to_w.normalized()
 		cam_yaw = atan2(-to_w.x, -to_w.z)
 		var side := Vector3(-to_w.z, 0, to_w.x)
-		want = _last_p - to_w * 4.6 + side * 1.5 + Vector3(0, 3.4, 0)
+		want = _last_p - to_w * 5.6 + side * 1.9 + Vector3(0, 3.9, 0)
 		focus = _last_p.lerp(_last_w, 0.6) + Vector3(0, 0.7, 0)
 	else:
 		cam_yaw -= cam_input.x * dt * 2.6
