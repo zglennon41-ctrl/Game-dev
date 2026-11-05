@@ -56,3 +56,32 @@ reads loosely. Kept as written in Systems.
    Toll, so it grows a shadow of it. HANDOFF's genius sketch shows exactly this (a Stoop shadow).
 13. **Chain length isn't capped.** Systems says "to six"; the Bible says "three to seven"; with
    verses it reaches 9 here.
+
+# Step 1 — the pulse room
+
+Calls I made to get a fight on the beat. All are numbers in `data/combat-room.json` or
+`data/beasts.json` unless noted.
+
+14. **The cut-wolf is Read-shaped, not Bind.** Breaks come from the Shape opposite the beast's,
+    and the slice has only the Anchor, whose opposite is Read. A Bind wolf could never be broken
+    by the one Shape in the slice. (`beasts.json → cut-wolf.shape`)
+15. **The wolf bites on your beat.** Beasts have their own pulse in the sketch (500 ms). Here
+    the wolf winds up and strikes on the Anchor's beats, so a parry is always on the beat you
+    hear. A beast on its own tempo is a second-molt idea, maybe.
+16. **Only techniques break.** A saber strike is a weapon, not an Anchor technique, so it does
+    damage but fills no break pips. Ground Strike (18 Will) breaks. Three on the beat, in a row,
+    open the 3-beat stagger. A hit taken or an off-beat input resets the pips.
+17. **One Project per beat.** A second press in the same beat is a fumble: no hit, and the chain
+    and the break pips reset. This is what stops mashing.
+18. **The chain**: each on-beat Project in a row adds 5% damage, up to 6 links. (Combat says
+    "techniques chain" without a number.)
+19. **Anchor stance**: hits ×1.5, no knockback, moves at 70%, drains 2 Will/s. Off the beat, it
+    comes a beat late.
+20. **Hold**: holding guard drains 3 Will/s. A block takes half the hit and 5 Will. A parry
+    (Hold pressed on the strike beat) takes nothing, refunds 10 Will, and the wolf reels a beat
+    before it recovers.
+21. **Timing calibration** happens in the tutorial's first step: eight taps with the click, and
+    the game shifts the beat by your median offset. Reset on the menu.
+22. **There is a tutorial.** The slice's acceptance test says a new player should get the beat
+    "with no explanation". The fight can be started from the menu without it, so both can be
+    tested.

@@ -1,0 +1,12 @@
+[
+  { "id": "cut-wolf", "name": "Cut-wolf", "shape": "read", "molt": 1, "health": 220,
+    "$comment": "Shape is read (not bind as in the HANDOFF sketch) so an Anchor can break it: breaks come from the Shape opposite the beast's. See docs/decisions-needed.md.",
+    "behaviors": ["circles", "lunges"], "breakWindowBeats": 3,
+    "strikeDamage": 12, "strikeReach": 120, "telegraphBeats": 2, "recoverBeats": 2,
+    "circleBeats": { "min": 3, "max": 6 }, "circleRadius": 230, "approachSpeed": 460, "moveSpeed": 210, "knockback": 70 },
+  { "id": "yard-wolf", "name": "Yard-wolf (on a chain)", "shape": "read", "molt": 1, "health": 9999,
+    "$comment": "The tutorial's training beast. Never dies; telegraphs long.",
+    "behaviors": ["chained"], "breakWindowBeats": 3,
+    "strikeDamage": 0, "strikeReach": 140, "telegraphBeats": 3, "recoverBeats": 3,
+    "circleBeats": { "min": 2, "max": 3 }, "circleRadius": 170, "approachSpeed": 300, "moveSpeed": 80, "knockback": 40 }
+]

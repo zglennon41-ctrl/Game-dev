@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "beasts",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "id",
+      "name",
+      "shape",
+      "molt",
+      "health",
+      "breakWindowBeats",
+      "strikeDamage",
+      "strikeReach",
+      "telegraphBeats",
+      "recoverBeats",
+      "circleBeats",
+      "circleRadius",
+      "approachSpeed",
+      "moveSpeed",
+      "knockback"
+    ],
+    "properties": {
+      "shape": {
+        "enum": [
+          "anchor",
+          "turn",
+          "cast",
+          "read",
+          "bind",
+          "make"
+        ]
+      },
+      "molt": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 5
+      },
+      "health": {
+        "type": "number"
+      },
+      "telegraphBeats": {
+        "type": "integer",
+        "minimum": 1
+      }
+    }
+  }
+}

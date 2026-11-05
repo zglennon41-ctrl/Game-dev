@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "combat-room",
+  "type": "object",
+  "required": [
+    "line",
+    "sessionSeconds",
+    "player",
+    "actions",
+    "stance",
+    "chain",
+    "staggerDamageFactor",
+    "feel"
+  ],
+  "properties": {
+    "line": {
+      "enum": [
+        "green",
+        "amber",
+        "red",
+        "black"
+      ]
+    }
+  }
+}

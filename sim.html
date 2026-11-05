@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WILDLINE — Rules simulator</title>
+    <style>
+      :root { color-scheme: dark; --bg: #14110f; --fg: #e8dcc8; --dim: #9a8c78; --accent: #d9a441; }
+      body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 Georgia, serif; }
+      header, main { max-width: 1000px; margin: 0 auto; padding: 16px; }
+      h1 { font-weight: normal; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 0; }
+      p { color: var(--dim); }
+      nav button { background: none; border: 1px solid var(--dim); color: var(--fg); padding: 6px 14px; margin-right: 8px; cursor: pointer; font: inherit; }
+      nav button.on { border-color: var(--accent); color: var(--accent); }
+      pre { font: 12.5px/1.45 ui-monospace, Menlo, Consolas, monospace; white-space: pre-wrap; overflow-x: auto; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>WILDLINE</h1>
+      <p>Step 0: the rules as data, and the simulator. Three scripted lives run through three years of rules. Change anything in <code>data/</code> and this page reloads with what the genius became. <a href="/" style="color:#d9a441">Back to the pulse room</a>.</p>
+      <nav id="lives"></nav>
+    </header>
+    <main><pre id="out"></pre></main>
+    <script type="module" src="/src/game/sim-page.ts"></script>
+  </body>
+</html>

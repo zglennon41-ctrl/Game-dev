@@ -1,0 +1,18 @@
+{
+  "$comment": "Step 1, the pulse combat room. One Anchor (Marshal, saber) against one cut-wolf on a Green line. Feel numbers: tune here.",
+  "line": "green",
+  "sessionSeconds": 120,
+  "player": {
+    "shape": "anchor", "health": 100, "moveSpeed": 260, "stanceMoveFactor": 0.7,
+    "reach": 105, "radius": 26,
+    "holdDrainPerSecond": 3, "blockDamageFactor": 0.5, "blockWillCost": 5
+  },
+  "actions": {
+    "strike": { "name": "Saber strike", "verb": "project", "will": 0, "damage": 10, "recoveryBeats": 0 },
+    "ground-strike": { "name": "Ground Strike", "verb": "project", "technique": "ground-strike", "will": 18, "damage": 26, "recoveryBeats": 1, "knockback": 120 }
+  },
+  "stance": { "name": "Anchor stance", "damageFactor": 1.5, "offBeatEntryDelayBeats": 1 },
+  "chain": { "$comment": "Consecutive on-beat Projects. Each link adds this much damage, up to the cap.", "perLink": 0.05, "maxLinks": 6 },
+  "staggerDamageFactor": 1.5,
+  "feel": { "hitstopMs": 70, "shakeOnHit": 6, "shakeOnHurt": 12, "audioOffsetMs": 0 }
+}
