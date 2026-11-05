@@ -36,6 +36,7 @@ const PAD := { "attack": JOY_BUTTON_X, "block": JOY_BUTTON_RIGHT_SHOULDER, "dodg
 	"stance": JOY_BUTTON_LEFT_SHOULDER, "pattern": JOY_BUTTON_B, "lock_on": JOY_BUTTON_RIGHT_STICK, "menu": JOY_BUTTON_START, "name_foe": JOY_BUTTON_DPAD_UP }
 
 func _ready() -> void:
+	Style.apply_global()
 	for a in OS.get_cmdline_user_args():
 		var kv := String(a).trim_prefix("--").split("=", true, 1)
 		_args[kv[0]] = kv[1] if kv.size() > 1 else true
@@ -51,6 +52,9 @@ func _ready() -> void:
 	creator.changed.connect(_preview_hero)
 	creator.finished.connect(_hero_made)
 	creator.cancelled.connect(func(): creator.visible = false; menu())
+	creator.clicked.connect(func(): sfx.play("ui-take", 1.0, -6.0))
+	# A soft tick whenever the chosen button moves, by mouse or pad.
+	get_viewport().gui_focus_changed.connect(func(c: Control): if c is Button: sfx.play("ui-move", 1.0, -10.0))
 	builder.done.connect(_pattern_built)
 	builder.cancelled.connect(func(): builder.visible = false; menu())
 	_last_ticks = Time.get_ticks_usec()
@@ -102,6 +106,11 @@ func _ready() -> void:
 		start("fight")
 	else:
 		menu()
+		if _args.has("shots") and _args.has("title"):
+			await get_tree().create_timer(2.0).timeout
+			_shot("title")
+			await get_tree().create_timer(0.3).timeout
+			get_tree().quit()
 
 func _setup_input() -> void:
 	for action in ACTIONS:
@@ -134,14 +143,19 @@ func menu() -> void:
 	creator.visible = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var saved := Settings.hero()
+	# The title stands over the chamber: the last hero made, in the moonlight, the genius circling.
+	var h: Dictionary = saved if not saved.is_empty() else Fight.default_hero()
+	_preview_hero(h)
+	world.portrait_side = -2.0
+	world.portrait_dist = 5.6
 	var buttons: Array = [["New character", new_character]]
-	var body := "A real-time party RPG of a guild that keeps a rail junction alive, ten thousand years after the Awakening.\n\nMouse and keyboard, or a gamepad. Sound on."
+	var body := "A real-time party RPG of a guild that keeps a rail junction alive.\n[color=#a59a8a][i]Mouse and keyboard, or a gamepad. Sound on.[/i][/color]"
 	if not saved.is_empty():
 		buttons.append(["Continue as %s  (%s, %s)" % [saved["name"], Data.by_id(Data.bloods, saved["blood"])["name"], String(saved["shape"]).capitalize()], _academy_gate])
 		buttons.append(["Practice yard: fight cut-wolves as %s  (two minutes)" % saved["name"], func(): hero = saved; start("fight")])
 	buttons.append(["Combat tutorial  (as an Anchor)", func(): hero = {}; start("tutorial")])
 	buttons.append(["Quit", func(): get_tree().quit()])
-	hud.show_screen("WILDLINE", "The Cumberland Cut", body, buttons)
+	hud.show_screen("WILDLINE", "The Cumberland Cut", body, buttons, "title")
 
 # --- The opening ---------------------------------------------------------------
 
@@ -162,6 +176,9 @@ func _preview_hero(h: Dictionary) -> void:
 	preview.p_facing = PI / 2.0
 	world.show_wolf = false
 	world.portrait = true
+	world.portrait_side = 1.25
+	world.portrait_dist = 4.4
+	world.genius_visible = true
 
 func _hero_made(h: Dictionary) -> void:
 	hero = h
@@ -183,6 +200,7 @@ func _card(lines: Array, next: Callable) -> void:
 func _start_prologue() -> void:
 	fight = Fight.new({ "hero": hero, "beast": "cut-wolf", "seed": randi(), "respawn": false, "mercy": true,
 		"allow_breach": false, "beast_health": 220 })
+	world.portrait = false
 	world.build_hero(hero)
 	world.reset_feedback()
 	world.snap_camera(fight)
@@ -249,6 +267,8 @@ func start(which: String) -> void:
 	hud.configure(fight, h.get("name", ""))
 	_breached = false
 	world.show_wolf = true
+	world.portrait = false
+	world.genius_visible = true
 	world.reset_feedback()
 	world.snap_camera(fight)
 	hud.hide_screen()
@@ -338,7 +358,7 @@ func _process(delta: float) -> void:
 	var t := Time.get_ticks_usec()
 	var real_dt := minf(0.1, (t - _last_ticks) / 1e6)
 	_last_ticks = t
-	if mode == "creator" and preview:
+	if (mode == "creator" or mode == "menu") and preview:
 		world.draw(preview, real_dt, Vector2.ZERO, Vector2.ZERO)
 		return
 	if mode != "tutorial" and mode != "fight" and mode != "prologue":

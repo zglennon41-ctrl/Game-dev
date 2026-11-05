@@ -123,3 +123,12 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
     are in `data/story.json`.
 38. **Order after this**: I have written the Academy (Act 1) as the next step, and folded the
     Green zone into its Field Examination, which is how your Academy tab describes it.
+39. **The look is "lamplight gothic"** (`game/scripts/style.gd`): Cinzel capitals for titles,
+    Alegreya for the story, Alegreya Sans for the HUD (all OFL); dark plates with brass rims
+    and clipped corners; ink outlines on characters and beasts; moonlight shafts, drifting
+    motes of field, and a cool-shadow, warm-highlight film grade. A placeholder direction
+    until the game has its own art director; say if it is wrong.
+40. **The genius before the rite is a small orb circling the head**, tinted by the Shape.
+    In the opening it is born from the burst when the field wakes; it flares on a parry,
+    a Pattern cue and a stance, flickers when you are hit, dims with low Will, and settles
+    beside you when you fall. Whether the Seed should colour it instead is yours.

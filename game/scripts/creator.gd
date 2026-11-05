@@ -6,6 +6,7 @@ extends CanvasLayer
 
 signal finished(hero: Dictionary)
 signal cancelled
+signal clicked                     # a button was pressed: a soft sound
 signal changed(hero: Dictionary)   # the reveal changed: the world redraws the character
 
 const BG := Color(0.03, 0.025, 0.025, 0.86)
@@ -42,32 +43,32 @@ func _clear() -> void:
 # --- The opening card ------------------------------------------------------------
 
 func _intro() -> void:
+	_screen = "other"
 	_clear()
-	var bg := ColorRect.new()
-	bg.color = Color(0.02, 0.018, 0.018, 0.97)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_root.add_child(bg)
+	_backdrop()
 	var box := _centered(760)
-	_text(box, "BEFORE THE FIELD", 40, GOLD)
+	_text(box, "WILDLINE  ·  THE MAKING OF A LIFE", 14, Style.BRASS, "title_light")
+	_text(box, "Before the Field", 52, FG, "title")
+	box.add_child(Style.rule(420))
 	_text(box, "Ten thousand years ago, the will of every living thing became a force in the world. It still wakes in every child, at the edge of growing up, and settles into a Shape.\n\nYours has not woken yet. Before it does, tell us who you were.", 19, FG)
 	_text(box, "There are no right answers. Your answers lean your blood, your Shape, your weapon, what will stand beside you, and the Terms you would accept for power. You will see all of it, and why, before anything is final.", 15, DIM)
 	_button(box, "Begin", func(): _ask(0), true)
 	_button(box, "Back", func(): cancelled.emit())
+	_arrive(box)
 
 # --- The questions ----------------------------------------------------------------
 
 func _ask(i: int) -> void:
+	_screen = "other"
 	_q = i
 	_clear()
-	var bg := ColorRect.new()
-	bg.color = Color(0.02, 0.018, 0.018, 0.97)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_root.add_child(bg)
+	_backdrop()
 	var qs: Array = Data.creation["questions"]
 	var q: Dictionary = qs[i]
 	var box := _centered(780)
-	_text(box, "%d / %d" % [i + 1, qs.size()], 15, DIM)
-	_text(box, q["ask"], 34, FG)
+	box.add_child(_progress(i, qs.size()))
+	_text(box, q["ask"], 34, FG, "body")
+	box.add_child(Style.rule(300, Style.BRASS_DIM))
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 8)
 	box.add_child(gap)
@@ -76,7 +77,31 @@ func _ask(i: int) -> void:
 		var chosen: bool = answers.size() > i and int(answers[i]) == ai
 		_button(box, a["text"], func(): _answer(i, ai), chosen)
 	if i > 0:
-		_button(box, "Back", func(): _ask(i - 1))
+		var back := _button(box, "Back", func(): _ask(i - 1))
+		back.add_theme_color_override("font_color", DIM)
+	_arrive(box)
+
+## Where you are in the questions: a row of lozenges, the answered ones lit.
+func _progress(i: int, n: int) -> Control:
+	var c := Control.new()
+	c.custom_minimum_size = Vector2(0, 22)
+	c.draw.connect(func():
+		for k in n:
+			var x := 7.0 + k * 22.0
+			var y := 11.0
+			var r := 6.0 if k == i else 4.5
+			var pts := PackedVector2Array([Vector2(x, y - r), Vector2(x + r, y), Vector2(x, y + r), Vector2(x - r, y)])
+			if k < i:
+				c.draw_colored_polygon(pts, Style.BRASS)
+			elif k == i:
+				c.draw_colored_polygon(pts, Style.BRASS_HI)
+			else:
+				pts.append(pts[0])
+				c.draw_polyline(pts, Style.BRASS_DIM, 1.0)
+		var f := Style.font("ui")
+		c.draw_string(f, Vector2(n * 22.0 + 12.0, 16.0), "%d of %d" % [i + 1, n], HORIZONTAL_ALIGNMENT_LEFT, -1, 14, DIM)
+	)
+	return c
 
 func _answer(i: int, ai: int) -> void:
 	while answers.size() <= i:
@@ -87,6 +112,8 @@ func _answer(i: int, ai: int) -> void:
 	else:
 		blood_choice = ""
 		_reveal()
+
+var _screen := ""
 
 # --- The reveal --------------------------------------------------------------------
 
@@ -107,7 +134,15 @@ func _reveal() -> void:
 	var panel := PanelContainer.new()
 	panel.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
 	panel.offset_left = -820
-	panel.add_theme_stylebox_override("panel", _box(PANEL))
+	var ps := Style.plate(Color(0.04, 0.034, 0.03, 0.93), Style.BRASS_DIM, 1, 26, 0)
+	ps.border_width_top = 0
+	ps.border_width_bottom = 0
+	ps.border_width_right = 0
+	ps.border_width_left = 2
+	ps.border_color = Style.BRASS
+	ps.shadow_size = 40
+	ps.shadow_color = Color(0, 0, 0, 0.6)
+	panel.add_theme_stylebox_override("panel", ps)
 	_root.add_child(panel)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -117,7 +152,9 @@ func _reveal() -> void:
 	v.add_theme_constant_override("separation", 6)
 	scroll.add_child(v)
 
-	_text(v, "WHO YOUR ANSWERS MADE", 30, GOLD)
+	_text(v, "WHO YOUR ANSWERS MADE", 14, Style.BRASS, "title_light")
+	var title := _text(v, hero["name"] if hero["name"] != "" else "Unnamed", 44, FG, "title")
+	v.add_child(Style.rule(380))
 	# Name.
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
@@ -192,6 +229,12 @@ func _reveal() -> void:
 	v.add_child(end)
 	_button(end, "This is me", func(): finished.emit(hero), true)
 	_button(end, "Answer again", func(): hero = {}; _ask(0))
+	name_edit.text_changed.connect(func(t): title.text = t if t != "" else "Unnamed")
+	if _screen != "reveal":
+		_arrive(v)
+		panel.modulate.a = 0.0
+		panel.create_tween().tween_property(panel, "modulate:a", 1.0, 0.4)
+	_screen = "reveal"
 
 func _shape_line(shape: String) -> String:
 	match shape:
@@ -211,11 +254,9 @@ func _seed_text(id: String) -> String:
 	return id
 
 func _choose_blood() -> void:
+	_screen = "other"
 	_clear()
-	var bg := ColorRect.new()
-	bg.color = Color(0.02, 0.018, 0.018, 0.97)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_root.add_child(bg)
+	_backdrop()
 	var scroll := ScrollContainer.new()
 	scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
 	scroll.offset_left = 60
@@ -228,10 +269,14 @@ func _choose_blood() -> void:
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.add_theme_constant_override("separation", 6)
 	scroll.add_child(v)
-	_text(v, "CHOOSE YOUR BLOOD", 30, GOLD)
+	_text(v, "Choose Your Blood", 42, FG, "title")
+	v.add_child(Style.rule(380))
 	_text(v, "The peoples and bloodlines that came out of the Awakening, and the single Marks that come to anyone.", 15, DIM)
 	for tier in [["bloodline", "BLOODLINES  ·  strong blood, registered by the cities"], ["kindred", "KINDREDS  ·  peoples who carry it together"], ["mark", "MARKS  ·  one mutation, yours alone"]]:
-		_text(v, tier[1], 19, FG)
+		var gap := Control.new()
+		gap.custom_minimum_size = Vector2(0, 8)
+		v.add_child(gap)
+		_text(v, tier[1], 16, Style.BRASS, "title")
 		var grid := GridContainer.new()
 		grid.columns = 3
 		grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -248,11 +293,11 @@ func _choose_blood() -> void:
 			btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 			btn.custom_minimum_size = Vector2(0, 96)
 			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			btn.add_theme_font_size_override("font_size", 13)
-			_style(btn, id == hero["blood"])
+			_style(btn, id == hero["blood"], 14, "ui")
 			btn.pressed.connect(func(): blood_choice = id; _reveal())
 			grid.add_child(btn)
 	_button(v, "Back", _reveal)
+	_arrive(v)
 
 # --- Helpers ---------------------------------------------------------------------
 
@@ -266,67 +311,64 @@ func _centered(width: float) -> VBoxContainer:
 	c.add_child(v)
 	return v
 
-func _text(parent: Control, t: String, size: int, color: Color) -> Label:
+func _text(parent: Control, t: String, size: int, color: Color, kind := "") -> Label:
 	var l := Label.new()
 	l.text = t
 	# Labels in a row size to their text; elsewhere they wrap.
 	if not (parent is HBoxContainer):
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD
-	l.add_theme_font_size_override("font_size", size)
-	l.add_theme_color_override("font_color", color)
+	if kind == "":
+		kind = "title" if size >= 28 else ("italic" if color == DIM and size <= 16 else ("body" if size >= 17 else "ui"))
+	Style.label(l, size, color, kind)
 	parent.add_child(l)
 	return l
 
+## A section of the reveal: a small brass heading over its value.
 func _section(parent: Control, title: String, value: String) -> void:
 	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0, 6)
+	gap.custom_minimum_size = Vector2(0, 10)
 	parent.add_child(gap)
-	var l := RichTextLabel.new()
-	l.bbcode_enabled = true
-	l.fit_content = true
-	l.scroll_active = false
-	l.add_theme_font_size_override("normal_font_size", 22)
-	l.add_theme_color_override("default_color", FG)
-	l.text = "[color=#9e958a]%s[/color]   %s" % [title, value]
-	parent.add_child(l)
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 10)
+	parent.add_child(h)
+	var t := Label.new()
+	Style.label(t, 14, Style.BRASS, "title")
+	t.text = title
+	h.add_child(t)
+	var r := Style.rule(200, Style.BRASS_DIM)
+	r.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(r)
+	if value != "":
+		var l := Label.new()
+		Style.label(l, 25, FG, "body_bold")
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD
+		l.text = value
+		parent.add_child(l)
 
 func _line(parent: Control, t: String, color := FG) -> void:
 	var l := RichTextLabel.new()
 	l.bbcode_enabled = true
 	l.fit_content = true
 	l.scroll_active = false
-	l.add_theme_font_size_override("normal_font_size", 16)
-	l.add_theme_font_size_override("bold_font_size", 16)
-	l.add_theme_font_size_override("italics_font_size", 16)
-	l.add_theme_color_override("default_color", color)
+	Style.rich(l, 17, color, "italic" if color == DIM else "body")
 	l.text = t
 	parent.add_child(l)
 
 func _box(color: Color) -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = color
-	s.border_color = EDGE
-	s.set_border_width_all(1)
-	s.set_corner_radius_all(3)
-	s.set_content_margin_all(14)
-	return s
+	return Style.plate(color, Style.BRASS_DIM, 1, 14)
 
-func _style(b: Button, on := false) -> void:
-	b.add_theme_stylebox_override("normal", _box(Color(0.32, 0.22, 0.08) if on else Color(0.08, 0.07, 0.06)))
-	b.add_theme_stylebox_override("hover", _box(Color(0.18, 0.13, 0.08)))
-	b.add_theme_stylebox_override("focus", _box(Color(0.2, 0.14, 0.08)))
-	b.add_theme_stylebox_override("pressed", _box(Color(0.32, 0.22, 0.08)))
-	b.add_theme_color_override("font_color", GOLD if on else FG)
+func _style(b: Button, on := false, size := 19, kind := "body") -> void:
+	Style.button(b, on, size, kind)
 
 func _button(parent: Control, t: String, cb: Callable, primary := false) -> Button:
 	var b := Button.new()
-	b.text = "   " + t
+	b.text = t
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	b.autowrap_mode = TextServer.AUTOWRAP_WORD
-	b.add_theme_font_size_override("font_size", 19)
-	b.custom_minimum_size = Vector2(0, 48)
-	_style(b, primary)
-	b.pressed.connect(cb)
+	b.custom_minimum_size = Vector2(0, 50)
+	_style(b, primary, 19)
+	b.pressed.connect(func(): _click(); cb.call())
 	parent.add_child(b)
 	if primary:
 		b.call_deferred("grab_focus")
@@ -334,8 +376,69 @@ func _button(parent: Control, t: String, cb: Callable, primary := false) -> Butt
 
 func _chip(parent: Control, t: String, cb: Callable, on := false) -> void:
 	var b := Button.new()
-	b.text = " %s " % t
-	b.add_theme_font_size_override("font_size", 15)
-	_style(b, on)
-	b.pressed.connect(cb)
+	b.text = t
+	_style(b, on, 15, "ui")
+	for st in ["normal", "hover", "focus", "pressed", "hover_pressed"]:
+		var sb := b.get_theme_stylebox(st) as StyleBoxFlat
+		sb.content_margin_left = 12
+		sb.content_margin_right = 12
+		sb.content_margin_top = 6
+		sb.content_margin_bottom = 6
+	b.pressed.connect(func(): _click(); cb.call())
 	parent.add_child(b)
+
+## The backdrop of the creator's screens: lamplight in the dark, with motes of field drifting.
+func _backdrop() -> void:
+	var bg := ColorRect.new()
+	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var sh := Shader.new()
+	sh.code = BACKDROP
+	var sm := ShaderMaterial.new()
+	sm.shader = sh
+	bg.material = sm
+	_root.add_child(bg)
+
+func _click() -> void:
+	clicked.emit()
+
+## Every screen of the creator arrives: its pieces fade in, one after another.
+func _arrive(box: Control) -> void:
+	var i := 0
+	for c in box.get_children():
+		if c is CanvasItem:
+			var it := c as CanvasItem
+			it.modulate.a = 0.0
+			it.create_tween().tween_property(it, "modulate:a", 1.0, 0.35).set_delay(0.045 * i).set_trans(Tween.TRANS_SINE)
+			i += 1
+
+const BACKDROP := """
+shader_type canvas_item;
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+void fragment() {
+	vec2 uv = UV;
+	vec3 col = vec3(0.022, 0.018, 0.018);
+	// Lamplight from above the centre.
+	float d = length((uv - vec2(0.5, 0.18)) * vec2(1.0, 1.4));
+	col += vec3(0.16, 0.09, 0.04) * pow(max(0.0, 1.0 - d), 2.5);
+	// Motes: a sparse grid of soft points drifting up, each with its own pace.
+	float m = 0.0;
+	for (int k = 0; k < 2; k++) {
+		vec2 g = uv * vec2(28.0, 16.0) * (1.0 + float(k) * 0.6);
+		g.y += TIME * (0.35 + float(k) * 0.2);
+		vec2 id = floor(g);
+		vec2 f = fract(g) - 0.5;
+		float h = hash(id + float(k) * 17.0);
+		if (h > 0.86) {
+			vec2 o = vec2(hash(id + 3.1) - 0.5, hash(id + 7.7) - 0.5) * 0.6;
+			o.x += 0.15 * sin(TIME * 0.7 + h * 30.0);
+			float r = length(f - o);
+			float tw = 0.5 + 0.5 * sin(TIME * 1.7 + h * 50.0);
+			m += smoothstep(0.09, 0.0, r) * tw * (0.5 + 0.5 * float(k == 0));
+		}
+	}
+	col += vec3(0.55, 0.8, 0.55) * m * 0.32;
+	float v = smoothstep(0.35, 1.0, length((uv - 0.5) * vec2(1.4, 1.0)));
+	col *= 1.0 - v * 0.75;
+	COLOR = vec4(col, 0.98);
+}
+"""

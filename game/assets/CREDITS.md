@@ -6,3 +6,5 @@ All placeholder art is CC0 (public domain): free for any use, credit not require
   www.kaylousberg.com. CC0. (`kaykit/`, `kaykit_dungeon/`; licenses alongside.)
 - **Wolf**, from the **Ultimate Animated Animals** pack by Quaternius, quaternius.com. CC0.
   (`quaternius/`)
+- **Cinzel** (Natanael Gama), **Alegreya** and **Alegreya Sans** (Huerta Tipográfica), from
+  Google Fonts, under the SIL Open Font License 1.1. (`fonts/`; licenses alongside.)

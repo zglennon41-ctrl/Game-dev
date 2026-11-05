@@ -22,6 +22,8 @@ var cam_yaw := 0.0
 var cam_pitch := -0.32
 var show_wolf := true
 var portrait := false   # the character creator: the camera faces the character
+var portrait_side := 1.25   # where the character stands in the portrait: + left of the screen, - right
+var portrait_dist := 3.6
 
 var _player: Node3D
 var _p_anim: AnimationPlayer
@@ -54,14 +56,20 @@ var _cam_look := Vector3.ZERO
 var _hitstop_until := 0
 var _slowmo_until := 0
 var _clock := 0.0
+var _moon: DirectionalLight3D
+var _motes := CPUParticles3D.new()
+var _p_skel: Skeleton3D
+var _head_bone := -1
 
 func _ready() -> void:
 	_build_environment()
 	_build_chamber()
+	_build_genius()
 	_build_player()
 	_build_wolf()
 	_build_markers()
 	_build_effects()
+	_build_flair()
 	add_child(camera)
 	camera.fov = 66.0
 	camera.near = 0.05
@@ -120,6 +128,7 @@ func _build_environment() -> void:
 	moon.shadow_enabled = true
 	moon.directional_shadow_max_distance = 40.0
 	add_child(moon)
+	_moon = moon
 
 func _build_chamber() -> void:
 	var a: Dictionary = Data.room["arena"]
@@ -224,6 +233,7 @@ func build_hero(hero: Dictionary) -> void:
 	_p_current = ""
 	_p_meshes = _player.find_children("*", "MeshInstance3D", true, false)
 	_overlay_player = _mat(C_HIT, 2.0, true, 0.0)
+	_overlay_player.next_pass = _ink(2.2)
 	for m in _p_meshes:
 		m.material_overlay = _overlay_player
 	_aura = MeshInstance3D.new()
@@ -238,6 +248,9 @@ func build_hero(hero: Dictionary) -> void:
 	_player.add_child(_aura)
 	_dress_blood(skel, hero.get("blood", ""))
 	_measure_weapon()
+	_p_skel = skel
+	_head_bone = skel.find_bone("head")
+	_tint_genius(_shape_color(hero.get("shape", "anchor")))
 
 func _attach(skel: Skeleton3D, bone: String, path: String) -> Node3D:
 	var att := BoneAttachment3D.new()
@@ -326,6 +339,7 @@ func _build_wolf() -> void:
 			_w_anim.get_animation(WA + loop).loop_mode = Animation.LOOP_LINEAR
 	_w_meshes = _wolf.find_children("*", "MeshInstance3D", true, false)
 	_overlay_wolf = _mat(C_WINDUP, 2.0, true, 0.0)
+	_overlay_wolf.next_pass = _ink(2.4)
 	for m in _w_meshes:
 		m.material_overlay = _overlay_wolf
 	for l in [_wolf_label, _alert]:
@@ -336,6 +350,7 @@ func _build_wolf() -> void:
 		l.outline_modulate = Color(0, 0, 0, 0.85)
 		add_child(l)
 	_wolf_label.font_size = 28
+	_wolf_label.font = Style.font("title")
 	_wolf_label.fixed_size = true
 	_wolf_label.pixel_size = 0.0012
 	_wolf_label.modulate = C_DIM
@@ -355,15 +370,88 @@ var _vig_tint := Color(0, 0, 0, 0)
 
 const VIGNETTE := """
 shader_type canvas_item;
+// The film the game is shot on: cool shadows, lamplit highlights, a little grain, the edge of
+// the frame falling into dark; and the hit's colour flashing in from the edges.
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear;
 uniform vec4 tint : source_color = vec4(0.0);
-uniform float base = 0.42;
+uniform float base = 0.5;
+uniform float grain = 0.03;
+float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 void fragment() {
+	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
+	float l = dot(c, vec3(0.299, 0.587, 0.114));
+	vec3 cool = vec3(0.84, 0.94, 1.12);
+	vec3 warm = vec3(1.1, 1.0, 0.84);
+	vec3 g = c * mix(cool, warm, smoothstep(0.04, 0.55, l));
+	g += vec3(0.006, 0.008, 0.016) * (1.0 - smoothstep(0.0, 0.25, l));
+	g = mix(vec3(l), g, 1.08);
 	vec2 uv = UV - 0.5;
 	float d = length(uv * vec2(1.5, 1.0));
-	float v = smoothstep(0.38, 0.95, d);
-	COLOR = vec4(tint.rgb * tint.a, v * base + tint.a * smoothstep(0.2, 0.9, d) * 0.8);
+	g *= 1.0 - smoothstep(0.36, 0.95, d) * base;
+	g += (hash(floor(FRAGCOORD.xy * 0.5) + fract(TIME * 7.13) * 97.0) - 0.5) * grain;
+	g = mix(g, tint.rgb, clamp(tint.a * smoothstep(0.2, 0.9, d) * 0.8, 0.0, 1.0));
+	COLOR = vec4(g, 1.0);
 }
 """
+
+const INK := """
+shader_type spatial;
+// Ink lines around the characters and the beasts, like a woodcut: the mesh drawn again, its
+// back faces pushed out a few pixels along the normal.
+render_mode unshaded, cull_front, shadows_disabled, depth_draw_opaque;
+uniform vec4 ink : source_color = vec4(0.045, 0.03, 0.028, 1.0);
+uniform float width = 2.0;
+void vertex() {
+	vec4 clip = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
+	vec3 n = (MODELVIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
+	vec2 off = (PROJECTION_MATRIX * vec4(n, 0.0)).xy;
+	off = off / max(length(off), 1e-4);
+	clip.xy += off * width * 2.0 / VIEWPORT_SIZE * clip.w;
+	POSITION = clip;
+}
+void fragment() {
+	ALBEDO = ink.rgb;
+}
+"""
+
+const SHAFT := """
+shader_type spatial;
+// A shaft of moonlight through the broken roof: brightest where you look across it.
+render_mode unshaded, blend_add, cull_disabled, depth_draw_never, shadows_disabled;
+uniform vec4 tint : source_color = vec4(0.5, 0.62, 1.0, 1.0);
+uniform float strength = 0.17;
+uniform float half_height = 7.0;
+varying float h;
+void vertex() { h = VERTEX.y; }
+void fragment() {
+	float edge = pow(abs(dot(NORMAL, VIEW)), 2.0);
+	float fade = smoothstep(-half_height, -half_height + 1.2, h) * (1.0 - smoothstep(half_height * 0.1, half_height, h));
+	float shimmer = 0.85 + 0.15 * sin(TIME * 0.5 + h * 0.9);
+	ALBEDO = tint.rgb;
+	ALPHA = clamp(strength * edge * fade * shimmer, 0.0, 1.0);
+}
+"""
+
+const GLOW := """
+shader_type spatial;
+// A soft round glow that always faces the camera: the genius's halo, the moon's pool.
+render_mode unshaded, blend_add, cull_disabled, depth_draw_never, shadows_disabled;
+uniform vec4 tint : source_color = vec4(1.0);
+uniform float strength = 1.0;
+uniform float falloff = 2.2;
+uniform bool billboard = true;
+void vertex() {
+	if (billboard) {
+		MODELVIEW_MATRIX = VIEW_MATRIX * mat4(INV_VIEW_MATRIX[0], INV_VIEW_MATRIX[1], INV_VIEW_MATRIX[2], MODEL_MATRIX[3]);
+	}
+}
+void fragment() {
+	float d = length(UV - 0.5) * 2.0;
+	ALBEDO = tint.rgb;
+	ALPHA = clamp(pow(max(0.0, 1.0 - d), falloff) * strength, 0.0, 1.0);
+}
+"""
+
 
 ## The sword trail, the screen's edge, and the effects that go with hits.
 func _build_effects() -> void:
@@ -553,6 +641,7 @@ func floater(at: Vector3, text: String, color: Color, size := 56, life := 0.9, r
 	var l := Label3D.new()
 	l.text = text
 	l.font_size = size
+	l.font = Style.font("title")
 	l.fixed_size = true
 	l.pixel_size = 0.0009
 	l.modulate = color
@@ -636,6 +725,8 @@ func field_wakes(f: Fight, hero: Dictionary) -> void:
 	burst(_v3(f.p_pos, 1.0), c, 80, 7.0)
 	impact(_v3(f.p_pos, 1.2), c, 2.4)
 	flash_screen(c, 0.7)
+	genius_born()
+	_motes.amount = 260
 	floater(_v3(f.p_pos, 3.0), "YOUR FIELD WAKES", c, 96, 2.2, 0.4)
 	slowmo(0.6, 0.25)
 
@@ -705,6 +796,7 @@ func feedback(f: Fight, events: Array) -> void:
 				_ring_wave(_v3(f.w_pos), C_STAGGER, 3.0)
 				_shake = 0.2
 			"parry":
+				genius_react("parry")
 				floater(P + Vector3(0, 0.3, 0), "PARRY", C_GUARD, 96, 1.0)
 				burst((_v3(f.p_pos, 1.2) + _v3(f.w_pos, 1.2)) / 2.0, C_GUARD, 50, 8.0)
 				_ring_wave(_v3(f.p_pos), C_GUARD, 3.5)
@@ -717,6 +809,7 @@ func feedback(f: Fight, events: Array) -> void:
 				burst(_v3(f.p_pos, 1.2) + _v3(Vector2.from_angle(f.p_facing) * 0.5), C_GUARD, 12, 4.0)
 				_shake = 0.07
 			"hurt":
+				genius_react("hurt")
 				floater(P, "-%d" % int(e["damage"]), C_WINDUP, 80)
 				_player_flash = 1.0
 				_shake = float(feel["shakeOnHurt"])
@@ -729,6 +822,7 @@ func feedback(f: Fight, events: Array) -> void:
 			"windup":
 				_alert.visible = true
 			"stance":
+				genius_react("stance")
 				floater(P - Vector3(0, 0.6, 0), "ANCHOR STANCE" if e["on"] else "stance off", C_STANCE, 46)
 			"faint":
 				floater(P, "THE FIELD FAINTS", C_WINDUP, 56)
@@ -766,6 +860,7 @@ func feedback(f: Fight, events: Array) -> void:
 					floater(P - Vector3(0, 0.4 + 0.3 * i, 0), "Toll: %s" % String(e["tolls"][i]).to_lower(), C_DIM, 36, 1.6)
 				_ring_wave(_v3(f.p_pos), C_GOLD, 4.0)
 			"pattern-cue":
+				genius_react("cue")
 				if e["hit"]:
 					burst(_v3(f.p_pos, 0.2), C_GOLD, 16, 4.0)
 				else:
@@ -920,12 +1015,14 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 
 	_update_trail(f.p_state in ["attack", "technique", "pattern"] and not f.ranged, dt)
 	_update_statuses(f)
+
 	_vig_tint.a = maxf(0.0, _vig_tint.a - dt * 1.6)
 	var low := 1.0 - clampf(f.p_hp / float(Data.room["player"]["health"]), 0.0, 1.0)
 	var pulse := 0.0 if f.p_hp > 30.0 or f.p_state == "down" else 0.12 * (0.5 + 0.5 * sin(_clock * 6.0)) * low
 	var tint := _vig_tint if _vig_tint.a > pulse else Color(0.8, 0.05, 0.05, pulse)
 	(_vignette.material as ShaderMaterial).set_shader_parameter("tint", tint)
 	_update_camera(dt, cam_input, f)
+	_update_genius(f, dt)
 
 ## Models face +Z; the fight's facing is the angle on the ground plane.
 func _yaw(facing: float) -> float:
@@ -937,8 +1034,9 @@ func _update_camera(dt: float, cam_input: Vector2, f: Fight) -> void:
 	if portrait:
 		# Face the character; leave room on the right for the reveal.
 		var k2 := 1.0 - exp(-dt * 4.0)
-		_cam_pos = _cam_pos.lerp(p + Vector3(1.25, 1.55, 3.6), k2)
-		_cam_look = _cam_look.lerp(p + Vector3(1.25, 1.05, 0), k2)
+		var sway := Vector3(sin(_clock * 0.23) * 0.25, sin(_clock * 0.31) * 0.08, 0)
+		_cam_pos = _cam_pos.lerp(p + Vector3(portrait_side, 1.25 + portrait_dist * 0.12, portrait_dist) + sway, k2)
+		_cam_look = _cam_look.lerp(p + Vector3(portrait_side, 1.15, 0), k2)
 		camera.position = _cam_pos
 		camera.look_at(_cam_look, Vector3.UP)
 		return
@@ -1081,3 +1179,259 @@ func reset_feedback() -> void:
 	_w_current = ""
 	_play(_p_anim, "Idle", 1.0, 0.0)
 	_play(_w_anim, WA + "Idle", 1.0, 0.0)
+
+# --- The look: ink, motes, moonlight -------------------------------------------
+
+static var _shaders := {}
+
+func _shader_mat(code: String) -> ShaderMaterial:
+	if not _shaders.has(code):
+		var sh := Shader.new()
+		sh.code = code
+		_shaders[code] = sh
+	var m := ShaderMaterial.new()
+	m.shader = _shaders[code]
+	return m
+
+func _ink(width: float) -> ShaderMaterial:
+	var m := _shader_mat(INK)
+	m.set_shader_parameter("width", width)
+	return m
+
+## The chamber's air: motes of field drifting in the dark, and moonlight falling through the
+## broken roof in shafts, with a pale pool where each one lands.
+func _build_flair() -> void:
+	var a: Dictionary = Data.room["arena"]
+	var hw := float(a["width"]) / 2.0
+	var hd := float(a["depth"]) / 2.0
+	_motes.amount = 170
+	_motes.lifetime = 9.0
+	_motes.preprocess = 9.0
+	_motes.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	_motes.emission_box_extents = Vector3(hw, 1.8, hd)
+	_motes.position = Vector3(0, 2.0, 0)
+	_motes.direction = Vector3(0, 1, 0)
+	_motes.spread = 180.0
+	_motes.initial_velocity_min = 0.03
+	_motes.initial_velocity_max = 0.18
+	_motes.gravity = Vector3(0, 0.035, 0)
+	_motes.scale_amount_min = 0.5
+	_motes.scale_amount_max = 1.3
+	var q := QuadMesh.new()
+	q.size = Vector2(0.05, 0.05)
+	_motes.mesh = q
+	var mm := _shader_mat(GLOW)
+	mm.set_shader_parameter("tint", Color(1, 1, 1))
+	mm.set_shader_parameter("strength", 1.6)
+	mm.set_shader_parameter("falloff", 1.6)
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.vertex_color_use_as_albedo = true
+	mat.albedo_texture = _soft_dot()
+	mat.no_depth_test = false
+	_motes.material_override = mat
+	var ramp := Gradient.new()
+	ramp.set_color(0, Color(1, 1, 1, 0))
+	ramp.set_color(1, Color(1, 1, 1, 0))
+	ramp.add_point(0.2, Color(1, 1, 1, 0.9))
+	ramp.add_point(0.8, Color(1, 1, 1, 0.7))
+	_motes.color_ramp = ramp
+	var hues := Gradient.new()
+	hues.set_color(0, Color(0.62, 0.95, 0.7))
+	hues.set_color(1, Color(1.0, 0.78, 0.45))
+	_motes.color_initial_ramp = hues
+	add_child(_motes)
+	# Moonlight: shafts along the moon's direction, each with a pool on the floor.
+	var up := _moon.global_transform.basis.z.normalized() if _moon.is_inside_tree() else _moon.transform.basis.z.normalized()
+	for spot in [[Vector3(-5.5, 0, -2.6), 1.3], [Vector3(3.2, 0, 3.4), 0.9], [Vector3(8.6, 0, -4.4), 1.1]]:
+		var at: Vector3 = spot[0]
+		var r: float = spot[1]
+		var shaft := MeshInstance3D.new()
+		var cm := CylinderMesh.new()
+		cm.top_radius = r * 1.25
+		cm.bottom_radius = r
+		cm.height = 14.0
+		cm.cap_top = false
+		cm.cap_bottom = false
+		cm.radial_segments = 24
+		shaft.mesh = cm
+		var sm := _shader_mat(SHAFT)
+		sm.set_shader_parameter("half_height", 7.0)
+		shaft.material_override = sm
+		shaft.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var y := up
+		var x := y.cross(Vector3.FORWARD).normalized()
+		var z := x.cross(y).normalized()
+		shaft.transform = Transform3D(Basis(x, y, z), at + up * 7.0)
+		add_child(shaft)
+		var pool := MeshInstance3D.new()
+		var pm := PlaneMesh.new()
+		pm.size = Vector2(r * 3.4, r * 3.4)
+		pool.mesh = pm
+		var gm := _shader_mat(GLOW)
+		gm.set_shader_parameter("billboard", false)
+		gm.set_shader_parameter("tint", Color(0.45, 0.58, 1.0))
+		gm.set_shader_parameter("strength", 0.35)
+		gm.set_shader_parameter("falloff", 1.4)
+		pool.material_override = gm
+		pool.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		pool.position = at + Vector3(0, 0.13, 0)
+		add_child(pool)
+
+## A soft round dot, drawn once, for motes and sparks.
+static var _dot: ImageTexture
+static func _soft_dot() -> ImageTexture:
+	if _dot:
+		return _dot
+	var n := 32
+	var img := Image.create(n, n, false, Image.FORMAT_RGBA8)
+	for yy in n:
+		for xx in n:
+			var d := Vector2(xx - n / 2.0 + 0.5, yy - n / 2.0 + 0.5).length() / (n / 2.0)
+			var a := clampf(pow(maxf(0.0, 1.0 - d), 1.8), 0.0, 1.0)
+			img.set_pixel(xx, yy, Color(1, 1, 1, a))
+	_dot = ImageTexture.create_from_image(img)
+	return _dot
+
+# --- The genius: before the rite, a little orb circling the head ------------------
+
+## Before the Academy's rite gives it a First Form, the genius is a mote of the hero's own field:
+## a small light that rings their head, keeps pace when they move, and answers what they do.
+var genius_visible := true
+var _genius := Node3D.new()
+var _g_core := MeshInstance3D.new()
+var _g_core_mat := StandardMaterial3D.new()
+var _g_halo := MeshInstance3D.new()
+var _g_halo_mat: ShaderMaterial
+var _g_light := OmniLight3D.new()
+var _g_trail := CPUParticles3D.new()
+var _g_tint := Color(1.0, 0.8, 0.4)
+var _g_angle := 0.0
+var _g_pulse := 0.0
+var _g_flicker := 0.0
+var _g_spin := 0.0
+var _g_born := 1.0
+var _g_pos := Vector3.ZERO
+
+const GENIUS_RADIUS := 0.62
+const GENIUS_RISE := 0.42   # above the head bone, which sits at the jaw
+
+func _build_genius() -> void:
+	add_child(_genius)
+	var sm := SphereMesh.new()
+	sm.radius = 0.075
+	sm.height = 0.15
+	sm.radial_segments = 16
+	sm.rings = 8
+	_g_core.mesh = sm
+	_g_core_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_g_core.material_override = _g_core_mat
+	_g_core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_genius.add_child(_g_core)
+	var q := QuadMesh.new()
+	q.size = Vector2(0.9, 0.9)
+	_g_halo.mesh = q
+	_g_halo_mat = _shader_mat(GLOW)
+	_g_halo_mat.set_shader_parameter("falloff", 2.4)
+	_g_halo.material_override = _g_halo_mat
+	_g_halo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_genius.add_child(_g_halo)
+	_g_light.omni_range = 2.4
+	_g_light.omni_attenuation = 1.4
+	_g_light.light_energy = 0.7
+	_g_light.shadow_enabled = false
+	_genius.add_child(_g_light)
+	# The trail: sparks left in the world as it circles, so the ring draws itself.
+	_g_trail.local_coords = false
+	_g_trail.amount = 64
+	_g_trail.lifetime = 0.75
+	_g_trail.direction = Vector3(0, 1, 0)
+	_g_trail.spread = 180.0
+	_g_trail.initial_velocity_min = 0.0
+	_g_trail.initial_velocity_max = 0.05
+	_g_trail.gravity = Vector3(0, 0.12, 0)
+	var tq := QuadMesh.new()
+	tq.size = Vector2(0.13, 0.13)
+	_g_trail.mesh = tq
+	var tm := StandardMaterial3D.new()
+	tm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	tm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	tm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	tm.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	tm.vertex_color_use_as_albedo = true
+	tm.albedo_texture = _soft_dot()
+	_g_trail.material_override = tm
+	var sc := Curve.new()
+	sc.add_point(Vector2(0, 1))
+	sc.add_point(Vector2(1, 0.1))
+	_g_trail.scale_amount_curve = sc
+	add_child(_g_trail)
+	_tint_genius(_g_tint)
+
+func _tint_genius(c: Color) -> void:
+	_g_tint = c.lightened(0.25)
+	_g_core_mat.albedo_color = c.lightened(0.7)
+	_g_halo_mat.set_shader_parameter("tint", _g_tint)
+	_g_light.light_color = _g_tint
+	var ramp := Gradient.new()
+	ramp.set_color(0, Color(_g_tint.lightened(0.3), 0.8))
+	ramp.set_color(1, Color(_g_tint, 0.0))
+	_g_trail.color_ramp = ramp
+
+## The genius is born: it comes out of the burst when the field wakes.
+func genius_born() -> void:
+	genius_visible = true
+	_g_born = 0.0
+	_g_pulse = 1.0
+
+func genius_react(kind: String) -> void:
+	match kind:
+		"parry": _g_pulse = 1.0; _g_spin = 1.0
+		"hit": _g_pulse = maxf(_g_pulse, 0.35)
+		"cue": _g_pulse = maxf(_g_pulse, 0.8)
+		"hurt": _g_flicker = 0.5
+		"stance": _g_pulse = maxf(_g_pulse, 0.6)
+
+func _update_genius(f: Fight, dt: float) -> void:
+	var show := genius_visible and _player != null and _p_skel != null and _head_bone >= 0
+	_genius.visible = show
+	_g_trail.emitting = show
+	if not show:
+		return
+	var down := f.p_state == "down"
+	var pattern := f.p_state == "pattern"
+	_g_born = minf(1.0, _g_born + dt * 0.9)
+	_g_pulse = maxf(0.0, _g_pulse - dt * 2.2)
+	_g_spin = maxf(0.0, _g_spin - dt * 1.2)
+	_g_flicker = maxf(0.0, _g_flicker - dt)
+	var speed := 2.1 + 5.0 * _g_spin + (5.5 if pattern else 0.0) + (1.0 if f.p_stance else 0.0)
+	if down:
+		speed = 0.6
+	_g_angle = fmod(_g_angle + dt * speed, TAU)
+	var head := _p_skel.global_transform * _p_skel.get_bone_global_pose(_head_bone).origin
+	var centre := head + Vector3(0, GENIUS_RISE, 0)
+	var radius := GENIUS_RADIUS * (0.8 if pattern else 1.0)
+	if down:
+		centre = _player.global_position + Vector3(0, 0.5, 0)
+		radius = 0.4
+	# The ring tilts a little, so it reads as a ring and not a line, and breathes.
+	var off := Vector3(cos(_g_angle) * radius, sin(_g_angle * 1.0 + 0.7) * 0.09 + 0.04 * sin(_clock * 2.3), sin(_g_angle) * radius)
+	var born_k := _g_born * _g_born * (3.0 - 2.0 * _g_born)
+	var want := centre + off * born_k
+	var k := 1.0 - exp(-dt * 16.0)
+	_g_pos = want if _g_pos == Vector3.ZERO else _g_pos.lerp(want, k)
+	_genius.global_position = _g_pos
+	_g_trail.global_position = _g_pos
+	var will := clampf(f.p_will / 100.0, 0.0, 1.0)
+	var bright := (0.55 + 0.45 * will) * (0.4 if down else 1.0)
+	if _g_flicker > 0.0:
+		bright *= 0.35 + 0.65 * absf(sin(_clock * 40.0))
+	var s := (0.9 + 0.7 * _g_pulse + 0.06 * sin(_clock * 6.0)) * (0.3 + 0.7 * born_k)
+	_g_core.scale = Vector3.ONE * s
+	_g_halo.scale = Vector3.ONE * (0.8 + 1.4 * _g_pulse) * (0.3 + 0.7 * born_k)
+	_g_halo_mat.set_shader_parameter("strength", (0.7 + 0.9 * _g_pulse) * bright)
+	_g_light.light_energy = (0.55 + 1.6 * _g_pulse) * bright
+	_g_core_mat.albedo_color = _g_tint.lightened(0.55 + 0.4 * _g_pulse) * Color(1, 1, 1, 1)

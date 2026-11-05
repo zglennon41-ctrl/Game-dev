@@ -47,6 +47,7 @@ func start(hud: Hud) -> void:
 	fight.w_floor = 40.0
 	fight.w_state = "absent"
 	world.show_wolf = false
+	world.genius_visible = false   # the genius is born when the field wakes
 	fight.p_lock = false
 	world.lock_on = false
 	_enter(hud)

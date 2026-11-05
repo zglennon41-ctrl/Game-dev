@@ -251,16 +251,11 @@ func _refresh() -> void:
 # --- Style -------------------------------------------------------------------
 
 func _label(l: Label, size: int, color: Color) -> void:
-	l.add_theme_font_size_override("font_size", size)
-	l.add_theme_color_override("font_color", color)
+	Style.label(l, size, color, "title" if size >= 28 else ("ui" if size <= 14 else "body"))
 
 func _box(color: Color) -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = color
-	s.border_color = EDGE
-	s.set_border_width_all(1)
-	s.set_corner_radius_all(3)
-	s.set_content_margin_all(10)
+	var s := Style.plate(Color(color, 0.95), Style.BRASS_DIM, 1, 10, 6)
+	s.shadow_size = 4
 	return s
 
 func _style_toggle(b: Button) -> void:
