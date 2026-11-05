@@ -1,96 +1,130 @@
 [
-  {
-    "id": "cut-wolf",
-    "name": "Cut-wolf",
-    "shape": "read",
-    "molt": 1,
-    "health": 300,
-    "$comment": "Shape is read (not bind as in the HANDOFF sketch) so an Anchor can break it: breaks come from techniques of the Shape opposite the beast's. Distances in meters, times in seconds. flinchEvery 0: only heavy hits (techniques) make it flinch; light hits it shrugs off and, after counterAfterHits of them, snaps back.",
-    "radius": 0.7,
-    "walkSpeed": 2.2,
-    "gallopSpeed": 7.5,
-    "circleRadius": 4.5,
-    "prowl": {
-      "min": 0.8,
-      "max": 2.0
-    },
-    "attacks": [
-      {
-        "id": "bite",
-        "name": "Bite",
-        "weight": 3,
-        "range": 1.9,
-        "windup": 0.5,
-        "active": 0.15,
-        "recover": 0.85,
-        "damage": 14,
-        "lunge": 1.2,
-        "knockback": 0.8
-      },
-      {
-        "id": "pounce",
-        "name": "Pounce",
-        "weight": 1,
-        "range": 5.5,
-        "minRange": 3.0,
-        "windup": 0.8,
-        "active": 0.25,
-        "recover": 1.2,
-        "damage": 20,
-        "lunge": 4.5,
-        "knockback": 1.6
-      },
-      {
-        "id": "snap",
-        "name": "Snap",
-        "weight": 0,
-        "range": 2.2,
-        "windup": 0.32,
-        "active": 0.12,
-        "recover": 0.7,
-        "damage": 10,
-        "lunge": 0.9,
-        "knockback": 0.6,
-        "$comment": "The counter: when struck while circling or recovering, the wolf snaps back."
-      }
-    ],
-    "flinchEvery": 0,
-    "flinchTime": 0.35,
-    "respawnSeconds": 3.0,
-    "counterAfterHits": 2
+ {
+  "id": "cut-wolf",
+  "name": "Cut-wolf",
+  "shape": "read",
+  "molt": 1,
+  "health": 300,
+  "$comment": "Shape is read (not bind as in the HANDOFF sketch) so an Anchor can break it: breaks come from techniques of the Shape opposite the beast's. Distances in meters, times in seconds. flinchEvery 0: only heavy hits (techniques) make it flinch; light hits it shrugs off and, after counterAfterHits of them, snaps back.",
+  "radius": 0.7,
+  "walkSpeed": 2.2,
+  "gallopSpeed": 7.5,
+  "circleRadius": 4.5,
+  "prowl": {
+   "min": 0.8,
+   "max": 2.0
   },
-  {
-    "id": "yard-wolf",
-    "name": "Yard-wolf (on a chain)",
-    "shape": "read",
-    "molt": 1,
-    "health": 99999,
-    "$comment": "The tutorial's training beast. Never dies; bites slowly, for no damage.",
-    "radius": 0.7,
-    "walkSpeed": 1.6,
-    "gallopSpeed": 4.0,
-    "circleRadius": 3.0,
-    "prowl": {
-      "min": 1.8,
-      "max": 2.6
-    },
-    "attacks": [
-      {
-        "id": "bite",
-        "name": "Bite",
-        "weight": 1,
-        "range": 2.0,
-        "windup": 0.8,
-        "active": 0.15,
-        "recover": 1.2,
-        "damage": 0,
-        "lunge": 1.0,
-        "knockback": 0.4
-      }
-    ],
-    "flinchEvery": 0,
-    "flinchTime": 0.35,
-    "respawnSeconds": 2.0,
-    "counterAfterHits": 0
-  }
+  "attacks": [
+   {
+    "id": "bite",
+    "name": "Bite",
+    "weight": 3,
+    "range": 1.9,
+    "windup": 0.5,
+    "active": 0.15,
+    "recover": 0.85,
+    "damage": 14,
+    "lunge": 1.2,
+    "knockback": 0.8
+   },
+   {
+    "id": "pounce",
+    "name": "Pounce",
+    "weight": 1,
+    "range": 5.5,
+    "minRange": 3.0,
+    "windup": 0.8,
+    "active": 0.25,
+    "recover": 1.2,
+    "damage": 20,
+    "lunge": 4.5,
+    "knockback": 1.6
+   },
+   {
+    "id": "snap",
+    "name": "Snap",
+    "weight": 0,
+    "range": 2.2,
+    "windup": 0.32,
+    "active": 0.12,
+    "recover": 0.7,
+    "damage": 10,
+    "lunge": 0.9,
+    "knockback": 0.6,
+    "$comment": "The counter: when struck while circling or recovering, the wolf snaps back."
+   }
+  ],
+  "flinchEvery": 0,
+  "flinchTime": 0.35,
+  "respawnSeconds": 3.0,
+  "counterAfterHits": 2
+ },
+ {
+  "id": "yard-wolf",
+  "name": "Yard-wolf (on a chain)",
+  "shape": "read",
+  "molt": 1,
+  "health": 99999,
+  "$comment": "The tutorial's training beast. Never dies; bites slowly, for no damage.",
+  "radius": 0.7,
+  "walkSpeed": 1.6,
+  "gallopSpeed": 4.0,
+  "circleRadius": 3.0,
+  "prowl": {
+   "min": 1.8,
+   "max": 2.6
+  },
+  "attacks": [
+   {
+    "id": "bite",
+    "name": "Bite",
+    "weight": 1,
+    "range": 2.0,
+    "windup": 0.8,
+    "active": 0.15,
+    "recover": 1.2,
+    "damage": 0,
+    "lunge": 1.0,
+    "knockback": 0.4
+   }
+  ],
+  "flinchEvery": 0,
+  "flinchTime": 0.35,
+  "respawnSeconds": 2.0,
+  "counterAfterHits": 0
+ },
+ {
+  "id": "millstone",
+  "name": "Millstone",
+  "shape": "read",
+  "molt": 1,
+  "health": 99999,
+  "$comment": "Yardmaster Bask's genius, for the Academy's Hold drill. Never falls; bites for a little, and the wards stop it mattering.",
+  "radius": 0.7,
+  "walkSpeed": 1.6,
+  "gallopSpeed": 4.0,
+  "circleRadius": 3.0,
+  "prowl": {
+   "min": 1.4,
+   "max": 2.2
+  },
+  "attacks": [
+   {
+    "id": "bite",
+    "name": "Bite",
+    "weight": 1,
+    "range": 2.0,
+    "windup": 0.85,
+    "active": 0.15,
+    "recover": 1.2,
+    "damage": 8,
+    "lunge": 1.0,
+    "knockback": 0.4
+   }
+  ],
+  "flinchEvery": 0,
+  "flinchTime": 0.35,
+  "respawnSeconds": 2.0,
+  "counterAfterHits": 0
+ }
 ]

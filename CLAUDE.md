@@ -17,9 +17,11 @@ A vertical slice, in this order, each step playable before the next starts:
    whose answers make the character (blood or people, Shape, city, weapon, Seed, and a
    Pattern of its own); the world encounter where the field wakes and the Pattern fires;
    the Academy recruiter; one year later; the Academy's gate. All six Shapes playable.
-4. Act 1, the Academy: the rite (the Shape and the genius's First Form), the lessons, the
-   cohort, the Field Examination (the Green zone: three areas, a post, a boss), the Gate
-   Reading.
+4. **Act 1, the Academy: the current and only focus** (owner, 2026-11-05). A solo, offline
+   game every character plays before the server: the walkable Academy, the cohort of twelve,
+   the six lessons (Hold, the rite, Shape, Discipline, the line, Project), the Field
+   Examination, Commencement. No one dies here (wards; a rescue team on expeditions). Every
+   run should make a character unlike the last. The plan is `docs/academy-plan.md`.
 5. The hall: common room, board, roster members, one named death.
 6. Co-op for three.
 

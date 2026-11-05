@@ -10,6 +10,7 @@ var hud := Hud.new()
 var sfx := Sfx.new()
 var builder := Builder.new()
 var creator := Creator.new()
+var academy := Academy.new()
 var prologue: Prologue
 var hero: Dictionary = {}
 var preview: Fight
@@ -29,11 +30,11 @@ var _bot_move := Vector2.ZERO
 const ACTIONS := {
 	"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN],
 	"attack": [KEY_J], "block": [KEY_K], "dodge": [KEY_SPACE, KEY_SHIFT], "technique": [KEY_Q, KEY_1],
-	"stance": [KEY_F, KEY_L], "pattern": [KEY_R], "name_foe": [KEY_N], "lock_on": [KEY_TAB], "menu": [KEY_ESCAPE],
+	"stance": [KEY_F, KEY_L], "pattern": [KEY_R], "name_foe": [KEY_N], "lock_on": [KEY_TAB], "menu": [KEY_ESCAPE], "interact": [KEY_E],
 }
 const MOUSE := { "attack": MOUSE_BUTTON_LEFT, "block": MOUSE_BUTTON_RIGHT, "lock_on": MOUSE_BUTTON_MIDDLE }
 const PAD := { "attack": JOY_BUTTON_X, "block": JOY_BUTTON_RIGHT_SHOULDER, "dodge": JOY_BUTTON_A, "technique": JOY_BUTTON_Y,
-	"stance": JOY_BUTTON_LEFT_SHOULDER, "pattern": JOY_BUTTON_B, "lock_on": JOY_BUTTON_RIGHT_STICK, "menu": JOY_BUTTON_START, "name_foe": JOY_BUTTON_DPAD_UP }
+	"stance": JOY_BUTTON_LEFT_SHOULDER, "pattern": JOY_BUTTON_B, "lock_on": JOY_BUTTON_RIGHT_STICK, "menu": JOY_BUTTON_START, "name_foe": JOY_BUTTON_DPAD_UP, "interact": JOY_BUTTON_X }
 
 func _ready() -> void:
 	Style.apply_global()
@@ -49,6 +50,11 @@ func _ready() -> void:
 	builder.visible = false
 	add_child(creator)
 	creator.visible = false
+	academy.world = world
+	academy.hud = hud
+	academy.sfx = sfx
+	add_child(academy)
+	academy.visible = false
 	creator.changed.connect(_preview_hero)
 	creator.finished.connect(_hero_made)
 	creator.cancelled.connect(func(): creator.visible = false; menu())
@@ -98,7 +104,21 @@ func _ready() -> void:
 		h["name"] = "Test"
 		_hero_made(h)
 		return
-	if _args.has("new"):
+	if _args.has("academy"):
+		# Automated checks: walk into the Academy with the saved hero (or a made one), fresh.
+		var h := Settings.hero()
+		if h.is_empty() or _args.has("fresh"):
+			h = Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0])
+			h["name"] = "Test"
+		if _args.has("fresh"):
+			h.erase("academy")
+		hero = h
+		enter_academy()
+		if _args.has("quit"):
+			get_tree().create_timer(float(_args.get("seconds", "90")), true, false, true).timeout.connect(func():
+				print("ACADEMY: place %s, done %s, met %d, rested %s, record %s" % [academy.progress["place"], str(academy.progress["done"]), academy.progress["met"].size(), str(academy.progress.get("rested", false)), str(academy.progress["record"])])
+				get_tree().quit())
+	elif _args.has("new"):
 		new_character()
 	elif _args.has("tutorial"):
 		start("tutorial")
@@ -141,6 +161,8 @@ func menu() -> void:
 	Engine.time_scale = 1.0
 	sfx.stop_ambience()
 	creator.visible = false
+	academy.visible = false
+	world.set_place("cut")
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var saved := Settings.hero()
 	# The title stands over the chamber: the last hero made, in the moonlight, the genius circling.
@@ -151,7 +173,8 @@ func menu() -> void:
 	var buttons: Array = [["New character", new_character]]
 	var body := "A real-time party RPG of a guild that keeps a rail junction alive.\n[color=#a59a8a][i]Mouse and keyboard, or a gamepad. Sound on.[/i][/color]"
 	if not saved.is_empty():
-		buttons.append(["Continue as %s  (%s, %s)" % [saved["name"], Data.by_id(Data.bloods, saved["blood"])["name"], String(saved["shape"]).capitalize()], _academy_gate])
+		var where := "at the Academy" if saved.has("academy") else "at the Academy's gate"
+		buttons.append(["Continue as %s  (%s, %s, %s)" % [saved["name"], Data.by_id(Data.bloods, saved["blood"])["name"], String(saved["shape"]).capitalize(), where], func(): hero = saved; enter_academy() if saved.has("academy") else _academy_gate()])
 		buttons.append(["Practice yard: fight cut-wolves as %s  (two minutes)" % saved["name"], func(): hero = saved; start("fight")])
 	buttons.append(["Combat tutorial  (as an Anchor)", func(): hero = {}; start("tutorial")])
 	buttons.append(["Quit", func(): get_tree().quit()])
@@ -239,6 +262,7 @@ func _academy_gate() -> void:
 		hero = Settings.hero()
 	var a: Dictionary = Data.story["academy"]
 	hud.show_screen(a["title"], "%s  ·  %s  ·  %s" % [hero["name"], Data.by_id(Data.bloods, hero["blood"])["name"], String(hero["shape"]).capitalize()], a["text"], [
+		["Walk through the Gate", enter_academy],
 		["Practice yard: fight cut-wolves  (two minutes)", func(): start("fight")],
 		["Main menu", menu],
 	])
@@ -247,6 +271,69 @@ func _academy_gate() -> void:
 		_shot.call_deferred("academy")
 		if _args.has("quit"):
 			get_tree().create_timer(1.0, true, false, true).timeout.connect(get_tree().quit)
+
+## The Academy: walk the grounds, meet the cohort, take the lessons.
+func enter_academy() -> void:
+	if hero.is_empty():
+		hero = Settings.hero()
+	mode = "academy"
+	Engine.time_scale = 1.0
+	sfx.start_ambience()
+	academy.auto = _args.has("bot")
+	academy.enter(hero)
+	fight = academy.fight
+	if not _args.has("bot"):
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+func _academy_frame(delta: float, real_dt: float) -> void:
+	var stick := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var move := world.move_from_stick(stick)
+	if academy.busy():
+		move = Vector2.ZERO
+	fight = academy.fight
+	if _args.has("bot"):
+		if academy.wants_still():
+			move = Vector2.ZERO
+		else:
+			move = _lesson_bot() if academy.in_lesson() and not academy.talking() else academy.auto_move()
+	fight.update(minf(delta, 0.1), move)
+	var events := fight.drain()
+	_sounds(events)
+	world.feedback(fight, events)
+	academy.update(events, real_dt)
+	fight = academy.fight
+	var cam := Vector2(Input.get_joy_axis(0, JOY_AXIS_RIGHT_X), Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y))
+	if cam.length() < 0.15:
+		cam = Vector2.ZERO
+	if not fight.p_lock:
+		world.look(_cam_mouse)
+	_cam_mouse = Vector2.ZERO
+	world.draw(fight, real_dt, cam, move)
+	if academy.in_lesson():
+		hud.update_play(fight, "", "the yard  ·  warded", true)
+	if _args.has("shots") and _clock_shots(real_dt):
+		_shot("academy-" + String(academy.progress["place"]))
+
+## Automated checks in a lesson: keep near the genius, face it, and parry each bite.
+func _lesson_bot() -> Vector2:
+	if not fight.p_lock:
+		fight.input("lock")
+	var to := fight.w_pos - fight.p_pos
+	if fight.w_state == "windup" and fight.w_timer >= fight.w_duration - 0.12 and not fight.p_block_held:
+		fight.input("block-down")
+	elif fight.w_state not in ["windup", "strike"] and fight.p_block_held:
+		fight.input("block-up")
+	if to.length() > 3.0:
+		return to.normalized()
+	return Vector2.ZERO
+
+var _shot_clock := 0.0
+func _clock_shots(dt: float) -> bool:
+	_shot_clock += dt
+	if _shot_clock >= float(_args.get("every", "5")):
+		_shot_clock = 0.0
+		return true
+	return false
 
 func _open_builder() -> void:
 	hud.screen.visible = false
@@ -335,7 +422,20 @@ func _results(reason: String) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_cam_mouse += event.relative
-	if mode != "tutorial" and mode != "fight" and mode != "prologue":
+	if mode == "academy":
+		if event.is_action_pressed("menu"):
+			academy.save()
+			menu()
+			return
+		if event is InputEventMouseButton and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED and not _args.has("bot"):
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+			return
+		if event.is_action_pressed("interact") or (academy.talking() and event.is_action_pressed("attack")):
+			academy.interact()
+			return
+		if not academy.in_lesson() or academy.talking():
+			return
+	elif mode != "tutorial" and mode != "fight" and mode != "prologue":
 		return
 	if event.is_action_pressed("menu"):
 		menu()
@@ -358,6 +458,9 @@ func _process(delta: float) -> void:
 	var t := Time.get_ticks_usec()
 	var real_dt := minf(0.1, (t - _last_ticks) / 1e6)
 	_last_ticks = t
+	if mode == "academy":
+		_academy_frame(delta, real_dt)
+		return
 	if (mode == "creator" or mode == "menu") and preview:
 		world.draw(preview, real_dt, Vector2.ZERO, Vector2.ZERO)
 		return

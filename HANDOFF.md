@@ -345,6 +345,20 @@ cosmetics; any art pipeline.
 ## 9. Decisions
 
 **Decided** (do not ask again):
+- **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
+  plays it alone before entering a server; it introduces the world, the gameplay and the
+  character systems, and gives the field and the genius time to grow into something unique.
+  It is the full 8–12 hours, walkable in 3D (the quad, the yard, the hearth hall, the
+  dormitories, the Instructors' tower, the Gate). The cohort is the twelve NPC classmates,
+  generated new for every run. Nothing in it happens on a server.
+- **No one dies at the Academy** (owner, 2026-11-05). Its wards make training safe, and on
+  expeditions a rescue team stands by: a downed student is pulled out, and failing costs the
+  run something but never the character.
+- **Death belongs to the server, and it is rare and spectacular** (owner, 2026-11-05). It can
+  happen on a character's first night on the server and leaves a lasting mark on the player.
+  A new character starts again at the questionnaire and the Academy. What carries over is a
+  mix of memory (the world remembers), lineage (something of the dead reaches the next) and
+  unlocks (new options for the next run), depending on how and why the character died.
 - The game opens with a character creator of questions (2026-11-05): answers suggest a blood
   (confirmed or changed by the player) and make the Shape, city, weapon, Seed and a first
   Pattern, which the character has from the start and outgrows. Then the world encounter, the
@@ -367,6 +381,10 @@ cosmetics; any art pipeline.
   earlier plan of a browser prototype first was dropped.
 
 **Deferred** (ask the owner when the slice reaches them):
+- What becomes of the genius when its partner dies (a shade, as the systems say; freed;
+  inherited; something else).
+- Which deaths carry over what (memory, lineage, unlocks), and whether Sworn survives as a
+  separate flag now that any character can die on the server.
 - Perfected at 500 uses or 300.
 - Whether a Reading can be refused outright for one instar.
 - Whether a Kin-form survives a partner's retirement.

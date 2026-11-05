@@ -12,6 +12,7 @@ var weapons: Array
 var kits: Dictionary
 var creation: Dictionary
 var story: Dictionary
+var academy: Dictionary
 
 func _init() -> void:
 	rules = _load("res://data/rules.json")
@@ -25,6 +26,7 @@ func _init() -> void:
 	kits = _load("res://data/shape-kits.json")
 	creation = _load("res://data/creation.json")
 	story = _load("res://data/story.json")
+	academy = _load("res://data/academy.json")
 
 func _load(path: String) -> Variant:
 	var f := FileAccess.open(path, FileAccess.READ)

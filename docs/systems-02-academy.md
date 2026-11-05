@@ -2,6 +2,22 @@
 
 Every character begins at the Academy at Alexandria, the thirteenth fortress, and leaves it with a Shape, a Stage 3 field, a cohort, and a guild. The Academy is the tutorial, the first act, the server's recruiting floor, and the place a server's own archetypes get taught to the next generation.
 
+## Solo and offline (owner, 2026-11-05)
+
+The Academy is played alone and offline, before a character ever reaches a server. It is
+where the field and the genius have time to become something no other player has, and
+where the player learns the world, the fight and the systems. Where this file describes
+players in a cohort, weekly enrollment, or Commencement at server times, read it as the
+original online design, kept for reference until the owner decides what survives:
+
+- The cohort is the twelve NPC classmates, generated new for every run.
+- No one dies here. The wards keep training safe; on an excursion a rescue team is on
+  standby, and a downed student is carried out. Failure costs the run (a retake, a
+  classmate hurt, the cohort's opinion), never the character.
+- Death is a server matter, rare and spectacular. After it, the next character begins
+  again at the questionnaire and this Academy.
+- The full length stands: 8–12 hours for a first character.
+
 ## The place
 
 Alexandria is the fortress built around the Library, and the Academy is its upper city: dormitories by Shape, the quad, the yard, the hearth hall where the rite is held, the Instructors' tower, and the Gate, the platform where graduates leave on the line. It is the only fortress every city sends its awakened to, which is why every city's Discipline has a teacher here and why the cohort you graduate with is the most mixed room you will ever stand in.

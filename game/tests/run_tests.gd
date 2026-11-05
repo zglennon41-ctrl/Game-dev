@@ -28,6 +28,7 @@ func _run() -> void:
 	test_forms()
 	test_triggers_tolls_bars()
 	test_creation()
+	test_academy()
 	test_shape_kits()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
@@ -400,3 +401,36 @@ func test_shape_kits() -> void:
 		line += "%s %d, " % [shape, f.stats["wolves_down"]]
 		check(f.stats["wolves_down"] >= 1, "a %s with a %s fells a wolf in a minute" % [shape, weapon])
 	print("  wolves felled in a minute by Shape: ", line)
+
+func test_academy() -> void:
+	var h := Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0])
+	h["name"] = "Test"
+	var a := Academy.make_cohort(42, h)
+	var b := Academy.make_cohort(42, h)
+	var c := Academy.make_cohort(43, h)
+	check(a.size() == 12, "the cohort is twelve")
+	check(str(a) == str(b), "the same run's seed makes the same cohort")
+	check(str(a) != str(c), "another run makes another cohort")
+	var names := {}
+	var shapes := {}
+	for m in a:
+		names[m["name"]] = true
+		shapes[m["shape"]] = int(shapes.get(m["shape"], 0)) + 1
+		check(Data.by_id(Data.weapons, m["weapon"])["city"] == m["city"], "%s carries a weapon of %s" % [m["name"], m["city"]])
+	check(names.size() == 12 and not names.has("Test"), "every classmate has their own name")
+	check(shapes.size() == 6 and shapes.values().all(func(n): return n == 2), "two classmates of every Shape")
+	# Every lesson is in a place that exists, taught by an Instructor who exists, with goals it knows.
+	for lesson in Data.academy["lessons"]:
+		check(Data.academy["places"].has(lesson["place"]), "lesson %s has its place" % lesson["id"])
+		check(not Data.by_id(Data.academy["instructors"], lesson["instructor"]).is_empty(), "lesson %s has its Instructor" % lesson["id"])
+		for st in lesson["steps"]:
+			check(st["goal"]["type"] in ["event", "streak", "will-full"], "step %s has a goal the Academy knows" % st["title"])
+	# A lesson can lock the moves it is not teaching.
+	var f := Fight.new({ "hero": h, "beast": "millstone", "passive": true, "mercy": true })
+	f.allowed = ["block-down", "block-up", "dodge", "lock"]
+	f.p_will = 100.0
+	f.input("pattern")
+	f.input("attack")
+	check(f.p_state == "free", "a locked move does nothing")
+	f.input("dodge")
+	check(f.p_state == "dodge", "an allowed move works")

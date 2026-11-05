@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "academy",
+  "type": "object",
+  "required": ["term", "arrival", "places", "instructors", "cohort", "lessons", "rest"],
+  "properties": {
+    "places": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name", "size", "floor", "spawn", "doors", "spots", "instructors"],
+        "properties": {
+          "size": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+          "doors": { "type": "array", "items": { "type": "object", "required": ["to", "at", "label"] } }
+        }
+      }
+    },
+    "instructors": { "type": "array", "items": { "type": "object", "required": ["id", "name", "shape", "body", "lines"] } },
+    "cohort": { "type": "object", "required": ["first", "last", "temperaments"] },
+    "lessons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "place", "instructor", "intro", "steps", "outro"],
+        "properties": {
+          "steps": { "type": "array", "items": { "type": "object", "required": ["title", "text", "goal"] } }
+        }
+      }
+    }
+  }
+}

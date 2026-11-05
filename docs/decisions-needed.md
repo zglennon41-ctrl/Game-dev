@@ -132,3 +132,13 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
     In the opening it is born from the burst when the field wakes; it flares on a parry,
     a Pattern cue and a stance, flickers when you are hit, dims with low Will, and settles
     beside you when you fall. Whether the Seed should colour it instead is yours.
+41. **The Academy's first Instructors and voices are mine** (`data/academy.json`): the
+    Yardmaster is Oren Bask (Anchor) with his genius Millstone; the cohort's eight
+    temperaments (earnest, wry, proud, scared, kind, sharp, quiet, reckless) and every line.
+42. **Lesson 1, Hold teaches only the guard, the parry and the dodge**: four drills
+    (contain your Will, block, parry, five bites in a row) with the other moves locked.
+    The lore line I gave it: a waking field leaks Will like lamplight, and that is what
+    drew the cut-wolf to you. Yours to keep or change.
+43. **Every run's cohort is twelve classmates made from a seed**: two of every Shape,
+    names from their cities, random bloods; the run keeps a record (parries, blocks,
+    hurts, dodges, talks, who you met) for the Readings to come.

@@ -32,6 +32,7 @@ will stand beside you, and your Pattern), then the night your field wakes. After
 | N | D-pad up | name the foe aloud (some Patterns need it) |
 | Tab, middle click | R3 | lock-on on or off |
 | Esc | Start | menu |
+| E | X | talk, open a door, rest (at the Academy) |
 
 The feel numbers are in `data/combat-room.json` and `data/beasts.json`. Change one, press
 F5 again, and the room plays differently.

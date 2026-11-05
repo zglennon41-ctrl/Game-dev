@@ -475,7 +475,8 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	score_label.text = score_text
 	hint.modulate.a = clampf(1.0 - (_play_time - 12.0) / 3.0, 0.35, 1.0)
 
-	# Ability bar state.
+	# Ability bar state (a lesson can lock some of it).
+	_fight_allowed = f.allowed
 	var tech: Dictionary = f.tech
 	var cd_left := maxf(0.0, float(f.p_cooldowns.get(tech["id"], 0.0)) - f.now)
 	_set_slot("technique", cd_left / float(tech["cooldown"]), f.p_will >= float(tech["will"]) and not f.p_fainted, false, Color(0, 0, 0, 0), cd_left)
@@ -492,12 +493,18 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 		pattern_banner.text = "%s   x%s\nstrike as the gold ring closes   %d / %d" % [pname.to_upper(), str(f.chain["multiplier"]), int(f.chain["next"]), n]
 	elif f.now <= f.breach_armed_until:
 		pattern_banner.text = "A BAR FORBIDS THIS: press R again to break your Term" + ("  (sworn: lost for good)" if f.pattern["sworn"] else "  (lost for a season)")
-	elif ready:
+	elif ready and (f.allowed.is_empty() or "pattern" in f.allowed):
 		pattern_banner.text = "%s is ready: press R" % pname
 	else:
 		pattern_banner.text = ""
 
+const SLOT_ACTION := { "attack": "attack", "block": "block-down", "dodge": "dodge", "technique": "technique", "stance": "stance", "pattern": "pattern" }
+var _fight_allowed: Array = []
+
 func _set_slot(id: String, cooldown: float, usable: bool, active: bool, glow := Color(0, 0, 0, 0), seconds := 0.0) -> void:
+	if not _fight_allowed.is_empty() and SLOT_ACTION[id] not in _fight_allowed:
+		usable = false
+		glow = Color(0, 0, 0, 0)
 	var s: Dictionary = slots[id]
 	var cd: ColorRect = s["cd"]
 	var k := clampf(cooldown, 0.0, 1.0)

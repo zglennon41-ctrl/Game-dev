@@ -89,6 +89,8 @@ var crit_until := -9.0
 var ward_until := -9.0
 var second_heart_used := false
 var w_shouted := false
+var obstacles: Array = []    # Vector3(x, z, radius): pillars and people the hero walks round
+var allowed: Array = []      # a lesson may allow only some actions (empty: all)
 var mercy := false           # the prologue: the hero cannot fall
 var allow_breach := true     # the prologue: a Bar warns, but cannot be broken
 var w_floor := 0.0           # the prologue: the beast cannot fall below this until the story is ready
@@ -113,7 +115,7 @@ func _init(opts: Dictionary = {}) -> void:
 	if opts.has("beast_health"):
 		beast = beast.duplicate(true)
 		beast["health"] = opts["beast_health"]
-	arena = Vector2(room["arena"]["width"], room["arena"]["depth"])
+	arena = opts.get("arena", Vector2(room["arena"]["width"], room["arena"]["depth"]))
 	passive = opts.get("passive", false)
 	respawn = opts.get("respawn", true)
 	rng.seed = opts.get("seed", 7)
@@ -181,6 +183,8 @@ func _in_arc(from: Vector2, facing: float, target: Vector2, reach: float, arc_de
 ## Actions: attack, technique (ground-strike), dodge, block-down, block-up, stance, pattern, lock.
 func input(action: String) -> void:
 	if p_state == "down":
+		return
+	if not allowed.is_empty() and action not in allowed:
 		return
 	# Pressed a little early (mid-swing, mid-dodge, mid-flinch): remember it briefly and fire
 	# it the moment it is allowed, so no press is lost.
@@ -258,7 +262,8 @@ func _can_start_action() -> bool:
 	# Swings can be cancelled from their recovery.
 	if p_state == "attack":
 		var s: Dictionary = combo[p_combo]
-		return p_timer >= float(s["startup"]) + float(s["active"])
+		# A shot has no active window: it can be cancelled once it has fired.
+		return p_timer >= float(s["startup"]) + float(s.get("active", 0.0))
 	return false
 
 func _press_attack() -> void:
@@ -483,6 +488,12 @@ func update(dt: float, move: Vector2 = Vector2.ZERO) -> void:
 	_update_wolf(dt * _wolf_time_scale())
 	_update_burn(dt)
 	_separate()
+	for o in obstacles:
+		var c := Vector2(o.x, o.y)
+		var d := p_pos - c
+		var m: float = o.z + float(room["player"]["radius"])
+		if d.length() < m:
+			p_pos = c + (d.normalized() if d.length() > 1e-4 else Vector2.RIGHT) * m
 
 ## The Shapes that slow the world: Read's stance, Bind's stance near you, Bind's Leash.
 func _wolf_time_scale() -> float:

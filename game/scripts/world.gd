@@ -57,12 +57,19 @@ var _hitstop_until := 0
 var _slowmo_until := 0
 var _clock := 0.0
 var _moon: DirectionalLight3D
+var _env: Environment
+var place := "cut"
+var arena := Vector2(22, 14)
+var _place_root := Node3D.new()
+var _figures: Array = []   # people standing in the place: {node, anim, pos, facing}
+var obstacles: Array = []  # Vector3(x, z, radius) for the place's pillars, people and furniture
 var _motes := CPUParticles3D.new()
 var _p_skel: Skeleton3D
 var _head_bone := -1
 
 func _ready() -> void:
 	_build_environment()
+	add_child(_place_root)
 	_build_chamber()
 	_build_genius()
 	_build_player()
@@ -96,7 +103,7 @@ func _piece(name: String, pos: Vector3, rot_deg := 0.0, scale := 1.0) -> Node3D:
 	n.position = pos
 	n.rotation_degrees.y = rot_deg
 	n.scale = Vector3.ONE * scale
-	add_child(n)
+	_place_root.add_child(n)
 	return n
 
 func _build_environment() -> void:
@@ -117,6 +124,7 @@ func _build_environment() -> void:
 	env.adjustment_enabled = true
 	env.adjustment_contrast = 1.08
 	env.adjustment_saturation = 1.1
+	_env = env
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
@@ -132,6 +140,7 @@ func _build_environment() -> void:
 
 func _build_chamber() -> void:
 	var a: Dictionary = Data.room["arena"]
+	arena = Vector2(a["width"], a["depth"])
 	var hw := float(a["width"]) / 2.0 + 1.0
 	var hd := float(a["depth"]) / 2.0 + 1.0
 	# Floor: large stone tiles, a few broken by rocks.
@@ -157,7 +166,7 @@ func _build_chamber() -> void:
 		b.mesh = bm
 		b.position = Vector3(tx, 0.1, 0)
 		b.material_override = tie
-		add_child(b)
+		_place_root.add_child(b)
 		tx += 0.8
 	for rz in [-0.72, 0.72]:
 		var r := MeshInstance3D.new()
@@ -166,7 +175,7 @@ func _build_chamber() -> void:
 		r.mesh = rm
 		r.position = Vector3(0, 0.2, rz)
 		r.material_override = rail
-		add_child(r)
+		_place_root.add_child(r)
 	# Walls on the long sides, with pillars, arches, and torches.
 	var kinds := ["wall", "wall_pillar", "wall_cracked", "wall_arched", "wall", "wall_broken", "wall_pillar"]
 	var wx := -hw + 2.0
@@ -1023,6 +1032,7 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 	(_vignette.material as ShaderMaterial).set_shader_parameter("tint", tint)
 	_update_camera(dt, cam_input, f)
 	_update_genius(f, dt)
+	_update_figures(f, dt)
 
 ## Models face +Z; the fight's facing is the angle on the ground plane.
 func _yaw(facing: float) -> float:
@@ -1140,9 +1150,8 @@ func _update_statuses(f: Fight) -> void:
 ## Like a spring arm: if the camera would sit inside a wall, pull it in along the line to
 ## the focus and lift it, so it looks down over the Anchor instead of through stone.
 func _keep_in_chamber(focus: Vector3, want: Vector3) -> Vector3:
-	var a: Dictionary = Data.room["arena"]
-	var hx := float(a["width"]) / 2.0 + 0.2
-	var hz := float(a["depth"]) / 2.0 + 0.2
+	var hx := arena.x / 2.0 + 0.2
+	var hz := arena.y / 2.0 + 0.2
 	if absf(want.x) <= hx and absf(want.z) <= hz:
 		return want
 	var d := want - focus
@@ -1244,9 +1253,12 @@ func _build_flair() -> void:
 	hues.set_color(1, Color(1.0, 0.78, 0.45))
 	_motes.color_initial_ramp = hues
 	add_child(_motes)
-	# Moonlight: shafts along the moon's direction, each with a pool on the floor.
+	_moonlight([[Vector3(-5.5, 0, -2.6), 1.3], [Vector3(3.2, 0, 3.4), 0.9], [Vector3(8.6, 0, -4.4), 1.1]])
+
+## Shafts of moonlight along the moon's direction, each with a pool on the floor.
+func _moonlight(spots: Array) -> void:
 	var up := _moon.global_transform.basis.z.normalized() if _moon.is_inside_tree() else _moon.transform.basis.z.normalized()
-	for spot in [[Vector3(-5.5, 0, -2.6), 1.3], [Vector3(3.2, 0, 3.4), 0.9], [Vector3(8.6, 0, -4.4), 1.1]]:
+	for spot in spots:
 		var at: Vector3 = spot[0]
 		var r: float = spot[1]
 		var shaft := MeshInstance3D.new()
@@ -1266,7 +1278,7 @@ func _build_flair() -> void:
 		var x := y.cross(Vector3.FORWARD).normalized()
 		var z := x.cross(y).normalized()
 		shaft.transform = Transform3D(Basis(x, y, z), at + up * 7.0)
-		add_child(shaft)
+		_place_root.add_child(shaft)
 		var pool := MeshInstance3D.new()
 		var pm := PlaneMesh.new()
 		pm.size = Vector2(r * 3.4, r * 3.4)
@@ -1279,7 +1291,7 @@ func _build_flair() -> void:
 		pool.material_override = gm
 		pool.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		pool.position = at + Vector3(0, 0.13, 0)
-		add_child(pool)
+		_place_root.add_child(pool)
 
 ## A soft round dot, drawn once, for motes and sparks.
 static var _dot: ImageTexture
@@ -1435,3 +1447,261 @@ func _update_genius(f: Fight, dt: float) -> void:
 	_g_halo_mat.set_shader_parameter("strength", (0.7 + 0.9 * _g_pulse) * bright)
 	_g_light.light_energy = (0.55 + 1.6 * _g_pulse) * bright
 	_g_core_mat.albedo_color = _g_tint.lightened(0.55 + 0.4 * _g_pulse) * Color(1, 1, 1, 1)
+
+# --- Places: the Cut, and the Academy's grounds ----------------------------------
+
+## Leave the current place and build another: "cut" (the chamber of the opening and the
+## practice yard) or a place of the Academy from data/academy.json.
+func set_place(id: String) -> void:
+	if id == place and _place_root.get_child_count() > 0:
+		return
+	place = id
+	remove_child(_place_root)
+	_place_root.queue_free()
+	_place_root = Node3D.new()
+	add_child(_place_root)
+	_torches.clear()
+	_figures.clear()
+	obstacles.clear()
+	if id == "cut":
+		_build_chamber()
+		_moonlight([[Vector3(-5.5, 0, -2.6), 1.3], [Vector3(3.2, 0, 3.4), 0.9], [Vector3(8.6, 0, -4.4), 1.1]])
+		_env.background_color = Color(0.02, 0.018, 0.02)
+		_env.ambient_light_energy = 0.2
+		_env.fog_density = 0.022
+	else:
+		_build_academy_place(Data.academy["places"][id])
+	_motes.emission_box_extents = Vector3(arena.x / 2.0, 1.8, arena.y / 2.0)
+	_motes.restart()
+
+## A place of the Academy: a floor, walls of the fortress with an arch at every door, torches,
+## and the props that say what the place is for. Evening at the Thaw: a deep blue sky.
+func _build_academy_place(spec: Dictionary) -> void:
+	arena = Vector2(spec["size"][0], spec["size"][1])
+	var hw := arena.x / 2.0 + 1.0
+	var hd := arena.y / 2.0 + 1.0
+	var floor_piece: String = spec["floor"]
+	var x := -hw + 2.0
+	var i := 0
+	while x < hw:
+		var z := -hd + 2.0
+		while z < hd:
+			var fp := floor_piece
+			if floor_piece == "floor_tile_large" and (i * 7) % 13 == 5:
+				fp = "floor_tile_large_rocks"
+			_piece(fp, Vector3(x, 0, z), 90.0 * (i % 4))
+			z += 4.0
+			i += 1
+		x += 4.0
+	var doors: Array = spec["doors"]
+	var is_door := func(px: float, pz: float) -> bool:
+		for d in doors:
+			if absf(float(d["at"][0]) - px) < 2.1 and absf(float(d["at"][1]) - pz) < 2.1:
+				return true
+		return false
+	var kinds := ["wall", "wall_pillar", "wall", "wall_cracked", "wall_pillar", "wall"]
+	if spec.get("walls", "") == "yard":
+		kinds = ["wall", "wall_broken", "wall_pillar", "wall_cracked", "wall", "wall_pillar"]
+	var k := 0
+	var wx := -hw + 2.0
+	while wx < hw:
+		for side in [-1, 1]:
+			var kind: String = "wall_arched" if is_door.call(wx, side * (hd - 1.0)) else kinds[(k + (3 if side > 0 else 0)) % kinds.size()]
+			_piece(kind, Vector3(wx, 0, side * hd), 0.0 if side < 0 else 180.0)
+			if k % 2 == 0 and kind != "wall_arched":
+				_torch(Vector3(wx, 2.4, side * (hd - 0.45)), 0.0 if side < 0 else 180.0)
+		wx += 4.0
+		k += 1
+	var ez := -hd + 2.0
+	while ez < hd:
+		for side in [-1, 1]:
+			var kind: String = "wall_arched" if is_door.call(side * (hw - 1.0), ez) else kinds[(k + 1) % kinds.size()]
+			_piece(kind, Vector3(side * hw, 0, ez), 90.0 if side < 0 else -90.0)
+			if k % 3 == 0 and kind != "wall_arched":
+				_torch(Vector3(side * (hw - 0.45), 2.4, ez), 90.0 if side < 0 else -90.0)
+		ez += 4.0
+		k += 1
+	for d in doors:
+		_door_marker(Vector3(float(d["at"][0]), 0, float(d["at"][1])), String(d["label"]), d.has("locked"))
+	match String(spec["name"]):
+		"The Quad": _furnish_quad()
+		"The Yard": _furnish_yard()
+		"The Dormitory": _furnish_dorm(spec)
+	_env.background_color = Color(0.045, 0.05, 0.095)
+	_env.ambient_light_energy = 0.34
+	_env.fog_density = 0.012
+	if spec.get("walls", "") != "fortress" or arena.x > 20.0:
+		_moonlight([[Vector3(arena.x * 0.18, 0, -arena.y * 0.12), 1.2], [Vector3(-arena.x * 0.25, 0, arena.y * 0.2), 0.9]])
+
+func _torch(at: Vector3, rot: float) -> void:
+	var t := _piece("torch_mounted", at, rot)
+	var light := OmniLight3D.new()
+	light.light_color = Color(1.0, 0.6, 0.3)
+	light.light_energy = 1.5
+	light.omni_range = 8.0
+	light.omni_attenuation = 1.5
+	light.shadow_enabled = false
+	light.position = Vector3(0, 0.6, 0.25)
+	t.add_child(light)
+	_torches.append(light)
+
+## Where a door is: a soft ring of light on the floor and its name above, dim if it is shut.
+func _door_marker(at: Vector3, label: String, locked: bool) -> void:
+	var ring := MeshInstance3D.new()
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(2.6, 2.6)
+	ring.mesh = pm
+	var gm := _shader_mat(GLOW)
+	gm.set_shader_parameter("billboard", false)
+	gm.set_shader_parameter("tint", Color(0.55, 0.6, 0.7) if locked else Color(1.0, 0.75, 0.4))
+	gm.set_shader_parameter("strength", 0.25 if locked else 0.6)
+	gm.set_shader_parameter("falloff", 1.8)
+	ring.material_override = gm
+	ring.position = at * Vector3(0.86, 0, 0.86) + Vector3(0, 0.12, 0)
+	_place_root.add_child(ring)
+	var l := Label3D.new()
+	l.text = label.to_upper()
+	l.font = Style.font("title")
+	l.font_size = 30
+	l.pixel_size = 0.006
+	l.modulate = Color(0.75, 0.72, 0.68, 0.55) if locked else Color(1.0, 0.85, 0.6)
+	l.outline_size = 8
+	l.outline_modulate = Color(0, 0, 0, 0.8)
+	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	l.position = at * Vector3(0.86, 0, 0.86) + Vector3(0, 3.6, 0)
+	_place_root.add_child(l)
+
+func _furnish_quad() -> void:
+	# The middle of the quad: a brazier that never goes out; the decorated pillars stand in its corners.
+	for c in [Vector2(-12, -8), Vector2(12, -8), Vector2(-12, 8.5), Vector2(12, 8.5)]:
+		_piece("pillar_decorated", Vector3(c.x, 0, c.y), 0.0)
+		obstacles.append(Vector3(c.x, c.y, 0.9))
+	var lamp := OmniLight3D.new()
+	lamp.light_color = Color(1.0, 0.72, 0.42)
+	lamp.light_energy = 2.2
+	lamp.omni_range = 10.0
+	lamp.position = Vector3(0, 2.2, 0)
+	_place_root.add_child(lamp)
+	_torches.append(lamp)
+	_piece("column", Vector3(0, 0, 0), 0.0, 0.4)
+	var flame := MeshInstance3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = 0.28
+	sm.height = 0.5
+	flame.mesh = sm
+	flame.material_override = _mat(Color(1.0, 0.7, 0.35), 4.0, true)
+	flame.position = Vector3(0, 1.45, 0)
+	_place_root.add_child(flame)
+	obstacles.append(Vector3(0, 0, 0.7))
+	for b in [[-9.0, -10.4, 0.0], [9.0, -10.4, 0.0], [-5.0, 10.4, 180.0], [5.0, 10.4, 180.0]]:
+		_piece("banner_patternA_red", Vector3(b[0], 0.6, b[1]), b[2])
+	_piece("barrel_large", Vector3(12.5, 0, 8.5), 30.0, 0.6)
+	_piece("crates_stacked", Vector3(-13.0, 0, 9.0), 10.0, 0.6)
+	_piece("barrel_small_stack", Vector3(-13.0, 0, -9.0), 0.0, 0.7)
+
+func _furnish_yard() -> void:
+	for p in [Vector3(2, 0, -4.5), Vector3(5, 0, -4.5), Vector3(8, 0, -4.5)]:
+		_piece("pillar", p, 0.0, 0.7)
+		obstacles.append(Vector3(p.x, p.z, 0.6))
+	_piece("crates_stacked", Vector3(9.0, 0, 5.0), 0.0, 0.6)
+	_piece("barrel_large", Vector3(7.0, 0, 5.4), 15.0, 0.6)
+	_piece("rubble_half", Vector3(-3.0, 0, 6.2), 180.0, 0.5)
+	_piece("banner_patternA_red", Vector3(0.0, 0.6, -7.55), 0.0)
+	# The ward ring: the circle the drills are fought in.
+	var ring := MeshInstance3D.new()
+	var tm := TorusMesh.new()
+	tm.inner_radius = 4.6
+	tm.outer_radius = 4.75
+	ring.mesh = tm
+	ring.scale = Vector3(1, 0.05, 1)
+	ring.position = Vector3(0, 0.12, 0)
+	ring.material_override = _mat(Color(0.55, 0.75, 1.0), 2.0, true, 0.55)
+	_place_root.add_child(ring)
+
+func _furnish_dorm(spec: Dictionary) -> void:
+	# Bunks: wooden frames with blankets, two rows.
+	var wood := _mat(Color(0.32, 0.2, 0.12))
+	var cloth := [Color(0.45, 0.2, 0.18), Color(0.2, 0.28, 0.4), Color(0.3, 0.35, 0.22), Color(0.5, 0.42, 0.3)]
+	var n := 0
+	for row in [-3.4, 3.4]:
+		for bx in [-2.0, 1.0, 4.0]:
+			var frame := MeshInstance3D.new()
+			var bm := BoxMesh.new()
+			bm.size = Vector3(1.2, 0.45, 2.2)
+			frame.mesh = bm
+			frame.material_override = wood
+			frame.position = Vector3(bx, 0.35, row)
+			obstacles.append(Vector3(bx, row - 0.55, 0.65))
+			obstacles.append(Vector3(bx, row + 0.55, 0.65))
+			_place_root.add_child(frame)
+			var blanket := MeshInstance3D.new()
+			var cm := BoxMesh.new()
+			cm.size = Vector3(1.1, 0.12, 1.5)
+			blanket.mesh = cm
+			blanket.material_override = _mat(cloth[n % cloth.size()])
+			blanket.position = Vector3(bx, 0.62, row + (0.3 if row > 0 else -0.3))
+			_place_root.add_child(blanket)
+			n += 1
+	_piece("barrel_small_stack", Vector3(5.6, 0, 0.0), 0.0, 0.6)
+
+## Someone standing in the place: a body, a weapon, their name and what they are over the head.
+func add_figure(body: String, at: Vector2, facing: float, title: String, sub: String, weapon := "", tint := Color(0, 0, 0, 0)) -> Dictionary:
+	var n: Node3D = load("res://game/assets/kaykit/%s.glb" % body).instantiate()
+	_place_root.add_child(n)
+	for a in n.find_children("*", "BoneAttachment3D", true, false):
+		var an := String(a.name)
+		a.visible = an.contains("Helmet") or an.contains("Hat") or an.contains("Cape") or an.contains("Hood")
+	var skel: Skeleton3D = n.find_child("Skeleton3D", true, false)
+	if weapon != "":
+		var w: Dictionary = Data.by_id(Data.weapons, weapon)
+		_attach(skel, "handslot.r", "res://game/assets/kaykit/weapons/%s.gltf" % w["model"])
+		if w.has("offhand"):
+			_attach(skel, "handslot.l", "res://game/assets/kaykit/weapons/%s.gltf" % w["offhand"])
+	var over := _mat(C_HIT, 0.0, true, 0.0)
+	over.albedo_color = tint
+	over.next_pass = _ink(2.0)
+	for m in n.find_children("*", "MeshInstance3D", true, false):
+		m.material_overlay = over
+	var ap: AnimationPlayer = n.find_child("AnimationPlayer", true, false)
+	if ap.has_animation("Idle"):
+		ap.get_animation("Idle").loop_mode = Animation.LOOP_LINEAR
+		ap.play("Idle", 0.0, randf_range(0.85, 1.1))
+		ap.seek(randf() * 2.0, true)
+	n.position = _v3(at)
+	n.rotation.y = _yaw(facing)
+	var l := Label3D.new()
+	l.text = title + ("\n" + sub if sub != "" else "")
+	l.font = Style.font("title")
+	l.font_size = 26
+	l.fixed_size = true
+	l.pixel_size = 0.0011
+	l.modulate = Color(0.95, 0.91, 0.84, 0.0)
+	l.outline_size = 8
+	l.outline_modulate = Color(0, 0, 0, 0.0)
+	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	l.no_depth_test = true
+	l.position = _v3(at, 2.55)
+	_place_root.add_child(l)
+	obstacles.append(Vector3(at.x, at.y, 0.45))
+	var fig := { "node": n, "anim": ap, "pos": at, "facing": facing, "label": l, "home": facing }
+	_figures.append(fig)
+	return fig
+
+## People turn to look at the hero when they come near, and their names show.
+func _update_figures(f: Fight, dt: float) -> void:
+	for fig in _figures:
+		var d: float = (f.p_pos - fig["pos"]).length()
+		var want: float = (f.p_pos - fig["pos"]).angle() if d < 4.5 else fig["home"]
+		fig["facing"] = lerp_angle(fig["facing"], want, 1.0 - exp(-dt * 4.0))
+		(fig["node"] as Node3D).rotation.y = _yaw(fig["facing"])
+		var l: Label3D = fig["label"]
+		var a := clampf((7.0 - d) / 3.0, 0.0, 1.0)
+		l.modulate.a = move_toward(l.modulate.a, a, dt * 3.0)
+		l.outline_modulate.a = l.modulate.a * 0.8
+
+## Put the camera straight behind the hero along the current yaw, with no glide in.
+func snap_camera_behind(f: Fight) -> void:
+	var back := Vector3(sin(cam_yaw), 0, cos(cam_yaw))
+	cam_pitch = -0.32
+	_cam_pos = _v3(f.p_pos) + back * 6.0 + Vector3(0, 3.2, 0)
+	_cam_look = _v3(f.p_pos, 1.4)
