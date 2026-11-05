@@ -35,7 +35,7 @@ If step 2 is not fun with one Shape and one zone, nothing added later fixes it.
   feedback before anything else. Placeholder art is fine; placeholder feel is not.
 - **Placeholders are shapes with tags.** No art pipeline yet. A genius form is a
   silhouette primitive plus feature tags rendered as labels. The lattice is data.
-- **Small, playable, often.** Every PR leaves `npm run dev` playable. No branches that
+- **Small, playable, often.** Every PR leaves the Godot project playable. No branches that
   go dark for a week.
 - **Explain in plain language.** The owner does not code. When you report, say what
   changed in the game, not in the code, and give the command to run it.
@@ -45,14 +45,20 @@ If step 2 is not fun with one Shape and one zone, nothing added later fixes it.
 
 ## Stack
 
-TypeScript, Vite, PixiJS for the 2D prototype; Vitest for tests; JSON Schema for data.
-Browser-first so the owner runs it with one command. Engine migration is a later
-decision and is not yours to make.
+**The game: Godot 4.3, GDScript, 3D, third-person** (the owner chose Godot over Unity and
+Unreal on 2026-11-05, replacing the 2D browser prototype). The project file is
+`project.godot` at the repo root; the game lives in `game/`. It uses the Compatibility
+renderer so it also exports to the web. Godot reads the same `data/*.json` as the tools.
+
+**The tools: TypeScript and Vitest** for the headless rules and the simulator (`src/`),
+and JSON Schema for data. The rules a designer tunes live in `data/` and are shared by both.
 
 ## Commands
 
-- `npm run dev` — the playable prototype
-- `npm test` — rules and simulator tests
+- Open `project.godot` in Godot 4.3 and press Play (F5) — the playable game
+- `godot --path .` — the same, from a terminal
+- `npm run test:game` — the game's headless tests (Godot)
+- `npm test` — rules and simulator tests (TypeScript)
 - `npm run sim -- --life data/lives/mira.json` — run a scripted life through a year
 - `npm run validate` — schema-check every file in `data/`
 
@@ -63,10 +69,11 @@ CLAUDE.md          this file
 HANDOFF.md         what the game is; the spine; the slice; decisions
 docs/              one file per system, buildable detail
 data/              the rules, as JSON
-src/rules/         pure functions: field, terms, reading, resonance, marks
-src/sim/           headless simulator and scripted lives
-src/game/          the PixiJS prototype
-tests/
+project.godot      the Godot project
+game/              the game: scenes, scripts, its own tests
+src/rules/         pure functions: field, terms, reading, resonance, marks (tools)
+src/sim/           headless simulator and scripted lives (tools)
+tests/             tests for the tools
 ```
 
 ## Vocabulary

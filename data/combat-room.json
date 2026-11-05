@@ -1,18 +1,19 @@
 {
-  "$comment": "Step 1, the pulse combat room. One Anchor (Marshal, saber) against one cut-wolf on a Green line. Feel numbers: tune here.",
+  "$comment": "Step 1, the pulse combat room. One Anchor (Marshal, saber) against one cut-wolf on a Green line. Distances in meters, speeds in meters per second. Feel numbers: tune here.",
   "line": "green",
   "sessionSeconds": 120,
+  "arena": { "width": 18, "depth": 12 },
   "player": {
-    "shape": "anchor", "health": 100, "moveSpeed": 260, "stanceMoveFactor": 0.7,
-    "reach": 105, "radius": 26,
+    "shape": "anchor", "health": 100, "moveSpeed": 3.8, "stanceMoveFactor": 0.7,
+    "reach": 1.6, "radius": 0.4,
     "holdDrainPerSecond": 3, "blockDamageFactor": 0.5, "blockWillCost": 5
   },
   "actions": {
     "strike": { "name": "Saber strike", "verb": "project", "will": 0, "damage": 10, "recoveryBeats": 0 },
-    "ground-strike": { "name": "Ground Strike", "verb": "project", "technique": "ground-strike", "will": 18, "damage": 26, "recoveryBeats": 1, "knockback": 120 }
+    "ground-strike": { "name": "Ground Strike", "verb": "project", "technique": "ground-strike", "will": 18, "damage": 26, "recoveryBeats": 1, "knockback": 1.7 }
   },
   "stance": { "name": "Anchor stance", "damageFactor": 1.5, "offBeatEntryDelayBeats": 1 },
   "chain": { "$comment": "Consecutive on-beat Projects. Each link adds this much damage, up to the cap.", "perLink": 0.05, "maxLinks": 6 },
   "staggerDamageFactor": 1.5,
-  "feel": { "hitstopMs": 70, "shakeOnHit": 6, "shakeOnHurt": 12, "audioOffsetMs": 0 }
+  "feel": { "hitstopMs": 70, "shakeOnHit": 0.08, "shakeOnHurt": 0.18, "audioOffsetMs": 0 }
 }

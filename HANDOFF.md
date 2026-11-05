@@ -352,7 +352,8 @@ cosmetics; any art pipeline.
 - Canonization cap 12 a season; founding needs 3 accounts.
 - Ledgers hidden weeks 1–3, published from week 4.
 - No open-world PvP. Rallies and Writ wars only.
-- Browser prototype first; engine choice for the real game is deferred to after the slice.
+- Engine: Godot 4 (owner's decision, 2026-11-05), 3D third-person from Step 1. The
+  earlier plan of a browser prototype first was dropped.
 
 **Deferred** (ask the owner when the slice reaches them):
 - Perfected at 500 uses or 300.

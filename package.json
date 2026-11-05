@@ -4,22 +4,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
     "test": "vitest run",
     "sim": "tsx src/sim/cli.ts",
     "validate": "tsx src/data/validate-cli.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "node -e \"require('fs').writeFileSync('node_modules/.gdignore','')\"",
+    "test:game": "godot --headless --path . res://game/tests/tests.tscn"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
     "ajv": "^8.20.0",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
-    "vite": "^5.4.21",
     "vitest": "^2.1.9"
-  },
-  "dependencies": {
-    "pixi.js": "^8.22.0"
   }
 }
