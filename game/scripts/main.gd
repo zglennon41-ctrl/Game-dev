@@ -36,6 +36,7 @@ func _ready() -> void:
 	_setup_input()
 	add_child(world)
 	add_child(hud)
+	pulse.force_ticks = _args.has("tickclock")
 	add_child(pulse)
 	window_ms = Settings.window_ms()
 	if _args.has("shots"):

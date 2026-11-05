@@ -23,6 +23,8 @@ var _last_pos := 0.0
 var _last_t := 0.0
 var _running := false
 var _dummy := false
+## Use the system timer as the clock (for machines with no sound device).
+var force_ticks := false
 var _start_ticks := 0
 var _frame_ticks := 0
 var _frame_t := 0.0
@@ -31,7 +33,7 @@ var _players: Array[AudioStreamPlayer] = []
 var _next_player := 0
 
 func _ready() -> void:
-	_dummy = DisplayServer.get_name() == "headless"
+	_dummy = DisplayServer.get_name() == "headless" or force_ticks
 	add_child(_music)
 	for i in 12:
 		var p := AudioStreamPlayer.new()
