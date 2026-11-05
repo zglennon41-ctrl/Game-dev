@@ -185,7 +185,7 @@ func run_bot(seconds: float, smart: bool) -> Fight:
 
 func summary(f: Fight) -> String:
 	var s := f.stats
-	return "%d wolves, %d hits, %d parries, %d staggers, %d patterns (%d fizzled), bitten %d, hp %d" % [s["wolves_down"], s["hits"], s["parries"], s["staggers"], s["patterns"], s["pattern_fizzles"], s["hurts"], f.p_hp]
+	return "%d wolves, %d hits, %d parries, %d staggers, %d patterns (%d fizzled), bitten %d, hp %d, lasted %.0f s" % [s["wolves_down"], s["hits"], s["parries"], s["staggers"], s["patterns"], s["pattern_fizzles"], s["hurts"], f.p_hp, f.now]
 
 func test_bots() -> void:
 	var good := run_bot(120, true)
@@ -194,6 +194,7 @@ func test_bots() -> void:
 	print("  masher bot:  ", summary(mash))
 	check(good.stats["parries"] > 3, "the skilled bot parries")
 	check(good.stats["patterns"] > 0 and good.stats["pattern_fizzles"] == 0, "the skilled bot lands Patterns")
-	check(good.stats["hurts"] < mash.stats["hurts"], "the skilled bot is bitten less")
+	check(good.now > mash.now * 2.0, "the skilled bot lasts far longer (%.0f s against %.0f s)" % [good.now, mash.now])
+	check(good.stats["hurts"] / maxf(1.0, good.now) < mash.stats["hurts"] / maxf(1.0, mash.now), "the skilled bot is bitten less often")
 	check(good.stats["wolves_down"] >= mash.stats["wolves_down"], "the skilled bot fells at least as many wolves")
 	check(good.stats["wolves_down"] <= 12, "a wolf takes real work, even played perfectly (%d felled)" % good.stats["wolves_down"])

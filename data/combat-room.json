@@ -1,34 +1,128 @@
 {
-  "$comment": "Step 1, the combat room: real-time action. One Anchor (Marshal: sword and shield) against a cut-wolf on a Green line. Distances in meters, times in seconds. The timing layer lives only in the parry and the Pattern (owner's decision, 2026-11-05). Every number here is a feel knob.",
+  "$comment": "Step 1, the combat room: real-time action. One Anchor (Marshal: sword and shield) against a cut-wolf on a Green line. Distances in meters, times in seconds. The timing layer lives only in the parry and the Pattern (owner's decision, 2026-11-05). Every number here is a feel knob. inputBufferSeconds: an action pressed while busy fires as soon as it is allowed, within this time.",
   "line": "green",
   "sessionSeconds": 120,
-  "arena": { "width": 22, "depth": 14 },
+  "arena": {
+    "width": 22,
+    "depth": 14
+  },
   "player": {
-    "shape": "anchor", "health": 100, "radius": 0.45,
-    "runSpeed": 4.6, "blockMoveSpeed": 1.8, "stanceMoveFactor": 0.75, "turnSpeed": 14,
-    "flinchTime": 0.35
+    "shape": "anchor",
+    "health": 100,
+    "radius": 0.45,
+    "runSpeed": 4.6,
+    "blockMoveSpeed": 1.8,
+    "stanceMoveFactor": 0.75,
+    "turnSpeed": 14,
+    "flinchTime": 0.35,
+    "acceleration": 22
   },
   "combo": [
-    { "name": "Chop", "anim": "1H_Melee_Attack_Chop", "damage": 9, "startup": 0.18, "active": 0.12, "recovery": 0.32, "lunge": 0.7, "reach": 1.9, "arc": 110 },
-    { "name": "Diagonal", "anim": "1H_Melee_Attack_Slice_Diagonal", "damage": 10, "startup": 0.16, "active": 0.12, "recovery": 0.3, "lunge": 0.6, "reach": 1.9, "arc": 120 },
-    { "name": "Sweep", "anim": "1H_Melee_Attack_Slice_Horizontal", "damage": 15, "startup": 0.22, "active": 0.14, "recovery": 0.5, "lunge": 0.9, "reach": 2.1, "arc": 160 }
+    {
+      "name": "Chop",
+      "anim": "1H_Melee_Attack_Chop",
+      "damage": 9,
+      "startup": 0.18,
+      "active": 0.12,
+      "recovery": 0.32,
+      "lunge": 0.7,
+      "reach": 1.9,
+      "arc": 110
+    },
+    {
+      "name": "Diagonal",
+      "anim": "1H_Melee_Attack_Slice_Diagonal",
+      "damage": 10,
+      "startup": 0.16,
+      "active": 0.12,
+      "recovery": 0.3,
+      "lunge": 0.6,
+      "reach": 1.9,
+      "arc": 120
+    },
+    {
+      "name": "Sweep",
+      "anim": "1H_Melee_Attack_Slice_Horizontal",
+      "damage": 15,
+      "startup": 0.22,
+      "active": 0.14,
+      "recovery": 0.5,
+      "lunge": 0.9,
+      "reach": 2.1,
+      "arc": 160
+    }
   ],
   "comboBufferSeconds": 0.35,
   "techniques": {
-    "ground-strike": { "name": "Ground Strike", "family": "anchor.weight", "anim": "2H_Melee_Attack_Chop", "will": 18, "cooldown": 3.5, "damage": 24, "startup": 0.35, "active": 0.12, "recovery": 0.45, "reach": 2.6, "arc": 200, "knockback": 1.6, "breaks": true }
+    "ground-strike": {
+      "name": "Ground Strike",
+      "family": "anchor.weight",
+      "anim": "2H_Melee_Attack_Chop",
+      "will": 18,
+      "cooldown": 3.5,
+      "damage": 24,
+      "startup": 0.35,
+      "active": 0.12,
+      "recovery": 0.45,
+      "reach": 2.6,
+      "arc": 200,
+      "knockback": 1.6,
+      "breaks": true
+    }
   },
-  "block": { "anim": "Blocking", "willPerSecond": 3, "damageFactor": 0.3, "willPerBlockedHit": 6, "arc": 150 },
+  "block": {
+    "anim": "Blocking",
+    "willPerSecond": 3,
+    "damageFactor": 0.3,
+    "willPerBlockedHit": 6,
+    "arc": 150
+  },
   "parry": {
     "$comment": "Tap block within this many seconds before a hit lands: no damage, Will back, the wolf reels.",
-    "window": 0.2, "will": 10, "staggerSeconds": 1.4
+    "window": 0.2,
+    "will": 10,
+    "staggerSeconds": 1.4
   },
-  "dodge": { "will": 8, "duration": 0.5, "distance": 3.2, "iframeStart": 0.05, "iframeEnd": 0.38, "cooldown": 0.25 },
-  "stance": { "name": "Anchor stance", "damageFactor": 1.5, "willPerSecond": 2, "noFlinch": true },
-  "break": { "needed": 3, "staggerSeconds": 2.4, "staggerDamageFactor": 1.5 },
+  "dodge": {
+    "will": 8,
+    "duration": 0.5,
+    "distance": 3.2,
+    "iframeStart": 0.05,
+    "iframeEnd": 0.38,
+    "cooldown": 0.25
+  },
+  "stance": {
+    "name": "Anchor stance",
+    "damageFactor": 1.5,
+    "willPerSecond": 2,
+    "noFlinch": true
+  },
+  "break": {
+    "needed": 3,
+    "staggerSeconds": 2.4,
+    "staggerDamageFactor": 1.5
+  },
   "pattern": {
     "$comment": "The Anchor's starting Pattern. Form: anchor.weight. Terms: Trigger 'Only after a perfect Hold', Toll 'All my Will'. The chain plays on the Anchor's pulse; every cue landed pays the multiplier, one missed fizzles it.",
-    "name": "Breaking Ground", "form": "anchor.weight", "terms": ["after-perfect-hold", "all-will"], "sworn": false,
-    "availableSeconds": 3.0, "baseDamage": 14, "cueWindowMs": 200, "leadIn": 0.6
+    "name": "Breaking Ground",
+    "form": "anchor.weight",
+    "terms": [
+      "after-perfect-hold",
+      "all-will"
+    ],
+    "sworn": false,
+    "availableSeconds": 3.0,
+    "baseDamage": 14,
+    "cueWindowMs": 200,
+    "leadIn": 0.6
   },
-  "feel": { "hitstop": 0.06, "heavyHitstop": 0.11, "parryHitstop": 0.12, "parrySlowmo": 0.35, "shakeOnHit": 0.06, "shakeOnHurt": 0.16 }
+  "feel": {
+    "hitstop": 0.06,
+    "heavyHitstop": 0.11,
+    "parryHitstop": 0.12,
+    "parrySlowmo": 0.35,
+    "shakeOnHit": 0.06,
+    "shakeOnHurt": 0.16
+  },
+  "inputBufferSeconds": 0.25
 }

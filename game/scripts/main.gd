@@ -185,8 +185,11 @@ func _process(delta: float) -> void:
 	world.feedback(fight, events)
 	if tutorial:
 		tutorial.update(events, hud)
-	var cam := Vector2(Input.get_joy_axis(0, JOY_AXIS_RIGHT_X), Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y)) * 1.5
-	cam += _cam_mouse * 0.08
+	var cam := Vector2(Input.get_joy_axis(0, JOY_AXIS_RIGHT_X), Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y))
+	if cam.length() < 0.15:
+		cam = Vector2.ZERO
+	if not fight.p_lock:
+		world.look(_cam_mouse)
 	_cam_mouse = Vector2.ZERO
 	world.draw(fight, real_dt, cam, move)
 	var timer := ""

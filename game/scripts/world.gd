@@ -60,8 +60,9 @@ func _ready() -> void:
 	_build_player()
 	_build_wolf()
 	_build_markers()
+	_build_effects()
 	add_child(camera)
-	camera.fov = 60.0
+	camera.fov = 66.0
 	camera.near = 0.05
 	camera.current = true
 
@@ -94,8 +95,8 @@ func _build_environment() -> void:
 	env.background_mode = Environment.BG_COLOR
 	env.background_color = Color(0.02, 0.018, 0.02)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.42, 0.45, 0.6)
-	env.ambient_light_energy = 0.32
+	env.ambient_light_color = Color(0.5, 0.44, 0.48)
+	env.ambient_light_energy = 0.2
 	env.fog_enabled = true
 	env.fog_light_color = Color(0.06, 0.05, 0.06)
 	env.fog_density = 0.022
@@ -114,7 +115,7 @@ func _build_environment() -> void:
 	var moon := DirectionalLight3D.new()
 	moon.rotation_degrees = Vector3(-62, -35, 0)
 	moon.light_color = Color(0.6, 0.68, 0.95)
-	moon.light_energy = 0.4
+	moon.light_energy = 0.28
 	moon.shadow_enabled = true
 	moon.directional_shadow_max_distance = 40.0
 	add_child(moon)
@@ -247,6 +248,133 @@ func _build_wolf() -> void:
 	_alert.modulate = C_WINDUP
 	_alert.visible = false
 
+var _trail := MeshInstance3D.new()
+var _trail_mesh := ImmediateMesh.new()
+var _trail_pts: Array = []
+var _sword: Node3D
+var _sword_a := Vector3.ZERO
+var _sword_b := Vector3.ZERO
+var _vignette := ColorRect.new()
+var _vig_tint := Color(0, 0, 0, 0)
+
+const VIGNETTE := """
+shader_type canvas_item;
+uniform vec4 tint : source_color = vec4(0.0);
+uniform float base = 0.42;
+void fragment() {
+	vec2 uv = UV - 0.5;
+	float d = length(uv * vec2(1.5, 1.0));
+	float v = smoothstep(0.38, 0.95, d);
+	COLOR = vec4(tint.rgb * tint.a, v * base + tint.a * smoothstep(0.2, 0.9, d) * 0.8);
+}
+"""
+
+## The sword trail, the screen's edge, and the effects that go with hits.
+func _build_effects() -> void:
+	_trail.mesh = _trail_mesh
+	var tm := StandardMaterial3D.new()
+	tm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	tm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	tm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	tm.cull_mode = BaseMaterial3D.CULL_DISABLED
+	tm.vertex_color_use_as_albedo = true
+	_trail.material_override = tm
+	_trail.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_trail)
+	# Where the blade is: two points along its length, from the sword mesh's own bounds.
+	_sword = _player.find_child("1H_Sword", true, false)
+	if _sword:
+		var mi: MeshInstance3D = _sword.find_children("*", "MeshInstance3D", true, false)[0] if _sword.find_children("*", "MeshInstance3D", true, false).size() > 0 else null
+		if mi:
+			var box := mi.get_aabb()
+			var axis := 0
+			for i in 3:
+				if box.size[i] > box.size[axis]:
+					axis = i
+			var lo := box.get_center()
+			var hi := box.get_center()
+			lo[axis] = box.position[axis] + box.size[axis] * 0.35
+			hi[axis] = box.position[axis] + box.size[axis] * 1.0
+			_sword_a = (_sword.global_transform.affine_inverse() * mi.global_transform) * lo
+			_sword_b = (_sword.global_transform.affine_inverse() * mi.global_transform) * hi
+	var layer := CanvasLayer.new()
+	layer.layer = 5
+	add_child(layer)
+	_vignette.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sh := Shader.new()
+	sh.code = VIGNETTE
+	var sm := ShaderMaterial.new()
+	sm.shader = sh
+	_vignette.material = sm
+	layer.add_child(_vignette)
+
+func _update_trail(swinging: bool, dt: float) -> void:
+	if _sword and swinging:
+		var t := _sword.global_transform
+		_trail_pts.push_front({ "a": t * _sword_a, "b": t * _sword_b, "age": 0.0 })
+	for p in _trail_pts:
+		p["age"] += dt
+	while _trail_pts.size() > 0 and (_trail_pts.back()["age"] > 0.14 or _trail_pts.size() > 14):
+		_trail_pts.pop_back()
+	_trail_mesh.clear_surfaces()
+	if _trail_pts.size() < 2:
+		return
+	_trail_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+	for p in _trail_pts:
+		var a := 1.0 - float(p["age"]) / 0.14
+		_trail_mesh.surface_set_color(Color(1.0, 0.92, 0.75, 0.55 * a))
+		_trail_mesh.surface_add_vertex(p["a"])
+		_trail_mesh.surface_set_color(Color(1.0, 0.95, 0.85, 0.85 * a))
+		_trail_mesh.surface_add_vertex(p["b"])
+	_trail_mesh.surface_end()
+
+func impact(at: Vector3, color: Color, size := 0.7) -> void:
+	var mi := MeshInstance3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = 0.5
+	sm.height = 1.0
+	mi.mesh = sm
+	var m := _mat(color, 4.0, true, 0.9)
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mi.material_override = m
+	mi.position = at
+	mi.scale = Vector3.ONE * size * 0.3
+	add_child(mi)
+	var tw: Tween = create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(mi, "scale", Vector3.ONE * size, 0.12).set_ease(Tween.EASE_OUT)
+	tw.tween_property(m, "albedo_color:a", 0.0, 0.14)
+	tw.chain().tween_callback(mi.queue_free)
+
+func dust(at: Vector3, amount := 18) -> void:
+	var p := CPUParticles3D.new()
+	p.one_shot = true
+	p.amount = amount
+	p.lifetime = 0.6
+	p.explosiveness = 0.9
+	p.direction = Vector3(0, 1, 0)
+	p.spread = 80.0
+	p.initial_velocity_min = 0.8
+	p.initial_velocity_max = 2.2
+	p.gravity = Vector3(0, -1.5, 0)
+	p.damping_min = 2.0
+	p.damping_max = 4.0
+	p.scale_amount_min = 1.0
+	p.scale_amount_max = 2.5
+	var sm := SphereMesh.new()
+	sm.radius = 0.06
+	sm.height = 0.12
+	p.mesh = sm
+	p.material_override = _mat(Color(0.55, 0.47, 0.4), 0.0, true, 0.5)
+	p.position = at
+	add_child(p)
+	p.emitting = true
+	get_tree().create_timer(1.2, true, false, true).timeout.connect(p.queue_free)
+
+func flash_screen(color: Color, strength: float) -> void:
+	_vig_tint = Color(color, maxf(_vig_tint.a, strength))
+
 func _build_markers() -> void:
 	# The bite's reach, on the ground in front of the wolf while it winds up.
 	var disc := CylinderMesh.new()
@@ -287,7 +415,12 @@ func anim_event(e: Dictionary) -> void:
 	var speed := float(e.get("speed", 1.0))
 	if e["who"] == "player":
 		var name: String = e["name"]
-		_play(_p_anim, name, speed, 0.06)
+		# Play the animation at the speed that fits the action's real timing, so the blade
+		# lands on the frame the hit lands.
+		if e.has("duration") and _p_anim.has_animation(name):
+			speed = clampf(_p_anim.get_animation(name).length / float(e["duration"]) * 0.9, 0.7, 2.6)
+		_p_anim.speed_scale = 1.0
+		_play(_p_anim, name, speed, 0.05)
 		_p_current = name
 		var len := _p_anim.get_animation(name).length if _p_anim.has_animation(name) else 0.4
 		_p_oneshot_until = _clock + len / speed * (0.95 if not name.begins_with("Death") else 99.0)
@@ -295,6 +428,7 @@ func anim_event(e: Dictionary) -> void:
 		var name: String = WA + String(e["name"])
 		if e["name"] == "HitReact":
 			name = WA + ("Idle_HitReact_Left" if randf() < 0.5 else "Idle_HitReact_Right")
+		_w_anim.speed_scale = 1.0
 		_play(_w_anim, name, speed, 0.06)
 		_w_current = name
 		var len := _w_anim.get_animation(name).length if _w_anim.has_animation(name) else 0.4
@@ -394,6 +528,7 @@ func feedback(f: Fight, events: Array) -> void:
 				var heavy: bool = e["heavy"] or e["pattern"]
 				floater(W + Vector3(0, 0.2, 0), str(int(e["damage"])), C_GOLD if e["pattern"] else (C_STAGGER if e["staggered"] else C_TEXT), 84 if heavy else 60)
 				burst(_v3(f.w_pos, 0.9), C_GOLD if heavy else C_HIT, 30 if heavy else 14, 7.0 if heavy else 5.0)
+				impact(_v3(f.w_pos, 0.9) + _v3((f.p_pos - f.w_pos).normalized() * 0.4), C_GOLD if heavy else C_HIT, 1.1 if heavy else 0.7)
 				_wolf_flash = 1.0
 				_shake = maxf(_shake, float(feel["shakeOnHit"]) * (2.0 if heavy else 1.0))
 				hitstop(float(feel["heavyHitstop"]) if heavy else float(feel["hitstop"]))
@@ -415,6 +550,8 @@ func feedback(f: Fight, events: Array) -> void:
 				_ring_wave(_v3(f.p_pos), C_GUARD, 3.5)
 				_shake = 0.12
 				slowmo(float(feel["parrySlowmo"]), 0.3)
+				impact((_v3(f.p_pos, 1.2) + _v3(f.w_pos, 1.2)) / 2.0, C_GUARD, 1.4)
+				flash_screen(Color(0.4, 0.7, 1.0), 0.35)
 			"block":
 				floater(P, "BLOCKED  -%d" % int(e["damage"]), C_GUARD, 48)
 				burst(_v3(f.p_pos, 1.2) + _v3(Vector2.from_angle(f.p_facing) * 0.5), C_GUARD, 12, 4.0)
@@ -423,9 +560,12 @@ func feedback(f: Fight, events: Array) -> void:
 				floater(P, "-%d" % int(e["damage"]), C_WINDUP, 80)
 				_player_flash = 1.0
 				_shake = float(feel["shakeOnHurt"])
+				flash_screen(Color(0.9, 0.08, 0.05), 0.55)
 				hitstop(0.08)
 			"evade":
 				floater(P, "EVADED" if e["how"] == "dodged" else "MISSED", C_DIM, 44)
+			"dodge":
+				dust(_v3(f.p_pos, 0.1), 20)
 			"windup":
 				_alert.visible = true
 			"stance":
@@ -463,6 +603,11 @@ func feedback(f: Fight, events: Array) -> void:
 # --- Each frame ---------------------------------------------------------------
 
 ## Draw a frame. `dt` is real time (unscaled), for the camera and the feedback.
+## Mouse look: applied directly (not scaled by frame time), so it feels the same at any frame rate.
+func look(mouse_delta: Vector2, sensitivity := 0.0032) -> void:
+	cam_yaw -= mouse_delta.x * sensitivity
+	cam_pitch = clampf(cam_pitch - mouse_delta.y * sensitivity, -1.0, 0.05)
+
 func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 	_clock += dt * Engine.time_scale
 	var now_ms := Time.get_ticks_msec()
@@ -499,6 +644,8 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 	# The wolf.
 	_wolf.visible = show_wolf and f.w_state != "absent"
 	_wolf.position = _v3(f.w_pos)
+	if f.w_state == "down" and f.w_timer > 1.4:
+		_wolf.position.y -= (f.w_timer - 1.4) * 0.6
 	_wolf.rotation.y = _yaw(f.w_facing)
 	_wolf_flash = maxf(0.0, _wolf_flash - dt * 7.0)
 	var glow := 0.0
@@ -582,6 +729,12 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 			lb.queue_free()
 			_floaters.erase(fl)
 
+	_update_trail(f.p_state in ["attack", "technique", "pattern"], dt)
+	_vig_tint.a = maxf(0.0, _vig_tint.a - dt * 1.6)
+	var low := 1.0 - clampf(f.p_hp / float(Data.room["player"]["health"]), 0.0, 1.0)
+	var pulse := 0.0 if f.p_hp > 30.0 or f.p_state == "down" else 0.12 * (0.5 + 0.5 * sin(_clock * 6.0)) * low
+	var tint := _vig_tint if _vig_tint.a > pulse else Color(0.8, 0.05, 0.05, pulse)
+	(_vignette.material as ShaderMaterial).set_shader_parameter("tint", tint)
 	_update_camera(dt, cam_input, f)
 
 ## Models face +Z; the fight's facing is the angle on the ground plane.
@@ -603,7 +756,7 @@ func _update_camera(dt: float, cam_input: Vector2, f: Fight) -> void:
 			to_w = Vector3(0, 0, -1)
 		to_w = to_w.normalized()
 		var target_yaw := atan2(-to_w.x, -to_w.z)
-		cam_yaw = lerp_angle(cam_yaw, target_yaw, 1.0 - exp(-dt * 5.0))
+		cam_yaw = lerp_angle(cam_yaw, target_yaw, 1.0 - exp(-dt * 7.0))
 		var back := Vector3(sin(cam_yaw), 0, cos(cam_yaw))
 		var side := Vector3(cos(cam_yaw), 0, -sin(cam_yaw))
 		var d := clampf(p.distance_to(w), 2.0, 8.0)
@@ -611,13 +764,13 @@ func _update_camera(dt: float, cam_input: Vector2, f: Fight) -> void:
 		want = p + back * (4.3 + d * 0.3) + side * 3.3 + Vector3(0, 5.0 + d * 0.15, 0)
 		focus = p.lerp(w, 0.7) + Vector3(0, 0.5, 0)
 	else:
-		cam_yaw -= cam_input.x * dt * 2.6
-		cam_pitch = clampf(cam_pitch - cam_input.y * dt * 1.6, -1.0, 0.05)
+		cam_yaw -= cam_input.x * dt * 2.8
+		cam_pitch = clampf(cam_pitch - cam_input.y * dt * 1.8, -1.0, 0.05)
 		var back := Vector3(sin(cam_yaw), 0, cos(cam_yaw))
 		var dist := 6.0
 		want = p + back * dist * cos(cam_pitch) + Vector3(0, 1.6 + dist * sin(-cam_pitch), 0)
 	want = _keep_in_chamber(focus, want)
-	var k := 1.0 - exp(-dt * 8.0)
+	var k := 1.0 - exp(-dt * 11.0)
 	_cam_pos = _cam_pos.lerp(want, k)
 	_cam_pos = _keep_in_chamber(focus, _cam_pos)
 	_cam_look = _cam_look.lerp(focus, 1.0 - exp(-dt * 10.0))

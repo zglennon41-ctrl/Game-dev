@@ -39,6 +39,9 @@ var p_dodge_ready_at := 0.0
 var p_cooldowns := {}      # technique id -> time ready
 var p_technique := ""
 var p_lock := true         # facing the wolf (lock-on)
+var p_vel := Vector2.ZERO  # movement, eased so starts and stops have a little weight
+var p_queued := ""         # an action pressed while busy, fired as soon as it is allowed
+var p_queued_until := 0.0
 var pattern_until := -9.0  # the Pattern's Trigger is met until this time
 var chain: Dictionary = {} # the Pattern in flight
 
@@ -55,6 +58,7 @@ var w_angle := 0.0
 var w_hits_taken := 0
 var w_break := 0
 var w_dir := 1.0
+var respawn_from_arch := false
 
 func _init(opts: Dictionary = {}) -> void:
 	room = Data.room
@@ -108,6 +112,14 @@ func _in_arc(from: Vector2, facing: float, target: Vector2, reach: float, arc_de
 func input(action: String) -> void:
 	if p_state == "down":
 		return
+	# Pressed a little early (mid-swing, mid-dodge, mid-flinch): remember it briefly and fire
+	# it the moment it is allowed, so no press is lost.
+	if action in ["attack", "technique", "dodge", "pattern", "block-down"] and _busy(action):
+		p_queued = action
+		p_queued_until = now + float(room.get("inputBufferSeconds", 0.25))
+		if action == "block-down":
+			p_block_held = true
+		return
 	match action:
 		"attack": _press_attack()
 		"technique": _press_technique("ground-strike")
@@ -132,6 +144,31 @@ func input(action: String) -> void:
 		"pattern": _press_pattern()
 		"lock":
 			p_lock = not p_lock
+
+func _busy(action: String) -> bool:
+	match p_state:
+		"free":
+			return action == "dodge" and now < p_dodge_ready_at
+		"attack":
+			# Attack presses chain into the combo; everything else waits for the recovery.
+			return action != "attack" and not _can_start_action()
+		"pattern":
+			return action != "attack"
+		"technique", "dodge", "flinch":
+			return true
+	return false
+
+func _try_queued() -> void:
+	if p_queued == "" or now > p_queued_until:
+		p_queued = ""
+		return
+	var a := p_queued
+	if _busy(a):
+		return
+	p_queued = ""
+	if a == "block-down" and not p_block_held:
+		return
+	input(a)
 
 func _can_start_action() -> bool:
 	if p_state == "free":
@@ -169,11 +206,16 @@ func _start_swing(i: int) -> void:
 	p_hit_done = false
 	_face_target_if_near()
 	stats["attacks"] += 1
-	_emit({ "type": "anim", "who": "player", "name": room["combo"][i]["anim"], "speed": 1.0 })
+	var sw: Dictionary = room["combo"][i]
+	_emit({ "type": "anim", "who": "player", "name": sw["anim"], "duration": float(sw["startup"]) + float(sw["active"]) + float(sw["recovery"]) })
 
+## Swings go toward the wolf when locked on or when it is close; otherwise where you steer.
 func _face_target_if_near() -> void:
-	if w_state != "down" and w_state != "absent" and dist() < 6.0:
+	var wolf_there := w_state != "down" and w_state != "absent"
+	if wolf_there and (p_lock or dist() < 3.0):
 		p_facing = _angle_to(p_pos, w_pos)
+	elif p_dodge_dir.length() > 0.3:
+		p_facing = p_dodge_dir.angle()
 
 func _press_technique(id: String) -> void:
 	var t: Dictionary = room["techniques"][id]
@@ -192,7 +234,7 @@ func _press_technique(id: String) -> void:
 	p_timer = 0.0
 	p_hit_done = false
 	_face_target_if_near()
-	_emit({ "type": "anim", "who": "player", "name": t["anim"], "speed": 1.0 })
+	_emit({ "type": "anim", "who": "player", "name": t["anim"], "duration": float(t["startup"]) + float(t["active"]) + float(t["recovery"]) })
 	_emit({ "type": "technique", "id": id })
 
 func _press_dodge() -> void:
@@ -213,8 +255,8 @@ func _press_dodge() -> void:
 	if absf(rel) > PI * 0.75: anim = "Dodge_Backward"
 	elif rel > PI * 0.25: anim = "Dodge_Right"
 	elif rel < -PI * 0.25: anim = "Dodge_Left"
-	_emit({ "type": "anim", "who": "player", "name": anim, "speed": 1.0 })
-	_emit({ "type": "dodge" })
+	_emit({ "type": "anim", "who": "player", "name": anim, "duration": float(d["duration"]) })
+	_emit({ "type": "dodge", "dir": p_dodge_dir })
 
 func _press_pattern() -> void:
 	var P: Dictionary = room["pattern"]
@@ -296,6 +338,9 @@ func update(dt: float, move: Vector2 = Vector2.ZERO) -> void:
 	p_timer += dt
 	_update_will(dt)
 	_update_player(dt, move)
+	if p_state != "free":
+		p_vel = Vector2.ZERO
+	_try_queued()
 	_update_wolf(dt)
 	_separate()
 
@@ -327,8 +372,10 @@ func _update_player(dt: float, move: Vector2) -> void:
 			var speed := float(P["runSpeed"])
 			if _blocking(): speed = float(P["blockMoveSpeed"])
 			if p_stance: speed *= float(P["stanceMoveFactor"])
-			if move.length() > 0.05:
-				p_pos = _clamp_in(p_pos + move.limit_length(1.0) * speed * dt)
+			var target_vel := move.limit_length(1.0) * speed
+			var accel := float(P.get("acceleration", 20.0))
+			p_vel = p_vel.move_toward(target_vel, accel * speed * dt)
+			p_pos = _clamp_in(p_pos + p_vel * dt)
 			var want := p_facing
 			if p_lock and w_state != "down" and w_state != "absent":
 				want = _angle_to(p_pos, w_pos)
@@ -441,7 +488,12 @@ func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
 func _spawn_wolf() -> void:
 	w_hp = beast["health"]
 	w_angle = rng.randf() * TAU
-	w_pos = _clamp_in(p_pos + Vector2.from_angle(w_angle) * float(beast["circleRadius"]) * 1.5)
+	if respawn_from_arch:
+		# A new wolf comes in from the far end of the chamber, where the line enters.
+		var side := -1.0 if p_pos.x > 0.0 else 1.0
+		w_pos = _clamp_in(Vector2(side * arena.x / 2.0, rng.randf_range(-1.0, 1.0)))
+	else:
+		w_pos = _clamp_in(p_pos + Vector2.from_angle(w_angle) * float(beast["circleRadius"]) * 1.5)
 	w_facing = _angle_to(w_pos, p_pos)
 	w_break = 0
 	w_hits_taken = 0
@@ -543,6 +595,7 @@ func _update_wolf(dt: float) -> void:
 				_wolf_set("recover", 0.6)
 		"down":
 			if respawn and w_timer >= w_duration:
+				respawn_from_arch = true
 				_spawn_wolf()
 				_emit({ "type": "wolf-up" })
 
