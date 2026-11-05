@@ -14,18 +14,22 @@ A real-time party RPG with guild management. Read `HANDOFF.md` for what the game
 4. Press **F5** (or the ▶ button, top right). The first open takes a minute while Godot
    imports the project.
 
-Turn the sound on. Start with **Learn the pulse**: six short steps, about three minutes.
-The first step tunes the beat to your screen and speakers. Then **Fight the cut-wolf**
-for two minutes.
+Turn the sound on and choose **New character**: ten questions about who you were before
+your field woke, then the reveal of who your answers made (your blood, Shape, weapon, what
+will stand beside you, and your Pattern), then the night your field wakes. Afterwards,
+**Practice yard** lets your character fight cut-wolves.
 
 | Keyboard and mouse | Gamepad | Verb |
 | --- | --- | --- |
 | WASD / arrows | left stick | move |
 | mouse | right stick | look around (when lock-on is off) |
-| J, Space, left click | A | strike (Project) |
-| I, E | X | Ground Strike: an Anchor technique, 18 Will; it breaks the wolf |
-| K, Shift, right click | B, RB | Hold: tap on the wolf's strike beat to parry, hold to block |
-| L, F | Y | Anchor stance (Shape) |
+| left click, J | X | strike, or shoot if you carry a gun |
+| right click, K | RB | hold to block; tap just before a blow lands to parry |
+| Space, Shift | A | dodge |
+| Q, 1 | Y | your Shape's technique; it breaks the beast |
+| F, L | LB | your Shape's stance |
+| R | B | your Pattern (when its Trigger is met) |
+| N | D-pad up | name the foe aloud (some Patterns need it) |
 | Tab, middle click | R3 | lock-on on or off |
 | Esc | Start | menu |
 

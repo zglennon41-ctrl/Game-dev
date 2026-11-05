@@ -10,13 +10,18 @@ is and `docs/` as the source of truth for how each system works. When they disag
 
 A vertical slice, in this order, each step playable before the next starts:
 
-1. Rules engine as data (Shapes, Stages, Terms, techniques) with a headless simulator.
-2. The pulse combat room: one Shape, one beast, one Pattern, timed on a visible beat.
-3. The Pattern builder: Form + up to three Terms, with the multiplier and breach rules.
-4. One Green zone: three areas, a post, a boss, 20–40 minutes, extraction.
-5. The genius as an AI follower: orders, Witness, a Reading at the Gate.
-6. The hall: common room, board, six roster members, one named death.
-7. Co-op for three.
+1. Rules engine as data (Shapes, Stages, Terms, techniques) with a headless simulator. (done)
+2. The combat room: real-time action on one beast; the timing layer in the parry and the
+   Pattern. (done; owner: "a lot of fun")
+3. **Character creation and the opening** (owner's direction, 2026-11-05): a questionnaire
+   whose answers make the character (blood or people, Shape, city, weapon, Seed, and a
+   Pattern of its own); the world encounter where the field wakes and the Pattern fires;
+   the Academy recruiter; one year later; the Academy's gate. All six Shapes playable.
+4. Act 1, the Academy: the rite (the Shape and the genius's First Form), the lessons, the
+   cohort, the Field Examination (the Green zone: three areas, a post, a boss), the Gate
+   Reading.
+5. The hall: common room, board, roster members, one named death.
+6. Co-op for three.
 
 Do not start a later step until the owner has played the earlier one and said it is fun.
 If step 2 is not fun with one Shape and one zone, nothing added later fixes it.
@@ -31,6 +36,8 @@ If step 2 is not fun with one Shape and one zone, nothing added later fixes it.
   breach detection, Mark counting, and canonization are pure functions with tests. The
   headless simulator runs a character through a year of play in seconds and prints what
   the genius became; `docs/three-lives.md` is the acceptance test for it.
+- **The creator is a key feature.** The first hook of the game is the questionnaire and the
+  night the field wakes. Its words live in `data/creation.json` and `data/story.json`.
 - **Real-time feel is the game.** WILDLINE is a real-time MMORPG first; it should feel
   like a AAA action MMO. Combat work goes to responsiveness, animation, hit feedback,
   readable enemy telegraphs, and the camera before anything else. The beat is secondary:

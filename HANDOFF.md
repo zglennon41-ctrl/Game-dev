@@ -345,6 +345,11 @@ cosmetics; any art pipeline.
 ## 9. Decisions
 
 **Decided** (do not ask again):
+- The game opens with a character creator of questions (2026-11-05): answers suggest a blood
+  (confirmed or changed by the player) and make the Shape, city, weapon, Seed and a first
+  Pattern, which the character has from the start and outgrows. Then the world encounter, the
+  Academy recruiter (Instructor Ilse Varga), one year later, Act 1 at the Academy. All six
+  Shapes are playable from the start.
 - Rules are data; the Reading and Ledgers are deterministic and tested.
 - Combat is real-time action; the beat lives only in the parry and the Pattern
   (2026-11-05). Online play stays at Step 7 of the slice. Placeholder art is CC0.

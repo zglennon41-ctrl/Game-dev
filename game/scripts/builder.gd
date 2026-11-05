@@ -203,8 +203,15 @@ func _set_term(kind: String, id: String) -> void:
 
 # --- The sentence and numbers -------------------------------------------------
 
+## A Form by its id, from the Shape's kit ("cast.reach" is in the Cast kit).
+static func form_of(form_id: String) -> Dictionary:
+	var shape := form_id.split(".")[0]
+	if Data.kits.has(shape) and Data.kits[shape]["forms"].has(form_id):
+		return Data.kits[shape]["forms"][form_id]
+	return Data.room["pattern"]["forms"][form_id]
+
 static func sentence(sp: Dictionary) -> String:
-	var form: Dictionary = Data.room["pattern"]["forms"][sp["form"]]
+	var form: Dictionary = form_of(sp["form"])
 	var parts: Array = ["[b]%s[/b]: %s." % [sp["name"] if sp["name"] != "" else "(unnamed)", form["name"]]]
 	for id in sp["terms"]:
 		var t: Dictionary = PatternTerms.term(id)
@@ -217,7 +224,7 @@ static func sentence(sp: Dictionary) -> String:
 	return " ".join(parts)
 
 static func payout(sp: Dictionary) -> String:
-	var form: Dictionary = Data.room["pattern"]["forms"][sp["form"]]
+	var form: Dictionary = form_of(sp["form"])
 	var n := Fight.chain_length(sp)
 	var m := Fight.multiplier_of(sp)
 	var stage := float(Data.rules["field"]["stageOutput"][3])

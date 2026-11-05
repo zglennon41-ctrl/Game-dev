@@ -1,4 +1,5 @@
-## The combat room (Step 1): a title screen, the tutorial, two minutes with a cut-wolf.
+## WILDLINE: the title, the character creator, the night the field wakes, the recruiter, the year,
+## the Academy's gate; and the practice yard and the combat tutorial.
 ## Command-line extras for automated checks (after --): --bot plays well; --tutorial / --fight
 ## start straight in; --shots=DIR saves screenshots every --every seconds; --session=S shortens
 ## the fight; --quit quits at the results.
@@ -8,10 +9,14 @@ var world := World.new()
 var hud := Hud.new()
 var sfx := Sfx.new()
 var builder := Builder.new()
+var creator := Creator.new()
+var prologue: Prologue
+var hero: Dictionary = {}
+var preview: Fight
 var _breached := false
 var fight: Fight
 var tutorial: Tutorial
-var mode := "menu"   # menu, tutorial, fight, results
+var mode := "menu"   # menu, creator, prologue, story, tutorial, fight, results
 var fight_end := 0.0
 var _cam_mouse := Vector2.ZERO
 var _last_ticks := 0
@@ -41,6 +46,11 @@ func _ready() -> void:
 	add_child(sfx)
 	add_child(builder)
 	builder.visible = false
+	add_child(creator)
+	creator.visible = false
+	creator.changed.connect(_preview_hero)
+	creator.finished.connect(_hero_made)
+	creator.cancelled.connect(func(): creator.visible = false; menu())
 	builder.done.connect(_pattern_built)
 	builder.cancelled.connect(func(): builder.visible = false; menu())
 	_last_ticks = Time.get_ticks_usec()
@@ -59,7 +69,34 @@ func _ready() -> void:
 			await get_tree().create_timer(0.5).timeout
 			get_tree().quit()
 		return
-	if _args.has("tutorial"):
+	if _args.has("reveal"):
+		var ra: Array = Array(String(_args["reveal"]).split(",")).map(func(x): return int(x))
+		new_character()
+		creator.answers = ra
+		creator._reveal()
+		await get_tree().create_timer(1.2).timeout
+		_shot("reveal")
+		await get_tree().create_timer(0.3).timeout
+		creator._choose_blood()
+		await get_tree().create_timer(0.4).timeout
+		_shot("bloods")
+		await get_tree().create_timer(0.3).timeout
+		creator._ask(2)
+		await get_tree().create_timer(0.4).timeout
+		_shot("question")
+		await get_tree().create_timer(0.3).timeout
+		get_tree().quit()
+		return
+	if _args.has("answers"):
+		# Automated checks: answer the questions from the command line, then play the opening.
+		var ans: Array = Array(String(_args["answers"]).split(",")).map(func(x): return int(x))
+		var h := Creation.generate(ans)
+		h["name"] = "Test"
+		_hero_made(h)
+		return
+	if _args.has("new"):
+		new_character()
+	elif _args.has("tutorial"):
 		start("tutorial")
 	elif _args.has("fight"):
 		start("fight")
@@ -94,16 +131,104 @@ func menu() -> void:
 	mode = "menu"
 	Engine.time_scale = 1.0
 	sfx.stop_ambience()
+	creator.visible = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	var spec := Settings.pattern()
-	var lost := Settings.pattern_lost_text()
-	hud.show_screen("WILDLINE", "The Cumberland Cut  ·  an Anchor and a cut-wolf",
-		"Mouse and keyboard, or a gamepad. Sound on.\n\nYour Pattern: %s   [color=#f5c95a]x%s[/color]%s" % [Builder.sentence(spec), str(snappedf(Fight.multiplier_of(spec), 0.01)), ("\n[color=#e65a4d]%s[/color]" % lost) if lost != "" else ""], [
-		["Learn to fight  (tutorial, about five minutes)", func(): start("tutorial")],
-		["Fight the cut-wolf  (two minutes)", func(): start("fight")],
-		["Build your Pattern", _open_builder],
-		["Quit", func(): get_tree().quit()],
+	var saved := Settings.hero()
+	var buttons: Array = [["New character", new_character]]
+	var body := "A real-time party RPG of a guild that keeps a rail junction alive, ten thousand years after the Awakening.\n\nMouse and keyboard, or a gamepad. Sound on."
+	if not saved.is_empty():
+		buttons.append(["Continue as %s  (%s, %s)" % [saved["name"], Data.by_id(Data.bloods, saved["blood"])["name"], String(saved["shape"]).capitalize()], _academy_gate])
+		buttons.append(["Practice yard: fight cut-wolves as %s  (two minutes)" % saved["name"], func(): hero = saved; start("fight")])
+	buttons.append(["Combat tutorial  (as an Anchor)", func(): hero = {}; start("tutorial")])
+	buttons.append(["Quit", func(): get_tree().quit()])
+	hud.show_screen("WILDLINE", "The Cumberland Cut", body, buttons)
+
+# --- The opening ---------------------------------------------------------------
+
+func new_character() -> void:
+	mode = "creator"
+	hud.hide_screen()
+	hud.play_ui.visible = false
+	sfx.start_ambience()
+	preview = null
+	creator.begin()
+
+## The reveal changed: dress the character standing in the chamber.
+func _preview_hero(h: Dictionary) -> void:
+	world.build_hero(h)
+	preview = Fight.new({ "hero": h, "passive": true, "respawn": false })
+	preview.w_state = "absent"
+	preview.p_pos = Vector2.ZERO
+	preview.p_facing = PI / 2.0
+	world.show_wolf = false
+	world.portrait = true
+
+func _hero_made(h: Dictionary) -> void:
+	hero = h
+	Settings.save_hero(h)
+	creator.visible = false
+	world.portrait = false
+	_card(Data.story["cards"]["open"], _start_prologue)
+
+## A title card: a few lines on black, and Continue.
+func _card(lines: Array, next: Callable) -> void:
+	mode = "story"
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	var filled: Array = lines.map(func(l): return Prologue.fill(l, hero))
+	hud.show_screen(filled[0], "\n".join(filled.slice(1)), "", [["Continue", next]])
+	if _args.has("answers"):
+		_shot.call_deferred("card")
+		next.call_deferred()
+
+func _start_prologue() -> void:
+	fight = Fight.new({ "hero": hero, "beast": "cut-wolf", "seed": randi(), "respawn": false, "mercy": true,
+		"allow_breach": false, "beast_health": 220 })
+	world.build_hero(hero)
+	world.reset_feedback()
+	world.snap_camera(fight)
+	hud.hide_screen()
+	hud.configure(fight, hero["name"])
+	sfx.start_ambience()
+	mode = "prologue"
+	tutorial = null
+	_next_shot = 0.0
+	if not _args.has("bot"):
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	prologue = Prologue.new(fight, world, hero)
+	prologue.finished.connect(_recruiter)
+	prologue.start(hud)
+
+func _recruiter() -> void:
+	mode = "story"
+	Engine.time_scale = 1.0
+	sfx.play("done")
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	var r: Dictionary = Data.story["recruiter"]
+	var b: Dictionary = Data.by_id(Data.bloods, hero["blood"])
+	var lines: Array = []
+	for l in Data.story["recruiter_lines"]:
+		var line: String = String(l).replace("{blood_line}", Data.story["blood_lines"][b["tier"]])
+		lines.append(Prologue.fill(line, hero))
+	hud.show_screen(String(r["name"]).to_upper(), r["title"], "\n\n".join(lines), [["Go with her", func(): _card(Data.story["cards"]["skip"], func(): _card(Data.story["cards"]["act1"], _academy_gate))]])
+	if _args.has("answers"):
+		_shot.call_deferred("recruiter")
+		await get_tree().create_timer(0.6, true, false, true).timeout
+		_card(Data.story["cards"]["skip"], func(): _card(Data.story["cards"]["act1"], _academy_gate))
+
+func _academy_gate() -> void:
+	mode = "story"
+	if hero.is_empty():
+		hero = Settings.hero()
+	var a: Dictionary = Data.story["academy"]
+	hud.show_screen(a["title"], "%s  ·  %s  ·  %s" % [hero["name"], Data.by_id(Data.bloods, hero["blood"])["name"], String(hero["shape"]).capitalize()], a["text"], [
+		["Practice yard: fight cut-wolves  (two minutes)", func(): start("fight")],
+		["Main menu", menu],
 	])
+	if _args.has("answers"):
+		print("REACHED THE ACADEMY: %s, %s %s with a %s; Pattern %s" % [hero["name"], hero["blood"], hero["shape"], hero["weapon"], Builder.sentence(hero["pattern"])])
+		_shot.call_deferred("academy")
+		if _args.has("quit"):
+			get_tree().create_timer(1.0, true, false, true).timeout.connect(get_tree().quit)
 
 func _open_builder() -> void:
 	hud.screen.visible = false
@@ -116,10 +241,12 @@ func _pattern_built(spec: Dictionary) -> void:
 
 func start(which: String) -> void:
 	# The tutorial teaches with the starting Pattern; the fight uses the one you built.
-	var spec: Dictionary = Data.room["pattern"]["default"] if which == "tutorial" else Settings.pattern()
-	fight = Fight.new({ "beast": "yard-wolf" if which == "tutorial" else "cut-wolf", "seed": randi(),
-		"passive": which == "tutorial", "respawn": true, "pattern": spec,
+	var h: Dictionary = Fight.default_hero() if which == "tutorial" or hero.is_empty() else hero
+	fight = Fight.new({ "hero": h, "beast": "yard-wolf" if which == "tutorial" else "cut-wolf", "seed": randi(),
+		"passive": which == "tutorial", "respawn": true,
 		"pattern_lost": false if which == "tutorial" else Settings.pattern_lost() })
+	world.build_hero(h)
+	hud.configure(fight, h.get("name", ""))
 	_breached = false
 	world.show_wolf = true
 	world.reset_feedback()
@@ -188,7 +315,7 @@ func _results(reason: String) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_cam_mouse += event.relative
-	if mode != "tutorial" and mode != "fight":
+	if mode != "tutorial" and mode != "fight" and mode != "prologue":
 		return
 	if event.is_action_pressed("menu"):
 		menu()
@@ -211,7 +338,10 @@ func _process(delta: float) -> void:
 	var t := Time.get_ticks_usec()
 	var real_dt := minf(0.1, (t - _last_ticks) / 1e6)
 	_last_ticks = t
-	if mode != "tutorial" and mode != "fight":
+	if mode == "creator" and preview:
+		world.draw(preview, real_dt, Vector2.ZERO, Vector2.ZERO)
+		return
+	if mode != "tutorial" and mode != "fight" and mode != "prologue":
 		return
 	var stick := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	var move := world.move_from_stick(stick)
@@ -227,6 +357,12 @@ func _process(delta: float) -> void:
 	world.feedback(fight, events)
 	if tutorial:
 		tutorial.update(events, hud)
+	if mode == "prologue" and prologue:
+		prologue.update(events, real_dt, hud)
+		if _args.has("debug"):
+			for e in events:
+				if e["type"] not in ["anim"]:
+					print("%.2f beat %d  %s  wolf %s %s hp %d" % [fight.now, prologue.beat, e["type"], fight.w_state, str(fight.w_pos), fight.w_hp])
 	var cam := Vector2(Input.get_joy_axis(0, JOY_AXIS_RIGHT_X), Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y))
 	if cam.length() < 0.15:
 		cam = Vector2.ZERO
@@ -235,7 +371,7 @@ func _process(delta: float) -> void:
 	_cam_mouse = Vector2.ZERO
 	world.draw(fight, real_dt, cam, move)
 	var timer := ""
-	var score := "the yard"
+	var score := "the old station" if mode == "prologue" else "the yard"
 	if mode == "fight":
 		var left := maxf(0.0, fight_end - fight.now)
 		timer = "%d:%02d" % [int(left) / 60, int(left) % 60]
@@ -294,6 +430,21 @@ func _shot(label: String) -> void:
 
 func _bot() -> Vector2:
 	var f := fight
+	if mode == "prologue" and prologue and prologue.beat < Data.story["beats"].size():
+		var bid: String = Data.story["beats"][prologue.beat]["id"]
+		if bid == "pattern":
+			var terms: Array = f.pattern["terms"]
+			if ("named-aloud" in terms or "never-silence" in terms) and not f.w_named:
+				f.input("name")
+			if ("struck-first" in terms and not f.p_struck_this_foe) or ("below-half" in terms and f.p_hp >= 50):
+				# Let it bite: no guard, no dodging.
+				if f.p_block_held:
+					f.input("block-up")
+				if f.pattern_ready():
+					f.input("pattern")
+				return (f.w_pos - f.p_pos).normalized() if (f.w_pos - f.p_pos).length() > 2.0 else Vector2.ZERO
+		if bid == "technique" and f.p_state == "free":
+			f.input("technique")
 	var to_w := f.w_pos - f.p_pos
 	var step := tutorial.i if tutorial else 99
 	var move := Vector2.ZERO

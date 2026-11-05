@@ -13,6 +13,7 @@ const GOLD := Color(1.0, 0.8, 0.35)
 const EDGE := Color(0.32, 0.27, 0.21)
 
 var play_ui := Control.new()
+var _name_label: Label
 var hp_bar := ProgressBar.new()
 var will_bar := ProgressBar.new()
 var hp_text := Label.new()
@@ -40,8 +41,8 @@ const SLOTS := [
 	["attack", "LMB", "Strike", ""],
 	["block", "RMB", "Block · Parry", ""],
 	["dodge", "Space", "Dodge", "8"],
-	["technique", "Q", "Ground Strike", "18"],
-	["stance", "F", "Anchor Stance", "2/s"],
+	["technique", "Q", "Technique", "18"],
+	["stance", "F", "Stance", "2/s"],
 	["pattern", "R", "Pattern", ""],
 ]
 
@@ -61,6 +62,7 @@ func _ready() -> void:
 	_label(name_l, 18, FG)
 	name_l.text = "ANCHOR  ·  Marshal"
 	me.add_child(name_l)
+	_name_label = name_l
 	for pair in [[hp_bar, hp_text, RED, 18], [will_bar, will_text, BLUE, 12]]:
 		var holder := Control.new()
 		holder.custom_minimum_size = Vector2(380, pair[3])
@@ -195,8 +197,18 @@ func _slot(s: Array) -> PanelContainer:
 	cd.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	cd.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	p.add_child(cd)
-	slots[s[0]] = { "panel": p, "key": key, "name": name, "cd": cd }
+	slots[s[0]] = { "panel": p, "key": key, "name": name, "cd": cd, "cost": cost }
 	return p
+
+## Name the ability bar for the hero in this fight.
+func configure(f: Fight, hero_name: String) -> void:
+	(slots["attack"]["name"] as Label).text = "Shot" if f.ranged else "Strike"
+	(slots["technique"]["name"] as Label).text = f.tech["name"]
+	(slots["technique"]["cost"] as Label).text = "%d Will" % int(f.tech["will"])
+	(slots["stance"]["name"] as Label).text = f.kit["stance"]["name"]
+	_hero_name = "%s  ·  %s" % [hero_name if hero_name != "" else "ANCHOR", String(f.player_shape).capitalize()]
+
+var _hero_name := "ANCHOR  ·  Marshal"
 
 func _label(l: Label, size: int, color: Color) -> void:
 	l.add_theme_font_size_override("font_size", size)
@@ -230,6 +242,7 @@ func _panel(color: Color) -> StyleBoxFlat:
 
 func show_screen(title: String, subtitle: String, body: String, buttons: Array) -> void:
 	for c in screen_box.get_children():
+		screen_box.remove_child(c)
 		c.queue_free()
 	var t := Label.new()
 	_label(t, 52, ACCENT)
@@ -285,6 +298,7 @@ func set_prompt_status(note: String, progress: String) -> void:
 	prompt_progress.text = progress
 
 func update_play(f: Fight, timer_text: String, score_text: String, show_target: bool) -> void:
+	_name_label.text = _hero_name
 	hp_bar.max_value = float(Data.room["player"]["health"])
 	hp_bar.value = f.p_hp
 	hp_text.text = "%d / %d" % [roundi(f.p_hp), int(hp_bar.max_value)]
@@ -296,7 +310,7 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	if f.p_combo_count > 2: st.append("%d hits" % f.p_combo_count)
 	status.text = "  ·  ".join(st)
 	target.visible = show_target and f.w_state not in ["down", "absent"]
-	target_name.text = "%s  ·  %s  ·  first molt" % [f.beast["name"], String(f.beast["shape"]).capitalize()]
+	target_name.text = "%s  ·  %s  ·  first molt" % [f.beast["name"], String(f.w_shape).capitalize()]
 	target_bar.max_value = float(f.beast["health"])
 	target_bar.value = f.w_hp
 	target_bar.visible = float(f.beast["health"]) < 50000

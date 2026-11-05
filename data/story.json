@@ -1,0 +1,85 @@
+{
+ "comment": "The opening: the night the field wakes, the recruiter, the year that passes. Every line here is the owner's to rewrite. {name}, {blood}, {shape}, {weapon}, {technique}, {pattern}, {city}, {stationcity} are filled in from the character.",
+ "recruiter": {
+  "name": "Instructor Ilse Varga",
+  "title": "of the Academy at Alexandria",
+  "shape": "read"
+ },
+ "cards": {
+  "open": [
+   "{stationcity}, the old station on the line.",
+   "Ten thousand years after the Awakening.",
+   "You are fifteen. Your field has not woken. Tonight the line went quiet."
+  ],
+  "skip": [
+   "ONE YEAR LATER"
+  ],
+  "act1": [
+   "ACT ONE",
+   "THE ACADEMY"
+  ]
+ },
+ "beats": [
+  {
+   "id": "quiet",
+   "title": "The line went quiet",
+   "text": "The lamps along the platform are out. The night train did not come. Something is moving at the far end, where the tunnel opens. [b]WASD[/b] to move; the mouse to look."
+  },
+  {
+   "id": "hold",
+   "title": "It comes",
+   "text": "It is a cut-wolf, and it is coming for you. Get your guard up: [b]hold right click[/b]. If you can, [b]tap it just as it bites[/b]."
+  },
+  {
+   "id": "woke",
+   "title": "Your field wakes",
+   "text": "Something in you answers. It feels like the floor rising under your feet. Fight back: [b]left click[/b]."
+  },
+  {
+   "id": "technique",
+   "title": "{technique}",
+   "text": "Your body knows a thing you were never taught. Press [b]Q[/b]: {technique}."
+  },
+  {
+   "id": "pattern",
+   "title": "Your Pattern",
+   "text": "There is a shape your will wants to take, and it has conditions. {pattern}\n{trigger_hint} Then press [b]R[/b], and strike each time the gold ring closes."
+  },
+  {
+   "id": "finish",
+   "title": "End it",
+   "text": "It is hurt and it is afraid of you now. Finish it, or drive it off."
+  }
+ ],
+ "trigger_hints": {
+  "after-perfect-hold": "Its Trigger is a perfect Hold: tap your guard just as it bites.",
+  "struck-first": "Its Trigger is being struck: it will come once the wolf has hurt you.",
+  "below-half": "Its Trigger is being below half health: it will come when this has cost you.",
+  "full-will": "Its Trigger is a full field: let your Will fill.",
+  "named-aloud": "Its Trigger is naming the foe aloud: press [b]N[/b] to shout what it is.",
+  "once-per-excursion": "Its Trigger is once in a night: this is the night.",
+  "underground": "Its Trigger is being underground, and you are.",
+  "last-standing": "Its Trigger is being the last one standing, and you are.",
+  "": "It has no Trigger: it is ready when you are."
+ },
+ "bar_hints": {
+  "never-silence": "Its Bar says never in silence: name the foe first ([b]N[/b]).",
+  "never-save-myself": "Its Bar says never to save yourself: use it before you are near the end.",
+  "never-twice-one-foe": "Its Bar says never twice on one foe: you get one."
+ },
+ "recruiter_lines": [
+  "You're the one who held the station. I'm Ilse Varga. I teach at the Academy at Alexandria, and I ride the lines looking for children whose fields have woken.",
+  "Most of them leak for a year before their field settles. Yours woke in a fight, and it woke with Terms in it. {pattern_name}. I watched it. Almost nobody does that the first night.",
+  "{blood_line}",
+  "Alexandria takes the awakened from every city. The next cohort enrolls at the Thaw, a year from now. Spend the year getting strong enough to walk through the Gate, and I will be there when you do."
+ ],
+ "blood_lines": {
+  "mark": "And there's something in your blood, isn't there? {blood}. Small things like that foretell a Pattern. Yours did.",
+  "kindred": "{blood}. Your people's blood is in how you stood. The Academy has seen a hundred of you; it has not seen you.",
+  "bloodline": "{blood} blood. The cities register that, and a house will hear about tonight. Better the Academy finds you first."
+ },
+ "academy": {
+  "title": "THE ACADEMY AT ALEXANDRIA",
+  "text": "The thirteenth fortress, built around the Library. Dormitories by Shape, the quad, the yard, the hearth hall where the rite is held, and the Gate where graduates leave on the line. You walk in at the Thaw with the Hundred-and-Fourth Cohort.\n\n[color=#9e958a]Act One (the Academy: the rite, the lessons, the cohort, the Field Examination) is the next thing to build.[/color]"
+ }
+}

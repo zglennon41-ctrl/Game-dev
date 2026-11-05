@@ -102,3 +102,24 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
     builder has a "testing only: restore" button so you can keep playing.
 29. **Two Bars always forbid in this room** (never against a beast, never on a Green line):
     every use is a breach. They are allowed, and labelled, because a vow can be impossible.
+
+# Step 3 (revised) — character creation and the opening (2026-11-05)
+
+30. **The ten questions and every answer's leanings are mine** (`data/creation.json`). They are
+    yours to rewrite: each answer lists what it leans toward and a "because" line for the reveal.
+31. **The Shape comes from the answers, leaned by the blood**, and the reveal says the rite at the
+    Academy will confirm it. In your design the rite decides the Shape and nobody chooses it;
+    should the rite in Act 1 ever disagree with the creator?
+32. **Weapons are the three launch cities' weapons from your Combat tab**, chosen by city and by
+    how you said you fight. The 3D models are KayKit placeholders (a harpoon is a staff, a
+    musket is a crossbow) until there is art.
+33. **Each Shape's one technique, stance, and three Pattern Forms are mine**
+    (`data/shape-kits.json`): Anchor Ground Strike; Turn Kindle (fire); Cast Closing Strike
+    (a dash); Read Read the Break (criticals); Bind Leash (slows); Make Ward (takes a bite).
+34. **Only 8 of the 40 Marks exist** (the ones the Blood tab names); the other 32 are yours.
+35. **The beast in a fight is always the Shape the hero counters**, so every Shape can break it.
+36. **The world encounter cannot kill you**, and a Bar there warns but cannot be broken.
+37. **The recruiter is Instructor Ilse Varga** of the Academy at Alexandria, a Read; her lines
+    are in `data/story.json`.
+38. **Order after this**: I have written the Academy (Act 1) as the next step, and folded the
+    Green zone into its Field Examination, which is how your Academy tab describes it.

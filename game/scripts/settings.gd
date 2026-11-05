@@ -58,3 +58,15 @@ func restore_pattern() -> void:
 	cfg.set_value("pattern", "lost_forever", false)
 	cfg.set_value("pattern", "lost_until", 0.0)
 	cfg.save(PATH)
+
+# --- The character -------------------------------------------------------------
+
+func hero() -> Dictionary:
+	var h: Variant = cfg.get_value("hero", "hero", {})
+	if h is Dictionary and h.has("shape") and Data.kits.has(h["shape"]):
+		return h
+	return {}
+
+func save_hero(h: Dictionary) -> void:
+	cfg.set_value("hero", "hero", h)
+	cfg.save(PATH)

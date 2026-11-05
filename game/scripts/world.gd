@@ -21,6 +21,7 @@ var lock_on := true
 var cam_yaw := 0.0
 var cam_pitch := -0.32
 var show_wolf := true
+var portrait := false   # the character creator: the camera faces the character
 
 var _player: Node3D
 var _p_anim: AnimationPlayer
@@ -196,29 +197,124 @@ func _build_chamber() -> void:
 	_piece("banner_patternA_red", Vector3(6.0, 0.6, hd - 0.55), 180.0)
 
 func _build_player() -> void:
-	_player = load("res://game/assets/kaykit/Knight.glb").instantiate()
+	build_hero(Fight.default_hero())
+
+var _tint := Color(0, 0, 0, 0)
+var _glow_light: OmniLight3D = null
+
+## Dress the body the character creator chose: the body model, the weapon in the right hand
+## (a shield in the left if it comes with one), and the blood where it shows.
+func build_hero(hero: Dictionary) -> void:
+	if _player:
+		_player.queue_free()
+	_player = load("res://game/assets/kaykit/%s.glb" % hero.get("body", "Knight")).instantiate()
 	add_child(_player)
-	for n in ["2H_Sword", "Rectangle_Shield", "Spike_Shield", "1H_Sword_Offhand", "Badge_Shield"]:
-		var x := _player.find_child(n, true, false)
-		if x:
-			x.visible = false
+	for a in _player.find_children("*", "BoneAttachment3D", true, false):
+		var n := String(a.name)
+		a.visible = n.contains("Helmet") or n.contains("Hat") or n.contains("Cape") or n.contains("Hood")
+	var skel: Skeleton3D = _player.find_child("Skeleton3D", true, false)
+	var w: Dictionary = Data.by_id(Data.weapons, hero.get("weapon", "saber"))
+	_sword = _attach(skel, "handslot.r", "res://game/assets/kaykit/weapons/%s.gltf" % w["model"])
+	if w.has("offhand"):
+		_attach(skel, "handslot.l", "res://game/assets/kaykit/weapons/%s.gltf" % w["offhand"])
 	_p_anim = _player.find_child("AnimationPlayer", true, false)
-	for loop in ["Idle", "Running_A", "Running_Strafe_Left", "Running_Strafe_Right", "Walking_Backwards", "Walking_A", "Blocking", "Death_A_Pose"]:
+	for loop in ["Idle", "Running_A", "Running_Strafe_Left", "Running_Strafe_Right", "Walking_Backwards", "Walking_A", "Blocking", "Death_A_Pose", "1H_Ranged_Aiming", "2H_Ranged_Aiming", "Spellcasting"]:
 		if _p_anim.has_animation(loop):
 			_p_anim.get_animation(loop).loop_mode = Animation.LOOP_LINEAR
+	_p_current = ""
 	_p_meshes = _player.find_children("*", "MeshInstance3D", true, false)
 	_overlay_player = _mat(C_HIT, 2.0, true, 0.0)
 	for m in _p_meshes:
 		m.material_overlay = _overlay_player
+	_aura = MeshInstance3D.new()
 	var cyl := CylinderMesh.new()
 	cyl.top_radius = 0.7
 	cyl.bottom_radius = 0.95
 	cyl.height = 2.2
 	_aura.mesh = cyl
 	_aura.position = Vector3(0, 1.1, 0)
-	_aura.material_override = _mat(C_STANCE, 1.4, true, 0.09)
+	_aura.material_override = _mat(_shape_color(hero.get("shape", "anchor")), 1.4, true, 0.09)
 	_aura.visible = false
 	_player.add_child(_aura)
+	_dress_blood(skel, hero.get("blood", ""))
+	_measure_weapon()
+
+func _attach(skel: Skeleton3D, bone: String, path: String) -> Node3D:
+	var att := BoneAttachment3D.new()
+	att.bone_name = bone
+	skel.add_child(att)
+	var model: Node3D = load(path).instantiate()
+	att.add_child(model)
+	return att
+
+const SHAPE_COLORS := { "anchor": Color(0.95, 0.68, 0.25), "turn": Color(1.0, 0.42, 0.15), "cast": Color(0.55, 0.85, 1.0),
+	"read": Color(0.85, 0.85, 1.0), "bind": Color(0.75, 0.45, 1.0), "make": Color(0.5, 1.0, 0.6) }
+
+func _shape_color(shape: String) -> Color:
+	return SHAPE_COLORS.get(shape, C_STANCE)
+
+## Blood is always visible: horns, wings, a glow, scales, fur, or a people's colouring.
+func _dress_blood(skel: Skeleton3D, blood_id: String) -> void:
+	_tint = Color(0, 0, 0, 0)
+	if _glow_light:
+		_glow_light = null
+	if blood_id == "":
+		return
+	var b: Dictionary = Data.by_id(Data.bloods, blood_id)
+	var tints := { "ridgefolk": Color(0.55, 0.55, 0.6), "fogborn": Color(0.75, 0.8, 0.9), "mound-kin": Color(0.6, 0.35, 0.2),
+		"greenwood": Color(0.3, 0.7, 0.3), "forgeborn": Color(0.25, 0.15, 0.1), "ironblooded": Color(0.3, 0.32, 0.4),
+		"tidewater": Color(0.3, 0.6, 0.7), "nightfolk": Color(0.2, 0.1, 0.3), "dragon-blooded": Color(0.2, 0.55, 0.35), "fused": Color(0.45, 0.32, 0.2) }
+	if tints.has(blood_id):
+		_tint = Color(tints[blood_id], 0.22)
+	match b.get("look", ""):
+		"horns":
+			var head := BoneAttachment3D.new()
+			head.bone_name = "head"
+			skel.add_child(head)
+			for side in [-1, 1]:
+				var horn := MeshInstance3D.new()
+				var cone := CylinderMesh.new()
+				cone.top_radius = 0.0
+				cone.bottom_radius = 0.09
+				cone.height = 0.45
+				horn.mesh = cone
+				horn.position = Vector3(side * 0.28, 0.95, 0.05)
+				horn.rotation_degrees = Vector3(-20, 0, -side * 25)
+				horn.material_override = _mat(Color(0.18, 0.1, 0.1))
+				head.add_child(horn)
+		"wings":
+			var chest := BoneAttachment3D.new()
+			chest.bone_name = "chest"
+			skel.add_child(chest)
+			for side in [-1, 1]:
+				var wing := MeshInstance3D.new()
+				var pm := PrismMesh.new()
+				pm.size = Vector3(1.1, 1.3, 0.05)
+				wing.mesh = pm
+				wing.position = Vector3(side * 0.55, 0.45, -0.35)
+				wing.rotation_degrees = Vector3(0, side * 25, side * 65)
+				wing.material_override = _mat(Color(0.92, 0.9, 0.85))
+				chest.add_child(wing)
+		"glow":
+			_tint = Color(1.0, 0.85, 0.5, 0.18)
+			_glow_light = OmniLight3D.new()
+			_glow_light.light_color = Color(1.0, 0.85, 0.55)
+			_glow_light.light_energy = 0.8
+			_glow_light.omni_range = 3.0
+			_glow_light.position = Vector3(0, 1.4, 0)
+			_player.add_child(_glow_light)
+		"fur":
+			var head2 := BoneAttachment3D.new()
+			head2.bone_name = "head"
+			skel.add_child(head2)
+			for side in [-1, 1]:
+				var ear := MeshInstance3D.new()
+				var pm2 := PrismMesh.new()
+				pm2.size = Vector3(0.22, 0.3, 0.08)
+				ear.mesh = pm2
+				ear.position = Vector3(side * 0.3, 1.05, 0.0)
+				ear.material_override = _mat(Color(0.4, 0.28, 0.18))
+				head2.add_child(ear)
 
 func _build_wolf() -> void:
 	_wolf = load("res://game/assets/quaternius/Wolf.glb").instantiate()
@@ -281,22 +377,6 @@ func _build_effects() -> void:
 	_trail.material_override = tm
 	_trail.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_trail)
-	# Where the blade is: two points along its length, from the sword mesh's own bounds.
-	_sword = _player.find_child("1H_Sword", true, false)
-	if _sword:
-		var mi: MeshInstance3D = _sword.find_children("*", "MeshInstance3D", true, false)[0] if _sword.find_children("*", "MeshInstance3D", true, false).size() > 0 else null
-		if mi:
-			var box := mi.get_aabb()
-			var axis := 0
-			for i in 3:
-				if box.size[i] > box.size[axis]:
-					axis = i
-			var lo := box.get_center()
-			var hi := box.get_center()
-			lo[axis] = box.position[axis] + box.size[axis] * 0.35
-			hi[axis] = box.position[axis] + box.size[axis] * 1.0
-			_sword_a = (_sword.global_transform.affine_inverse() * mi.global_transform) * lo
-			_sword_b = (_sword.global_transform.affine_inverse() * mi.global_transform) * hi
 	var layer := CanvasLayer.new()
 	layer.layer = 5
 	add_child(layer)
@@ -308,6 +388,27 @@ func _build_effects() -> void:
 	sm.shader = sh
 	_vignette.material = sm
 	layer.add_child(_vignette)
+
+## Where the blade is: two points along its length, from the weapon mesh's own bounds.
+func _measure_weapon() -> void:
+	if not _sword:
+		return
+	var ms := _sword.find_children("*", "MeshInstance3D", true, false)
+	if ms.size() == 0:
+		return
+	var mi: MeshInstance3D = ms[0]
+	var box := mi.get_aabb()
+	var axis := 0
+	for i in 3:
+		if box.size[i] > box.size[axis]:
+			axis = i
+	var lo := box.get_center()
+	var hi := box.get_center()
+	lo[axis] = box.position[axis] + box.size[axis] * 0.35
+	hi[axis] = box.position[axis] + box.size[axis] * 1.0
+	var rel := _sword.global_transform.affine_inverse() * mi.global_transform
+	_sword_a = rel * lo
+	_sword_b = rel * hi
 
 func _update_trail(swinging: bool, dt: float) -> void:
 	if _sword and swinging:
@@ -503,6 +604,41 @@ func _ring_wave(at: Vector3, color: Color, radius: float) -> void:
 	tw.tween_property(m, "albedo_color:a", 0.0, 0.35)
 	tw.chain().tween_callback(mi.queue_free)
 
+var _ward: MeshInstance3D = null
+var _ward_at := Vector3.ZERO
+var _tether := MeshInstance3D.new()
+var _tether_mesh := ImmediateMesh.new()
+var _fire: CPUParticles3D = null
+
+func _tracer(from: Vector3, to: Vector3, hit: bool) -> void:
+	var im := ImmediateMesh.new()
+	var mi := MeshInstance3D.new()
+	mi.mesh = im
+	var m := _mat(Color(1.0, 0.9, 0.6), 4.0, true, 0.9)
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mi.material_override = m
+	im.surface_begin(Mesh.PRIMITIVE_LINES)
+	im.surface_add_vertex(from)
+	im.surface_add_vertex(to)
+	im.surface_end()
+	add_child(mi)
+	impact(from, Color(1.0, 0.85, 0.5), 0.5)
+	if hit:
+		impact(to, Color(1.0, 0.9, 0.7), 0.6)
+	var tw: Tween = create_tween()
+	tw.tween_property(m, "albedo_color:a", 0.0, 0.12)
+	tw.tween_callback(mi.queue_free)
+
+## The first time: the field wakes. A wave of the Shape's colour, and the screen breathes.
+func field_wakes(f: Fight, hero: Dictionary) -> void:
+	var c := _shape_color(hero.get("shape", "anchor"))
+	_ring_wave(_v3(f.p_pos), c, 6.0)
+	burst(_v3(f.p_pos, 1.0), c, 80, 7.0)
+	impact(_v3(f.p_pos, 1.2), c, 2.4)
+	flash_screen(c, 0.7)
+	floater(_v3(f.p_pos, 3.0), "YOUR FIELD WAKES", c, 96, 2.2, 0.4)
+	slowmo(0.6, 0.25)
+
 ## Freeze time for a moment: the weight of a hit.
 func hitstop(seconds: float, scale := 0.05) -> void:
 	Engine.time_scale = scale
@@ -526,7 +662,7 @@ func feedback(f: Fight, events: Array) -> void:
 				anim_event(e)
 			"hit":
 				var heavy: bool = e["heavy"] or e["pattern"]
-				floater(W + Vector3(0, 0.2, 0), str(int(e["damage"])), C_GOLD if e["pattern"] else (C_STAGGER if e["staggered"] else C_TEXT), 84 if heavy else 60)
+				floater(W + Vector3(0, 0.2, 0), ("%d!" if e.get("crit", false) else "%d") % int(e["damage"]), C_GOLD if e["pattern"] else (C_STAGGER if e["staggered"] else (Color(0.85, 0.85, 1.0) if e.get("crit", false) else C_TEXT)), 84 if heavy or e.get("crit", false) else 60)
 				burst(_v3(f.w_pos, 0.9), C_GOLD if heavy else C_HIT, 30 if heavy else 14, 7.0 if heavy else 5.0)
 				impact(_v3(f.w_pos, 0.9) + _v3((f.p_pos - f.w_pos).normalized() * 0.4), C_GOLD if heavy else C_HIT, 1.1 if heavy else 0.7)
 				_wolf_flash = 1.0
@@ -534,6 +670,30 @@ func feedback(f: Fight, events: Array) -> void:
 				hitstop(float(feel["heavyHitstop"]) if heavy else float(feel["hitstop"]))
 			"whiff":
 				pass
+			"shot":
+				_tracer(_v3(e["from"], 1.35) + _v3(Vector2.from_angle(f.p_facing) * 0.6), _v3(e["to"], 1.0), e["hit"])
+			"burst":
+				_ring_wave(_v3(e["at"]), Color(1.0, 0.45, 0.15), 2.8)
+				burst(_v3(e["at"], 0.8), Color(1.0, 0.5, 0.15), 40, 6.0)
+				impact(_v3(e["at"], 1.0), Color(1.0, 0.5, 0.2), 1.6)
+			"crit-open":
+				floater(W + Vector3(0, 0.9, 0), "THE BREAK IS OPEN", Color(0.9, 0.9, 1.0), 56, 1.4)
+			"tether":
+				floater(W + Vector3(0, 0.9, 0), "LEASHED", Color(0.8, 0.55, 1.0), 56, 1.2)
+			"ward-up":
+				_ward_at = _v3(e["at"])
+				_ring_wave(_ward_at, Color(0.5, 1.0, 0.6), 2.0)
+			"ward-broken":
+				if _ward:
+					burst(_ward.position + Vector3(0, 1.0, 0), Color(0.5, 1.0, 0.6), 40, 6.0)
+				floater(P, "THE WARD TAKES IT", Color(0.5, 1.0, 0.6), 52)
+			"burn-tick":
+				floater(W + Vector3(randf_range(-0.3, 0.3), 0, 0), "%d" % int(e["damage"]), Color(1.0, 0.55, 0.2), 34, 0.6)
+			"second-heart":
+				floater(P + Vector3(0, 0.4, 0), "A SECOND HEART", Color(1.0, 0.4, 0.4), 72, 1.6)
+				flash_screen(Color(1.0, 0.2, 0.2), 0.6)
+			"hesitates":
+				floater(W + Vector3(0, 0.8, 0), "IT HESITATES", C_TEXT, 56)
 			"quake":
 				_ring_wave(_v3(e["at"]), C_STANCE, 2.6)
 				burst(_v3(e["at"], 0.1), Color(0.7, 0.6, 0.5), 24, 4.0)
@@ -648,7 +808,7 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 	_player.rotation.y = _yaw(f.p_facing)
 	_aura.visible = f.p_stance
 	_player_flash = maxf(0.0, _player_flash - dt * 6.0)
-	_overlay_player.albedo_color = Color(C_WINDUP, 0.45 * _player_flash)
+	_overlay_player.albedo_color = _tint.lerp(Color(C_WINDUP, 0.45), _player_flash) if _player_flash > 0.01 else _tint
 	if _clock >= _p_oneshot_until:
 		match f.p_state:
 			"free":
@@ -663,6 +823,8 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 							_loop(_p_anim, "Running_Strafe_Right" if rel > 0 else "Running_Strafe_Left", 1.0)
 					else:
 						_loop(_p_anim, "Running_A", 1.0 if not f.p_stance else 0.8)
+				elif f.ranged and f.p_lock:
+					_loop(_p_anim, "2H_Ranged_Aiming" if f.weapon["style"] == "gun-heavy" else "1H_Ranged_Aiming")
 				else:
 					_loop(_p_anim, "Idle")
 			"down":
@@ -716,7 +878,7 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 	match f.w_state:
 		"stagger": state_text = "  ·  STAGGERED"
 		"windup": state_text = "  ·  %s" % String(f.w_attack["name"]).to_upper()
-	_wolf_label.text = "%s%s" % [String(f.beast["name"]).to_upper(), state_text]
+	_wolf_label.text = "%s  ·  %s%s" % [String(f.beast["name"]).to_upper(), String(f.w_shape).capitalize(), state_text]
 	_lock_ring.visible = _wolf.visible and f.p_lock and f.w_state != "down"
 	_lock_ring.position = _v3(f.w_pos, 0.07)
 	_lock_ring.scale = Vector3(1.0 + 0.05 * sin(_clock * 5.0), 0.04, 1.0 + 0.05 * sin(_clock * 5.0))
@@ -756,7 +918,8 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 			lb.queue_free()
 			_floaters.erase(fl)
 
-	_update_trail(f.p_state in ["attack", "technique", "pattern"], dt)
+	_update_trail(f.p_state in ["attack", "technique", "pattern"] and not f.ranged, dt)
+	_update_statuses(f)
 	_vig_tint.a = maxf(0.0, _vig_tint.a - dt * 1.6)
 	var low := 1.0 - clampf(f.p_hp / float(Data.room["player"]["health"]), 0.0, 1.0)
 	var pulse := 0.0 if f.p_hp > 30.0 or f.p_state == "down" else 0.12 * (0.5 + 0.5 * sin(_clock * 6.0)) * low
@@ -771,6 +934,14 @@ func _yaw(facing: float) -> float:
 
 func _update_camera(dt: float, cam_input: Vector2, f: Fight) -> void:
 	var p := _v3(f.p_pos)
+	if portrait:
+		# Face the character; leave room on the right for the reveal.
+		var k2 := 1.0 - exp(-dt * 4.0)
+		_cam_pos = _cam_pos.lerp(p + Vector3(1.25, 1.55, 3.6), k2)
+		_cam_look = _cam_look.lerp(p + Vector3(1.25, 1.05, 0), k2)
+		camera.position = _cam_pos
+		camera.look_at(_cam_look, Vector3.UP)
+		return
 	var w := _v3(f.w_pos)
 	var focus := p + Vector3(0, 1.4, 0)
 	var want: Vector3
@@ -806,6 +977,67 @@ func _update_camera(dt: float, cam_input: Vector2, f: Fight) -> void:
 	camera.position = _cam_pos + jitter
 	if camera.position.distance_to(_cam_look) > 0.01:
 		camera.look_at(_cam_look + jitter * 0.4, Vector3.UP)
+
+func _update_statuses(f: Fight) -> void:
+	# The Ward post.
+	var warded := f.now < f.ward_until
+	if warded and not _ward:
+		_ward = MeshInstance3D.new()
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.25
+		cm.bottom_radius = 0.35
+		cm.height = 2.2
+		_ward.mesh = cm
+		_ward.material_override = _mat(Color(0.5, 1.0, 0.6), 1.5, true, 0.45)
+		add_child(_ward)
+	if _ward:
+		if warded:
+			_ward.position = _v3(f.p_pos + Vector2.from_angle(f.p_facing + 1.2) * 1.0, 1.1)
+		else:
+			_ward.queue_free()
+			_ward = null
+	# The Leash: a line of field from the hand to the foe while it holds.
+	if _tether.get_parent() == null:
+		_tether.mesh = _tether_mesh
+		var tm := _mat(Color(0.75, 0.45, 1.0), 3.0, true, 0.85)
+		tm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		_tether.material_override = tm
+		add_child(_tether)
+	_tether_mesh.clear_surfaces()
+	if f.now < f.w_slow_until and f.w_state not in ["down", "absent"]:
+		_tether_mesh.surface_begin(Mesh.PRIMITIVE_LINES)
+		var a := _v3(f.p_pos, 1.3)
+		var b := _v3(f.w_pos, 0.9)
+		for k in 6:
+			var u := float(k) / 6.0
+			var v := float(k + 1) / 6.0
+			var sag := Vector3(0, -0.3 * sin(u * PI), 0)
+			var sag2 := Vector3(0, -0.3 * sin(v * PI), 0)
+			_tether_mesh.surface_add_vertex(a.lerp(b, u) + sag)
+			_tether_mesh.surface_add_vertex(a.lerp(b, v) + sag2)
+		_tether_mesh.surface_end()
+	# Burning.
+	if not _fire:
+		_fire = CPUParticles3D.new()
+		_fire.amount = 24
+		_fire.lifetime = 0.6
+		_fire.direction = Vector3(0, 1, 0)
+		_fire.spread = 25.0
+		_fire.initial_velocity_min = 0.8
+		_fire.initial_velocity_max = 1.8
+		_fire.gravity = Vector3(0, 1.5, 0)
+		_fire.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+		_fire.emission_sphere_radius = 0.5
+		var sm := SphereMesh.new()
+		sm.radius = 0.06
+		sm.height = 0.12
+		_fire.mesh = sm
+		var fm := _mat(Color(1.0, 0.5, 0.15), 4.0, true, 0.8)
+		fm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		_fire.material_override = fm
+		add_child(_fire)
+	_fire.emitting = f.now < f.w_burn_until and f.w_state not in ["down", "absent"]
+	_fire.position = _v3(f.w_pos, 0.8)
 
 ## Like a spring arm: if the camera would sit inside a wall, pull it in along the line to
 ## the focus and lift it, so it looks down over the Anchor instead of through stone.

@@ -121,7 +121,7 @@ static func generate(answers: Array, blood_id := "") -> Dictionary:
 		"name": "", "blood": blood_id, "shape": shape, "city": city, "discipline": CITY_DISCIPLINE[city],
 		"weapon": best_w["id"], "seed": seed, "pattern": pattern, "body": Data.creation["models"][shape],
 		"answers": answers.duplicate(),
-		"why": { "shape": shape_why, "city": [city_why], "weapon": weapon_why,
+		"why": { "shape": _unique(shape_why), "city": [city_why], "weapon": _unique(weapon_why.filter(func(x): return x != city_why)),
 			"form": t["why"]["effect"].get(effect, []), "trigger": t["lines"].get("trigger", ""),
 			"toll": t["lines"].get("toll", ""), "bar": t["lines"].get("bar", ""), "seed": t["lines"].get("seed", "") },
 	}
@@ -131,3 +131,10 @@ static func weapon(id: String) -> Dictionary:
 
 static func blood(id: String) -> Dictionary:
 	return Data.by_id(Data.bloods, id)
+
+static func _unique(xs: Array) -> Array:
+	var out: Array = []
+	for x in xs:
+		if not out.has(x):
+			out.append(x)
+	return out

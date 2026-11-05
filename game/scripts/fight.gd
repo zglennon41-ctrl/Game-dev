@@ -89,6 +89,9 @@ var crit_until := -9.0
 var ward_until := -9.0
 var second_heart_used := false
 var w_shouted := false
+var mercy := false           # the prologue: the hero cannot fall
+var allow_breach := true     # the prologue: a Bar warns, but cannot be broken
+var w_floor := 0.0           # the prologue: the beast cannot fall below this until the story is ready
 
 func _init(opts: Dictionary = {}) -> void:
 	room = Data.room
@@ -105,6 +108,11 @@ func _init(opts: Dictionary = {}) -> void:
 	if hero.get("blood", "") != "":
 		bc = Data.by_id(Data.bloods, hero["blood"]).get("combat", {})
 	w_shape = opts.get("beast_shape", Data.opposite(player_shape))
+	mercy = opts.get("mercy", false)
+	allow_breach = opts.get("allow_breach", true)
+	if opts.has("beast_health"):
+		beast = beast.duplicate(true)
+		beast["health"] = opts["beast_health"]
 	arena = Vector2(room["arena"]["width"], room["arena"]["depth"])
 	passive = opts.get("passive", false)
 	respawn = opts.get("respawn", true)
@@ -360,7 +368,7 @@ func _press_pattern() -> void:
 	var bars := PatternTerms.covering_bars(self, pattern["terms"])
 	var breach := false
 	if bars.size() > 0:
-		if now > breach_armed_until:
+		if now > breach_armed_until or not allow_breach:
 			breach_armed_until = now + float(P["breachConfirmSeconds"])
 			_emit({ "type": "bar-warning", "bars": bars, "sworn": pattern["sworn"] })
 			return
@@ -494,7 +502,7 @@ func _update_burn(dt: float) -> void:
 	w_burn_tick += dt
 	if w_burn_tick >= 0.5:
 		w_burn_tick = 0.0
-		w_hp = maxf(0.0, w_hp - 2.0)
+		w_hp = maxf(w_floor, w_hp - 2.0)
 		stats["damage_dealt"] += 2
 		_emit({ "type": "burn-tick", "damage": 2 })
 		if w_hp == 0.0:
@@ -672,7 +680,7 @@ func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
 	var crit := now < crit_until and not from_pattern
 	if crit:
 		dmg = roundf(dmg * float(tech.get("crit", 1.5)))
-	w_hp = maxf(0.0, w_hp - dmg)
+	w_hp = maxf(w_floor, w_hp - dmg)
 	stats["hits"] += 1
 	stats["damage_dealt"] += dmg
 	p_combo_count += 1
@@ -879,6 +887,8 @@ func _resolve_bite() -> void:
 				p_timer = 0.0
 				_emit({ "type": "anim", "who": "player", "name": "Hit_A", "speed": 1.2 })
 	p_hp = maxf(0.0, p_hp - dmg)
+	if mercy:
+		p_hp = maxf(p_hp, 1.0)
 	if p_hp == 0.0 and bc.get("secondHeart", false) and not second_heart_used:
 		second_heart_used = true
 		p_hp = 1.0
