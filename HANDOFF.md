@@ -351,6 +351,11 @@ cosmetics; any art pipeline.
   It is the full 8–12 hours, walkable in 3D (the quad, the yard, the hearth hall, the
   dormitories, the Instructors' tower, the Gate). The cohort is the twelve NPC classmates,
   generated new for every run. Nothing in it happens on a server.
+- **The rite can surprise** (owner, 2026-11-05): the bowl reads the Shape from the
+  questionnaire, how the Academy has been played, and its own chance, and may disagree with
+  the questions. It plays as a slow, anticipatory reveal (a monster-breeding game's disc
+  reading): pour, the Shapes' lights spinning and slowing, the landing, then the genius made
+  in the fire.
 - **No one dies at the Academy** (owner, 2026-11-05). Its wards make training safe, and on
   expeditions a rescue team stands by: a downed student is pulled out, and failing costs the
   run something but never the character.

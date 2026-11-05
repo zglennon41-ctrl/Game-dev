@@ -17,40 +17,269 @@
   "places": {
     "quad": {
       "name": "The Quad",
-      "size": [30, 22],
+      "size": [
+        30,
+        22
+      ],
       "floor": "floor_tile_large",
       "walls": "fortress",
-      "spawn": [0, 8],
-      "doors": [
-        { "to": "gate", "at": [0, 11], "label": "the Gate", "locked": "The line leaves from the Gate at Commencement. Not before." },
-        { "to": "yard", "at": [-15, 0], "label": "the Yard" },
-        { "to": "hearth", "at": [0, -11], "label": "the Hearth Hall", "locked": "The rite is held in the Hearth Hall. The Instructors will call you when it is time: after your first lesson, and a night's rest." },
-        { "to": "dorm", "at": [15, 4], "label": "the Dormitory" },
-        { "to": "tower", "at": [15, -5], "label": "the Instructors' Tower", "locked": "The Instructors' Tower. Students go up when they are sent for." }
+      "spawn": [
+        0,
+        8
       ],
-      "spots": [[-6, 3], [-8, -2], [-3, -6], [4, -5], [7, 1], [9, -3], [5, 6], [-10, 4], [-9, -7], [10, 5], [3, 2.5], [-4, 7.5]],
-      "instructors": [{ "id": "varga", "at": [2, 7] }]
+      "doors": [
+        {
+          "to": "gate",
+          "at": [
+            0,
+            11
+          ],
+          "label": "the Gate",
+          "locked": "The line leaves from the Gate at Commencement. Not before."
+        },
+        {
+          "to": "yard",
+          "at": [
+            -15,
+            0
+          ],
+          "label": "the Yard"
+        },
+        {
+          "to": "hearth",
+          "at": [
+            0,
+            -11
+          ],
+          "label": "the Hearth Hall",
+          "locked": "The rite is held in the Hearth Hall. The Instructors will call you when it is time: after your first lesson, and a night's rest.",
+          "opensWhen": "rested"
+        },
+        {
+          "to": "dorm",
+          "at": [
+            15,
+            4
+          ],
+          "label": "the Dormitory"
+        },
+        {
+          "to": "tower",
+          "at": [
+            15,
+            -5
+          ],
+          "label": "the Instructors' Tower",
+          "locked": "The Instructors' Tower. Students go up when they are sent for."
+        }
+      ],
+      "spots": [
+        [
+          -6,
+          3
+        ],
+        [
+          -8,
+          -2
+        ],
+        [
+          -3,
+          -6
+        ],
+        [
+          4,
+          -5
+        ],
+        [
+          7,
+          1
+        ],
+        [
+          9,
+          -3
+        ],
+        [
+          5,
+          6
+        ],
+        [
+          -10,
+          4
+        ],
+        [
+          -9,
+          -7
+        ],
+        [
+          10,
+          5
+        ],
+        [
+          3,
+          2.5
+        ],
+        [
+          -4,
+          7.5
+        ]
+      ],
+      "instructors": [
+        {
+          "id": "varga",
+          "at": [
+            2,
+            7
+          ]
+        }
+      ]
     },
     "yard": {
       "name": "The Yard",
-      "size": [22, 14],
+      "size": [
+        22,
+        14
+      ],
       "floor": "floor_dirt_large_rocky",
       "walls": "yard",
-      "spawn": [-8, 0],
-      "doors": [{ "to": "quad", "at": [-11, 0], "label": "the Quad" }],
+      "spawn": [
+        -8,
+        0
+      ],
+      "doors": [
+        {
+          "to": "quad",
+          "at": [
+            -11,
+            0
+          ],
+          "label": "the Quad"
+        }
+      ],
       "spots": [],
-      "instructors": [{ "id": "bask", "at": [-6, -4] }]
+      "instructors": [
+        {
+          "id": "bask",
+          "at": [
+            -6,
+            -4
+          ]
+        }
+      ]
     },
     "dorm": {
       "name": "The Dormitory",
-      "size": [14, 10],
+      "size": [
+        14,
+        10
+      ],
       "floor": "floor_tile_large",
       "walls": "fortress",
-      "spawn": [-5, 0],
-      "doors": [{ "to": "quad", "at": [-7, 0], "label": "the Quad" }],
-      "rest": { "at": [4, -3], "label": "your bunk" },
+      "spawn": [
+        -5,
+        0
+      ],
+      "doors": [
+        {
+          "to": "quad",
+          "at": [
+            -7,
+            0
+          ],
+          "label": "the Quad"
+        }
+      ],
+      "rest": {
+        "at": [
+          4,
+          -3
+        ],
+        "label": "your bunk"
+      },
       "spots": [],
       "instructors": []
+    },
+    "hearth": {
+      "name": "The Hearth Hall",
+      "size": [
+        18,
+        18
+      ],
+      "floor": "floor_tile_large",
+      "walls": "fortress",
+      "spawn": [
+        0,
+        6.5
+      ],
+      "doors": [
+        {
+          "to": "quad",
+          "at": [
+            0,
+            9
+          ],
+          "label": "the Quad"
+        }
+      ],
+      "spots": [
+        [
+          -5,
+          -2
+        ],
+        [
+          -4.5,
+          2
+        ],
+        [
+          -3,
+          -5
+        ],
+        [
+          0,
+          -5.8
+        ],
+        [
+          3,
+          -5
+        ],
+        [
+          4.5,
+          2
+        ],
+        [
+          5,
+          -2
+        ],
+        [
+          -6,
+          4.5
+        ],
+        [
+          6,
+          4.5
+        ],
+        [
+          -2,
+          5.5
+        ],
+        [
+          2.2,
+          5.6
+        ],
+        [
+          -6.5,
+          -5
+        ]
+      ],
+      "cohortHere": true,
+      "instructors": [
+        {
+          "id": "varga",
+          "at": [
+            2.2,
+            -1.6
+          ]
+        }
+      ]
     }
   },
   "instructors": [
@@ -63,7 +292,9 @@
       "lines": {
         "before:hold": "The Yardmaster is waiting. West door. Don't make him come and get you; he enjoys it.",
         "after:hold": "Bask says you held. He doesn't say that. Rest tonight; tomorrow the hearth.",
-        "default": "Go on. The Academy rewards the ones who walk about in it."
+        "default": "Go on. The Academy rewards the ones who walk about in it.",
+        "before:rite": "The hearth is lit. North door, when you're ready. Everyone in your cohort has been through it this morning but you. No pressure.",
+        "after:rite": "So that's what you are. Good. Now we teach you to use it."
       }
     },
     {
@@ -72,80 +303,152 @@
       "title": "Anchor · master of the yard",
       "shape": "anchor",
       "body": "Barbarian",
-      "genius": { "name": "Millstone", "beast": "millstone" },
+      "genius": {
+        "name": "Millstone",
+        "beast": "millstone"
+      },
       "lines": {
         "before:hold": "You're Varga's. Good. That one is Millstone, my genius. He is going to bite you a great many times today. Ready?",
         "after:hold": "Come back and spar whenever you like. Millstone has taken a liking to you; that is not a compliment.",
-        "default": "The yard is open. The wards are up. Hit something."
+        "default": "The yard is open. The wards are up. Hit something.",
+        "after:rite": "Heard the bowl had something to say about you. It usually does."
       }
     }
   ],
   "cohort": {
     "first": {
-      "columbia": ["Wren", "Abel", "Clary", "Jonah", "Hettie", "Silas", "Nell", "Amos", "Della", "Rufus"],
-      "cahokia": ["Tamsin", "Okon", "Ravel", "Isa", "Corin", "Pell", "Maren", "Tobit", "Yara", "Lio"],
-      "lunden": ["Prue", "Edmund", "Ottilie", "Bram", "Cass", "Hollis", "Rook", "Imogen", "Fenn", "Agatha"]
+      "columbia": [
+        "Wren",
+        "Abel",
+        "Clary",
+        "Jonah",
+        "Hettie",
+        "Silas",
+        "Nell",
+        "Amos",
+        "Della",
+        "Rufus"
+      ],
+      "cahokia": [
+        "Tamsin",
+        "Okon",
+        "Ravel",
+        "Isa",
+        "Corin",
+        "Pell",
+        "Maren",
+        "Tobit",
+        "Yara",
+        "Lio"
+      ],
+      "lunden": [
+        "Prue",
+        "Edmund",
+        "Ottilie",
+        "Bram",
+        "Cass",
+        "Hollis",
+        "Rook",
+        "Imogen",
+        "Fenn",
+        "Agatha"
+      ]
     },
     "last": {
-      "columbia": ["Ashby", "Pryor", "Coalwood", "Tull", "Brandt", "Mercer", "Haskell", "Rowe"],
-      "cahokia": ["Mound", "Varro", "Sedge", "Kettle", "Oake", "Marrow", "Fennick", "Quill"],
-      "lunden": ["Thorne", "Galloway", "Fitch", "Lockyear", "Penhale", "Strand", "Vesey", "Blight"]
+      "columbia": [
+        "Ashby",
+        "Pryor",
+        "Coalwood",
+        "Tull",
+        "Brandt",
+        "Mercer",
+        "Haskell",
+        "Rowe"
+      ],
+      "cahokia": [
+        "Mound",
+        "Varro",
+        "Sedge",
+        "Kettle",
+        "Oake",
+        "Marrow",
+        "Fennick",
+        "Quill"
+      ],
+      "lunden": [
+        "Thorne",
+        "Galloway",
+        "Fitch",
+        "Lockyear",
+        "Penhale",
+        "Strand",
+        "Vesey",
+        "Blight"
+      ]
     },
     "temperaments": [
       {
         "id": "earnest",
         "lines": {
           "greet": "I'm {my_name}. {my_city}, {my_blood}. I think I'm a {my_shape}, but the rite will say. I've read everything the Library lets first-years read. Twice.",
-          "after:hold": "You did the Millstone drill already? What did he do on the fifth bite? I want to be ready."
+          "after:hold": "You did the Millstone drill already? What did he do on the fifth bite? I want to be ready.",
+          "after:rite": "The bowl took longer with you than with anyone. I timed it. Is that good? I think that's good."
         }
       },
       {
         "id": "wry",
         "lines": {
           "greet": "{my_name}. Pleasure. Don't tell anyone, but I woke up in a privy. The field does not choose its moments.",
-          "after:hold": "You've got the yard look. Sort of a limp, but proud of it."
+          "after:hold": "You've got the yard look. Sort of a limp, but proud of it.",
+          "after:rite": "Your genius looked at me. I've decided we're friends now, it and I. You can come too."
         }
       },
       {
         "id": "proud",
         "lines": {
           "greet": "{my_name} of {my_city}. My family has sent a child here every generation for three hundred years. You're the recruit Varga brought in herself? Hm.",
-          "after:hold": "So you held. Everyone holds against a genius that's being kind to them."
+          "after:hold": "So you held. Everyone holds against a genius that's being kind to them.",
+          "after:rite": "My family's bowl reading took four seconds. Yours was... theatrical."
         }
       },
       {
         "id": "scared",
         "lines": {
           "greet": "Oh. Hello. I'm {my_name}. Sorry. Everyone here already seems to know what they are. I'm {my_blood}, and that's about all I'm sure of.",
-          "after:hold": "Does it hurt? The yard? Varga said the wards stop it hurting, but she says a lot of things kindly."
+          "after:hold": "Does it hurt? The yard? Varga said the wards stop it hurting, but she says a lot of things kindly.",
+          "after:rite": "I closed my eyes for mine. I watched all of yours. It was beautiful. Is that strange to say?"
         }
       },
       {
         "id": "kind",
         "lines": {
           "greet": "You're new off the line too? I'm {my_name}. If you need anything, the {my_shape} bunks are by the east wall and I don't sleep much.",
-          "after:hold": "You look done in. There's bread in the dormitory; I saved you some."
+          "after:hold": "You look done in. There's bread in the dormitory; I saved you some.",
+          "after:rite": "How do you feel? Mine made me sick for an hour after. There's tea in the dormitory."
         }
       },
       {
         "id": "sharp",
         "lines": {
           "greet": "{my_name}. You're a {your_shape}, or you will be. It's in how you stand. Don't look so surprised; reading people is the first thing a field does.",
-          "after:hold": "Your guard came up late on the left. Twice. You're welcome."
+          "after:hold": "Your guard came up late on the left. Twice. You're welcome.",
+          "after:rite": "Called it. Well. Half called it. The bowl reads things you don't show; that's the point of it."
         }
       },
       {
         "id": "quiet",
         "lines": {
           "greet": "...{my_name}.",
-          "after:hold": "Good hold."
+          "after:hold": "Good hold.",
+          "after:rite": "...It suits you."
         }
       },
       {
         "id": "reckless",
         "lines": {
           "greet": "{my_name}! {my_city}! Want to spar? Not now, the wards in the quad are thin. Later. Definitely later.",
-          "after:hold": "I asked Bask if I could take Millstone without the guard. He said no. He said it in a way I've decided means yes."
+          "after:hold": "I asked Bask if I could take Millstone without the guard. He said no. He said it in a way I've decided means yes.",
+          "after:rite": "Want to see if our geniuses will fight? Not now. Later. Definitely later."
         }
       }
     ]
@@ -157,7 +460,12 @@
       "title": "Hold",
       "place": "yard",
       "instructor": "bask",
-      "allow": ["block-down", "block-up", "dodge", "lock"],
+      "allow": [
+        "block-down",
+        "block-up",
+        "dodge",
+        "lock"
+      ],
       "intro": [
         "Hold is the first thing and the last thing. Before the stance, before the techniques, before the Pattern: you hold your field in, and you hold your guard up.",
         "A child whose field is waking leaks. Will comes off you like lamplight off a window, and the molted things on the line can smell it from a mile out. That's why the cut-wolf came for you, {name}. Not bad luck. You were shining.",
@@ -167,29 +475,63 @@
         {
           "title": "Contain",
           "text": "Your Will is the blue bar under your health. Stand still, breathe, and draw it back in. [b]Do nothing[/b] until it is full.",
-          "setup": { "will": 25, "genius": "sit" },
-          "goal": { "type": "will-full" }
+          "setup": {
+            "will": 25,
+            "genius": "sit"
+          },
+          "goal": {
+            "type": "will-full"
+          }
         },
         {
           "title": "The guard",
           "text": "Millstone will come at you now. When he winds up he glows red and a [b]![/b] rises over him. [b]Hold right click[/b] to take the bite on your guard. Block three bites.",
-          "setup": { "genius": "loose" },
-          "goal": { "type": "event", "event": ["block", "parry"], "count": 3 },
-          "notes": { "hurt": "Bitten. The wards took it. Get the guard up before he lunges, and face him.", "parry": "A parry: that is the next lesson, and it counts." }
+          "setup": {
+            "genius": "loose"
+          },
+          "goal": {
+            "type": "event",
+            "event": [
+              "block",
+              "parry"
+            ],
+            "count": 3
+          },
+          "notes": {
+            "hurt": "Bitten. The wards took it. Get the guard up before he lunges, and face him.",
+            "parry": "A parry: that is the next lesson, and it counts."
+          }
         },
         {
           "title": "The parry",
           "text": "Holding the guard costs Will. A parry costs nothing and gives Will back: [b]tap right click just as the bite lands[/b]. Millstone reels when you do. Parry three bites.",
-          "setup": { "genius": "loose" },
-          "goal": { "type": "event", "event": "parry", "count": 3 },
-          "notes": { "block": "Blocked: you raised it too early. Wait for the lunge, then tap.", "hurt": "Too late. Watch the glow: tap as it peaks." }
+          "setup": {
+            "genius": "loose"
+          },
+          "goal": {
+            "type": "event",
+            "event": "parry",
+            "count": 3
+          },
+          "notes": {
+            "block": "Blocked: you raised it too early. Wait for the lunge, then tap.",
+            "hurt": "Too late. Watch the glow: tap as it peaks."
+          }
         },
         {
           "title": "Hold",
           "text": "Now the drill. Millstone will not stop. Take [b]five bites in a row[/b] on your guard or your parry without one getting through. Dodging ([b]Space[/b]) does not break the count.",
-          "setup": { "genius": "loose", "fast": true },
-          "goal": { "type": "streak", "count": 5 },
-          "notes": { "hurt": "Through. The count starts again." }
+          "setup": {
+            "genius": "loose",
+            "fast": true
+          },
+          "goal": {
+            "type": "streak",
+            "count": 5
+          },
+          "notes": {
+            "hurt": "Through. The count starts again."
+          }
         }
       ],
       "outro": [
@@ -204,5 +546,50 @@
       "Your field sits in your chest like a coal banked for the night. The little light that has followed you since the station turns slowly over your pillow, and settles."
     ],
     "next": "Tomorrow: the rite in the Hearth Hall. (The rite is the next part to be built.)"
+  },
+  "rite": {
+    "$comment": "The rite in the Hearth Hall: the bowl reads your Shape and your genius takes its First Form. The Shape read is the questionnaire's leans (nudged by your spark), plus how you have played the Academy so far (recordLeans: per thing done, toward a Shape), plus the bowl's own noise. A different Shape from the questionnaire's is a surprise; noise is the main knob for how often that happens. The First Form is read from the Seed, the blood and the Shape (data/reading.json, firstFormWeights) plus formNoise.",
+    "place": "hearth",
+    "instructor": "varga",
+    "noise": 0.35,
+    "recordLeans": {
+      "parries": {
+        "read": 0.03
+      },
+      "blocks": {
+        "anchor": 0.03
+      },
+      "dodges": {
+        "turn": 0.02,
+        "cast": 0.02
+      },
+      "hurts": {
+        "anchor": 0.01,
+        "make": 0.01
+      },
+      "talks": {
+        "bind": 0.03
+      }
+    },
+    "recordCap": 0.9,
+    "formNoise": 0.3,
+    "pourSeconds": 2.6,
+    "spinSteps": 26,
+    "lines": {
+      "intro": [
+        "Everyone else has been through. The bowl is warm. Good.",
+        "Your field has been awake a year, {name}, and it has never been asked a question. The bowl asks. Pour yourself into it, all of it, and keep nothing back.",
+        "When it has read you, the little light that follows you will go into the fire, and come out as what it truly is."
+      ],
+      "pour": "Hold [b]E[/b] (or the left mouse button) to pour your field into the bowl.",
+      "confirm": "{shape}. As the questions said. Some of us are what we look like.",
+      "surprise": "{shape}. Not {was}: {shape}. The questions read what you told them. The bowl reads what you are.",
+      "genius": "Now. Watch the fire.",
+      "name": "It will answer to a name. Give it one.",
+      "after": [
+        "{genius_name}. A {form}. It has chosen you back; it will grow as you do, and it will remember all of it.",
+        "Tomorrow you start learning what a {shape} is for."
+      ]
+    }
   }
 }

@@ -24,6 +24,10 @@ var show_wolf := true
 var portrait := false   # the character creator: the camera faces the character
 var portrait_side := 1.25   # where the character stands in the portrait: + left of the screen, - right
 var portrait_dist := 3.6
+var cine := false            # a scene holds the camera (the rite)
+var cine_pos := Vector3.ZERO
+var cine_look := Vector3.ZERO
+var cine_speed := 2.0
 
 var _player: Node3D
 var _p_anim: AnimationPlayer
@@ -63,6 +67,7 @@ var arena := Vector2(22, 14)
 var _place_root := Node3D.new()
 var _figures: Array = []   # people standing in the place: {node, anim, pos, facing}
 var obstacles: Array = []  # Vector3(x, z, radius) for the place's pillars, people and furniture
+var open_doors: Dictionary = {}   # doors the term has opened (by where they lead)
 var _motes := CPUParticles3D.new()
 var _p_skel: Skeleton3D
 var _head_bone := -1
@@ -260,6 +265,16 @@ func build_hero(hero: Dictionary) -> void:
 	_p_skel = skel
 	_head_bone = skel.find_bone("head")
 	_tint_genius(_shape_color(hero.get("shape", "anchor")))
+	# After the rite the genius has a First Form; before it, it is the orb.
+	var g: Dictionary = hero.get("genius", {})
+	if g.is_empty():
+		clear_form()
+	elif _g_form_info.get("form", "") != g.get("form", "") or not _g_form:
+		clear_form()
+		var form := make_form(g, _shape_color(hero.get("shape", "anchor")).lightened(0.15))
+		add_child(form)
+		form.position = _player.position + Vector3(1, 1.5, 0)
+		set_form(g, form)
 
 func _attach(skel: Skeleton3D, bone: String, path: String) -> Node3D:
 	var att := BoneAttachment3D.new()
@@ -1041,6 +1056,15 @@ func _yaw(facing: float) -> float:
 
 func _update_camera(dt: float, cam_input: Vector2, f: Fight) -> void:
 	var p := _v3(f.p_pos)
+	if cine:
+		var kc := 1.0 - exp(-dt * cine_speed)
+		_cam_pos = _cam_pos.lerp(cine_pos, kc)
+		_cam_look = _cam_look.lerp(cine_look, kc)
+		_shake = maxf(0.0, _shake - dt * 0.9)
+		var jit := Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)) * _shake
+		camera.position = _cam_pos + jit
+		camera.look_at(_cam_look + jit * 0.4, Vector3.UP)
+		return
 	if portrait:
 		# Face the character; leave room on the right for the reveal.
 		var k2 := 1.0 - exp(-dt * 4.0)
@@ -1327,6 +1351,13 @@ var _g_flicker := 0.0
 var _g_spin := 0.0
 var _g_born := 1.0
 var _g_pos := Vector3.ZERO
+var genius_goal := Vector3.INF     # where a scene has called the genius to
+var genius_goal_radius := 0.0
+var _g_form: Node3D = null         # the First Form, once the rite has given it one
+var _g_form_info: Dictionary = {}
+var _g_form_anim: AnimationPlayer
+var _g_form_pos := Vector3.ZERO
+var _g_form_facing := 0.0
 
 const GENIUS_RADIUS := 0.62
 const GENIUS_RISE := 0.42   # above the head bone, which sits at the jaw
@@ -1423,8 +1454,22 @@ func _update_genius(f: Fight, dt: float) -> void:
 	if down:
 		speed = 0.6
 	_g_angle = fmod(_g_angle + dt * speed, TAU)
+	if _g_form:
+		_update_form(f, dt)
+		return
 	var head := _p_skel.global_transform * _p_skel.get_bone_global_pose(_head_bone).origin
 	var centre := head + Vector3(0, GENIUS_RISE, 0)
+	if genius_goal != Vector3.INF:
+		# A scene has called it away (the rite): it spirals in to the goal.
+		var to := genius_goal + Vector3(cos(_clock * 9.0), 0.3 * sin(_clock * 5.0), sin(_clock * 9.0)) * genius_goal_radius
+		_g_pos = _g_pos.lerp(to, 1.0 - exp(-dt * 3.5))
+		_genius.global_position = _g_pos
+		_g_trail.global_position = _g_pos
+		_g_core.scale = Vector3.ONE * (1.0 + 0.6 * _g_pulse)
+		_g_halo.scale = Vector3.ONE * (1.0 + 1.6 * _g_pulse)
+		_g_halo_mat.set_shader_parameter("strength", 1.4 + _g_pulse)
+		_g_light.light_energy = 1.4 + 2.0 * _g_pulse
+		return
 	var radius := GENIUS_RADIUS * (0.8 if pattern else 1.0)
 	if down:
 		centre = _player.global_position + Vector3(0, 0.5, 0)
@@ -1463,6 +1508,9 @@ func set_place(id: String) -> void:
 	_torches.clear()
 	_figures.clear()
 	obstacles.clear()
+	_sigils.clear()
+	_pillar = null
+	bowl_flame = null
 	if id == "cut":
 		_build_chamber()
 		_moonlight([[Vector3(-5.5, 0, -2.6), 1.3], [Vector3(3.2, 0, 3.4), 0.9], [Vector3(8.6, 0, -4.4), 1.1]])
@@ -1522,11 +1570,12 @@ func _build_academy_place(spec: Dictionary) -> void:
 		ez += 4.0
 		k += 1
 	for d in doors:
-		_door_marker(Vector3(float(d["at"][0]), 0, float(d["at"][1])), String(d["label"]), d.has("locked"))
+		_door_marker(Vector3(float(d["at"][0]), 0, float(d["at"][1])), String(d["label"]), d.has("locked") and not open_doors.has(d["to"]))
 	match String(spec["name"]):
 		"The Quad": _furnish_quad()
 		"The Yard": _furnish_yard()
 		"The Dormitory": _furnish_dorm(spec)
+		"The Hearth Hall": _furnish_hearth()
 	_env.background_color = Color(0.045, 0.05, 0.095)
 	_env.ambient_light_energy = 0.34
 	_env.fog_density = 0.012
@@ -1696,6 +1745,13 @@ func _update_figures(f: Fight, dt: float) -> void:
 		(fig["node"] as Node3D).rotation.y = _yaw(fig["facing"])
 		var l: Label3D = fig["label"]
 		var a := clampf((7.0 - d) / 3.0, 0.0, 1.0)
+		# In a scene, names stand down, and no one stands between the camera and what matters.
+		var node: Node3D = fig["node"]
+		if cine:
+			a = 0.0
+			node.visible = camera.global_position.distance_to(node.global_position + Vector3(0, 1.0, 0)) > 2.6
+		else:
+			node.visible = true
 		l.modulate.a = move_toward(l.modulate.a, a, dt * 3.0)
 		l.outline_modulate.a = l.modulate.a * 0.8
 
@@ -1705,3 +1761,349 @@ func snap_camera_behind(f: Fight) -> void:
 	cam_pitch = -0.32
 	_cam_pos = _v3(f.p_pos) + back * 6.0 + Vector3(0, 3.2, 0)
 	_cam_look = _v3(f.p_pos, 1.4)
+
+# --- The Hearth Hall and the rite ------------------------------------------------
+
+var bowl_flame: MeshInstance3D
+var bowl_flame_mat: StandardMaterial3D
+var bowl_light: OmniLight3D
+var _sigils: Array = []        # the six Shapes' lights around the bowl during the reading
+var _pillar: MeshInstance3D    # the column of light when the genius is made
+
+const BOWL := Vector3(0, 0, -1.2)
+
+func _furnish_hearth() -> void:
+	# The bowl: a broad stone basin on a short column, with the fire in it.
+	_piece("column", BOWL, 0.0, 0.5)
+	var rim := MeshInstance3D.new()
+	var tm := TorusMesh.new()
+	tm.inner_radius = 0.7
+	tm.outer_radius = 1.0
+	rim.mesh = tm
+	rim.position = BOWL + Vector3(0, 1.05, 0)
+	rim.material_override = _mat(Color(0.35, 0.3, 0.27))
+	_place_root.add_child(rim)
+	var basin := MeshInstance3D.new()
+	var cm := CylinderMesh.new()
+	cm.top_radius = 0.85
+	cm.bottom_radius = 0.4
+	cm.height = 0.4
+	basin.mesh = cm
+	basin.position = BOWL + Vector3(0, 0.85, 0)
+	basin.material_override = _mat(Color(0.3, 0.26, 0.24))
+	_place_root.add_child(basin)
+	obstacles.append(Vector3(BOWL.x, BOWL.z, 1.1))
+	bowl_flame = MeshInstance3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = 0.45
+	sm.height = 0.9
+	bowl_flame.mesh = sm
+	bowl_flame_mat = _mat(Color(1.0, 0.65, 0.3), 4.0, true)
+	bowl_flame_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	bowl_flame.material_override = bowl_flame_mat
+	bowl_flame.position = BOWL + Vector3(0, 1.35, 0)
+	bowl_flame.scale = Vector3(0.6, 0.8, 0.6)
+	_place_root.add_child(bowl_flame)
+	bowl_light = OmniLight3D.new()
+	bowl_light.light_color = Color(1.0, 0.65, 0.35)
+	bowl_light.light_energy = 2.0
+	bowl_light.omni_range = 9.0
+	bowl_light.position = BOWL + Vector3(0, 2.0, 0)
+	_place_root.add_child(bowl_light)
+	# A ring on the floor round the bowl, where the student stands.
+	var ring := MeshInstance3D.new()
+	var rt := TorusMesh.new()
+	rt.inner_radius = 2.6
+	rt.outer_radius = 2.72
+	ring.mesh = rt
+	ring.scale = Vector3(1, 0.05, 1)
+	ring.position = BOWL + Vector3(0, 0.12, 0)
+	ring.material_override = _mat(Color(1.0, 0.75, 0.4), 1.5, true, 0.5)
+	_place_root.add_child(ring)
+	for b in [[-4.0, -9.4, 0.0], [4.0, -9.4, 0.0]]:
+		_piece("banner_patternA_red", Vector3(b[0], 0.6, b[1]), b[2])
+	for c in [Vector2(-6.5, -6.5), Vector2(6.5, -6.5)]:
+		_piece("pillar_decorated", Vector3(c.x, 0, c.y), 0.0)
+		obstacles.append(Vector3(c.x, c.y, 0.9))
+
+## How dark the hall falls while the bowl reads (0: as lit; 1: only the bowl).
+func dim(k: float) -> void:
+	for t in _torches:
+		(t as OmniLight3D).light_energy = lerpf(1.5, 0.15, k)
+	_env.ambient_light_energy = lerpf(0.34, 0.08, k)
+	_torch_dim = k
+
+var _torch_dim := 0.0
+
+## The bowl's fire: its colour and how high it burns.
+func flame(color: Color, size: float, energy := 4.0) -> void:
+	if not bowl_flame:
+		return
+	bowl_flame_mat.albedo_color = color
+	bowl_flame_mat.emission = color
+	bowl_flame_mat.emission_energy_multiplier = energy
+	bowl_flame.scale = Vector3(0.6, 0.85, 0.6) * size
+	bowl_flame.position = BOWL + Vector3(0, 1.2 + 0.25 * size, 0)
+	bowl_light.light_color = color
+	bowl_light.light_energy = 1.0 + 1.6 * size
+
+## The six Shapes' lights, in a ring above the bowl. lit: the one the reading is passing.
+func sigils(show: bool, lit := "", turn := 0.0) -> void:
+	if show and _sigils.is_empty():
+		for s in Creation.SHAPES:
+			var m := MeshInstance3D.new()
+			var sm := SphereMesh.new()
+			sm.radius = 0.16
+			sm.height = 0.32
+			m.mesh = sm
+			var mat := _mat(SHAPE_COLORS[s], 1.0, true)
+			m.material_override = mat
+			var l := Label3D.new()
+			l.text = s.to_upper()
+			l.font = Style.font("title")
+			l.font_size = 22
+			l.pixel_size = 0.006
+			l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+			l.modulate = Color(SHAPE_COLORS[s], 0.5)
+			l.outline_size = 6
+			l.outline_modulate = Color(0, 0, 0, 0.8)
+			l.position = Vector3(0, 0.38, 0)
+			m.add_child(l)
+			_place_root.add_child(m)
+			_sigils.append({ "shape": s, "m": m, "mat": mat, "l": l })
+	for i in _sigils.size():
+		var sg: Dictionary = _sigils[i]
+		var m: MeshInstance3D = sg["m"]
+		m.visible = show
+		if not show:
+			continue
+		var a := turn + i * TAU / 6.0
+		m.position = BOWL + Vector3(cos(a) * 1.9, 2.3 + 0.1 * sin(_clock * 3.0 + i), sin(a) * 1.9)
+		var on: bool = sg["shape"] == lit
+		(sg["mat"] as StandardMaterial3D).emission_energy_multiplier = 6.0 if on else 0.6
+		m.scale = Vector3.ONE * (1.6 if on else 0.8)
+		(sg["l"] as Label3D).modulate.a = 1.0 if on else 0.35
+
+## The column of light that stands in the bowl while the genius is made.
+func light_pillar(height: float, color: Color) -> void:
+	if not _pillar:
+		_pillar = MeshInstance3D.new()
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.5
+		cm.bottom_radius = 0.7
+		cm.height = 1.0
+		cm.cap_top = false
+		cm.cap_bottom = false
+		_pillar.mesh = cm
+		_pillar.material_override = _shader_mat(SHAFT)
+		_place_root.add_child(_pillar)
+	_pillar.visible = height > 0.01
+	(_pillar.material_override as ShaderMaterial).set_shader_parameter("tint", color)
+	(_pillar.material_override as ShaderMaterial).set_shader_parameter("strength", 0.9)
+	(_pillar.material_override as ShaderMaterial).set_shader_parameter("half_height", height / 2.0)
+	_pillar.mesh.height = maxf(height, 0.01)
+	_pillar.position = BOWL + Vector3(0, 1.2 + height / 2.0, 0)
+
+const SILHOUETTE := """
+shader_type spatial;
+// A genius before there is art for it: a body of shadow lit at the edges in its colour,
+// like a figure seen against the fire.
+render_mode cull_back;
+uniform vec4 glow : source_color = vec4(1.0, 0.7, 0.3, 1.0);
+uniform float strength = 1.0;
+void fragment() {
+	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 2.4);
+	ALBEDO = vec3(0.03, 0.025, 0.03);
+	EMISSION = glow.rgb * (rim * 3.2 + 0.25) * strength;
+	ROUGHNESS = 0.9;
+}
+"""
+
+## A First Form from its silhouette and features: shadow bodies, lit at the edges in the
+## genius's colour, with glowing eyes. Placeholder until there is art for every form.
+func make_form(info: Dictionary, color: Color) -> Node3D:
+	var root := Node3D.new()
+	var mat := _shader_mat(SILHOUETTE)
+	mat.set_shader_parameter("glow", color)
+	var sil: String = info["silhouette"]
+	var feats: Array = info["features"]
+	var eye_h := 0.6
+	var add_part := func(mesh: Mesh, pos: Vector3, rot := Vector3.ZERO, scl := Vector3.ONE) -> MeshInstance3D:
+		var m := MeshInstance3D.new()
+		m.mesh = mesh
+		m.position = pos
+		m.rotation = rot
+		m.scale = scl
+		m.material_override = mat
+		root.add_child(m)
+		return m
+	match sil:
+		"beast-runner", "beast-grazer", "engine-quadruped", "beast-swimmer":
+			var w: Node3D = load("res://game/assets/quaternius/Wolf.glb").instantiate()
+			var sc := { "beast-runner": Vector3(0.42, 0.42, 0.42), "beast-grazer": Vector3(0.5, 0.46, 0.42),
+				"engine-quadruped": Vector3(0.46, 0.4, 0.46), "beast-swimmer": Vector3(0.36, 0.28, 0.5) }
+			w.scale = sc[sil]
+			root.add_child(w)
+			for m in w.find_children("*", "MeshInstance3D", true, false):
+				m.material_override = mat
+				m.material_overlay = _ink(1.6)
+			_g_form_anim = w.find_child("AnimationPlayer", true, false)
+			for a in ["Idle", "Walk", "Gallop"]:
+				if _g_form_anim.has_animation(WA + a):
+					_g_form_anim.get_animation(WA + a).loop_mode = Animation.LOOP_LINEAR
+			_g_form_anim.play(WA + "Idle")
+			eye_h = -1.0
+			if sil == "beast-grazer":
+				for side in [-1, 1]:
+					add_part.call(_cone(0.07, 0.3), Vector3(side * 0.12, 0.62, 0.42), Vector3(-0.6, 0, side * 0.6))
+		"beast-flier":
+			add_part.call(_sphere(0.16), Vector3(0, 0.5, 0), Vector3.ZERO, Vector3(1, 1, 1.5))
+			add_part.call(_sphere(0.11), Vector3(0, 0.64, 0.2))
+			add_part.call(_cone(0.05, 0.16), Vector3(0, 0.62, 0.34), Vector3(PI / 2, 0, 0))
+			for side in [-1, 1]:
+				var wing: MeshInstance3D = add_part.call(_box(Vector3(0.62, 0.03, 0.28)), Vector3(side * 0.4, 0.58, -0.02), Vector3(0, 0, side * 0.35))
+				wing.set_meta("wing", side)
+			eye_h = 0.68
+		"kith-fey":
+			add_part.call(_sphere(0.14), Vector3(0, 0.72, 0))
+			add_part.call(_cone(0.12, 0.4), Vector3(0, 0.45, 0), Vector3(PI, 0, 0))
+			for side in [-1, 1]:
+				var wing: MeshInstance3D = add_part.call(_box(Vector3(0.3, 0.02, 0.18)), Vector3(side * 0.2, 0.62, -0.08), Vector3(0.3, 0, side * 0.6))
+				wing.set_meta("wing", side)
+			eye_h = 0.74
+		"engine-lantern":
+			add_part.call(_box(Vector3(0.34, 0.42, 0.34)), Vector3(0, 0.62, 0))
+			add_part.call(_cone(0.26, 0.2), Vector3(0, 0.92, 0))
+			for side in [-1, 1]:
+				add_part.call(_box(Vector3(0.06, 0.42, 0.06)), Vector3(side * 0.1, 0.2, 0))
+			var core := MeshInstance3D.new()
+			core.mesh = _sphere(0.1)
+			core.material_override = _mat(color, 5.0, true)
+			core.position = Vector3(0, 0.62, 0)
+			root.add_child(core)
+			eye_h = -1.0
+		"kith-homunculus", "daemon-small":
+			add_part.call(_sphere(0.17), Vector3(0, 0.62, 0))
+			add_part.call(_cone(0.17, 0.4), Vector3(0, 0.3, 0))
+			for side in [-1, 1]:
+				add_part.call(_box(Vector3(0.05, 0.28, 0.05)), Vector3(side * 0.2, 0.36, 0), Vector3(0, 0, side * 0.4))
+			if sil == "daemon-small" or feats.has("horns"):
+				for side in [-1, 1]:
+					add_part.call(_cone(0.04, 0.18), Vector3(side * 0.09, 0.8, 0), Vector3(0, 0, -side * 0.4))
+			eye_h = 0.66
+		"aspect-flame", "aspect-shadow":
+			var core := MeshInstance3D.new()
+			core.mesh = _sphere(0.2)
+			var cm := _mat(color if sil == "aspect-flame" else Color(0.05, 0.03, 0.08), 3.0 if sil == "aspect-flame" else 0.0, true, 0.9)
+			core.material_override = cm
+			core.position = Vector3(0, 0.55, 0)
+			root.add_child(core)
+			var p := CPUParticles3D.new()
+			p.amount = 40
+			p.lifetime = 0.8
+			p.local_coords = false
+			p.direction = Vector3(0, 1, 0)
+			p.spread = 25.0
+			p.initial_velocity_min = 0.3
+			p.initial_velocity_max = 0.8
+			p.gravity = Vector3(0, 0.6, 0)
+			var q := QuadMesh.new()
+			q.size = Vector2(0.16, 0.16)
+			p.mesh = q
+			var pm := StandardMaterial3D.new()
+			pm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			pm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD if sil == "aspect-flame" else BaseMaterial3D.BLEND_MODE_MIX
+			pm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			pm.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+			pm.vertex_color_use_as_albedo = true
+			pm.albedo_texture = _soft_dot()
+			p.material_override = pm
+			var g := Gradient.new()
+			g.set_color(0, Color(color.lightened(0.3), 0.9) if sil == "aspect-flame" else Color(0.08, 0.04, 0.12, 0.8))
+			g.set_color(1, Color(color, 0.0))
+			p.color_ramp = g
+			p.position = Vector3(0, 0.5, 0)
+			root.add_child(p)
+			eye_h = 0.6
+		_:
+			add_part.call(_sphere(0.25), Vector3(0, 0.5, 0))
+	if feats.has("wings") and sil not in ["beast-flier", "kith-fey"]:
+		for side in [-1, 1]:
+			var wing: MeshInstance3D = add_part.call(_box(Vector3(0.4, 0.02, 0.2)), Vector3(side * 0.28, 0.7, -0.1), Vector3(0, 0, side * 0.4))
+			wing.set_meta("wing", side)
+	if eye_h > 0.0:
+		for side in [-1, 1]:
+			var eye := MeshInstance3D.new()
+			eye.mesh = _sphere(0.028)
+			eye.material_override = _mat(color.lightened(0.5), 6.0, true)
+			eye.position = Vector3(side * 0.06, eye_h, 0.14)
+			root.add_child(eye)
+	return root
+
+func _sphere(r: float) -> SphereMesh:
+	var m := SphereMesh.new()
+	m.radius = r
+	m.height = r * 2.0
+	m.radial_segments = 16
+	m.rings = 8
+	return m
+
+func _cone(r: float, h: float) -> CylinderMesh:
+	var m := CylinderMesh.new()
+	m.top_radius = 0.0
+	m.bottom_radius = r
+	m.height = h
+	return m
+
+func _box(size: Vector3) -> BoxMesh:
+	var m := BoxMesh.new()
+	m.size = size
+	return m
+
+## Give the genius its First Form: the orb goes, the form stays, and follows from now on.
+func set_form(info: Dictionary, form: Node3D) -> void:
+	if _g_form and _g_form != form:
+		_g_form.queue_free()
+	_g_form = form
+	_g_form_info = info
+	if form.get_parent() == null:
+		add_child(form)
+	elif form.get_parent() != self:
+		form.reparent(self)
+	_g_form_pos = form.global_position
+	_genius.visible = false
+	_g_trail.emitting = false
+
+func clear_form() -> void:
+	if _g_form:
+		_g_form.queue_free()
+	_g_form = null
+	_g_form_info = {}
+	_g_form_anim = null
+
+## The First Form follows: fliers and fey and flames at the shoulder, walkers at the heel.
+func _update_form(f: Fight, dt: float) -> void:
+	_genius.visible = false
+	_g_trail.emitting = false
+	var walker := _g_form_anim != null
+	var side := Vector2.from_angle(f.p_facing + (2.2 if walker else 1.9))
+	var want := _v3(f.p_pos + side * (1.1 if walker else 0.8), 0.0 if walker else 1.5 + 0.08 * sin(_clock * 2.4))
+	if genius_goal != Vector3.INF:
+		want = genius_goal
+	var before := _g_form_pos
+	_g_form_pos = _g_form_pos.lerp(want, 1.0 - exp(-dt * (4.0 if walker else 6.0)))
+	_g_form.global_position = _g_form_pos
+	var vel := (_g_form_pos - before) / maxf(dt, 1e-4)
+	var flat := Vector2(vel.x, vel.z)
+	if flat.length() > 0.3:
+		_g_form_facing = lerp_angle(_g_form_facing, flat.angle(), 1.0 - exp(-dt * 8.0))
+	else:
+		_g_form_facing = lerp_angle(_g_form_facing, f.p_facing, 1.0 - exp(-dt * 3.0))
+	_g_form.rotation.y = _yaw(_g_form_facing)
+	if walker and is_instance_valid(_g_form_anim):
+		var want_anim := WA + ("Gallop" if flat.length() > 4.0 else ("Walk" if flat.length() > 0.4 else "Idle"))
+		if _g_form_anim.current_animation != want_anim:
+			_g_form_anim.play(want_anim, 0.2)
+	for c in _g_form.get_children():
+		if c.has_meta("wing"):
+			(c as Node3D).rotation.z = float(c.get_meta("wing")) * (0.35 + 0.45 * sin(_clock * 14.0))

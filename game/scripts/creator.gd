@@ -18,6 +18,9 @@ const EDGE := Color(0.32, 0.27, 0.21)
 
 var answers: Array = []
 var hero: Dictionary = {}
+var spark := 1                # this character's spark: nudges the leans, picks the name
+var _field_col := Color(0.6, 0.9, 0.7)
+var _field_k := 0.0
 var blood_choice := ""
 var _q := 0
 var _root := Control.new()
@@ -32,8 +35,28 @@ func begin() -> void:
 	visible = true
 	answers = []
 	blood_choice = ""
+	hero = {}
+	spark = _new_spark()
 	_q = 0
+	_field_k = 0.0
 	_intro()
+
+static func _new_spark() -> int:
+	return 1 + randi() % 2000000000
+
+## The field gathering as you answer: the colour of the Shapes your answers lean toward so far,
+## brighter with every answer.
+func _field_now() -> void:
+	var t := Creation.tally_with(answers, spark)
+	var total := 0.0
+	var c := Color(0, 0, 0)
+	for s in t["shape"]:
+		var w := pow(maxf(0.0, float(t["shape"][s])), 2.0)
+		c += World.SHAPE_COLORS.get(s, Color.WHITE) * w
+		total += w
+	if total > 0.0:
+		_field_col = Color(c.r / total, c.g / total, c.b / total)
+	_field_k = clampf(float(answers.size()) / float(Data.creation["questions"].size()), 0.0, 1.0)
 
 func _clear() -> void:
 	for c in _root.get_children():
@@ -53,6 +76,7 @@ func _intro() -> void:
 	_text(box, "Ten thousand years ago, the will of every living thing became a force in the world. It still wakes in every child, at the edge of growing up, and settles into a Shape.\n\nYours has not woken yet. Before it does, tell us who you were.", 19, FG)
 	_text(box, "There are no right answers. Your answers lean your blood, your Shape, your weapon, what will stand beside you, and the Terms you would accept for power. You will see all of it, and why, before anything is final.", 15, DIM)
 	_button(box, "Begin", func(): _ask(0), true)
+	_button(box, "Surprise me: answer at random", _surprise)
 	_button(box, "Back", func(): cancelled.emit())
 	_arrive(box)
 
@@ -72,10 +96,18 @@ func _ask(i: int) -> void:
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 8)
 	box.add_child(gap)
-	for ai in q["answers"].size():
+	# The answers come in a different order for every character, numbered like an old ledger.
+	var order: Array = range(q["answers"].size())
+	var rng := RandomNumberGenerator.new()
+	rng.seed = spark + i * 101
+	Academy._shuffle(order, rng)
+	var numerals := ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"]
+	for n in order.size():
+		var ai: int = order[n]
 		var a: Dictionary = q["answers"][ai]
 		var chosen: bool = answers.size() > i and int(answers[i]) == ai
-		_button(box, a["text"], func(): _answer(i, ai), chosen)
+		var b := _button(box, "%s.   %s" % [numerals[n], a["text"]], func(): _answer(i, ai), chosen)
+		b.add_theme_font_override("font", Style.font("body"))
 	if i > 0:
 		var back := _button(box, "Back", func(): _ask(i - 1))
 		back.add_theme_color_override("font_color", DIM)
@@ -103,6 +135,14 @@ func _progress(i: int, n: int) -> Control:
 	)
 	return c
 
+## Answer every question at random and go straight to who that made.
+func _surprise() -> void:
+	answers = []
+	for q in Data.creation["questions"]:
+		answers.append(randi() % q["answers"].size())
+	blood_choice = ""
+	_reveal()
+
 func _answer(i: int, ai: int) -> void:
 	while answers.size() <= i:
 		answers.append(0)
@@ -120,13 +160,12 @@ var _screen := ""
 func _reveal() -> void:
 	var keep_name: String = hero.get("name", "")
 	var keep_body: String = hero.get("body_override", "")
-	hero = Creation.generate(answers, blood_choice)
+	hero = Creation.generate(answers, blood_choice, spark)
 	if keep_body != "":
 		hero["body"] = keep_body
 		hero["body_override"] = keep_body
 	if keep_name == "":
-		var names: Array = Data.creation["names"][hero["city"]]
-		keep_name = names[(answers.reduce(func(a, b): return a + b, 0)) % names.size()]
+		keep_name = Creation.name_for(hero["city"], spark)
 	hero["name"] = keep_name
 	changed.emit(hero)
 	_clear()
@@ -174,7 +213,7 @@ func _reveal() -> void:
 	_line(v, "Shows as %s. %s" % [b.get("shows", "nothing"), b["gift"] + "."])
 	_line(v, "The Gap: %s." % b["gap"], DIM)
 	var reasons := ""
-	for s in Creation.suggest_bloods(Creation.tally(answers), 26):
+	for s in Creation.suggest_bloods(Creation.tally_with(answers, spark), 26):
 		if s["id"] == hero["blood"]:
 			reasons = ", ".join(s["reasons"])
 	if reasons != "":
@@ -183,7 +222,7 @@ func _reveal() -> void:
 	alt.add_theme_constant_override("separation", 8)
 	v.add_child(alt)
 	_text(alt, "Or:", 15, DIM)
-	for s in Creation.suggest_bloods(Creation.tally(answers)):
+	for s in Creation.suggest_bloods(Creation.tally_with(answers, spark)):
 		if s["id"] != hero["blood"]:
 			var id: String = s["id"]
 			_chip(alt, Creation.blood(id)["name"], func(): blood_choice = id; _reveal())
@@ -192,7 +231,7 @@ func _reveal() -> void:
 	# Shape, city, weapon.
 	_section(v, "SHAPE", String(hero["shape"]).capitalize())
 	_line(v, Data.shape(hero["shape"])["field"] + ". " + _shape_line(hero["shape"]))
-	_line(v, "Because %s. (The rite at the Academy will confirm it.)" % ", ".join(hero["why"]["shape"]), DIM)
+	_line(v, "Because %s. (The rite at the Academy will read it, and may not agree.)" % ", ".join(hero["why"]["shape"]), DIM)
 	var w := Creation.weapon(hero["weapon"])
 	_section(v, "HOME AND WEAPON", "%s  ·  %s" % [String(hero["city"]).capitalize(), w["name"]])
 	_line(v, "%s The %s Discipline teaches it." % [w["text"], String(hero["discipline"]).capitalize()])
@@ -229,6 +268,7 @@ func _reveal() -> void:
 	v.add_child(end)
 	_button(end, "This is me", func(): finished.emit(hero), true)
 	_button(end, "Answer again", func(): hero = {}; _ask(0))
+	_button(end, "Another life, same answers", func(): hero = {}; blood_choice = ""; spark = _new_spark(); _reveal())
 	name_edit.text_changed.connect(func(t): title.text = t if t != "" else "Unnamed")
 	if _screen != "reveal":
 		_arrive(v)
@@ -397,6 +437,17 @@ func _backdrop() -> void:
 	sm.shader = sh
 	bg.material = sm
 	_root.add_child(bg)
+	# The field: from where it was, to where the answers have taken it.
+	sm.set_shader_parameter("field_col", Vector3(_field_col.r, _field_col.g, _field_col.b))
+	sm.set_shader_parameter("field_k", _field_k)
+	var before := _field_col
+	var k0 := _field_k
+	_field_now()
+	var tw := bg.create_tween()
+	tw.tween_method(func(u: float):
+		var c := before.lerp(_field_col, u)
+		sm.set_shader_parameter("field_col", Vector3(c.r, c.g, c.b))
+		sm.set_shader_parameter("field_k", lerpf(k0, _field_k, u)), 0.0, 1.0, 1.2).set_trans(Tween.TRANS_SINE)
 
 func _click() -> void:
 	clicked.emit()
@@ -413,6 +464,8 @@ func _arrive(box: Control) -> void:
 
 const BACKDROP := """
 shader_type canvas_item;
+uniform vec3 field_col = vec3(0.6, 0.9, 0.7);
+uniform float field_k = 0.0;
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 void fragment() {
 	vec2 uv = UV;
@@ -436,7 +489,13 @@ void fragment() {
 			m += smoothstep(0.09, 0.0, r) * tw * (0.5 + 0.5 * float(k == 0));
 		}
 	}
-	col += vec3(0.55, 0.8, 0.55) * m * 0.32;
+	col += mix(vec3(0.55, 0.8, 0.55), field_col, field_k) * m * (0.32 + 0.5 * field_k);
+	// Your field, gathering below: it takes the colour of the Shapes your answers lean toward.
+	vec2 fp = (uv - vec2(0.5, 1.08)) * vec2(1.0, 1.5);
+	float a = atan(fp.y, fp.x);
+	float swirl = 0.85 + 0.15 * sin(a * 7.0 + TIME * 0.9) * sin(length(fp) * 14.0 - TIME * 1.6);
+	float glow = pow(max(0.0, 1.0 - length(fp) * 1.25), 2.6) * swirl;
+	col += field_col * glow * (0.08 + 0.55 * field_k) * (0.9 + 0.1 * sin(TIME * 1.3));
 	float v = smoothstep(0.35, 1.0, length((uv - 0.5) * vec2(1.4, 1.0)));
 	col *= 1.0 - v * 0.75;
 	COLOR = vec4(col, 0.98);

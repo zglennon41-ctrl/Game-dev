@@ -109,6 +109,16 @@ func _ready() -> void:
 ## Begin or resume the Academy with this hero.
 func enter(h: Dictionary) -> void:
 	hero = h
+	_rite = null
+	_naming = false
+	_lesson = {}
+	_lines.clear()
+	_box.visible = false
+	world.cine = false
+	world.genius_goal = Vector3.INF
+	if _ui_built:
+		_pour_box.visible = false
+		_name_box.visible = false
 	progress = hero.get("academy", {})
 	if progress.is_empty():
 		progress = { "seed": randi() % 1000000, "arrived": false, "done": [], "met": [], "day": 1, "rested": false,
@@ -170,6 +180,11 @@ static func _shuffle(a: Array, rng: RandomNumberGenerator) -> void:
 func go(place_id: String, quiet := false, from := "") -> void:
 	var spec: Dictionary = Data.academy["places"][place_id]
 	progress["place"] = place_id
+	world.open_doors = {}
+	for d in spec["doors"]:
+		if door_open(d):
+			world.open_doors[d["to"]] = true
+	world.place = ""
 	world.set_place(place_id)
 	_people.clear()
 	_doors = spec["doors"]
@@ -203,7 +218,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 			fight.w_pos = at + Vector2(1.6, 0.8)
 			fight.w_facing = (spawn - fight.w_pos).angle()
 			world.show_wolf = true
-	if place_id == "quad":
+	if place_id == "quad" or spec.get("cohortHere", false):
 		var spots: Array = spec["spots"]
 		for i in mini(cohort.size(), spots.size()):
 			var c: Dictionary = cohort[i]
@@ -301,8 +316,15 @@ func interact() -> void:
 		"instructor": _talk_instructor(_target["id"])
 		"classmate": _talk_classmate(_target["c"])
 
+func door_open(d: Dictionary) -> bool:
+	if not d.has("locked"):
+		return true
+	match String(d.get("opensWhen", "")):
+		"rested": return progress.get("rested", false)
+	return false
+
 func _use_door(d: Dictionary) -> void:
-	if d.has("locked"):
+	if not door_open(d):
 		say("", [d["locked"]])
 		return
 	var from: String = progress["place"]
@@ -318,6 +340,10 @@ func _talk_instructor(id: String) -> void:
 			var intro: Array = [lines.get("before:" + String(lesson["id"]), "")] + lesson["intro"]
 			say(id, intro.filter(func(x): return x != ""), func(): _start_lesson(lesson))
 			return
+	var rite: Dictionary = Data.academy["rite"]
+	if id == rite["instructor"] and progress["place"] == rite["place"] and not progress["done"].has("rite"):
+		_start_rite()
+		return
 	var key := _stage_key()
 	say(id, [lines.get(key, lines["default"])])
 
@@ -327,12 +353,20 @@ func _talk_classmate(c: Dictionary) -> void:
 	var first: bool = not progress["met"].has(c["id"])
 	if first:
 		progress["met"].append(c["id"])
-	var key := _stage_key()
-	var line: String = t["lines"]["greet"] if first or not t["lines"].has(key) else t["lines"][key]
+	var line: String = t["lines"]["greet"]
+	if not first:
+		for key in [_stage_key(), "after:rite" if progress["done"].has("rite") else "", "after:hold" if progress["done"].has("hold") else ""]:
+			if key != "" and t["lines"].has(key):
+				line = t["lines"][key]
+				break
 	say(c, [line], save)
 
 ## Where the term has got to, for which lines people say.
 func _stage_key() -> String:
+	if progress["done"].has("rite"):
+		return "after:rite"
+	if progress.get("rested", false):
+		return "before:rite"
 	if progress["done"].has("hold"):
 		return "after:hold"
 	return "before:hold"
@@ -342,8 +376,12 @@ func _rest_now() -> void:
 		say("", ["It is too early to sleep. The Yardmaster is waiting in the yard."])
 		return
 	var r: Dictionary = Data.academy["rest"]
+	if progress.get("rested", false):
+		say("", ["You are rested. The hearth is waiting."])
+		return
 	say("", r["lines"] + [r["next"]], func():
 		progress["rested"] = true
+		progress["day"] = int(progress["day"]) + 1
 		save())
 
 # --- Each frame -----------------------------------------------------------------
@@ -357,20 +395,41 @@ func objective() -> String:
 		return "Lesson 1 · Hold: find Yardmaster Bask in the Yard (the west door of the quad). Meet your cohort on the way."
 	if not progress.get("rested", false):
 		return "Rest in the Dormitory (the east door of the quad)."
-	return "Day %d. Tomorrow: the rite in the Hearth Hall (the next part to be built)." % int(progress["day"])
+	if not progress["done"].has("rite"):
+		if progress["place"] == "hearth":
+			return "Day %d · The rite: speak to Instructor Varga at the bowl." % int(progress["day"])
+		return "Day %d · The rite: go to the Hearth Hall (the north door of the quad)." % int(progress["day"])
+	var g: Dictionary = hero.get("genius", {})
+	return "Day %d · %s walks with you. Next: Lesson 3, Shape (the next part to be built)." % [int(progress["day"]), g.get("name", "Your genius")]
 
 ## The lesson asks for stillness now (Contain): the autopilot keeps its hands down.
 func wants_still() -> bool:
 	return in_lesson() and _step >= 0 and _step < _lesson["steps"].size() and _lesson["steps"][_step]["goal"]["type"] == "will-full"
 
 func busy() -> bool:
-	return talking()
+	return talking() or _rite != null or _naming
+
+func in_rite() -> bool:
+	return _rite != null
 
 func in_lesson() -> bool:
 	return not _lesson.is_empty()
 
 func update(events: Array, dt: float) -> void:
 	_objective.text = objective()
+	if _rite:
+		var held := auto or Input.is_action_pressed("interact") or Input.is_action_pressed("attack")
+		if not talking():
+			_rite.update(dt, held)
+		_prompt.visible = false
+		if talking() and auto:
+			_auto_wait -= dt
+			if _auto_wait <= 0.0:
+				if _type_tw:
+					_type_tw.kill()
+				_text.visible_ratio = 1.0
+				interact()
+		return
 	_objective.visible = not in_lesson()
 	if in_lesson():
 		_lesson_update(events, dt)
@@ -405,16 +464,23 @@ func update(events: Array, dt: float) -> void:
 	_prompt.visible = not _target.is_empty()
 	if _prompt.visible:
 		match _target["kind"]:
-			"door": _prompt_label.text = ("E   " + ("Try " if _target["door"].has("locked") else "Enter ") + String(_target["door"]["label"]))
+			"door": _prompt_label.text = ("E   " + ("Enter " if door_open(_target["door"]) else "Try ") + String(_target["door"]["label"]))
 			"rest": _prompt_label.text = "E   Rest in %s" % _rest["label"]
 			_: _prompt_label.text = "E   Talk to %s" % _target["name"]
 
 ## Automated checks: where the autopilot walks next, and whether to act there.
 func auto_move() -> Vector2:
-	if talking() or in_lesson():
+	if talking() or in_lesson() or in_rite():
 		return Vector2.ZERO
 	var goal := Vector2.INF
 	var place: String = progress["place"]
+	if progress.get("rested", false) and not progress["done"].has("rite"):
+		if place == "quad":
+			goal = Vector2(0, -11) * 0.86
+		elif place == "hearth":
+			goal = _people.filter(func(p): return p["kind"] == "instructor")[0]["pos"]
+		elif place == "dorm":
+			goal = Vector2(-7, 0) * 0.86
 	if not progress["done"].has("hold"):
 		if place == "quad":
 			# Greet two classmates on the way, then the west door.
@@ -548,3 +614,148 @@ func _finish_lesson() -> void:
 		_lesson = {}
 		hud.play_ui.visible = false
 		save())
+
+# --- The rite ------------------------------------------------------------------
+
+var _rite: RiteScene = null
+var _naming := false
+var _big := Label.new()
+var _big_sub := Label.new()
+var _pour_box := PanelContainer.new()
+var _pour_label := RichTextLabel.new()
+var _pour_bar := ProgressBar.new()
+var _name_box := PanelContainer.new()
+var _ui_built := false
+
+func _build_rite_ui() -> void:
+	if _ui_built:
+		return
+	_ui_built = true
+	var root: Control = get_child(0)
+	Style.label(_big, 120, Style.FG, "title", 10)
+	_big.set_anchors_preset(Control.PRESET_CENTER)
+	_big.position = Vector2(-700, -400)
+	_big.custom_minimum_size = Vector2(1400, 0)
+	_big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_big.modulate.a = 0.0
+	root.add_child(_big)
+	Style.label(_big_sub, 24, Style.FG, "title_light", 6)
+	_big_sub.set_anchors_preset(Control.PRESET_CENTER)
+	_big_sub.position = Vector2(-700, -250)
+	_big_sub.custom_minimum_size = Vector2(1400, 0)
+	_big_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_big_sub.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_big_sub.modulate.a = 0.0
+	root.add_child(_big_sub)
+	_pour_box.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_pour_box.custom_minimum_size = Vector2(640, 0)
+	_pour_box.position = Vector2(-320, -190)
+	_pour_box.add_theme_stylebox_override("panel", Style.plate(Color(0.04, 0.034, 0.03, 0.88), Style.BRASS, 1, 16))
+	var pv := VBoxContainer.new()
+	pv.add_theme_constant_override("separation", 10)
+	_pour_box.add_child(pv)
+	_pour_label.bbcode_enabled = true
+	_pour_label.fit_content = true
+	_pour_label.scroll_active = false
+	_pour_label.custom_minimum_size = Vector2(600, 0)
+	Style.rich(_pour_label, 19, Style.FG, "body")
+	pv.add_child(_pour_label)
+	Style.bar_styles(_pour_bar, Style.GOLD)
+	_pour_bar.custom_minimum_size = Vector2(600, 16)
+	_pour_bar.max_value = 1.0
+	_pour_bar.step = 0.0
+	pv.add_child(_pour_bar)
+	_pour_box.visible = false
+	root.add_child(_pour_box)
+
+func _start_rite() -> void:
+	_build_rite_ui()
+	_target = {}
+	_prompt.visible = false
+	_rite = RiteScene.new(self, hero)
+	_rite.done.connect(_rite_done)
+	_rite.start()
+
+func _rite_done() -> void:
+	progress["done"].append("rite")
+	_rite = null
+	world.cine = false
+	save()
+	# The hall comes back, with the genius in it.
+	go("hearth", true, "")
+
+func show_pour(on: bool, text: String) -> void:
+	_pour_box.visible = on
+	_pour_label.text = text
+	_pour_bar.value = 0.0
+
+func set_pour(k: float) -> void:
+	_pour_bar.value = k
+
+## A great word over the scene: the Shape, the form.
+func title_card(text: String, sub: String, color: Color) -> void:
+	_big.text = text
+	_big.add_theme_color_override("font_color", color.lightened(0.35))
+	_big.add_theme_color_override("font_shadow_color", Color(color, 0.5))
+	_big.add_theme_constant_override("shadow_outline_size", 30)
+	_big.add_theme_constant_override("shadow_offset_x", 0)
+	_big.add_theme_constant_override("shadow_offset_y", 0)
+	_big_sub.text = sub
+	_big.pivot_offset = Vector2(700, 70)
+	_big.scale = Vector2(1.25, 1.25)
+	var tw := _big.create_tween().set_parallel(true)
+	tw.tween_property(_big, "modulate:a", 1.0, 0.25)
+	tw.tween_property(_big, "scale", Vector2.ONE, 0.6).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(_big_sub, "modulate:a", 1.0, 0.6).set_delay(0.5)
+	var out := _big.create_tween()
+	out.tween_interval(3.4)
+	out.tween_property(_big, "modulate:a", 0.0, 0.8)
+	out.parallel().tween_property(_big_sub, "modulate:a", 0.0, 0.8)
+
+## Name the genius: a box with its form's name already in it.
+func ask_name(default_name: String, then: Callable) -> void:
+	_naming = true
+	for c in _name_box.get_children():
+		c.queue_free()
+	if _name_box.get_parent() == null:
+		_name_box.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+		_name_box.custom_minimum_size = Vector2(620, 0)
+		_name_box.position = Vector2(-310, -230)
+		_name_box.add_theme_stylebox_override("panel", Style.plate(Color(0.04, 0.034, 0.03, 0.94), Style.BRASS, 1, 22))
+		get_child(0).add_child(_name_box)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 10)
+	_name_box.add_child(v)
+	var l := Label.new()
+	Style.label(l, 22, Style.GOLD, "title")
+	l.text = "Name your genius"
+	v.add_child(l)
+	var hint := Label.new()
+	Style.label(hint, 16, Style.DIM, "italic")
+	hint.text = fill(String(Data.academy["rite"]["lines"]["name"]))
+	v.add_child(hint)
+	var e := LineEdit.new()
+	e.text = default_name
+	e.max_length = 20
+	e.add_theme_font_size_override("font_size", 22)
+	v.add_child(e)
+	var b := Button.new()
+	b.text = "This is its name"
+	Style.button(b, true, 19)
+	v.add_child(b)
+	var finish := func():
+		if not _naming:
+			return
+		_naming = false
+		_name_box.visible = false
+		if not auto:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		then.call(e.text)
+	b.pressed.connect(finish)
+	e.text_submitted.connect(func(_t): finish.call())
+	_name_box.visible = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	e.call_deferred("grab_focus")
+	e.call_deferred("select_all")
+	if auto:
+		get_tree().create_timer(1.0).timeout.connect(finish)

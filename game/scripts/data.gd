@@ -13,6 +13,10 @@ var kits: Dictionary
 var creation: Dictionary
 var story: Dictionary
 var academy: Dictionary
+var _reading: Dictionary
+var _forms: Array
+var _seeds: Array
+var _features: Array
 
 func _init() -> void:
 	rules = _load("res://data/rules.json")
@@ -27,6 +31,15 @@ func _init() -> void:
 	creation = _load("res://data/creation.json")
 	story = _load("res://data/story.json")
 	academy = _load("res://data/academy.json")
+	_reading = _load("res://data/reading.json")
+	_forms = _load("res://data/forms.json")
+	_seeds = _load("res://data/seeds.json")
+	_features = _load("res://data/features.json")
+
+func rules_reading() -> Dictionary: return _reading
+func forms() -> Array: return _forms
+func seeds() -> Array: return _seeds
+func features() -> Array: return _features
 
 func _load(path: String) -> Variant:
 	var f := FileAccess.open(path, FileAccess.READ)

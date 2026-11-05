@@ -112,6 +112,12 @@ func _ready() -> void:
 			h["name"] = "Test"
 		if _args.has("fresh"):
 			h.erase("academy")
+			h.erase("genius")
+		if _args.has("rite"):
+			# Straight to the morning of the rite, for automated checks of it.
+			h.erase("genius")
+			h["academy"] = { "seed": int(_args.get("seed", "4242")), "arrived": true, "done": ["hold"], "met": [], "day": 2, "rested": true,
+				"place": "hearth", "record": { "parries": 6, "blocks": 4, "hurts": 2, "dodges": 1, "talks": 3 } }
 		hero = h
 		enter_academy()
 		if _args.has("quit"):

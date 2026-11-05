@@ -29,6 +29,8 @@ func _run() -> void:
 	test_triggers_tolls_bars()
 	test_creation()
 	test_academy()
+	test_rite()
+	test_spark()
 	test_shape_kits()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
@@ -434,3 +436,60 @@ func test_academy() -> void:
 	check(f.p_state == "free", "a locked move does nothing")
 	f.input("dodge")
 	check(f.p_state == "dodge", "an allowed move works")
+
+func test_rite() -> void:
+	var h := Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 99)
+	var rec := { "parries": 6, "blocks": 4, "hurts": 2, "dodges": 1, "talks": 3 }
+	var a := Rite.read_shape(h, rec, 7)
+	check(str(a) == str(Rite.read_shape(h, rec, 7)), "the bowl reads the same hero the same way")
+	# Across many runs the bowl mostly agrees with the questions, and sometimes it does not.
+	var surprises := 0
+	var shapes := {}
+	for s in 200:
+		var r := Rite.read_shape(h, rec, 1000 + s)
+		if r["surprise"]:
+			surprises += 1
+		shapes[r["shape"]] = true
+	check(surprises > 10 and surprises < 110, "the rite surprises sometimes, not always (%d of 200)" % surprises)
+	# What you do at the Academy moves it: a student who parries everything leans Read.
+	var reader := 0
+	var plain := 0
+	for s in 200:
+		if Rite.read_shape(h, { "parries": 40 }, 2000 + s)["shape"] == "read": reader += 1
+		if Rite.read_shape(h, {}, 2000 + s)["shape"] == "read": plain += 1
+	check(reader > plain, "parrying through the Academy leans the bowl toward Read (%d against %d)" % [reader, plain])
+	# The First Form is a first-instar form, with the Seed's mark.
+	var f := Rite.first_form(h, a["shape"], 7)
+	var form: Dictionary = Data.forms().filter(func(x): return x["id"] == f["form"])[0]
+	check(int(form["instars"]["min"]) == 1, "the First Form is a form a first instar can take (%s)" % f["form"])
+	check(f["features"].size() >= form["features"].size(), "the First Form carries its features")
+	var forms := {}
+	for s in 60:
+		var hh := Creation.generate([0, 1, s % 6, s % 4, 1, 2, 0, s % 3, 2, 0], "", s + 1)
+		forms[Rite.first_form(hh, hh["shape"], s)["form"]] = true
+	check(forms.size() >= 4, "different lives take different First Forms (%d kinds)" % forms.size())
+	# A surprise Shape keeps a Pattern that works with the new kit.
+	for s in Creation.SHAPES:
+		var hh := h.duplicate(true)
+		Rite.reshape(hh, s)
+		check(Data.kits[s]["forms"].has(hh["pattern"]["form"]), "after the rite reads %s, the Pattern's Form is the %s kit's" % [s, s])
+		var fi := Fight.new({ "hero": hh })
+		check(fi.player_shape == s, "a %s fights as a %s" % [s, s])
+
+func test_spark() -> void:
+	var ans := [0, 1, 2, 0, 1, 2, 0, 1, 2, 0]
+	check(str(Creation.generate(ans, "", 0)) == str(Creation.generate(ans)), "with no spark, the answers alone decide")
+	check(str(Creation.generate(ans, "", 5)) == str(Creation.generate(ans, "", 5)), "the same spark makes the same person")
+	var shapes := {}
+	var bloods := {}
+	var weapons := {}
+	for s in 80:
+		var c := Creation.generate(ans, "", s + 1)
+		shapes[c["shape"]] = true
+		bloods[c["blood"]] = true
+		weapons[c["weapon"]] = true
+	check(shapes.size() >= 2 and weapons.size() >= 2, "the same answers can make different people (%d Shapes, %d bloods, %d weapons)" % [shapes.size(), bloods.size(), weapons.size()])
+	var names := {}
+	for s in 40:
+		names[Creation.name_for("columbia", s + 1)] = true
+	check(names.size() >= 20, "a spark names people many ways (%d names in 40)" % names.size())

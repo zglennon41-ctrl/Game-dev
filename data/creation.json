@@ -657,5 +657,9 @@
   "mark": 0.0,
   "kindred": 0.0,
   "bloodline": 0.0
+ },
+ "spark": {
+  "$comment": "Every new character gets a spark: a hidden random number that nudges the answers' leans, so the same answers can make a different person. jitter is how far each lean can move (0.25 = up to a quarter either way); 0 turns the spark off.",
+  "jitter": 0.3
  }
 }

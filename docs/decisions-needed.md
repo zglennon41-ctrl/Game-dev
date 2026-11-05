@@ -142,3 +142,13 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
 43. **Every run's cohort is twelve classmates made from a seed**: two of every Shape,
     names from their cities, random bloods; the run keeps a record (parries, blocks,
     hurts, dodges, talks, who you met) for the Readings to come.
+44. **The rite's numbers are mine** (`data/academy.json`, "rite"): about one rite in five
+    surprises with the default record; parrying, blocking, dodging, being hit and talking
+    each lean the bowl a little toward a Shape. When it surprises, your Pattern keeps its
+    Terms and becomes the new Shape's Form with the same effect.
+45. **The spark** (`data/creation.json`, "spark"): every character gets a hidden random
+    number that nudges the answers' leans (up to 30%) and picks the name, so the same answers
+    can make another person. A strong answer (a fear that names a blood) still wins. On the
+    reveal, "Another life, same answers" draws a new spark.
+46. **Graphics**: options and a recommendation are in `docs/art-direction.md`, with four
+    questions for you.

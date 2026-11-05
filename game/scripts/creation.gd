@@ -1,5 +1,6 @@
-## The character creator's generator: answers become a character. Pure: the same answers
-## always make the same character. Every result carries the reasons that chose it.
+## The character creator's generator: answers become a character. Pure: the same answers and
+## the same spark always make the same character; a new spark (every new character gets one)
+## nudges the leans, so the same answers can make someone else. Every result carries its reasons.
 class_name Creation
 extends RefCounted
 
@@ -46,6 +47,42 @@ static func tally(answers: Array) -> Dictionary:
 				t["lines"][key] = why
 	return t
 
+## The tally, nudged by the spark: each lean moves by up to `jitter` either way. Spark 0: no nudge.
+static func tally_with(answers: Array, spark: int) -> Dictionary:
+	var t := tally(answers)
+	if spark == 0:
+		return t
+	var rng := RandomNumberGenerator.new()
+	rng.seed = spark
+	var j := float(Data.creation.get("spark", {}).get("jitter", 0.3))
+	for key in ["shape", "tier", "blood", "style", "effect"]:
+		var d: Dictionary = t[key]
+		var keys: Array = d.keys()
+		keys.sort()
+		for k in keys:
+			d[k] = float(d[k]) * (1.0 + rng.randf_range(-j, j))
+		# A little of every Shape, so a quiet lean can still win on a strong spark.
+		if key == "shape":
+			for s in SHAPES:
+				d[s] = float(d.get(s, 0.0)) + rng.randf_range(0.0, j * 0.4)
+		# And of every blood, so the same answers do not always suggest the same people.
+		if key == "blood":
+			var top := 0.0
+			for k in d:
+				top = maxf(top, float(d[k]))
+			for b in Data.bloods:
+				d[b["id"]] = float(d.get(b["id"], 0.0)) + rng.randf_range(0.0, j * 1.2) * maxf(top, 0.3)
+	return t
+
+## A name from the city's names, by the spark.
+static func name_for(city: String, spark: int) -> String:
+	var c: Dictionary = Data.academy["cohort"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = spark + 7
+	var firsts: Array = c["first"].get(city, c["first"]["columbia"])
+	var lasts: Array = c["last"].get(city, c["last"]["columbia"])
+	return "%s %s" % [firsts[rng.randi() % firsts.size()], lasts[rng.randi() % lasts.size()]]
+
 ## The bloods the answers suggest, best first: [{ id, score, reasons }].
 static func suggest_bloods(t: Dictionary, count := 3) -> Array:
 	var tier := _top(t["tier"], ["mark", "kindred", "bloodline"])
@@ -70,8 +107,8 @@ static func _max(d: Dictionary) -> float:
 	return m
 
 ## Build the character from the answers and a blood (the suggested one, or the player's pick).
-static func generate(answers: Array, blood_id := "") -> Dictionary:
-	var t := tally(answers)
+static func generate(answers: Array, blood_id := "", spark := 0) -> Dictionary:
+	var t := tally_with(answers, spark)
 	if blood_id == "":
 		blood_id = suggest_bloods(t)[0]["id"]
 	var blood: Dictionary = Data.by_id(Data.bloods, blood_id)
@@ -120,7 +157,7 @@ static func generate(answers: Array, blood_id := "") -> Dictionary:
 	return {
 		"name": "", "blood": blood_id, "shape": shape, "city": city, "discipline": CITY_DISCIPLINE[city],
 		"weapon": best_w["id"], "seed": seed, "pattern": pattern, "body": Data.creation["models"][shape],
-		"answers": answers.duplicate(),
+		"answers": answers.duplicate(), "spark": spark,
 		"why": { "shape": _unique(shape_why), "city": [city_why], "weapon": _unique(weapon_why.filter(func(x): return x != city_why)),
 			"form": t["why"]["effect"].get(effect, []), "trigger": t["lines"].get("trigger", ""),
 			"toll": t["lines"].get("toll", ""), "bar": t["lines"].get("bar", ""), "seed": t["lines"].get("seed", "") },
