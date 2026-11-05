@@ -1,0 +1,12 @@
+[
+  { "id": "mount", "name": "Mount", "does": "Carries the character; Cast Speed from its back", "requires": [{ "kind": "rank", "archetypeDiscipline": "rider", "rank": "adept" }, { "kind": "expression", "in": ["beast", "engine"] }] },
+  { "id": "arms", "name": "Arms", "does": "Becomes the character's weapon for a fight; Fold costs half", "requires": [{ "kind": "expression", "in": ["relic", "engine"] }, { "kind": "counter", "metric": "orders.hunt", "atLeast": 50 }] },
+  { "id": "ward", "name": "Ward", "does": "Stands as a post: a party can regroup inside it", "requires": [{ "kind": "counter", "metric": "fieldUses.make.ward", "atLeast": 100 }] },
+  { "id": "night", "name": "Night", "does": "Still with the genius; Black lines a shade brighter", "requires": [{ "kind": "counter", "metric": "runs.night", "atLeast": 50 }] },
+  { "id": "storm", "name": "Storm", "does": "Carries the character's last element and lays it on the ground", "requires": [{ "kind": "counter", "metric": "fieldUses.turn.element", "atLeast": 200 }] },
+  { "id": "herald", "name": "Herald", "does": "Speaks a Bar aloud: a foe covered by it hesitates a beat", "requires": [{ "kind": "expression", "in": ["kith", "daemon"] }, { "kind": "patternFamily", "family": "bind.contract" }] },
+  { "id": "shade-walker", "name": "Shade-walker", "does": "Carries that shade's one Pattern as a shadow at x2", "requires": [{ "kind": "counter", "metric": "shades.accepted", "atLeast": 1 }] },
+  { "id": "war", "name": "War", "does": "A form for the tunnels: objective carry, no Hunt", "requires": [{ "kind": "counter", "metric": "rallies.won", "atLeast": 1 }] },
+  { "id": "carrier", "name": "Carrier", "does": "Holds a Salvage carry so the character keeps their Pattern", "requires": [{ "kind": "counter", "metric": "runs.quest.escort", "atLeast": 30 }] },
+  { "id": "union", "name": "Union", "does": "Merges with the character for seven beats", "requires": [{ "kind": "instar", "atLeast": 6 }, { "kind": "accord" }] }
+]

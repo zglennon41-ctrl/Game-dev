@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "wheel",
+  "type": "object",
+  "required": [
+    "order"
+  ],
+  "properties": {
+    "order": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "anchor",
+          "turn",
+          "cast",
+          "read",
+          "bind",
+          "make"
+        ]
+      },
+      "minItems": 6,
+      "maxItems": 6,
+      "uniqueItems": true
+    }
+  }
+}

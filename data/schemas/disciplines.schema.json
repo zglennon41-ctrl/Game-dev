@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "disciplines",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "name": {
+        "type": "string"
+      },
+      "city": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "weapons": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "stanceModifier": {
+        "type": "string"
+      },
+      "techniques": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 3,
+        "maxItems": 3
+      },
+      "rite": {
+        "type": "string"
+      },
+      "launch": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "id",
+      "name",
+      "city",
+      "weapons",
+      "stanceModifier",
+      "techniques",
+      "rite",
+      "launch"
+    ],
+    "additionalProperties": false
+  }
+}

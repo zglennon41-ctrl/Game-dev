@@ -1,0 +1,6 @@
+[
+  { "id": "old-marshal", "name": "The Marshal who held the Cut", "discipline": "marshal", "expression": "engine", "features": ["lantern", "iron-hide", "gears"], "graftFeature": "lantern", "pattern": { "name": "Last Post", "form": "anchor.endurance" } },
+  { "id": "wrong-term-blade", "name": "The Blade who swore the wrong Term", "discipline": "blade", "expression": "relic", "features": ["edge", "sheath", "grip"], "graftFeature": "sheath", "pattern": { "name": "Draw-Cut", "form": "cast.reach" } },
+  { "id": "dead-archivist", "name": "The Archivist of the old hall", "discipline": "archivist", "expression": "kith", "features": ["lantern-jaw", "old-eyes", "small-hands"], "graftFeature": "lantern-jaw", "pattern": { "name": "Catalogue of the Dead", "form": "read.sense" } },
+  { "id": "rider-shade", "name": "The Rider whose ram will not leave the yard", "discipline": "rider", "expression": "beast", "features": ["horn-brow", "broad-chest", "stone-skin"], "graftFeature": "horn-brow", "pattern": { "name": "Ram's Road", "form": "anchor.weight" } }
+]

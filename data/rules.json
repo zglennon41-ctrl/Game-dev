@@ -1,0 +1,98 @@
+{
+  "$comment": "Global numbers. Every value here is a designer knob. Sources: HANDOFF.md §3 and docs/systems-*.md. Values marked OWNER in docs/decisions-needed.md are choices awaiting the owner.",
+  "field": {
+    "willMax": 100,
+    "regenOpen": 4,
+    "regenStill": 0,
+    "perfectHoldRefund": 10,
+    "stanceCostPerSecond": 2,
+    "techniqueCost": { "min": 8, "max": 25 },
+    "patternBaseCost": 30,
+    "faintRecoverAt": 20,
+    "foldCost": 40,
+    "foldBeats": 3,
+    "stageOutput": [1, 2, 3, 4],
+    "stageReach": ["skin", "skin", "2 paces", "10 paces", "10 paces and a throw"],
+    "affinityByDistance": [1.0, 0.8, 0.6, 0.4],
+    "costMultiplierByDistance": [1.0, 1.25, 1.5, 2.0]
+  },
+  "combat": {
+    "beatWindowMs": 150,
+    "beatWindowMsGreen": 200,
+    "offBeatOutput": 0.7,
+    "health": 100,
+    "downTimerSeconds": 60,
+    "reviveBeats": 3,
+    "breaksToStagger": 3,
+    "staggerBeats": 3,
+    "chordPerfectBeats": 8,
+    "chordBeats": 3
+  },
+  "pattern": {
+    "chainBaseBeats": 3,
+    "beatsPerTerm": 1,
+    "maxTermsPerPattern": 3,
+    "maxTermsSworn": 4,
+    "swornMultiplier": 2,
+    "multiplierCeiling": 9,
+    "stage4FormOutput": 4,
+    "unswornBreachLossDays": 91
+  },
+  "tiers": [
+    { "tier": 1, "uses": 0 },
+    { "tier": 2, "uses": 50 },
+    { "tier": 3, "uses": 150 },
+    { "tier": 4, "uses": 400, "stage4Days": 365 },
+    { "tier": 5, "uses": 400, "sworn": true, "masterInArchetype": true }
+  ],
+  "verses": { "byTierEquivalent": { "2": 1, "3": 2, "5": 3 } },
+  "resonance": {
+    "$comment": "OWNER Q2. Resonance is on the instar scale: max(instar, tier + tierOffset). tierOffset 1 means tier III fights like a Fourth Form (as the Guide says of Tobiah). Set to 0 for the literal 'higher of instar and tier'.",
+    "tierOffset": 1
+  },
+  "instars": [
+    { "instar": 1, "name": "First Form", "minDay": 0, "unlockedBy": ["rite"] },
+    { "instar": 2, "name": "Second Form", "minDay": 7, "unlockedBy": ["gate"] },
+    { "instar": 3, "name": "Third Form", "minDay": 30, "unlockedBy": ["pattern-built", "tier:3"] },
+    { "instar": 4, "name": "Fourth Form", "minDay": 90, "unlockedBy": ["adept", "tier:4"] },
+    { "instar": 5, "name": "Fifth Form", "minDay": 365, "unlockedBy": ["master", "tier:5"] },
+    { "instar": 6, "name": "Apex", "minDay": 540, "unlockedBy": ["accord"] }
+  ],
+  "accord": { "instar": 5, "tier": 5 },
+  "genius": {
+    "willBase": 40,
+    "willPerInstar": 10,
+    "shadowUses": 10,
+    "shadowCapByResonance": { "1": 0, "2": 1, "3": 2, "4": 3, "5": 3, "6": 3 },
+    "adaptationSlots": 2,
+    "adaptationFadeDays": 91,
+    "graftSlots": 3,
+    "secondarySlots": 3,
+    "secondaryFromInstar": 3,
+    "shiftCost": 20,
+    "heritageMin": 1,
+    "heritageMax": 3,
+    "kinRuns": 100,
+    "namedBeastKills": 5,
+    "bloodGraftFromInstar": 3
+  },
+  "grades": [
+    { "grade": "learned", "uses": 0, "output": 1.0, "willCost": 1.0 },
+    { "grade": "practiced", "uses": 100, "output": 1.2, "willCost": 1.0 },
+    { "grade": "perfected", "uses": 500, "output": 1.5, "willCost": 0.75 }
+  ],
+  "marks": {
+    "byColor": { "green": 1, "amber": 2, "red": 3, "black": 5 },
+    "swornMultiplier": 2,
+    "archivistMultiplier": 1.25,
+    "adept": 10,
+    "master": 50,
+    "stage4Quests": 10
+  },
+  "founding": { "members": 3, "accounts": 3, "usesEach": 10, "canonServerUses": 100, "canonPerSeason": 12 },
+  "calendar": {
+    "seasonDays": 91,
+    "seasons": ["Thaw", "Writ", "Rally", "Dark"],
+    "$comment": "Simulator day 0 is the first day of a Thaw, the day of the rite."
+  }
+}

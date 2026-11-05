@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "reading",
+  "type": "object",
+  "required": [
+    "weights",
+    "firstFormWeights",
+    "emphasis",
+    "diversity",
+    "crossing",
+    "heritage",
+    "leans"
+  ],
+  "properties": {
+    "weights": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "firstFormWeights": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "leans": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "properties": {
+            "expression": {
+              "type": "object",
+              "propertyNames": {
+                "enum": [
+                  "beast",
+                  "kith",
+                  "engine",
+                  "relic",
+                  "daemon",
+                  "aspect"
+                ]
+              },
+              "additionalProperties": {
+                "type": "number"
+              }
+            },
+            "features": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number"
+              }
+            }
+          },
+          "required": [
+            "expression",
+            "features"
+          ],
+          "additionalProperties": false
+        }
+      }
+    }
+  }
+}

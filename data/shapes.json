@@ -1,0 +1,8 @@
+[
+  { "id": "anchor", "name": "Anchor", "field": "Stays in the body", "families": ["wall", "weight", "endurance"], "pulseMs": 600, "bowlSign": "the water rises and overflows", "palette": "broad" },
+  { "id": "turn", "name": "Turn", "field": "Changes its nature", "families": ["element", "property", "conversion"], "pulseMs": 520, "bowlSign": "the water changes color or taste", "palette": "shifting" },
+  { "id": "cast", "name": "Cast", "field": "Leaves the body", "families": ["shot", "reach", "speed"], "pulseMs": 420, "bowlSign": "the water leaps out of the bowl", "palette": "long" },
+  { "id": "read", "name": "Read", "field": "Perceives", "families": ["sense", "foresight", "mending"], "pulseMs": 500, "bowlSign": "you see something in the water", "palette": "luminous" },
+  { "id": "bind", "name": "Bind", "field": "Attaches to others", "families": ["leash", "puppet", "contract"], "pulseMs": 500, "bowlSign": "the water moves toward your hand", "palette": "threaded" },
+  { "id": "make", "name": "Make", "field": "Takes independent form", "families": ["form", "ward", "summon"], "pulseMs": 560, "bowlSign": "a shape forms in the water", "palette": "angular" }
+]

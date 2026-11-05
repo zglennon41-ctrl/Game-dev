@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "bloods",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "tier": {
+        "enum": [
+          "mark",
+          "kindred",
+          "bloodline"
+        ]
+      },
+      "name": {
+        "type": "string"
+      },
+      "gift": {
+        "type": "string"
+      },
+      "gap": {
+        "type": "string"
+      },
+      "house": {
+        "type": "string"
+      },
+      "shapeLean": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "number"
+        }
+      },
+      "graft": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      }
+    },
+    "required": [
+      "id",
+      "tier",
+      "name",
+      "gift",
+      "gap"
+    ],
+    "additionalProperties": false
+  }
+}

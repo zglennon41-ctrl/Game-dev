@@ -1,0 +1,10 @@
+[
+  { "id": "webbed", "metric": "runs.ground.water", "threshold": 30 },
+  { "id": "dark-eyed", "metric": "runs.night", "threshold": 30 },
+  { "id": "long-legged", "metric": "fieldUses.cast.speed", "threshold": 200 },
+  { "id": "plated", "metric": "runs.company.make", "threshold": 100 },
+  { "id": "set-feet", "metric": "fights.range.close", "threshold": 50 },
+  { "id": "hall-fat", "metric": "days.kitchenHigh", "threshold": 91 },
+  { "id": "scorched", "metric": "fieldUses.turn.element", "threshold": 100 },
+  { "id": "tunnel-ear", "metric": "runs.quest.linework", "threshold": 50 }
+]

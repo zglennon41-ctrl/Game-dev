@@ -1,0 +1,1 @@
+{ "$comment": "The Shape wheel, in order. Distance around the wheel sets affinity; the Shape three away is the opposite and the counter.", "order": ["anchor", "turn", "cast", "read", "bind", "make"] }

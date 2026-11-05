@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "techniques",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "name": {
+        "type": "string"
+      },
+      "shape": {
+        "enum": [
+          "anchor",
+          "turn",
+          "cast",
+          "read",
+          "bind",
+          "make"
+        ]
+      },
+      "family": {
+        "type": "string"
+      },
+      "beats": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "will": {
+        "type": "number"
+      },
+      "stage": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 4
+      },
+      "effect": {
+        "type": "object"
+      },
+      "tags": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "placeholder": {
+        "type": "boolean"
+      },
+      "$comment": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "id",
+      "name",
+      "shape",
+      "family",
+      "beats",
+      "will",
+      "stage"
+    ],
+    "additionalProperties": false
+  }
+}

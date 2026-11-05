@@ -1,0 +1,10 @@
+[
+  { "id": "watches-from-above", "text": "Something that watches from above", "seedMark": "far-eyes", "leansToward": "Beast or Kith with wings; eyes that see far" },
+  { "id": "stands-between", "text": "Something that stands between me and harm", "seedMark": "broad-guard", "leansToward": "Engine or Beast, broad; a wall" },
+  { "id": "i-can-hold", "text": "Something I can hold", "seedMark": "grip", "leansToward": "Relic" },
+  { "id": "never-alive", "text": "Something that was never alive", "seedMark": "cold-core", "leansToward": "Engine or Aspect" },
+  { "id": "with-a-voice", "text": "Something with a voice", "seedMark": "voice", "leansToward": "Kith or Daemon" },
+  { "id": "that-burns", "text": "Something that burns", "seedMark": "ember", "leansToward": "Aspect or Daemon; Turn" },
+  { "id": "remembers", "text": "Something that remembers", "seedMark": "old-eyes", "leansToward": "Kith; a Read lean; shades accept it sooner" },
+  { "id": "owes-me", "text": "Something that owes me", "seedMark": "ledger", "leansToward": "Daemon; a contract from day one" }
+]

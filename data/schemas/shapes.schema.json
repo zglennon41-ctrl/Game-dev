@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "shapes",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "enum": [
+          "anchor",
+          "turn",
+          "cast",
+          "read",
+          "bind",
+          "make"
+        ]
+      },
+      "name": {
+        "type": "string"
+      },
+      "field": {
+        "type": "string"
+      },
+      "families": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "minItems": 3,
+        "maxItems": 3
+      },
+      "pulseMs": {
+        "type": "number"
+      },
+      "bowlSign": {
+        "type": "string"
+      },
+      "palette": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "id",
+      "name",
+      "field",
+      "families",
+      "pulseMs",
+      "bowlSign",
+      "palette"
+    ],
+    "additionalProperties": false
+  }
+}

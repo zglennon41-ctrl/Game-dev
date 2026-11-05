@@ -1,0 +1,10 @@
+[
+  { "$comment": "PLACEHOLDER techniques: only the Forms the three lives need and the Anchor Journeyman three. Names and numbers are not design; the owner fills the 162.", "id": "brace", "name": "Brace", "shape": "anchor", "family": "wall", "beats": 2, "will": 10, "stage": 2, "effect": { "kind": "guard", "value": 1.0 }, "tags": ["close"], "placeholder": true },
+  { "id": "cannot-be-moved", "name": "Cannot Be Moved", "shape": "anchor", "family": "wall", "beats": 3, "will": 15, "stage": 3, "effect": { "kind": "immovable", "value": 1.0 }, "tags": ["close"], "placeholder": true },
+  { "id": "shoulder-in", "name": "Shoulder In", "shape": "anchor", "family": "wall", "beats": 2, "will": 12, "stage": 2, "effect": { "kind": "guard", "value": 0.8 }, "tags": ["close"], "placeholder": true },
+  { "id": "ground-strike", "name": "Ground Strike", "shape": "anchor", "family": "weight", "beats": 3, "will": 18, "stage": 3, "effect": { "kind": "damage", "value": 1.4 }, "tags": ["close"], "placeholder": true },
+  { "id": "second-wind", "name": "Second Wind", "shape": "anchor", "family": "endurance", "beats": 2, "will": 15, "stage": 3, "effect": { "kind": "heal", "value": 0.2 }, "tags": [], "placeholder": true },
+  { "id": "closing-strike", "name": "Closing Strike", "shape": "cast", "family": "reach", "beats": 2, "will": 12, "stage": 3, "effect": { "kind": "damage", "value": 1.2 }, "tags": ["close"], "placeholder": true },
+  { "id": "long-shot", "name": "Long Shot", "shape": "cast", "family": "shot", "beats": 2, "will": 10, "stage": 2, "effect": { "kind": "damage", "value": 1.0 }, "tags": ["far"], "placeholder": true },
+  { "id": "terms-of-debt", "name": "Terms of Debt", "shape": "bind", "family": "contract", "beats": 3, "will": 16, "stage": 3, "effect": { "kind": "contract", "value": 1.0 }, "tags": ["mid"], "placeholder": true }
+]

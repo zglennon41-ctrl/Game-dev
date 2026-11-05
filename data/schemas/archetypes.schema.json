@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "archetypes",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "name": {
+        "type": "string"
+      },
+      "shape": {
+        "enum": [
+          "anchor",
+          "turn",
+          "cast",
+          "read",
+          "bind",
+          "make"
+        ]
+      },
+      "discipline": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      }
+    },
+    "required": [
+      "id",
+      "name",
+      "shape",
+      "discipline"
+    ],
+    "additionalProperties": false
+  }
+}

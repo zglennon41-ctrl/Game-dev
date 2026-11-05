@@ -1,0 +1,34 @@
+{
+  "$comment": "Tobiah: fires the Pattern, ignores the genius. docs/three-lives.md. Most early runs are Linework with no archetype loadout, so they count toward Stage 4 but give no Marks.",
+  "id": "tobiah", "name": "Tobiah", "account": "acct-tobiah", "guild": "lamplit-company",
+  "blood": "ridgefolk", "seed": "stands-between", "shape": "anchor", "city": "columbia", "discipline": "marshal",
+  "days": 1095, "gateDay": 7, "archetype": "bulwark",
+  "phases": [
+    { "from": 0, "to": 7, "label": "The Academy", "fightsPerDay": 8, "runsPerDay": 1,
+      "range": { "close": 0.9, "mid": 0.1 }, "families": { "anchor.wall": 1.0, "anchor.weight": 0.3 },
+      "ordersPerDay": 1, "orders": { "guard": 1.0 }, "company": { "cast": 0.5, "read": 0.5 }, "ground": { "tunnel": 1.0 } },
+    { "from": 7, "to": 365, "label": "Year one: every fight, Bulwark Stand", "runsPerDay": 1.5, "fightsPerRun": 1.33,
+      "range": { "close": 0.9, "mid": 0.1 }, "families": { "anchor.wall": 1.0, "anchor.weight": 0.4 },
+      "ordersPerDay": 0.13, "orders": { "guard": 0.8, "hold": 0.2 }, "company": { "make": 0.5, "cast": 0.3, "read": 0.2 },
+      "runsWith": { "mira": 0.2 }, "ground": { "tunnel": 0.7, "ruin": 0.3 }, "questTypes": { "linework": 0.5 },
+      "fieldUses": { "make.ward": 0.4 },
+      "patternFiresPerDay": 3,
+      "quests": [ { "archetype": "none", "color": "green", "perDay": 0.6 }, { "archetype": "bulwark", "color": "green", "perDay": 0.045 } ],
+      "techniques": { "cannot-be-moved": 3, "brace": 2 } },
+    { "from": 365, "to": 1095, "label": "Years two and three", "runsPerDay": 1.5, "fightsPerRun": 1.33,
+      "range": { "close": 0.9, "mid": 0.1 }, "families": { "anchor.wall": 1.0, "anchor.weight": 0.4 },
+      "ordersPerDay": 0.13, "orders": { "guard": 0.8, "hold": 0.2 }, "company": { "make": 0.5, "cast": 0.3, "read": 0.2 },
+      "runsWith": { "mira": 0.2 }, "ground": { "tunnel": 0.7, "ruin": 0.3 }, "questTypes": { "linework": 0.5 },
+      "fieldUses": { "make.ward": 0.4 },
+      "patternFiresPerDay": 3,
+      "quests": [ { "archetype": "bulwark", "color": "green", "perDay": 0.075 } ],
+      "techniques": { "cannot-be-moved": 3, "brace": 2 } }
+  ],
+  "events": [
+    { "day": 7, "type": "build-pattern", "name": "Bulwark Stand", "form": "anchor.wall", "technique": "cannot-be-moved",
+      "terms": ["with-member-behind", "half-health"], "sworn": false, "archetype": "bulwark" },
+    { "day": 735, "type": "swear" }
+  ],
+  "companions": { "mira": { "kinFeature": "far-eyes" } },
+  "grafts": "accept"
+}

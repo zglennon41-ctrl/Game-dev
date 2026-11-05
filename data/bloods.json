@@ -1,0 +1,5 @@
+[
+  { "id": "long-stride", "tier": "mark", "name": "Long stride", "gift": "A longer stride: Cast Speed reaches a pace further", "gap": "Slow to set the feet against a third molt" },
+  { "id": "ridgefolk", "tier": "kindred", "name": "Ridgefolk", "gift": "Stone-skinned", "gap": "Sinks in water", "shapeLean": { "anchor": 0.5 } },
+  { "id": "demon-blooded", "tier": "bloodline", "name": "Demon-blooded", "house": "key", "gift": "The Trunk: Contract from day one", "gap": "Cannot cross a threshold uninvited", "shapeLean": { "bind": 0.6 }, "graft": "second-face" }
+]

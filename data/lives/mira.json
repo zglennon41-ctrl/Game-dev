@@ -1,0 +1,315 @@
+{
+  "$comment": "Mira: says ranged, fights close. docs/three-lives.md. Rates are per day; day 0 is the rite on the first day of a Thaw.",
+  "id": "mira",
+  "name": "Mira",
+  "account": "acct-mira",
+  "guild": "lamplit-company",
+  "blood": "long-stride",
+  "seed": "watches-from-above",
+  "shape": "cast",
+  "city": "columbia",
+  "discipline": "marshal",
+  "days": 1095,
+  "gateDay": 7,
+  "archetype": "deadeye",
+  "phases": [
+    {
+      "from": 0,
+      "to": 7,
+      "label": "The Academy",
+      "fightsPerDay": 10,
+      "runsPerDay": 1,
+      "range": {
+        "close": 0.8,
+        "far": 0.2
+      },
+      "families": {
+        "cast.reach": 1.0,
+        "cast.shot": 0.25
+      },
+      "ordersPerDay": 6,
+      "orders": {
+        "guard": 0.7,
+        "hunt": 0.3
+      },
+      "company": {
+        "anchor": 1.0
+      },
+      "ground": {
+        "tunnel": 1.0
+      }
+    },
+    {
+      "from": 7,
+      "to": 120,
+      "label": "Year one: saber close, Guard orders",
+      "runsPerDay": 1.5,
+      "fightsPerRun": 3,
+      "range": {
+        "close": 0.8,
+        "far": 0.2
+      },
+      "families": {
+        "cast.reach": 1.0,
+        "cast.shot": 0.25,
+        "marshal.school": 0.2
+      },
+      "ordersPerDay": 8,
+      "orders": {
+        "guard": 0.7,
+        "hunt": 0.3
+      },
+      "company": {
+        "anchor": 0.7,
+        "read": 0.3
+      },
+      "runsWith": {
+        "oona": 0.25
+      },
+      "ground": {
+        "tunnel": 0.6,
+        "ruin": 0.4
+      },
+      "night": 0.1,
+      "questTypes": {
+        "linework": 0.4,
+        "hunt": 0.3
+      },
+      "patternFiresPerDay": 0.5,
+      "quests": [
+        {
+          "archetype": "deadeye",
+          "color": "green",
+          "perDay": 0.05
+        },
+        {
+          "archetype": "none",
+          "color": "green",
+          "perDay": 0.03
+        }
+      ],
+      "techniques": {
+        "closing-strike": 3.5,
+        "long-shot": 1.0
+      }
+    },
+    {
+      "from": 120,
+      "to": 365,
+      "label": "Year one, after the shade's Draw-Cut lessons",
+      "runsPerDay": 1.5,
+      "fightsPerRun": 3,
+      "range": {
+        "close": 0.8,
+        "far": 0.2
+      },
+      "families": {
+        "cast.reach": 1.0,
+        "cast.shot": 0.25,
+        "marshal.school": 0.2
+      },
+      "ordersPerDay": 8,
+      "orders": {
+        "guard": 0.7,
+        "hunt": 0.3
+      },
+      "company": {
+        "anchor": 0.7,
+        "read": 0.3
+      },
+      "runsWith": {
+        "oona": 0.25
+      },
+      "ground": {
+        "tunnel": 0.6,
+        "ruin": 0.4
+      },
+      "night": 0.1,
+      "questTypes": {
+        "linework": 0.4,
+        "hunt": 0.3
+      },
+      "patternFiresPerDay": 0.5,
+      "quests": [
+        {
+          "archetype": "deadeye",
+          "color": "green",
+          "perDay": 0.05
+        },
+        {
+          "archetype": "draw-cutter",
+          "color": "green",
+          "perDay": 0.05
+        }
+      ],
+      "techniques": {
+        "closing-strike": 3.5,
+        "long-shot": 1.0
+      }
+    },
+    {
+      "from": 365,
+      "to": 730,
+      "label": "Year two: Hunts at close range with an Edo blade",
+      "runsPerDay": 1.5,
+      "fightsPerRun": 3,
+      "range": {
+        "close": 0.85,
+        "far": 0.15
+      },
+      "families": {
+        "cast.reach": 0.8,
+        "blade.school": 0.8
+      },
+      "ordersPerDay": 8,
+      "orders": {
+        "guard": 0.6,
+        "hunt": 0.4
+      },
+      "company": {
+        "anchor": 0.6,
+        "read": 0.3,
+        "turn": 0.2
+      },
+      "runsWith": {
+        "oona": 0.2
+      },
+      "ground": {
+        "tunnel": 0.4,
+        "ruin": 0.3,
+        "wild": 0.3
+      },
+      "night": 0.1,
+      "questTypes": {
+        "hunt": 0.5
+      },
+      "patternFiresPerDay": 0.5,
+      "quests": [
+        {
+          "archetype": "deadeye",
+          "color": "green",
+          "perDay": 0.02
+        },
+        {
+          "archetype": "draw-cutter",
+          "color": "green",
+          "perDay": 0.06
+        }
+      ],
+      "techniques": {
+        "closing-strike": 3.0
+      }
+    },
+    {
+      "from": 730,
+      "to": 1095,
+      "label": "Year three: Master Draw-Cutter, the Reef, the Hearth War",
+      "runsPerDay": 1.5,
+      "fightsPerRun": 3,
+      "range": {
+        "close": 0.85,
+        "far": 0.15
+      },
+      "families": {
+        "cast.reach": 0.8,
+        "blade.school": 0.8
+      },
+      "ordersPerDay": 8,
+      "orders": {
+        "guard": 0.6,
+        "hunt": 0.4
+      },
+      "company": {
+        "anchor": 0.6,
+        "read": 0.3,
+        "turn": 0.2
+      },
+      "runsWith": {
+        "oona": 0.2
+      },
+      "ground": {
+        "ruin": 0.4,
+        "wild": 0.4,
+        "quiet": 0.2
+      },
+      "night": 0.1,
+      "patternFiresPerDay": 0.6,
+      "quests": [
+        {
+          "archetype": "draw-cutter",
+          "color": "green",
+          "perDay": 0.1
+        }
+      ],
+      "techniques": {
+        "closing-strike": 3.0
+      }
+    }
+  ],
+  "events": [
+    {
+      "day": 100,
+      "type": "shade-accept",
+      "shade": "wrong-term-blade"
+    },
+    {
+      "day": 120,
+      "type": "take-archetype",
+      "archetype": "draw-cutter"
+    },
+    {
+      "day": 140,
+      "type": "build-pattern",
+      "name": "Stoop",
+      "form": "cast.reach",
+      "technique": "closing-strike",
+      "terms": [
+        "after-perfect-hold",
+        "genius-sits-out",
+        "never-unarmed"
+      ],
+      "sworn": false,
+      "archetype": "draw-cutter"
+    },
+    {
+      "day": 400,
+      "type": "equip",
+      "archetype": "draw-cutter"
+    },
+    {
+      "day": 735,
+      "type": "swear"
+    },
+    {
+      "day": 960,
+      "type": "peer-uses",
+      "account": "acct-tobiah",
+      "character": "tobiah-alt",
+      "uses": 4
+    },
+    {
+      "day": 980,
+      "type": "peer-uses",
+      "account": "acct-tobiah",
+      "character": "tobiah-alt",
+      "uses": 10
+    },
+    {
+      "day": 1000,
+      "type": "peer-uses",
+      "account": "acct-classmate",
+      "character": "npc-classmate",
+      "uses": 10
+    }
+  ],
+  "picks": {
+    "2": {
+      "expression": "kith"
+    },
+    "3": {
+      "expression": "relic"
+    }
+  },
+  "focus": "warden",
+  "grafts": "accept"
+}

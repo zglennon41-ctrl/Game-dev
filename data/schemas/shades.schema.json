@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "shades",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "name": {
+        "type": "string"
+      },
+      "discipline": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "expression": {
+        "enum": [
+          "beast",
+          "kith",
+          "engine",
+          "relic",
+          "daemon",
+          "aspect"
+        ]
+      },
+      "features": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "graftFeature": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "pattern": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "form": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "form"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "id",
+      "name",
+      "discipline",
+      "expression",
+      "features",
+      "graftFeature",
+      "pattern"
+    ],
+    "additionalProperties": false
+  }
+}

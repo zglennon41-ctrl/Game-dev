@@ -1,0 +1,6 @@
+[
+  { "id": "oona", "name": "Oona Flint", "blood": { "tier": "kindred", "id": "ridgefolk" }, "shape": "anchor", "discipline": "rider",
+    "pattern": { "name": "Ridgeback", "form": "anchor.wall", "terms": ["with-member-behind", "season-no-stance"], "sworn": true },
+    "genius": { "form": "ram", "expression": "beast", "features": ["horn-brow", "broad-chest", "stone-skin"], "kinFeature": "horn-brow" },
+    "wants": ["a ram that outlives her"], "feuds": ["hollis"], "atRiskOn": ["red"] }
+]

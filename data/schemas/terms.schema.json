@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "terms",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      },
+      "n": {
+        "type": "integer"
+      },
+      "kind": {
+        "enum": [
+          "trigger",
+          "toll",
+          "bar"
+        ]
+      },
+      "text": {
+        "type": "string"
+      },
+      "multiplier": {
+        "type": "number",
+        "minimum": 1
+      },
+      "predicate": {
+        "type": "string"
+      },
+      "apply": {
+        "type": "string"
+      },
+      "forbids": {
+        "type": "string"
+      },
+      "tags": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "swornOnly": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "id",
+      "n",
+      "kind",
+      "text",
+      "multiplier",
+      "tags"
+    ],
+    "additionalProperties": false
+  }
+}

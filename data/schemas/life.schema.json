@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "life",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "account",
+    "guild",
+    "blood",
+    "seed",
+    "shape",
+    "city",
+    "discipline",
+    "days",
+    "gateDay",
+    "archetype",
+    "phases",
+    "events"
+  ],
+  "properties": {
+    "shape": {
+      "enum": [
+        "anchor",
+        "turn",
+        "cast",
+        "read",
+        "bind",
+        "make"
+      ]
+    },
+    "days": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "gateDay": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to"
+        ],
+        "properties": {
+          "from": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "to": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "day",
+          "type"
+        ],
+        "properties": {
+          "day": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "type": {
+            "enum": [
+              "take-archetype",
+              "equip",
+              "build-pattern",
+              "swear",
+              "shade-accept",
+              "named-kill",
+              "rally-won",
+              "peer-uses"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
