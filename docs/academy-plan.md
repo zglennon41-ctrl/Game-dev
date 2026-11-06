@@ -81,7 +81,20 @@ The creator, the opening, the genius system and its Readings, the rite and the G
 six lessons as the spine of the term, the seeds already planted (Marks, the board, the
 shade, the calendar, the declaration), advanced standing.
 
-## Pacing to eight hours
+## Pacing to eight hours (the term as it stands, 2026-11-07)
+
+| Part | Count | Each | Hours |
+| --- | --- | --- | --- |
+| The opening, the arrival, the rite | 1 | 30 min | 0.5 |
+| The six lessons as courses | 6 | 20–30 min | 2.5 |
+| The cohort's troubles | 3 | 5–10 min | 0.4 |
+| The board: the ten postings the Gate waits for, one of each type | 10 | 20–40 min | 3.5–6.5 |
+| The crisis's own postings among them, the Deep Run | | | (in the ten) |
+| The smith, the Hearthkeeper, the school's extra techniques, the shade | | | 0.5 |
+| The Gate, the Reckoning, Commencement | 1 | 20 min | 0.3 |
+| **A term** | | | **7.7–10.7** |
+
+## Pacing to eight hours (the first plan)
 
 | Part | Hours |
 | --- | --- |
