@@ -21,6 +21,12 @@ func start_ambience() -> void:
 	if not _ambience.playing:
 		_ambience.play()
 
+## The air of a place: the halls' low hum, or the line's wind (lower, slower, wider).
+func set_ambience(kind: String) -> void:
+	var tw := create_tween()
+	tw.tween_property(_ambience, "pitch_scale", 0.68 if kind == "wild" else 1.0, 1.2)
+	tw.parallel().tween_property(_ambience, "volume_db", 2.0 if kind == "wild" else 0.0, 1.2)
+
 func stop_ambience() -> void:
 	_ambience.stop()
 

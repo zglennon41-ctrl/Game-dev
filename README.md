@@ -16,8 +16,28 @@ A real-time party RPG with guild management. Read `HANDOFF.md` for what the game
 
 Turn the sound on and choose **New character**: ten questions about who you were before
 your field woke, then the reveal of who your answers made (your blood, Shape, weapon, what
-will stand beside you, and your Pattern), then the night your field wakes. Afterwards,
-**Practice yard** lets your character fight cut-wolves.
+will stand beside you, and your Pattern), then the night your field wakes, and the
+Instructor who takes you in.
+
+Then **the Academy at Alexandria**, a term of play that ends with a settled character:
+
+- **Lesson 1, Hold** in the warded yard: the guard and the parry.
+- **The rite** in the Hearth Hall: the bowl reads your Shape (it can surprise you) and your
+  genius takes its First Form, one of three the bowl offers.
+- **Lesson 3, Shape**: your stance, your technique, and a sparring ladder against your
+  cohort of twelve classmates, made new for every character.
+- **Lesson 4, Discipline**: your city's school, a weapon of your choosing, three techniques
+  on keys 1, 2, 3, and a bout against your Instructor.
+- **Lesson 5, the line**: a party of two classmates, the car to the Green, the post, the
+  Warden's den, extraction. No one dies: the rescue team carries the fallen out.
+- **Lesson 6, Project**: the field opened past the skin, and the Field Examination with it
+  open: Stage 3.
+- **The Gate**: your genius's Second Form read from how you played, the cohort's write-up of
+  you, Commencement.
+
+Between lessons, talk to anyone (E), rest in the dormitory, and press J for your genius's
+page. **Practice yard** lets your character fight cut-wolves at any time; the art for every
+genius is built by `tools/blender/genius_kit.py` (see `docs/art-bible.md`).
 
 | Keyboard and mouse | Gamepad | Verb |
 | --- | --- | --- |

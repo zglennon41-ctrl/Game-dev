@@ -276,6 +276,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 	if not zone.is_empty():
 		hud.target.visible = true
 	_show_place(spec["name"])
+	sfx.set_ambience("wild" if not zone.is_empty() else "hall")
 	# Arrive out of the dark.
 	if _fade.is_inside_tree():
 		_fade.modulate.a = 1.0
