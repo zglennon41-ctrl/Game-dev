@@ -69,6 +69,7 @@ var arena := Vector2(22, 14)
 var _place_root := Node3D.new()
 var _figures: Array = []   # people standing in the place: {node, anim, pos, facing}
 var obstacles: Array = []  # Vector3(x, z, radius) for the place's pillars, people and furniture
+var _ally_nodes: Array = []   # the party, drawn from the fight's allies: {node, anim, cur, until}
 var open_doors: Dictionary = {}   # doors the term has opened (by where they lead)
 var _motes := CPUParticles3D.new()
 var _p_skel: Skeleton3D
@@ -368,9 +369,9 @@ func set_foe(spec: Dictionary) -> void:
 	_foe_spec = spec
 	if _wolf:
 		_wolf.queue_free()
-	if spec.is_empty():
+	if not spec.has("body"):
 		_wolf = load("res://game/assets/quaternius/Wolf.glb").instantiate()
-		_wolf.scale = Vector3.ONE * WOLF_SCALE
+		_wolf.scale = Vector3.ONE * WOLF_SCALE * float(spec.get("wolf_scale", 1.0))
 		_w_anims = WOLF_ANIMS
 	else:
 		_wolf = load("res://game/assets/kaykit/%s.glb" % spec.get("body", "Knight")).instantiate()
@@ -924,6 +925,14 @@ func feedback(f: Fight, events: Array) -> void:
 			"order":
 				floater(P + Vector3(0, 0.3, 0), "ORDER: %s" % String(e["order"]).to_upper(), _g_tint.lightened(0.3), 44, 1.0)
 				genius_react("cue")
+			"ally-hit", "ally-hurt", "ally-down", "ally-up":
+				_ally_event(f, e)
+			"field-open":
+				_ring_wave(_v3(f.p_pos), _shape_color(f.player_shape), 5.0)
+				burst(P, _shape_color(f.player_shape), 60, 6.0)
+				floater(P + Vector3(0, 0.6, 0), "THE FIELD OPENS", _shape_color(f.player_shape), 80, 2.0, 0.4)
+				flash_screen(_shape_color(f.player_shape), 0.5)
+				genius_react("stance")
 			"marked":
 				floater(W + Vector3(0, 0.9, 0), "UNDER WARRANT", C_GOLD, 56, 1.4)
 				_ring_wave(_v3(f.w_pos), C_GOLD, 2.0)
@@ -998,7 +1007,8 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 	# The Anchor.
 	_player.position = _v3(f.p_pos)
 	_player.rotation.y = _yaw(f.p_facing)
-	_aura.visible = f.p_stance
+	_aura.visible = f.p_stance or f.p_field_open
+	(_aura.material_override as StandardMaterial3D).albedo_color.a = 0.09 if f.p_stance else 0.035
 	_player_flash = maxf(0.0, _player_flash - dt * 6.0)
 	_overlay_player.albedo_color = _tint.lerp(Color(C_WINDUP, 0.45), _player_flash) if _player_flash > 0.01 else _tint
 	if _clock >= _p_oneshot_until:
@@ -1121,6 +1131,7 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 	_update_camera(dt, cam_input, f)
 	_update_genius(f, dt)
 	_update_figures(f, dt)
+	_update_allies(f, dt)
 
 ## Models face +Z; the fight's facing is the angle on the ground plane.
 func _yaw(facing: float) -> float:
@@ -1598,7 +1609,9 @@ func set_place(id: String) -> void:
 		_moonlight([[Vector3(-5.5, 0, -2.6), 1.3], [Vector3(3.2, 0, 3.4), 0.9], [Vector3(8.6, 0, -4.4), 1.1]])
 		_env.background_color = Color(0.02, 0.018, 0.02)
 		_env.ambient_light_energy = 0.2
+		_env.ambient_light_color = Color(0.5, 0.44, 0.48)
 		_env.fog_density = 0.022
+		_moon.light_energy = 0.28
 	else:
 		_build_academy_place(Data.academy["places"][id])
 	_motes.emission_box_extents = Vector3(arena.x / 2.0, 1.8, arena.y / 2.0)
@@ -1630,15 +1643,18 @@ func _build_academy_place(spec: Dictionary) -> void:
 				return true
 		return false
 	var kinds := ["wall", "wall_pillar", "wall", "wall_cracked", "wall_pillar", "wall"]
+	var wild: bool = spec.get("walls", "") == "wild"
 	if spec.get("walls", "") == "yard":
 		kinds = ["wall", "wall_broken", "wall_pillar", "wall_cracked", "wall", "wall_pillar"]
+	if wild:
+		kinds = ["wall_broken", "rubble_large", "wall_cracked", "rubble_large", "wall_broken", "wall_broken"]
 	var k := 0
 	var wx := -hw + 2.0
 	while wx < hw:
 		for side in [-1, 1]:
 			var kind: String = "wall_arched" if is_door.call(wx, side * (hd - 1.0)) else kinds[(k + (3 if side > 0 else 0)) % kinds.size()]
 			_piece(kind, Vector3(wx, 0, side * hd), 0.0 if side < 0 else 180.0)
-			if k % 2 == 0 and kind != "wall_arched":
+			if k % 2 == 0 and kind != "wall_arched" and not wild:
 				_torch(Vector3(wx, 2.4, side * (hd - 0.45)), 0.0 if side < 0 else 180.0)
 		wx += 4.0
 		k += 1
@@ -1647,22 +1663,60 @@ func _build_academy_place(spec: Dictionary) -> void:
 		for side in [-1, 1]:
 			var kind: String = "wall_arched" if is_door.call(side * (hw - 1.0), ez) else kinds[(k + 1) % kinds.size()]
 			_piece(kind, Vector3(side * hw, 0, ez), 90.0 if side < 0 else -90.0)
-			if k % 3 == 0 and kind != "wall_arched":
+			if k % 3 == 0 and kind != "wall_arched" and not wild:
 				_torch(Vector3(side * (hw - 0.45), 2.4, ez), 90.0 if side < 0 else -90.0)
 		ez += 4.0
 		k += 1
 	for d in doors:
 		_door_marker(Vector3(float(d["at"][0]), 0, float(d["at"][1])), String(d["label"]), d.has("locked") and not open_doors.has(d["to"]))
+	if spec.get("rails", false):
+		_rails(arena.x / 2.0 + 1.0)
 	match String(spec["name"]):
 		"The Quad": _furnish_quad()
 		"The Yard": _furnish_yard()
 		"The Dormitory": _furnish_dorm(spec)
 		"The Hearth Hall": _furnish_hearth()
+	if wild:
+		_furnish_wild(spec)
+		_env.background_color = Color(0.03, 0.045, 0.06)
+		_env.ambient_light_energy = 0.42
+		_env.ambient_light_color = Color(0.5, 0.6, 0.75)
+		_env.fog_density = 0.018
+		_moon.light_energy = 0.9
+		_moonlight([[Vector3(-arena.x * 0.2, 0, -arena.y * 0.15), 1.4], [Vector3(arena.x * 0.28, 0, arena.y * 0.2), 1.0], [Vector3(0, 0, 0), 0.8]])
+		return
 	_env.background_color = Color(0.045, 0.05, 0.095)
 	_env.ambient_light_energy = 0.34
+	_env.ambient_light_color = Color(0.5, 0.44, 0.48)
 	_env.fog_density = 0.012
+	_moon.light_energy = 0.28
 	if spec.get("walls", "") != "fortress" or arena.x > 20.0:
 		_moonlight([[Vector3(arena.x * 0.18, 0, -arena.y * 0.12), 1.2], [Vector3(-arena.x * 0.25, 0, arena.y * 0.2), 0.9]])
+
+## The line itself: ties and two rails across the place.
+func _rails(hw: float) -> void:
+	var tie := _mat(Color(0.22, 0.15, 0.1))
+	var rail := _mat(Color(0.42, 0.4, 0.38))
+	rail.metallic = 0.85
+	rail.roughness = 0.3
+	var tx := -hw
+	while tx < hw:
+		var bm := BoxMesh.new()
+		bm.size = Vector3(0.3, 0.12, 2.4)
+		var b := MeshInstance3D.new()
+		b.mesh = bm
+		b.position = Vector3(tx, 0.1, 0)
+		b.material_override = tie
+		_place_root.add_child(b)
+		tx += 0.8
+	for rz in [-0.72, 0.72]:
+		var rm := BoxMesh.new()
+		rm.size = Vector3(hw * 2.0, 0.12, 0.1)
+		var r := MeshInstance3D.new()
+		r.mesh = rm
+		r.position = Vector3(0, 0.2, rz)
+		r.material_override = rail
+		_place_root.add_child(r)
 
 func _torch(at: Vector3, rot: float) -> void:
 	var t := _piece("torch_mounted", at, rot)
@@ -1701,6 +1755,48 @@ func _door_marker(at: Vector3, label: String, locked: bool) -> void:
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	l.position = at * Vector3(0.86, 0, 0.86) + Vector3(0, 3.6, 0)
 	_place_root.add_child(l)
+
+## The Green: rocks, the odd dead stump (a scaled column), and at the post a ring of ward-light.
+func _furnish_wild(spec: Dictionary) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(arena.x * 7 + arena.y)
+	for i in 7:
+		var at := Vector3(rng.randf_range(-arena.x / 2.0 + 1.5, arena.x / 2.0 - 1.5), 0, rng.randf_range(-arena.y / 2.0 + 1.5, arena.y / 2.0 - 1.5))
+		if at.length() < 3.0:
+			continue
+		if i % 3 == 0:
+			_piece("column", at, rng.randf_range(0, 360), 0.55)
+			obstacles.append(Vector3(at.x, at.z, 0.5))
+		else:
+			_piece("rubble_half" if i % 2 == 0 else "rubble_large", at, rng.randf_range(0, 360), 0.5)
+			obstacles.append(Vector3(at.x, at.z, 0.7))
+	if spec.has("post"):
+		var pa := Vector3(float(spec["post"]["at"][0]), 0, float(spec["post"]["at"][1]))
+		_piece("column", pa, 0.0, 0.45)
+		obstacles.append(Vector3(pa.x, pa.z, 0.6))
+		var ring := MeshInstance3D.new()
+		var tm := TorusMesh.new()
+		tm.inner_radius = 3.4
+		tm.outer_radius = 3.55
+		ring.mesh = tm
+		ring.scale = Vector3(1, 0.05, 1)
+		ring.position = pa + Vector3(0, 0.12, 0)
+		ring.material_override = _mat(Color(0.55, 0.75, 1.0), 2.0, true, 0.5)
+		_place_root.add_child(ring)
+		var lamp := OmniLight3D.new()
+		lamp.light_color = Color(0.6, 0.78, 1.0)
+		lamp.light_energy = 1.8
+		lamp.omni_range = 8.0
+		lamp.position = pa + Vector3(0, 2.2, 0)
+		_place_root.add_child(lamp)
+		var flame := MeshInstance3D.new()
+		var sm := SphereMesh.new()
+		sm.radius = 0.2
+		sm.height = 0.4
+		flame.mesh = sm
+		flame.material_override = _mat(Color(0.6, 0.8, 1.0), 4.0, true)
+		flame.position = pa + Vector3(0, 1.55, 0)
+		_place_root.add_child(flame)
 
 func _furnish_quad() -> void:
 	# The middle of the quad: a brazier that never goes out; the decorated pillars stand in its corners.
@@ -1775,6 +1871,92 @@ func _furnish_dorm(spec: Dictionary) -> void:
 			_place_root.add_child(blanket)
 			n += 1
 	_piece("barrel_small_stack", Vector3(5.6, 0, 0.0), 0.0, 0.6)
+
+## The party beside the hero: bodies that follow the fight's allies.
+func set_allies(specs: Array) -> void:
+	for a in _ally_nodes:
+		(a["node"] as Node).queue_free()
+	_ally_nodes.clear()
+	for sp in specs:
+		var n: Node3D = load("res://game/assets/kaykit/%s.glb" % sp.get("body", "Knight")).instantiate()
+		add_child(n)
+		for a in n.find_children("*", "BoneAttachment3D", true, false):
+			var an := String(a.name)
+			a.visible = an.contains("Helmet") or an.contains("Hat") or an.contains("Cape") or an.contains("Hood")
+		var skel: Skeleton3D = n.find_child("Skeleton3D", true, false)
+		var w: Dictionary = Data.by_id(Data.weapons, sp.get("weapon", "saber"))
+		_attach(skel, "handslot.r", "res://game/assets/kaykit/weapons/%s.gltf" % w["model"])
+		if w.has("offhand"):
+			_attach(skel, "handslot.l", "res://game/assets/kaykit/weapons/%s.gltf" % w["offhand"])
+		for m in n.find_children("*", "MeshInstance3D", true, false):
+			m.material_overlay = _ink(2.0)
+		var ap: AnimationPlayer = n.find_child("AnimationPlayer", true, false)
+		for loop in ["Idle", "Running_A"]:
+			if ap.has_animation(loop):
+				ap.get_animation(loop).loop_mode = Animation.LOOP_LINEAR
+		ap.play("Idle")
+		var l := Label3D.new()
+		l.text = sp.get("name", "")
+		l.font = Style.font("title")
+		l.font_size = 22
+		l.fixed_size = true
+		l.pixel_size = 0.001
+		l.modulate = Color(0.8, 0.9, 1.0, 0.85)
+		l.outline_size = 8
+		l.outline_modulate = Color(0, 0, 0, 0.8)
+		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		l.no_depth_test = true
+		l.position = Vector3(0, 2.3, 0)
+		n.add_child(l)
+		_ally_nodes.append({ "node": n, "anim": ap, "cur": "Idle", "until": 0.0 })
+
+func _update_allies(f: Fight, dt: float) -> void:
+	for i in mini(_ally_nodes.size(), f.allies.size()):
+		var a: Dictionary = _ally_nodes[i]
+		var al: Dictionary = f.allies[i]
+		var n: Node3D = a["node"]
+		n.position = _v3(al["pos"])
+		n.rotation.y = _yaw(float(al["facing"]))
+		# Never between the camera and the hero.
+		n.visible = camera.global_position.distance_to(n.global_position + Vector3(0, 1.0, 0)) > 2.4
+		var ap: AnimationPlayer = a["anim"]
+		if _clock < float(a["until"]):
+			continue
+		var want := "Death_A" if al["down"] else ("Running_A" if al["moving"] else "Idle")
+		if want != a["cur"]:
+			a["cur"] = want
+			ap.play(want, 0.15)
+			if want == "Death_A":
+				a["until"] = _clock + 99.0
+
+func _ally_event(f: Fight, e: Dictionary) -> void:
+	var i := int(e.get("who", -1))
+	if i < 0 or i >= _ally_nodes.size() or i >= f.allies.size():
+		return
+	var a: Dictionary = _ally_nodes[i]
+	var ap: AnimationPlayer = a["anim"]
+	var at := _v3(f.allies[i]["pos"], 1.2)
+	match String(e["type"]):
+		"ally-hit":
+			ap.play("1H_Melee_Attack_Slice_Horizontal", 0.05)
+			a["cur"] = "attack"
+			a["until"] = _clock + 0.5
+			impact(_v3(f.w_pos, 0.9), Color(0.8, 0.9, 1.0), 0.5)
+			floater(_v3(f.w_pos, 1.8) + Vector3(-0.4, 0.3, 0), "%d" % int(e["damage"]), Color(0.75, 0.85, 1.0), 40, 0.7)
+		"ally-hurt":
+			ap.play("Hit_A", 0.05)
+			a["cur"] = "hurt"
+			a["until"] = _clock + 0.5
+			floater(at + Vector3(0, 0.6, 0), "-%d" % int(e["damage"]), C_WINDUP, 44, 0.8)
+		"ally-down":
+			a["until"] = 0.0
+			a["cur"] = ""
+			floater(at + Vector3(0, 0.8, 0), "%s IS DOWN" % String(f.allies[i]["name"]).to_upper(), C_WINDUP, 56, 1.8)
+		"ally-up":
+			a["until"] = 0.0
+			a["cur"] = ""
+			_ring_wave(_v3(f.allies[i]["pos"]), Color(0.6, 0.8, 1.0), 2.0)
+			floater(at + Vector3(0, 0.8, 0), "%s STANDS" % String(f.allies[i]["name"]).to_upper(), Color(0.6, 0.8, 1.0), 48, 1.4)
 
 ## Someone standing in the place: a body, a weapon, their name and what they are over the head.
 func add_figure(body: String, at: Vector2, facing: float, title: String, sub: String, weapon := "", tint := Color(0, 0, 0, 0)) -> Dictionary:

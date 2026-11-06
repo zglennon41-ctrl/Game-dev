@@ -46,13 +46,29 @@ Discipline lesson).
 the school teaches), the Discipline's first three techniques on keys 1, 2, 3; the
 Instructor's test, a bout against them.
 
-**E. Lesson 5, the line** (next) — the car, the post, extraction, orders for the genius, a
-party of three: you and two classmates you choose. The Field Examination in the Green
-zone (three areas, a post, a boss), the rescue team on standby.
+**E. Lesson 5, the line** (next) — choose two classmates for your party; the car to the
+Green; three areas as places (the cutting, the post, the den); the post held with your
+genius on Hold; a beast of the Green at the den; extraction; the rescue team if anyone
+falls. Classmates fight beside you and can be hurt; the cohort remembers.
 
-**F. Lesson 6, Project, and the Gate** — Stage 3, the field past the skin; the Gate
-Reading (the genius's Second Form, read from how the Academy was played); Commencement
-and the cohort's write-up; the character is ready for a server.
+**F. Lesson 6, Project** — the field opened past the skin: a drill in the yard that ends
+with Stage 3 (more Will, more reach, a visible field). Then the Field Examination proper,
+in the Green with the field open and a party of three; the Instructor watching from the post.
+
+**G. The Gate and Commencement** — the Gate Reading: the genius's Second Form read from how
+the Academy was played, three candidates with their reasons, your choice; the cohort's
+write-up of you; Commencement on the platform; the character leaves settled (Shape, Stage 3,
+Discipline and weapon, Pattern, genius, record) and the title shows it.
+
+**H. Polish** — day cards, fades between places, pacing, lines, sound; the whole run played
+end to end before it is called done.
+
+## After the Academy (the owner's direction, 2026-11-06)
+
+The server is a mastery progression: the player learns to use their field and to cover its
+weaknesses by levelling, until the character dies of old age, of injury, or by spending the
+whole field at once in a grand working that leaves a lasting mark on the world. The Academy
+is built to lead into that life; its rules are later steps.
 
 **Between lessons, all the way through** — days of the term: free time in the quad
 (pick-up sparring, the card game, Instructors' stories), classmates' troubles that

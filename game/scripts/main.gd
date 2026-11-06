@@ -56,6 +56,7 @@ func _ready() -> void:
 	academy.sfx = sfx
 	add_child(academy)
 	academy.visible = false
+	academy.leave.connect(func(): academy.save(); menu())
 	add_child(page)
 	page.closed.connect(func(): if mode == "academy" and not _args.has("bot"): Input.mouse_mode = Input.MOUSE_MODE_CAPTURED)
 	creator.changed.connect(_preview_hero)
@@ -162,6 +163,42 @@ func _ready() -> void:
 		if _args.has("fresh"):
 			h.erase("academy")
 			h.erase("genius")
+		if _args.has("gate"):
+			# The morning of the Gate: Stage 3, the term behind you, for automated checks.
+			var dkg: Dictionary = Data.discipline_kits.get(h.get("discipline", "marshal"), {})
+			h["techniques"] = dkg.get("techniques", []).map(func(t): return t["id"])
+			h["stage"] = 3
+			h["projected"] = true
+			h["academy"] = { "seed": int(_args.get("seed", "4242")), "arrived": true, "done": ["hold", "rite", "shape", "discipline", "line", "project"], "met": ["c0", "c1", "c2"], "day": 7, "rested_after": "project",
+				"place": "quad", "party": ["c0", "c1"], "record": { "parries": 14, "blocks": 4, "hurts": 3, "dodges": 1, "talks": 9, "spars_won": 3, "spars_lost": 0, "posts_held": 2, "runs_out": 2, "examined": true } }
+			if not h.has("genius"):
+				var ffg := Rite.first_form(h, h["shape"], 11)
+				var gg := Rite.birth(h, ffg["reading"], ffg["name"])
+				for i in 30: gg.hit_at(1.5)
+				for i in 12: gg.gave_order("hold")
+				for i in 9: gg.gave_order("guard")
+				for i in 14: gg.used_family("%s.%s" % [h["shape"], Data.kits[h["shape"]]["technique"]["family"]])
+				gg.save_to(h)
+		if _args.has("project"):
+			# The morning of Lesson 6: the line behind you, for automated checks.
+			var dk0: Dictionary = Data.discipline_kits.get(h.get("discipline", "marshal"), {})
+			h["techniques"] = dk0.get("techniques", []).map(func(t): return t["id"])
+			h["stage"] = 2
+			h.erase("projected")
+			h["academy"] = { "seed": int(_args.get("seed", "4242")), "arrived": true, "done": ["hold", "rite", "shape", "discipline", "line"], "met": ["c0", "c1"], "day": 6, "rested_after": "line",
+				"place": "yard", "party": ["c0", "c1"], "record": { "parries": 9, "blocks": 4, "hurts": 3, "dodges": 1, "talks": 6, "spars_won": 3, "spars_lost": 0, "posts_held": 1, "runs_out": 1 } }
+			if not h.has("genius"):
+				var ff4 := Rite.first_form(h, h["shape"], 11)
+				Rite.birth(h, ff4["reading"], ff4["name"])
+		if _args.has("line"):
+			# The morning of Lesson 5: a genius born, a Discipline learned, for automated checks.
+			var dk: Dictionary = Data.discipline_kits.get(h.get("discipline", "marshal"), {})
+			h["techniques"] = dk.get("techniques", []).map(func(t): return t["id"])
+			h["academy"] = { "seed": int(_args.get("seed", "4242")), "arrived": true, "done": ["hold", "rite", "shape", "discipline"], "met": ["c0", "c1"], "day": 5, "rested_after": "discipline",
+				"place": "quad", "record": { "parries": 8, "blocks": 4, "hurts": 2, "dodges": 1, "talks": 5, "spars_won": 3, "spars_lost": 0 } }
+			if not h.has("genius"):
+				var ff3 := Rite.first_form(h, h["shape"], 11)
+				Rite.birth(h, ff3["reading"], ff3["name"])
 		if _args.has("discipline"):
 			# The morning of Lesson 4, with a genius born, for automated checks.
 			h["academy"] = { "seed": int(_args.get("seed", "4242")), "arrived": true, "done": ["hold", "rite", "shape"], "met": [], "day": 4, "rested_after": "shape",
@@ -244,7 +281,7 @@ func menu() -> void:
 	var buttons: Array = [["New character", new_character]]
 	var body := "A real-time party RPG of a guild that keeps a rail junction alive.\n[color=#a59a8a][i]Mouse and keyboard, or a gamepad. Sound on.[/i][/color]"
 	if not saved.is_empty():
-		var where := "at the Academy" if saved.has("academy") else "at the Academy's gate"
+		var where := ("settled, ready for the line" if saved.get("settled", false) else "at the Academy") if saved.has("academy") else "at the Academy's gate"
 		buttons.append(["Continue as %s  (%s, %s, %s)" % [saved["name"], Data.by_id(Data.bloods, saved["blood"])["name"], String(saved["shape"]).capitalize(), where], func(): hero = saved; enter_academy() if saved.has("academy") else _academy_gate()])
 		buttons.append(["Practice yard: fight cut-wolves as %s  (two minutes)" % saved["name"], func(): hero = saved; start("fight")])
 	if saved.has("genius") and Genius.from_dict(saved["genius"]).is_born():
@@ -375,9 +412,14 @@ func _academy_frame(delta: float, real_dt: float) -> void:
 				move = Vector2.ZERO
 			"technique":
 				var bt := academy.bot_tech()
+				var want_d := academy.bot_range()
 				if fight.p_state == "free" and fight.p_will >= float(bt["will"]) and fight.now >= float(fight.p_cooldowns.get(bt["id"], 0.0)):
-					if fight.dist() > 2.2:
+					if not fight.p_lock:
+						fight.input("lock")
+					if fight.dist() > want_d + 0.3:
 						move = (fight.w_pos - fight.p_pos).normalized()
+					elif fight.dist() < want_d - 0.4:
+						move = -(fight.w_pos - fight.p_pos).normalized()
 					else:
 						fight.input(academy.bot_action())
 			"fight": move = _bot()
@@ -396,7 +438,7 @@ func _academy_frame(delta: float, real_dt: float) -> void:
 	_cam_mouse = Vector2.ZERO
 	world.draw(fight, real_dt, cam, move)
 	if academy.in_lesson():
-		hud.update_play(fight, "", "the yard  ·  warded", true)
+		hud.update_play(fight, "", academy.place_label(), true)
 	if _args.has("shots") and _clock_shots(real_dt):
 		_shot("academy-" + String(academy.progress["place"]))
 
@@ -647,6 +689,7 @@ func _sounds(events: Array) -> void:
 			"genius-hunt": sfx.play("hit", 1.6, -3.0)
 			"genius-fall": sfx.play("fizzle", 0.6)
 			"genius-up": sfx.play("cue-hit", 0.7)
+			"field-open": sfx.play("pattern", 1.1)
 			"order": sfx.play("stance", 1.7, -4.0)
 
 func _shot(label: String) -> void:

@@ -58,6 +58,7 @@ static func birth(hero: Dictionary, reading: Dictionary, genius_name: String) ->
 	g.milestone("rite")
 	g.name = genius_name
 	g.save_to(hero)
+	hero["stage"] = 2
 	return g
 
 ## Apply a new Shape to the hero: the kit changes, and the Pattern's Form becomes the new

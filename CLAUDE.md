@@ -21,7 +21,8 @@ A vertical slice, in this order, each step playable before the next starts:
    game every character plays before the server: the walkable Academy, the cohort of twelve,
    the six lessons (Hold, the rite, Shape, Discipline, the line, Project), the Field
    Examination, Commencement. No one dies here (wards; a rescue team on expeditions). Every
-   run should make a character unlike the last. The plan is `docs/academy-plan.md`.
+   run should make a character unlike the last, and the run ends with a settled field:
+   a character ready for the server (owner, 2026-11-06). The plan is `docs/academy-plan.md`.
 5. The hall: common room, board, roster members, one named death.
 6. Co-op for three.
 

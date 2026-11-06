@@ -38,6 +38,8 @@ func _run() -> void:
 	test_genius_art()
 	test_sparring()
 	test_disciplines()
+	test_party()
+	test_project_and_gate()
 	test_shape_kits()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
@@ -434,7 +436,7 @@ func test_academy() -> void:
 		check(Data.academy["places"].has(lesson["place"]), "lesson %s has its place" % lesson["id"])
 		check(lesson["instructor"] == "$discipline" or not Data.by_id(Data.academy["instructors"], lesson["instructor"]).is_empty(), "lesson %s has its Instructor" % lesson["id"])
 		for st in lesson["steps"]:
-			check(st["goal"]["type"] in ["event", "streak", "will-full", "stance-seconds", "spar", "choose-weapon"], "step %s has a goal the Academy knows" % st["title"])
+			check(st["goal"]["type"] in ["event", "streak", "will-full", "stance-seconds", "spar", "choose-weapon", "choose-party", "travel", "fell", "hold", "extract", "reach-hits"], "step %s has a goal the Academy knows" % st["title"])
 	# A lesson can lock the moves it is not teaching.
 	var f := Fight.new({ "hero": h, "beast": "millstone", "passive": true, "mercy": true })
 	f.allowed = ["block-down", "block-up", "dodge", "lock"]
@@ -776,3 +778,86 @@ func test_disciplines() -> void:
 	check(lesson["instructor"] == "$discipline" and lesson["steps"][0]["goal"]["type"] == "choose-weapon" and lesson["steps"].back()["setup"]["spar"] == "instructor", "Lesson 4 is taught by your school, starts with a weapon and ends with the Instructor's test")
 	var schools: Array = Data.academy["instructors"].filter(func(i): return i.has("discipline")).map(func(i): return i["discipline"])
 	check(schools.has("marshal") and schools.has("pilot") and schools.has("aeronaut"), "every launch Discipline has an Instructor")
+
+## The party: classmates fight beside you, take bites meant for them, go down, and stand at the post.
+func test_party() -> void:
+	var h := Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
+	h["name"] = "Test"
+	var cohort := Academy.make_cohort(42, h)
+	var g := Genius.for_hero(h)
+	g.read(1); g.take(); g.milestone("rite")
+	var f := Fight.new({ "hero": h, "allies": [cohort[0], cohort[1]], "seed": 4, "genius": g })
+	check(f.allies.size() == 2 and f.allies[0]["name"] == cohort[0]["name"], "two classmates come as the party")
+	check(float(g.tally["company"].get(cohort[0]["shape"], 0)) >= 1.0, "the genius counts who you fight beside")
+	# They strike the foe when it is near.
+	f.w_state = "idle"
+	f.w_pos = f.p_pos + Vector2(2.0, 0)
+	var hp0 := f.w_hp
+	var evs := run_for(f, 4.0)
+	check(types(evs).has("ally-hit") and f.w_hp < hp0, "allies strike a foe beside them")
+	# The foe can go for an ally, and an ally can fall; the post stands them up.
+	var hurt := 0
+	var down := false
+	for i in 40:
+		var k := Fight.new({ "hero": h, "allies": [cohort[0], cohort[1]], "seed": 100 + i })
+		k.allies[0]["hp"] = 5.0
+		k.allies[0]["pos"] = k.w_pos + Vector2(1.5, 0)
+		k.p_pos = k.w_pos + Vector2(-6.0, 0)
+		k.w_target = 0
+		k.w_attack = k.beast["attacks"][0]
+		k._wolf_set("approach", 6.0)
+		var ev := run_for(k, 3.0)
+		if types(ev).has("ally-hurt"): hurt += 1
+		if types(ev).has("ally-down"):
+			down = true
+			check(k.allies[0]["down"] and k.allies_standing() == 1, "a fallen ally stays down")
+			k.allies_recover()
+			check(not k.allies[0]["down"] and k.allies[0]["hp"] == k.allies[0]["hp_max"], "the post stands the party up")
+			break
+	check(hurt > 0 and down, "a foe can turn on an ally and put them down (%d hurt in %d tries)" % [hurt, 40])
+	# A party makes the fight easier: more wolves fall in a minute.
+	var alone := run_bot(60.0, true, h)
+	var together := run_bot(60.0, true, h, { "allies": [cohort[0], cohort[1]] })
+	check(together.stats["wolves_down"] >= alone.stats["wolves_down"], "a party fells at least as many wolves (%d with, %d alone)" % [together.stats["wolves_down"], alone.stats["wolves_down"]])
+	# The Green's places and Lesson 5 are declared.
+	for pid in ["green-1", "green-2", "green-3"]:
+		check(Data.academy["places"][pid].has("zone"), "%s is a zone of the line" % pid)
+	var l: Dictionary = Data.by_id(Data.academy["lessons"], "line")
+	check(l["steps"][0]["goal"]["type"] == "choose-party" and l["steps"].back()["goal"]["type"] == "extract" and l.has("rescue"), "Lesson 5 chooses a party, ends in extraction, and has a rescue team")
+
+## Project: the stance held with a full field opens it; Stage 3 reaches farther and hits harder.
+## The Gate: a Second Form read from the term, with heritage, and a settled hero.
+func test_project_and_gate() -> void:
+	var h := Fight.default_hero()
+	var f := Fight.new({ "hero": h, "passive": true, "seed": 2 })
+	f.project_training = true
+	f.w_state = "idle"
+	f.w_pos = f.p_pos + Vector2(4.0, 0)
+	f.input("stance")
+	var evs := run_for(f, 3.5)
+	check(types(evs).has("field-open") and f.p_field_open, "three seconds in the stance with Will high opens the field")
+	var t := f.staged(f.tech)
+	check(float(t["damage"]) > float(f.tech["damage"]) and float(t["reach"]) == float(f.tech["reach"]) + 1.0, "an open field puts more into a technique and reaches a pace farther")
+	var h3 := Fight.default_hero()
+	h3["stage"] = 3
+	var g3 := Fight.new({ "hero": h3, "passive": true })
+	check(g3.p_field_open, "a Stage 3 field is open from the start")
+	var h2 := Fight.new({ "hero": Fight.default_hero(), "passive": true })
+	check(not h2.p_field_open and h2.staged(h2.tech) == h2.tech, "a Stage 2 field stays inside the skin")
+	# The Gate's Reading offers three, each with the Seed-mark and heritage, and the write-up reads the record.
+	var hero := Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
+	hero["seed"] = "watches-from-above"
+	var gn := Genius.for_hero(hero)
+	gn.read(1); gn.take(); gn.milestone("rite")
+	for i in 30: gn.hit_at(1.5)
+	for i in 12: gn.gave_order("hold")
+	gn.milestone("gate")
+	gn.day = 7
+	var rd := gn.read(2)
+	check(rd["candidates"].size() == 3 and rd["candidates"].all(func(c): return c["features"].has("far-eyes") and c["heritage"].size() >= 1), "the Gate offers three Second Forms, each marked and carrying heritage")
+	var c := gn.take(1)
+	check(gn.instar == 2 and gn.body["form"] == c["form"] and gn.history.size() == 2, "taking one makes it the Second Form")
+	var gate: Dictionary = Data.academy["gate"]
+	check(gate["writeup"].size() >= 8 and Data.academy["places"].has("gate"), "the Gate has a place and a write-up to draw from")
+	var lesson: Dictionary = Data.by_id(Data.academy["lessons"], "project")
+	check(lesson["steps"][0]["setup"].get("project", false) and lesson["steps"].back()["goal"].get("award", "") == "stage3", "Lesson 6 opens the field and awards Stage 3 at extraction")

@@ -27,6 +27,8 @@ var _g_row := VBoxContainer.new()
 var _g_label := Label.new()
 var _g_order := Label.new()
 var g_bar := ProgressBar.new()
+var _party := VBoxContainer.new()
+var _party_rows: Array = []   # [{label, bar}]
 var status := Label.new()
 var target := PanelContainer.new()
 var target_name := Label.new()
@@ -139,6 +141,25 @@ func _ready() -> void:
 	_g_row.add_child(_meter(g_bar, null, null, Style.GOLD, 7, 376))
 	_g_row.visible = false
 	me.add_child(_g_row)
+	# The party: a small bar for each classmate beside you.
+	_party.add_theme_constant_override("separation", 3)
+	for i in 2:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		var l := Label.new()
+		Style.label(l, 13, Style.DIM, "ui", 3)
+		l.custom_minimum_size = Vector2(150, 0)
+		l.clip_text = true
+		row.add_child(l)
+		var b := ProgressBar.new()
+		Style.bar_styles(b, Color(0.55, 0.72, 0.95))
+		b.custom_minimum_size = Vector2(216, 7)
+		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(b)
+		_party.add_child(row)
+		_party_rows.append({ "label": l, "bar": b, "row": row })
+	_party.visible = false
+	me.add_child(_party)
 
 	# The target frame.
 	target.set_anchors_preset(Control.PRESET_CENTER_TOP)
@@ -353,6 +374,9 @@ func configure(f: Fight, hero_name: String) -> void:
 	_last_t = -1.0
 	_play_time = 0.0
 	_g_row.visible = f.genius != null
+	_party.visible = not f.allies.is_empty()
+	for i in _party_rows.size():
+		(_party_rows[i]["row"] as Control).visible = i < f.allies.size()
 	if f.genius:
 		(g_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color = _accent.lightened(0.15)
 
@@ -477,6 +501,13 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	_hurt_flash = maxf(0.0, _hurt_flash - dt * 3.0)
 	(_frame.get_theme_stylebox("panel") as StyleBoxFlat).border_color = Style.BRASS_DIM.lerp(Style.EMBER, _hurt_flash)
 	will_bar.value = f.p_will
+	for i in mini(f.allies.size(), _party_rows.size()):
+		var al: Dictionary = f.allies[i]
+		var pr: Dictionary = _party_rows[i]
+		(pr["label"] as Label).text = String(al["name"]) + ("  ·  DOWN" if al["down"] else "")
+		(pr["label"] as Label).add_theme_color_override("font_color", Style.EMBER if al["down"] else Style.DIM)
+		(pr["bar"] as ProgressBar).max_value = float(al["hp_max"])
+		(pr["bar"] as ProgressBar).value = float(al["hp"])
 	if f.genius:
 		var gn: Genius = f.genius
 		_g_label.text = gn.form_name() if gn.name == "" or gn.name == gn.form_name() else "%s  ·  %s" % [gn.name, gn.form_name()]
@@ -490,6 +521,7 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	var st: Array = []
 	if f.p_stance: st.append(String(f.kit["stance"]["name"]).to_upper())
 	if f.p_fainted: st.append("FAINTED")
+	if f.p_field_open: st.append("FIELD OPEN" if f.stage < 3 else "STAGE 3")
 	if f.p_combo_count > 2: st.append("%d HITS" % f.p_combo_count)
 	status.text = "  ·  ".join(st)
 	_sigil.color = _accent.lightened(0.35 * (0.5 + 0.5 * sin(_play_time * 5.0))) if f.p_stance else _accent

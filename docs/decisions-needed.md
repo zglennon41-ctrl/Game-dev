@@ -177,3 +177,9 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
 54. **Lesson 4 lets you change your weapon** to any your city's school teaches, then ends in
     a bout against your Instructor (health ×1.9). Classmates now bring their school's attack
     to the ladder (a Columbia shot, a Cahokia hook, a Lunden lunge).
+55. **Lesson 5 and 6 numbers, mine**: classmates in the party have 90 health and strike for 7
+    every two seconds; the foe turns on a classmate about a third of the time; the post is held
+    for 45 seconds; the Warden of the Cutting has 520 health and is half again as large; Stage 3
+    makes techniques hit half again as hard and reach one pace farther (shots two).
+56. **The Gate's write-up** (`data/academy.json`, "gate.writeup") is a list of tests on the
+    term's record with a sentence each; the cohort signs it. Yours to rewrite.

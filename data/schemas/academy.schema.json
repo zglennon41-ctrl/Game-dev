@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "academy",
   "type": "object",
-  "required": ["term", "arrival", "places", "instructors", "cohort", "lessons", "rest", "rite"],
+  "required": ["term", "arrival", "places", "instructors", "cohort", "lessons", "rest", "rite", "gate"],
   "properties": {
     "places": {
       "type": "object",

@@ -89,6 +89,12 @@ var crit_until := -9.0
 var ward_until := -9.0
 var second_heart_used := false
 var w_shouted := false
+var stage := 2               # the field's Stage: 2 after the rite, 3 once the field is Projected
+var p_field_open := false    # the field past the skin (Stage 3, or opened in the Project drill)
+var project_training := false
+var p_project_t := 0.0
+var allies: Array = []       # the party: classmates fighting beside the hero (see _update_allies)
+var w_target := -1           # whom the foe is after: -1 the hero, else an ally's index
 var extra_techs: Array = []  # the Discipline's techniques (keys 1, 2, 3), once learned
 var p_tech_active: Dictionary = {}
 var w_mark_until := -9.0
@@ -142,9 +148,17 @@ func _init(opts: Dictionary = {}) -> void:
 	p_hp = room["player"]["health"]
 	p_will = rules["field"]["willMax"]
 	p_pos = Vector2(-2.0, 1.0)
+	stage = int(hero.get("stage", 2))
+	p_field_open = stage >= 3 or hero.get("projected", false)
+	for c in opts.get("allies", []):
+		allies.append({ "id": c.get("id", ""), "name": c.get("name", "Classmate"), "shape": c.get("shape", "anchor"), "body": c.get("body", "Knight"),
+			"weapon": c.get("weapon", "saber"), "hp": 90.0, "hp_max": 90.0, "pos": p_pos + Vector2(-1.5, 1.5 * (1 if allies.is_empty() else -1)),
+			"facing": 0.0, "down": false, "hit_at": 0.0, "damage": 7.0, "interval": 1.9, "moving": false })
 	var gn: Variant = opts.get("genius", null)
 	if gn is Genius and (gn as Genius).is_born():
 		genius = gn
+		for al in allies:
+			genius.fought_beside(al["shape"])
 		g_will_max = genius.will_max()
 		g_will = 0.0 if genius.fallen else g_will_max
 		if genius.fallen:
@@ -620,6 +634,8 @@ func update(dt: float, move: Vector2 = Vector2.ZERO) -> void:
 	_update_wolf(dt * _wolf_time_scale())
 	_update_burn(dt)
 	_update_genius(dt)
+	_update_allies(dt)
+	_update_project(dt)
 	_separate()
 	for o in obstacles:
 		var c := Vector2(o.x, o.y)
@@ -744,8 +760,34 @@ func _update_player(dt: float, move: Vector2) -> void:
 					_emit({ "type": "pattern-cue", "k": i, "hit": false, "offset_ms": 999.0 })
 					_finish_pattern(false)
 
+## The field past the skin: a Projected field (Stage 3) puts more into every technique and
+## reaches farther with it (rules.json: field.stageOutput, stageReach).
+func staged(t: Dictionary) -> Dictionary:
+	if not p_field_open:
+		return t
+	var out := t.duplicate()
+	var outs: Array = rules["field"]["stageOutput"]
+	var f := float(outs[2]) / float(outs[1])
+	if out.has("damage"): out["damage"] = roundf(float(out["damage"]) * f)
+	if out.has("reach"): out["reach"] = float(out["reach"]) + 1.0
+	if out.has("range"): out["range"] = float(out["range"]) + 2.0
+	return out
+
+## The Project drill: the stance held with the field full opens it past the skin.
+func _update_project(dt: float) -> void:
+	if p_field_open or not project_training:
+		return
+	if p_stance and p_will >= 60.0:
+		p_project_t += dt
+		if p_project_t >= 3.0:
+			p_field_open = true
+			_emit({ "type": "field-open" })
+	else:
+		p_project_t = maxf(0.0, p_project_t - dt * 2.0)
+
 ## The Shape's technique lands. Every technique breaks a beast of the opposite Shape.
-func _resolve_technique(t: Dictionary) -> void:
+func _resolve_technique(t0: Dictionary) -> void:
+	var t := staged(t0)
 	match t["effect"]:
 		"heavy":
 			_resolve_swing(float(t["damage"]), float(t["reach"]), float(t["arc"]), true, float(t.get("knockback", 0.0)))
@@ -860,7 +902,7 @@ func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
 	stats["damage_dealt"] += dmg
 	p_combo_count += 1
 	stats["longest_combo"] = maxi(stats["longest_combo"], p_combo_count)
-	_emit({ "type": "hit", "damage": dmg, "pattern": from_pattern, "heavy": heavy, "staggered": w_state == "stagger", "combo": p_combo, "crit": crit, "dist": dist() })
+	_emit({ "type": "hit", "damage": dmg, "pattern": from_pattern, "heavy": heavy, "staggered": w_state == "stagger", "combo": p_combo, "crit": crit, "dist": dist(), "technique": p_state == "technique" })
 	if w_hp == 0.0:
 		stats["wolves_down"] += 1
 		_wolf_set("down", float(beast["respawnSeconds"]))
@@ -923,7 +965,24 @@ func provoke() -> void:
 	if w_state in ["idle", "prowl"]:
 		_choose_attack()
 
+## Where the foe is going: the hero, or the ally it has chosen.
+func _tpos() -> Vector2:
+	if w_target >= 0 and w_target < allies.size() and not allies[w_target]["down"]:
+		return allies[w_target]["pos"]
+	return p_pos
+
+func _tdist() -> float:
+	return w_pos.distance_to(_tpos())
+
 func _choose_attack() -> void:
+	# Now and then it goes for someone else in the party.
+	w_target = -1
+	var standing: Array = []
+	for i in allies.size():
+		if not allies[i]["down"]:
+			standing.append(i)
+	if not standing.is_empty() and rng.randf() < 0.35:
+		w_target = standing[rng.randi() % standing.size()]
 	var options: Array = []
 	var total := 0.0
 	for a in beast["attacks"]:
@@ -962,19 +1021,19 @@ func _update_wolf(dt: float) -> void:
 				_choose_attack()
 		"approach":
 			var rng_a := float(w_attack["range"])
-			if dist() > rng_a * 0.85:
-				_wolf_step_toward(p_pos, float(b["gallopSpeed"]) * dt)
-				w_facing = _angle_to(w_pos, p_pos)
+			if _tdist() > rng_a * 0.85:
+				_wolf_step_toward(_tpos(), float(b["gallopSpeed"]) * dt)
+				w_facing = _angle_to(w_pos, _tpos())
 			else:
 				_wolf_set("windup", float(w_attack["windup"]))
-				w_facing = _angle_to(w_pos, p_pos)
+				w_facing = _angle_to(w_pos, _tpos())
 				_emit({ "type": "windup", "attack": w_attack["id"], "name": w_attack["name"], "seconds": w_duration })
 			if w_timer > 6.0:
 				_wolf_prowl()
 		"windup":
 			# Track the Anchor until the last fifth of the wind-up, then commit to the line.
 			if w_timer < w_duration * 0.8:
-				w_facing = lerp_angle(w_facing, _angle_to(w_pos, p_pos), 1.0 - exp(-10.0 * dt))
+				w_facing = lerp_angle(w_facing, _angle_to(w_pos, _tpos()), 1.0 - exp(-10.0 * dt))
 			if w_timer >= w_duration:
 				_wolf_set("strike", float(w_attack["active"]))
 				w_hit_done = false
@@ -988,6 +1047,12 @@ func _update_wolf(dt: float) -> void:
 				if mouth.distance_to(p_pos) <= float(room["player"]["radius"]) + 1.0:
 					w_hit_done = true
 					_resolve_bite()
+				else:
+					for i in allies.size():
+						if not allies[i]["down"] and mouth.distance_to(allies[i]["pos"]) <= 1.3:
+							w_hit_done = true
+							_hurt_ally(i, float(w_attack["damage"]))
+							break
 			if w_timer >= w_duration:
 				if not w_hit_done:
 					_emit({ "type": "evade", "how": "out of reach" })
@@ -1007,6 +1072,75 @@ func _update_wolf(dt: float) -> void:
 				respawn_from_arch = true
 				_spawn_wolf()
 				_emit({ "type": "wolf-up" })
+
+# ===================================================================== the party
+
+## Classmates beside you: they keep to your flanks, strike the foe when it is near, and take
+## the bites meant for them. Down, they stay down until the post.
+func _update_allies(dt: float) -> void:
+	var foe_up := w_state not in ["down", "absent"]
+	for i in allies.size():
+		var al: Dictionary = allies[i]
+		if al["down"]:
+			continue
+		var side := 1.0 if i % 2 == 0 else -1.0
+		var want: Vector2
+		if foe_up:
+			var to_w := (w_pos - p_pos).normalized() if dist() > 0.1 else Vector2.RIGHT
+			want = w_pos - to_w.rotated(side * 1.1) * 2.0
+		else:
+			# At ease: on the hero's flanks, a little ahead, never behind where the camera sits.
+			want = p_pos + Vector2.from_angle(p_facing).rotated(side * 1.35) * 1.7
+		var d: Vector2 = want - al["pos"]
+		var step := 5.2 * dt
+		al["moving"] = d.length() > 0.3
+		if d.length() > step:
+			al["pos"] = _clamp_in(al["pos"] + d.normalized() * step)
+		else:
+			al["pos"] = _clamp_in(want)
+		al["facing"] = _angle_to(al["pos"], w_pos) if foe_up else p_facing
+		if foe_up and now >= float(al["hit_at"]) and al["pos"].distance_to(w_pos) < 2.4:
+			al["hit_at"] = now + float(al["interval"]) * rng.randf_range(0.85, 1.15)
+			var dmg := float(al["damage"])
+			if w_state == "stagger":
+				dmg = roundf(dmg * float(room["break"]["staggerDamageFactor"]))
+			w_hp = maxf(w_floor, w_hp - dmg)
+			stats["damage_dealt"] += dmg
+			_emit({ "type": "ally-hit", "who": i, "damage": dmg })
+			if w_hp == 0.0:
+				_fell_wolf()
+
+func _hurt_ally(i: int, dmg: float) -> void:
+	var al: Dictionary = allies[i]
+	al["hp"] = maxf(0.0, float(al["hp"]) - dmg)
+	_emit({ "type": "ally-hurt", "who": i, "damage": dmg })
+	if al["hp"] == 0.0:
+		al["down"] = true
+		w_target = -1
+		_emit({ "type": "ally-down", "who": i })
+
+## At a post the party regroups: whoever is down stands up, and everyone is whole.
+func allies_recover() -> void:
+	for i in allies.size():
+		var al: Dictionary = allies[i]
+		if al["down"]:
+			_emit({ "type": "ally-up", "who": i })
+		al["down"] = false
+		al["hp"] = al["hp_max"]
+	p_hp = float(room["player"]["health"])
+
+func allies_standing() -> int:
+	var n := 0
+	for al in allies:
+		if not al["down"]:
+			n += 1
+	return n
+
+func _fell_wolf() -> void:
+	stats["wolves_down"] += 1
+	_wolf_set("down", float(beast["respawnSeconds"]))
+	_emit({ "type": "wolf-down" })
+	_emit({ "type": "anim", "who": "wolf", "name": "Death", "speed": 1.0 })
 
 func _wolf_step_toward(target: Vector2, step: float) -> void:
 	var d := w_pos.distance_to(target)

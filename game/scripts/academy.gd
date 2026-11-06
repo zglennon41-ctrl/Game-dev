@@ -204,8 +204,15 @@ func go(place_id: String, quiet := false, from := "") -> void:
 		if d["to"] == from:
 			spawn = Vector2(d["at"][0], d["at"][1]) * 0.78
 	# The hero walks the grounds in a fight with no foe in it; in the yard, Millstone sits by Bask.
+	# In a zone of the line the fight is real: wolves, the party beside you, no wards.
+	var zone: Dictionary = spec.get("zone", {})
+	_post = spec.get("post", {})
+	_holding = false
 	var opts := { "hero": hero, "beast": "millstone", "passive": true, "respawn": true, "mercy": true, "allow_breach": false,
 		"arena": Vector2(spec["size"][0], spec["size"][1]) }
+	if not zone.is_empty():
+		opts = { "hero": hero, "beast": zone["beast"], "passive": false, "respawn": zone.get("respawn", true), "mercy": false, "allow_breach": false,
+			"arena": Vector2(spec["size"][0], spec["size"][1]), "seed": randi(), "allies": party() }
 	if genius and genius.is_born():
 		opts["genius"] = genius
 	fight = Fight.new(opts)
@@ -216,8 +223,22 @@ func go(place_id: String, quiet := false, from := "") -> void:
 	world.lock_on = false
 	world.portrait = false
 	world.genius_visible = true
-	world.set_foe({})
+	world.set_foe({ "wolf_scale": float(fight.beast.get("modelScale", 1.0)) })
+	world.set_allies(fight.allies)
 	world.build_hero(hero)
+	if not zone.is_empty():
+		for al in fight.allies:
+			al["pos"] = spawn + Vector2(-1.2, 1.4 * (1 if fight.allies.find(al) == 0 else -1))
+		if zone.get("waitForPost", false):
+			fight.respawn = false
+		else:
+			fight._spawn_wolf()
+			fight.w_pos = fight._clamp_in(spawn + Vector2(9.0, randf_range(-3.0, 3.0)))
+			fight.p_lock = true
+			world.lock_on = true
+			world.show_wolf = true
+		if genius and genius.is_born():
+			genius.ran(String(zone.get("ground", "wild")), zone.get("night", false))
 	world.reset_feedback()
 	world.cam_yaw = atan2(spawn.x, spawn.y) if spawn.length() > 0.1 else 0.0
 	world.snap_camera_behind(fight)
@@ -243,9 +264,25 @@ func go(place_id: String, quiet := false, from := "") -> void:
 			_people.append({ "kind": "classmate", "id": c["id"], "name": c["name"], "pos": at, "c": c })
 	fight.obstacles = world.obstacles
 	hud.hide_screen()
-	hud.play_ui.visible = false
+	hud.configure(fight, hero["name"])
+	hud.play_ui.visible = not zone.is_empty()
+	if not zone.is_empty():
+		hud.target.visible = true
 	_show_place(spec["name"])
 	save()
+
+## The two classmates chosen for the party, as classmate dictionaries.
+func party() -> Array:
+	var out: Array = []
+	for id in progress.get("party", []):
+		for c in cohort:
+			if c["id"] == id:
+				out.append(c)
+	return out
+
+var _post: Dictionary = {}
+var _holding := false
+var _hold_t := 0.0
 
 func _show_place(title: String) -> void:
 	_place_card.text = title
@@ -327,12 +364,13 @@ func interact() -> void:
 			sfx.play("ui-move", 0.9, -8.0)
 			_show_line()
 		return
-	if in_lesson() or _target.is_empty():
+	if _target.is_empty() or (in_lesson() and _target["kind"] not in ["door", "post"]):
 		return
 	sfx.play("ui-take", 1.0, -6.0)
 	match _target["kind"]:
 		"door": _use_door(_target["door"])
 		"rest": _rest_now()
+		"post": _take_post()
 		"instructor": _talk_instructor(_target["id"])
 		"classmate": _talk_classmate(_target["c"])
 
@@ -341,6 +379,8 @@ func door_open(d: Dictionary) -> bool:
 		return true
 	match String(d.get("opensWhen", "")):
 		"rested": return rested_on("hold") or progress["done"].has("rite")
+		"cleared": return progress.get("cleared", {}).has(progress["place"])
+		"gate": return rested_on("project") or progress["done"].has("gate")
 	return false
 
 func _use_door(d: Dictionary) -> void:
@@ -348,6 +388,9 @@ func _use_door(d: Dictionary) -> void:
 		say("", [d["locked"]])
 		return
 	var from: String = progress["place"]
+	if d["to"] == "extraction":
+		_extract()
+		return
 	go(d["to"], false, from)
 
 func _talk_instructor(id: String) -> void:
@@ -363,6 +406,10 @@ func _talk_instructor(id: String) -> void:
 	var rite: Dictionary = Data.academy["rite"]
 	if id == rite["instructor"] and progress["place"] == rite["place"] and not progress["done"].has("rite"):
 		_start_rite()
+		return
+	var gate: Dictionary = Data.academy["gate"]
+	if id == gate["instructor"] and progress["place"] == gate["place"] and not progress["done"].has("gate") and next_need() == "gate":
+		_start_gate()
 		return
 	var key := _stage_key()
 	say(id, [lines.get(key, lines["default"])])
@@ -383,7 +430,7 @@ func _talk_classmate(c: Dictionary) -> void:
 
 ## Where the term has got to, for which lines people say.
 func _stage_key() -> String:
-	var order := ["hold", "rite", "shape"]
+	var order := ["hold", "rite", "shape", "discipline", "line", "project", "gate"]
 	var last := last_done()
 	if last == "":
 		return "before:hold"
@@ -436,8 +483,9 @@ func next_need() -> String:
 		for lesson in Data.academy["lessons"]:
 			if not progress["done"].has(lesson["id"]):
 				return "rest" if lesson.get("requires", {}).has("rested_after") and not rested_on(lesson["requires"]["rested_after"]) else ""
-		# Nothing more is built yet: the day still ends in the dormitory.
-		return "rest" if not rested_on(last_done()) else ""
+		if not progress["done"].has("gate"):
+			return "gate" if rested_on("project") else "rest"
+		return ""
 	return ""
 
 func _rest_now() -> void:
@@ -467,6 +515,10 @@ func objective() -> String:
 	var day := int(progress["day"])
 	match next_need():
 		"rest": return "Day %d · Rest in the Dormitory (the east door of the quad)." % day
+		"gate":
+			if progress["place"] == "gate":
+				return "Day %d · The Gate: speak to Instructor Varga on the platform." % day
+			return "Day %d · The Gate: the south door of the quad. Your cohort is gathering." % day
 		"rite":
 			if progress["place"] == "hearth":
 				return "Day %d · The rite: speak to Instructor Varga at the bowl." % day
@@ -479,7 +531,9 @@ func objective() -> String:
 			return "Day %d · Lesson %d, %s: speak to %s." % [day, int(nl["number"]), nl["title"], ins["name"]]
 		return "Day %d · Lesson %d, %s: find %s in %s." % [day, int(nl["number"]), nl["title"], ins["name"], place["name"]]
 	var g: Dictionary = hero.get("genius", {})
-	return "Day %d · %s walks with you. Next: Lesson 4, Discipline (the next part to be built)." % [day, g.get("name", "Your genius")]
+	if progress["done"].has("gate"):
+		return "Settled. The line is waiting; the Academy is yours to walk."
+	return "Day %d · %s walks with you." % [day, g.get("name", "Your genius")]
 
 ## The lesson asks for stillness now (Contain): the autopilot keeps its hands down.
 func wants_still() -> bool:
@@ -491,7 +545,15 @@ func bot_mode() -> String:
 		return "walk"
 	var g: Dictionary = _lesson["steps"][_step]["goal"]
 	match String(g["type"]):
-		"will-full", "choose-weapon": return "still"
+		"will-full", "choose-weapon", "choose-party", "travel": return "still"
+		"fell": return "fight"
+		"reach-hits": return "technique"
+		"event":
+			var want0: Array = g["event"] if g["event"] is Array else [g["event"]]
+			if "field-open" in want0:
+				return "stance"
+		"hold": return "fight" if _holding else "walk"
+		"extract": return "walk"
 		"stance-seconds": return "stance"
 		"spar": return "fight"
 		"event":
@@ -506,12 +568,17 @@ func bot_tech() -> Dictionary:
 		return fight.extra_techs[int(g["tech"]) - 1]
 	return fight.tech
 
+## How far from the foe the autopilot should stand to use a technique.
+func bot_range() -> float:
+	var g: Dictionary = _lesson["steps"][_step]["goal"]
+	return float(g.get("distance", 2.5)) + 0.35 if String(g["type"]) == "reach-hits" else 2.2
+
 func bot_action() -> String:
 	var g: Dictionary = _lesson["steps"][_step]["goal"]
 	return "tech%d" % int(g["tech"]) if g.has("tech") else "technique"
 
 func busy() -> bool:
-	return talking() or _rite != null or _naming or _choice_box != null
+	return talking() or _rite != null or _gate != null or _naming or _choice_box != null or _reading_box != null
 
 func in_rite() -> bool:
 	return _rite != null
@@ -521,6 +588,14 @@ func in_lesson() -> bool:
 
 func update(events: Array, dt: float) -> void:
 	_objective.text = objective()
+	if _gate and talking() and auto:
+		_auto_wait -= dt
+		if _auto_wait <= 0.0:
+			if _type_tw:
+				_type_tw.kill()
+			_text.visible_ratio = 1.0
+			interact()
+		return
 	if _rite:
 		var held := auto or Input.is_action_pressed("interact") or Input.is_action_pressed("attack")
 		if not talking():
@@ -548,7 +623,7 @@ func update(events: Array, dt: float) -> void:
 		return
 	# What is within reach to act on.
 	_target = {}
-	if not in_lesson():
+	if not in_lesson() or _in_zone():
 		var best := 2.4
 		for p in _people:
 			var d: float = (fight.p_pos - p["pos"]).length()
@@ -565,23 +640,46 @@ func update(events: Array, dt: float) -> void:
 			var ra := Vector2(_rest["at"][0], _rest["at"][1])
 			if (fight.p_pos - ra).length() < minf(best, 2.4):
 				_target = { "kind": "rest", "pos": ra }
+		if not _post.is_empty() and not _holding:
+			var pa := Vector2(_post["at"][0], _post["at"][1])
+			if (fight.p_pos - pa).length() < minf(best, 2.6):
+				_target = { "kind": "post", "pos": pa }
 	_prompt.visible = not _target.is_empty()
 	if _prompt.visible:
 		match _target["kind"]:
 			"door": _prompt_label.text = ("E   " + ("Enter " if door_open(_target["door"]) else "Try ") + String(_target["door"]["label"]))
 			"rest": _prompt_label.text = "E   Rest in %s" % _rest["label"]
+			"post": _prompt_label.text = "E   Take %s" % _post["label"]
 			_: _prompt_label.text = "E   Talk to %s" % _target["name"]
 
 ## Automated checks: where the autopilot walks next, and whether to act there.
 func auto_move() -> Vector2:
-	if talking() or in_lesson() or in_rite():
+	if talking() or in_rite():
 		return Vector2.ZERO
 	var goal := Vector2.INF
 	var place: String = progress["place"]
+	if in_lesson():
+		# In a lesson, the only walking is to the post or the way out.
+		if _step >= 0 and _step < _lesson["steps"].size():
+			var gt := String(_lesson["steps"][_step]["goal"]["type"])
+			if gt == "hold" and not _holding and not _post.is_empty():
+				goal = Vector2(_post["at"][0], _post["at"][1])
+			elif gt == "extract":
+				for d in _doors:
+					if d["to"] == "extraction":
+						goal = Vector2(d["at"][0], d["at"][1]) * 0.86
+		if goal == Vector2.INF:
+			return Vector2.ZERO
+		if (goal - fight.p_pos).length() < 1.8:
+			if not _target.is_empty():
+				interact()
+			return Vector2.ZERO
+		return (goal - fight.p_pos).normalized()
 	var want_place := ""
 	match next_need():
 		"rest": want_place = "dorm"
 		"rite": want_place = "hearth"
+		"gate": want_place = "gate"
 		_:
 			var nl := next_lesson()
 			want_place = nl["place"] if not nl.is_empty() else ""
@@ -739,6 +837,7 @@ func _next_step() -> void:
 	var setup: Dictionary = s.get("setup", {})
 	if setup.has("will"):
 		fight.p_will = float(setup["will"])
+	fight.project_training = setup.get("project", false)
 	match String(setup.get("genius", "")):
 		"sit":
 			fight.passive = true
@@ -755,6 +854,21 @@ func _next_step() -> void:
 		_spar_rung = 0
 		_spar_wins = 0
 		_spar_begin()
+	if s.has("place") and progress["place"] != s["place"]:
+		go(s["place"], false, progress["place"])
+	match String(s["goal"]["type"]):
+		"choose-party":
+			_choice_done = false
+			progress["party"] = []
+			_pick_party(2)
+		"travel":
+			_choice_done = false
+			var to: String = s["goal"]["to"]
+			say("", s["goal"].get("lines", []), func():
+				_choice_done = true
+				go(to, false, progress["place"]))
+		"extract":
+			_choice_done = false
 	if String(s["goal"]["type"]) == "choose-weapon":
 		_choice_done = false
 		var opts: Array = []
@@ -772,7 +886,8 @@ func _next_step() -> void:
 func _progress_text(s: Dictionary) -> String:
 	var g: Dictionary = s["goal"]
 	match String(g["type"]):
-		"event", "streak": return "%d / %d" % [_count, int(g["count"])]
+		"event", "streak", "fell", "reach-hits": return "%d / %d" % [_count, int(g["count"])]
+		"hold": return ("%d / %d s" % [int(_hold_t), int(g["seconds"])]) if _holding else "take the post"
 		"will-full": return "Will %d / %d" % [roundi(fight.p_will), int(Data.rules["field"]["willMax"])]
 		"stance-seconds": return "%.1f / %d s" % [_held, int(g["count"])]
 		"spar": return "bouts won %d / %d" % [_spar_wins, int(g["count"])]
@@ -820,6 +935,37 @@ func _lesson_update(events: Array, dt: float) -> void:
 	if String(g["type"]) == "stance-seconds":
 		_held = _held + dt if fight.p_stance else 0.0
 		done = _held >= float(g["count"])
+	if String(g["type"]) in ["fell", "hold", "extract", "travel", "choose-party"]:
+		for e in events:
+			var t: String = e["type"]
+			if notes.has(t):
+				_note = notes[t]
+			if t == "player-down" and _in_zone():
+				_rescue()
+				return
+			if t == "field-open":
+				hero["projected"] = true
+			if t == "wolf-down" and String(g["type"]) == "fell":
+				_count += 1
+		match String(g["type"]):
+			"fell":
+				done = _count >= int(g["count"])
+				if done:
+					fight.respawn = false
+					_clear_place()
+			"hold":
+				if _holding:
+					_hold_t += dt
+					done = _hold_t >= float(g["seconds"])
+					if done:
+						fight.respawn = false
+						_clear_place()
+			"extract", "travel", "choose-party":
+				done = _choice_done
+		if done and String(g["type"]) in ["fell", "hold"]:
+			var ahead: Array = _doors.filter(func(d): return door_open(d))
+			if not ahead.is_empty():
+				_note = "The way on is open: %s." % String(ahead[0]["label"])
 	for e in events:
 		var t: String = e["type"]
 		if notes.has(t):
@@ -839,11 +985,17 @@ func _lesson_update(events: Array, dt: float) -> void:
 					_count += 1
 				elif t == "hurt":
 					_count = 0
+			"reach-hits":
+				if t == "hit" and e.get("technique", false) and float(e.get("dist", 0.0)) >= float(g.get("distance", 2.5)):
+					_count += 1
+					_note = ""
+				elif t == "hit" and e.get("technique", false):
+					_note = "Too close: that one landed inside arm's reach."
 	match String(g["type"]):
-		"event", "streak": done = _count >= int(g["count"])
+		"event", "streak", "reach-hits": done = _count >= int(g["count"])
 		"will-full": done = fight.p_will >= float(Data.rules["field"]["willMax"]) - 0.5
 		"stance-seconds": done = done or _held >= float(g["count"])
-		"choose-weapon": done = _choice_done
+		"choose-weapon", "fell", "hold", "extract", "travel", "choose-party": done = done or (_choice_done and String(g["type"]) in ["choose-weapon", "extract", "travel", "choose-party"])
 	hud.set_prompt_status(_note, _progress_text(s))
 	if done:
 		sfx.play("cue-hit", 1.0)
@@ -863,6 +1015,8 @@ func _finish_lesson() -> void:
 	sfx.play("done")
 	if lesson["id"] == "discipline" and genius:
 		genius.studied(String(hero.get("discipline", "")), 3.0)
+	if _in_zone():
+		go("quad", true, "")
 	say(lesson_instructor(lesson), lesson["outro"], func():
 		_lesson = {}
 		hud.play_ui.visible = false
@@ -1076,3 +1230,235 @@ func choose(title: String, options: Array, then: Callable) -> void:
 		first.call_deferred("grab_focus")
 	if auto:
 		get_tree().create_timer(1.0).timeout.connect(func(): if _choice_box: (first as Button).pressed.emit())
+
+# --- The line: zones, the post, extraction, the rescue team --------------------------------
+
+func _in_zone() -> bool:
+	return Data.academy["places"].get(progress["place"], {}).has("zone")
+
+func _clear_place() -> void:
+	if not progress.has("cleared"):
+		progress["cleared"] = {}
+	progress["cleared"][progress["place"]] = true
+	world.open_doors = {}
+	for d in _doors:
+		if door_open(d):
+			world.open_doors[d["to"]] = true
+	world.place = ""
+	world.set_place(progress["place"])
+	fight.obstacles = world.obstacles
+	world.set_allies(fight.allies)
+	sfx.play("done")
+
+## Take the post: the party regroups, and then the holding begins: the wolves come.
+func _take_post() -> void:
+	fight.allies_recover()
+	_holding = true
+	_hold_t = 0.0
+	fight.respawn = true
+	fight._spawn_wolf()
+	fight.w_pos = fight._clamp_in(Vector2(7.0, 6.0))
+	fight.p_lock = true
+	world.lock_on = true
+	world.show_wolf = true
+	world._ring_wave(world._v3(fight.p_pos), Color(0.6, 0.8, 1.0), 4.0)
+	title_card("THE POST IS YOURS", "hold it", Color(0.6, 0.8, 1.0))
+	sfx.play("stance", 1.2)
+	progress["record"]["posts_held"] = int(progress["record"].get("posts_held", 0)) + 1
+	if genius:
+		genius.gave_order("hold")
+
+## The way out of the Green: the car, and the lesson's end.
+func _extract() -> void:
+	var s: Dictionary = _lesson["steps"][_step] if in_lesson() and _step < _lesson["steps"].size() else {}
+	var lines: Array = s.get("goal", {}).get("lines", ["The car takes you back."])
+	hud.set_prompt("", "")
+	var award := String(s.get("goal", {}).get("award", ""))
+	say("", lines, func():
+		_choice_done = true
+		progress["record"]["runs_out"] = int(progress["record"].get("runs_out", 0)) + 1
+		if award == "stage3":
+			hero["stage"] = 3
+			hero["projected"] = true
+			progress["record"]["examined"] = true
+			if genius:
+				genius.milestone("gate")
+				genius.day = maxi(genius.day, int(GeniusResonance.instar_rule(2)["minDay"]))
+			title_card("STAGE THREE", "the Field Examination, passed", World.SHAPE_COLORS.get(hero["shape"], Color.WHITE))
+			sfx.play("done")
+		save())
+
+## Down on the line: the rescue team carries you out, and the lesson waits for another night.
+func _rescue() -> void:
+	var r: Dictionary = _lesson.get("rescue", {})
+	progress["record"]["rescued"] = int(progress["record"].get("rescued", 0)) + 1
+	var lesson := _lesson
+	_lesson = {}
+	hud.set_prompt("", "")
+	hud.set_prompt_status("", "")
+	fight.allowed = []
+	say("", r.get("lines", ["The rescue team carries you out."]), func():
+		progress["cleared"] = {}
+		save()
+		go("quad", true, "")
+		var ins := lesson_instructor(lesson)
+		say(ins, ["Not tonight. Rest, and we go out again when you're ready."]))
+
+## Choose the party, one classmate at a time.
+func _pick_party(n: int) -> void:
+	var chosen: Array = progress.get("party", [])
+	if chosen.size() >= n:
+		_choice_done = true
+		return
+	var opts: Array = []
+	for c in cohort:
+		if chosen.has(c["id"]):
+			continue
+		var t: Dictionary = Data.by_id(Data.academy["cohort"]["temperaments"], c["temperament"])
+		opts.append({ "id": c["id"], "label": "%s  ·  %s  ·  %s" % [c["name"], String(c["shape"]).capitalize(), c["blood_name"]],
+			"text": "%s. %s" % [String(c["city"]).capitalize(), Creation.weapon(c["weapon"])["name"]], "on": progress["met"].has(c["id"]) and opts.is_empty() })
+	choose("Who comes with you? (%d of %d)" % [chosen.size() + 1, n], opts, func(id: String):
+		progress["party"].append(id)
+		if genius:
+			for c in cohort:
+				if c["id"] == id:
+					genius.bonded("party")
+		save()
+		_pick_party(n))
+
+## What the HUD says of where you are.
+func place_label() -> String:
+	if _in_zone():
+		return "the Green  ·  the line"
+	return "%s  ·  warded" % String(Data.academy["places"].get(progress["place"], {}).get("name", "the yard")).to_lower()
+
+# --- The Gate ---------------------------------------------------------------------
+
+var _gate: GateScene = null
+var _reading_box: Control = null
+
+func _start_gate() -> void:
+	_build_rite_ui()
+	_target = {}
+	_prompt.visible = false
+	_gate = GateScene.new(self, hero)
+	_gate.done.connect(_gate_done)
+	_gate.start()
+
+func _gate_done() -> void:
+	progress["done"].append("gate")
+	progress["day"] = int(progress["day"]) + 1
+	hero["settled"] = true
+	_gate = null
+	world.cine = false
+	save()
+	settled_sheet()
+
+## The Reading laid out: three cards with the lines of the Tally that chose each, a choice,
+## or "let it settle".
+func show_reading(reading: Dictionary, then: Callable) -> void:
+	hide_reading()
+	var col: Color = World.SHAPE_COLORS.get(hero["shape"], Color.WHITE)
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var veil := ColorRect.new()
+	veil.color = Color(0.02, 0.016, 0.016, 0.82)
+	veil.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(veil)
+	var v := VBoxContainer.new()
+	v.set_anchors_preset(Control.PRESET_CENTER)
+	v.add_theme_constant_override("separation", 12)
+	root.add_child(v)
+	var title := Label.new()
+	Style.label(title, 34, Style.FG, "title")
+	title.text = "The Reading: a Second Form"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(title)
+	var sub := Label.new()
+	Style.label(sub, 16, Style.DIM, "italic")
+	var leads: Array = reading.get("lineLeads", []).slice(0, 3).map(func(l): return GeniusPage.LINE_WORDS.get(l["line"], String(l["line"])).to_lower())
+	sub.text = "Read from %s. Every one carries the Seed-mark%s." % [", ".join(leads) if not leads.is_empty() else "the term", " and heritage from the First Form" if true else ""]
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(sub)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 18)
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_child(row)
+	var cands: Array = reading["candidates"]
+	for i in cands.size():
+		var c: Dictionary = cands[i]
+		var col_v := VBoxContainer.new()
+		col_v.add_theme_constant_override("separation", 8)
+		var info := c.duplicate()
+		info["instar"] = 2
+		info["name"] = c["name"]
+		var card := GeniusCard.make(info, col, "CANDIDATE %d" % (i + 1))
+		card.custom_minimum_size = Vector2(330, 0)
+		col_v.add_child(card)
+		var why := RichTextLabel.new()
+		why.bbcode_enabled = true
+		why.fit_content = true
+		why.scroll_active = false
+		why.custom_minimum_size = Vector2(330, 0)
+		Style.rich(why, 14, Style.DIM, "italic")
+		var reasons: Array = []
+		for r in c.get("reasons", []):
+			reasons.append("%s: %s" % [GeniusPage.LINE_WORDS.get(r["line"], String(r["line"])).to_lower(), String(r["key"]).replace(".", " · ").replace("family:", "").replace("tag:", "")])
+		var her: Array = c.get("heritage", []).map(func(f): return Rite.feature_label(String(f)))
+		why.text = ("Because of " + "; ".join(reasons) + "." if not reasons.is_empty() else "") + (("  Carries %s from the First Form." % ", ".join(her)) if not her.is_empty() else "")
+		col_v.add_child(why)
+		var b := Button.new()
+		b.text = "This one"
+		Style.button(b, i == 0, 18)
+		b.pressed.connect(func():
+			sfx.play("ui-take", 1.0, -6.0)
+			hide_reading()
+			then.call(i))
+		col_v.add_child(b)
+		row.add_child(col_v)
+	var settle := Button.new()
+	settle.text = "Let it settle on the best fit"
+	Style.button(settle, false, 17)
+	settle.pressed.connect(func():
+		sfx.play("ui-take", 1.0, -6.0)
+		hide_reading()
+		then.call(-1))
+	v.add_child(settle)
+	_reading_box = root
+	get_child(0).add_child(root)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if auto:
+		get_tree().create_timer(1.5).timeout.connect(func(): if _reading_box: hide_reading(); then.call(-1))
+
+func hide_reading() -> void:
+	if _reading_box:
+		_reading_box.queue_free()
+		_reading_box = null
+	if not auto:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+## The settled character: everything the Academy made, on one sheet.
+func settled_sheet() -> void:
+	var g := Genius.for_hero(hero)
+	var b: Dictionary = Data.by_id(Data.bloods, hero["blood"]) if hero.get("blood", "") != "" else { "name": "unmarked" }
+	var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), { "name": String(hero.get("discipline", "")).capitalize() })
+	var techs: Array = dk.get("techniques", []).map(func(t): return t["name"])
+	var rec: Dictionary = progress["record"]
+	var body := "[table=2]"
+	for r in [["Blood", b["name"]], ["Shape", "%s  ·  Stage %d" % [String(hero["shape"]).capitalize(), int(hero.get("stage", 2))]],
+			["School", "%s  ·  %s" % [dk["name"], Creation.weapon(hero["weapon"])["name"]]], ["Techniques", ", ".join([Data.kits[hero["shape"]]["technique"]["name"]] + techs)],
+			["Pattern", Builder.sentence(hero["pattern"])], ["Genius", "%s, a %s (%s), %s" % [g.name, g.form_name(), String(g.body.get("expression", "")).capitalize(), g.instar_name()]],
+			["The term", "%d parries, %d blocks, bitten %d; %d bouts won, %d lost; %d posts held, %d runs out%s" % [int(rec.get("parries", 0)), int(rec.get("blocks", 0)), int(rec.get("hurts", 0)), int(rec.get("spars_won", 0)), int(rec.get("spars_lost", 0)), int(rec.get("posts_held", 0)), int(rec.get("runs_out", 0)), ", carried out %d" % int(rec["rescued"]) if int(rec.get("rescued", 0)) > 0 else ""]]]:
+		body += "[cell][color=#a8803f]%s[/color]   [/cell][cell]%s[/cell]" % [r[0], r[1]]
+	body += "[/table]"
+	var wu: Array = progress.get("writeup", [])
+	if not wu.is_empty():
+		body += "\n\n[i]%s[/i]" % "  ".join(wu)
+	hud.show_screen("%s" % hero["name"], "Settled. Ready for the line.", body, [
+		["Leave by the line  (to the title)", func(): leave.emit()],
+		["Stay a while: walk the Academy", func(): hud.hide_screen(); go("quad", true, "")],
+	])
+	hud.play_ui.visible = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if auto:
+		get_tree().create_timer(2.0).timeout.connect(func(): if hud.screen.visible: leave.emit())

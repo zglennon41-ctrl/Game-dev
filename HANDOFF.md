@@ -363,6 +363,27 @@ cosmetics; any art pipeline.
   the same scaffolding: the Reading, Resonance, instars, the Tally, orders, adaptations, grafts,
   secondary forms, shadows and falls, in the game and matching the tools; and geniuses
   assembled from bodies and socketed parts that art files replace by name.
+- **The Academy is finished as a whole, polished sequence that ends with a settled field**
+  (owner, 2026-11-06): Lesson 5 (the line: a party of three, the Green zone, the post,
+  extraction, orders), Lesson 6 (Project: the field opens to Stage 3), the Field Examination
+  with the field open, the Gate Reading (the genius's Second Form) and Commencement. The
+  character that leaves is settled: Shape, Stage 3, Discipline and weapon, Pattern, a genius
+  in its Second Form, and a record of how they were made.
+- **The server is a mastery progression to a death** (owner, 2026-11-06). After the Academy,
+  the player learns to use their field and to cover its weaknesses by levelling, until the
+  character dies: of old age, of injury, or by spending the whole field at once in a grand
+  working that leaves a lasting effect on the world at the cost of their life. The Academy
+  teaches toward that life; the server's own rules are later steps of the slice.
+- **Every Reading offers three, the rite included** (owner, 2026-11-06): the bowl shows three
+  First Forms with their reasons and the player chooses, or lets it settle.
+- **After a death, the player chooses how much Academy to replay** (owner, 2026-11-06): the
+  whole term, or advanced standing (the rite, the Field Examination and the Gate never skipped,
+  the drills compressed).
+- **A life is about 300 hours of play** from the Gate to death of old age (owner, 2026-11-06):
+  months per character; a death is an event the server notices. The mastery progression is
+  paced to that.
+- **After the Academy is polished, the art comes next** (owner, 2026-11-06): the remaining
+  First Forms in Blender (bodies, parts and cards), so every rite has real art.
 - **No one dies at the Academy** (owner, 2026-11-05). Its wards make training safe, and on
   expeditions a rescue team stands by: a downed student is pulled out, and failing costs the
   run something but never the character.
@@ -395,6 +416,9 @@ cosmetics; any art pipeline.
 **Deferred** (ask the owner when the slice reaches them):
 - What becomes of the genius when its partner dies (a shade, as the systems say; freed;
   inherited; something else).
+- The grand working that ends a life (its name, what it can do, who can witness it, what it
+  leaves behind) and how old age and injury accrue: the server's rules, to be designed with
+  the owner before the hall is built.
 - Which deaths carry over what (memory, lineage, unlocks), and whether Sworn survives as a
   separate flag now that any character can die on the server.
 - Perfected at 500 uses or 300.

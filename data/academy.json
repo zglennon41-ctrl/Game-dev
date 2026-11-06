@@ -35,7 +35,8 @@
             11
           ],
           "label": "the Gate",
-          "locked": "The line leaves from the Gate at Commencement. Not before."
+          "locked": "The line leaves from the Gate at Commencement. Not before.",
+          "opensWhen": "gate"
         },
         {
           "to": "yard",
@@ -304,6 +305,203 @@
           ]
         }
       ]
+    },
+    "green-1": {
+      "name": "The Cutting",
+      "size": [
+        26,
+        16
+      ],
+      "floor": "floor_dirt_large_rocky",
+      "walls": "wild",
+      "spawn": [
+        -11,
+        0
+      ],
+      "doors": [
+        {
+          "to": "green-2",
+          "at": [
+            13,
+            0
+          ],
+          "label": "the Post, ahead",
+          "locked": "The cutting is not clear. Fell what hunts in it.",
+          "opensWhen": "cleared"
+        }
+      ],
+      "spots": [],
+      "instructors": [],
+      "zone": {
+        "beast": "cut-wolf",
+        "ground": "wild",
+        "night": true
+      }
+    },
+    "green-2": {
+      "name": "The Post",
+      "size": [
+        18,
+        18
+      ],
+      "floor": "floor_dirt_large_rocky",
+      "walls": "wild",
+      "spawn": [
+        -7,
+        0
+      ],
+      "doors": [
+        {
+          "to": "green-3",
+          "at": [
+            0,
+            -9
+          ],
+          "label": "the Den",
+          "locked": "Hold the post first.",
+          "opensWhen": "cleared"
+        }
+      ],
+      "post": {
+        "at": [
+          0,
+          0
+        ],
+        "label": "the post"
+      },
+      "spots": [],
+      "instructors": [
+        {
+          "id": "varga",
+          "at": [
+            -3,
+            -3.5
+          ]
+        }
+      ],
+      "zone": {
+        "beast": "cut-wolf",
+        "ground": "wild",
+        "night": true,
+        "waitForPost": true
+      }
+    },
+    "green-3": {
+      "name": "The Den",
+      "size": [
+        20,
+        14
+      ],
+      "floor": "floor_dirt_large_rocky",
+      "walls": "wild",
+      "spawn": [
+        -8,
+        0
+      ],
+      "doors": [
+        {
+          "to": "extraction",
+          "at": [
+            -10,
+            0
+          ],
+          "label": "the line back",
+          "locked": "Not with the Warden still standing.",
+          "opensWhen": "cleared"
+        }
+      ],
+      "spots": [],
+      "instructors": [],
+      "zone": {
+        "beast": "green-warden",
+        "ground": "wild",
+        "night": true,
+        "respawn": false
+      }
+    },
+    "gate": {
+      "name": "The Gate",
+      "size": [
+        24,
+        12
+      ],
+      "floor": "floor_tile_large",
+      "walls": "fortress",
+      "spawn": [
+        -9,
+        3
+      ],
+      "doors": [
+        {
+          "to": "quad",
+          "at": [
+            -12,
+            0
+          ],
+          "label": "the Quad"
+        }
+      ],
+      "spots": [
+        [
+          -5,
+          -4
+        ],
+        [
+          -2,
+          -4.5
+        ],
+        [
+          1,
+          -4
+        ],
+        [
+          4,
+          -4.5
+        ],
+        [
+          7,
+          -4
+        ],
+        [
+          -7,
+          4
+        ],
+        [
+          -4,
+          4.5
+        ],
+        [
+          -1,
+          4
+        ],
+        [
+          2,
+          4.5
+        ],
+        [
+          5,
+          4
+        ],
+        [
+          8,
+          4
+        ],
+        [
+          10,
+          -3
+        ]
+      ],
+      "cohortHere": true,
+      "rails": true,
+      "instructors": [
+        {
+          "id": "varga",
+          "at": [
+            3,
+            0
+          ]
+        }
+      ]
     }
   },
   "instructors": [
@@ -320,7 +518,10 @@
         "before:rite": "The hearth is lit. North door, when you're ready. Everyone in your cohort has been through it this morning but you. No pressure.",
         "after:rite": "So that's what you are. Good. Now we teach you to use it.",
         "after:shape": "Bask says you stood up to the cohort. He also says one of them nearly had you. Which is how it should be.",
-        "after:discipline": "Three techniques and a weapon you chose. That's a Discipline: the first thing about you that your city gave you on purpose."
+        "after:discipline": "Three techniques and a weapon you chose. That's a Discipline: the first thing about you that your city gave you on purpose.",
+        "before:line": "Lesson 5. You have held, you have a Shape, you have a school. Now the line, which does not care about any of that.",
+        "after:line": "You went out and you came back, all three of you. Write that down somewhere; it will not always be true.",
+        "after:project": "Your field reaches past you now. Everything from here is learning what to do with that. Tomorrow, the Gate."
       }
     },
     {
@@ -340,7 +541,10 @@
         "after:rite": "Heard the bowl had something to say about you. It usually does.",
         "before:shape": "Heard the bowl. So you're a {your_shape} now, whatever you walked in as. Good: today we find out what that means with a weapon in your hand. And then your cohort gets a turn at you.",
         "after:shape": "You took the ladder. Some of them will want it back; let them come. Tomorrow Varga's people take you for Discipline.",
-        "after:discipline": "Rourke, Tane, Halloway: they all say the same thing about their own. That you're sloppy, and that you'll do."
+        "after:discipline": "Rourke, Tane, Halloway: they all say the same thing about their own. That you're sloppy, and that you'll do.",
+        "after:line": "First run. You look it. Good.",
+        "before:project": "Varga says the field can go past the skin. She would; she's a Read, hers goes everywhere. Fine. We'll do it her way: stance up, field full, and hold until something gives.",
+        "after:project": "Stage three, and the Green behind you twice. You're not a first-year any more. Don't tell the first-years."
       }
     },
     {
@@ -465,7 +669,9 @@
           "after:hold": "You did the Millstone drill already? What did he do on the fifth bite? I want to be ready.",
           "after:rite": "The bowl took longer with you than with anyone. I timed it. Is that good? I think that's good.",
           "after:shape": "I watched your bout. Your stance drops when you reach. Mine does too; I wrote it down.",
-          "after:discipline": "Which did you choose? For your weapon. I changed mine and now I can't stop thinking I was wrong."
+          "after:discipline": "Which did you choose? For your weapon. I changed mine and now I can't stop thinking I was wrong.",
+          "after:line": "You chose a party. Did you... think about who? I'd have come. I'd have been useful. Probably.",
+          "after:project": "Stage three! I measured mine: two paces and a hand. What's yours? Is it rude to ask?"
         }
       },
       {
@@ -475,7 +681,9 @@
           "after:hold": "You've got the yard look. Sort of a limp, but proud of it.",
           "after:rite": "Your genius looked at me. I've decided we're friends now, it and I. You can come too.",
           "after:shape": "So that's what a {your_shape} looks like angry. Noted. Filed. Will not be sparring you before breakfast.",
-          "after:discipline": "Your Instructor shouted your name across the yard. Twice. I think that's affection, in their school."
+          "after:discipline": "Your Instructor shouted your name across the yard. Twice. I think that's affection, in their school.",
+          "after:line": "Heard the Warden got a look at you. Heard it blinked first.",
+          "after:project": "Your field's open. I can tell because my hair stands up when you walk past. Flattering, in a way."
         }
       },
       {
@@ -485,7 +693,9 @@
           "after:hold": "So you held. Everyone holds against a genius that's being kind to them.",
           "after:rite": "My family's bowl reading took four seconds. Yours was... theatrical.",
           "after:shape": "You beat the ladder. Against first-years. I'll be at the top of it next week; do come.",
-          "after:discipline": "My school has produced forty Masters. Yours has produced... you, so far. Early days."
+          "after:discipline": "My school has produced forty Masters. Yours has produced... you, so far. Early days.",
+          "after:line": "A Green run with a rescue team on standby is a walk with a picnic. Still. You came back.",
+          "after:project": "Stage three is the floor, not the ceiling. My grandmother reached four at nineteen. Still. Passed, then."
         }
       },
       {
@@ -495,7 +705,9 @@
           "after:hold": "Does it hurt? The yard? Varga said the wards stop it hurting, but she says a lot of things kindly.",
           "after:rite": "I closed my eyes for mine. I watched all of yours. It was beautiful. Is that strange to say?",
           "after:shape": "I lost in eleven seconds. I counted. But the wards caught me and nobody laughed, so. Maybe again tomorrow.",
-          "after:discipline": "The Instructor's test. Did you win? I fell off the ring. Technically that's a loss. Technically."
+          "after:discipline": "The Instructor's test. Did you win? I fell off the ring. Technically that's a loss. Technically.",
+          "after:line": "Was it bad? Out there? You can tell me if it was bad. I'd rather know.",
+          "after:project": "You passed the Examination. The real one. I go out next week. Will you... tell me what the post is like?"
         }
       },
       {
@@ -505,7 +717,9 @@
           "after:hold": "You look done in. There's bread in the dormitory; I saved you some.",
           "after:rite": "How do you feel? Mine made me sick for an hour after. There's tea in the dormitory.",
           "after:shape": "You fought well. You also hit poor Isa rather hard; I've sent bread.",
-          "after:discipline": "You looked happy with the new techniques. It suits you. Come and show me the second one later?"
+          "after:discipline": "You looked happy with the new techniques. It suits you. Come and show me the second one later?",
+          "after:line": "Whoever went with you: I've put tea by their bunks. And yours.",
+          "after:project": "Twice into the Green and twice back. Sit down; you've gone a colour."
         }
       },
       {
@@ -515,7 +729,9 @@
           "after:hold": "Your guard came up late on the left. Twice. You're welcome.",
           "after:rite": "Called it. Well. Half called it. The bowl reads things you don't show; that's the point of it.",
           "after:shape": "You lead with the same shoulder every time. Fix it before the Examination. Everything in the Green reads shoulders.",
-          "after:discipline": "You use the first technique too much and the third not at all. The third is the one that wins."
+          "after:discipline": "You use the first technique too much and the third not at all. The third is the one that wins.",
+          "after:line": "You held the post from the front. Hold it from the side next time; the wolves come round, not through.",
+          "after:project": "Projected. Good. Now your weaknesses reach two paces further too. Think about that before the Gate."
         }
       },
       {
@@ -525,7 +741,9 @@
           "after:hold": "Good hold.",
           "after:rite": "...It suits you.",
           "after:shape": "...Good stance.",
-          "after:discipline": "...Good weapon."
+          "after:discipline": "...Good weapon.",
+          "after:line": "...Came back.",
+          "after:project": "...Stage three."
         }
       },
       {
@@ -535,7 +753,9 @@
           "after:hold": "I asked Bask if I could take Millstone without the guard. He said no. He said it in a way I've decided means yes.",
           "after:rite": "Want to see if our geniuses will fight? Not now. Later. Definitely later.",
           "after:shape": "Spar me. Now. Fine, later. But soon. I've been working on a thing.",
-          "after:discipline": "THREE techniques. I have three techniques. Spar me. Later. Yes."
+          "after:discipline": "THREE techniques. I have three techniques. Spar me. Later. Yes.",
+          "after:line": "Take ME next time. I will not die. I've decided.",
+          "after:project": "THE FIELD GOES PAST THE SKIN. Did you know? I didn't know. Everything is different now."
         }
       }
     ]
@@ -817,6 +1037,218 @@
         "That is the school's first lesson, and you have it. Carry it well; it carries your city's name.",
         "Rest. Tomorrow the line."
       ]
+    },
+    {
+      "id": "line",
+      "number": 5,
+      "title": "The line",
+      "place": "quad",
+      "instructor": "varga",
+      "requires": {
+        "done": [
+          "discipline"
+        ],
+        "rested_after": "discipline"
+      },
+      "intro": [
+        "The line is the one place the Academy cannot ward. So we go out with a rescue team at the post, and with each other.",
+        "A party is three. Choose two of your cohort to come. Choose for the fight, or for the company; both are reasons."
+      ],
+      "steps": [
+        {
+          "title": "Your party",
+          "text": "Choose two of your cohort to come with you.",
+          "goal": {
+            "type": "choose-party"
+          }
+        },
+        {
+          "title": "The car",
+          "text": "The car waits at the Gate.",
+          "goal": {
+            "type": "travel",
+            "to": "green-1",
+            "lines": [
+              "The car takes you out of Alexandria at lamp hour: three of you, Instructor Varga, and the rescue team riding the tender.",
+              "The Green is the line’s gentlest colour. It is still the line. The lamps thin out, and then there are none, and then the car stops at a cutting in the hills.",
+              "Varga says: “The post is a mile on. I’ll be there before you. Fell what hunts the cutting, hold the post, and look in on the den if you can. Nobody is a hero tonight.”"
+            ]
+          }
+        },
+        {
+          "title": "The cutting",
+          "place": "green-1",
+          "text": "Fell [b]two[/b] of what hunts here. Your party fights beside you; [b]Tab[/b] locks on, [b]G[/b] gives your genius its order. Classmates who fall stay down until the post.",
+          "goal": {
+            "type": "fell",
+            "count": 2
+          }
+        },
+        {
+          "title": "The post",
+          "place": "green-2",
+          "text": "Take the post ([b]E[/b]): whoever is down stands up there, and everyone is whole. Then hold it for [b]forty-five seconds[/b], whatever comes.",
+          "goal": {
+            "type": "hold",
+            "seconds": 45
+          },
+          "notes": {
+            "ally-down": "One of yours is down. The post will stand them up; hold until then."
+          }
+        },
+        {
+          "title": "The den",
+          "place": "green-3",
+          "text": "The Warden of the Cutting. A second-molt beast, named. Everything you have, and everyone with you.",
+          "goal": {
+            "type": "fell",
+            "count": 1
+          }
+        },
+        {
+          "title": "Extraction",
+          "place": "green-3",
+          "text": "Back to the line ([b]E[/b] at the way out). The car is waiting, and so is Varga.",
+          "goal": {
+            "type": "extract",
+            "lines": [
+              "The car’s lamps come up the cutting. The rescue team puts away the stretchers they did not need.",
+              "On the way back nobody talks much. The Green is behind you, and the window shows your own face in it, and it looks different."
+            ]
+          }
+        }
+      ],
+      "rescue": {
+        "lines": [
+          "You are down, and the Green does not stop. Then it does: the rescue team’s lamps, and hands under your arms, and the car.",
+          "The wards of the Academy close over you like water. You will go out again. Not tonight."
+        ]
+      },
+      "outro": [
+        "All three of you. Good.",
+        "The line took your measure tonight, and you took its. Rest; tomorrow I show you what the field can do past the skin."
+      ]
+    },
+    {
+      "id": "project",
+      "number": 6,
+      "title": "Project",
+      "place": "yard",
+      "instructor": "bask",
+      "requires": {
+        "done": [
+          "line"
+        ],
+        "rested_after": "line"
+      },
+      "intro": [
+        "Everything you have done so far, you did inside your skin. Hold kept the field in; the stance let it stand; the techniques threw a little of it. Project is the rest.",
+        "Take your stance with your Will high and keep it there. When the field has nowhere left to go, it goes out. You will feel it. Then we see what you can reach."
+      ],
+      "steps": [
+        {
+          "title": "Open the field",
+          "text": "Press [b]F[/b] for your stance and hold it with your Will above sixty. Three seconds, and the field goes past the skin.",
+          "setup": {
+            "genius": "sit",
+            "will": 100,
+            "project": true
+          },
+          "goal": {
+            "type": "event",
+            "event": "field-open",
+            "count": 1
+          },
+          "notes": {
+            "no-will": "Your Will is too low. Drop the stance, breathe, and take it again."
+          }
+        },
+        {
+          "title": "Reach",
+          "text": "Your techniques reach farther now, and hit harder. Land your Shape's technique ([b]Q[/b]) on Millstone from [b]beyond arm's reach[/b] (more than two and a half metres) three times.",
+          "setup": {
+            "genius": "sit",
+            "will": 100
+          },
+          "goal": {
+            "type": "reach-hits",
+            "count": 3,
+            "distance": 2.5
+          },
+          "notes": {
+            "whiff": "Still out of reach. A pace closer; the field goes two paces now, not ten."
+          }
+        },
+        {
+          "title": "The Field Examination",
+          "text": "The real one: the Green again, with your field open and a party of three. Varga watches from the post. Choose who comes.",
+          "goal": {
+            "type": "choose-party"
+          }
+        },
+        {
+          "title": "The car",
+          "text": "The car waits at the Gate.",
+          "goal": {
+            "type": "travel",
+            "to": "green-1",
+            "lines": [
+              "The car again, at lamp hour. Nobody says it is the Examination. Everybody knows.",
+              "Varga, at the door of the car: “Field open from the moment your boots touch the cutting. I will be at the post. I will not help.”"
+            ]
+          }
+        },
+        {
+          "title": "The cutting",
+          "place": "green-1",
+          "text": "Fell [b]two[/b]. Your field is open: your techniques reach past the skin.",
+          "goal": {
+            "type": "fell",
+            "count": 2
+          }
+        },
+        {
+          "title": "The post",
+          "place": "green-2",
+          "text": "Take the post ([b]E[/b]) and hold it for [b]forty-five seconds[/b]. Varga is watching.",
+          "goal": {
+            "type": "hold",
+            "seconds": 45
+          }
+        },
+        {
+          "title": "The den",
+          "place": "green-3",
+          "text": "The Warden. This time it is the Examination.",
+          "goal": {
+            "type": "fell",
+            "count": 1
+          }
+        },
+        {
+          "title": "Extraction",
+          "place": "green-3",
+          "text": "Back to the line ([b]E[/b] at the way out).",
+          "goal": {
+            "type": "extract",
+            "award": "stage3",
+            "lines": [
+              "Varga is at the car before you are. She has a slate, and she does not show you what is on it.",
+              "“Stage three,” she says, as if remarking on the weather. “Passed.” Behind her the rescue team is already asleep in the tender."
+            ]
+          }
+        }
+      ],
+      "rescue": {
+        "lines": [
+          "Down. The Green closes over you, and then the rescue team's lamps open it again.",
+          "Varga, in the car: “That was the Examination. You will take it again. Everybody who is anybody has.”"
+        ]
+      },
+      "outro": [
+        "Stage three. That is the last thing the Academy teaches your field; the rest it teaches itself, out there.",
+        "Tomorrow the Gate: your genius is read, and your cohort says what it saw. Rest."
+      ]
     }
   ],
   "rest": {
@@ -828,7 +1260,9 @@
       "hold": "Tomorrow: the rite in the Hearth Hall.",
       "rite": "Tomorrow: Lesson 3, Shape, with the Yardmaster. Your genius turns over once in the dark and settles against your foot.",
       "shape": "Tomorrow: Lesson 4, Discipline. Your city's school takes you.",
-      "discipline": "Tomorrow: Lesson 5, the line. (The next part to be built.)"
+      "discipline": "Tomorrow: the line. The car leaves at lamp hour, and you will not be alone in it.",
+      "line": "Tomorrow: Project. Varga says the field can go past the skin.",
+      "project": "Tomorrow: the Gate. Your genius is read, your cohort speaks, and the line takes you."
     },
     "too_early": "It is too early to sleep. There is work in the yard.",
     "already": "You are rested. The day is waiting."
@@ -877,5 +1311,116 @@
         "Tomorrow you start learning what a {shape} is for."
       ]
     }
+  },
+  "gate": {
+    "$comment": "The Gate: the genius's Second Form read from how the Academy was played (three candidates, your choice, or settle), the cohort's write-up, Commencement. The write-up is built from the record: each line's test is a key of the record compared to a number.",
+    "place": "gate",
+    "instructor": "varga",
+    "lines": {
+      "intro": [
+        "Here we are. The Gate: the platform the line leaves from, and the last thing the Academy does to you.",
+        "Your genius has watched you for a term. Every parry, every order, every time you stood in the yard with the wrong shoulder forward. Now it reads what it saw, and takes a body that fits.",
+        "It offers three. Choose, or let it settle on the one that fits best. Either way it is yours; there is no wrong one."
+      ],
+      "chosen": "{genius_name} becomes a {form}. Look at it: that is a term of your life, standing there.",
+      "settled": "It settles: a {form}. It knew before you did.",
+      "writeup_intro": "Your cohort has written you up, as every cohort does. They do not know you will read it. Here.",
+      "commencement": [
+        "Commencement. There is no ceremony in it; there is the line, and the car, and the fact that you are on it.",
+        "You leave with a Shape, a field at Stage three, a school, a Pattern, a genius with a name, and twelve people who will remember you. That is what the Academy is for.",
+        "Go on, {name}. Mind the line."
+      ]
+    },
+    "writeup": [
+      {
+        "test": [
+          "parries",
+          ">=",
+          10
+        ],
+        "text": "Quick hands: parries more than they block, and knows it."
+      },
+      {
+        "test": [
+          "parries",
+          "<",
+          10
+        ],
+        "text": "Takes a bite on the guard rather than risk the parry. Steady, not showy."
+      },
+      {
+        "test": [
+          "hurts",
+          "<=",
+          2
+        ],
+        "text": "Hard to hit. The yard remembers trying."
+      },
+      {
+        "test": [
+          "hurts",
+          ">",
+          6
+        ],
+        "text": "Gets hit a lot and does not seem to mind. Either brave or stubborn; the cohort is split."
+      },
+      {
+        "test": [
+          "spars_lost",
+          "==",
+          0
+        ],
+        "text": "Took the ladder without a loss, and did not gloat. Mostly."
+      },
+      {
+        "test": [
+          "spars_lost",
+          ">",
+          0
+        ],
+        "text": "Lost on the ladder and came back for the next rung. Some of us noticed."
+      },
+      {
+        "test": [
+          "rescued",
+          ">",
+          0
+        ],
+        "text": "Carried out of the Green once. Went back. That is the whole of it."
+      },
+      {
+        "test": [
+          "posts_held",
+          ">=",
+          2
+        ],
+        "text": "Holds a post like it is a doorway with someone behind it."
+      },
+      {
+        "test": [
+          "talks",
+          ">=",
+          8
+        ],
+        "text": "Talks to everyone. Knows every name in the cohort, and uses them."
+      },
+      {
+        "test": [
+          "talks",
+          "<",
+          5
+        ],
+        "text": "Keeps to themself. Those they did speak to speak well of them."
+      },
+      {
+        "test": [
+          "examined",
+          "==",
+          true
+        ],
+        "text": "Passed the Field Examination with the field open, first time of asking."
+      }
+    ],
+    "closing": "Would found a guild with them. Signed, the Hundred-and-Fourth Cohort."
   }
 }
