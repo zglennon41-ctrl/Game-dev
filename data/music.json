@@ -1,0 +1,172 @@
+{
+  "$comment": "The placeholder score, made by tools/score/compose.py (python3 tools/score/compose.py). One motif runs through every piece; the loops share two tempos (60 and 120 beats a minute, one the double of the other) and one key family around D minor (D minor, D dorian, D phrygian, F major, D major), so the fight layer can play over any zone piece at the same pulse. gain is in decibels, the level the game plays the track at: the files all peak at -1.5 dBFS, so the balance between pieces lives here. Loops carry their loop points in the file (a smpl chunk), which Godot's importer reads. Stingers play once. The fight layer fades in over the zone piece, which keeps playing. file is the name of the file in game/assets/music/.",
+  "tracks": {
+    "title": {
+      "file": "title.ogg",
+      "kind": "loop",
+      "tempo": 60,
+      "key": "D minor",
+      "gain": -6.0,
+      "seconds": 40,
+      "$comment": "The title: slow and wide, the motif alone on a horn over a drone, then strings."
+    },
+    "academy_quad": {
+      "file": "academy_quad.ogg",
+      "kind": "loop",
+      "tempo": 60,
+      "key": "F major",
+      "gain": -7.0,
+      "seconds": 36,
+      "$comment": "The quad in the evening: harp over harmonium, warm and unhurried."
+    },
+    "academy_yard": {
+      "file": "academy_yard.ogg",
+      "kind": "loop",
+      "tempo": 120,
+      "key": "D dorian",
+      "gain": -7.0,
+      "seconds": 32,
+      "$comment": "The training yard: a steady pulse, brushed drums, a low string ostinato."
+    },
+    "academy_hearth": {
+      "file": "academy_hearth.ogg",
+      "kind": "loop",
+      "tempo": 60,
+      "key": "D minor",
+      "gain": -8.0,
+      "seconds": 36,
+      "$comment": "The hearth hall: an organ alone, hushed, the motif in the minor."
+    },
+    "academy_dorm": {
+      "file": "academy_dorm.ogg",
+      "kind": "loop",
+      "tempo": 60,
+      "key": "D minor",
+      "gain": -12.0,
+      "seconds": 30,
+      "$comment": "The dormitory at night: a music box over a drone, in three, nearly nothing."
+    },
+    "zone_green": {
+      "file": "zone_green.ogg",
+      "kind": "loop",
+      "tempo": 60,
+      "key": "D dorian",
+      "gain": -8.0,
+      "seconds": 36,
+      "$comment": "The Green hills at night: moonlit strings, a high harmonic, a distant pulse."
+    },
+    "zone_shenandoah": {
+      "file": "zone_shenandoah.ogg",
+      "kind": "loop",
+      "tempo": 60,
+      "key": "D phrygian",
+      "gain": -8.0,
+      "seconds": 36,
+      "$comment": "The drowned ruin: water, bells, a slow dissonance."
+    },
+    "zone_harpers_cut": {
+      "file": "zone_harpers_cut.ogg",
+      "kind": "loop",
+      "tempo": 120,
+      "key": "D phrygian",
+      "gain": -7.0,
+      "seconds": 32,
+      "$comment": "The dark junction: iron percussion, a tense ostinato on D and Eb."
+    },
+    "zone_cahokia_river": {
+      "file": "zone_cahokia_river.ogg",
+      "kind": "loop",
+      "tempo": 60,
+      "key": "F major",
+      "gain": -7.0,
+      "seconds": 36,
+      "$comment": "The river line: amber, a current of plucked strings, one long melody."
+    },
+    "fight": {
+      "file": "fight.ogg",
+      "kind": "loop",
+      "tempo": 120,
+      "key": "D minor",
+      "gain": -8.0,
+      "seconds": 24,
+      "$comment": "The fight layer: drums and a low ostinato on D, A and C; plays over any zone piece."
+    },
+    "gate": {
+      "file": "gate.ogg",
+      "kind": "loop",
+      "tempo": 60,
+      "key": "D major",
+      "gain": -6.0,
+      "seconds": 40,
+      "$comment": "The Gate and Commencement: the motif grand, brass over organ, drums."
+    },
+    "sting_pattern": {
+      "file": "sting_pattern.ogg",
+      "kind": "stinger",
+      "tempo": 120,
+      "key": "D minor",
+      "gain": -5.0,
+      "seconds": 2.5,
+      "$comment": "The Pattern fires: a rising harp, a brass hit, a shimmer."
+    },
+    "sting_rite": {
+      "file": "sting_rite.ogg",
+      "kind": "stinger",
+      "tempo": 60,
+      "key": "D minor to D major",
+      "gain": -5.0,
+      "seconds": 4,
+      "$comment": "The genius takes form: an organ swell from minor to major, bells over it."
+    },
+    "sting_reckoning": {
+      "file": "sting_reckoning.ogg",
+      "kind": "stinger",
+      "tempo": 60,
+      "key": "D minor",
+      "gain": -5.0,
+      "seconds": 5,
+      "$comment": "The Reckoning read: three tolls, a drone, the motif's head, a question left."
+    },
+    "sting_done": {
+      "file": "sting_done.ogg",
+      "kind": "stinger",
+      "tempo": 120,
+      "key": "D major",
+      "gain": -6.0,
+      "seconds": 2,
+      "$comment": "A quest done: a bright plucked rise, a bell on top."
+    },
+    "sting_lost": {
+      "file": "sting_lost.ogg",
+      "kind": "stinger",
+      "tempo": 60,
+      "key": "D minor",
+      "gain": -6.0,
+      "seconds": 2.5,
+      "$comment": "A quest lost: a falling minor line, a dull low drum."
+    }
+  },
+  "places": {
+    "quad": "academy_quad",
+    "yard": "academy_yard",
+    "hearth": "academy_hearth",
+    "dorm": "academy_dorm",
+    "gate": "gate",
+    "cut": "zone_harpers_cut"
+  },
+  "zones": {
+    "green": "zone_green",
+    "shenandoah": "zone_shenandoah",
+    "harpers-cut": "zone_harpers_cut",
+    "cahokia-river": "zone_cahokia_river"
+  },
+  "fight": "fight",
+  "stingers": {
+    "pattern": "sting_pattern",
+    "rite": "sting_rite",
+    "reckoning": "sting_reckoning",
+    "done": "sting_done",
+    "lost": "sting_lost"
+  },
+  "crossfade": 2.0
+}

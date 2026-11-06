@@ -38,6 +38,8 @@ func _stream(track: String) -> AudioStream:
 	if not ResourceLoader.exists(path):
 		return null
 	var st: AudioStream = load(path)
+	if st is AudioStreamOggVorbis:
+		(st as AudioStreamOggVorbis).loop = t.get("kind", "loop") == "loop"
 	if st is AudioStreamWAV:
 		(st as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD if t.get("kind", "loop") == "loop" else AudioStreamWAV.LOOP_DISABLED
 		if t.get("kind", "loop") == "loop":

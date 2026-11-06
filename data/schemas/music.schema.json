@@ -1,0 +1,116 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "music",
+  "description": "The score: every track, and which track plays where. Track ids in places, zones, fight and stingers must name entries of tracks (the validator checks).",
+  "type": "object",
+  "required": [
+    "tracks",
+    "places",
+    "zones",
+    "fight",
+    "stingers"
+  ],
+  "properties": {
+    "$comment": {
+      "type": "string"
+    },
+    "tracks": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "file",
+          "kind",
+          "tempo",
+          "key",
+          "gain"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+\\.(wav|ogg)$",
+            "description": "the file's name in game/assets/music/"
+          },
+          "kind": {
+            "enum": [
+              "loop",
+              "stinger"
+            ]
+          },
+          "tempo": {
+            "type": "number",
+            "minimum": 20,
+            "maximum": 300,
+            "description": "beats a minute"
+          },
+          "key": {
+            "type": "string"
+          },
+          "gain": {
+            "type": "number",
+            "minimum": -60,
+            "maximum": 12,
+            "description": "decibels, the level the game plays the track at"
+          },
+          "seconds": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "$comment": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "places": {
+      "type": "object",
+      "required": [
+        "quad",
+        "yard",
+        "hearth",
+        "dorm",
+        "gate",
+        "cut"
+      ],
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "zones": {
+      "type": "object",
+      "required": [
+        "green",
+        "shenandoah",
+        "harpers-cut",
+        "cahokia-river"
+      ],
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "fight": {
+      "type": "string"
+    },
+    "stingers": {
+      "type": "object",
+      "required": [
+        "pattern",
+        "rite",
+        "reckoning",
+        "done",
+        "lost"
+      ],
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "crossfade": {
+      "type": "number",
+      "minimum": 0,
+      "description": "seconds, the fade between two loops when the place changes"
+    }
+  },
+  "additionalProperties": false
+}
