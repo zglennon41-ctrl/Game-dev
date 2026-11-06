@@ -191,3 +191,17 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
 58. **First Form blockouts**: all eleven First Forms now have Blender-built bodies, parts and
     cards (placeholder quality, proportions and sockets right). An art body with no rig walks
     with a bob and a lean the game gives it; rigged art will replace that.
+59. **The seeds of the MMO planted in the Academy** (owner's direction, 2026-11-06), all mine
+    to be rewritten: the board's four troubles and their words (`academy.json`, "board"); the
+    hearth's shade, drawn from `shades.json`, accepting a student after three visits and
+    firing its Pattern four times a visit; classmates' Patterns (their Shape's first Form,
+    Trigger "below-half"), fired once a bout; the three recruiting guilds (the Lamplighters'
+    Company, Banneker Commons, the Ninth Car) and the founding promise; the five rumours of
+    the season's Omen (the Shenandoah ruin, Harper's Cut, House Carroll's Writ for Enoch
+    Vane, the Green's lamps, the Marshal's old enemy); the schools' rites framed on the
+    Instructor's test.
+60. **What the server will read off a settled character**: Shape and Stage 3; blood; school,
+    weapon and three techniques; the Pattern; the genius (Second Form, with any shadow and
+    graft); Marks and the Journeyman archetype; the record (parries, bouts, posts, runs,
+    troubles, rumours heard, the shade's acceptance); the cohort's write-up; the declaration
+    (a guild joined, a founding promised with two named classmates, or free).

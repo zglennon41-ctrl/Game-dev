@@ -818,6 +818,24 @@ func auto_move() -> Vector2:
 		_:
 			var nl := next_lesson()
 			want_place = nl["place"] if not nl.is_empty() else ""
+	# The autopilot, asked to, visits the shade until it is accepted, then the board.
+	var sh: Dictionary = Data.academy.get("shade", {})
+	if auto_troubles and progress["done"].has("rite") and int(progress.get("shade_visits", 0)) < int(sh.get("acceptVisits", 3)) and not in_lesson():
+		if place == sh["place"]:
+			goal = Vector2(sh["at"][0], sh["at"][1])
+		elif place == "quad":
+			for d in _doors:
+				if d["to"] == sh["place"] and door_open(d):
+					goal = Vector2(d["at"][0], d["at"][1]) * 0.86
+		else:
+			for d in _doors:
+				if d["to"] == "quad":
+					goal = Vector2(d["at"][0], d["at"][1]) * 0.86
+		if goal != Vector2.INF:
+			if (goal - fight.p_pos).length() < 2.2 and not _target.is_empty():
+				interact()
+				return Vector2.ZERO
+			return (goal - fight.p_pos).normalized()
 	if auto_troubles and board_open() and progress.get("trouble", "") == "" and troubles_open().size() > 0:
 		var bspec: Dictionary = Data.academy["places"].get("quad", {}).get("board", {})
 		if place == "quad":

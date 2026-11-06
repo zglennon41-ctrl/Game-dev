@@ -63,6 +63,19 @@ Discipline and weapon, Pattern, genius, record) and the title shows it.
 **H. Polish** (next) — day cards, fades between places, pacing, lines, sound; the whole run played
 end to end before it is called done.
 
+## The seeds (owner's direction, 2026-11-06: sow every seed that pays off in the MMO)
+
+| Seed in the Academy | Pays off on the server |
+| --- | --- |
+| Marks for lessons, bouts, runs and the Examination; the Journeyman archetype at Commencement | Marks and ranks; archetypes, cross titles, founding |
+| The board's troubles (salvage, escort, hunt, rally) from classmates | The hall's board and its seven quest types |
+| The hearth's shade: visits, witnessing, a shadow, a graft | Shades, witness and shadows, grafts at Readings |
+| Classmates' Patterns fired in bouts | Witnessing other players' Patterns; founding on a shared Pattern |
+| The dated term and the Omen's rumours | The calendar, the season's crisis, the Ledgers |
+| The declaration: guilds of three Charters, a founding promise, free lance | Guilds, Charters, Companies, the Writ of Founding |
+| The schools' rites named | Disciplines and their archetypes |
+| The party of two classmates, the post, extraction, the rescue team | Excursions: platform, car, areas, post, extraction |
+
 ## After the Academy (the owner's direction, 2026-11-06)
 
 The server is a mastery progression: the player learns to use their field and to cover its
