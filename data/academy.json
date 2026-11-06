@@ -787,6 +787,93 @@
           "I'm down!"
         ]
       }
+    },
+    "schedule": {
+      "$comment": "Where a classmate is on a given weekday, by temperament (M4): the places with spots. Each day one or two of the cohort are out on a run of their own (drawn by the seed), and anyone carried out of a run is in the infirmary for infirmaryDays.",
+      "haunts": {
+        "earnest": [
+          "yard",
+          "hearth",
+          "yard",
+          "quad",
+          "yard",
+          "hearth",
+          "hearth"
+        ],
+        "wry": [
+          "quad",
+          "yard",
+          "quad",
+          "hearth",
+          "yard",
+          "quad",
+          "quad"
+        ],
+        "proud": [
+          "yard",
+          "yard",
+          "quad",
+          "yard",
+          "yard",
+          "quad",
+          "hearth"
+        ],
+        "scared": [
+          "hearth",
+          "quad",
+          "hearth",
+          "quad",
+          "hearth",
+          "hearth",
+          "hearth"
+        ],
+        "kind": [
+          "quad",
+          "hearth",
+          "yard",
+          "quad",
+          "hearth",
+          "quad",
+          "hearth"
+        ],
+        "sharp": [
+          "yard",
+          "quad",
+          "yard",
+          "yard",
+          "quad",
+          "yard",
+          "quad"
+        ],
+        "quiet": [
+          "hearth",
+          "hearth",
+          "quad",
+          "hearth",
+          "yard",
+          "hearth",
+          "hearth"
+        ],
+        "reckless": [
+          "yard",
+          "quad",
+          "yard",
+          "quad",
+          "yard",
+          "yard",
+          "quad"
+        ]
+      },
+      "awayPerDay": 2,
+      "infirmaryDays": 2,
+      "lines": {
+        "away": "{my_name} is out on the line tonight: a posting of their own.",
+        "infirmary": "{my_name} is in the infirmary, carried out of a run. Back in a day or two.",
+        "infirmaryGreet": "Don't look at me like that. I'm fine. The rescue team said I was fine. Two days, they said.",
+        "withPosting": "{my_name} has taken this one and wants a second.",
+        "carriedOut": "{my_name} was carried out by the rescue team. The infirmary for two days.",
+        "backFromAway": "I was out on the line last night. Nobody died. I'll tell you about it when I stop shaking."
+      }
     }
   },
   "lessons": [

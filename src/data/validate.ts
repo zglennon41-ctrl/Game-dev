@@ -74,6 +74,17 @@ export function validateData(dir = 'data'): Problem[] {
     }
     for (const k of ['floor', 'edge'] as const) if (!z.tiles[k].length) problems.push({ file: 'zones.json', message: `${z.id}: no ${k} tiles` });
   }
+  const questTypes = new Set<string>(Object.keys(D('quests').types));
+  for (const c of D('crises')) {
+    for (const [k, l] of Object.entries(c.ledgers as Record<string, { serves: string[] }>)) for (const t of l.serves) if (!questTypes.has(t)) problems.push({ file: 'crises.json', message: `${c.id}: ledger ${k} served by unknown quest type ${t}` });
+    if (!c.ledgers[c.default]) problems.push({ file: 'crises.json', message: `${c.id}: default ending ${c.default} is not a ledger` });
+    for (const k of Object.keys(c.ledgers)) if (!c.endings[k]) problems.push({ file: 'crises.json', message: `${c.id}: ledger ${k} has no ending` });
+    for (const q of c.crisisQuests) {
+      if (!questTypes.has(q.type)) problems.push({ file: 'crises.json', message: `${c.id}: crisis quest of unknown type ${q.type}` });
+      if (!zones.some((z: { id: string }) => z.id === q.zone)) problems.push({ file: 'crises.json', message: `${c.id}: crisis quest in unknown zone ${q.zone}` });
+      if (!c.ledgers[q.ledger]) problems.push({ file: 'crises.json', message: `${c.id}: crisis quest serves unknown ledger ${q.ledger}` });
+    }
+  }
   const academy = D('academy');
   const placeKnown = (p: string) => Boolean(academy.places[p]) || zoneAreas.has(p);
   for (const l of academy.lessons) {

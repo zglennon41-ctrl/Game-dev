@@ -1,0 +1,147 @@
+[
+  {
+    "id": "dark-mile",
+    "name": "The Dark Mile",
+    "season": "the Thaw",
+    "$comment": "The term's crisis (docs/systems-05-crisis-storylines.md, crisis 1): the Cahokia line goes quiet past the Shenandoah ruin. Omen until Lesson 5 is walked; Pressure after it; Crisis with the field open; the Reckoning at the Gate. Three Ledgers; weight comes from quests done (by the type that serves a Ledger and the line colour), from a Writ's decision, and from the crisis postings. The heaviest Ledger with a quarter of the weight wins, else the default. An ending writes the world onto the character for the server.",
+    "phases": {
+      "omen": {
+        "until": "line"
+      },
+      "pressure": {
+        "after": "line"
+      },
+      "crisis": {
+        "after": "project"
+      },
+      "reckoning": {
+        "at": "gate"
+      }
+    },
+    "weights": {
+      "green": 1,
+      "amber": 3,
+      "crisis": 3
+    },
+    "ledgers": {
+      "relit": {
+        "name": "Relit by the guilds",
+        "serves": [
+          "linework",
+          "deep-run",
+          "rally"
+        ],
+        "decisions": {
+          "writ:archive": 2
+        },
+        "text": "The Compact and the guilds relight the mile themselves and keep it."
+      },
+      "abandoned": {
+        "name": "Abandoned to the water",
+        "serves": [
+          "hunt",
+          "salvage"
+        ],
+        "decisions": {},
+        "text": "The mile is given up; what was in the ruin is carried out, and the river keeps the rest."
+      },
+      "carroll": {
+        "name": "Claimed by House Carroll",
+        "serves": [
+          "writ",
+          "escort"
+        ],
+        "decisions": {
+          "writ:house": 2
+        },
+        "text": "House Carroll relights the mile under its own lamps and its own toll."
+      }
+    },
+    "default": "abandoned",
+    "notices": {
+      "omen": "The Compact's notice: the Cahokia line runs slow past the Shenandoah ruin. No Ledger is open yet. Listen on Mondays.",
+      "pressure": "The Ledgers are open on the Dark Mile. Every posting that serves one weighs it; the Compact reads them on Wednesdays.",
+      "crisis": "The Dark Mile is at its crisis. The crisis postings weigh three times; the Reckoning is read at the Gate.",
+      "reckoning": "The Ledgers are closed. The Reckoning was read at the Gate."
+    },
+    "crisisQuests": [
+      {
+        "type": "linework",
+        "zone": "cahokia-river",
+        "ledger": "relit",
+        "title": "The Dark Mile: relight the crossing",
+        "posting": "CRISIS. The Compact asks every hall for hands: the crossing at the mile wants relighting before the water takes the ballast. Weighs the Relit Ledger threefold."
+      },
+      {
+        "type": "salvage",
+        "zone": "shenandoah",
+        "ledger": "abandoned",
+        "title": "The Dark Mile: carry out the Archive's last",
+        "posting": "CRISIS. The Archive will not hold the mile; it wants what is in the ruin carried out before it is given up. Weighs the Abandoned Ledger threefold."
+      },
+      {
+        "type": "writ",
+        "zone": "cahokia-river",
+        "ledger": "carroll",
+        "title": "The Dark Mile: House Carroll's writ",
+        "posting": "CRISIS. House Carroll has a writ for the crossing's lamps and will pay in Favour and Notes. Weighs the Carroll Ledger threefold; the decision at the end weighs more."
+      },
+      {
+        "type": "hunt",
+        "zone": "cahokia-river",
+        "ledger": "abandoned",
+        "title": "The Dark Mile: what sleeps in the hull",
+        "posting": "CRISIS. The river towns want the Barge-Heart felled whatever becomes of the line. Weighs the Abandoned Ledger threefold."
+      },
+      {
+        "type": "escort",
+        "zone": "shenandoah",
+        "ledger": "carroll",
+        "title": "The Dark Mile: Carroll's surveyor",
+        "posting": "CRISIS. House Carroll's surveyor must reach the ruin's post to mark the lamps. Weighs the Carroll Ledger threefold."
+      },
+      {
+        "type": "deep-run",
+        "zone": "cahokia-river",
+        "ledger": "relit",
+        "title": "The Dark Mile: to the hull and back",
+        "posting": "CRISIS. Varga's posting: the river line to its heart in one run, for the guilds' relighting. Weighs the Relit Ledger threefold."
+      }
+    ],
+    "endings": {
+      "relit": {
+        "title": "The mile is relit",
+        "text": "At the Reckoning the Relit Ledger stood heaviest. The guilds took the Dark Mile back post by post; the Cahokia line runs through to the west, and no house owns its lamps. Enoch Vane was never found, and House Carroll remembers who relit the mile without it.",
+        "world": {
+          "cahokia_line": "open",
+          "house_carroll": "thwarted",
+          "mile_lamps": "the guilds",
+          "enoch_vane": "lost"
+        },
+        "chronicle": "The Thaw of the Hundred-and-Fourth Cohort: the Dark Mile relit by the guilds."
+      },
+      "abandoned": {
+        "title": "The mile is given up",
+        "text": "At the Reckoning no Ledger carried the day, or the Abandoned one did: the Compact let the Dark Mile go. Cahokia is reached by airship this year; the ruin is sealed; what the Archive carried out is in its vaults. The river towns say the Barge-Heart is dead, and say it quietly.",
+        "world": {
+          "cahokia_line": "dark",
+          "house_carroll": "waiting",
+          "mile_lamps": "none",
+          "enoch_vane": "fled west"
+        },
+        "chronicle": "The Thaw of the Hundred-and-Fourth Cohort: the Dark Mile abandoned to the water."
+      },
+      "carroll": {
+        "title": "The mile is Carroll's",
+        "text": "At the Reckoning the Carroll Ledger stood heaviest. House Carroll relit the Dark Mile under its own lamps and its own toll; the line runs, and every car that runs it pays. Enoch Vane was taken at the crossing. The Compact signed, and the Commons said it would remember the signature.",
+        "world": {
+          "cahokia_line": "tolled",
+          "house_carroll": "ascendant",
+          "mile_lamps": "House Carroll",
+          "enoch_vane": "taken"
+        },
+        "chronicle": "The Thaw of the Hundred-and-Fourth Cohort: the Dark Mile claimed by House Carroll."
+      }
+    }
+  }
+]

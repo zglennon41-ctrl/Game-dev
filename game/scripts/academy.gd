@@ -326,8 +326,11 @@ func go(place_id: String, quiet := false, from := "") -> void:
 		_people.append({ "kind": "shade", "id": sd["id"], "name": sd["name"], "pos": sat })
 	if place_id == "quad" or spec.get("cohortHere", false):
 		var spots: Array = spec["spots"]
-		for i in mini(cohort.size(), spots.size()):
-			var c: Dictionary = cohort[i]
+		var here: Array = cohort
+		if progress["done"].has("rite"):
+			here = cohort.filter(func(c): return _classmate_here(c, place_id))
+		for i in mini(here.size(), spots.size()):
+			var c: Dictionary = here[i]
 			var at := Vector2(spots[i][0], spots[i][1])
 			var fig := world.add_figure(c["body"], at, (Vector2.ZERO - at).angle() + randf_range(-0.6, 0.6), c["name"],
 				"%s · %s" % [c["blood_name"], String(c["shape"]).capitalize()], c["weapon"])
@@ -543,6 +546,9 @@ func _talk_classmate(c: Dictionary) -> void:
 	if first:
 		progress["met"].append(c["id"])
 	var line: String = t["lines"]["greet"]
+	var sch: Dictionary = Data.academy["cohort"].get("schedule", {})
+	if not first and away_today(int(progress["day"]) - 1).has(c["id"]):
+		line = sch.get("lines", {}).get("backFromAway", line)
 	if not first:
 		for key in [_stage_key(), "after:rite" if progress["done"].has("rite") else "", "after:hold" if progress["done"].has("hold") else ""]:
 			if key != "" and t["lines"].has(key):
@@ -1163,6 +1169,7 @@ func _next_step() -> void:
 				if not progress.has("decisions"):
 					progress["decisions"] = []
 				progress["decisions"].append({ "quest": _lesson["id"], "type": _lesson.get("kind", ""), "choice": id, "day": int(progress["day"]) })
+				weigh_decision("%s:%s" % [_lesson.get("kind", ""), id])
 				_choice_done = true
 				save())
 	if String(s["goal"]["type"]) == "choose-weapon":
@@ -1605,6 +1612,8 @@ func _extract() -> void:
 	var lines: Array = s.get("goal", {}).get("lines", ["The car takes you back."])
 	hud.set_prompt("", "")
 	var award := String(s.get("goal", {}).get("award", ""))
+	if not _lesson.get("quest", false):
+		_carry_out_fallen()
 	say("", lines, func():
 		_choice_done = true
 		progress["record"]["runs_out"] = int(progress["record"].get("runs_out", 0)) + 1
@@ -1645,7 +1654,7 @@ func _pick_party(n: int) -> void:
 		return
 	var opts: Array = []
 	for c in cohort:
-		if chosen.has(c["id"]):
+		if chosen.has(c["id"]) or party_unavailable(c["id"]):
 			continue
 		var t: Dictionary = Data.by_id(Data.academy["cohort"]["temperaments"], c["temperament"])
 		opts.append({ "id": c["id"], "label": "%s  ·  %s  ·  %s" % [c["name"], String(c["shape"]).capitalize(), c["blood_name"]],
@@ -1863,10 +1872,19 @@ func _read_board() -> void:
 		say("", ["You have %s's trouble in hand already." % _classmate(progress["trouble"].trim_prefix("trouble:")).get("name", "a classmate")])
 		return
 	if open.is_empty() and posts.is_empty():
-		say("", [Data.quests["lines"]["nothing"]])
+		say("", [Data.quests["lines"]["nothing"], ledgers_text()] if not crisis().is_empty() else [Data.quests["lines"]["nothing"]])
+		return
+	if open.is_empty() and crisis().is_empty():
+		_read_postings(posts)
 		return
 	if open.is_empty():
-		_read_postings(posts)
+		var qopts: Array = [{ "id": "postings", "label": "The day's postings  ·  %d" % posts.size(), "text": "Work from the Compact, the Archive, the towns and the houses: excursions out on the line." },
+			{ "id": "ledgers", "label": "The Ledgers  ·  %s" % crisis()["name"], "text": ledgers_text() }]
+		choose("The board", qopts, func(id: String):
+			if id == "postings":
+				_read_postings(posts)
+			else:
+				say("", [ledgers_text()]))
 		return
 	var opts: Array = []
 	for t in open:
@@ -1875,9 +1893,13 @@ func _read_board() -> void:
 		opts.append({ "id": t["id"], "label": "%s  ·  %s" % [ks["title"], c["name"]], "text": fill(ks["posting"], c) })
 	if not posts.is_empty():
 		opts.append({ "id": "postings", "label": "The day's postings  ·  %d" % posts.size(), "text": "Work from the Compact, the Archive, the towns and the houses: excursions out on the line." })
+	if not crisis().is_empty():
+		opts.append({ "id": "ledgers", "label": "The Ledgers  ·  %s" % crisis()["name"], "text": ledgers_text() })
 	choose("The board", opts, func(id: String):
 		if id == "postings":
 			_read_postings(posts)
+		elif id == "ledgers":
+			say("", [ledgers_text()])
 		else:
 			_take_trouble(id))
 
@@ -2016,8 +2038,19 @@ func postings_for_day(day: int) -> Array:
 			p["entry"] = t["place"]
 		p["title"] = fill_quest(t["title"], p)
 		p["posting"] = fill_quest(t["posting"], p)
+		# A classmate took this one and wants a second.
+		if rng.randf() < 0.35 and progress["done"].has("rite"):
+			var free: Array = cohort.filter(func(c): return not party_unavailable(c["id"], day))
+			if not free.is_empty():
+				var c: Dictionary = free[rng.randi() % free.size()]
+				p["with"] = c["id"]
+				p["posting"] += "  " + fill(String(Data.academy["cohort"].get("schedule", {}).get("lines", {}).get("withPosting", "")), c)
 		used_types[tid] = used_types.get(tid, 0) + 1
 		out.append(p)
+	# The crisis posts one of its own while its Ledgers are open.
+	var cp := crisis_posting(day, rng)
+	if not cp.is_empty():
+		out.append(cp)
 	return out
 
 func weekday_of(day: int) -> String:
@@ -2097,7 +2130,7 @@ func _begin_quest(p: Dictionary) -> void:
 		rng.seed = int(progress["seed"]) + int(p["day"]) * 3
 		var c: Dictionary = cohort[rng.randi() % cohort.size()]
 		_lesson["passenger"] = { "id": "passenger", "name": "the passenger", "shape": c["shape"], "body": c["body"], "weapon": c["weapon"] }
-	progress["party"] = []
+	progress["party"] = [p["with"]] if p.has("with") and not party_unavailable(String(p["with"])) else []
 	_carrying = false
 	hud.play_ui.visible = true
 	hud.target.visible = false
@@ -2124,6 +2157,8 @@ func _finish_quest() -> void:
 	progress["writeup_extra"].append(fill_quest(String(t["writeup"]), p))
 	if genius:
 		genius.bonded("party")
+	_carry_out_fallen()
+	weigh_ledgers(p)
 	_end_quest_run()
 	earn_marks_n(int(p["pay"]), p["title"])
 	title_card(String(t["name"]).to_upper(), String(Data.quests["lines"]["done"]).replace("{title}", p["title"]).replace("{pay}", str(int(p["pay"]))), Style.GOLD)
@@ -2141,6 +2176,7 @@ func _fail_quest(why: String) -> void:
 	progress["record"]["quests_lost"] = int(progress["record"].get("quests_lost", 0)) + 1
 	if why == "rescued":
 		progress["record"]["rescued"] = int(progress["record"].get("rescued", 0)) + 1
+	_carry_out_fallen()
 	var L: Dictionary = Data.quests["lines"]
 	var line := String(L["failed"]).replace("{title}", p["title"])
 	match why:
@@ -2170,6 +2206,190 @@ func _end_quest_run() -> void:
 	if _in_zone():
 		progress["cleared"] = {}
 		go("quad", true, "")
+
+# --- The cohort's days: where each of them is, who is out, who is in the infirmary -----------
+
+## Is this classmate at this place today? (After the rite; before it the cohort keeps together.)
+func _classmate_here(c: Dictionary, place_id: String) -> bool:
+	if in_lesson() and _lesson.get("poster", {}).get("id", "") == c["id"]:
+		return true
+	return classmate_status(c, int(progress["day"]))["place"] == place_id
+
+## Where a classmate is on a day, and whether they are away: on a run of their own, or in
+## the infirmary after being carried out.
+func classmate_status(c: Dictionary, day: int) -> Dictionary:
+	var inf: Dictionary = progress.get("infirmary", {})
+	if int(inf.get(c["id"], 0)) >= day:
+		return { "place": "", "away": "infirmary" }
+	if away_today(day).has(c["id"]):
+		return { "place": "", "away": "run" }
+	var sch: Dictionary = Data.academy["cohort"].get("schedule", {})
+	var haunts: Array = sch.get("haunts", {}).get(c["temperament"], ["quad"])
+	return { "place": haunts[(day - 1) % haunts.size()], "away": "" }
+
+## The classmates out on a run of their own today (none before Lesson 5 opens the line).
+func away_today(day: int) -> Array:
+	if day < 1 or not progress["done"].has("line"):
+		return []
+	var sch: Dictionary = Data.academy["cohort"].get("schedule", {})
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(progress["seed"]) * 13 + day * 5
+	var ids: Array = cohort.map(func(c): return c["id"])
+	Academy._shuffle(ids, rng)
+	return ids.slice(0, mini(int(sch.get("awayPerDay", 2)), ids.size()))
+
+func party_unavailable(id: String, day := -1) -> bool:
+	var d := int(progress["day"]) if day < 0 else day
+	for c in cohort:
+		if c["id"] == id:
+			return classmate_status(c, d)["away"] != ""
+	return true
+
+## After a run: whoever was down is carried out by the rescue team and spends days in the infirmary.
+func _carry_out_fallen() -> void:
+	if not fight or fight.allies.is_empty():
+		return
+	var sch: Dictionary = Data.academy["cohort"].get("schedule", {})
+	for al in fight.allies:
+		if not al["down"] or al.get("passenger", false) or String(al.get("id", "")) == "":
+			continue
+		if not progress.has("infirmary"):
+			progress["infirmary"] = {}
+		progress["infirmary"][al["id"]] = int(progress["day"]) + int(sch.get("infirmaryDays", 2))
+		progress["record"]["carried_out"] = int(progress["record"].get("carried_out", 0)) + 1
+		if not progress.has("writeup_extra"):
+			progress["writeup_extra"] = []
+		progress["writeup_extra"].append(fill(String(sch.get("lines", {}).get("carriedOut", "")), _classmate(al["id"])))
+
+# --- The season's crisis: the Omen, Pressure, the Crisis, the Reckoning ---------------------
+# One crisis a term (data/crises.json). Its phase follows the term; its Ledgers take weight
+# from the quests done (the type that serves a Ledger, by the line colour), from a Writ's
+# decision, and from the crisis postings; the Reckoning at the Gate reads the heaviest and
+# writes the ending onto the character for the server.
+
+func crisis() -> Dictionary:
+	var all: Array = Data.crises()
+	return all[0] if not all.is_empty() else {}
+
+func crisis_phase() -> String:
+	if progress.has("reckoning") or progress["done"].has("gate"):
+		return "reckoning"
+	if progress["done"].has("project"):
+		return "crisis"
+	if progress["done"].has("line"):
+		return "pressure"
+	return "omen"
+
+func ledgers() -> Dictionary:
+	var c := crisis()
+	var out := {}
+	for k in c.get("ledgers", {}):
+		out[k] = int(progress.get("ledgers", {}).get(k, 0))
+	return out
+
+func _add_weight(ledger: String, w: int) -> void:
+	if not progress.has("ledgers"):
+		progress["ledgers"] = {}
+	progress["ledgers"][ledger] = int(progress["ledgers"].get(ledger, 0)) + w
+
+## A quest done weighs the Ledger its type serves (the crisis's own postings weigh threefold).
+func weigh_ledgers(p: Dictionary) -> void:
+	var c := crisis()
+	if c.is_empty() or crisis_phase() in ["omen", "reckoning"]:
+		return
+	var w := int(c["weights"].get(p.get("colour", "green"), 1))
+	if p.has("crisis_ledger"):
+		_add_weight(p["crisis_ledger"], w * int(c["weights"].get("crisis", 3)))
+		return
+	for k in c["ledgers"]:
+		if c["ledgers"][k]["serves"].has(p["type"]):
+			_add_weight(k, w)
+
+## A decision in a quest (a Writ's) weighs the Ledgers that name it.
+func weigh_decision(key: String) -> void:
+	var c := crisis()
+	if c.is_empty() or crisis_phase() in ["omen", "reckoning"]:
+		return
+	for k in c["ledgers"]:
+		var d: Dictionary = c["ledgers"][k].get("decisions", {})
+		if d.has(key):
+			_add_weight(k, int(d[key]))
+
+## The crisis's own posting for the day, while its Ledgers are open.
+func crisis_posting(day: int, rng: RandomNumberGenerator) -> Dictionary:
+	var c := crisis()
+	var phase := crisis_phase()
+	if c.is_empty() or phase not in ["pressure", "crisis"]:
+		return {}
+	if phase == "pressure" and day % 2 == 0:
+		return {}
+	var open_ids: Array = zones_open().map(func(z): return z["id"])
+	var fit: Array = c["crisisQuests"].filter(func(q):
+		var t: Dictionary = Data.quests["types"][q["type"]]
+		return open_ids.has(q["zone"]) and (not t.has("requires") or progress["done"].has(String(t["requires"]))))
+	if fit.is_empty():
+		return {}
+	var cq: Dictionary = fit[rng.randi() % fit.size()]
+	var t: Dictionary = Data.quests["types"][cq["type"]]
+	var z: Dictionary = Data.zone(cq["zone"])
+	var named: Array = z["beasts"].get("named", [])
+	var p := { "id": "crisis:%d" % day, "day": day, "type": cq["type"], "zone": z["id"], "colour": z["colour"], "poster": "The Compact's crisis board",
+		"pay": int(t["pay"].get(z["colour"], 1)) + 1, "entry": "%s/%s" % [z["id"], z["areas"][0]["id"]], "post": "", "elite": "",
+		"named": named[rng.randi() % named.size()] if not named.is_empty() else {}, "crisis_ledger": cq["ledger"] }
+	for a in z["areas"]:
+		if a.has("post") and p["post"] == "":
+			p["post"] = "%s/%s" % [z["id"], a["id"]]
+		if a.get("beast", "") == "elite" and p["elite"] == "":
+			p["elite"] = "%s/%s" % [z["id"], a["id"]]
+	p["title"] = fill_quest(cq["title"], p)
+	p["posting"] = fill_quest(cq["posting"], p)
+	return p
+
+## What the board says of the Ledgers.
+func ledgers_text() -> String:
+	var c := crisis()
+	if c.is_empty():
+		return ""
+	var phase := crisis_phase()
+	var parts: Array = []
+	var L := ledgers()
+	for k in L:
+		parts.append("%s %d" % [c["ledgers"][k]["name"], int(L[k])])
+	var notice := String(c["notices"].get(phase, ""))
+	if phase == "omen":
+		return notice
+	return "%s  [i]%s[/i]" % [notice, "  ·  ".join(parts)]
+
+## The Reckoning: the heaviest Ledger with a quarter of the weight, else the default; written
+## onto the character as the world the server will know.
+func reckoning() -> Dictionary:
+	var c := crisis()
+	if c.is_empty():
+		return {}
+	if progress.has("reckoning"):
+		return c["endings"][progress["reckoning"]]
+	var L := ledgers()
+	var total := 0
+	var best := ""
+	var best_w := -1
+	for k in L:
+		total += int(L[k])
+		if int(L[k]) > best_w:
+			best_w = int(L[k])
+			best = k
+	var key: String = c["default"]
+	if total > 0 and best_w * 4 >= total and best_w > 0:
+		key = best
+	progress["reckoning"] = key
+	var e: Dictionary = c["endings"][key]
+	var world_state: Dictionary = e["world"].duplicate()
+	world_state["crisis"] = c["id"]
+	world_state["ending"] = key
+	world_state["chronicle"] = e["chronicle"]
+	world_state["ledgers"] = L
+	hero["world"] = world_state
+	save()
+	return e
 
 # --- The hearth's shade ---------------------------------------------------------------
 

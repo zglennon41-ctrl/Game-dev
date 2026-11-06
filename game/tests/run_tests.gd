@@ -50,6 +50,7 @@ func _run() -> void:
 	test_zones()
 	test_quests()
 	test_cohort_ai()
+	test_cohort_days_and_crisis()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -1187,3 +1188,62 @@ func test_cohort_ai() -> void:
 	check(r.allies[0]["ranged"] and float(r.allies[0]["reach"]) > 5.0, "a classmate with a pistol fights at range")
 	var rev := types(run_for(r, 30.0))
 	check(rev.has("ally-shot"), "they shoot")
+
+## The cohort's days (where each classmate is, who is out, who is in the infirmary) and the
+## term's crisis: phases, Ledgers weighed by quests and decisions, the Reckoning's ending.
+func test_cohort_days_and_crisis() -> void:
+	var h := Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
+	var a := Academy.new()
+	a.hero = h
+	a.cohort = Academy.make_cohort(42, h)
+	a.progress = { "seed": 42, "arrived": true, "done": ["hold", "rite", "shape", "discipline"], "met": [], "day": 5, "rested_after": "discipline", "place": "quad",
+		"record": { "parries": 0, "blocks": 0, "hurts": 0, "dodges": 0, "talks": 0 } }
+	# Days.
+	var places := {}
+	for c in a.cohort:
+		var st: Dictionary = a.classmate_status(c, 5)
+		check(st["away"] == "" and st["place"] in ["quad", "yard", "hearth"], "%s is somewhere today" % c["name"])
+		places[st["place"]] = true
+	check(places.size() >= 2, "the cohort is spread over the Academy")
+	check(a.away_today(5).is_empty(), "nobody runs the line before Lesson 5")
+	a.progress["done"].append("line")
+	var away: Array = a.away_today(6)
+	check(away.size() == 2 and str(away) == str(a.away_today(6)) and str(away) != str(a.away_today(7)), "two classmates are out on a run of their own each day, by the seed")
+	a.progress["infirmary"] = { a.cohort[0]["id"]: 7 }
+	check(a.classmate_status(a.cohort[0], 6)["away"] == "infirmary" and a.classmate_status(a.cohort[0], 8)["away"] != "infirmary", "the infirmary holds a classmate until their day")
+	check(a.party_unavailable(a.cohort[0]["id"], 6), "a classmate in the infirmary cannot come")
+	# A posting with a partner, now and then.
+	var with_any := false
+	for d in range(6, 30):
+		for p in a.postings_for_day(d):
+			if p.has("with"):
+				with_any = true
+				check(not a.party_unavailable(p["with"], d), "the partner is someone who is here")
+	check(with_any, "some postings come with a classmate who took them")
+	# The crisis.
+	check(a.crisis()["id"] == "dark-mile" and a.crisis_phase() == "pressure", "Lesson 5 opens the crisis's Pressure")
+	var crisis_posts := 0
+	for d in range(6, 20):
+		for p in a.postings_for_day(d):
+			if p.has("crisis_ledger"):
+				crisis_posts += 1
+				check(p["id"].begins_with("crisis:") and int(p["pay"]) >= 2, "a crisis posting pays more")
+	check(crisis_posts >= 4, "the crisis posts while its Ledgers are open (%d)" % crisis_posts)
+	a.weigh_ledgers({ "type": "linework", "colour": "green" })
+	a.weigh_ledgers({ "type": "writ", "colour": "amber" })
+	a.weigh_ledgers({ "type": "hunt", "colour": "green", "crisis_ledger": "abandoned" })
+	var L := a.ledgers()
+	check(L["relit"] == 1 and L["carroll"] == 3 and L["abandoned"] == 3, "quests weigh the Ledgers their types serve, by colour, the crisis's threefold (%s)" % str(L))
+	a.weigh_decision("writ:house")
+	check(a.ledgers()["carroll"] == 5, "a Writ's decision weighs its house's Ledger")
+	var e := a.reckoning()
+	check(e["title"] == "The mile is Carroll's" and h["world"]["ending"] == "carroll" and h["world"]["cahokia_line"] == "tolled", "the Reckoning reads the heaviest Ledger and writes the world")
+	check(a.crisis_phase() == "reckoning" and a.reckoning()["title"] == e["title"], "the Reckoning is read once")
+	# Nothing weighed: the default ending.
+	var b := Academy.new()
+	b.hero = Creation.generate([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "", 4)
+	b.cohort = Academy.make_cohort(7, b.hero)
+	b.progress = { "seed": 7, "done": ["hold", "rite", "shape", "discipline", "line", "project"], "met": [], "day": 9, "place": "quad", "record": { "talks": 0 } }
+	check(b.crisis_phase() == "crisis" and b.reckoning()["title"] == "The mile is given up", "with nothing weighed the default ending holds")
+	a.free()
+	b.free()

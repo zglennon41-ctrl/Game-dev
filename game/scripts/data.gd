@@ -26,6 +26,7 @@ var discipline_kits: Dictionary
 var _archetypes: Array
 var _zones: Array
 var quests: Dictionary
+var _crises: Array
 
 func _init() -> void:
 	rules = _load("res://data/rules.json")
@@ -53,6 +54,7 @@ func _init() -> void:
 	_archetypes = _load("res://data/archetypes.json")
 	_zones = _load("res://data/zones.json")
 	quests = _load("res://data/quests.json")
+	_crises = _load("res://data/crises.json")
 
 func rules_reading() -> Dictionary: return _reading
 func forms() -> Array: return _forms
@@ -66,6 +68,7 @@ func genius_bodies() -> Dictionary: return _bodies
 func archetypes() -> Array: return _archetypes
 func zones() -> Array: return _zones
 func zone(id: String) -> Dictionary: return by_id(_zones, id)
+func crises() -> Array: return _crises
 
 func _load(path: String) -> Variant:
 	var f := FileAccess.open(path, FileAccess.READ)

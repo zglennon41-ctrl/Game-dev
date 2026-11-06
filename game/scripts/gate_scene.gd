@@ -64,7 +64,16 @@ func _take(i: int) -> void:
 	var line := String(cfg["lines"][key]).replace("{genius_name}", g.name).replace("{form}", String(c["name"]).to_lower()).replace("{was}", old_name.to_lower())
 	ac.say(cfg["instructor"], [line], func():
 		ac.hide_card()
-		_writeup())
+		_reckoning())
+
+## The Ledgers are read at the lamp hour: the crisis ends one way, and the world is written.
+func _reckoning() -> void:
+	var e: Dictionary = ac.reckoning()
+	if e.is_empty():
+		_writeup()
+		return
+	ac.title_card(String(e["title"]).to_upper(), "the Reckoning", Color(0.85, 0.75, 0.5))
+	ac.say(cfg["instructor"], ["The Ledgers were read at the lamp hour, while you were on the platform.", "[i]%s[/i]" % e["text"]], _writeup)
 
 ## The cohort's write-up: what the term saw, from the record.
 func _writeup() -> void:
