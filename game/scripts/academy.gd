@@ -761,6 +761,8 @@ func _start_lesson(lesson0: Dictionary) -> void:
 			if counts.has(st["title"]):
 				st["goal"]["count"] = counts[st["title"]]
 	_lesson = lesson
+	# A run of the line starts with every door of the Green shut again.
+	progress["cleared"] = {}
 	# The Discipline lesson hands over the school's three techniques to learn.
 	if lesson["id"] == "discipline":
 		var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})

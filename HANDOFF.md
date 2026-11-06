@@ -333,12 +333,15 @@ are the tests. The simulator is how the owner tunes the Reading without playing 
 
 ## 8. Not in the slice
 
-Blood tiers beyond one kindred; the other five Shapes (data exists, not playable);
-Disciplines beyond Marshal; Amber/Red/Black lines; the Academy (the slice starts at the
-Gate); guild founding, Charters, Atmosphere, Standing; the calendar, crises, Ledgers,
-Chronicle; houses, Favor, Writs; economy, gear tiers, the Smith; secondary forms, grafts,
-Focus (data exists; one adaptation only); shades; Rallies and PvP; airship routes;
-cosmetics; any art pipeline.
+Built so far: the rules and simulator, the combat room, the creator and the opening, the whole
+Academy (six lessons, the rite, the Field Examination, the Gate, Commencement), the genius
+system (Reading, Resonance, orders, adaptations, grafts, secondary forms, shadows) and the
+art pipeline with First Form blockouts. Not yet: Amber/Red/Black lines; Disciplines beyond
+the three launch cities; guild founding, Charters, Atmosphere, Standing; the calendar,
+crises, Ledgers, Chronicle; houses, Favor, Writs; economy, gear tiers, the Smith; secondary
+forms, grafts and shadows in play (the rules exist, nothing yet earns them); shades; Rallies
+and PvP; airship routes; cosmetics; the server's mastery progression and the deaths that
+end a life; finished art (the blockouts are placeholders in the right shape).
 
 ---
 
