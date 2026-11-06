@@ -1526,7 +1526,7 @@ func _separate() -> void:
 		var fo: Foe = foes[i]
 		if not fo.alive():
 			continue
-		var mf := float(room["player"]["radius"]) + float(fo.beast["radius"]) + 0.6
+		var mf := float(room["player"]["radius"]) + float(fo.beast["radius"]) + 0.3
 		var df := fo.pos.distance_to(p_pos)
 		if df < mf:
 			fo.pos = _clamp_in(p_pos + Vector2.from_angle(_angle_to(p_pos, fo.pos) if df > 1e-6 else float(i)) * mf)
@@ -1547,7 +1547,7 @@ func _separate() -> void:
 				fo.pos = _clamp_in(w_pos + (fo.pos - w_pos) / dw * mw)
 	if w_state in ["absent", "down"]:
 		return
-	var m := float(room["player"]["radius"]) + float(beast["radius"]) + 0.6
+	var m := float(room["player"]["radius"]) + float(beast["radius"]) + 0.3
 	var d := dist()
 	if d >= m:
 		return
