@@ -97,6 +97,7 @@ var allies: Array = []       # the party: classmates fighting beside the hero (s
 var w_target := -1           # whom the foe is after: -1 the hero, else an ally's index
 var extra_techs: Array = []  # the Discipline's techniques (keys 1, 2, 3), once learned
 var p_tech_active: Dictionary = {}
+var w_pattern_used := false   # a classmate's Pattern, fired once a bout
 var w_mark_until := -9.0
 var w_mark_factor := 1.0
 var genius: Genius = null   # the hero's genius, if the rite has given it a body
@@ -254,6 +255,10 @@ func _record(evs: Array) -> void:
 			"pattern-start":
 				genius.pattern_fired()
 				genius.used_family(String(pattern["form"]))
+			"foe-pattern":
+				var made := genius.witness({ "name": e["name"], "form": e["form"], "terms": e["terms"] })
+				if not made.is_empty():
+					_emit({ "type": "shadow-made", "name": e["name"] })
 			"genius-guard": genius.gave_order("guard")
 			"genius-hunt": genius.gave_order("hunt")
 
@@ -277,6 +282,15 @@ static func student_beast(c: Dictionary, scale := 1.0) -> Dictionary:
 	for a in Data.discipline_kits.get(disc, {}).get("studentAttacks", []):
 		b["attacks"].append(a.duplicate(true))
 	b["title"] = c.get("title", "of the cohort")
+	# Their Pattern: their Shape's first Form, one Trigger (data/academy.json, cohort.patterns).
+	if b.has("pattern") and c.has("shape") and Data.kits.has(c["shape"]):
+		var forms: Dictionary = Data.kits[c["shape"]]["forms"]
+		var fid: String = forms.keys()[0]
+		b["pattern"]["id"] = "pattern"
+		b["pattern"]["name"] = forms[fid]["name"]
+		b["pattern"]["form"] = fid
+		b["pattern"]["terms"] = [Data.academy.get("cohort", {}).get("patterns", {}).get("trigger", "below-half")]
+		b["pattern"]["weight"] = 0
 	return b
 
 ## The Anchor the room started with, for the tests and the practice yard.
@@ -947,6 +961,7 @@ func _spawn_wolf() -> void:
 	w_slow_until = -9.0
 	w_mark_until = -9.0
 	w_pattern_hits = 0
+	w_pattern_used = false
 	p_struck_this_foe = false
 	_wolf_prowl()
 
@@ -1010,6 +1025,14 @@ func _update_wolf(dt: float) -> void:
 				_wolf_step_toward(p_pos, float(b["walkSpeed"]) * dt)
 			w_facing = lerp_angle(w_facing, _angle_to(w_pos, p_pos), 1.0 - exp(-8.0 * dt))
 		"prowl":
+			# A classmate below half health fires their Pattern, once: a heavier blow, witnessed.
+			if b.has("pattern") and not w_pattern_used and w_hp <= float(b["health"]) * 0.5:
+				w_pattern_used = true
+				w_target = -1
+				w_attack = b["pattern"]
+				_wolf_set("approach", 6.0)
+				_emit({ "type": "foe-pattern", "name": b["pattern"]["name"], "form": b["pattern"]["form"], "terms": b["pattern"]["terms"] })
+				return
 			# Circle the Anchor at a distance, then commit.
 			w_angle += w_dir * float(b["walkSpeed"]) / float(b["circleRadius"]) * dt
 			var target := p_pos + Vector2.from_angle(w_angle) * float(b["circleRadius"])

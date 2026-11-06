@@ -132,7 +132,14 @@
             7
           ]
         }
-      ]
+      ],
+      "board": {
+        "at": [
+          9,
+          -8
+        ],
+        "label": "the board"
+      }
     },
     "yard": {
       "name": "The Yard",
@@ -758,7 +765,11 @@
           "after:project": "THE FIELD GOES PAST THE SKIN. Did you know? I didn't know. Everything is different now."
         }
       }
-    ]
+    ],
+    "patterns": {
+      "$comment": "Every classmate has a Pattern of their Shape's first Form with one Trigger; in a bout they fire it once below half health, and your genius witnesses it.",
+      "trigger": "below-half"
+    }
   },
   "lessons": [
     {
@@ -1012,7 +1023,7 @@
         },
         {
           "title": "The Instructor's test",
-          "text": "Now me. Everything you have: strike, guard, dodge, your Shape's technique ([b]Q[/b]), the school's three ([b]1[/b] [b]2[/b] [b]3[/b]), your stance, your Pattern, your genius. The wards are up. Put me down once.",
+          "text": "This is the school's rite, as the Archive calls it: {discipline_rite}. For a first-year it is me. Everything you have: strike, guard, dodge, your Shape's technique ([b]Q[/b]), the school's three ([b]1[/b] [b]2[/b] [b]3[/b]), your stance, your Pattern, your genius. The wards are up. Put me down once.",
           "setup": {
             "spar": "instructor"
           },
@@ -1419,6 +1430,22 @@
           true
         ],
         "text": "Passed the Field Examination with the field open, first time of asking."
+      },
+      {
+        "test": [
+          "troubles",
+          ">=",
+          2
+        ],
+        "text": "Took on classmates' troubles from the board when the term gave no credit for it. The cohort noticed."
+      },
+      {
+        "test": [
+          "troubles",
+          "==",
+          0
+        ],
+        "text": "Never read the board. Head down, straight through the term."
       }
     ],
     "closing": "Would found a guild with them. Signed, the Hundred-and-Fourth Cohort."
@@ -1468,5 +1495,234 @@
     "run": 1,
     "exam": 2,
     "quest": 1
+  },
+  "board": {
+    "$comment": "The board in the quad: classmates' troubles, posted as the server's quests are posted. Each run draws `count` troubles for different classmates, by temperament; each is a miniature of a quest type the hall's board will carry (salvage, escort, hunt, rally). Open from `opensAfter`. {my_name} is the poster; {other} another classmate the trouble names.",
+    "opensAfter": "shape",
+    "count": 3,
+    "byTemperament": {
+      "scared": "escort",
+      "kind": "salvage",
+      "earnest": "salvage",
+      "quiet": "escort",
+      "wry": "hunt",
+      "sharp": "hunt",
+      "reckless": "rally",
+      "proud": "rally"
+    },
+    "kinds": {
+      "salvage": {
+        "title": "A lost thing",
+        "posting": "{my_name}: lost a thing in the yard. A keepsake. Would anyone look? I would, but I'm not allowed back in the yard this week.",
+        "place": "yard",
+        "steps": [
+          {
+            "title": "The yard",
+            "place": "yard",
+            "text": "Somewhere in the yard is {my_name}'s keepsake. Find it ([b]E[/b] to pick it up).",
+            "goal": {
+              "type": "find",
+              "item": "{my_name}'s keepsake"
+            }
+          },
+          {
+            "title": "Bring it back",
+            "place": "quad",
+            "text": "Bring it to {my_name} in the quad.",
+            "goal": {
+              "type": "talk"
+            }
+          }
+        ],
+        "thanks": "You found it. I didn't think anyone would look. It was my mother's; it's nothing to anyone else.",
+        "writeup": "Went looking for a classmate's keepsake in the yard and found it. Kept it quiet."
+      },
+      "escort": {
+        "title": "Company after dark",
+        "posting": "{my_name}: the Hearth Hall at night. I have to go and I would rather not go alone. Would somebody walk with me?",
+        "place": "quad",
+        "steps": [
+          {
+            "title": "Walk with them",
+            "text": "{my_name} is beside you. Walk them to the Hearth Hall (the north door of the quad).",
+            "goal": {
+              "type": "reach",
+              "place": "hearth"
+            },
+            "companion": true
+          },
+          {
+            "title": "At the hearth",
+            "place": "hearth",
+            "text": "{my_name} wanted to stand by the bowl a while. Stay with them ([b]E[/b] when they are ready).",
+            "goal": {
+              "type": "talk"
+            }
+          }
+        ],
+        "thanks": "Thank you. I had to see it again, in the dark, when nobody was watching. I'm less afraid of it now.",
+        "writeup": "Walked a frightened classmate to the hearth at night and did not make anything of it."
+      },
+      "hunt": {
+        "title": "Loose in the yard",
+        "posting": "{my_name}: a yard-wolf is off its chain. Bask says leave it; Bask is not the one who has to cross the yard. Someone fell it.",
+        "place": "yard",
+        "steps": [
+          {
+            "title": "The loose wolf",
+            "place": "yard",
+            "text": "It is somewhere in the yard, and the wards are up. Fell it.",
+            "goal": {
+              "type": "hunt",
+              "beast": "cut-wolf",
+              "scale": 0.6
+            }
+          },
+          {
+            "title": "Tell them",
+            "place": "quad",
+            "text": "Tell {my_name} the yard is safe.",
+            "goal": {
+              "type": "talk"
+            }
+          }
+        ],
+        "thanks": "Felled it? Good. Bask says you are not to be encouraged. I am encouraging you.",
+        "writeup": "Felled the loose yard-wolf when nobody else would. Bask pretended not to see."
+      },
+      "rally": {
+        "title": "A rematch",
+        "posting": "{my_name}: a rematch. The ladder was luck. Meet me in the yard and we settle it in front of whoever is watching.",
+        "place": "yard",
+        "steps": [
+          {
+            "title": "The rematch",
+            "place": "yard",
+            "text": "{my_name} is waiting in the ring. One bout.",
+            "goal": {
+              "type": "spar",
+              "count": 1
+            },
+            "setup": {
+              "spar": "poster"
+            }
+          },
+          {
+            "title": "Afterwards",
+            "place": "yard",
+            "text": "Say something to {my_name}.",
+            "goal": {
+              "type": "talk"
+            }
+          }
+        ],
+        "thanks": "Fine. Fine. It wasn't luck. Next week, though.",
+        "writeup": "Took a rematch when asked, and won it without rubbing it in. Mostly."
+      }
+    },
+    "lost": "They lost it again, in a way: they talked about it for a week.",
+    "taken": "Taken. {my_name} will know you're on it."
+  },
+  "shade": {
+    "$comment": "The Academy hearth keeps a shade (one of data/shades.json, drawn by the run's seed): a dead character's genius in its final form. It speaks to students, fires its old partner's Pattern for the hall so a student's genius may witness it (ten witnessed uses make a shadow, from the Second Form), and after `acceptVisits` visits accepts the student and offers its graft for the Gate Reading. Silhouettes draw it by Expression.",
+    "place": "hearth",
+    "at": [
+      -2.6,
+      -3.4
+    ],
+    "acceptVisits": 3,
+    "usesPerVisit": 4,
+    "silhouette": {
+      "engine": "engine-sentinel",
+      "relic": "relic-blade",
+      "kith": "kith-elder",
+      "beast": "beast-grazer",
+      "daemon": "daemon-tall",
+      "aspect": "aspect-shadow"
+    },
+    "visits": [
+      [
+        "I was somebody's. That is what a shade is: a genius that outlived its partner and would not go. They keep me here for the first-years, so you can see what a long road ends in.",
+        "Watch. This was {pattern_name}; my partner swore it. I fire it for the hall now, so the young geniuses can learn it. Yours is watching. Good."
+      ],
+      [
+        "You came back. Most come once, to say they have seen a shade. The hearth hears who comes twice.",
+        "Again, then: {pattern_name}. Your genius takes a little of it each time. Ten times, and it carries a shadow of it, as I carry everything my partner did."
+      ],
+      [
+        "Three times. That is a cohort-mate's share of patience, and you are not my cohort. So I will treat you as one.",
+        "Take this with you to the Gate: a piece of what I am. If your genius will carry it, it will carry it forever. {pattern_name}, once more, for the hall."
+      ],
+      [
+        "There is nothing more I can give you. Come and sit, if you like; the dead are good at sitting."
+      ]
+    ],
+    "accepted": "The shade accepts you. Its graft waits for the Gate.",
+    "witness": "{genius_name} witnesses {pattern_name}: {n} of {need}.",
+    "shadow": "{genius_name} carries a shadow of {pattern_name}."
+  },
+  "calendar": {
+    "$comment": "The term is dated: the season and the weekday (the server's week: Monday rumours, Wednesday the Compact, Friday the Rally, Saturday market, Sunday the hearth). Day 1 is a Monday of the Thaw.",
+    "season": "the Thaw",
+    "weekdays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "notes": {
+      "Monday": "rumours come in with the morning train",
+      "Wednesday": "the Compact posts its notices",
+      "Friday": "Rally night in the cities",
+      "Saturday": "market day",
+      "Sunday": "the hearth speaks"
+    }
+  },
+  "rumours": {
+    "$comment": "The season's Omen, as the cohort hears it: a rumour a day from whoever you talk to, in the order below (one each). They name a place, a house and a person at risk, which is what the crisis will be about on the server.",
+    "lines": [
+      "Heard it from the Monday train: the Cahokia line is running slow past the Shenandoah ruin. Nobody says why. Pilots say the water is wrong.",
+      "A Compact notice went up in the quad: the junction at Harper's Cut wants relighting, and the guild that held it is not answering.",
+      "House Carroll has a Writ out for a man called Enoch Vane. Nobody knows what he did. Everybody knows his face now.",
+      "Third night running, the lamps along the Green went out together and came back. Varga says a field did it. A big one.",
+      "They say the Marshal who held the Cut, the shade in our hearth, held it against something that is awake again. The old ones won't say what."
+    ]
+  },
+  "commencement": {
+    "$comment": "At Commencement a graduate declares: join a guild that recruits (named, with a Charter), promise a founding with classmates (a Company needs three on the line), or leave free. Recorded on the character for the server.",
+    "guilds": [
+      {
+        "id": "lamplighters-company",
+        "name": "The Lamplighters' Company",
+        "charter": "Captaincy",
+        "hall": "Harper's Cut",
+        "line": "Captain Odile Ferrant: “We hold a junction and we keep it lit. Captaincy: one voice, mine, and I am fair. We take the Examination's best.”"
+      },
+      {
+        "id": "banneker-commons",
+        "name": "Banneker Commons",
+        "charter": "Commons",
+        "hall": "the Alexandria city hall, for now",
+        "line": "Delegate Arno Teague: “Every member a vote. Slow, loud, honest. We have never refused a house Writ we didn't want to refuse.”"
+      },
+      {
+        "id": "the-ninth-car",
+        "name": "The Ninth Car",
+        "charter": "Council",
+        "hall": "a junction on the Cahokia line",
+        "line": "Pilot-Master Ife Oyelaran: “Five of us decide, and we decide fast, because the river does. We want Pilots and anyone who can hold a post.”"
+      }
+    ],
+    "lines": {
+      "intro": "The recruiters have read the cohort's write-up. Three stand on the platform. Two of your own cohort stand a little apart, and they are looking at you.",
+      "found": "{a} and {b}: “Found with us. Three of us, one Pattern sworn the same way, and the Archive gives us a Writ. We'd follow you to a junction.”",
+      "free": "Leave as a Free Lance: the city boards, no hearth, no Rally, and nobody's name on you but your own.",
+      "declared_join": "You give {guild} your name. {charter}. The recruiter writes it on a slate, and that is a guild.",
+      "declared_found": "You give {a} and {b} your word. When the three of you stand on the line together, the Archive will hear of a founding.",
+      "declared_free": "You give nobody your name. The platform clears round you, and the line is all yours."
+    }
   }
 }

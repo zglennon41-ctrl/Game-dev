@@ -83,8 +83,11 @@ func _writeup() -> void:
 			"==": ok = (v == want) or (float(v) == 1.0 if want is bool and want else false)
 		if ok:
 			lines.append(w["text"])
-	if lines.size() > 5:
-		lines = lines.slice(0, 5)
+	# What the cohort saw you do for them goes in first.
+	for extra in ac.progress.get("writeup_extra", []):
+		lines.push_front(extra)
+	if lines.size() > 6:
+		lines = lines.slice(0, 6)
 	ac.progress["writeup"] = lines
 	ac.say(cfg["instructor"], [cfg["lines"]["writeup_intro"]], func():
 		ac.say("", ["[i]%s[/i]" % "  ".join(lines), "[i]%s[/i]" % cfg["closing"]], _commencement))
@@ -92,4 +95,4 @@ func _writeup() -> void:
 func _commencement() -> void:
 	var lines: Array = cfg["lines"]["commencement"].map(func(l): return ac.fill(String(l)))
 	world.cine = false
-	ac.say(cfg["instructor"], lines, func(): done.emit())
+	ac.say(cfg["instructor"], lines, func(): ac.declare(func(): done.emit()))

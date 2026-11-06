@@ -67,7 +67,8 @@
     "knockback": 0.3,
     "anim": "1H_Ranged_Shoot"
    }
-  ]
+  ],
+  "rite": "Serve a Writ"
  },
  "pilot": {
   "name": "Pilot",
@@ -135,7 +136,8 @@
     "knockback": 0.8,
     "anim": "2H_Melee_Attack_Stab"
    }
-  ]
+  ],
+  "rite": "A river crossing"
  },
  "aeronaut": {
   "name": "Aeronaut",
@@ -206,6 +208,7 @@
     "knockback": 0.6,
     "anim": "1H_Melee_Attack_Slice_Diagonal"
    }
-  ]
+  ],
+  "rite": "A dock drop"
  }
 }

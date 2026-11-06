@@ -933,6 +933,13 @@ func feedback(f: Fight, events: Array) -> void:
 				floater(P + Vector3(0, 0.6, 0), "THE FIELD OPENS", _shape_color(f.player_shape), 80, 2.0, 0.4)
 				flash_screen(_shape_color(f.player_shape), 0.5)
 				genius_react("stance")
+			"foe-pattern":
+				floater(W + Vector3(0, 1.1, 0), String(e["name"]).to_upper(), C_GOLD, 64, 1.6)
+				_ring_wave(_v3(f.w_pos), C_GOLD, 3.0)
+				genius_react("cue")
+			"shadow-made":
+				floater(P + Vector3(0, 0.8, 0), "A SHADOW: %s" % String(e["name"]).to_upper(), _g_tint.lightened(0.3), 56, 2.0)
+				genius_react("parry")
 			"marked":
 				floater(W + Vector3(0, 0.9, 0), "UNDER WARRANT", C_GOLD, 56, 1.4)
 				_ring_wave(_v3(f.w_pos), C_GOLD, 2.0)
@@ -1669,6 +1676,22 @@ func _build_academy_place(spec: Dictionary) -> void:
 		k += 1
 	for d in doors:
 		_door_marker(Vector3(float(d["at"][0]), 0, float(d["at"][1])), String(d["label"]), d.has("locked") and not open_doors.has(d["to"]))
+	if spec.has("board"):
+		var ba := Vector3(float(spec["board"]["at"][0]), 0, float(spec["board"]["at"][1]))
+		_piece("crates_stacked", ba, 20.0, 0.5)
+		_piece("banner_patternA_red", ba + Vector3(0, 0.6, -0.6), 0.0)
+		obstacles.append(Vector3(ba.x, ba.z, 0.8))
+		var l := Label3D.new()
+		l.text = "THE BOARD"
+		l.font = Style.font("title")
+		l.font_size = 26
+		l.pixel_size = 0.006
+		l.modulate = Color(1.0, 0.85, 0.6)
+		l.outline_size = 8
+		l.outline_modulate = Color(0, 0, 0, 0.8)
+		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		l.position = ba + Vector3(0, 2.6, 0)
+		_place_root.add_child(l)
 	if spec.get("rails", false):
 		_rails(arena.x / 2.0 + 1.0)
 	match String(spec["name"]):
@@ -1958,6 +1981,35 @@ func _ally_event(f: Fight, e: Dictionary) -> void:
 			a["cur"] = ""
 			_ring_wave(_v3(f.allies[i]["pos"]), Color(0.6, 0.8, 1.0), 2.0)
 			floater(at + Vector3(0, 0.8, 0), "%s STANDS" % String(f.allies[i]["name"]).to_upper(), Color(0.6, 0.8, 1.0), 48, 1.4)
+
+## A thing to find, lying in the place: a small keepsake with a glow round it. null hides it.
+var _marker: Node3D = null
+func set_marker(at: Variant) -> void:
+	if _marker:
+		_marker.queue_free()
+		_marker = null
+	if at == null:
+		return
+	_marker = Node3D.new()
+	var m := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = Vector3(0.18, 0.12, 0.14)
+	m.mesh = bm
+	m.material_override = _mat(Color(0.75, 0.6, 0.35), 0.6)
+	m.position = Vector3(0, 0.1, 0)
+	_marker.add_child(m)
+	var halo := MeshInstance3D.new()
+	var q := QuadMesh.new()
+	q.size = Vector2(1.2, 1.2)
+	halo.mesh = q
+	var gm := _shader_mat(GLOW)
+	gm.set_shader_parameter("tint", Color(1.0, 0.85, 0.5))
+	gm.set_shader_parameter("strength", 0.9)
+	halo.material_override = gm
+	halo.position = Vector3(0, 0.35, 0)
+	_marker.add_child(halo)
+	_marker.position = _v3(at, 0.0)
+	add_child(_marker)
 
 ## Someone standing in the place: a body, a weapon, their name and what they are over the head.
 func add_figure(body: String, at: Vector2, facing: float, title: String, sub: String, weapon := "", tint := Color(0, 0, 0, 0)) -> Dictionary:

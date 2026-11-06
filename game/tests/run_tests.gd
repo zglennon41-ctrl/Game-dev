@@ -42,6 +42,9 @@ func _run() -> void:
 	test_project_and_gate()
 	test_advanced_standing()
 	test_marks()
+	test_board()
+	test_shade_and_witness()
+	test_calendar_and_declaration()
 	test_shape_kits()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
@@ -888,3 +891,67 @@ func test_marks() -> void:
 			check(not Marks.archetype_for(s, d).is_empty(), "a %s %s has an archetype" % [s, d])
 	check(Marks.archetype_for("cast", "marshal")["name"] == "Deadeye", "a Cast Marshal is a Deadeye")
 	check(Marks.academy("lesson") == 1 and Marks.academy("exam") == 2, "the Academy pays Marks for lessons and the Examination")
+
+## The board: three troubles a run, each a different kind, posted by different classmates,
+## and every kind's steps are goals the Academy knows.
+func test_board() -> void:
+	var h := Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
+	var cohort := Academy.make_cohort(42, h)
+	var a := Academy.make_troubles(42, cohort)
+	check(a.size() == 3, "three troubles a run (%d)" % a.size())
+	var kinds := {}
+	var posters := {}
+	for t in a:
+		kinds[t["kind"]] = true
+		posters[t["poster"]] = true
+	check(kinds.size() == 3 and posters.size() == 3, "each a different kind, from a different classmate")
+	check(str(a) == str(Academy.make_troubles(42, cohort)) and str(a) != str(Academy.make_troubles(43, cohort)), "the run's seed decides them")
+	var b: Dictionary = Data.academy["board"]
+	for k in b["kinds"]:
+		for st in b["kinds"][k]["steps"]:
+			check(st["goal"]["type"] in ["find", "talk", "reach", "hunt", "spar"], "trouble %s: step %s has a goal the Academy knows" % [k, st["title"]])
+		check(b["kinds"][k].has("thanks") and b["kinds"][k].has("writeup"), "trouble %s thanks you and goes in the write-up" % k)
+	check(Data.academy["places"]["quad"].has("board"), "the quad has a board")
+
+## The hearth's shade and witnessing: classmates fire a Pattern once a bout that the genius
+## witnesses; the shade's visits add up to a shadow and a graft for the Gate.
+func test_shade_and_witness() -> void:
+	var h := Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
+	var c: Dictionary = Academy.make_cohort(42, h)[0]
+	var sb := Fight.student_beast(c)
+	check(sb.has("pattern") and sb["pattern"]["form"] in Data.kits[c["shape"]]["forms"].keys() and sb["pattern"]["terms"] == ["below-half"], "a classmate carries a Pattern of their Shape with one Trigger")
+	var g := _born_genius()
+	var f := Fight.new({ "hero": h, "foe": c, "mercy": true, "respawn": false, "genius": g, "seed": 9 })
+	f.w_hp = f.beast["health"] * 0.4
+	f._wolf_set("prowl", 0.1)
+	var evs := run_for(f, 2.0)
+	check(types(evs).has("foe-pattern") and f.w_pattern_used, "below half health a classmate fires their Pattern once")
+	var key := "%s|below-half" % sb["pattern"]["form"]
+	check(int(g.witnessed.get(key, 0)) == 1, "and the genius witnesses it")
+	# The shade: four to draw from, by seed; its visits.
+	var sh: Dictionary = Data.academy["shade"]
+	check(sh["visits"].size() >= 4 and int(sh["usesPerVisit"]) * (int(sh["acceptVisits"]) - 0) >= int(Data.rules["genius"]["shadowUses"]), "three visits to the shade witness enough for a shadow")
+	for sd in Data.shades():
+		check(sh["silhouette"].has(sd["expression"]), "the shade %s can be drawn" % sd["id"])
+	var g2 := _born_genius()
+	g2.instar = 2
+	var sd: Dictionary = Data.shades()[0]
+	var made := {}
+	for i in 12:
+		var m := g2.witness({ "name": sd["pattern"]["name"], "form": sd["pattern"]["form"], "terms": [] })
+		if not m.is_empty(): made = m
+	check(not made.is_empty() and g2.shadows.size() == 1, "a Second Form carries the shade's Pattern as a shadow after ten uses")
+	g2.offer_graft({ "id": "shade:" + sd["id"], "feature": sd["graftFeature"], "source": "shade" })
+	check(g2.pending_grafts.size() == 1, "the shade's graft waits for the next Reading")
+
+## The term is dated, the Omen is rumoured, and Commencement offers guilds, a founding, or freedom.
+func test_calendar_and_declaration() -> void:
+	var cal: Dictionary = Data.academy["calendar"]
+	check(cal["weekdays"].size() == 7 and cal["notes"].has("Friday"), "the week is the server's week")
+	check(Data.academy["rumours"]["lines"].size() >= 5, "the Omen is rumoured over the term")
+	var cm: Dictionary = Data.academy["commencement"]
+	check(cm["guilds"].size() == 3 and cm["guilds"].all(func(g): return g["charter"] in ["Captaincy", "Council", "Commons"]), "three guilds recruit, one of each Charter")
+	for k in ["intro", "found", "free", "declared_join", "declared_found", "declared_free"]:
+		check(cm["lines"].has(k), "Commencement has its %s line" % k)
+	for d in ["marshal", "pilot", "aeronaut"]:
+		check(Data.discipline_kits[d].has("rite"), "%s has its rite named" % d)

@@ -261,6 +261,30 @@ func go(place_id: String, quiet := false, from := "") -> void:
 			fight.w_pos = at + Vector2(1.6, 0.8)
 			fight.w_facing = (spawn - fight.w_pos).angle()
 			world.show_wolf = true
+	var sh: Dictionary = Data.academy.get("shade", {})
+	if place_id == sh.get("place", "") and progress["done"].has("rite"):
+		var sd := shade()
+		var sat := Vector2(sh["at"][0], sh["at"][1])
+		var body := world.make_form({ "form": "shade:" + sd["id"], "silhouette": sh["silhouette"].get(sd["expression"], "kith-elder"), "expression": sd["expression"], "features": sd["features"], "instar": 4 }, Color(0.55, 0.62, 0.75))
+		world.add_child(body)
+		body.position = world._v3(sat)
+		body.rotation.y = world._yaw((spawn - sat).angle())
+		(body as GeniusBody).set_strength(0.6)
+		_shade_node = body
+		var l := Label3D.new()
+		l.text = sd["name"].to_upper() + "\na shade of the hearth"
+		l.font = Style.font("title")
+		l.font_size = 24
+		l.fixed_size = true
+		l.pixel_size = 0.001
+		l.modulate = Color(0.75, 0.82, 0.95, 0.85)
+		l.outline_size = 8
+		l.outline_modulate = Color(0, 0, 0, 0.8)
+		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		l.no_depth_test = true
+		l.position = Vector3(0, 2.2, 0)
+		body.add_child(l)
+		_people.append({ "kind": "shade", "id": sd["id"], "name": sd["name"], "pos": sat })
 	if place_id == "quad" or spec.get("cohortHere", false):
 		var spots: Array = spec["spots"]
 		for i in mini(cohort.size(), spots.size()):
@@ -348,6 +372,8 @@ func fill(t: String, c: Dictionary = {}) -> String:
 	t = t.replace("{your_shape}", String(hero["shape"]).capitalize()).replace("{your_blood}", Data.by_id(Data.bloods, hero["blood"])["name"] if hero.get("blood", "") != "" else "unmarked")
 	var arch := Marks.archetype_for(hero["shape"], hero.get("discipline", ""))
 	t = t.replace("{archetype}", arch.get("name", "Journeyman")).replace("{marks}", str(int(progress["record"].get("marks", 0))))
+	t = t.replace("{weekday}", weekday()).replace("{season}", String(Data.academy.get("calendar", {}).get("season", "the Thaw")))
+	t = t.replace("{discipline_rite}", String(Data.discipline_kits.get(hero.get("discipline", ""), {}).get("rite", "the Instructor's test")))
 	var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
 	if not dk.is_empty():
 		t = t.replace("{discipline}", dk["name"]).replace("{discipline_school}", dk["school"])
@@ -394,13 +420,16 @@ func interact() -> void:
 			sfx.play("ui-move", 0.9, -8.0)
 			_show_line()
 		return
-	if _target.is_empty() or (in_lesson() and _target["kind"] not in ["door", "post"]) or _rite or _gate or _reading_box or _naming:
+	if _target.is_empty() or (in_lesson() and _target["kind"] not in ["door", "post", "find", "classmate", "instructor"]) or _rite or _gate or _reading_box or _naming:
 		return
 	sfx.play("ui-take", 1.0, -6.0)
 	match _target["kind"]:
 		"door": _use_door(_target["door"])
 		"rest": _rest_now()
 		"post": _take_post()
+		"board": _read_board()
+		"shade": _visit_shade()
+		"find": _pick_up()
 		"instructor": _talk_instructor(_target["id"])
 		"classmate": _talk_classmate(_target["c"])
 
@@ -426,6 +455,9 @@ func _use_door(d: Dictionary) -> void:
 func _talk_instructor(id: String) -> void:
 	var data: Dictionary = Data.by_id(Data.academy["instructors"], id)
 	progress["record"]["talks"] += 1
+	if in_lesson():
+		say(id, [data["lines"]["default"]])
+		return
 	var lines: Dictionary = data["lines"]
 	# The Instructor who teaches the next lesson starts it.
 	for lesson in Data.academy["lessons"]:
@@ -447,6 +479,13 @@ func _talk_instructor(id: String) -> void:
 func _talk_classmate(c: Dictionary) -> void:
 	var t: Dictionary = Data.by_id(Data.academy["cohort"]["temperaments"], c["temperament"])
 	progress["record"]["talks"] += 1
+	if in_lesson() and _lesson.get("trouble", false):
+		if c["id"] == _lesson["poster"]["id"] and _step_goal_type() == "talk":
+			_choice_done = true
+			say(c, [fill(_lesson["kind_spec"]["thanks"], c)])
+		else:
+			say(c, [t["lines"]["greet"]])
+		return
 	var first: bool = not progress["met"].has(c["id"])
 	if first:
 		progress["met"].append(c["id"])
@@ -456,7 +495,16 @@ func _talk_classmate(c: Dictionary) -> void:
 			if key != "" and t["lines"].has(key):
 				line = t["lines"][key]
 				break
-	say(c, [line], save)
+	var lines: Array = [line]
+	# The season's Omen, a rumour a day, from whoever you talk to first.
+	var rum: Array = Data.academy.get("rumours", {}).get("lines", [])
+	var heard := int(progress.get("rumours_heard", 0))
+	if heard < rum.size() and int(progress.get("rumour_day", 0)) != int(progress["day"]):
+		lines.append("[i]%s[/i]" % rum[heard])
+		progress["rumours_heard"] = heard + 1
+		progress["rumour_day"] = int(progress["day"])
+		progress["record"]["rumours"] = heard + 1
+	say(c, lines, save)
 
 ## Where the term has got to, for which lines people say.
 func _stage_key() -> String:
@@ -547,10 +595,19 @@ func _rest_now() -> void:
 		var tw := _fade.create_tween()
 		tw.tween_interval(0.6)
 		tw.tween_property(_fade, "modulate:a", 0.0, 1.0).set_trans(Tween.TRANS_SINE)
-		title_card("DAY %d" % int(progress["day"]), objective().trim_prefix("Day %d · " % int(progress["day"])), Style.GOLD)
+		title_card("DAY %d" % int(progress["day"]), "%s  ·  %s" % [date_line(), Data.academy.get("calendar", {}).get("notes", {}).get(weekday(), "")], Style.GOLD)
 		sfx.play("stance", 0.8, -6.0))
 
 # --- Each frame -----------------------------------------------------------------
+
+## The term's date: "Day 3, Wednesday of the Thaw".
+func weekday() -> String:
+	var cal: Dictionary = Data.academy.get("calendar", {})
+	var days: Array = cal.get("weekdays", ["Monday"])
+	return days[(int(progress["day"]) - 1) % days.size()]
+
+func date_line() -> String:
+	return "Day %d, %s of %s" % [int(progress["day"]), weekday(), String(Data.academy.get("calendar", {}).get("season", "the Thaw"))]
 
 func objective() -> String:
 	if in_lesson():
@@ -577,6 +634,8 @@ func objective() -> String:
 		if progress["place"] == nl["place"]:
 			return "Day %d · Lesson %d, %s: speak to %s." % [day, int(nl["number"]), nl["title"], ins["name"]]
 		return "Day %d · Lesson %d, %s: find %s in %s." % [day, int(nl["number"]), nl["title"], ins["name"], place["name"]]
+	if in_lesson() and _lesson.get("trouble", false):
+		return "%s's trouble · %s" % [_lesson["poster"]["name"], fill(_lesson["steps"][_step]["title"], _lesson["poster"]) if _step >= 0 and _step < _lesson["steps"].size() else ""]
 	var g: Dictionary = hero.get("genius", {})
 	if progress["done"].has("gate"):
 		return "Settled. The line is waiting; the Academy is yours to walk."
@@ -593,6 +652,8 @@ func bot_mode() -> String:
 	var g: Dictionary = _lesson["steps"][_step]["goal"]
 	match String(g["type"]):
 		"will-full", "choose-weapon", "choose-party", "travel": return "still"
+		"find", "talk", "reach": return "walk"
+		"hunt": return "fight"
 		"fell": return "fight"
 		"reach-hits": return "technique"
 		"hold": return "fight" if _holding else "walk"
@@ -689,12 +750,23 @@ func update(events: Array, dt: float) -> void:
 			var pa := Vector2(_post["at"][0], _post["at"][1])
 			if (fight.p_pos - pa).length() < minf(best, 2.6):
 				_target = { "kind": "post", "pos": pa }
+		if board_open() and not in_lesson():
+			var bspec: Dictionary = Data.academy["places"][progress["place"]].get("board", {})
+			if not bspec.is_empty():
+				var ba := Vector2(bspec["at"][0], bspec["at"][1])
+				if (fight.p_pos - ba).length() < minf(best, 2.8):
+					_target = { "kind": "board", "pos": ba }
+		if _lost_at != Vector2.INF and (fight.p_pos - _lost_at).length() < minf(best, 2.0):
+			_target = { "kind": "find", "pos": _lost_at }
 	_prompt.visible = not _target.is_empty()
 	if _prompt.visible:
 		match _target["kind"]:
 			"door": _prompt_label.text = ("E   " + ("Enter " if door_open(_target["door"]) else "Try ") + String(_target["door"]["label"]))
 			"rest": _prompt_label.text = "E   Rest in %s" % _rest["label"]
 			"post": _prompt_label.text = "E   Take %s" % _post["label"]
+			"board": _prompt_label.text = "E   Read the board"
+			"shade": _prompt_label.text = "E   Speak with the shade"
+			"find": _prompt_label.text = "E   Pick up %s" % _lost_label
 			_: _prompt_label.text = "E   Talk to %s" % _target["name"]
 
 ## Automated checks: where the autopilot walks next, and whether to act there.
@@ -704,14 +776,32 @@ func auto_move() -> Vector2:
 	var goal := Vector2.INF
 	var place: String = progress["place"]
 	if in_lesson():
-		# In a lesson, the only walking is to the post or the way out.
+		# In a lesson, the only walking is to the post, the way out, or a trouble's goal.
 		if _step >= 0 and _step < _lesson["steps"].size():
-			var gt := String(_lesson["steps"][_step]["goal"]["type"])
+			var st: Dictionary = _lesson["steps"][_step]
+			var gt := String(st["goal"]["type"])
 			if gt == "hold" and not _holding and not _post.is_empty():
 				goal = Vector2(_post["at"][0], _post["at"][1])
 			elif gt == "extract":
 				for d in _doors:
 					if d["to"] == "extraction":
+						goal = Vector2(d["at"][0], d["at"][1]) * 0.86
+			elif gt == "find" and _lost_at != Vector2.INF:
+				goal = _lost_at
+			elif gt == "talk":
+				var who: Dictionary = _lesson.get("poster", {})
+				var want_place := String(st.get("place", progress["place"]))
+				if progress["place"] != want_place:
+					for d in _doors:
+						if d["to"] == want_place:
+							goal = Vector2(d["at"][0], d["at"][1]) * 0.86
+				else:
+					for p in _people:
+						if p.get("id", "") == who.get("id", "-"):
+							goal = p["pos"]
+			elif gt == "reach":
+				for d in _doors:
+					if d["to"] == st["goal"]["place"]:
 						goal = Vector2(d["at"][0], d["at"][1]) * 0.86
 		if goal == Vector2.INF:
 			return Vector2.ZERO
@@ -728,6 +818,18 @@ func auto_move() -> Vector2:
 		_:
 			var nl := next_lesson()
 			want_place = nl["place"] if not nl.is_empty() else ""
+	if auto_troubles and board_open() and progress.get("trouble", "") == "" and troubles_open().size() > 0:
+		var bspec: Dictionary = Data.academy["places"].get("quad", {}).get("board", {})
+		if place == "quad":
+			goal = Vector2(bspec["at"][0], bspec["at"][1])
+		else:
+			for d in _doors:
+				if d["to"] == "quad":
+					goal = Vector2(d["at"][0], d["at"][1]) * 0.86
+		if (goal - fight.p_pos).length() < 2.2 and not _target.is_empty():
+			interact()
+			return Vector2.ZERO
+		return (goal - fight.p_pos).normalized() if goal != Vector2.INF else Vector2.ZERO
 	if want_place == "":
 		return Vector2.ZERO
 	if place == want_place:
@@ -830,7 +932,10 @@ func spar_order() -> Array:
 func _spar_begin() -> void:
 	var spec: Dictionary = Data.academy["places"][_lesson["place"]]
 	var scale := 1.0 + _spar_rung * float(_lesson.get("spar", {}).get("scalePerRung", 0.18))
-	if _spar_mode == "instructor":
+	if _spar_mode == "poster":
+		_spar_who = _lesson["poster"].duplicate()
+		scale = 1.1
+	elif _spar_mode == "instructor":
 		var ins: Dictionary = Data.by_id(Data.academy["instructors"], lesson_instructor(_lesson))
 		_spar_who = { "name": ins["name"], "shape": ins["shape"], "body": ins["body"], "weapon": ins.get("weapon", "saber"),
 			"blood_name": ins.get("title", "Instructor"), "city": Data.discipline_kits.get(ins.get("discipline", ""), {}).get("city", hero["city"]),
@@ -908,14 +1013,34 @@ func _next_step() -> void:
 			if fight.w_state in ["idle", "absent"]:
 				fight._wolf_set("prowl", 0.8)
 	_held = 0.0
+	if s.get("companion", false) and _lesson.get("trouble", false):
+		# The poster walks beside you.
+		fight.allies = []
+		var c: Dictionary = _lesson["poster"]
+		fight.allies.append({ "id": c["id"], "name": c["name"], "shape": c["shape"], "body": c["body"], "weapon": c["weapon"], "hp": 90.0, "hp_max": 90.0,
+			"pos": fight.p_pos + Vector2(-1.2, 1.2), "facing": 0.0, "down": false, "hit_at": 0.0, "damage": 0.0, "interval": 9.0, "moving": false })
+		world.set_allies(fight.allies)
 	if setup.get("spar", false):
-		_spar_mode = "instructor" if str(setup["spar"]) == "instructor" else "cohort"
+		_spar_mode = "poster" if str(setup["spar"]) == "poster" else ("instructor" if str(setup["spar"]) == "instructor" else "cohort")
 		_spar_rung = 0
 		_spar_wins = 0
 		_spar_begin()
 	if s.has("place") and progress["place"] != s["place"]:
 		go(s["place"], false, progress["place"])
 	match String(s["goal"]["type"]):
+		"find":
+			_choice_done = false
+			var rng := RandomNumberGenerator.new()
+			rng.seed = int(progress["seed"]) + 77
+			var a: Dictionary = Data.academy["places"][progress["place"]]
+			_lost_at = Vector2(rng.randf_range(-a["size"][0] / 2.0 + 2.0, a["size"][0] / 2.0 - 2.0), rng.randf_range(-a["size"][1] / 2.0 + 2.0, a["size"][1] / 2.0 - 2.0))
+			_lost_label = fill(String(s["goal"]["item"]), _lesson.get("poster", {}))
+			world.set_marker(_lost_at)
+		"talk", "reach":
+			_choice_done = false
+		"hunt":
+			_choice_done = false
+			_hunt_begin(String(s["goal"]["beast"]), float(s["goal"].get("scale", 1.0)))
 		"choose-party":
 			_choice_done = false
 			progress["party"] = []
@@ -994,6 +1119,14 @@ func _lesson_update(events: Array, dt: float) -> void:
 	if String(g["type"]) == "stance-seconds":
 		_held = _held + dt if fight.p_stance else 0.0
 		done = _held >= float(g["count"])
+	match String(g["type"]):
+		"find", "talk": done = _choice_done
+		"reach": done = progress["place"] == g["place"]
+		"hunt":
+			for e in events:
+				if e["type"] == "wolf-down":
+					_choice_done = true
+			done = _choice_done
 	if String(g["type"]) in ["fell", "hold", "extract", "travel", "choose-party"]:
 		for e in events:
 			var t: String = e["type"]
@@ -1054,7 +1187,7 @@ func _lesson_update(events: Array, dt: float) -> void:
 		"event", "streak", "reach-hits": done = _count >= int(g["count"])
 		"will-full": done = fight.p_will >= float(Data.rules["field"]["willMax"]) - 0.5
 		"stance-seconds": done = done or _held >= float(g["count"])
-		"choose-weapon", "fell", "hold", "extract", "travel", "choose-party": done = done or (_choice_done and String(g["type"]) in ["choose-weapon", "extract", "travel", "choose-party"])
+		"choose-weapon", "fell", "hold", "extract", "travel", "choose-party", "find", "talk", "reach", "hunt": done = done or (_choice_done and String(g["type"]) in ["choose-weapon", "extract", "travel", "choose-party", "find", "talk", "hunt"])
 	hud.set_prompt_status(_note, _progress_text(s))
 	if done:
 		sfx.play("cue-hit", 1.0)
@@ -1063,6 +1196,9 @@ func _lesson_update(events: Array, dt: float) -> void:
 
 func _finish_lesson() -> void:
 	var lesson := _lesson
+	if lesson.get("trouble", false):
+		_finish_trouble()
+		return
 	progress["done"].append(lesson["id"])
 	earn_marks("lesson", "Lesson %d, %s" % [int(lesson["number"]), lesson["title"]])
 	save()
@@ -1517,6 +1653,7 @@ func settled_sheet() -> void:
 			["School", "%s  ·  %s" % [dk["name"], Creation.weapon(hero["weapon"])["name"]]], ["Techniques", ", ".join([Data.kits[hero["shape"]]["technique"]["name"]] + techs)],
 			["Pattern", Builder.sentence(hero["pattern"])],
 			["Archetype", "%s, Journeyman  ·  %d Marks" % [Marks.archetype_for(hero["shape"], hero.get("discipline", "")).get("name", "none"), int(rec.get("marks", 0))]],
+			["Declared", declaration_text()],
 			["Genius", "%s, a %s (%s), %s" % [g.name, g.form_name(), String(g.body.get("expression", "")).capitalize(), g.instar_name()]],
 			["The term", "%d parries, %d blocks, bitten %d; %d bouts won, %d lost; %d posts held, %d runs out%s" % [int(rec.get("parries", 0)), int(rec.get("blocks", 0)), int(rec.get("hurts", 0)), int(rec.get("spars_won", 0)), int(rec.get("spars_lost", 0)), int(rec.get("posts_held", 0)), int(rec.get("runs_out", 0)), ", carried out %d" % int(rec["rescued"]) if int(rec.get("rescued", 0)) > 0 else ""]]]:
 		body += "[cell][color=#a8803f]%s[/color]   [/cell][cell]%s[/cell]" % [r[0], r[1]]
@@ -1532,3 +1669,237 @@ func settled_sheet() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if auto:
 		get_tree().create_timer(2.0).timeout.connect(func(): if hud.screen.visible: leave.emit())
+
+# --- The board: classmates' troubles ---------------------------------------------------
+
+var auto_troubles := false
+var _lost_at := Vector2.INF
+var _lost_label := ""
+
+func _step_goal_type() -> String:
+	if not in_lesson() or _step < 0 or _step >= _lesson["steps"].size():
+		return ""
+	return String(_lesson["steps"][_step]["goal"]["type"])
+
+func board_open() -> bool:
+	return progress["done"].has(String(Data.academy["board"].get("opensAfter", "shape")))
+
+## This run's troubles: `count` classmates with different troubles, drawn by the run's seed,
+## kinds by temperament (data/academy.json, "board").
+static func make_troubles(seed_value: int, cohort_in: Array) -> Array:
+	var b: Dictionary = Data.academy["board"]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value + 303
+	var order := cohort_in.duplicate()
+	_shuffle(order, rng)
+	var out: Array = []
+	var kinds_used := {}
+	for c in order:
+		var kind: String = b["byTemperament"].get(c["temperament"], "")
+		if kind == "" or kinds_used.has(kind):
+			continue
+		kinds_used[kind] = true
+		out.append({ "id": "trouble:%s" % c["id"], "kind": kind, "poster": c["id"] })
+		if out.size() >= int(b.get("count", 3)):
+			break
+	return out
+
+## The troubles still open (not done, not the one in hand).
+func troubles_open() -> Array:
+	var done: Array = progress.get("troubles_done", [])
+	return make_troubles(int(progress["seed"]), cohort).filter(func(t): return not done.has(t["id"]))
+
+func _classmate(id: String) -> Dictionary:
+	for c in cohort:
+		if c["id"] == id:
+			return c
+	return {}
+
+func _read_board() -> void:
+	var b: Dictionary = Data.academy["board"]
+	var open := troubles_open()
+	if progress.get("trouble", "") != "":
+		say("", ["You have %s's trouble in hand already." % _classmate(progress["trouble"].trim_prefix("trouble:")).get("name", "a classmate")])
+		return
+	if open.is_empty():
+		say("", ["Nothing on the board for you. The cohort's troubles are its own this week."])
+		return
+	var opts: Array = []
+	for t in open:
+		var c := _classmate(t["poster"])
+		var ks: Dictionary = b["kinds"][t["kind"]]
+		opts.append({ "id": t["id"], "label": "%s  ·  %s" % [ks["title"], c["name"]], "text": fill(ks["posting"], c) })
+	choose("The board", opts, func(id: String): _take_trouble(id))
+
+func _take_trouble(id: String) -> void:
+	var b: Dictionary = Data.academy["board"]
+	var t: Dictionary = {}
+	for x in troubles_open():
+		if x["id"] == id:
+			t = x
+	if t.is_empty():
+		return
+	var c := _classmate(t["poster"])
+	var ks: Dictionary = b["kinds"][t["kind"]]
+	progress["trouble"] = id
+	save()
+	say("", [fill(b["taken"], c)], func():
+		_lesson = { "id": id, "trouble": true, "kind": t["kind"], "kind_spec": ks, "poster": c, "number": 0, "title": ks["title"],
+			"place": progress["place"], "instructor": "varga", "steps": ks["steps"].duplicate(true), "intro": [], "outro": [] }
+		hud.play_ui.visible = true
+		hud.target.visible = false
+		_step = -1
+		_next_step())
+
+func _pick_up() -> void:
+	_choice_done = true
+	world.set_marker(null)
+	_lost_at = Vector2.INF
+	sfx.play("cue-hit", 1.3)
+	world.floater(world._v3(fight.p_pos, 2.2), "FOUND", Style.GOLD, 52, 1.2)
+
+## A beast loose in the yard, wards up: a small hunt.
+func _hunt_begin(beast: String, scale: float) -> void:
+	var spec: Dictionary = Data.academy["places"][progress["place"]]
+	var keep := fight.p_pos
+	fight = Fight.new({ "hero": hero, "beast": beast, "passive": false, "respawn": false, "mercy": true, "allow_breach": false,
+		"genius": genius if genius and genius.is_born() else null, "arena": Vector2(spec["size"][0], spec["size"][1]), "seed": randi(), "beast_health": roundf(float(Data.beast(beast)["health"]) * scale) })
+	fight.obstacles = world.obstacles
+	fight.p_pos = keep
+	fight.w_pos = fight._clamp_in(keep + Vector2(7.0, 3.0))
+	fight.p_lock = true
+	world.set_foe({})
+	world.lock_on = true
+	world.show_wolf = true
+	world.reset_feedback()
+	hud.configure(fight, hero["name"])
+	hud.target.visible = true
+	title_card("LOOSE IN THE YARD", "the wards are up", Style.EMBER)
+
+func _finish_trouble() -> void:
+	var lesson := _lesson
+	var c: Dictionary = lesson["poster"]
+	if not progress.has("troubles_done"):
+		progress["troubles_done"] = []
+	progress["troubles_done"].append(lesson["id"])
+	progress["trouble"] = ""
+	progress["record"]["troubles"] = int(progress["record"].get("troubles", 0)) + 1
+	if not progress.has("writeup_extra"):
+		progress["writeup_extra"] = []
+	progress["writeup_extra"].append(lesson["kind_spec"]["writeup"])
+	earn_marks("quest", "%s's trouble" % c["name"])
+	if genius:
+		genius.bonded("classmate")
+	_lesson = {}
+	world.set_marker(null)
+	_lost_at = Vector2.INF
+	fight.allowed = []
+	hud.set_prompt("", "")
+	hud.set_prompt_status("", "")
+	hud.play_ui.visible = _in_zone()
+	sfx.play("done")
+	save()
+
+# --- The hearth's shade ---------------------------------------------------------------
+
+var _shade_node: Node3D = null
+
+## This run's shade: one of the dead, by the run's seed.
+func shade() -> Dictionary:
+	var all: Array = Data.shades()
+	return all[int(progress["seed"]) % all.size()]
+
+## A visit: the shade speaks, fires its Pattern for the hall (your genius witnesses it), and
+## after enough visits accepts you and offers its graft for the Gate.
+func _visit_shade() -> void:
+	var sh: Dictionary = Data.academy["shade"]
+	var sd := shade()
+	var visits := int(progress.get("shade_visits", 0))
+	var lines_all: Array = sh["visits"]
+	var lines: Array = lines_all[mini(visits, lines_all.size() - 1)].map(func(l): return String(l).replace("{pattern_name}", sd["pattern"]["name"]))
+	progress["shade_visits"] = visits + 1
+	progress["record"]["talks"] += 1
+	var fires := visits < lines_all.size() - 1
+	say(sd["name"], lines, func():
+		if fires:
+			_shade_fires(sd)
+		if visits + 1 == int(sh["acceptVisits"]) and genius:
+			genius.offer_graft({ "id": "shade:" + sd["id"], "feature": sd["graftFeature"], "source": "shade:" + sd["id"] })
+			genius.bonded("shade")
+			progress["record"]["shade_accepted"] = true
+			title_card("ACCEPTED", "the shade's graft waits for the Gate", Color(0.7, 0.8, 1.0))
+			sfx.play("done")
+		save())
+
+## The Pattern fired for the hall: gold rings from the shade, and the genius takes it in.
+func _shade_fires(sd: Dictionary) -> void:
+	var sh: Dictionary = Data.academy["shade"]
+	var at := Vector2(sh["at"][0], sh["at"][1])
+	var n := int(sh["usesPerVisit"])
+	var pattern := { "name": sd["pattern"]["name"], "form": sd["pattern"]["form"], "terms": [] }
+	var made := {}
+	for i in n:
+		var tw := create_tween()
+		tw.tween_interval(0.5 * i)
+		tw.tween_callback(func():
+			world._ring_wave(world._v3(at), World.C_GOLD, 3.5)
+			world.burst(world._v3(at, 1.2), World.C_GOLD, 20, 4.0)
+			sfx.play("cue-hit", 0.9 + 0.1 * i)
+			world.genius_react("cue"))
+		if genius:
+			var m := genius.witness(pattern)
+			if not m.is_empty():
+				made = m
+	if genius:
+		var key := "%s|" % pattern["form"]
+		var count := int(genius.witnessed.get(key, 0))
+		var need := int(Data.rules["genius"]["shadowUses"])
+		var tw2 := create_tween()
+		tw2.tween_interval(0.5 * n + 0.3)
+		tw2.tween_callback(func():
+			world.floater(world._v3(fight.p_pos, 2.6), String(sh["witness"]).replace("{genius_name}", genius.name).replace("{pattern_name}", sd["pattern"]["name"]).replace("{n}", str(mini(count, need))).replace("{need}", str(need)).to_upper(), World.C_GOLD, 40, 2.4, 0.4)
+			if not made.is_empty():
+				world.floater(world._v3(fight.p_pos, 3.0), String(sh["shadow"]).replace("{genius_name}", genius.name).replace("{pattern_name}", sd["pattern"]["name"]).to_upper(), Color(0.8, 0.9, 1.0), 48, 3.0, 0.3)
+				sfx.play("pattern", 1.2))
+		save()
+
+# --- Commencement: the declaration ---------------------------------------------------
+
+func declaration_text() -> String:
+	var dcl: Dictionary = hero.get("declaration", {})
+	match String(dcl.get("kind", "")):
+		"join": return "joined %s (%s)" % [dcl.get("guild_name", "a guild"), dcl.get("charter", "")]
+		"found": return "a founding promised with %s" % " and ".join(dcl.get("founders", []))
+		"free": return "a Free Lance"
+	return "nothing yet"
+
+## The recruiters and the cohort on the platform: join, found, or go free.
+func declare(then: Callable) -> void:
+	var cm: Dictionary = Data.academy.get("commencement", {})
+	if cm.is_empty():
+		then.call()
+		return
+	var p := party()
+	var a: String = p[0]["name"] if p.size() > 0 else cohort[0]["name"]
+	var b: String = p[1]["name"] if p.size() > 1 else cohort[1]["name"]
+	var opts: Array = []
+	for g in cm["guilds"]:
+		opts.append({ "id": "join:" + g["id"], "label": "%s  ·  %s" % [g["name"], g["charter"]], "text": g["line"] })
+	opts.append({ "id": "found", "label": "Found with %s and %s" % [a, b], "text": String(cm["lines"]["found"]).replace("{a}", a).replace("{b}", b) })
+	opts.append({ "id": "free", "label": "Leave as a Free Lance", "text": cm["lines"]["free"] })
+	say("", [cm["lines"]["intro"]], func():
+		choose("Commencement", opts, func(id: String):
+			var line := ""
+			if id.begins_with("join:"):
+				var g: Dictionary = Data.by_id(cm["guilds"], id.trim_prefix("join:"))
+				hero["declaration"] = { "kind": "join", "guild": g["id"], "guild_name": g["name"], "charter": g["charter"] }
+				line = String(cm["lines"]["declared_join"]).replace("{guild}", g["name"]).replace("{charter}", g["charter"])
+			elif id == "found":
+				hero["declaration"] = { "kind": "found", "founders": [a, b], "founder_ids": p.map(func(c): return c["id"]) }
+				line = String(cm["lines"]["declared_found"]).replace("{a}", a).replace("{b}", b)
+			else:
+				hero["declaration"] = { "kind": "free" }
+				line = cm["lines"]["declared_free"]
+			progress["record"]["declared"] = hero["declaration"]["kind"]
+			save()
+			say("", [line], then)))

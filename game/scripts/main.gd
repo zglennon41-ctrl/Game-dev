@@ -197,6 +197,13 @@ func _ready() -> void:
 			if not h.has("genius"):
 				var ff3 := Rite.first_form(h, h["shape"], 11)
 				Rite.birth(h, ff3["reading"], ff3["name"])
+		if _args.has("board"):
+			# After Lesson 3, with the board open, for automated checks of classmates' troubles.
+			h["academy"] = { "seed": int(_args.get("seed", "4242")), "arrived": true, "done": ["hold", "rite", "shape"], "met": ["c0", "c1"], "day": 3, "rested_after": "rite",
+				"place": "quad", "record": { "parries": 8, "blocks": 4, "hurts": 2, "dodges": 1, "talks": 3, "spars_won": 2, "spars_lost": 0 } }
+			if not h.has("genius"):
+				var ffb := Rite.first_form(h, h["shape"], 11)
+				Rite.birth(h, ffb["reading"], ffb["name"])
 		if _args.has("discipline"):
 			# The morning of Lesson 4, with a genius born, for automated checks.
 			h["academy"] = { "seed": int(_args.get("seed", "4242")), "arrived": true, "done": ["hold", "rite", "shape"], "met": [], "day": 4, "rested_after": "shape",
@@ -397,6 +404,7 @@ func enter_academy() -> void:
 	Engine.time_scale = 1.0
 	sfx.start_ambience()
 	academy.auto = _args.has("bot")
+	academy.auto_troubles = _args.has("troubles")
 	academy.enter(hero)
 	fight = academy.fight
 	if not _args.has("bot"):

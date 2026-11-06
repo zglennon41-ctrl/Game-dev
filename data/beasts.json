@@ -173,7 +173,18 @@
   "flinchEvery": 3,
   "flinchTime": 0.3,
   "respawnSeconds": 3.0,
-  "counterAfterHits": 0
+  "counterAfterHits": 0,
+  "pattern": {
+   "$comment": "The classmate's Pattern, fired once below half health: a heavy blow with a gold ring. The fight fills name and form from the classmate.",
+   "damage": 22,
+   "range": 2.6,
+   "windup": 1.1,
+   "active": 0.15,
+   "recover": 1.4,
+   "lunge": 1.2,
+   "knockback": 1.8,
+   "anim": "2H_Melee_Attack_Spin"
+  }
  },
  {
   "id": "green-warden",
