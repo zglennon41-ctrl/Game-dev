@@ -1089,8 +1089,8 @@ func _update_allies(dt: float) -> void:
 			var to_w := (w_pos - p_pos).normalized() if dist() > 0.1 else Vector2.RIGHT
 			want = w_pos - to_w.rotated(side * 1.1) * 2.0
 		else:
-			# At ease: on the hero's flanks, a little ahead, never behind where the camera sits.
-			want = p_pos + Vector2.from_angle(p_facing).rotated(side * 1.35) * 1.7
+			# At ease: ahead of the hero on either side, never behind where the camera sits.
+			want = p_pos + Vector2.from_angle(p_facing).rotated(side * 0.85) * 2.3
 		var d: Vector2 = want - al["pos"]
 		var step := 5.2 * dt
 		al["moving"] = d.length() > 0.3

@@ -23,6 +23,7 @@ var next_tick := 0.0
 var turn := 0.0
 var _feat_i := 0
 var _form_node: Node3D
+var _pick := -1   # which of the bowl's three the player took (-1: settled)
 var _tick_t := 0.0
 
 func _init(a: Academy, h: Dictionary) -> void:
@@ -61,6 +62,8 @@ func start() -> void:
 func _go(p: String) -> void:
 	phase = p
 	t = 0.0
+	if OS.get_cmdline_user_args().has("--debug"):
+		print("RITE %s at %.1f" % [p, Time.get_ticks_msec() / 1000.0])
 	match p:
 		"pour":
 			ac.show_pour(true, Rite_fill(cfg["lines"]["pour"]))
@@ -189,8 +192,15 @@ func _genius(dt: float) -> void:
 		world.flame(Color(1, 1, 1), 2.4, 10.0)
 		world.flash_screen(Color(1, 1, 1), 0.6)
 		sfx.play("parry", 0.8)
-		_feat_i = 0
-		_go("making")
+		phase = "choose"
+		# The bowl offers three bodies (owner, 2026-11-06): choose, or let it settle.
+		ac.show_reading(form["reading"], func(i: int):
+			_pick = i
+			var c: Dictionary = form["reading"]["candidates"][maxi(i, 0)]
+			form = { "form": c["form"], "name": c["name"], "expression": c["expression"], "silhouette": c["silhouette"],
+				"features": c["features"], "seedMark": c["seedMark"], "reading": form["reading"] }
+			_feat_i = 0
+			_go("making"), "The bowl offers three", "Read from your Seed, your blood and your Shape. Every one carries the Seed-mark.")
 
 func _making(dt: float) -> void:
 	var col: Color = World.SHAPE_COLORS[hero["shape"]].lightened(0.15)
@@ -241,7 +251,7 @@ func _form(dt: float) -> void:
 		_go("name")
 
 func _named(n: String) -> void:
-	var gn := Rite.birth(hero, form["reading"], n if n.strip_edges() != "" else form["name"])
+	var gn := Rite.birth(hero, form["reading"], n if n.strip_edges() != "" else form["name"], _pick)
 	ac.genius = gn
 	var g := gn.to_dict()
 	# It comes down to its partner, small, and stays.

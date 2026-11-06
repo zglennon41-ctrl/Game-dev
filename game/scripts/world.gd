@@ -1917,8 +1917,9 @@ func _update_allies(f: Fight, dt: float) -> void:
 		var n: Node3D = a["node"]
 		n.position = _v3(al["pos"])
 		n.rotation.y = _yaw(float(al["facing"]))
-		# Never between the camera and the hero.
-		n.visible = camera.global_position.distance_to(n.global_position + Vector3(0, 1.0, 0)) > 2.4
+		# Never between the camera and the hero: anyone nearer the camera than the hero is fades out.
+		var cam_to_hero := camera.global_position.distance_to(_player.global_position + Vector3(0, 1.0, 0))
+		n.visible = camera.global_position.distance_to(n.global_position + Vector3(0, 1.0, 0)) > cam_to_hero * 0.7
 		var ap: AnimationPlayer = a["anim"]
 		if _clock < float(a["until"]):
 			continue

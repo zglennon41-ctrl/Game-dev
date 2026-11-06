@@ -40,6 +40,7 @@ func _run() -> void:
 	test_disciplines()
 	test_party()
 	test_project_and_gate()
+	test_advanced_standing()
 	test_shape_kits()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
@@ -861,3 +862,17 @@ func test_project_and_gate() -> void:
 	check(gate["writeup"].size() >= 8 and Data.academy["places"].has("gate"), "the Gate has a place and a write-up to draw from")
 	var lesson: Dictionary = Data.by_id(Data.academy["lessons"], "project")
 	check(lesson["steps"][0]["setup"].get("project", false) and lesson["steps"].back()["goal"].get("award", "") == "stage3", "Lesson 6 opens the field and awards Stage 3 at extraction")
+
+## Advanced standing: a second character's short term keeps the rite, the Examination and the Gate.
+func test_advanced_standing() -> void:
+	var adv: Dictionary = Data.academy["advanced"]
+	check(adv["skipLessons"] == ["line"] and not adv["skipLessons"].has("project"), "the short term skips the first run of the line but never the Examination")
+	var titles := {}
+	for l in Data.academy["lessons"]:
+		titles[l["id"]] = l["steps"].map(func(st): return st["title"])
+	for lid in adv["skipSteps"]:
+		for t in adv["skipSteps"][lid]:
+			check(titles[lid].has(t), "advanced standing skips a step that exists: %s / %s" % [lid, t])
+		var left: Array = titles[lid].filter(func(t): return not adv["skipSteps"][lid].has(t))
+		check(left.size() >= 1, "%s keeps at least one step under advanced standing (%s)" % [lid, str(left)])
+	check(titles["project"].filter(func(t): return not adv["skipSteps"]["project"].has(t)).has("Extraction"), "the Field Examination survives advanced standing")

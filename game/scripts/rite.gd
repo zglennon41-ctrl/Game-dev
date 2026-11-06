@@ -50,11 +50,11 @@ static func first_form(hero: Dictionary, shape: String, seed_value: int) -> Dict
 		"features": c["features"], "score": c["score"], "seedMark": c["seedMark"], "reading": r }
 
 ## The hero's genius after the rite: born in the First Form the bowl read, and named.
-static func birth(hero: Dictionary, reading: Dictionary, genius_name: String) -> Genius:
+static func birth(hero: Dictionary, reading: Dictionary, genius_name: String, pick := -1) -> Genius:
 	var g := Genius.for_hero(hero)
 	g.pending_reading = reading.duplicate(true)
 	g.pending_reading["unlockedBy"] = "rite"
-	g.take()
+	g.take(pick)
 	g.milestone("rite")
 	g.name = genius_name
 	g.save_to(hero)

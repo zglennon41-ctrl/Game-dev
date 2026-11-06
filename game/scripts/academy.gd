@@ -31,6 +31,7 @@ var _step_hold := 0.0
 var _auto_wait := 0.0
 var _type_tw: Tween
 
+var _fade := ColorRect.new()
 var _prompt := PanelContainer.new()
 var _prompt_label := Label.new()
 var _objective := Label.new()
@@ -103,6 +104,12 @@ func _ready() -> void:
 	v.add_child(_cont)
 	_box.visible = false
 	root.add_child(_box)
+	# The fade between places: black, in and out.
+	_fade.color = Color(0.01, 0.008, 0.008, 1.0)
+	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fade.modulate.a = 0.0
+	root.add_child(_fade)
 
 # --- Entering ----------------------------------------------------------------
 
@@ -269,6 +276,12 @@ func go(place_id: String, quiet := false, from := "") -> void:
 	if not zone.is_empty():
 		hud.target.visible = true
 	_show_place(spec["name"])
+	# Arrive out of the dark.
+	if _fade.is_inside_tree():
+		_fade.modulate.a = 1.0
+		var tw := _fade.create_tween()
+		tw.tween_interval(0.15)
+		tw.tween_property(_fade, "modulate:a", 0.0, 0.7).set_trans(Tween.TRANS_SINE)
 	save()
 
 ## The two classmates chosen for the party, as classmate dictionaries.
@@ -364,7 +377,7 @@ func interact() -> void:
 			sfx.play("ui-move", 0.9, -8.0)
 			_show_line()
 		return
-	if _target.is_empty() or (in_lesson() and _target["kind"] not in ["door", "post"]):
+	if _target.is_empty() or (in_lesson() and _target["kind"] not in ["door", "post"]) or _rite or _gate or _reading_box or _naming:
 		return
 	sfx.play("ui-take", 1.0, -6.0)
 	match _target["kind"]:
@@ -399,7 +412,7 @@ func _talk_instructor(id: String) -> void:
 	var lines: Dictionary = data["lines"]
 	# The Instructor who teaches the next lesson starts it.
 	for lesson in Data.academy["lessons"]:
-		if lesson_instructor(lesson) == id and not progress["done"].has(lesson["id"]) and lesson["place"] == progress["place"] and lesson_available(lesson):
+		if lesson_instructor(lesson) == id and not lesson_done(lesson["id"]) and lesson["place"] == progress["place"] and lesson_available(lesson):
 			var intro: Array = [lines.get("before:" + String(lesson["id"]), "")] + lesson["intro"]
 			say(id, intro.filter(func(x): return x != ""), func(): _start_lesson(lesson))
 			return
@@ -448,7 +461,7 @@ func rested_on(id: String) -> bool:
 ## The next lesson (or the rite) whose requirements are met and is not done: {} if none.
 func next_lesson() -> Dictionary:
 	for lesson in Data.academy["lessons"]:
-		if progress["done"].has(lesson["id"]):
+		if lesson_done(lesson["id"]):
 			continue
 		if lesson_available(lesson):
 			return lesson
@@ -463,10 +476,19 @@ func lesson_instructor(lesson: Dictionary) -> String:
 				return ins["id"]
 	return lesson["instructor"]
 
+## Advanced standing: a second character's short term (data/academy.json, "advanced").
+func advanced() -> bool:
+	return hero.get("advanced", false)
+
+func lesson_done(id: String) -> bool:
+	if progress["done"].has(id):
+		return true
+	return advanced() and Data.academy.get("advanced", {}).get("skipLessons", []).has(id)
+
 func lesson_available(lesson: Dictionary) -> bool:
 	var req: Dictionary = lesson.get("requires", {})
 	for d in req.get("done", []):
-		if not progress["done"].has(d):
+		if not lesson_done(d):
 			return false
 	if req.has("rested_after") and not rested_on(req["rested_after"]):
 		return false
@@ -481,7 +503,7 @@ func next_need() -> String:
 	var nl := next_lesson()
 	if nl.is_empty():
 		for lesson in Data.academy["lessons"]:
-			if not progress["done"].has(lesson["id"]):
+			if not lesson_done(lesson["id"]):
 				return "rest" if lesson.get("requires", {}).has("rested_after") and not rested_on(lesson["requires"]["rested_after"]) else ""
 		if not progress["done"].has("gate"):
 			return "gate" if rested_on("project") else "rest"
@@ -501,7 +523,15 @@ func _rest_now() -> void:
 	say("", r["lines"] + ([next_line] if next_line != "" else []), func():
 		progress["rested_after"] = last
 		progress["day"] = int(progress["day"]) + 1
-		save())
+		save()
+		_build_rite_ui()
+		# Morning: the fade down and up, and the day's number.
+		_fade.modulate.a = 1.0
+		var tw := _fade.create_tween()
+		tw.tween_interval(0.6)
+		tw.tween_property(_fade, "modulate:a", 0.0, 1.0).set_trans(Tween.TRANS_SINE)
+		title_card("DAY %d" % int(progress["day"]), objective().trim_prefix("Day %d · " % int(progress["day"])), Style.GOLD)
+		sfx.play("stance", 0.8, -6.0))
 
 # --- Each frame -----------------------------------------------------------------
 
@@ -654,7 +684,7 @@ func update(events: Array, dt: float) -> void:
 
 ## Automated checks: where the autopilot walks next, and whether to act there.
 func auto_move() -> Vector2:
-	if talking() or in_rite():
+	if busy():
 		return Vector2.ZERO
 	var goal := Vector2.INF
 	var place: String = progress["place"]
@@ -718,7 +748,18 @@ func auto_move() -> Vector2:
 
 # --- Lessons -------------------------------------------------------------------
 
-func _start_lesson(lesson: Dictionary) -> void:
+func _start_lesson(lesson0: Dictionary) -> void:
+	var lesson := lesson0
+	if advanced():
+		# The short term: the drills named in the data are left out, and the rest cut down.
+		var adv: Dictionary = Data.academy.get("advanced", {})
+		lesson = lesson0.duplicate(true)
+		var skip: Array = adv.get("skipSteps", {}).get(lesson["id"], [])
+		lesson["steps"] = lesson["steps"].filter(func(st): return not skip.has(st["title"]))
+		var counts: Dictionary = adv.get("counts", {}).get(lesson["id"], {})
+		for st in lesson["steps"]:
+			if counts.has(st["title"]):
+				st["goal"]["count"] = counts[st["title"]]
 	_lesson = lesson
 	# The Discipline lesson hands over the school's three techniques to learn.
 	if lesson["id"] == "discipline":
@@ -1102,6 +1143,7 @@ func set_pour(k: float) -> void:
 ## A great word over the scene: the Shape, the form.
 func title_card(text: String, sub: String, color: Color) -> void:
 	_big.text = text
+	_big.add_theme_font_size_override("font_size", 120 if text.length() <= 10 else (88 if text.length() <= 16 else 64))
 	_big.add_theme_color_override("font_color", color.lightened(0.35))
 	_big.add_theme_color_override("font_shadow_color", Color(color, 0.5))
 	_big.add_theme_constant_override("shadow_outline_size", 30)
@@ -1349,6 +1391,7 @@ func _gate_done() -> void:
 	progress["done"].append("gate")
 	progress["day"] = int(progress["day"]) + 1
 	hero["settled"] = true
+	Settings.mark_settled()
 	_gate = null
 	world.cine = false
 	save()
@@ -1356,7 +1399,7 @@ func _gate_done() -> void:
 
 ## The Reading laid out: three cards with the lines of the Tally that chose each, a choice,
 ## or "let it settle".
-func show_reading(reading: Dictionary, then: Callable) -> void:
+func show_reading(reading: Dictionary, then: Callable, heading := "The Reading: a Second Form", subheading := "") -> void:
 	hide_reading()
 	var col: Color = World.SHAPE_COLORS.get(hero["shape"], Color.WHITE)
 	var root := Control.new()
@@ -1371,13 +1414,13 @@ func show_reading(reading: Dictionary, then: Callable) -> void:
 	root.add_child(v)
 	var title := Label.new()
 	Style.label(title, 34, Style.FG, "title")
-	title.text = "The Reading: a Second Form"
+	title.text = heading
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(title)
 	var sub := Label.new()
 	Style.label(sub, 16, Style.DIM, "italic")
 	var leads: Array = reading.get("lineLeads", []).slice(0, 3).map(func(l): return GeniusPage.LINE_WORDS.get(l["line"], String(l["line"])).to_lower())
-	sub.text = "Read from %s. Every one carries the Seed-mark%s." % [", ".join(leads) if not leads.is_empty() else "the term", " and heritage from the First Form" if true else ""]
+	sub.text = subheading if subheading != "" else "Read from %s. Every one carries the Seed-mark and heritage from the First Form." % (", ".join(leads) if not leads.is_empty() else "the term")
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sub)
 	var row := HBoxContainer.new()
@@ -1390,7 +1433,7 @@ func show_reading(reading: Dictionary, then: Callable) -> void:
 		var col_v := VBoxContainer.new()
 		col_v.add_theme_constant_override("separation", 8)
 		var info := c.duplicate()
-		info["instar"] = 2
+		info["instar"] = 2 if int(reading.get("instar", 2)) >= 2 else 1
 		info["name"] = c["name"]
 		var card := GeniusCard.make(info, col, "CANDIDATE %d" % (i + 1))
 		card.custom_minimum_size = Vector2(330, 0)

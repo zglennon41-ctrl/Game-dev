@@ -46,21 +46,21 @@ Discipline lesson).
 the school teaches), the Discipline's first three techniques on keys 1, 2, 3; the
 Instructor's test, a bout against them.
 
-**E. Lesson 5, the line** (next) — choose two classmates for your party; the car to the
+**E. Lesson 5, the line** (built) — choose two classmates for your party; the car to the
 Green; three areas as places (the cutting, the post, the den); the post held with your
 genius on Hold; a beast of the Green at the den; extraction; the rescue team if anyone
 falls. Classmates fight beside you and can be hurt; the cohort remembers.
 
-**F. Lesson 6, Project** — the field opened past the skin: a drill in the yard that ends
+**F. Lesson 6, Project** (built) — the field opened past the skin: a drill in the yard that ends
 with Stage 3 (more Will, more reach, a visible field). Then the Field Examination proper,
 in the Green with the field open and a party of three; the Instructor watching from the post.
 
-**G. The Gate and Commencement** — the Gate Reading: the genius's Second Form read from how
+**G. The Gate and Commencement** (built) — the Gate Reading: the genius's Second Form read from how
 the Academy was played, three candidates with their reasons, your choice; the cohort's
 write-up of you; Commencement on the platform; the character leaves settled (Shape, Stage 3,
 Discipline and weapon, Pattern, genius, record) and the title shows it.
 
-**H. Polish** — day cards, fades between places, pacing, lines, sound; the whole run played
+**H. Polish** (next) — day cards, fades between places, pacing, lines, sound; the whole run played
 end to end before it is called done.
 
 ## After the Academy (the owner's direction, 2026-11-06)

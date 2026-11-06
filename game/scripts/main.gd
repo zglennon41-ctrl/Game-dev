@@ -319,6 +319,14 @@ func _hero_made(h: Dictionary) -> void:
 	Settings.save_hero(h)
 	creator.visible = false
 	world.portrait = false
+	# A second life may take advanced standing at the Academy (owner, 2026-11-06).
+	if Settings.settled_count() > 0 and not _args.has("answers"):
+		var adv: Dictionary = Data.academy.get("advanced", {}).get("offer", {})
+		hud.show_screen(adv.get("title", "A second life"), "", adv.get("text", ""), [
+			[adv.get("full", "The whole term"), func(): hero["advanced"] = false; Settings.save_hero(hero); _card(Data.story["cards"]["open"], _start_prologue)],
+			[adv.get("short", "Advanced standing"), func(): hero["advanced"] = true; Settings.save_hero(hero); _card(Data.story["cards"]["open"], _start_prologue)],
+		])
+		return
 	_card(Data.story["cards"]["open"], _start_prologue)
 
 ## A title card: a few lines on black, and Continue.
@@ -699,6 +707,8 @@ func _shot(label: String) -> void:
 	var img := get_viewport().get_texture().get_image()
 	_shot_n += 1
 	img.save_png("%s/%02d-%s.png" % [_args["shots"], _shot_n, label])
+	if _args.has("debug"):
+		print("SHOT %d %s mode=%s at %.1f" % [_shot_n, label, mode, Time.get_ticks_msec() / 1000.0])
 
 # --- The bot: plays well, for automated checks --------------------------------
 

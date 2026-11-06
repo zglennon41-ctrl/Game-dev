@@ -1422,5 +1422,43 @@
       }
     ],
     "closing": "Would found a guild with them. Signed, the Hundred-and-Fourth Cohort."
+  },
+  "advanced": {
+    "$comment": "Advanced standing (owner, 2026-11-06): a second character may replay a shorter term. The rite, the Field Examination and the Gate are never skipped. skipLessons are passed over entirely; skipSteps names, by lesson, the drill steps left out (by their titles as written in the lessons); counts shortens what remains.",
+    "skipLessons": [
+      "line"
+    ],
+    "skipSteps": {
+      "hold": [
+        "Contain",
+        "The guard"
+      ],
+      "shape": [
+        "The stance",
+        "{technique}"
+      ],
+      "discipline": [
+        "{tech1}",
+        "{tech2}",
+        "{tech3}"
+      ],
+      "project": [
+        "Reach"
+      ]
+    },
+    "counts": {
+      "hold": {
+        "Hold": 3
+      },
+      "shape": {
+        "The ladder": 1
+      }
+    },
+    "offer": {
+      "title": "A second life",
+      "text": "You have walked this Academy before, with another name. The Instructors know the look.\n\nTake the whole term again, or advanced standing: a short term of the things that cannot be skipped (the rite, the Field Examination, the Gate) and the drills cut to the bone.",
+      "full": "The whole term  (8 to 12 hours)",
+      "short": "Advanced standing  (a short term)"
+    }
   }
 }

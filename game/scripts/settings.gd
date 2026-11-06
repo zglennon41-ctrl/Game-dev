@@ -61,6 +61,14 @@ func restore_pattern() -> void:
 
 # --- The character -------------------------------------------------------------
 
+## How many characters have left the Academy settled: a second one may take advanced standing.
+func settled_count() -> int:
+	return int(cfg.get_value("hero", "settled_count", 0))
+
+func mark_settled() -> void:
+	cfg.set_value("hero", "settled_count", settled_count() + 1)
+	cfg.save(PATH)
+
 func hero() -> Dictionary:
 	var h: Variant = cfg.get_value("hero", "hero", {})
 	if h is Dictionary and h.has("shape") and Data.kits.has(h["shape"]):

@@ -183,3 +183,8 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
     makes techniques hit half again as hard and reach one pace farther (shots two).
 56. **The Gate's write-up** (`data/academy.json`, "gate.writeup") is a list of tests on the
     term's record with a sentence each; the cohort signs it. Yours to rewrite.
+57. **Advanced standing** (`data/academy.json`, "advanced", mine): the second character's
+    short term skips Lesson 5 (the first run of the line) and the drill steps named there,
+    cuts Hold to three bites and the ladder to one win, and keeps the rite, the Field
+    Examination and the Gate. The offer appears after the questionnaire once any character
+    has left the Academy settled.
