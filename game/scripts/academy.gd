@@ -729,7 +729,7 @@ func update(events: Array, dt: float) -> void:
 		return
 	# What is within reach to act on.
 	_target = {}
-	if not in_lesson() or _in_zone():
+	if not in_lesson() or _in_zone() or _lesson.get("trouble", false):
 		var best := 2.4
 		for p in _people:
 			var d: float = (fight.p_pos - p["pos"]).length()
@@ -809,7 +809,7 @@ func auto_move() -> Vector2:
 			if not _target.is_empty():
 				interact()
 			return Vector2.ZERO
-		return (goal - fight.p_pos).normalized()
+		return _steer((goal - fight.p_pos).normalized())
 	var want_place := ""
 	match next_need():
 		"rest": want_place = "dorm"
@@ -835,7 +835,7 @@ func auto_move() -> Vector2:
 			if (goal - fight.p_pos).length() < 2.2 and not _target.is_empty():
 				interact()
 				return Vector2.ZERO
-			return (goal - fight.p_pos).normalized()
+			return _steer((goal - fight.p_pos).normalized())
 	if auto_troubles and board_open() and progress.get("trouble", "") == "" and troubles_open().size() > 0:
 		var bspec: Dictionary = Data.academy["places"].get("quad", {}).get("board", {})
 		if place == "quad":
@@ -847,7 +847,7 @@ func auto_move() -> Vector2:
 		if (goal - fight.p_pos).length() < 2.2 and not _target.is_empty():
 			interact()
 			return Vector2.ZERO
-		return (goal - fight.p_pos).normalized() if goal != Vector2.INF else Vector2.ZERO
+		return _steer((goal - fight.p_pos).normalized()) if goal != Vector2.INF else Vector2.ZERO
 	if want_place == "":
 		return Vector2.ZERO
 	if place == want_place:
@@ -879,7 +879,18 @@ func auto_move() -> Vector2:
 		if not _target.is_empty():
 			interact()
 		return Vector2.ZERO
-	return (goal - fight.p_pos).normalized()
+	return _steer((goal - fight.p_pos).normalized())
+
+## Walk round what is in the way: a pillar, a brazier, a person.
+func _steer(dir: Vector2) -> Vector2:
+	for o in fight.obstacles:
+		var c := Vector2(o.x, o.y)
+		var to := c - fight.p_pos
+		var d := to.length()
+		if d < float(o.z) + 1.2 and d > 0.01 and dir.dot(to / d) > 0.6:
+			var side := 1.0 if dir.cross(to) < 0.0 else -1.0
+			return dir.rotated(side * 1.1).normalized()
+	return dir
 
 # --- Lessons -------------------------------------------------------------------
 
@@ -1587,12 +1598,15 @@ func show_reading(reading: Dictionary, then: Callable, heading := "The Reading: 
 	veil.color = Color(0.02, 0.016, 0.016, 0.82)
 	veil.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.add_child(veil)
+	# Centred on the screen, whatever its size: a CenterContainer, not a centre anchor.
+	var centre := CenterContainer.new()
+	centre.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.add_child(centre)
 	var v := VBoxContainer.new()
-	v.set_anchors_preset(Control.PRESET_CENTER)
-	v.add_theme_constant_override("separation", 12)
-	root.add_child(v)
+	v.add_theme_constant_override("separation", 10)
+	centre.add_child(v)
 	var title := Label.new()
-	Style.label(title, 34, Style.FG, "title")
+	Style.label(title, 30, Style.FG, "title")
 	title.text = heading
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(title)
@@ -1614,15 +1628,14 @@ func show_reading(reading: Dictionary, then: Callable, heading := "The Reading: 
 		var info := c.duplicate()
 		info["instar"] = 2 if int(reading.get("instar", 2)) >= 2 else 1
 		info["name"] = c["name"]
-		var card := GeniusCard.make(info, col, "CANDIDATE %d" % (i + 1))
-		card.custom_minimum_size = Vector2(330, 0)
+		var card := GeniusCard.make(info, col, "CANDIDATE %d" % (i + 1), true)
 		col_v.add_child(card)
 		var why := RichTextLabel.new()
 		why.bbcode_enabled = true
 		why.fit_content = true
 		why.scroll_active = false
-		why.custom_minimum_size = Vector2(330, 0)
-		Style.rich(why, 14, Style.DIM, "italic")
+		why.custom_minimum_size = Vector2(300, 0)
+		Style.rich(why, 13, Style.DIM, "italic")
 		var reasons: Array = []
 		for r in c.get("reasons", []):
 			reasons.append("%s: %s" % [GeniusPage.LINE_WORDS.get(r["line"], String(r["line"])).to_lower(), String(r["key"]).replace(".", " · ").replace("family:", "").replace("tag:", "")])
@@ -1638,6 +1651,8 @@ func show_reading(reading: Dictionary, then: Callable, heading := "The Reading: 
 			then.call(i))
 		col_v.add_child(b)
 		row.add_child(col_v)
+		if i == 0:
+			b.call_deferred("grab_focus")
 	var settle := Button.new()
 	settle.text = "Let it settle on the best fit"
 	Style.button(settle, false, 17)
@@ -1650,7 +1665,8 @@ func show_reading(reading: Dictionary, then: Callable, heading := "The Reading: 
 	get_child(0).add_child(root)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if auto:
-		get_tree().create_timer(1.5).timeout.connect(func(): if _reading_box: hide_reading(); then.call(-1))
+		var hold := 14.0 if OS.get_cmdline_user_args().has("--slowchoice") else 1.5
+		get_tree().create_timer(hold).timeout.connect(func(): if _reading_box: hide_reading(); then.call(-1))
 
 func hide_reading() -> void:
 	if _reading_box:

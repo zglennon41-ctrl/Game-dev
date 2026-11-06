@@ -5,16 +5,21 @@ class_name GeniusCard
 extends PanelContainer
 
 const CARD_DIR := "res://game/assets/genius/cards/%s.png"
-const W := 380.0
-const ART_H := 400.0
+const W_FULL := 380.0
+const ART_FULL := 400.0
+var W := 380.0      # a compact card (three on a screen) is narrower and shorter
+var ART_H := 400.0
 
 var _vp: SubViewport
 var _pivot: Node3D
 var _t := 0.0
 
 ## info: a genius's to_dict() (or the Reading's candidate with a name), color: the Shape's.
-static func make(info: Dictionary, color: Color, title := "") -> GeniusCard:
+static func make(info: Dictionary, color: Color, title := "", compact := false) -> GeniusCard:
 	var c := GeniusCard.new()
+	if compact:
+		c.W = 300.0
+		c.ART_H = 250.0
 	c._build(info, color, title)
 	return c
 

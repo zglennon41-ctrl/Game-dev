@@ -443,6 +443,8 @@ func _academy_frame(delta: float, real_dt: float) -> void:
 	_sounds(events)
 	world.feedback(fight, events)
 	academy.update(events, real_dt)
+	if _args.has("debug") and Engine.get_process_frames() % 90 == 0:
+		print("BOT place=%s mode=%s move=%s pos=%s target=%s busy=%s lesson=%s" % [academy.progress["place"], academy.bot_mode(), str(move), str(fight.p_pos), str(academy._target.get("kind", "")), str(academy.busy()), str(academy._lesson.get("id", ""))])
 	fight = academy.fight
 	var cam := Vector2(Input.get_joy_axis(0, JOY_AXIS_RIGHT_X), Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y))
 	if cam.length() < 0.15:
