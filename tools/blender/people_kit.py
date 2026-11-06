@@ -51,13 +51,13 @@ WEAPON_SHOWN = {"Knight": "1H_Sword", "Mage": "1H_Wand", "Rogue": "Knife", "Rogu
 # The reshaping, in the chibi's units (hip joint at 0.519, ankle at 0.145, knee at 0.292,
 # shoulder at 1.107, neck at 1.241, crown at 2.315). Designers tune these.
 PROPORTIONS = {
-    "head": (0.35, 0.37, 0.40),   # head and whatever hangs from the head bone (helmet, hat), about the neck joint
+    "head": (0.37, 0.39, 0.42),   # head and whatever hangs from the head bone (helmet, hat), about the neck joint
     "head_lift": 0.06,            # a little neck: the head carried up off the shoulders
     "thigh": 2.9,                 # hip to knee, along the leg
     "shin": 3.7,                  # knee to ankle; the foot keeps its height
     "leg_girth": 0.9,             # legs thinner across
     "torso": 1.45,                # hip joint to neck, along the spine
-    "torso_width": 0.9,           # shoulders and hips narrower
+    "torso_width": 0.86,          # shoulders and hips narrower
     "arm_girth": 0.8,             # arms thinner across
     "hang": 0.5,                  # where the fingertips hang: 0 = hip joint, 1 = knee
     "height": 2.4,                # the finished body, crown of the bare head, in model units
