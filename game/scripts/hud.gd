@@ -480,7 +480,7 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 
 	target.visible = show_target and f.w_state not in ["down", "absent"]
 	target_name.text = String(f.beast["name"]).to_upper()
-	target_sub.text = "%s  ·  first molt" % String(f.w_shape).capitalize()
+	target_sub.text = "%s  ·  %s" % [String(f.w_shape).capitalize(), f.beast.get("title", "first molt")]
 	var t_max := float(f.beast["health"])
 	target_bar.max_value = t_max
 	target_ghost.max_value = t_max

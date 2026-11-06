@@ -294,7 +294,8 @@
         "after:hold": "Bask says you held. He doesn't say that. Rest tonight; tomorrow the hearth.",
         "default": "Go on. The Academy rewards the ones who walk about in it.",
         "before:rite": "The hearth is lit. North door, when you're ready. Everyone in your cohort has been through it this morning but you. No pressure.",
-        "after:rite": "So that's what you are. Good. Now we teach you to use it."
+        "after:rite": "So that's what you are. Good. Now we teach you to use it.",
+        "after:shape": "Bask says you stood up to the cohort. He also says one of them nearly had you. Which is how it should be."
       }
     },
     {
@@ -311,7 +312,9 @@
         "before:hold": "You're Varga's. Good. That one is Millstone, my genius. He is going to bite you a great many times today. Ready?",
         "after:hold": "Come back and spar whenever you like. Millstone has taken a liking to you; that is not a compliment.",
         "default": "The yard is open. The wards are up. Hit something.",
-        "after:rite": "Heard the bowl had something to say about you. It usually does."
+        "after:rite": "Heard the bowl had something to say about you. It usually does.",
+        "before:shape": "Heard the bowl. So you're a {your_shape} now, whatever you walked in as. Good: today we find out what that means with a weapon in your hand. And then your cohort gets a turn at you.",
+        "after:shape": "You took the ladder. Some of them will want it back; let them come. Tomorrow Varga's people take you for Discipline."
       }
     }
   ],
@@ -392,7 +395,8 @@
         "lines": {
           "greet": "I'm {my_name}. {my_city}, {my_blood}. I think I'm a {my_shape}, but the rite will say. I've read everything the Library lets first-years read. Twice.",
           "after:hold": "You did the Millstone drill already? What did he do on the fifth bite? I want to be ready.",
-          "after:rite": "The bowl took longer with you than with anyone. I timed it. Is that good? I think that's good."
+          "after:rite": "The bowl took longer with you than with anyone. I timed it. Is that good? I think that's good.",
+          "after:shape": "I watched your bout. Your stance drops when you reach. Mine does too; I wrote it down."
         }
       },
       {
@@ -400,7 +404,8 @@
         "lines": {
           "greet": "{my_name}. Pleasure. Don't tell anyone, but I woke up in a privy. The field does not choose its moments.",
           "after:hold": "You've got the yard look. Sort of a limp, but proud of it.",
-          "after:rite": "Your genius looked at me. I've decided we're friends now, it and I. You can come too."
+          "after:rite": "Your genius looked at me. I've decided we're friends now, it and I. You can come too.",
+          "after:shape": "So that's what a {your_shape} looks like angry. Noted. Filed. Will not be sparring you before breakfast."
         }
       },
       {
@@ -408,7 +413,8 @@
         "lines": {
           "greet": "{my_name} of {my_city}. My family has sent a child here every generation for three hundred years. You're the recruit Varga brought in herself? Hm.",
           "after:hold": "So you held. Everyone holds against a genius that's being kind to them.",
-          "after:rite": "My family's bowl reading took four seconds. Yours was... theatrical."
+          "after:rite": "My family's bowl reading took four seconds. Yours was... theatrical.",
+          "after:shape": "You beat the ladder. Against first-years. I'll be at the top of it next week; do come."
         }
       },
       {
@@ -416,7 +422,8 @@
         "lines": {
           "greet": "Oh. Hello. I'm {my_name}. Sorry. Everyone here already seems to know what they are. I'm {my_blood}, and that's about all I'm sure of.",
           "after:hold": "Does it hurt? The yard? Varga said the wards stop it hurting, but she says a lot of things kindly.",
-          "after:rite": "I closed my eyes for mine. I watched all of yours. It was beautiful. Is that strange to say?"
+          "after:rite": "I closed my eyes for mine. I watched all of yours. It was beautiful. Is that strange to say?",
+          "after:shape": "I lost in eleven seconds. I counted. But the wards caught me and nobody laughed, so. Maybe again tomorrow."
         }
       },
       {
@@ -424,7 +431,8 @@
         "lines": {
           "greet": "You're new off the line too? I'm {my_name}. If you need anything, the {my_shape} bunks are by the east wall and I don't sleep much.",
           "after:hold": "You look done in. There's bread in the dormitory; I saved you some.",
-          "after:rite": "How do you feel? Mine made me sick for an hour after. There's tea in the dormitory."
+          "after:rite": "How do you feel? Mine made me sick for an hour after. There's tea in the dormitory.",
+          "after:shape": "You fought well. You also hit poor Isa rather hard; I've sent bread."
         }
       },
       {
@@ -432,7 +440,8 @@
         "lines": {
           "greet": "{my_name}. You're a {your_shape}, or you will be. It's in how you stand. Don't look so surprised; reading people is the first thing a field does.",
           "after:hold": "Your guard came up late on the left. Twice. You're welcome.",
-          "after:rite": "Called it. Well. Half called it. The bowl reads things you don't show; that's the point of it."
+          "after:rite": "Called it. Well. Half called it. The bowl reads things you don't show; that's the point of it.",
+          "after:shape": "You lead with the same shoulder every time. Fix it before the Examination. Everything in the Green reads shoulders."
         }
       },
       {
@@ -440,7 +449,8 @@
         "lines": {
           "greet": "...{my_name}.",
           "after:hold": "Good hold.",
-          "after:rite": "...It suits you."
+          "after:rite": "...It suits you.",
+          "after:shape": "...Good stance."
         }
       },
       {
@@ -448,7 +458,8 @@
         "lines": {
           "greet": "{my_name}! {my_city}! Want to spar? Not now, the wards in the quad are thin. Later. Definitely later.",
           "after:hold": "I asked Bask if I could take Millstone without the guard. He said no. He said it in a way I've decided means yes.",
-          "after:rite": "Want to see if our geniuses will fight? Not now. Later. Definitely later."
+          "after:rite": "Want to see if our geniuses will fight? Not now. Later. Definitely later.",
+          "after:shape": "Spar me. Now. Fine, later. But soon. I've been working on a thing."
         }
       }
     ]
@@ -538,6 +549,92 @@
         "Good. That's a hold.",
         "You'll do this every morning of the term, and on the line you'll do it with your life. Go and eat. Varga will want you rested for the hearth."
       ]
+    },
+    {
+      "id": "shape",
+      "number": 3,
+      "title": "Shape",
+      "place": "yard",
+      "instructor": "bask",
+      "requires": {
+        "done": [
+          "rite"
+        ],
+        "rested_after": "rite"
+      },
+      "intro": [
+        "Every Shape has a stance. It is not a pose; it is what your field does when you stop holding it in and let it stand. An Anchor's weighs a tonne. A Cast's goes thin and fast. Yours is yours.",
+        "And every Shape has its first technique: the thing your body did on the night the field woke, before anyone taught you anything. Today you do it on purpose, until it is boring.",
+        "Then the ladder. Three of your cohort, one after another, inside the wards. Nobody gets hurt in here. Everybody remembers who won."
+      ],
+      "steps": [
+        {
+          "title": "The stance",
+          "text": "Press [b]F[/b] to take {stance}: {stance_text}. It drains Will while you hold it. Hold it for [b]four seconds[/b] without dropping it.",
+          "setup": {
+            "genius": "sit",
+            "will": 100
+          },
+          "goal": {
+            "type": "stance-seconds",
+            "count": 4
+          }
+        },
+        {
+          "title": "{technique}",
+          "text": "[b]Q[/b] is {technique}: {technique_text} It costs Will and has a cooldown, so you cannot lean on it. Use it [b]three times[/b] on Millstone.",
+          "setup": {
+            "genius": "sit",
+            "will": 100
+          },
+          "goal": {
+            "type": "event",
+            "event": "technique",
+            "count": 3
+          },
+          "notes": {
+            "no-will": "Out of Will. Stand still a moment; it refills.",
+            "whiff": "Out of reach. Step in."
+          }
+        },
+        {
+          "title": "The ladder",
+          "text": "Your cohort, one at a time. Strike ([b]LMB[/b]), guard and parry ([b]RMB[/b]), dodge ([b]Space[/b]), your technique ([b]Q[/b]), your stance ([b]F[/b]), your Pattern ([b]R[/b]) when its Trigger is met, and your genius ([b]G[/b] to change its order). A bout ends when one of you drops; the wards catch whoever it is. Win [b]two bouts[/b].",
+          "setup": {
+            "spar": true
+          },
+          "goal": {
+            "type": "spar",
+            "count": 2
+          },
+          "notes": {
+            "player-down": "Down. The wards took it. Up, and again."
+          }
+        }
+      ],
+      "spar": {
+        "$comment": "The ladder: who steps up, in order of temperament (the shy ones first), and how much stronger each rung is.",
+        "order": [
+          "scared",
+          "kind",
+          "quiet",
+          "earnest",
+          "wry",
+          "sharp",
+          "reckless",
+          "proud"
+        ],
+        "scalePerRung": 0.18,
+        "lines": {
+          "step_up": "{my_name} steps into the ring.",
+          "won": "{my_name} is down. The wards catch them.",
+          "lost": "You are down. The wards catch you; {my_name} offers a hand."
+        }
+      },
+      "outro": [
+        "That's a Shape. Not a word on a list: a way of standing, a thing you do, and a cohort that knows it.",
+        "Rest. Tomorrow belongs to your city's Discipline."
+      ]
     }
   ],
   "rest": {
@@ -545,7 +642,13 @@
       "The dormitory is quiet except for someone in the {your_shape} bunks muttering through a dream.",
       "Your field sits in your chest like a coal banked for the night. The little light that has followed you since the station turns slowly over your pillow, and settles."
     ],
-    "next": "Tomorrow: the rite in the Hearth Hall. (The rite is the next part to be built.)"
+    "next": {
+      "hold": "Tomorrow: the rite in the Hearth Hall.",
+      "rite": "Tomorrow: Lesson 3, Shape, with the Yardmaster. Your genius turns over once in the dark and settles against your foot.",
+      "shape": "Tomorrow: Lesson 4, Discipline. (The next part to be built.)"
+    },
+    "too_early": "It is too early to sleep. There is work in the yard.",
+    "already": "You are rested. The day is waiting."
   },
   "rite": {
     "$comment": "The rite in the Hearth Hall: the bowl reads your Shape and your genius takes its First Form. The Shape read is the questionnaire's leans (nudged by your spark), plus how you have played the Academy so far (recordLeans: per thing done, toward a Shape), plus the bowl's own noise. A different Shape from the questionnaire's is a surprise; noise is the main knob for how often that happens. The First Form is read from the Seed, the blood and the Shape (data/reading.json, firstFormWeights) plus formNoise.",

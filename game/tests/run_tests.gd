@@ -36,6 +36,7 @@ func _run() -> void:
 	test_genius_fights()
 	test_genius_assembly()
 	test_genius_art()
+	test_sparring()
 	test_shape_kits()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
@@ -160,10 +161,11 @@ func test_pattern() -> void:
 	check(types(h.drain()).has("pattern-locked"), "the Pattern is unavailable without its Trigger")
 
 ## Two bots: one plays well (parries telegraphs, punishes, breaks, fires the Pattern), one mashes.
-func run_bot(seconds: float, smart: bool, hero := {}) -> Fight:
+func run_bot(seconds: float, smart: bool, hero := {}, extra := {}) -> Fight:
 	var opts := { "seed": 5 }
 	if not hero.is_empty():
 		opts["hero"] = hero
+	opts.merge(extra, true)
 	var f := Fight.new(opts)
 	var frame := 0
 	for i in int(seconds / DT):
@@ -431,7 +433,7 @@ func test_academy() -> void:
 		check(Data.academy["places"].has(lesson["place"]), "lesson %s has its place" % lesson["id"])
 		check(not Data.by_id(Data.academy["instructors"], lesson["instructor"]).is_empty(), "lesson %s has its Instructor" % lesson["id"])
 		for st in lesson["steps"]:
-			check(st["goal"]["type"] in ["event", "streak", "will-full"], "step %s has a goal the Academy knows" % st["title"])
+			check(st["goal"]["type"] in ["event", "streak", "will-full", "stance-seconds", "spar"], "step %s has a goal the Academy knows" % st["title"])
 	# A lesson can lock the moves it is not teaching.
 	var f := Fight.new({ "hero": h, "beast": "millstone", "passive": true, "mercy": true })
 	f.allowed = ["block-down", "block-up", "dodge", "lock"]
@@ -716,3 +718,25 @@ func test_genius_art() -> void:
 		var tex: Texture2D = load("res://game/assets/genius/cards/" + file)
 		check(absf(float(tex.get_width()) / tex.get_height() - 0.75) < 0.01, "cards/%s is a 3:4 portrait" % file)
 	check(n > 0, "there is genius art to check (%d files)" % n)
+
+## Classmates as foes: a student beast from a classmate, and a spar the skilled bot can win.
+func test_sparring() -> void:
+	var h := Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
+	h["name"] = "Test"
+	var c: Dictionary = Academy.make_cohort(42, h)[0]
+	var b := Fight.student_beast(c, 1.18)
+	check(b["name"] == c["name"] and b["shape"] == c["shape"] and b["person"]["body"] == c["body"] and b["person"]["weapon"] == c["weapon"], "a student beast is the classmate, in body, weapon, name and Shape")
+	check(is_equal_approx(float(b["health"]), roundf(140.0 * 1.18)), "a rung up the ladder is stronger (%d)" % int(b["health"]))
+	var f := Fight.new({ "hero": h, "foe": c, "mercy": false, "respawn": false })
+	check(f.w_shape == c["shape"] and f.beast["title"] == "of the cohort", "the fight takes the classmate's Shape")
+	var won := 0
+	var lost := 0
+	for i in 4:
+		var g := run_bot(60.0, true, h, { "foe": Academy.make_cohort(42 + i, h)[0], "mercy": false, "respawn": false })
+		if g.stats["wolves_down"] >= 1: won += 1
+		if g.p_state == "down": lost += 1
+	check(won >= 2, "the skilled bot wins most spars (%d of 4, lost %d)" % [won, lost])
+	# Lesson 3 waits for the rite and a night's rest; the ladder orders the shy ones first.
+	var lesson: Dictionary = Data.by_id(Data.academy["lessons"], "shape")
+	check(lesson["requires"]["done"] == ["rite"] and lesson["requires"]["rested_after"] == "rite", "Lesson 3 needs the rite and a night's rest")
+	check(lesson["spar"]["order"][0] == "scared" and lesson["spar"]["order"].back() == "proud", "the ladder starts with the shy and ends with the proud")

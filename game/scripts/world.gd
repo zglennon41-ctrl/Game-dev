@@ -37,6 +37,8 @@ var _p_current := ""
 var _wolf: Node3D
 var _w_anim: AnimationPlayer
 var _w_meshes: Array = []
+var _w_anims: Dictionary = {}   # the foe's animation names by what the fight asks for ({}: the wolf's)
+var _foe_spec: Dictionary = {}  # {} for the wolf; a person: {body, weapon, name}
 var _w_oneshot_until := 0.0
 var _w_current := ""
 var _overlay_wolf := StandardMaterial3D.new()
@@ -353,19 +355,53 @@ func _dress_blood(skel: Skeleton3D, blood_id: String) -> void:
 				ear.material_override = _mat(Color(0.4, 0.28, 0.18))
 				head2.add_child(ear)
 
-func _build_wolf() -> void:
-	_wolf = load("res://game/assets/quaternius/Wolf.glb").instantiate()
-	_wolf.scale = Vector3.ONE * WOLF_SCALE
+const WOLF_ANIMS := { "idle": "AnimalArmature|Idle", "walk": "AnimalArmature|Walk", "gallop": "AnimalArmature|Gallop",
+	"windup": "AnimalArmature|Idle_2_HeadLow", "stagger": "AnimalArmature|Idle_2_HeadLow", "flinch": "AnimalArmature|Idle",
+	"Attack": "AnimalArmature|Attack", "HitReact": "AnimalArmature|Idle_HitReact_Left", "HitReact2": "AnimalArmature|Idle_HitReact_Right", "Death": "AnimalArmature|Death" }
+const PERSON_ANIMS := { "idle": "Idle", "walk": "Walking_A", "gallop": "Running_A", "windup": "Idle", "stagger": "Idle", "flinch": "Idle",
+	"Attack": "1H_Melee_Attack_Slice_Horizontal", "HitReact": "Hit_A", "HitReact2": "Hit_B", "Death": "Death_A" }
+
+## The foe: the wolf ({}), or a person ({ body, weapon, name }) such as a classmate in the yard.
+func set_foe(spec: Dictionary) -> void:
+	if spec == _foe_spec and _wolf:
+		return
+	_foe_spec = spec
+	if _wolf:
+		_wolf.queue_free()
+	if spec.is_empty():
+		_wolf = load("res://game/assets/quaternius/Wolf.glb").instantiate()
+		_wolf.scale = Vector3.ONE * WOLF_SCALE
+		_w_anims = WOLF_ANIMS
+	else:
+		_wolf = load("res://game/assets/kaykit/%s.glb" % spec.get("body", "Knight")).instantiate()
+		_w_anims = PERSON_ANIMS
+		for a in _wolf.find_children("*", "BoneAttachment3D", true, false):
+			var an := String(a.name)
+			a.visible = an.contains("Helmet") or an.contains("Hat") or an.contains("Cape") or an.contains("Hood")
+		var skel: Skeleton3D = _wolf.find_child("Skeleton3D", true, false)
+		if spec.get("weapon", "") != "":
+			var w: Dictionary = Data.by_id(Data.weapons, spec["weapon"])
+			_attach(skel, "handslot.r", "res://game/assets/kaykit/weapons/%s.gltf" % w["model"])
+			if w.has("offhand"):
+				_attach(skel, "handslot.l", "res://game/assets/kaykit/weapons/%s.gltf" % w["offhand"])
 	add_child(_wolf)
 	_w_anim = _wolf.find_child("AnimationPlayer", true, false)
-	for loop in ["Idle", "Walk", "Gallop", "Idle_2_HeadLow", "Idle_2"]:
-		if _w_anim.has_animation(WA + loop):
-			_w_anim.get_animation(WA + loop).loop_mode = Animation.LOOP_LINEAR
+	for key in ["idle", "walk", "gallop", "windup", "stagger", "flinch"]:
+		if _w_anim.has_animation(_w_anims[key]):
+			_w_anim.get_animation(_w_anims[key]).loop_mode = Animation.LOOP_LINEAR
 	_w_meshes = _wolf.find_children("*", "MeshInstance3D", true, false)
 	_overlay_wolf = _mat(C_WINDUP, 2.0, true, 0.0)
 	_overlay_wolf.next_pass = _ink(2.4)
 	for m in _w_meshes:
 		m.material_overlay = _overlay_wolf
+	_w_current = ""
+	_w_oneshot_until = 0.0
+
+func _wa(key: String) -> String:
+	return _w_anims.get(key, key)
+
+func _build_wolf() -> void:
+	set_foe({})
 	for l in [_wolf_label, _alert]:
 		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		l.no_depth_test = true
@@ -638,9 +674,11 @@ func anim_event(e: Dictionary) -> void:
 		var len := _p_anim.get_animation(name).length if _p_anim.has_animation(name) else 0.4
 		_p_oneshot_until = _clock + len / speed * (0.95 if not name.begins_with("Death") else 99.0)
 	else:
-		var name: String = WA + String(e["name"])
-		if e["name"] == "HitReact":
-			name = WA + ("Idle_HitReact_Left" if randf() < 0.5 else "Idle_HitReact_Right")
+		var name: String = _wa(e["name"])
+		if e["name"] == "HitReact" and randf() < 0.5:
+			name = _wa("HitReact2")
+		if e["name"] == "Attack" and e.has("anim") and _w_anim.has_animation(e["anim"]):
+			name = e["anim"]
 		_w_anim.speed_scale = 1.0
 		_play(_w_anim, name, speed, 0.06)
 		_w_current = name
@@ -993,12 +1031,12 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 	_overlay_wolf.albedo_color = overlay
 	if _clock >= _w_oneshot_until:
 		match f.w_state:
-			"prowl": _loop(_w_anim, WA + "Walk", 1.2, true)
-			"approach": _loop(_w_anim, WA + "Gallop", 1.3, true)
-			"windup": _loop(_w_anim, WA + "Idle_2_HeadLow", 0.6, true)
-			"recover", "idle", "pinned": _loop(_w_anim, WA + "Idle", 1.0, true)
-			"stagger": _loop(_w_anim, WA + "Idle_2_HeadLow", 0.3, true)
-			"flinch": _loop(_w_anim, WA + "Idle", 1.0, true)
+			"prowl": _loop(_w_anim, _wa("walk"), 1.2, true)
+			"approach": _loop(_w_anim, _wa("gallop"), 1.3, true)
+			"windup": _loop(_w_anim, _wa("windup"), 0.6, true)
+			"recover", "idle", "pinned": _loop(_w_anim, _wa("idle"), 1.0, true)
+			"stagger": _loop(_w_anim, _wa("stagger"), 0.3, true)
+			"flinch": _loop(_w_anim, _wa("flinch"), 1.0, true)
 	if f.w_state == "stagger":
 		_wolf.rotation.z = sin(_clock * 22.0) * 0.06
 	else:
@@ -1238,7 +1276,7 @@ func reset_feedback() -> void:
 	_p_current = ""
 	_w_current = ""
 	_play(_p_anim, "Idle", 1.0, 0.0)
-	_play(_w_anim, WA + "Idle", 1.0, 0.0)
+	_play(_w_anim, _wa("idle"), 1.0, 0.0)
 
 # --- The look: ink, motes, moonlight -------------------------------------------
 
@@ -1684,7 +1722,8 @@ func _furnish_quad() -> void:
 	_piece("barrel_small_stack", Vector3(-13.0, 0, -9.0), 0.0, 0.7)
 
 func _furnish_yard() -> void:
-	for p in [Vector3(2, 0, -4.5), Vector3(5, 0, -4.5), Vector3(8, 0, -4.5)]:
+	# Pillars in the corners, clear of the ring and of the camera behind whoever is sparring.
+	for p in [Vector3(-9.5, 0, -5.8), Vector3(9.5, 0, -5.8), Vector3(9.5, 0, 5.8)]:
 		_piece("pillar", p, 0.0, 0.7)
 		obstacles.append(Vector3(p.x, p.z, 0.6))
 	_piece("crates_stacked", Vector3(9.0, 0, 5.0), 0.0, 0.6)

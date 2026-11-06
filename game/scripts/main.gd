@@ -162,6 +162,13 @@ func _ready() -> void:
 		if _args.has("fresh"):
 			h.erase("academy")
 			h.erase("genius")
+		if _args.has("shape"):
+			# Straight to the morning of Lesson 3, with a genius born, for automated checks.
+			h["academy"] = { "seed": int(_args.get("seed", "4242")), "arrived": true, "done": ["hold", "rite"], "met": [], "day": 3, "rested_after": "rite",
+				"place": "yard", "record": { "parries": 6, "blocks": 4, "hurts": 2, "dodges": 1, "talks": 3 } }
+			if not h.has("genius"):
+				var ff := Rite.first_form(h, h["shape"], 11)
+				Rite.birth(h, ff["reading"], ff["name"])
 		if _args.has("rite"):
 			# Straight to the morning of the rite, for automated checks of it.
 			h.erase("genius")
@@ -171,7 +178,7 @@ func _ready() -> void:
 		enter_academy()
 		if _args.has("quit"):
 			get_tree().create_timer(float(_args.get("seconds", "90")), true, false, true).timeout.connect(func():
-				print("ACADEMY: place %s, done %s, met %d, rested %s, record %s" % [academy.progress["place"], str(academy.progress["done"]), academy.progress["met"].size(), str(academy.progress.get("rested", false)), str(academy.progress["record"])])
+				print("ACADEMY: place %s, done %s, met %d, rested after %s, record %s" % [academy.progress["place"], str(academy.progress["done"]), academy.progress["met"].size(), str(academy.progress.get("rested_after", "")), str(academy.progress["record"])])
 				get_tree().quit())
 	elif _args.has("new"):
 		new_character()
@@ -352,10 +359,21 @@ func _academy_frame(delta: float, real_dt: float) -> void:
 		move = Vector2.ZERO
 	fight = academy.fight
 	if _args.has("bot"):
-		if academy.wants_still():
-			move = Vector2.ZERO
-		else:
-			move = _lesson_bot() if academy.in_lesson() and not academy.talking() else academy.auto_move()
+		match academy.bot_mode() if not academy.talking() else "talk":
+			"still", "talk": move = Vector2.ZERO
+			"guard": move = _lesson_bot()
+			"stance":
+				if not fight.p_stance and fight.p_state == "free":
+					fight.input("stance")
+				move = Vector2.ZERO
+			"technique":
+				if fight.p_state == "free" and fight.p_will >= float(fight.tech["will"]) and fight.now >= float(fight.p_cooldowns.get(fight.tech["id"], 0.0)):
+					if fight.dist() > 2.2:
+						move = (fight.w_pos - fight.p_pos).normalized()
+					else:
+						fight.input("technique")
+			"fight": move = _bot()
+			_: move = academy.auto_move()
 	fight.update(minf(delta, 0.1), move)
 	var events := fight.drain()
 	_sounds(events)

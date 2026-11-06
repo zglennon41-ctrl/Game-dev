@@ -30,7 +30,8 @@ static func fill(text: String, h: Dictionary) -> String:
 		"name": h.get("name", ""), "blood": b.get("name", ""), "shape": String(h["shape"]).capitalize(),
 		"weapon": w["name"].to_lower(), "technique": kit["technique"]["name"], "city": String(h["city"]).capitalize(),
 		"stationcity": cities.get(h["city"], "On the line"), "pattern": Builder.sentence(h["pattern"]),
-		"pattern_name": h["pattern"]["name"],
+		"pattern_name": h["pattern"]["name"], "stance": kit["stance"]["name"], "stance_text": kit["stance"]["text"],
+		"technique_text": kit["technique"]["text"],
 	})
 
 func _beat_index(id: String) -> int:

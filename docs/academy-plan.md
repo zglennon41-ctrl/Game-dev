@@ -22,7 +22,7 @@ read. Two players with the same questionnaire answers should still leave differe
 
 ## Milestones
 
-**A. The grounds and the first lesson** (this milestone)
+**A. The grounds and the first lesson** (built)
 - The Gate at the Thaw, one year after the recruiter: Instructor Varga meets you.
 - A walkable Academy: the quad (the hub), the yard, the dormitory, the hearth hall and
   the tower shown as doors; you walk between them.
@@ -33,14 +33,16 @@ read. Two players with the same questionnaire answers should still leave differe
   the parry, why beasts find leaking children. The wards mean you cannot fall.
 - The term's progress is saved; Continue returns you to the quad.
 
-**B. The rite** — the hearth hall, the cohort watching; the bowl finds your Shape; the
+**B. The rite** (built) — the hearth hall, the cohort watching; the bowl finds your Shape; the
 genius takes its First Form, read from the Seed, the blood, the Shape and the record so
 far. The orb becomes its form (a silhouette with features until there is art).
 
-**C. Lesson 3, Shape** — the stance and the Shape's first technique family; a sparring
-ladder against classmates, who fight with their own kits.
+**C. Lesson 3, Shape** (built) — the stance and the Shape's first technique family; a
+sparring ladder against classmates, who fight with their own kits (today: everyone fights
+at close reach with a strike and a heavy blow; their Shape's techniques come with the
+Discipline lesson).
 
-**D. Lesson 4, Discipline** — your city's school, your first weapon proper, the
+**D. Lesson 4, Discipline** (next) — your city's school, your first weapon proper, the
 Discipline's first three techniques; the Instructor's test.
 
 **E. Lesson 5, the line** — the car, the post, extraction, orders for the genius, a

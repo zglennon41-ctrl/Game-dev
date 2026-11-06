@@ -106,6 +106,8 @@ func _init(opts: Dictionary = {}) -> void:
 	room = Data.room
 	rules = Data.rules
 	beast = Data.beast(opts.get("beast", "cut-wolf"))
+	if opts.has("foe"):
+		beast = student_beast(opts["foe"], float(opts.get("foe_scale", 1.0)))
 	hero = opts.get("hero", default_hero())
 	player_shape = hero["shape"]
 	kit = Data.kits[player_shape]
@@ -116,7 +118,7 @@ func _init(opts: Dictionary = {}) -> void:
 	tech = kit["technique"]
 	if hero.get("blood", "") != "":
 		bc = Data.by_id(Data.bloods, hero["blood"]).get("combat", {})
-	w_shape = opts.get("beast_shape", Data.opposite(player_shape))
+	w_shape = opts.get("beast_shape", beast["shape"] if opts.has("foe") else Data.opposite(player_shape))
 	mercy = opts.get("mercy", false)
 	allow_breach = opts.get("allow_breach", true)
 	if opts.has("beast_health"):
@@ -238,6 +240,17 @@ func dist() -> float:
 ## Bloods with a sense for the break need one fewer.
 func breaks_needed() -> int:
 	return int(room["break"]["needed"]) - (1 if bc.get("breakSense", false) else 0)
+
+## A person to spar with, as a beast the fight can run: the "student" template from
+## data/beasts.json, named and Shaped for the classmate, scaled for the ladder's rung.
+static func student_beast(c: Dictionary, scale := 1.0) -> Dictionary:
+	var b: Dictionary = Data.beast("student").duplicate(true)
+	b["name"] = c.get("name", "Student")
+	b["shape"] = c.get("shape", "anchor")
+	b["health"] = roundf(float(b["health"]) * scale)
+	b["person"] = { "body": c.get("body", "Knight"), "weapon": c.get("weapon", "saber"), "name": c.get("name", "") }
+	b["title"] = c.get("title", "of the cohort")
+	return b
 
 ## The Anchor the room started with, for the tests and the practice yard.
 static func default_hero() -> Dictionary:
@@ -916,7 +929,7 @@ func _update_wolf(dt: float) -> void:
 			if w_timer >= w_duration:
 				_wolf_set("strike", float(w_attack["active"]))
 				w_hit_done = false
-				_emit({ "type": "anim", "who": "wolf", "name": "Attack", "speed": 1.4 })
+				_emit({ "type": "anim", "who": "wolf", "name": "Attack", "speed": 1.4, "anim": w_attack.get("anim", "") })
 		"strike":
 			var lunge := float(w_attack["lunge"]) / float(w_attack["active"]) * dt
 			if dist() > float(room["player"]["radius"]) + float(b["radius"]):

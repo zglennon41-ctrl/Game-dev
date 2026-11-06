@@ -162,3 +162,10 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
     should offer a choice too.
 50. **The genius page shows the whole Tally** (the systems doc's open question): I chose to
     show it.
+51. **The sparring ladder** (`data/academy.json`, lesson "shape", mine): classmates step up
+    in order of temperament (the frightened first, the proud last); each rung has 18% more
+    health; two wins pass the lesson, a loss repeats the rung; the wards catch whoever drops.
+    Classmates fight at close reach with a strike and a heavy blow, whatever their weapon;
+    their own techniques and ranged styles are still to build.
+52. **Rest closes every day**: the Hearth Hall opens after sleeping on Lesson 1, Lesson 3 after
+    sleeping on the rite, and so on. The dormitory line for each night is in `rest.next`.
