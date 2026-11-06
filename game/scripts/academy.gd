@@ -1298,13 +1298,14 @@ func _next_step() -> void:
 		var c: Dictionary = _lesson["poster"]
 		fight.allies.append(Fight.make_ally(c, fight.p_pos + Vector2(-1.2, 1.2)))
 		world.set_allies(fight.allies)
+	if s.has("place") and progress["place"] != s["place"]:
+		go(s["place"], false, progress["place"])
+	# The spar is set up after the walk to its place, or the new place would wipe it.
 	if setup.get("spar", false):
 		_spar_mode = "poster" if str(setup["spar"]) == "poster" else ("instructor" if str(setup["spar"]) == "instructor" else "cohort")
 		_spar_rung = 0
 		_spar_wins = 0
 		_spar_begin()
-	if s.has("place") and progress["place"] != s["place"]:
-		go(s["place"], false, progress["place"])
 	match String(s["goal"]["type"]):
 		"find":
 			_choice_done = false
