@@ -1092,6 +1092,9 @@ func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
 		_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 1.0 })
 		return
 	var counter := int(beast.get("counterAfterHits", 0))
+	# A second-molt beast reads the stance: held in it, you are countered a hit sooner.
+	if beast.get("readsStance", false) and p_stance and counter > 1:
+		counter -= 1
 	if counter > 0 and w_hits_taken % counter == 0 and not passive:
 		for a in beast["attacks"]:
 			if a["id"] == "snap":

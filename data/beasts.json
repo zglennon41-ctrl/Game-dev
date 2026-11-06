@@ -250,7 +250,8 @@
     "respawnSeconds": 99.0,
     "counterAfterHits": 3,
     "model": "cut-wolf",
-    "guard": 0.35
+    "guard": 0.35,
+    "readsStance": true
   },
   {
     "id": "river-thing",
@@ -375,7 +376,8 @@
     "flinchTime": 0.3,
     "respawnSeconds": 99.0,
     "counterAfterHits": 3,
-    "guard": 0.35
+    "guard": 0.35,
+    "readsStance": true
   },
   {
     "id": "molted-hound",
@@ -500,7 +502,8 @@
     "flinchTime": 0.3,
     "respawnSeconds": 99.0,
     "counterAfterHits": 3,
-    "guard": 0.35
+    "guard": 0.35,
+    "readsStance": true
   },
   {
     "id": "current-eel",
@@ -625,6 +628,7 @@
     "flinchTime": 0.3,
     "respawnSeconds": 99.0,
     "counterAfterHits": 3,
-    "guard": 0.35
+    "guard": 0.35,
+    "readsStance": true
   }
 ]

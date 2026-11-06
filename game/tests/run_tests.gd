@@ -1438,6 +1438,28 @@ func test_gear_and_gate() -> void:
 	check(float(reach.combo[0]["reach"]) > float(plain.combo[0]["reach"]), "a reaching weapon reaches")
 	for z in Data.zones():
 		check(Data.gear["named"].has(z["id"]), "%s has a named weapon" % z["id"])
+	# A second-molt beast reads the stance: in it, the counter comes a hit sooner.
+	var hw := Fight.default_hero()
+	var snaps_plain := 0
+	var snaps_stance := 0
+	for stance in [false, true]:
+		var g := Fight.new({ "hero": hw, "beast": "green-warden", "seed": 3, "passive": false })
+		g._wolf_set("prowl", 9.0)
+		g.w_pos = g.p_pos + Vector2(1.6, 0)
+		g.p_facing = 0.0
+		g.p_stance = stance
+		var n := 0
+		for i in 12:
+			g.w_state = "prowl"
+			g.w_timer = 0.0
+			g.input("attack")
+			for e in run_for(g, 0.9):
+				if e["type"] == "windup" and e["attack"] == "snap":
+					n += 1
+			g.p_state = "free"
+		if stance: snaps_stance = n
+		else: snaps_plain = n
+	check(snaps_stance > snaps_plain, "the Warden reads the stance and counters sooner (%d against %d)" % [snaps_stance, snaps_plain])
 	# The Gate.
 	var a := Academy.new()
 	a.hero = Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
