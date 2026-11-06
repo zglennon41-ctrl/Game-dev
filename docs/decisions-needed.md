@@ -251,3 +251,7 @@ type), 66–67 (one weapon at a time; gear tiers at the Academy: named from Hunt
 Archive, fine for Marks, no armour), 68 (one Discipline for life), 69 (the art steers by
 cel-shaded stylized high detail; the next people effort is open), and sound: the score
 first, then barks.
+70. **Packs, elites and the harness** (mine, 2026-11-07): the pack takes turns at the hero
+    (one bite in flight), bites for 0.6, and goes for whoever is nearest; elites are guarded
+    (a third of damage lands) until broken; `npm run balance:game` prints the tables that
+    set these. The Green's packs are two; Harper's Cut's and the river's up to three.

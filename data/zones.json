@@ -209,7 +209,7 @@
         "waitForPost": true,
         "pack": {
           "min": 2,
-          "max": 3
+          "max": 2
         },
         "instructors": [
           {
@@ -454,7 +454,7 @@
         "setRot": 90,
         "pack": {
           "min": 2,
-          "max": 3
+          "max": 2
         },
         "doors": [
           {

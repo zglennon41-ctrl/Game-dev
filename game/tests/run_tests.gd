@@ -1066,12 +1066,12 @@ func test_zones() -> void:
 		check(elites.size() == 1 and elites[0].get("respawn", true) == false, "%s has one elite area whose beast stays down" % z["id"])
 		check(z["areas"].any(func(a): return a.has("post")), "%s has a post" % z["id"])
 	# The pack and the variant follow the seed: the same seed, the same place; another seed, another.
-	var a1 := Zones.area_place("green/post", 10)
-	var a2 := Zones.area_place("green/post", 10)
+	var a1 := Zones.area_place("green/cutting", 10)
+	var a2 := Zones.area_place("green/cutting", 10)
 	check(a1["variant"] == a2["variant"] and a1["zone"]["pack"] == a2["zone"]["pack"], "the same seed draws the same area")
 	var differs := false
 	for sd in range(11, 40):
-		var a3 := Zones.area_place("green/post", sd)
+		var a3 := Zones.area_place("green/cutting", sd)
 		if a3["variant"] != a1["variant"] and a3["zone"]["pack"].size() != a1["zone"]["pack"].size():
 			differs = true
 			break

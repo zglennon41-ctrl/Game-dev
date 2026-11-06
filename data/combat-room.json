@@ -570,5 +570,11 @@
         "knockback": 1.2
       }
     }
+  },
+  "pack": {
+    "$comment": "The rest of the pack: their bites land for this much of the beast's damage (the locked beast is the fight; the pack is the pressure), and they go for whoever is nearest, the hero drawing them this much more than a classmate (below 1: less). atOnce: how many bites may be in flight at the hero at once; the rest of the pack circles until its turn.",
+    "damage": 0.6,
+    "heroDraw": 1.15,
+    "atOnce": 1
   }
 }

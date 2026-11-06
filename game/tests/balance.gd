@@ -40,12 +40,35 @@ func _run() -> void:
 		for r in tech_rows:
 			if r[5] > 0 and (r[6] < med * 0.5 or r[6] > med * 2.0):
 				print("  %s %s: %.2f per Will (%s)" % [r[0], r[1], r[6], "weak" if r[6] < med else "strong"])
+	print("\n== ZONES: a skilled saber hero at Stage 3 with two classmates, 150 s in each area (the pack at its largest; the elite in its lair) ==")
+	print("%-24s %-14s %5s %6s %7s %6s %7s %5s" % ["area", "beast", "pack", "felled", "elite", "hurt", "lasted", "down"])
+	for z in Data.zones():
+		for a in z["areas"]:
+			var r := _zone_run(z, a)
+			print("%-24s %-14s %5d %6d %7s %6d %7.0f %5d" % r)
 	print("\n== TEMPERAMENTS: two classmates of one temperament, 90 s with the hero standing still, a pack of one beside the locked wolf ==")
 	print("%-10s %6s %7s %8s %6s %6s %6s %6s" % ["temper", "felled", "hits", "dealt", "techs", "parry", "retreat", "down"])
 	for tp in Data.academy["cohort"]["temperaments"]:
 		var r := _cohort(String(tp["id"]))
 		print("%-10s %6d %7d %8d %6d %6d %6d %6d" % r)
 	get_tree().quit()
+
+## A bite about to land on the hero, from the locked beast or any of the pack.
+func _bite_coming(f: Fight) -> bool:
+	if f.w_state == "windup" and f.w_duration - f.w_timer <= 0.1 and f.w_duration - f.w_timer > 0.1 - DT:
+		return true
+	for fo in f.foes:
+		if fo.state == "windup" and fo.target == -1 and fo.duration - fo.timer <= 0.1 and fo.duration - fo.timer > 0.1 - DT:
+			return true
+	return false
+
+func _any_windup(f: Fight) -> bool:
+	if f.w_state == "windup":
+		return true
+	for fo in f.foes:
+		if fo.state == "windup" and fo.target == -1:
+			return true
+	return false
 
 func _weapon_of_type(st: String) -> Dictionary:
 	for w in Data.weapons:
@@ -66,9 +89,9 @@ func _bot(seconds: float, weapon_id: String) -> Fight:
 	for i in int(seconds / DT):
 		var to_w := f.w_pos - f.p_pos
 		var move := Vector2.ZERO
-		if f.w_state == "windup" and f.w_duration - f.w_timer <= 0.1 and f.w_duration - f.w_timer > 0.1 - DT:
+		if _bite_coming(f):
 			f.input("block-down")
-		if f.p_block_held and f.w_state != "windup":
+		if f.p_block_held and not _any_windup(f):
 			f.input("block-up")
 		if f.pattern_ready():
 			f.input("pattern")
@@ -130,6 +153,51 @@ func _technique_damage(d: Dictionary, t: Dictionary) -> float:
 		best = maxf(best, hp0 - f.w_hp)
 	return best
 
+## The hero, Stage 3, with the first two classmates, against an area's beasts.
+func _zone_run(z: Dictionary, a: Dictionary) -> Array:
+	var h := Fight.default_hero()
+	h["stage"] = 3
+	h["projected"] = true
+	var cohort := Academy.make_cohort(42, h)
+	var which := String(a.get("beast", "common"))
+	var beast_id: String = z["beasts"]["common"] if which == "common" else (z["beasts"]["elite"] if which == "elite" else which)
+	var pack: Array = []
+	if a.has("pack"):
+		for i in int(a["pack"]["max"]):
+			pack.append(z["beasts"]["common"])
+	var f := Fight.new({ "seed": 11, "hero": h, "beast": beast_id, "allies": [cohort[0], cohort[1]], "pack": pack, "respawn": a.get("respawn", true), "arena": Vector2(a["size"][0], a["size"][1]) })
+	var elite_down := "-"
+	var downs := 0
+	for i in int(150.0 / DT):
+		var to_w := f.w_pos - f.p_pos
+		var move := Vector2.ZERO
+		if _bite_coming(f):
+			f.input("block-down")
+		if f.p_block_held and not _any_windup(f):
+			f.input("block-up")
+		if f.pattern_ready():
+			f.input("pattern")
+		if f.p_state == "pattern" and not f.chain.is_empty():
+			var c: float = f.chain["cues"][f.chain["next"]]
+			if absf(f.now - c) < DT / 2.0:
+				f.input("attack")
+		elif f.w_state in ["recover", "stagger", "flinch", "idle", "prowl"] and to_w.length() < 2.4 and (f.w_state != "recover" or f.w_duration - f.w_timer > 0.45):
+			if f.p_will > 40 and f.now >= float(f.p_cooldowns.get(f.tech["id"], 0.0)):
+				f.input("technique")
+			else:
+				f.input("attack")
+		if to_w.length() > 2.0 and f.w_state != "windup" and f.w_state not in ["down", "absent"]:
+			move = to_w.normalized()
+		f.update(DT, move)
+		for e in f.drain():
+			if e["type"] == "wolf-down" and which == "elite" and elite_down == "-":
+				elite_down = "%.0f s" % f.now
+			if e["type"] == "ally-down":
+				downs += 1
+		if f.p_state == "down":
+			break
+	return ["%s/%s" % [z["id"], a["id"]], beast_id, pack.size(), f.stats["wolves_down"], elite_down, f.stats["hurts"], f.now, downs]
+
 func _cohort(temper: String) -> Array:
 	var h := Fight.default_hero()
 	var cohort := Academy.make_cohort(42, h)
@@ -145,9 +213,9 @@ func _cohort(temper: String) -> Array:
 	var retreats := 0
 	var downs := 0
 	for i in int(90.0 / DT):
-		if f.w_state == "windup" and f.w_duration - f.w_timer <= 0.1 and f.w_duration - f.w_timer > 0.1 - DT:
+		if _bite_coming(f):
 			f.input("block-down")
-		if f.p_block_held and f.w_state != "windup":
+		if f.p_block_held and not _any_windup(f):
 			f.input("block-up")
 		f.update(DT, Vector2.ZERO)
 		for e in f.drain():

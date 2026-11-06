@@ -72,3 +72,24 @@ minute, alive at fifty seconds). The techniques' damage per Will sits between 0.
 for those that deal damage; marks, sounds, tethers and wards are utility and show 0.
 Temperaments read distinct: the reckless strike most, the scared and the kind fall back
 most, nobody is useless.
+
+### Packs and elites, from the zones table
+
+The harness also runs the hero (Stage 3, saber, parrying every bite it can see) with two
+classmates through every area. From it, three rules now in the data:
+
+- **The pack takes turns** (`combat-room.json`, `pack.atOnce`): one bite may be in flight
+  at the hero at a time; the rest circle close until it has landed. Readable, and the "!"
+  tells which one is coming.
+- **The pack's bites land softer** (`pack.damage`, 0.6 of the beast's): the locked beast is
+  the fight; the pack is the pressure. The pack goes for whoever is nearest, the hero
+  drawing a little more than a classmate (`pack.heroDraw`), so the party draws it off.
+- **Elites are guarded until broken** (`beasts.json`, `guard`): their blows land for a third
+  of their damage until the beast is staggered; a Pattern goes through. Breaking the beast
+  is the strategy, and the HUD says so. Their health is up to match.
+
+With these, a parry-only hero lasts the two and a half minutes on the Shenandoah's bank and
+the river's shore, a minute and a half in the Green's cutting, and falls in the deeper
+areas and at Harper's Cut unless they dodge, swap the lock to the biter and let the party
+draw: those are the Amber areas, meant for the field open. Elites fall to a perfect Pattern
+run in about half a minute; a player who cannot break them takes a few minutes.

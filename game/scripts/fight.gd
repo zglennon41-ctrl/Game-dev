@@ -1051,7 +1051,14 @@ func _resolve_swing(damage: float, reach: float, arc: float, breaks: bool, knock
 			_emit({ "type": "stagger", "seconds": float(room["break"]["staggerSeconds"]), "cause": "break" })
 	return true
 
+## An elite's guard: until it is broken, blows land for a fraction; a Pattern goes through.
+func _guarded(dmg: float, from_pattern := false) -> float:
+	if from_pattern or w_state == "stagger" or not beast.has("guard"):
+		return dmg
+	return roundf(dmg * float(beast["guard"]))
+
 func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
+	dmg = _guarded(dmg, from_pattern)
 	if w_state in ["down", "absent"]:
 		return
 	if w_state == "stagger":
@@ -1482,6 +1489,7 @@ func _ally_strike(i: int, tgt: int, dmg: float, heavy: bool, pattern := false) -
 	if tgt == -1:
 		if w_state == "stagger":
 			dmg = roundf(dmg * float(room["break"]["staggerDamageFactor"]))
+		dmg = _guarded(dmg, pattern)
 		w_hp = maxf(w_floor, w_hp - dmg)
 		stats["damage_dealt"] += dmg
 		_emit({ "type": "ally-hit", "who": i, "damage": dmg, "heavy": heavy, "pattern": pattern })
@@ -1717,6 +1725,14 @@ func _update_others(dt: float) -> void:
 				if fo.pos.distance_to(tp) > rng_a * 0.85:
 					_foe_step(fo, tp, float(b["gallopSpeed"]) * dt)
 					fo.facing = _angle_to(fo.pos, tp)
+				elif fo.target == -1 and _bites_on_hero() >= int(room.get("pack", {}).get("atOnce", 1)):
+					# The pack takes turns at the hero: this one circles close until the bite in
+					# flight has landed.
+					fo.facing = _angle_to(fo.pos, tp)
+					var around := _angle_to(tp, fo.pos) + fo.dir * 0.9 * dt
+					_foe_step(fo, tp + Vector2.from_angle(around) * rng_a * 0.9, float(b["walkSpeed"]) * dt)
+					if fo.timer > 4.0:
+						fo.set_state("prowl", 1.0)
 				else:
 					fo.set_state("windup", float(fo.attack["windup"]))
 					fo.facing = _angle_to(fo.pos, tp)
@@ -1737,12 +1753,14 @@ func _update_others(dt: float) -> void:
 					var mouth := fo.pos + Vector2.from_angle(fo.facing) * (float(b["radius"]) + 0.4)
 					if mouth.distance_to(p_pos) <= float(room["player"]["radius"]) + 1.0:
 						fo.hit_done = true
-						_resolve_bite_from(fo.attack, fo.pos, i)
+						var soft := fo.attack.duplicate()
+						soft["damage"] = roundf(float(fo.attack["damage"]) * float(room.get("pack", {}).get("damage", 1.0)))
+						_resolve_bite_from(soft, fo.pos, i)
 					else:
 						for k in allies.size():
 							if not allies[k]["down"] and mouth.distance_to(allies[k]["pos"]) <= 1.3:
 								fo.hit_done = true
-								_hurt_ally(k, float(fo.attack["damage"]), i)
+								_hurt_ally(k, roundf(float(fo.attack["damage"]) * float(room.get("pack", {}).get("damage", 1.0))), i)
 								break
 				if fo.timer >= fo.duration:
 					fo.set_state("recover", float(fo.attack["recover"]))
@@ -1750,6 +1768,16 @@ func _update_others(dt: float) -> void:
 				if fo.timer >= fo.duration:
 					fo.set_state("prowl", rng.randf_range(float(b["prowl"]["min"]), float(b["prowl"]["max"])))
 					fo.dir = -1.0 if rng.randf() < 0.5 else 1.0
+
+## How many bites are in flight at the hero right now (the locked beast's and the pack's).
+func _bites_on_hero() -> int:
+	var n := 0
+	if w_state in ["windup", "strike"] and w_target == -1:
+		n += 1
+	for fo in foes:
+		if (fo as Foe).state in ["windup", "strike"] and (fo as Foe).target == -1:
+			n += 1
+	return n
 
 func _foe_target_pos(fo: Foe) -> Vector2:
 	if fo.target >= 0 and fo.target < allies.size() and not allies[fo.target]["down"]:
@@ -1763,13 +1791,21 @@ func _foe_step(fo: Foe, target: Vector2, step: float) -> void:
 	fo.pos = _clamp_in(fo.pos + (target - fo.pos) / d * minf(step, d))
 
 func _foe_choose(fo: Foe) -> void:
+	# The nearest standing body, mostly; now and then whoever it fancies.
 	fo.target = -1
 	var standing: Array = []
+	var best_d := fo.pos.distance_to(p_pos) / float(room.get("pack", {}).get("heroDraw", 1.0))
 	for i in allies.size():
 		if not allies[i]["down"]:
 			standing.append(i)
-	if not standing.is_empty() and rng.randf() < 0.35:
+			var d: float = fo.pos.distance_to(allies[i]["pos"])
+			if d < best_d:
+				best_d = d
+				fo.target = i
+	if not standing.is_empty() and rng.randf() < 0.2:
 		fo.target = standing[rng.randi() % standing.size()]
+	elif rng.randf() < 0.15:
+		fo.target = -1
 	var tp := _foe_target_pos(fo)
 	var options: Array = []
 	var total := 0.0

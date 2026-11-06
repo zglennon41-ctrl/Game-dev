@@ -194,8 +194,8 @@
     "name": "The Warden of the Cutting",
     "shape": "turn",
     "molt": 2,
-    "health": 520,
-    "$comment": "The beast of the Green at the Field Examination's den: a second-molt cut-wolf, half again as big, named. modelScale draws it larger.",
+    "health": 1092,
+    "$comment": "The beast of the Green at the Field Examination's den: a second-molt cut-wolf, half again as big, named. modelScale draws it larger. guard: blows land for this much of their damage until the beast is broken (staggered); a Pattern goes through.",
     "modelScale": 1.45,
     "title": "second molt · named",
     "radius": 0.95,
@@ -249,7 +249,8 @@
     "flinchTime": 0.3,
     "respawnSeconds": 99.0,
     "counterAfterHits": 3,
-    "model": "cut-wolf"
+    "model": "cut-wolf",
+    "guard": 0.35
   },
   {
     "id": "river-thing",
@@ -318,8 +319,8 @@
     "name": "The Ruin-stag",
     "shape": "bind",
     "molt": 2,
-    "health": 560,
-    "$comment": "The Shenandoah's elite: tall, gaunt, a rack of antlers; it charges from the far side of the ruin.",
+    "health": 1176,
+    "$comment": "The Shenandoah's elite: tall, gaunt, a rack of antlers; it charges from the far side of the ruin. guard: blows land for this much of their damage until the beast is broken (staggered); a Pattern goes through.",
     "model": "ruin-stag",
     "modelScale": 1.1,
     "title": "second molt · named",
@@ -373,7 +374,8 @@
     "flinchEvery": 0,
     "flinchTime": 0.3,
     "respawnSeconds": 99.0,
-    "counterAfterHits": 3
+    "counterAfterHits": 3,
+    "guard": 0.35
   },
   {
     "id": "molted-hound",
@@ -442,8 +444,8 @@
     "name": "The Post-breaker",
     "shape": "make",
     "molt": 2,
-    "health": 720,
-    "$comment": "Harper's Cut's elite: squat and armoured; it took the last post and it will take this one.",
+    "health": 1512,
+    "$comment": "Harper's Cut's elite: squat and armoured; it took the last post and it will take this one. guard: blows land for this much of their damage until the beast is broken (staggered); a Pattern goes through.",
     "model": "post-breaker",
     "modelScale": 1.15,
     "title": "second molt · named",
@@ -497,7 +499,8 @@
     "flinchEvery": 0,
     "flinchTime": 0.3,
     "respawnSeconds": 99.0,
-    "counterAfterHits": 3
+    "counterAfterHits": 3,
+    "guard": 0.35
   },
   {
     "id": "current-eel",
@@ -566,8 +569,8 @@
     "name": "The Barge-Heart",
     "shape": "anchor",
     "molt": 2,
-    "health": 820,
-    "$comment": "The Cahokia river's elite: a river-thing grown huge in a barge hull, named by the river towns.",
+    "health": 1722,
+    "$comment": "The Cahokia river's elite: a river-thing grown huge in a barge hull, named by the river towns. guard: blows land for this much of their damage until the beast is broken (staggered); a Pattern goes through.",
     "model": "river-thing",
     "modelScale": 1.7,
     "title": "second molt · named",
@@ -621,6 +624,7 @@
     "flinchEvery": 0,
     "flinchTime": 0.3,
     "respawnSeconds": 99.0,
-    "counterAfterHits": 3
+    "counterAfterHits": 3,
+    "guard": 0.35
   }
 ]
