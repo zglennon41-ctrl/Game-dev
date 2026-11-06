@@ -1,96 +1,94 @@
-# The Academy: build plan
+# The Academy: the MMO, offline
 
-The Academy is a solo, offline game of 8–12 hours that every character plays before the
-server (owner, 2026-11-05). It teaches the world, the fight and the systems, and it is
-where the field and the genius grow into something no other character has. No one dies
-here. This file is the order it gets built in; each milestone is playable before the next.
+The owner's direction (2026-11-07): the first Academy, played through in thirty minutes, was
+the scaffold. The real one is the MMO at every level, played alone and offline, eight to
+twelve hours long, to an AAA standard of art and interface. This is the plan for the rebuild.
+Each milestone leaves the game playable; the order is what the owner plays first.
 
-## What makes every run a different character
+## What the term is
 
-The Academy keeps a **record** of how it was played, and the record is what the readings
-read. Two players with the same questionnaire answers should still leave different.
+A season at Alexandria: **the Thaw, thirteen weeks**, played as about twenty-five days the
+player chooses to spend (lessons take a day each; a day with no lesson is a day on the board,
+in the yard, at the hearth, or with the cohort). The clock never gates the player; the
+calendar gives the term its shape:
 
-- **The questionnaire** (built): blood, Shape lean, city, weapon, Seed, first Pattern.
-- **The cohort**: twelve classmates generated for the run (names, bloods, Shapes, cities,
-  temperaments), so the room, the rivals and the friends differ every time.
-- **The record**: parries and blocks, range kept, techniques leaned on, who you sparred,
-  who you helped, what you said to the Instructors, whether you hid your Pattern. It
-  feeds the rite's First Form, the Gate's Second Form, the Stage 3 field and the cohort's
-  write-up.
-- **Choices with weight**: which classmate's trouble you take on, who comes on the
-  Examination with you, whether you swear a Term.
+| Week | What the term holds | The crisis |
+| --- | --- | --- |
+| 1 | Arrival, Hold, the rite, Shape | Omen: rumours, a new zone variant, side quests that point at the trouble |
+| 2–3 | Discipline, the line, the board opens (Green) | Omen |
+| 4–9 | The board in full (Green and the first Amber), Project, deeper courses, the Examination | Pressure: Ledgers published Wednesdays; crisis quests weigh them |
+| 10–12 | The crisis quests; the Deep Run; the Rally | Crisis |
+| 13 | The Reckoning; the Gate; Commencement | Reckoning: the ending writes the world the character leaves with |
 
-## Milestones
+Twelve classmates live through the same term as agents of their own.
 
-**A. The grounds and the first lesson** (built)
-- The Gate at the Thaw, one year after the recruiter: Instructor Varga meets you.
-- A walkable Academy: the quad (the hub), the yard, the dormitory, the hearth hall and
-  the tower shown as doors; you walk between them.
-- The cohort: twelve classmates generated for the run, standing about the quad; you can
-  talk to each (E). Every run's twelve are different.
-- Instructors: Varga (Read) at the quad, the Yardmaster at the yard.
-- **Lesson 1, Hold**: in the warded yard, against the Yardmaster's genius: the guard,
-  the parry, why beasts find leaking children. The wards mean you cannot fall.
-- The term's progress is saved; Continue returns you to the quad.
+## The milestones
 
-**B. The rite** (built) — the hearth hall, the cohort watching; the bowl finds your Shape; the
-genius takes its First Form, read from the Seed, the blood, the Shape and the record so
-far. The orb becomes its form (a silhouette with features until there is art).
+**M1. The world.** Packs: fights with several foes at once, each with its own behaviour.
+Four zones around Alexandria, each a tile library (12–20 tiles) assembled into 3–5 areas with
+fixed set pieces, three variants, a post, and the beasts of the zone:
 
-**C. Lesson 3, Shape** (built) — the stance and the Shape's first technique family; a
-sparring ladder against classmates, who fight with their own kits (today: everyone fights
-at close reach with a strike and a heavy blow; their Shape's techniques come with the
-Discipline lesson).
+| Zone | Line | Colour | Beasts | Set piece |
+| --- | --- | --- | --- | --- |
+| The Green hills (the cutting) | Columbia | Green | cut-wolves, the Warden | the den |
+| The Shenandoah ruin | Cahokia | Green, Amber | river-things, a ruin-stag | the bridge-thing |
+| Harper's Cut junction | Columbia | Green, Amber | molted hounds, a post-breaker | the dark junction |
+| The Cahokia river line | Cahokia | Amber | eels of the current, the Barge-Heart | the crossing |
 
-**D. Lesson 4, Discipline** (built) — your city's school, your first weapon proper (any
-the school teaches), the Discipline's first three techniques on keys 1, 2, 3; the
-Instructor's test, a bout against them.
+Four beast kinds beyond the wolf (built in Blender on the wolf's rig so they walk and bite),
+second-molt behaviour (reads your stance and counters), named beasts that remember.
 
-**E. Lesson 5, the line** (built) — choose two classmates for your party; the car to the
-Green; three areas as places (the cutting, the post, the den); the post held with your
-genius on Hold; a beast of the Green at the den; extraction; the rescue team if anyone
-falls. Classmates fight beside you and can be hurt; the cohort remembers.
+**M2. The board.** The seven quest types as excursion templates with objectives, failure
+conditions and pay, posted daily from the term's state: Linework (hold a post three beats),
+Salvage (carry a thing out, no Patterns while carrying), Hunt (a named beast on a timer),
+Escort (a car with health, waves from both sides), Writ (a house's errand with a decision
+timer), Deep Run (two zones, one extraction), Rally (three against three in the yard, Fridays).
+The excursion loop: platform (gear, orders, the party), the car, areas, the post (push or
+extract), extraction, the hearth (Marks, witness, loot).
 
-**F. Lesson 6, Project** (built) — the field opened past the skin: a drill in the yard that ends
-with Stage 3 (more Will, more reach, a visible field). Then the Field Examination proper,
-in the Green with the field open and a party of three; the Instructor watching from the post.
+**M3. The crisis.** One season's crisis as data (`data/crises.json`): the Omen's rumours and
+side quests, Pressure's Ledgers (three), crisis-tagged quests that weigh them, the Reckoning
+that picks the heaviest ending and writes the world state (the line map, the houses, the
+named NPCs who lived or died) onto the character for the server.
 
-**G. The Gate and Commencement** (built) — the Gate Reading: the genius's Second Form read from how
-the Academy was played, three candidates with their reasons, your choice; the cohort's
-write-up of you; Commencement on the platform; the character leaves settled (Shape, Stage 3,
-Discipline and weapon, Pattern, genius, record) and the title shows it.
+**M4. The cohort's AI.** Classmates as agents: goals and a schedule through the term; a
+fighting style from Shape, school and temperament (their own targets, techniques, stance,
+Pattern, retreat when hurt); their own excursions the player may join; they can be lost on
+a run (hurt and carried out, never killed at the Academy).
 
-**H. Polish** (next) — day cards, fades between places, pacing, lines, sound; the whole run played
-end to end before it is called done.
+**M5. Deeper lessons and mastery.** Technique grades by use (learned, practiced,
+perfected); the school's nine techniques across Journeyman rank; Pattern building at the
+Academy hearth under a Hearthkeeper; the Examination as a true Green run with the field
+open and an Instructor at the post.
 
-## The seeds (owner's direction, 2026-11-06: sow every seed that pays off in the MMO)
+**M6. Art.** Grounded people (built in Blender on the existing rig so the animation library
+carries over), beasts on the wolf's rig, environments from a proper kit with lighting and
+post-processing, effects for the field; AI-made assets produced and improved through
+Blender here; briefs and a drop-in pipeline for assets the owner generates with their own
+tools (`docs/art-bible.md`).
 
-| Seed in the Academy | Pays off on the server |
+**M7. Interface.** The fight HUD and the menus, sheets and pages redesigned: fewer, calmer
+elements in fights; one consistent sheet language; gamepad and keyboard first-class.
+
+## What is kept
+
+The creator, the opening, the genius system and its Readings, the rite and the Gate, the
+six lessons as the spine of the term, the seeds already planted (Marks, the board, the
+shade, the calendar, the declaration), advanced standing.
+
+## Pacing to eight hours
+
+| Part | Hours |
 | --- | --- |
-| Marks for lessons, bouts, runs and the Examination; the Journeyman archetype at Commencement | Marks and ranks; archetypes, cross titles, founding |
-| The board's troubles (salvage, escort, hunt, rally) from classmates | The hall's board and its seven quest types |
-| The hearth's shade: visits, witnessing, a shadow, a graft | Shades, witness and shadows, grafts at Readings |
-| Classmates' Patterns fired in bouts | Witnessing other players' Patterns; founding on a shared Pattern |
-| The dated term and the Omen's rumours | The calendar, the season's crisis, the Ledgers |
-| The declaration: guilds of three Charters, a founding promise, free lance | Guilds, Charters, Companies, the Writ of Founding |
-| The schools' rites named | Disciplines and their archetypes |
-| The party of two classmates, the post, extraction, the rescue team | Excursions: platform, car, areas, post, extraction |
+| The opening and arrival | 0.5 |
+| The six lessons as courses | 2.5 |
+| The board: ten to fifteen excursions of 20–40 minutes | 4–6 |
+| The crisis quests, the Deep Run, the Rally | 1.5 |
+| The hearth, the cohort, the shade, the Gate | 0.5 |
 
 ## After the Academy (the owner's direction, 2026-11-06)
 
 The server is a mastery progression: the player learns to use their field and to cover its
 weaknesses by levelling, until the character dies of old age, of injury, or by spending the
-whole field at once in a grand working that leaves a lasting mark on the world. The Academy
-is built to lead into that life; its rules are later steps.
-
-**Between lessons, all the way through** — days of the term: free time in the quad
-(pick-up sparring, the card game, Instructors' stories), classmates' troubles that
-become side quests, the dormitory at night.
-
-## Open (the owner's)
-
-- Does the rite confirm the Shape the questionnaire leaned toward, or can it surprise?
-- What becomes of the genius when its partner dies on the server?
-- Which deaths carry over what (memory, lineage, unlocks)?
-- Does Sworn remain a separate flag now that any character can die on the server?
-- The Yardmaster and the other Instructors are placeholders of mine (`data/academy.json`).
+whole field at once in a grand working that leaves a lasting mark on the world. A life is
+about 300 hours. The Academy is built to lead into that life; its rules are later steps.

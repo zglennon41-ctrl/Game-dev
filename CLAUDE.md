@@ -22,7 +22,11 @@ A vertical slice, in this order, each step playable before the next starts:
    the six lessons (Hold, the rite, Shape, Discipline, the line, Project), the Field
    Examination, Commencement. No one dies here (wards; a rescue team on expeditions). Every
    run should make a character unlike the last, and the run ends with a settled field:
-   a character ready for the server (owner, 2026-11-06). The plan is `docs/academy-plan.md`.
+   a character ready for the server (owner, 2026-11-06). **It is the MMO, offline, at every
+   level** (owner, 2026-11-07): a season's crisis arc, the full quest board in zones around
+   Alexandria, deeper lessons, classmates with AI of their own, AAA-standard art and
+   interface. The first version (thirty minutes long) was the scaffold; the plan for the
+   rebuild is `docs/academy-plan.md`.
 5. The hall: common room, board, roster members, one named death.
 6. Co-op for three.
 

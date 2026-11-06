@@ -387,6 +387,21 @@ end a life; finished art (the blockouts are placeholders in the right shape).
   paced to that.
 - **After the Academy is polished, the art comes next** (owner, 2026-11-06): the remaining
   First Forms in Blender (bodies, parts and cards), so every rite has real art.
+- **The Academy is the MMO, offline, at every level** (owner, 2026-11-07, after playing the
+  first version through in thirty minutes): eight to twelve hours of a term that carries a
+  season-long crisis arc (Omen, Pressure, Crisis, Reckoning, with Ledgers the cohort's quests
+  weigh and an ending that writes the world the character leaves with); the full quest board
+  (Linework, Salvage, Hunt, Escort, Writ, Deep Run, Rally) run in zones around Alexandria;
+  deeper lessons and mastery (technique grades, more of each school, Pattern building at the
+  hearth, a harder Examination). The cohort's classmates are agents of their own: goals, a
+  schedule, a fighting style from their Shape, school and temperament; in a party they choose
+  their own targets and techniques, retreat, and can be lost.
+- **AAA standard is the bar for art and interface** (owner, 2026-11-07). Art on two tracks at
+  once: grounded models, real lighting, animation and effects built now (AI-made assets made
+  and improved through Blender in the development environment, and grounded CC0 where it
+  serves), with briefs and a drop-in pipeline for assets the owner generates with their own
+  tools. The fight HUD and the menus, sheets and pages are to be redesigned. The genius
+  mechanics are the direction to keep.
 - **No one dies at the Academy** (owner, 2026-11-05). Its wards make training safe, and on
   expeditions a rescue team stands by: a downed student is pulled out, and failing costs the
   run something but never the character.
