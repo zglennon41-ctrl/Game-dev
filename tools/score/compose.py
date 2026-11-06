@@ -108,18 +108,28 @@ def pink(n: int, rng: np.random.Generator) -> np.ndarray:
 # --------------------------------------------------------------------------------------
 
 
-def partial_sum(freq: float, n: int, partials, detunes_cents=(0.0,), vibrato=(0.0, 0.0, 0.0), decay=None, bright_in=0.0):
+def fit_period(hz: float, period: float | None) -> float:
+    """Round a frequency so whole cycles fit the period (a loop), when there is one."""
+    if not period:
+        return hz
+    return max(round(hz * period), 1) / period
+
+
+def partial_sum(freq: float, n: int, partials, detunes_cents=(0.0,), vibrato=(0.0, 0.0, 0.0), decay=None, bright_in=0.0, period=None):
     """Additive synthesis. partials: [(ratio, amp)]. decay: fn(ratio) -> per-second rate, or None.
-    vibrato: (rate hz, depth fraction, onset s). bright_in: seconds for high partials to bloom."""
+    vibrato: (rate hz, depth fraction, onset s). bright_in: seconds for high partials to bloom.
+    period: a loop length in seconds; every frequency is then fitted to it so the sound wraps."""
     t = time_axis(n)
     out = np.zeros(n)
     vib = np.zeros(n)
     if vibrato[1] > 0:
         rate, depth, onset = vibrato
         ramp = np.clip((t - onset) / max(onset, 0.05), 0.0, 1.0)
-        vib = depth * ramp * np.sin(TWO_PI * rate * t)
+        if period:
+            ramp = 1.0
+        vib = depth * ramp * np.sin(TWO_PI * fit_period(rate, period) * t)
     for cents in detunes_cents:
-        f0 = freq * 2.0 ** (cents / 1200.0)
+        f0 = fit_period(freq * 2.0 ** (cents / 1200.0), period)
         phase_base = np.cumsum(TWO_PI * f0 * (1.0 + vib) / SR)
         for ratio, amp in partials:
             if f0 * ratio > SR * 0.45:
@@ -201,13 +211,13 @@ def v_bell(freq, dur, vel, rng):
     return y * env * vel * 0.4
 
 
-def v_drone(freq, dur, vel, rng):
+def v_drone(freq, dur, vel, rng, period=None):
     n = samples(dur)
     env = adsr(n, 1.5, 0.5, 1.0, 2.0)
     ps = harmonic_series(18, 1.0, lowpass_k=5.0)
-    y = partial_sum(freq, len(env), ps, detunes_cents=(-7.0, -3.0, 0.0, 3.5, 7.5))
+    y = partial_sum(freq, len(env), ps, detunes_cents=(-7.0, -3.0, 0.0, 3.5, 7.5), period=period)
     t = time_axis(len(env))
-    lfo = 1.0 + 0.06 * np.sin(TWO_PI * 0.11 * t) + 0.03 * np.sin(TWO_PI * 0.071 * t + 1.0)
+    lfo = 1.0 + 0.06 * np.sin(TWO_PI * fit_period(0.11, period) * t) + 0.03 * np.sin(TWO_PI * fit_period(0.071, period) * t + 1.0)
     return y * env * lfo * vel * 0.35
 
 
@@ -217,7 +227,7 @@ def v_strings(freq, dur, vel, rng):
     ps = harmonic_series(16, 1.0, lowpass_k=7.0)
     y = partial_sum(freq, len(env), ps, detunes_cents=(-6.0, 0.0, 6.5), vibrato=(5.1, 0.0035, 0.35))
     bow = fft_filter(noise(len(env), rng), 1500, 5000) * 0.006
-    return (y + bow) * env * vel * 0.3
+    return (y + bow) * env * vel * 0.24
 
 
 def v_cello(freq, dur, vel, rng):
@@ -234,7 +244,7 @@ def v_brass(freq, dur, vel, rng):
     env = adsr(n, 0.07, 0.18, 0.8, 0.3, curve=0.8)
     ps = harmonic_series(18, 0.8, lowpass_k=9.0)
     y = partial_sum(freq, len(env), ps, detunes_cents=(-2.0, 2.0), vibrato=(4.7, 0.004, 0.5), bright_in=0.07)
-    return np.tanh(y * 1.4 * env) * env * vel * 0.3
+    return np.tanh(y * 1.4 * env) * env * vel * 0.42
 
 
 def v_horn(freq, dur, vel, rng):
@@ -243,15 +253,15 @@ def v_horn(freq, dur, vel, rng):
     env = adsr(n, 0.12, 0.2, 0.8, 0.4, curve=1.0)
     ps = harmonic_series(12, 1.1, lowpass_k=5.0)
     y = partial_sum(freq, len(env), ps, detunes_cents=(-2.0, 2.0), vibrato=(4.4, 0.003, 0.5), bright_in=0.12)
-    return y * env * vel * 0.32
+    return y * env * vel * 0.44
 
 
-def v_glass(freq, dur, vel, rng):
+def v_glass(freq, dur, vel, rng, period=None):
     """A high harmonic shimmer: a bowed glass or a far-off string harmonic."""
     n = samples(dur)
     env = adsr(n, 0.6, 0.3, 0.8, 1.2, curve=1.6)
     ps = [(1, 1.0), (2, 0.15), (3, 0.05)]
-    y = partial_sum(freq, len(env), ps, detunes_cents=(-4.0, 4.0), vibrato=(3.8, 0.002, 0.8))
+    y = partial_sum(freq, len(env), ps, detunes_cents=(-4.0, 4.0), vibrato=(3.8, 0.002, 0.8), period=period)
     return y * env * vel * 0.3
 
 
@@ -388,7 +398,7 @@ def reverb(x: np.ndarray, size: float = 1.0, damp_hz: float = 5000.0, decay: flo
     for d in combs:
         dd = max(int(d * size) + offs, 50)
         wet += comb(inp, dd, decay)
-    wet *= 0.25
+    wet *= 0.25 * (1.0 - decay) * 5.0  # about 1.25x the input's level when it sustains
     for d in aps:
         wet = allpass(wet, max(int(d * size), 20), 0.5)
     return wet
@@ -468,7 +478,7 @@ class Piece:
         self.events = 0
 
     # -- placing sound ---------------------------------------------------------------
-    def place(self, y: np.ndarray, at_seconds: float, gain: float = 1.0, send: dict | None = None):
+    def place(self, y: np.ndarray, at_seconds: float, gain: float = 1.0, send: dict | None = None, fade: bool = True):
         start = samples(at_seconds)
         if start < 0:
             y = y[-start:]
@@ -477,6 +487,10 @@ class Piece:
         if end <= start:
             return
         seg = y[: end - start] * gain
+        k = min(64, len(seg))  # every sound begins from silence: no clicks, and a clean seam
+        if fade and k and abs(seg[0]) > 1e-6:
+            seg = seg.copy()
+            seg[:k] *= np.linspace(0.0, 1.0, k)
         self.dry[start:end] += seg
         for name, amt in (send or {}).items():
             buf = self.wet.setdefault(name, np.zeros_like(self.dry))
@@ -512,22 +526,37 @@ class Piece:
     def drone(self, voice, midi, gain=1.0, send=None, vel=0.6):
         """A sound that lasts the whole loop, its pitch quantised so whole cycles fit the loop."""
         hz = midi_to_hz(midi)
-        if self.loop:
-            cycles = max(round(hz * self.length), 1)
-            hz = cycles / self.length
-        y = voice(hz, self.length + 1.0, vel, self.rng)
-        self.place(y, 0.0, gain, send)
+        if not self.loop:
+            self.place(voice(hz, self.length, vel, self.rng), 0.0, gain, send)
+            return
+        # Render past the attack and take the steady middle, every frequency fitted to the loop.
+        lead = 2.5
+        y = voice(hz, self.length + lead + 1.0, vel, self.rng, period=self.length)
+        self.place(y[samples(lead) : samples(lead) + self.n], 0.0, gain, send, fade=False)
 
     def texture(self, fn, gain=1.0, send=None):
-        y = fn(self.n + self.tail, self.rng)
-        self.place(y, 0.0, gain, send)
+        if not self.loop:
+            self.place(fn(self.n, self.rng), 0.0, gain, send)
+            return
+        # A texture loops on itself: its last second is blended into its first.
+        k = samples(1.0)
+        y = fn(self.n + k, self.rng)
+        w = np.linspace(0.0, 1.0, k)
+        head = y[:k] * w + y[self.n : self.n + k] * (1.0 - w)
+        y = y[: self.n].copy()
+        y[:k] = head
+        self.place(y, 0.0, gain, send, fade=False)
 
     # -- rendering ---------------------------------------------------------------------
     def render(self, reverbs: dict, master_db: float = 0.0, comp=(-14.0, 2.5)) -> np.ndarray:
         mix = self.dry.copy()
+        wet_all = np.zeros_like(mix)
         for name, buf in self.wet.items():
             spec = reverbs[name]
-            mix += reverb(buf, **spec)
+            wet_all += reverb(buf, **spec)
+        rms = lambda a: 20 * math.log10(np.sqrt(np.mean(a ** 2)) + 1e-9)
+        print(f"  {self.name}: {self.events} events, dry {rms(self.dry):.1f} dB, wet {rms(wet_all):.1f} dB", flush=True)
+        mix += wet_all
         if self.loop:
             out = mix[: self.n].copy()
             out[: self.tail] += mix[self.n : self.n + self.tail]  # the tail falls onto the start
@@ -540,7 +569,11 @@ class Piece:
             out[-k:] *= np.linspace(1.0, 0.0, k) ** 1.5
         out = fft_filter(out, lo=24.0, slope=2.0)  # no rumble, no offset
         out -= np.mean(out)
-        out = compress(out, comp[0], comp[1])
+        if self.loop:
+            # The compressor settles over the loop once, then its second pass is kept: no gain step at the seam.
+            out = compress(np.concatenate([out, out]), comp[0], comp[1])[len(out):]
+        else:
+            out = compress(out, comp[0], comp[1])
         out *= db(master_db)
         return limiter(out)
 
@@ -1028,8 +1061,10 @@ def analyse(y: np.ndarray, loop: bool) -> dict:
         "clipped": int(np.sum(np.abs(mono) >= 0.999)),
     }
     if loop:
-        info["seam"] = round(float(abs(mono[-1] - mono[0])), 4)
-        info["seam_rms_1k"] = round(float(np.sqrt(np.mean((mono[-1000:] - mono[:1000]) ** 2))), 4)
+        # The step across the seam against the steps the music takes anyway (its 99.9th percentile).
+        body = np.percentile(np.abs(np.diff(mono)), 99.9)
+        info["seam"] = round(float(abs(mono[-1] - mono[0])), 5)
+        info["seam_vs_body"] = round(float(abs(mono[-1] - mono[0]) / (body + 1e-9)), 2)
     return info
 
 
@@ -1061,7 +1096,7 @@ def main(argv=None):
         info.update(seconds=round(len(y) / SR, 3), bytes=os.path.getsize(path), tempo=tempo, key=key, kind=kind)
         report[name] = info
         print(f"{name:20s} {info['seconds']:6.2f}s {info['bytes']/1e6:5.2f}MB peak {info['peak_dbfs']:6.2f} rms {info['rms_dbfs']:6.2f} dc {info['dc']:+.5f} clip {info['clipped']}"
-              + (f" seam {info['seam']:.4f}/{info['seam_rms_1k']:.4f}" if loop else ""), flush=True)
+              + (f" seam {info['seam']:.5f} ({info['seam_vs_body']:.2f}x a normal step)" if loop else ""), flush=True)
     if args.report:
         with open(args.report, "w") as f:
             json.dump(report, f, indent=1)
