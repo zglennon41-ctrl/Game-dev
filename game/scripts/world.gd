@@ -240,9 +240,9 @@ func build_hero(hero: Dictionary) -> void:
 		a.visible = n.contains("Helmet") or n.contains("Hat") or n.contains("Cape") or n.contains("Hood")
 	var skel: Skeleton3D = _player.find_child("Skeleton3D", true, false)
 	var w: Dictionary = Data.by_id(Data.weapons, hero.get("weapon", "saber"))
-	_sword = _attach(skel, "handslot.r", "res://game/assets/kaykit/weapons/%s.gltf" % w["model"])
+	_sword = _attach(skel, "handslot.r", _weapon_model(w["model"]))
 	if w.has("offhand"):
-		_attach(skel, "handslot.l", "res://game/assets/kaykit/weapons/%s.gltf" % w["offhand"])
+		_attach(skel, "handslot.l", _weapon_model(w["offhand"]))
 	_p_anim = _player.find_child("AnimationPlayer", true, false)
 	for loop in ["Idle", "Running_A", "Running_Strafe_Left", "Running_Strafe_Right", "Walking_Backwards", "Walking_A", "Blocking", "Death_A_Pose", "1H_Ranged_Aiming", "2H_Ranged_Aiming", "Spellcasting"]:
 		if _p_anim.has_animation(loop):
@@ -382,9 +382,9 @@ func set_foe(spec: Dictionary) -> void:
 		var skel: Skeleton3D = _wolf.find_child("Skeleton3D", true, false)
 		if spec.get("weapon", "") != "":
 			var w: Dictionary = Data.by_id(Data.weapons, spec["weapon"])
-			_attach(skel, "handslot.r", "res://game/assets/kaykit/weapons/%s.gltf" % w["model"])
+			_attach(skel, "handslot.r", _weapon_model(w["model"]))
 			if w.has("offhand"):
-				_attach(skel, "handslot.l", "res://game/assets/kaykit/weapons/%s.gltf" % w["offhand"])
+				_attach(skel, "handslot.l", _weapon_model(w["offhand"]))
 	add_child(_wolf)
 	_w_anim = _wolf.find_child("AnimationPlayer", true, false)
 	for key in ["idle", "walk", "gallop", "windup", "stagger", "flinch"]:
@@ -397,6 +397,16 @@ func set_foe(spec: Dictionary) -> void:
 		m.material_overlay = _overlay_wolf
 	_w_current = ""
 	_w_oneshot_until = 0.0
+
+## A weapon's model: the weapon kit's when it exists, else KayKit's of that name.
+func _weapon_model(model: String) -> String:
+	var path := "res://game/assets/weapons/%s.glb" % model
+	if ResourceLoader.exists(path):
+		return path
+	var kk := "res://game/assets/kaykit/weapons/%s.gltf" % model
+	if ResourceLoader.exists(kk):
+		return kk
+	return "res://game/assets/kaykit/weapons/sword_1handed.gltf"
 
 ## A person's body: the grounded one from the people kit when it exists, else KayKit's.
 func _person_model(body: String) -> String:
@@ -844,7 +854,20 @@ func feedback(f: Fight, events: Array) -> void:
 			"whiff":
 				pass
 			"shot":
-				_tracer(_v3(e["from"], 1.35) + _v3(Vector2.from_angle(f.p_facing) * 0.6), _v3(e["to"], 1.0), e["hit"])
+				if e.get("cone", false):
+					var m := _v3(f.p_pos, 1.2) + _v3(Vector2.from_angle(f.p_facing) * 1.0)
+					burst(m, Color(1.0, 0.8, 0.5), 40, 9.0)
+					impact(m, Color(1.0, 0.75, 0.4), 1.2)
+					_shake = maxf(_shake, 0.2)
+				else:
+					_tracer(_v3(e["from"], 1.35) + _v3(Vector2.from_angle(f.p_facing) * 0.6), _v3(e["to"], 1.0), e["hit"])
+			"reload":
+				floater(P - Vector3(0, 0.5, 0), "RELOADING", C_DIM, 36, 0.8)
+			"reloaded":
+				floater(P - Vector3(0, 0.5, 0), "LOADED", Color(0.75, 0.85, 1.0), 36, 0.6)
+			"draw-release":
+				if float(e.get("charge", 0.0)) >= 0.99:
+					floater(P + Vector3(0, 0.2, 0), "FULL DRAW", C_GOLD, 44, 0.8)
 			"burst":
 				_ring_wave(_v3(e["at"]), Color(1.0, 0.45, 0.15), 2.8)
 				burst(_v3(e["at"], 0.8), Color(1.0, 0.5, 0.15), 40, 6.0)
@@ -2296,9 +2319,9 @@ func set_allies(specs: Array) -> void:
 			a.visible = an.contains("Helmet") or an.contains("Hat") or an.contains("Cape") or an.contains("Hood")
 		var skel: Skeleton3D = n.find_child("Skeleton3D", true, false)
 		var w: Dictionary = Data.by_id(Data.weapons, sp.get("weapon", "saber"))
-		_attach(skel, "handslot.r", "res://game/assets/kaykit/weapons/%s.gltf" % w["model"])
+		_attach(skel, "handslot.r", _weapon_model(w["model"]))
 		if w.has("offhand"):
-			_attach(skel, "handslot.l", "res://game/assets/kaykit/weapons/%s.gltf" % w["offhand"])
+			_attach(skel, "handslot.l", _weapon_model(w["offhand"]))
 		for m in n.find_children("*", "MeshInstance3D", true, false):
 			m.material_overlay = _ink(2.0)
 		var ap: AnimationPlayer = n.find_child("AnimationPlayer", true, false)

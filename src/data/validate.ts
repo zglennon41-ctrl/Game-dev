@@ -74,6 +74,19 @@ export function validateData(dir = 'data'): Problem[] {
     }
     for (const k of ['floor', 'edge'] as const) if (!z.tiles[k].length) problems.push({ file: 'zones.json', message: `${z.id}: no ${k} tiles` });
   }
+  // Weapons: every weapon names a type the room knows, every discipline's weapons exist, every
+  // instructor's and every creation answer's style keys exist.
+  const styleIds = new Set<string>(Object.keys(D('combat-room').styles).filter((k) => !k.startsWith('$')));
+  const weaponIds = ids('weapons');
+  for (const w of D('weapons')) {
+    if (!styleIds.has(w.style)) problems.push({ file: 'weapons.json', message: `${w.id}: unknown weapon type ${w.style}` });
+    if (!D('disciplines').some((d: { city: string }) => d.city === w.city)) problems.push({ file: 'weapons.json', message: `${w.id}: no discipline for city ${w.city}` });
+  }
+  for (const d of D('disciplines')) for (const w of d.weapons) need('disciplines.json', weaponIds, w, `weapon of ${d.id}`);
+  for (const [sh, kit] of Object.entries(D('shape-kits') as Record<string, { styles?: Record<string, number> }>)) if (kit.styles) for (const st of Object.keys(kit.styles)) if (!styleIds.has(st)) problems.push({ file: 'shape-kits.json', message: `${sh}: unknown weapon type ${st} in styles` });
+  for (const q of D('creation').questions) for (const an of q.answers) for (const st of Object.keys(an.style ?? {})) if (!styleIds.has(st)) problems.push({ file: 'creation.json', message: `${q.id}: unknown weapon type ${st}` });
+  for (const ins of D('academy').instructors) if (ins.weapon) need('academy.json', weaponIds, ins.weapon, `weapon of instructor ${ins.id}`);
+  for (const st of styleIds) if (!D('academy').cohort.fighting.weapons[st]) problems.push({ file: 'academy.json', message: `cohort.fighting.weapons has no entry for ${st}` });
   const questTypes = new Set<string>(Object.keys(D('quests').types));
   for (const c of D('crises')) {
     for (const [k, l] of Object.entries(c.ledgers as Record<string, { serves: string[] }>)) for (const t of l.serves) if (!questTypes.has(t)) problems.push({ file: 'crises.json', message: `${c.id}: ledger ${k} served by unknown quest type ${t}` });

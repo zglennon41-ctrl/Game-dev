@@ -1,665 +1,878 @@
 {
- "comment": "The character creator: questions about the life before the field woke. Each answer leans the character; the generator (game/scripts/creation.gd) adds the leans up. A people or bloodline is suggested and the player confirms or picks another.",
- "questions": [
-  {
-   "id": "home",
-   "ask": "Before your field woke, where was home?",
-   "answers": [
+  "comment": "The character creator: questions about the life before the field woke. Each answer leans the character; the generator (game/scripts/creation.gd) adds the leans up. A people or bloodline is suggested and the player confirms or picks another.",
+  "questions": [
     {
-     "text": "Columbia, under the marshals' bells. Every quarrel there goes to court.",
-     "why": "you grew up in Columbia",
-     "city": "columbia",
-     "shape": {
-      "anchor": 0.2,
-      "cast": 0.2
-     },
-     "style": {
-      "blade": 0.3,
-      "gun": 0.3
-     },
-     "blood": {
-      "lamplighters": 0.2,
-      "aerie-born": 0.1,
-      "nightfolk": 0.1
-     }
+      "id": "home",
+      "ask": "Before your field woke, where was home?",
+      "answers": [
+        {
+          "text": "Columbia, under the marshals' bells. Every quarrel there goes to court.",
+          "why": "you grew up in Columbia",
+          "city": "columbia",
+          "shape": {
+            "anchor": 0.2,
+            "cast": 0.2
+          },
+          "style": {
+            "blade": 0.3,
+            "pistol": 0.3
+          },
+          "blood": {
+            "lamplighters": 0.2,
+            "aerie-born": 0.1,
+            "nightfolk": 0.1
+          }
+        },
+        {
+          "text": "Cahokia, on the river. The current decides, and you learn to read it.",
+          "why": "you grew up on the river at Cahokia",
+          "city": "cahokia",
+          "shape": {
+            "bind": 0.2,
+            "read": 0.2
+          },
+          "style": {
+            "polehook": 0.4
+          },
+          "blood": {
+            "reads-currents": 0.3,
+            "riverborn": 0.3,
+            "mound-kin": 0.2
+          }
+        },
+        {
+          "text": "Lunden, in the fog under the airship docks.",
+          "why": "you grew up in Lunden's fog",
+          "city": "lunden",
+          "shape": {
+            "cast": 0.2,
+            "bind": 0.2
+          },
+          "style": {
+            "pistol": 0.2,
+            "polehook": 0.2,
+            "blade": 0.2
+          },
+          "blood": {
+            "fogborn": 0.3,
+            "forgeborn": 0.2
+          }
+        },
+        {
+          "text": "Colonia, in the engine-works, where the field runs in brass pipes.",
+          "why": "you grew up in Colonia's works",
+          "city": "colonia",
+          "shape": {
+            "make": 0.3,
+            "anchor": 0.1
+          },
+          "style": {
+            "maul": 0.4,
+            "musket": 0.2
+          },
+          "blood": {
+            "forgeborn": 0.3,
+            "ironblooded": 0.2
+          }
+        },
+        {
+          "text": "Tiber, under the old walls, where the line is held three beats at a time.",
+          "why": "you grew up in Tiber",
+          "city": "tiber",
+          "shape": {
+            "anchor": 0.3,
+            "bind": 0.1
+          },
+          "style": {
+            "blade": 0.3,
+            "spear": 0.3
+          },
+          "blood": {
+            "iron-blood": 0.2,
+            "second-heart": 0.2
+          }
+        },
+        {
+          "text": "Khemet, on the black fields, where the growers plant the wards.",
+          "why": "you grew up on Khemet's fields",
+          "city": "khemet",
+          "shape": {
+            "make": 0.2,
+            "read": 0.2
+          },
+          "style": {
+            "staff": 0.3,
+            "scatter": 0.2,
+            "axe": 0.1
+          },
+          "blood": {
+            "greenwood": 0.3,
+            "hearth-hears": 0.1
+          }
+        },
+        {
+          "text": "Baghdad, in the house of figures, where every field is measured.",
+          "why": "you grew up in Baghdad",
+          "city": "baghdad",
+          "shape": {
+            "read": 0.3,
+            "cast": 0.1
+          },
+          "style": {
+            "bow": 0.3,
+            "blade": 0.2,
+            "twin": 0.1
+          },
+          "blood": {
+            "eyes-heat": 0.2,
+            "lamplighters": 0.1
+          }
+        },
+        {
+          "text": "Varanasi, on the steps, where the ascetics sit through the night in Still.",
+          "why": "you grew up on Varanasi's steps",
+          "city": "varanasi",
+          "shape": {
+            "anchor": 0.2,
+            "turn": 0.2
+          },
+          "style": {
+            "twin": 0.3,
+            "staff": 0.3
+          },
+          "blood": {
+            "never-cold": 0.2,
+            "hollowfolk": 0.2
+          }
+        },
+        {
+          "text": "Jiangnan, in the examination halls, where the field is a sentence and the brush writes it.",
+          "why": "you grew up in Jiangnan",
+          "city": "jiangnan",
+          "shape": {
+            "bind": 0.3,
+            "read": 0.1
+          },
+          "style": {
+            "blade": 0.2,
+            "twin": 0.2,
+            "staff": 0.2
+          },
+          "blood": {
+            "reads-currents": 0.1,
+            "nightfolk": 0.2
+          }
+        },
+        {
+          "text": "Kazan, on the steppe, where you ride before you walk.",
+          "why": "you grew up on the Kazan steppe",
+          "city": "kazan",
+          "shape": {
+            "cast": 0.3,
+            "turn": 0.1
+          },
+          "style": {
+            "bow": 0.3,
+            "spear": 0.2,
+            "polehook": 0.1
+          },
+          "blood": {
+            "long-stride": 0.3,
+            "beast-voice": 0.2
+          }
+        },
+        {
+          "text": "Timbuktu, in the library, where every founding is written down.",
+          "why": "you grew up in Timbuktu's library",
+          "city": "timbuktu",
+          "shape": {
+            "read": 0.2,
+            "make": 0.2
+          },
+          "style": {
+            "staff": 0.2,
+            "twin": 0.2,
+            "greatblade": 0.2
+          },
+          "blood": {
+            "hearth-hears": 0.3,
+            "lamplighters": 0.1
+          }
+        },
+        {
+          "text": "Edo, in the sword schools, where the draw is on the beat or not at all.",
+          "why": "you grew up in Edo's schools",
+          "city": "edo",
+          "shape": {
+            "turn": 0.3,
+            "cast": 0.1
+          },
+          "style": {
+            "greatblade": 0.4,
+            "spear": 0.1,
+            "bow": 0.1
+          },
+          "blood": {
+            "second-heart": 0.2,
+            "aerie-born": 0.1
+          }
+        },
+        {
+          "text": "Nowhere for long: a station on the line, between the cities.",
+          "why": "you grew up on the line itself",
+          "shape": {
+            "anchor": 0.1,
+            "make": 0.2
+          },
+          "style": {
+            "greatblade": 0.3
+          },
+          "blood": {
+            "ridgefolk": 0.3,
+            "hollowfolk": 0.3,
+            "aerie-born": 0.2
+          }
+        }
+      ]
     },
     {
-     "text": "Cahokia, on the river. The current decides, and you learn to read it.",
-     "why": "you grew up on the river at Cahokia",
-     "city": "cahokia",
-     "shape": {
-      "bind": 0.2,
-      "read": 0.2
-     },
-     "style": {
-      "hook": 0.4
-     },
-     "blood": {
-      "reads-currents": 0.3,
-      "riverborn": 0.3,
-      "mound-kin": 0.2
-     }
+      "id": "blood",
+      "ask": "What did the old ones say about your blood?",
+      "answers": [
+        {
+          "text": "Nothing. We're ordinary, as far as anyone knows.",
+          "why": "your family called itself ordinary",
+          "tier": {
+            "mark": 1.0
+          }
+        },
+        {
+          "text": "That we are one of the peoples. We carry it together.",
+          "why": "your people carry it together",
+          "tier": {
+            "kindred": 1.0
+          }
+        },
+        {
+          "text": "That a house would come looking for me one day.",
+          "why": "a house was always going to come for you",
+          "tier": {
+            "bloodline": 1.0
+          }
+        },
+        {
+          "text": "Nobody said. I never knew them.",
+          "why": "you never knew your blood",
+          "tier": {
+            "mark": 0.4,
+            "kindred": 0.4,
+            "bloodline": 0.45
+          },
+          "blood": {
+            "shapechanger": 0.3,
+            "fused": 0.3
+          }
+        }
+      ]
     },
     {
-     "text": "Lunden, in the fog under the airship docks.",
-     "why": "you grew up in Lunden's fog",
-     "city": "lunden",
-     "shape": {
-      "cast": 0.2,
-      "bind": 0.2
-     },
-     "style": {
-      "gun": 0.2,
-      "hook": 0.2,
-      "blade": 0.2
-     },
-     "blood": {
-      "fogborn": 0.3,
-      "forgeborn": 0.2
-     }
+      "id": "door",
+      "ask": "Something comes to the door at night. What do you do?",
+      "answers": [
+        {
+          "text": "Stand in the doorway.",
+          "why": "you stood in the doorway",
+          "shape": {
+            "anchor": 1.0
+          },
+          "effect": {
+            "guard": 0.3
+          },
+          "blood": {
+            "second-heart": 0.3,
+            "ridgefolk": 0.2
+          }
+        },
+        {
+          "text": "Take the gun down from the wall.",
+          "why": "you went for the gun",
+          "shape": {
+            "cast": 1.0
+          },
+          "style": {
+            "pistol": 0.5,
+            "musket": 0.3
+          },
+          "blood": {
+            "long-stride": 0.3,
+            "lamplighters": 0.2
+          }
+        },
+        {
+          "text": "Set the straw alight between us.",
+          "why": "you set the straw alight",
+          "shape": {
+            "turn": 1.0
+          },
+          "blood": {
+            "never-cold": 0.3,
+            "dragon-blooded": 0.3
+          }
+        },
+        {
+          "text": "Watch it, and wait for its mistake.",
+          "why": "you waited for its mistake",
+          "shape": {
+            "read": 1.0
+          },
+          "blood": {
+            "eyes-heat": 0.3,
+            "mound-kin": 0.2,
+            "demigod": 0.3
+          }
+        },
+        {
+          "text": "Call to it, so it looks at me and not at them.",
+          "why": "you made it look at you",
+          "shape": {
+            "bind": 1.0
+          },
+          "blood": {
+            "beast-voice": 0.4,
+            "demon-blooded": 0.2,
+            "nightfolk": 0.2,
+            "fogborn": 0.1
+          }
+        },
+        {
+          "text": "Pull the shelves across the door.",
+          "why": "you barred the door with what was to hand",
+          "shape": {
+            "make": 1.0
+          },
+          "blood": {
+            "iron-blood": 0.3,
+            "ironblooded": 0.3,
+            "forgeborn": 0.2
+          }
+        }
+      ]
     },
     {
-     "text": "Nowhere for long: a station on the line, between the cities.",
-     "why": "you grew up on the line itself",
-     "shape": {
-      "anchor": 0.1,
-      "make": 0.2
-     },
-     "style": {
-      "heavy": 0.3
-     },
-     "blood": {
-      "ridgefolk": 0.3,
-      "hollowfolk": 0.3,
-      "aerie-born": 0.2
-     }
+      "id": "seed",
+      "ask": "What do you want beside you in the dark?",
+      "answers": [
+        {
+          "text": "Something that watches from above.",
+          "why": "you wanted something that watches from above",
+          "seed": "watches-from-above",
+          "shape": {
+            "cast": 0.2
+          },
+          "blood": {
+            "winged": 0.2
+          }
+        },
+        {
+          "text": "Something that stands between me and harm.",
+          "why": "you wanted something to stand between you and harm",
+          "seed": "stands-between",
+          "shape": {
+            "anchor": 0.2
+          }
+        },
+        {
+          "text": "Something I can hold.",
+          "why": "you wanted something you could hold",
+          "seed": "i-can-hold",
+          "shape": {
+            "make": 0.1,
+            "anchor": 0.1
+          }
+        },
+        {
+          "text": "Something that was never alive.",
+          "why": "you wanted something that was never alive",
+          "seed": "never-alive",
+          "shape": {
+            "make": 0.2
+          }
+        },
+        {
+          "text": "Something with a voice.",
+          "why": "you wanted something with a voice",
+          "seed": "with-a-voice",
+          "shape": {
+            "bind": 0.2
+          }
+        },
+        {
+          "text": "Something that burns.",
+          "why": "you wanted something that burns",
+          "seed": "that-burns",
+          "shape": {
+            "turn": 0.3
+          }
+        },
+        {
+          "text": "Something that remembers.",
+          "why": "you wanted something that remembers",
+          "seed": "remembers",
+          "shape": {
+            "read": 0.3
+          },
+          "blood": {
+            "hearth-hears": 0.4
+          }
+        },
+        {
+          "text": "Something that owes me.",
+          "why": "you wanted something that owes you",
+          "seed": "owes-me",
+          "shape": {
+            "bind": 0.2
+          },
+          "blood": {
+            "demon-blooded": 0.3
+          }
+        }
+      ]
+    },
+    {
+      "id": "never",
+      "ask": "What would you never do, even to save your own life?",
+      "answers": [
+        {
+          "text": "Strike the same one twice with everything I have.",
+          "why": "you would never strike one foe twice with everything",
+          "bar": "never-twice-one-foe",
+          "shape": {
+            "anchor": 0.1
+          }
+        },
+        {
+          "text": "Fight for myself alone.",
+          "why": "you would never fight for yourself alone",
+          "bar": "never-save-myself",
+          "effect": {
+            "guard": 0.2
+          }
+        },
+        {
+          "text": "Raise a hand without saying why.",
+          "why": "you would never strike in silence",
+          "bar": "never-silence",
+          "shape": {
+            "bind": 0.2
+          }
+        },
+        {
+          "text": "There's nothing I wouldn't do.",
+          "why": "there is nothing you would not do",
+          "tier": {
+            "bloodline": 0.1
+          },
+          "shape": {
+            "turn": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "id": "pay",
+      "ask": "What would you pay, for the power to keep them safe?",
+      "answers": [
+        {
+          "text": "My own blood.",
+          "why": "you would pay in blood",
+          "toll": "half-health",
+          "effect": {
+            "strikes": 0.2
+          }
+        },
+        {
+          "text": "Everything I have left in me.",
+          "why": "you would pay everything you had left",
+          "toll": "all-will",
+          "shape": {
+            "anchor": 0.1
+          }
+        },
+        {
+          "text": "The weapon in my hand, after.",
+          "why": "you would give up your weapon after",
+          "toll": "no-weapon",
+          "shape": {
+            "make": 0.2
+          }
+        },
+        {
+          "text": "A mark on me, forever, where anyone can see.",
+          "why": "you would take a scar for it",
+          "toll": "scar",
+          "tier": {
+            "kindred": 0.1
+          }
+        },
+        {
+          "text": "Power shouldn't cost anything.",
+          "why": "you think power should not cost",
+          "shape": {
+            "cast": 0.1
+          }
+        }
+      ]
+    },
+    {
+      "id": "best",
+      "ask": "When are you at your best?",
+      "answers": [
+        {
+          "text": "After I've been hit.",
+          "why": "you are best after you have been hit",
+          "trigger": "struck-first",
+          "shape": {
+            "anchor": 0.2
+          }
+        },
+        {
+          "text": "When it's nearly over, and I'm still standing.",
+          "why": "you are best when it is nearly over",
+          "trigger": "below-half",
+          "shape": {
+            "turn": 0.2
+          }
+        },
+        {
+          "text": "When I've caught the first blow clean.",
+          "why": "you are best once you have caught the first blow",
+          "trigger": "after-perfect-hold",
+          "shape": {
+            "read": 0.2
+          }
+        },
+        {
+          "text": "When I've named what I'm fighting, out loud.",
+          "why": "you are best once you have named the foe",
+          "trigger": "named-aloud",
+          "shape": {
+            "bind": 0.2
+          }
+        },
+        {
+          "text": "Fresh, before anything has gone wrong.",
+          "why": "you are best fresh",
+          "trigger": "full-will",
+          "shape": {
+            "cast": 0.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "friends",
+      "ask": "What would your friends call you, if they were honest?",
+      "answers": [
+        {
+          "text": "Immovable.",
+          "why": "your friends call you immovable",
+          "shape": {
+            "anchor": 0.5
+          },
+          "blood": {
+            "second-heart": 0.2
+          }
+        },
+        {
+          "text": "Quick.",
+          "why": "your friends call you quick",
+          "shape": {
+            "cast": 0.5
+          },
+          "blood": {
+            "long-stride": 0.3,
+            "aerie-born": 0.2
+          }
+        },
+        {
+          "text": "Changeable.",
+          "why": "your friends call you changeable",
+          "shape": {
+            "turn": 0.5
+          },
+          "blood": {
+            "shapechanger": 0.3
+          }
+        },
+        {
+          "text": "Watchful.",
+          "why": "your friends call you watchful",
+          "shape": {
+            "read": 0.5
+          },
+          "blood": {
+            "eyes-heat": 0.2,
+            "tidewater": 0.2
+          }
+        },
+        {
+          "text": "Persuasive.",
+          "why": "your friends call you persuasive",
+          "shape": {
+            "bind": 0.5
+          },
+          "blood": {
+            "demon-blooded": 0.2
+          }
+        },
+        {
+          "text": "Handy.",
+          "why": "your friends call you handy",
+          "shape": {
+            "make": 0.5
+          },
+          "blood": {
+            "iron-blood": 0.2,
+            "ironblooded": 0.2
+          }
+        }
+      ]
+    },
+    {
+      "id": "fight",
+      "ask": "In a fight, you would rather...",
+      "answers": [
+        {
+          "text": "Hit hard, once, and be done.",
+          "why": "you would rather hit hard once",
+          "effect": {
+            "strikes": 0.5
+          },
+          "style": {
+            "greatblade": 0.6,
+            "musket": 0.4
+          }
+        },
+        {
+          "text": "Keep it at a distance.",
+          "why": "you would rather keep your distance",
+          "effect": {
+            "strikes": 0.3
+          },
+          "style": {
+            "pistol": 0.7,
+            "polehook": 0.3
+          }
+        },
+        {
+          "text": "Never let it land a blow.",
+          "why": "you would rather it never land a blow",
+          "effect": {
+            "guard": 0.6
+          },
+          "style": {
+            "blade": 0.4
+          }
+        },
+        {
+          "text": "Outlast it.",
+          "why": "you would rather outlast it",
+          "effect": {
+            "mend": 0.6
+          },
+          "style": {
+            "polehook": 0.2,
+            "greatblade": 0.2
+          }
+        },
+        {
+          "text": "Get close, and stay close.",
+          "why": "you would rather be close",
+          "effect": {
+            "strikes": 0.3
+          },
+          "style": {
+            "blade": 0.7
+          }
+        }
+      ]
+    },
+    {
+      "id": "fear",
+      "ask": "What frightens you, truly?",
+      "answers": [
+        {
+          "text": "Deep water.",
+          "why": "deep water frightens you",
+          "blood": {
+            "ridgefolk": 0.8
+          }
+        },
+        {
+          "text": "The open sun.",
+          "why": "the open sun frightens you",
+          "blood": {
+            "fogborn": 0.8,
+            "lamplighters": 0.3
+          }
+        },
+        {
+          "text": "Fire.",
+          "why": "fire frightens you",
+          "blood": {
+            "greenwood": 0.8,
+            "never-cold": 0.4
+          }
+        },
+        {
+          "text": "The cold.",
+          "why": "the cold frightens you",
+          "blood": {
+            "forgeborn": 0.7,
+            "dragon-blooded": 0.7
+          }
+        },
+        {
+          "text": "Being held down.",
+          "why": "being held down frightens you",
+          "blood": {
+            "winged": 0.8,
+            "aerie-born": 0.5
+          }
+        },
+        {
+          "text": "Being seen for what I am.",
+          "why": "being seen for what you are frightens you",
+          "blood": {
+            "shapechanger": 0.9,
+            "hollowfolk": 0.3
+          }
+        },
+        {
+          "text": "Being alone.",
+          "why": "being alone frightens you",
+          "blood": {
+            "fused": 0.8,
+            "hearth-hears": 0.3
+          }
+        },
+        {
+          "text": "The dark between the stars.",
+          "why": "the dark between the stars frightens you",
+          "blood": {
+            "demigod": 0.8,
+            "eyes-heat": 0.3,
+            "nightfolk": 0.3
+          }
+        },
+        {
+          "text": "Nothing that has a name.",
+          "why": "nothing with a name frightens you",
+          "blood": {
+            "demon-blooded": 0.8,
+            "riverborn": 0.2,
+            "tidewater": 0.2
+          }
+        }
+      ]
     }
-   ]
+  ],
+  "models": {
+    "anchor": "Knight",
+    "cast": "Rogue",
+    "bind": "Rogue_Hooded",
+    "turn": "Barbarian",
+    "read": "Mage",
+    "make": "Barbarian"
   },
-  {
-   "id": "blood",
-   "ask": "What did the old ones say about your blood?",
-   "answers": [
-    {
-     "text": "Nothing. We're ordinary, as far as anyone knows.",
-     "why": "your family called itself ordinary",
-     "tier": {
-      "mark": 1.0
-     }
-    },
-    {
-     "text": "That we are one of the peoples. We carry it together.",
-     "why": "your people carry it together",
-     "tier": {
-      "kindred": 1.0
-     }
-    },
-    {
-     "text": "That a house would come looking for me one day.",
-     "why": "a house was always going to come for you",
-     "tier": {
-      "bloodline": 1.0
-     }
-    },
-    {
-     "text": "Nobody said. I never knew them.",
-     "why": "you never knew your blood",
-     "tier": {
-      "mark": 0.4,
-      "kindred": 0.4,
-      "bloodline": 0.45
-     },
-     "blood": {
-      "shapechanger": 0.3,
-      "fused": 0.3
-     }
-    }
-   ]
+  "bodies": [
+    "Knight",
+    "Barbarian",
+    "Mage",
+    "Rogue",
+    "Rogue_Hooded"
+  ],
+  "names": {
+    "columbia": [
+      "Mira Hale",
+      "Tobiah Cord",
+      "Josie Marsh",
+      "Ellis Vane"
+    ],
+    "cahokia": [
+      "Sable Reed",
+      "Noah Teal",
+      "Ada Brule",
+      "Cass Moreau"
+    ],
+    "lunden": [
+      "Wren Ashby",
+      "Pell Corrie",
+      "Nell Faraday",
+      "Osric Lane"
+    ],
+    "colonia": [
+      "Teo Marrow",
+      "Ilsa Brandt",
+      "Rook Castell",
+      "Vesna Kort"
+    ],
+    "tiber": [
+      "Cassia Varro",
+      "Lucan Petra",
+      "Drusa Hale",
+      "Marcus Vell"
+    ],
+    "khemet": [
+      "Neferet Ode",
+      "Kemi Sabah",
+      "Tahir Nile",
+      "Sitra Amun"
+    ],
+    "baghdad": [
+      "Zahra Qasim",
+      "Idris Fahd",
+      "Layla Noor",
+      "Omar Tariq"
+    ],
+    "varanasi": [
+      "Asha Rai",
+      "Dev Sharan",
+      "Mira Ganga",
+      "Kiran Bodh"
+    ],
+    "jiangnan": [
+      "Lin Shu",
+      "Wei Jian",
+      "Mei Huan",
+      "Zhao Ren"
+    ],
+    "kazan": [
+      "Aigul Bek",
+      "Timur Sal",
+      "Zarina Kul",
+      "Ruslan Aktay"
+    ],
+    "timbuktu": [
+      "Aminata Keita",
+      "Sekou Diallo",
+      "Fatou Traore",
+      "Modibo Sene"
+    ],
+    "edo": [
+      "Hana Mori",
+      "Ren Takeda",
+      "Sora Ishii",
+      "Kaito Shiba"
+    ]
   },
-  {
-   "id": "door",
-   "ask": "Something comes to the door at night. What do you do?",
-   "answers": [
-    {
-     "text": "Stand in the doorway.",
-     "why": "you stood in the doorway",
-     "shape": {
-      "anchor": 1.0
-     },
-     "effect": {
-      "guard": 0.3
-     },
-     "blood": {
-      "second-heart": 0.3,
-      "ridgefolk": 0.2
-     }
-    },
-    {
-     "text": "Take the gun down from the wall.",
-     "why": "you went for the gun",
-     "shape": {
-      "cast": 1.0
-     },
-     "style": {
-      "gun": 0.5,
-      "gun-heavy": 0.3
-     },
-     "blood": {
-      "long-stride": 0.3,
-      "lamplighters": 0.2
-     }
-    },
-    {
-     "text": "Set the straw alight between us.",
-     "why": "you set the straw alight",
-     "shape": {
-      "turn": 1.0
-     },
-     "blood": {
-      "never-cold": 0.3,
-      "dragon-blooded": 0.3
-     }
-    },
-    {
-     "text": "Watch it, and wait for its mistake.",
-     "why": "you waited for its mistake",
-     "shape": {
-      "read": 1.0
-     },
-     "blood": {
-      "eyes-heat": 0.3,
-      "mound-kin": 0.2,
-      "demigod": 0.3
-     }
-    },
-    {
-     "text": "Call to it, so it looks at me and not at them.",
-     "why": "you made it look at you",
-     "shape": {
-      "bind": 1.0
-     },
-     "blood": {
-      "beast-voice": 0.4,
-      "demon-blooded": 0.2,
-      "nightfolk": 0.2,
-      "fogborn": 0.1
-     }
-    },
-    {
-     "text": "Pull the shelves across the door.",
-     "why": "you barred the door with what was to hand",
-     "shape": {
-      "make": 1.0
-     },
-     "blood": {
-      "iron-blood": 0.3,
-      "ironblooded": 0.3,
-      "forgeborn": 0.2
-     }
-    }
-   ]
+  "bloodTierWeight": {
+    "mark": 0.0,
+    "kindred": 0.0,
+    "bloodline": 0.0
   },
-  {
-   "id": "seed",
-   "ask": "What do you want beside you in the dark?",
-   "answers": [
-    {
-     "text": "Something that watches from above.",
-     "why": "you wanted something that watches from above",
-     "seed": "watches-from-above",
-     "shape": {
-      "cast": 0.2
-     },
-     "blood": {
-      "winged": 0.2
-     }
-    },
-    {
-     "text": "Something that stands between me and harm.",
-     "why": "you wanted something to stand between you and harm",
-     "seed": "stands-between",
-     "shape": {
-      "anchor": 0.2
-     }
-    },
-    {
-     "text": "Something I can hold.",
-     "why": "you wanted something you could hold",
-     "seed": "i-can-hold",
-     "shape": {
-      "make": 0.1,
-      "anchor": 0.1
-     }
-    },
-    {
-     "text": "Something that was never alive.",
-     "why": "you wanted something that was never alive",
-     "seed": "never-alive",
-     "shape": {
-      "make": 0.2
-     }
-    },
-    {
-     "text": "Something with a voice.",
-     "why": "you wanted something with a voice",
-     "seed": "with-a-voice",
-     "shape": {
-      "bind": 0.2
-     }
-    },
-    {
-     "text": "Something that burns.",
-     "why": "you wanted something that burns",
-     "seed": "that-burns",
-     "shape": {
-      "turn": 0.3
-     }
-    },
-    {
-     "text": "Something that remembers.",
-     "why": "you wanted something that remembers",
-     "seed": "remembers",
-     "shape": {
-      "read": 0.3
-     },
-     "blood": {
-      "hearth-hears": 0.4
-     }
-    },
-    {
-     "text": "Something that owes me.",
-     "why": "you wanted something that owes you",
-     "seed": "owes-me",
-     "shape": {
-      "bind": 0.2
-     },
-     "blood": {
-      "demon-blooded": 0.3
-     }
-    }
-   ]
-  },
-  {
-   "id": "never",
-   "ask": "What would you never do, even to save your own life?",
-   "answers": [
-    {
-     "text": "Strike the same one twice with everything I have.",
-     "why": "you would never strike one foe twice with everything",
-     "bar": "never-twice-one-foe",
-     "shape": {
-      "anchor": 0.1
-     }
-    },
-    {
-     "text": "Fight for myself alone.",
-     "why": "you would never fight for yourself alone",
-     "bar": "never-save-myself",
-     "effect": {
-      "guard": 0.2
-     }
-    },
-    {
-     "text": "Raise a hand without saying why.",
-     "why": "you would never strike in silence",
-     "bar": "never-silence",
-     "shape": {
-      "bind": 0.2
-     }
-    },
-    {
-     "text": "There's nothing I wouldn't do.",
-     "why": "there is nothing you would not do",
-     "tier": {
-      "bloodline": 0.1
-     },
-     "shape": {
-      "turn": 0.1
-     }
-    }
-   ]
-  },
-  {
-   "id": "pay",
-   "ask": "What would you pay, for the power to keep them safe?",
-   "answers": [
-    {
-     "text": "My own blood.",
-     "why": "you would pay in blood",
-     "toll": "half-health",
-     "effect": {
-      "strikes": 0.2
-     }
-    },
-    {
-     "text": "Everything I have left in me.",
-     "why": "you would pay everything you had left",
-     "toll": "all-will",
-     "shape": {
-      "anchor": 0.1
-     }
-    },
-    {
-     "text": "The weapon in my hand, after.",
-     "why": "you would give up your weapon after",
-     "toll": "no-weapon",
-     "shape": {
-      "make": 0.2
-     }
-    },
-    {
-     "text": "A mark on me, forever, where anyone can see.",
-     "why": "you would take a scar for it",
-     "toll": "scar",
-     "tier": {
-      "kindred": 0.1
-     }
-    },
-    {
-     "text": "Power shouldn't cost anything.",
-     "why": "you think power should not cost",
-     "shape": {
-      "cast": 0.1
-     }
-    }
-   ]
-  },
-  {
-   "id": "best",
-   "ask": "When are you at your best?",
-   "answers": [
-    {
-     "text": "After I've been hit.",
-     "why": "you are best after you have been hit",
-     "trigger": "struck-first",
-     "shape": {
-      "anchor": 0.2
-     }
-    },
-    {
-     "text": "When it's nearly over, and I'm still standing.",
-     "why": "you are best when it is nearly over",
-     "trigger": "below-half",
-     "shape": {
-      "turn": 0.2
-     }
-    },
-    {
-     "text": "When I've caught the first blow clean.",
-     "why": "you are best once you have caught the first blow",
-     "trigger": "after-perfect-hold",
-     "shape": {
-      "read": 0.2
-     }
-    },
-    {
-     "text": "When I've named what I'm fighting, out loud.",
-     "why": "you are best once you have named the foe",
-     "trigger": "named-aloud",
-     "shape": {
-      "bind": 0.2
-     }
-    },
-    {
-     "text": "Fresh, before anything has gone wrong.",
-     "why": "you are best fresh",
-     "trigger": "full-will",
-     "shape": {
-      "cast": 0.2
-     }
-    }
-   ]
-  },
-  {
-   "id": "friends",
-   "ask": "What would your friends call you, if they were honest?",
-   "answers": [
-    {
-     "text": "Immovable.",
-     "why": "your friends call you immovable",
-     "shape": {
-      "anchor": 0.5
-     },
-     "blood": {
-      "second-heart": 0.2
-     }
-    },
-    {
-     "text": "Quick.",
-     "why": "your friends call you quick",
-     "shape": {
-      "cast": 0.5
-     },
-     "blood": {
-      "long-stride": 0.3,
-      "aerie-born": 0.2
-     }
-    },
-    {
-     "text": "Changeable.",
-     "why": "your friends call you changeable",
-     "shape": {
-      "turn": 0.5
-     },
-     "blood": {
-      "shapechanger": 0.3
-     }
-    },
-    {
-     "text": "Watchful.",
-     "why": "your friends call you watchful",
-     "shape": {
-      "read": 0.5
-     },
-     "blood": {
-      "eyes-heat": 0.2,
-      "tidewater": 0.2
-     }
-    },
-    {
-     "text": "Persuasive.",
-     "why": "your friends call you persuasive",
-     "shape": {
-      "bind": 0.5
-     },
-     "blood": {
-      "demon-blooded": 0.2
-     }
-    },
-    {
-     "text": "Handy.",
-     "why": "your friends call you handy",
-     "shape": {
-      "make": 0.5
-     },
-     "blood": {
-      "iron-blood": 0.2,
-      "ironblooded": 0.2
-     }
-    }
-   ]
-  },
-  {
-   "id": "fight",
-   "ask": "In a fight, you would rather...",
-   "answers": [
-    {
-     "text": "Hit hard, once, and be done.",
-     "why": "you would rather hit hard once",
-     "effect": {
-      "strikes": 0.5
-     },
-     "style": {
-      "heavy": 0.6,
-      "gun-heavy": 0.4
-     }
-    },
-    {
-     "text": "Keep it at a distance.",
-     "why": "you would rather keep your distance",
-     "effect": {
-      "strikes": 0.3
-     },
-     "style": {
-      "gun": 0.7,
-      "hook": 0.3
-     }
-    },
-    {
-     "text": "Never let it land a blow.",
-     "why": "you would rather it never land a blow",
-     "effect": {
-      "guard": 0.6
-     },
-     "style": {
-      "blade": 0.4
-     }
-    },
-    {
-     "text": "Outlast it.",
-     "why": "you would rather outlast it",
-     "effect": {
-      "mend": 0.6
-     },
-     "style": {
-      "hook": 0.2,
-      "heavy": 0.2
-     }
-    },
-    {
-     "text": "Get close, and stay close.",
-     "why": "you would rather be close",
-     "effect": {
-      "strikes": 0.3
-     },
-     "style": {
-      "blade": 0.7
-     }
-    }
-   ]
-  },
-  {
-   "id": "fear",
-   "ask": "What frightens you, truly?",
-   "answers": [
-    {
-     "text": "Deep water.",
-     "why": "deep water frightens you",
-     "blood": {
-      "ridgefolk": 0.8
-     }
-    },
-    {
-     "text": "The open sun.",
-     "why": "the open sun frightens you",
-     "blood": {
-      "fogborn": 0.8,
-      "lamplighters": 0.3
-     }
-    },
-    {
-     "text": "Fire.",
-     "why": "fire frightens you",
-     "blood": {
-      "greenwood": 0.8,
-      "never-cold": 0.4
-     }
-    },
-    {
-     "text": "The cold.",
-     "why": "the cold frightens you",
-     "blood": {
-      "forgeborn": 0.7,
-      "dragon-blooded": 0.7
-     }
-    },
-    {
-     "text": "Being held down.",
-     "why": "being held down frightens you",
-     "blood": {
-      "winged": 0.8,
-      "aerie-born": 0.5
-     }
-    },
-    {
-     "text": "Being seen for what I am.",
-     "why": "being seen for what you are frightens you",
-     "blood": {
-      "shapechanger": 0.9,
-      "hollowfolk": 0.3
-     }
-    },
-    {
-     "text": "Being alone.",
-     "why": "being alone frightens you",
-     "blood": {
-      "fused": 0.8,
-      "hearth-hears": 0.3
-     }
-    },
-    {
-     "text": "The dark between the stars.",
-     "why": "the dark between the stars frightens you",
-     "blood": {
-      "demigod": 0.8,
-      "eyes-heat": 0.3,
-      "nightfolk": 0.3
-     }
-    },
-    {
-     "text": "Nothing that has a name.",
-     "why": "nothing with a name frightens you",
-     "blood": {
-      "demon-blooded": 0.8,
-      "riverborn": 0.2,
-      "tidewater": 0.2
-     }
-    }
-   ]
+  "spark": {
+    "$comment": "Every new character gets a spark: a hidden random number that nudges the answers' leans, so the same answers can make a different person. jitter is how far each lean can move (0.25 = up to a quarter either way); 0 turns the spark off.",
+    "jitter": 0.3
   }
- ],
- "models": {
-  "anchor": "Knight",
-  "cast": "Rogue",
-  "bind": "Rogue_Hooded",
-  "turn": "Barbarian",
-  "read": "Mage",
-  "make": "Barbarian"
- },
- "bodies": [
-  "Knight",
-  "Barbarian",
-  "Mage",
-  "Rogue",
-  "Rogue_Hooded"
- ],
- "names": {
-  "columbia": [
-   "Mira Hale",
-   "Tobiah Cord",
-   "Josie Marsh",
-   "Ellis Vane"
-  ],
-  "cahokia": [
-   "Sable Reed",
-   "Noah Teal",
-   "Ada Brule",
-   "Cass Moreau"
-  ],
-  "lunden": [
-   "Wren Ashby",
-   "Pell Corrie",
-   "Nell Faraday",
-   "Osric Lane"
-  ]
- },
- "bloodTierWeight": {
-  "mark": 0.0,
-  "kindred": 0.0,
-  "bloodline": 0.0
- },
- "spark": {
-  "$comment": "Every new character gets a spark: a hidden random number that nudges the answers' leans, so the same answers can make a different person. jitter is how far each lean can move (0.25 = up to a quarter either way); 0 turns the spark off.",
-  "jitter": 0.3
- }
 }

@@ -31,7 +31,7 @@ var _bot_move := Vector2.ZERO
 const ACTIONS := {
 	"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN],
 	"attack": [KEY_J], "block": [KEY_K], "dodge": [KEY_SPACE, KEY_SHIFT], "technique": [KEY_Q], "tech1": [KEY_1], "tech2": [KEY_2], "tech3": [KEY_3],
-	"stance": [KEY_F, KEY_L], "pattern": [KEY_R], "name_foe": [KEY_N], "lock_on": [KEY_TAB], "menu": [KEY_ESCAPE], "interact": [KEY_E], "order": [KEY_G], "genius_page": [KEY_J], "show_step": [KEY_H],
+	"stance": [KEY_F, KEY_L], "pattern": [KEY_R], "name_foe": [KEY_N], "lock_on": [KEY_TAB], "menu": [KEY_ESCAPE], "interact": [KEY_E], "order": [KEY_G], "genius_page": [KEY_J], "show_step": [KEY_H], "reload": [KEY_X],
 }
 const MOUSE := { "attack": MOUSE_BUTTON_LEFT, "block": MOUSE_BUTTON_RIGHT, "lock_on": MOUSE_BUTTON_MIDDLE }
 const PAD := { "attack": JOY_BUTTON_X, "block": JOY_BUTTON_RIGHT_SHOULDER, "dodge": JOY_BUTTON_A, "technique": JOY_BUTTON_Y,
@@ -632,11 +632,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("lock_on"):
 		fight.input("lock")
 		world.lock_on = fight.p_lock
-	for pair in [["attack", "attack"], ["technique", "technique"], ["dodge", "dodge"], ["stance", "stance"], ["pattern", "pattern"], ["block", "block-down"], ["name_foe", "name"], ["order", "order"], ["tech1", "tech1"], ["tech2", "tech2"], ["tech3", "tech3"]]:
+	for pair in [["attack", "attack"], ["technique", "technique"], ["dodge", "dodge"], ["stance", "stance"], ["pattern", "pattern"], ["block", "block-down"], ["name_foe", "name"], ["order", "order"], ["tech1", "tech1"], ["tech2", "tech2"], ["tech3", "tech3"], ["reload", "reload"]]:
 		if event.is_action_pressed(pair[0], false, true):
 			fight.input(pair[1])
 	if event.is_action_released("block", true):
 		fight.input("block-up")
+	if event.is_action_released("attack", true):
+		fight.input("attack-up")
 
 # --- Each frame -------------------------------------------------------------
 
@@ -721,6 +723,9 @@ func _sounds(events: Array) -> void:
 			"stagger": sfx.play("stagger")
 			"stance": sfx.play("stance", 1.0 if e["on"] else 0.75)
 			"wolf-down": sfx.play("fell")
+			"reload": sfx.play("ui-take", 0.7, -6.0)
+			"reloaded": sfx.play("cue-hit", 1.4, -8.0)
+			"draw-start": sfx.play("swish", 0.5, -10.0)
 			"ally-hit":
 				if e.get("pattern", false): sfx.play("heavy", 0.8, -4.0)
 				elif e.get("heavy", false): sfx.play("hit", 0.9, -4.0)

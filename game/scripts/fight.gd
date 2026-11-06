@@ -79,6 +79,11 @@ var weapon: Dictionary = {}
 var style: Dictionary = {}   # how the weapon fights: a melee combo, or shots
 var combo: Array = []
 var ranged := false
+var p_ammo := 0              # rounds in the magazine (ranged); 0 with no magazine means a quiver that never empties
+var p_ammo_max := 0
+var p_draw := 0.0            # seconds the bow has been drawn
+var p_charge := 1.0          # the last loosed shot's draw, 0..1
+var p_reload_t := 0.0
 var tech: Dictionary = {}    # the Shape's technique
 var bc: Dictionary = {}      # the blood's combat passives
 var w_burn_until := -9.0
@@ -127,6 +132,8 @@ func _init(opts: Dictionary = {}) -> void:
 	style = room["styles"][weapon["style"]]
 	ranged = style["kind"] == "ranged"
 	combo = style.get("combo", [style.get("shot", {})])
+	p_ammo_max = int(style.get("ammo", 0))
+	p_ammo = p_ammo_max
 	tech = kit["technique"]
 	for tid in hero.get("techniques", []):
 		var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
@@ -279,7 +286,7 @@ static func student_beast(c: Dictionary, scale := 1.0) -> Dictionary:
 	b["health"] = roundf(float(b["health"]) * scale)
 	b["person"] = { "body": c.get("body", "Knight"), "weapon": c.get("weapon", "saber"), "name": c.get("name", "") }
 	# What their city's school taught them, if they have a city.
-	var disc: String = c.get("discipline", Creation.CITY_DISCIPLINE.get(c.get("city", ""), ""))
+	var disc: String = c.get("discipline", Creation.discipline_of(c.get("city", "")))
 	for a in Data.discipline_kits.get(disc, {}).get("studentAttacks", []):
 		b["attacks"].append(a.duplicate(true))
 	b["title"] = c.get("title", "of the cohort")
@@ -353,6 +360,12 @@ func input(action: String) -> void:
 		return
 	match action:
 		"attack": _press_attack()
+		"attack-up":
+			if p_state == "draw":
+				_loose()
+		"reload":
+			if ranged and p_ammo_max > 0 and p_ammo < p_ammo_max and (p_state == "free" or (p_state == "attack" and _can_start_action())):
+				_start_reload()
 		"technique": _press_technique(tech)
 		"tech1", "tech2", "tech3":
 			var i := int(action.substr(4)) - 1
@@ -361,12 +374,14 @@ func input(action: String) -> void:
 		"dodge": _press_dodge()
 		"block-down":
 			p_block_held = true
-			# A block cancels the end of a swing, as a dodge does.
+			# A block cancels the end of a swing, as a dodge does; it cancels a reload or a draw too.
 			if p_state == "attack" and _can_start_action():
 				p_state = "free"
 				p_last_attack_end = now
+			if p_state in ["reload", "draw"]:
+				p_state = "free"
 			if p_state == "free" and not p_fainted:
-				p_parry_until = now + float(room["parry"]["window"])
+				p_parry_until = now + float(room["parry"]["window"]) * float(style.get("guard", 1.0))
 		"block-up":
 			p_block_held = false
 		"stance":
@@ -411,6 +426,11 @@ func _busy(action: String) -> bool:
 			return action != "attack"
 		"technique", "dodge", "flinch":
 			return true
+		"reload":
+			# A dodge or a block cancels the reload; the rest waits.
+			return action not in ["dodge", "block-down"]
+		"draw":
+			return action not in ["dodge", "block-down", "attack"]
 	return false
 
 func _try_queued() -> void:
@@ -440,6 +460,19 @@ func _press_attack() -> void:
 		_pattern_press()
 		return
 	if ranged:
+		if style.has("draw"):
+			if p_state == "free" or (p_state == "attack" and _can_start_action()):
+				p_state = "draw"
+				p_timer = 0.0
+				p_draw = 0.0
+				_face_target_if_near()
+				_emit({ "type": "draw-start" })
+				_emit({ "type": "anim", "who": "player", "name": "2H_Ranged_Aiming", "speed": 1.0 })
+			return
+		if p_ammo_max > 0 and p_ammo <= 0:
+			if p_state == "free" or (p_state == "attack" and _can_start_action()):
+				_start_reload()
+			return
 		if p_state == "free" or (p_state == "attack" and _can_start_action()):
 			_start_swing(0)
 		elif p_state == "attack":
@@ -460,6 +493,29 @@ func _press_attack() -> void:
 		next = p_combo + 1
 	_start_swing(next)
 
+## The bow looses at the draw it has: a full draw hits for the shot's full damage, a snap shot for its least.
+func _loose() -> void:
+	var d: Dictionary = style["draw"]
+	p_charge = clampf(p_draw / float(d["seconds"]), 0.0, 1.0)
+	p_state = "free"
+	_start_swing(0)
+	_emit({ "type": "draw-release", "charge": p_charge })
+
+func _start_reload() -> void:
+	var r: Dictionary = style["reload"]
+	p_state = "reload"
+	p_timer = 0.0
+	p_reload_t = float(r["seconds"])
+	_emit({ "type": "reload", "seconds": p_reload_t })
+	_emit({ "type": "anim", "who": "player", "name": String(r.get("anim", "1H_Ranged_Reload")), "duration": p_reload_t })
+
+## What a shot does, by the draw (a bow) or as written.
+func _shot_damage(s: Dictionary) -> float:
+	if style.has("draw"):
+		var d: Dictionary = style["draw"]
+		return roundf(lerpf(float(d["min"]), float(d["max"]), p_charge))
+	return float(s["damage"])
+
 func _start_swing(i: int) -> void:
 	p_state = "attack"
 	p_timer = 0.0
@@ -468,6 +524,9 @@ func _start_swing(i: int) -> void:
 	p_hit_done = false
 	_face_target_if_near()
 	stats["attacks"] += 1
+	if ranged and p_ammo_max > 0:
+		p_ammo -= 1
+		stats["shots"] = int(stats.get("shots", 0)) + 1
 	var sw: Dictionary = combo[i]
 	_emit({ "type": "anim", "who": "player", "name": sw["anim"], "duration": float(sw["startup"]) + float(sw.get("active", 0.0)) + float(sw["recovery"]) })
 
@@ -517,7 +576,7 @@ func _press_technique(t: Dictionary) -> void:
 
 func _press_dodge() -> void:
 	var d: Dictionary = room["dodge"]
-	if now < p_dodge_ready_at or not (p_state == "free" or _can_start_action()):
+	if now < p_dodge_ready_at or not (p_state == "free" or p_state in ["reload", "draw"] or _can_start_action()):
 		return
 	var dcost := float(d["will"]) * _b("dodgeCost", 1.0) * (float(kit["stance"].get("dodgeCost", 1.0)) if p_stance else 1.0)
 	if p_fainted or p_will < dcost:
@@ -750,6 +809,23 @@ func _update_player(dt: float, move: Vector2) -> void:
 			elif move.length() > 0.05:
 				want = move.angle()
 			p_facing = lerp_angle(p_facing, want, 1.0 - exp(-float(P["turnSpeed"]) * dt))
+		"draw":
+			p_draw += dt
+			var d: Dictionary = style["draw"]
+			if p_lock and w_state not in ["down", "absent"]:
+				p_facing = lerp_angle(p_facing, _angle_to(p_pos, w_pos), 1.0 - exp(-8.0 * dt))
+			elif move.length() > 0.05:
+				p_facing = lerp_angle(p_facing, move.angle(), 1.0 - exp(-4.0 * dt))
+			# Drawn, you walk; the bow looses on its own a little past full draw.
+			var speed_d := float(P["runSpeed"]) * 0.45
+			p_pos = _clamp_in(p_pos + move * speed_d * dt)
+			if p_draw >= float(d["seconds"]) + float(d.get("holdAfter", 0.5)):
+				_loose()
+		"reload":
+			if p_timer >= p_reload_t:
+				p_ammo = p_ammo_max
+				p_state = "free"
+				_emit({ "type": "reloaded" })
 		"attack":
 			var s: Dictionary = combo[p_combo]
 			var st := float(s["startup"])
@@ -758,10 +834,17 @@ func _update_player(dt: float, move: Vector2) -> void:
 				p_pos = _clamp_in(p_pos + Vector2.from_angle(p_facing) * float(s["lunge"]) / (st + ac) * dt)
 			if not p_hit_done and p_timer >= st:
 				p_hit_done = true
-				if ranged:
-					_resolve_shot(float(s["damage"]), float(s["range"]), float(s["arc"]))
+				if ranged and style.get("cone", false):
+					# Scatter: everything in the cone takes it, and is thrown back.
+					_emit({ "type": "shot", "from": p_pos, "to": p_pos + Vector2.from_angle(p_facing) * float(s["range"]), "hit": true, "cone": true })
+					_resolve_swing(_shot_damage(s), float(s["range"]), float(s["arc"]), false, float(s.get("knockback", 0.0)))
+				elif ranged:
+					_resolve_shot(_shot_damage(s), float(s["range"]), float(s["arc"]))
 				else:
-					_resolve_swing(float(s["damage"]), float(s["reach"]), float(s["arc"]), false, 0.0)
+					var kb := float(s.get("knockback", 0.0))
+					_resolve_swing(float(s["damage"]), float(s["reach"]), float(s["arc"]), s.get("breaks", false), kb)
+					if s.has("burnSeconds") and w_state not in ["down", "absent"] and _in_arc(p_pos, p_facing, w_pos, float(s["reach"]) + float(beast["radius"]), float(s["arc"])):
+						w_burn_until = maxf(w_burn_until, now) + float(s["burnSeconds"])
 			if p_buffer and p_timer >= st + ac and (ranged or p_combo < combo.size() - 1):
 				_start_swing(0 if ranged else p_combo + 1)
 			elif p_timer >= st + ac + float(s["recovery"]):

@@ -378,7 +378,8 @@ func _slot_box(bg: Color, rim: Color, width := 1) -> StyleBoxFlat:
 
 ## Name the ability bar for the hero in this fight.
 func configure(f: Fight, hero_name: String) -> void:
-	(slots["attack"]["name"] as Label).text = "Shot" if f.ranged else "Strike"
+	(slots["attack"]["name"] as Label).text = ("Draw" if f.style.has("draw") else "Shot") if f.ranged else "Strike"
+	(slots["attack"]["cost"] as Label).text = " "
 	(slots["technique"]["name"] as Label).text = f.tech["name"]
 	(slots["technique"]["cost"] as Label).text = "%d Will" % int(f.tech["will"])
 	(slots["stance"]["name"] as Label).text = f.kit["stance"]["name"]
@@ -619,7 +620,16 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 		_set_slot("tech%d" % (i + 1), left / float(et["cooldown"]), f.p_will >= float(et["will"]) and not f.p_fainted, f.p_state == "technique" and f.p_technique == et["id"], Color(0, 0, 0, 0), left)
 	_set_slot("dodge", 0.0, f.p_will >= float(Data.room["dodge"]["will"]), f.p_state == "dodge")
 	_set_slot("block", 0.0, not f.p_fainted, f.p_block_held)
-	_set_slot("attack", 0.0, true, f.p_state == "attack")
+	if f.ranged and f.p_ammo_max > 0:
+		_set_slot("attack", (1.0 - f.p_timer / maxf(0.01, f.p_reload_t)) if f.p_state == "reload" else 0.0, f.p_ammo > 0 or f.p_state == "reload", f.p_state == "attack", Color(0, 0, 0, 0), 0.0)
+		(slots["attack"]["cost"] as Label).text = ("reloading  (X)" if f.p_state == "reload" else ("%d / %d%s" % [f.p_ammo, f.p_ammo_max, "" if f.p_ammo > 0 else "  ·  X"]))
+		(slots["attack"]["cost"] as Label).add_theme_color_override("font_color", Style.EMBER if f.p_ammo == 0 and f.p_state != "reload" else BLUE.lightened(0.2))
+	elif f.ranged and f.style.has("draw"):
+		var charge := clampf(f.p_draw / float(f.style["draw"]["seconds"]), 0.0, 1.0) if f.p_state == "draw" else 0.0
+		_set_slot("attack", 0.0, true, f.p_state in ["attack", "draw"], Color(GOLD, charge) if charge > 0.0 else Color(0, 0, 0, 0), 0.0)
+		(slots["attack"]["cost"] as Label).text = ("drawn %d%%" % int(charge * 100)) if f.p_state == "draw" else "hold to draw"
+	else:
+		_set_slot("attack", 0.0, true, f.p_state == "attack")
 	var ready := f.pattern_ready()
 	_set_slot("pattern", 0.0 if ready or f.p_state == "pattern" else 1.0, ready, f.p_state == "pattern", Color(GOLD, 0.5 + 0.5 * sin(Time.get_ticks_msec() / 110.0)) if ready else Color(0, 0, 0, 0))
 	var pname: String = f.pattern["name"]

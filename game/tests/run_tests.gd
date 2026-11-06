@@ -52,6 +52,7 @@ func _run() -> void:
 	test_cohort_ai()
 	test_cohort_days_and_crisis()
 	test_mastery()
+	test_weapons()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -386,7 +387,7 @@ func test_shape_kits() -> void:
 	run_for(cast, 0.5)
 	check(cast.dist() < before - 2.0, "Closing Strike closes the distance (%.1f to %.1f)" % [before, cast.dist()])
 	# Turn: Kindle sets it burning.
-	var turn := Fight.new({ "seed": 1, "hero": hero_of("turn", "hatchet"), "passive": true })
+	var turn := Fight.new({ "seed": 1, "hero": hero_of("turn", "saber"), "passive": true })
 	idle_wolf_at(turn, 1.4)
 	turn.input("technique")
 	var tevs := run_for(turn, 2.0)
@@ -419,7 +420,7 @@ func test_shape_kits() -> void:
 	# And every Shape can win a fight played well.
 	var line := ""
 	for shape in ["anchor", "turn", "cast", "read", "bind", "make"]:
-		var weapon: String = { "anchor": "saber", "turn": "hatchet", "cast": "pistol", "read": "pistol", "bind": "grapple", "make": "oar-staff" }[shape]
+		var weapon: String = { "anchor": "saber", "turn": "saber", "cast": "pistol", "read": "pistol", "bind": "grapple", "make": "oar-staff" }[shape]
 		var f := run_bot(60, true, hero_of(shape, weapon))
 		line += "%s %d, " % [shape, f.stats["wolves_down"]]
 		check(f.stats["wolves_down"] >= 1, "a %s with a %s fells a wolf in a minute" % [shape, weapon])
@@ -1293,3 +1294,106 @@ func test_mastery() -> void:
 	var keeper: Dictionary = Data.by_id(Data.academy["instructors"], "keeper")
 	check(keeper["after"] == "discipline" and Data.academy["places"]["hearth"]["instructors"].any(func(i): return i["id"] == "keeper"), "the Hearthkeeper waits at the hearth after Lesson 4")
 	check(Data.academy["mastery"]["grades"].size() == 3, "three grades")
+
+## The twelve weapon types: every weapon names one, three a city; guns carry a magazine and
+## reload, the bow draws, the scatter-gun's cone hits the pack, the twin blades bleed.
+func test_weapons() -> void:
+	var styles: Dictionary = Data.room["styles"]
+	var types: Array = styles.keys().filter(func(k): return not String(k).begins_with("$"))
+	check(types.size() == 12, "twelve weapon types (%d)" % types.size())
+	var by_city := {}
+	for w in Data.weapons:
+		check(styles.has(w["style"]), "%s has a type" % w["id"])
+		by_city[w["city"]] = int(by_city.get(w["city"], 0)) + 1
+	check(by_city.size() == 12 and by_city.values().all(func(n): return n == 3), "three weapons in each of twelve cities (%s)" % str(by_city))
+	var used := {}
+	for w in Data.weapons:
+		used[w["style"]] = true
+	check(used.size() == 12, "every type is carried by some city")
+	# The pistol: six rounds, then a reload that the bar shows and a dodge can cancel.
+	var h := Fight.default_hero()
+	h["weapon"] = "pistol"
+	var f := Fight.new({ "hero": h, "seed": 1, "passive": true })
+	f._wolf_set("idle", 99.0)
+	f.w_pos = f.p_pos + Vector2(6, 0)
+	f.p_facing = 0.0
+	check(f.ranged and f.p_ammo == 6 and f.p_ammo_max == 6, "a pistol carries six rounds")
+	var shots := 0
+	for i in 6:
+		f.input("attack")
+		var ev := types(run_for(f, 0.6))
+		shots += ev.count("shot")
+	check(shots == 6 and f.p_ammo == 0, "six shots, then the magazine is empty (%d shots)" % shots)
+	f.input("attack")
+	var ev2 := types(run_for(f, 0.3))
+	check(ev2.has("reload") and f.p_state == "reload", "the seventh press reloads")
+	var ev3 := types(run_for(f, 1.6))
+	check(ev3.has("reloaded") and f.p_ammo == 6 and f.p_state == "free", "the reload fills the magazine")
+	f.input("attack")
+	run_for(f, 0.6)
+	f.input("reload")
+	check(f.p_state == "reload", "X reloads early")
+	f.input("dodge")
+	check(f.p_state == "dodge", "a dodge cancels the reload")
+	# The bow: held, it draws; loosed at full draw it hits three times as hard as a snap shot.
+	var hb := Fight.default_hero()
+	hb["weapon"] = "bow"
+	hb["city"] = "edo"
+	var b := Fight.new({ "hero": hb, "seed": 2, "passive": true })
+	b._wolf_set("idle", 99.0)
+	b.w_pos = b.p_pos + Vector2(6, 0)
+	b.p_facing = 0.0
+	b.input("attack")
+	run_for(b, 0.1)
+	check(b.p_state == "draw", "the bow draws while held")
+	b.input("attack-up")
+	var hp0 := b.w_hp
+	run_for(b, 0.5)
+	var snap := hp0 - b.w_hp
+	b.input("attack")
+	run_for(b, 1.15)
+	hp0 = b.w_hp
+	b.input("attack-up")
+	run_for(b, 0.5)
+	var full := hp0 - b.w_hp
+	check(snap > 0 and full >= snap * 2.5, "a full draw hits far harder than a snap shot (%d vs %d)" % [full, snap])
+	b.input("attack")
+	var ev4 := types(run_for(b, 2.2))
+	check(ev4.has("draw-release") and b.p_state != "draw", "held past full draw, the bow looses on its own")
+	# The scatter-gun's cone hits the pack beside the locked foe.
+	var hs := Fight.default_hero()
+	hs["weapon"] = "seed-sling"
+	hs["city"] = "khemet"
+	var sc := Fight.new({ "hero": hs, "seed": 3, "pack": ["cut-wolf"], "passive": true })
+	sc._wolf_set("idle", 99.0)
+	sc.w_pos = sc.p_pos + Vector2(3, 0.5)
+	var pf: Foe = sc.foes[0]
+	pf.set_state("idle", 99.0)
+	pf.pos = sc.p_pos + Vector2(3, -1.0)
+	sc.p_facing = 0.0
+	sc.p_lock = false
+	var php := pf.hp
+	var whp := sc.w_hp
+	sc.input("attack")
+	var ev5 := types(run_for(sc, 0.5))
+	check(ev5.has("shot") and sc.w_hp < whp and pf.hp < php, "the scatter cone hits the locked foe and the pack")
+	# The twin blades' fourth cut bleeds; the staff's parry window is wider.
+	var ht := Fight.default_hero()
+	ht["weapon"] = "needle"
+	ht["city"] = "jiangnan"
+	var t := Fight.new({ "hero": ht, "seed": 4, "passive": true })
+	check(t.combo.size() == 4 and t.combo[3].has("burnSeconds"), "twin blades cut four times and the last bleeds")
+	var hst := Fight.default_hero()
+	hst["weapon"] = "oar-staff"
+	hst["city"] = "cahokia"
+	var st := Fight.new({ "hero": hst, "seed": 5, "passive": true })
+	st.input("block-down")
+	var window := st.p_parry_until - st.now
+	check(absf(window - float(Data.room["parry"]["window"]) * 1.5) < 0.01, "the staff's parry window is half again as wide")
+	# Classmates with any of the twelve fight at the right reach.
+	var cohort := Academy.make_cohort(42, h)
+	for w in Data.weapons:
+		var c: Dictionary = cohort[0].duplicate()
+		c["weapon"] = w["id"]
+		var al := Fight.make_ally(c, Vector2.ZERO)
+		check(float(al["reach"]) > 1.0, "a classmate with a %s has a reach" % w["name"])

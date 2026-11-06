@@ -157,8 +157,11 @@
     }
   },
   "styles": {
+    "$comment": "The twelve weapon types (docs/weapons.md). kind melee: a combo of swings (reach in metres, arc in degrees, startup/active/recovery in seconds; knockback pushes; burnSeconds bleeds). kind ranged: one shot, a magazine (ammo; 0 is a quiver that never empties), a reload (seconds and the animation), and for bows a draw (hold to draw: damage from min to max over seconds; the bow looses on its own a little after full draw). cone: the shot hits everything in its arc. guard: the parry window is this many times wider. Every weapon in data/weapons.json names one of these.",
     "blade": {
       "kind": "melee",
+      "hands": 1,
+      "text": "Quick and sure; three cuts, the third wide.",
       "combo": [
         {
           "name": "Chop",
@@ -195,35 +198,187 @@
         }
       ]
     },
-    "heavy": {
+    "greatblade": {
       "kind": "melee",
+      "hands": 2,
+      "text": "Long, two-handed; slow to start and heavy at the end.",
       "combo": [
+        {
+          "name": "Rising cut",
+          "anim": "2H_Melee_Attack_Slice",
+          "damage": 14,
+          "startup": 0.26,
+          "active": 0.14,
+          "recovery": 0.42,
+          "lunge": 0.8,
+          "reach": 2.4,
+          "arc": 150
+        },
         {
           "name": "Overhead",
           "anim": "2H_Melee_Attack_Chop",
-          "damage": 16,
-          "startup": 0.32,
+          "damage": 18,
+          "startup": 0.3,
           "active": 0.14,
           "recovery": 0.5,
           "lunge": 0.6,
           "reach": 2.3,
-          "arc": 150
+          "arc": 140,
+          "knockback": 0.8
         },
         {
-          "name": "Sweep",
-          "anim": "2H_Melee_Attack_Slice",
-          "damage": 19,
-          "startup": 0.3,
-          "active": 0.16,
-          "recovery": 0.6,
-          "lunge": 0.7,
-          "reach": 2.4,
-          "arc": 190
+          "name": "Wheel",
+          "anim": "2H_Melee_Attack_Spin",
+          "damage": 22,
+          "startup": 0.34,
+          "active": 0.2,
+          "recovery": 0.62,
+          "lunge": 0.9,
+          "reach": 2.5,
+          "arc": 300,
+          "knockback": 1.2
         }
       ]
     },
-    "hook": {
+    "axe": {
       "kind": "melee",
+      "hands": 1,
+      "text": "Chops that bite deep; the last one throws the foe back.",
+      "combo": [
+        {
+          "name": "Chop",
+          "anim": "1H_Melee_Attack_Chop",
+          "damage": 11,
+          "startup": 0.2,
+          "active": 0.12,
+          "recovery": 0.36,
+          "lunge": 0.7,
+          "reach": 1.9,
+          "arc": 100
+        },
+        {
+          "name": "Backhand",
+          "anim": "1H_Melee_Attack_Slice_Horizontal",
+          "damage": 12,
+          "startup": 0.18,
+          "active": 0.12,
+          "recovery": 0.34,
+          "lunge": 0.6,
+          "reach": 1.9,
+          "arc": 140
+        },
+        {
+          "name": "Cleave",
+          "anim": "2H_Melee_Attack_Chop",
+          "damage": 20,
+          "startup": 0.3,
+          "active": 0.14,
+          "recovery": 0.56,
+          "lunge": 0.9,
+          "reach": 2.1,
+          "arc": 120,
+          "knockback": 1.6
+        }
+      ]
+    },
+    "twin": {
+      "kind": "melee",
+      "hands": 2,
+      "paired": true,
+      "text": "Two short blades: four fast cuts, the last leaves a bleed.",
+      "combo": [
+        {
+          "name": "Left",
+          "anim": "1H_Melee_Attack_Slice_Diagonal",
+          "damage": 6,
+          "startup": 0.12,
+          "active": 0.1,
+          "recovery": 0.22,
+          "lunge": 0.5,
+          "reach": 1.6,
+          "arc": 100
+        },
+        {
+          "name": "Right",
+          "anim": "1H_Melee_Attack_Slice_Horizontal",
+          "damage": 6,
+          "startup": 0.12,
+          "active": 0.1,
+          "recovery": 0.22,
+          "lunge": 0.5,
+          "reach": 1.6,
+          "arc": 100
+        },
+        {
+          "name": "Cross",
+          "anim": "1H_Melee_Attack_Chop",
+          "damage": 7,
+          "startup": 0.14,
+          "active": 0.1,
+          "recovery": 0.24,
+          "lunge": 0.6,
+          "reach": 1.6,
+          "arc": 110
+        },
+        {
+          "name": "Twist",
+          "anim": "2H_Melee_Attack_Spin",
+          "damage": 10,
+          "startup": 0.18,
+          "active": 0.14,
+          "recovery": 0.44,
+          "lunge": 0.8,
+          "reach": 1.8,
+          "arc": 220,
+          "burnSeconds": 3.0
+        }
+      ]
+    },
+    "spear": {
+      "kind": "melee",
+      "hands": 2,
+      "text": "Reach: thrusts that land before the foe arrives.",
+      "combo": [
+        {
+          "name": "Thrust",
+          "anim": "2H_Melee_Attack_Stab",
+          "damage": 12,
+          "startup": 0.18,
+          "active": 0.12,
+          "recovery": 0.34,
+          "lunge": 0.4,
+          "reach": 3.0,
+          "arc": 40
+        },
+        {
+          "name": "Thrust",
+          "anim": "2H_Melee_Attack_Stab",
+          "damage": 12,
+          "startup": 0.16,
+          "active": 0.12,
+          "recovery": 0.34,
+          "lunge": 0.4,
+          "reach": 3.0,
+          "arc": 40
+        },
+        {
+          "name": "Lunge",
+          "anim": "2H_Melee_Attack_Stab",
+          "damage": 18,
+          "startup": 0.26,
+          "active": 0.14,
+          "recovery": 0.56,
+          "lunge": 1.6,
+          "reach": 3.4,
+          "arc": 50,
+          "knockback": 1.0
+        }
+      ]
+    },
+    "polehook": {
+      "kind": "melee",
+      "hands": 2,
+      "text": "Reach, rake, and the wheel that clears a circle.",
       "combo": [
         {
           "name": "Reach",
@@ -260,28 +415,157 @@
         }
       ]
     },
-    "gun": {
+    "staff": {
+      "kind": "melee",
+      "hands": 2,
+      "guard": 1.5,
+      "text": "Fast, sweeping, and easy to parry with: the window is half again as wide.",
+      "combo": [
+        {
+          "name": "Strike",
+          "anim": "2H_Melee_Attack_Slice",
+          "damage": 8,
+          "startup": 0.14,
+          "active": 0.12,
+          "recovery": 0.26,
+          "lunge": 0.5,
+          "reach": 2.3,
+          "arc": 140
+        },
+        {
+          "name": "Return",
+          "anim": "2H_Melee_Attack_Slice",
+          "damage": 8,
+          "startup": 0.14,
+          "active": 0.12,
+          "recovery": 0.26,
+          "lunge": 0.5,
+          "reach": 2.3,
+          "arc": 140
+        },
+        {
+          "name": "Sweep",
+          "anim": "2H_Melee_Attack_Spin",
+          "damage": 13,
+          "startup": 0.24,
+          "active": 0.18,
+          "recovery": 0.46,
+          "lunge": 0.6,
+          "reach": 2.5,
+          "arc": 320
+        }
+      ]
+    },
+    "maul": {
+      "kind": "melee",
+      "hands": 2,
+      "text": "The slowest weapon and the heaviest blow; it breaks what it hits.",
+      "combo": [
+        {
+          "name": "Heave",
+          "anim": "2H_Melee_Attack_Chop",
+          "damage": 20,
+          "startup": 0.38,
+          "active": 0.16,
+          "recovery": 0.6,
+          "lunge": 0.7,
+          "reach": 2.4,
+          "arc": 120,
+          "knockback": 1.4
+        },
+        {
+          "name": "Slam",
+          "anim": "2H_Melee_Attack_Slam",
+          "damage": 28,
+          "startup": 0.46,
+          "active": 0.18,
+          "recovery": 0.8,
+          "lunge": 0.8,
+          "reach": 2.4,
+          "arc": 160,
+          "knockback": 2.2,
+          "breaks": true
+        }
+      ]
+    },
+    "pistol": {
       "kind": "ranged",
+      "hands": 1,
+      "text": "Six rounds, quick; then a reload.",
+      "ammo": 6,
+      "reload": {
+        "seconds": 1.6,
+        "anim": "1H_Ranged_Reload"
+      },
       "shot": {
         "name": "Shot",
         "anim": "1H_Ranged_Shoot",
         "damage": 10,
         "startup": 0.1,
-        "recovery": 0.38,
+        "recovery": 0.36,
         "range": 13.0,
         "arc": 40
       }
     },
-    "gun-heavy": {
+    "musket": {
       "kind": "ranged",
+      "hands": 2,
+      "text": "Two rounds that do not miss; a long reload.",
+      "ammo": 2,
+      "reload": {
+        "seconds": 2.4,
+        "anim": "2H_Ranged_Reload"
+      },
       "shot": {
         "name": "Shot",
         "anim": "2H_Ranged_Shoot",
-        "damage": 22,
+        "damage": 24,
         "startup": 0.22,
-        "recovery": 0.9,
-        "range": 16.0,
-        "arc": 30
+        "recovery": 0.8,
+        "range": 17.0,
+        "arc": 28
+      }
+    },
+    "bow": {
+      "kind": "ranged",
+      "hands": 2,
+      "text": "Hold to draw: a full draw hits three times as hard. The quiver never empties.",
+      "ammo": 0,
+      "draw": {
+        "seconds": 1.1,
+        "min": 7,
+        "max": 21,
+        "holdAfter": 0.5
+      },
+      "shot": {
+        "name": "Loose",
+        "anim": "2H_Ranged_Shoot",
+        "damage": 21,
+        "startup": 0.08,
+        "recovery": 0.5,
+        "range": 15.0,
+        "arc": 32
+      }
+    },
+    "scatter": {
+      "kind": "ranged",
+      "hands": 2,
+      "text": "Two shells of scatter: a cone that hits everything close.",
+      "ammo": 2,
+      "reload": {
+        "seconds": 2.2,
+        "anim": "2H_Ranged_Reload"
+      },
+      "cone": true,
+      "shot": {
+        "name": "Blast",
+        "anim": "2H_Ranged_Shoot",
+        "damage": 26,
+        "startup": 0.16,
+        "recovery": 0.7,
+        "range": 6.5,
+        "arc": 75,
+        "knockback": 1.2
       }
     }
   }

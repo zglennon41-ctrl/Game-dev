@@ -5,7 +5,12 @@ class_name Creation
 extends RefCounted
 
 const SHAPES := ["anchor", "turn", "cast", "read", "bind", "make"]
-const CITY_DISCIPLINE := { "columbia": "marshal", "cahokia": "pilot", "lunden": "aeronaut" }
+## The Discipline a city teaches (data/disciplines.json).
+static func discipline_of(city: String) -> String:
+	for d in Data.disciplines:
+		if d["city"] == city:
+			return d["id"]
+	return "marshal"
 
 static func question(i: int) -> Dictionary:
 	return Data.creation["questions"][i]
@@ -155,7 +160,7 @@ static func generate(answers: Array, blood_id := "", spark := 0) -> Dictionary:
 	var pattern := { "name": form["name"], "form": form_id, "terms": terms, "sworn": false }
 	var seed: String = t["seed"] if t["seed"] != "" else "stands-between"
 	return {
-		"name": "", "blood": blood_id, "shape": shape, "city": city, "discipline": CITY_DISCIPLINE[city],
+		"name": "", "blood": blood_id, "shape": shape, "city": city, "discipline": discipline_of(city),
 		"weapon": best_w["id"], "seed": seed, "pattern": pattern, "body": Data.creation["models"][shape],
 		"answers": answers.duplicate(), "spark": spark,
 		"why": { "shape": _unique(shape_why), "city": [city_why], "weapon": _unique(weapon_why.filter(func(x): return x != city_why)),

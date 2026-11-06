@@ -1,12 +1,297 @@
 [
-  {"id": "saber", "name": "Saber", "city": "columbia", "style": "blade", "model": "sword_1handed", "offhand": "shield_round_color", "text": "A marshal's saber and a round shield."},
-  {"id": "hatchet", "name": "Hatchet", "city": "columbia", "style": "blade", "model": "axe_1handed", "text": "A frontier hatchet, balanced for the hand and the throw."},
-  {"id": "pistol", "name": "Pistol", "city": "columbia", "style": "gun", "model": "crossbow_1handed", "text": "A Columbia service pistol. Fast, loud, short."},
-  {"id": "musket", "name": "Musket", "city": "columbia", "style": "gun-heavy", "model": "crossbow_2handed", "text": "A long Columbia musket: slow, and it does not miss twice."},
-  {"id": "harpoon", "name": "Harpoon", "city": "cahokia", "style": "hook", "model": "staff", "text": "A river harpoon on a line, for things that live under barges."},
-  {"id": "boat-hook", "name": "Boat-hook", "city": "cahokia", "style": "hook", "model": "axe_2handed", "text": "A pilot's boat-hook: pull the thing close, then decide."},
-  {"id": "oar-staff", "name": "Oar-staff", "city": "cahokia", "style": "heavy", "model": "staff", "text": "An ironwood oar-staff, heavy at both ends."},
-  {"id": "rapier", "name": "Rapier", "city": "lunden", "style": "blade", "model": "sword_1handed", "text": "A Lunden rapier: quick, narrow, and polite until it is not."},
-  {"id": "air-pistol", "name": "Air-pistol", "city": "lunden", "style": "gun", "model": "crossbow_1handed", "text": "A compressed-air pistol from the dock-yards. Quiet."},
-  {"id": "grapple", "name": "Grapple", "city": "lunden", "style": "hook", "model": "dagger", "text": "An aeronaut's grapple and line, and the knife that cuts it."}
+  {
+    "id": "saber",
+    "name": "Saber",
+    "city": "columbia",
+    "style": "blade",
+    "model": "cutlass",
+    "offhand": "shield_round_color",
+    "text": "A marshal's saber and a round shield."
+  },
+  {
+    "id": "pistol",
+    "name": "Pistol",
+    "city": "columbia",
+    "style": "pistol",
+    "model": "pistol",
+    "text": "A Columbia service pistol: six rounds, fast, loud."
+  },
+  {
+    "id": "musket",
+    "name": "Musket",
+    "city": "columbia",
+    "style": "musket",
+    "model": "musket",
+    "text": "A long Columbia musket: two rounds, and it does not miss twice."
+  },
+  {
+    "id": "harpoon",
+    "name": "Harpoon",
+    "city": "cahokia",
+    "style": "polehook",
+    "model": "harpoon",
+    "text": "A river harpoon on a line, for things that live under barges."
+  },
+  {
+    "id": "hook",
+    "name": "Boat-hook",
+    "city": "cahokia",
+    "style": "polehook",
+    "model": "boat_hook",
+    "text": "A pilot's boat-hook: pull the thing close, then decide."
+  },
+  {
+    "id": "oar-staff",
+    "name": "Oar-staff",
+    "city": "cahokia",
+    "style": "staff",
+    "model": "staff",
+    "text": "An ironwood oar-staff, heavy at both ends."
+  },
+  {
+    "id": "air-pistol",
+    "name": "Air-pistol",
+    "city": "lunden",
+    "style": "pistol",
+    "model": "air_pistol",
+    "text": "A compressed-air pistol from the dock-yards. Quiet."
+  },
+  {
+    "id": "rapier",
+    "name": "Rapier",
+    "city": "lunden",
+    "style": "blade",
+    "model": "rapier",
+    "text": "A Lunden rapier: quick, narrow, and polite until it is not."
+  },
+  {
+    "id": "grapple",
+    "name": "Grapple",
+    "city": "lunden",
+    "style": "polehook",
+    "model": "grapple_hook",
+    "text": "An aeronaut's grapple and line, and the knife that cuts it."
+  },
+  {
+    "id": "engine-arm",
+    "name": "Engine-arm",
+    "city": "colonia",
+    "style": "maul",
+    "model": "engine_arm",
+    "text": "A Colonia engineer's piston arm: brass, iron, and a hammer where the hand should be."
+  },
+  {
+    "id": "hammer",
+    "name": "Hammer",
+    "city": "colonia",
+    "style": "maul",
+    "model": "maul",
+    "text": "A long-hafted engineer's hammer, for posts and for what comes at them."
+  },
+  {
+    "id": "bolt-thrower",
+    "name": "Bolt-thrower",
+    "city": "colonia",
+    "style": "musket",
+    "model": "bolt_thrower",
+    "text": "A heavy crossbow-rifle of the Colonia works: two bolts, then the crank."
+  },
+  {
+    "id": "shield",
+    "name": "Scutum and gladius",
+    "city": "tiber",
+    "style": "blade",
+    "model": "gladius",
+    "offhand": "shield_badge_color",
+    "text": "A legionary's short sword behind a tall shield."
+  },
+  {
+    "id": "short-blade",
+    "name": "Short blades",
+    "city": "tiber",
+    "style": "twin",
+    "model": "gladius",
+    "offhand": "gladius",
+    "text": "Two legionary short swords, for the close work."
+  },
+  {
+    "id": "pilum",
+    "name": "Pilum",
+    "city": "tiber",
+    "style": "spear",
+    "model": "pilum",
+    "text": "A legionary's heavy spear: thrust, thrust, lunge."
+  },
+  {
+    "id": "ward-staff",
+    "name": "Ward-staff",
+    "city": "khemet",
+    "style": "staff",
+    "model": "ward_staff",
+    "text": "A grower's staff with a seed-pod head; the wards are planted with it."
+  },
+  {
+    "id": "sickle",
+    "name": "Sickle",
+    "city": "khemet",
+    "style": "axe",
+    "model": "sickle",
+    "text": "A Khemet reaping sickle on a short haft."
+  },
+  {
+    "id": "seed-sling",
+    "name": "Seed-sling",
+    "city": "khemet",
+    "style": "scatter",
+    "model": "seed_sling",
+    "text": "A flared grower's gun that throws a cone of iron seed."
+  },
+  {
+    "id": "astrolabe",
+    "name": "Astrolabe",
+    "city": "baghdad",
+    "style": "bow",
+    "model": "astrolabe",
+    "text": "A geometer's brass astrolabe, drawn like a bow: the figure is solved and loosed."
+  },
+  {
+    "id": "glass-blade",
+    "name": "Glass blade",
+    "city": "baghdad",
+    "style": "blade",
+    "model": "glass_blade",
+    "text": "A straight blade of Baghdad glass; it does not dull."
+  },
+  {
+    "id": "compass",
+    "name": "Dividers",
+    "city": "baghdad",
+    "style": "twin",
+    "model": "compass_dividers",
+    "offhand": "compass_dividers",
+    "text": "A pair of brass dividers held like knives; they measure the foe."
+  },
+  {
+    "id": "unarmed",
+    "name": "Wrapped fists",
+    "city": "varanasi",
+    "style": "twin",
+    "model": "fist_wrap",
+    "offhand": "fist_wrap",
+    "text": "An ascetic's wrapped fists; the field is the weapon."
+  },
+  {
+    "id": "staff",
+    "name": "Staff",
+    "city": "varanasi",
+    "style": "staff",
+    "model": "staff",
+    "text": "A plain ascetic's staff, worn smooth by a thousand nights."
+  },
+  {
+    "id": "chakram",
+    "name": "Chakram",
+    "city": "varanasi",
+    "style": "pistol",
+    "model": "chakram",
+    "text": "A thrown steel ring that comes back to the hand: six throws, then the gathering."
+  },
+  {
+    "id": "fan",
+    "name": "War fan",
+    "city": "jiangnan",
+    "style": "blade",
+    "model": "war_fan",
+    "text": "An examiner's iron war fan: closed it strikes, open it cuts."
+  },
+  {
+    "id": "needle",
+    "name": "Needles",
+    "city": "jiangnan",
+    "style": "twin",
+    "model": "needle",
+    "offhand": "needle",
+    "text": "Two long examiner's needles with ring pommels."
+  },
+  {
+    "id": "brush",
+    "name": "Brush-staff",
+    "city": "jiangnan",
+    "style": "staff",
+    "model": "brush_staff",
+    "text": "An examiner's staff tipped with a great brush: the sentence is written on the foe."
+  },
+  {
+    "id": "lance",
+    "name": "Lance",
+    "city": "kazan",
+    "style": "spear",
+    "model": "lance",
+    "text": "A rider's lance, carried on foot: the charge is the lunge."
+  },
+  {
+    "id": "horse-bow",
+    "name": "Horse-bow",
+    "city": "kazan",
+    "style": "bow",
+    "model": "bow_short",
+    "text": "A Kazan recurve, short enough to draw at a gallop."
+  },
+  {
+    "id": "whip",
+    "name": "Stock whip",
+    "city": "kazan",
+    "style": "polehook",
+    "model": "whip",
+    "text": "A rider's stock whip: it reaches, it rakes, it pulls."
+  },
+  {
+    "id": "lantern",
+    "name": "Lantern-staff",
+    "city": "timbuktu",
+    "style": "staff",
+    "model": "lantern_staff",
+    "text": "An archivist's staff with a brass lantern at its head; it lights what it strikes."
+  },
+  {
+    "id": "pen",
+    "name": "Pen-knives",
+    "city": "timbuktu",
+    "style": "twin",
+    "model": "pen_knife",
+    "offhand": "pen_knife",
+    "text": "Two scribe's pen-knives, sharper than they look."
+  },
+  {
+    "id": "book",
+    "name": "The ledger",
+    "city": "timbuktu",
+    "style": "greatblade",
+    "model": "ledger_book",
+    "text": "An iron-bound ledger the size of a shield, swung two-handed. Every blow is recorded."
+  },
+  {
+    "id": "katana",
+    "name": "Katana",
+    "city": "edo",
+    "style": "greatblade",
+    "model": "katana",
+    "text": "An Edo blade: long, curved, drawn on the beat."
+  },
+  {
+    "id": "naginata",
+    "name": "Naginata",
+    "city": "edo",
+    "style": "spear",
+    "model": "naginata",
+    "text": "An Edo pole-blade: reach and the sweeping lunge."
+  },
+  {
+    "id": "bow",
+    "name": "Longbow",
+    "city": "edo",
+    "style": "bow",
+    "model": "bow_long",
+    "text": "A tall Edo bow; the full draw is the whole art."
+  }
 ]

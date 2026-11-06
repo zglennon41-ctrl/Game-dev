@@ -51,10 +51,17 @@
     },
     "styles": {
       "blade": 0.6,
-      "heavy": 0.7,
-      "hook": 0.2,
-      "gun": 0.1,
-      "gun-heavy": 0.1
+      "greatblade": 0.7,
+      "axe": 0.6,
+      "twin": 0.2,
+      "spear": 0.4,
+      "polehook": 0.2,
+      "staff": 0.5,
+      "maul": 0.8,
+      "pistol": 0.1,
+      "musket": 0.1,
+      "bow": 0.1,
+      "scatter": 0.2
     }
   },
   "turn": {
@@ -109,10 +116,17 @@
     },
     "styles": {
       "blade": 0.6,
-      "heavy": 0.5,
-      "hook": 0.3,
-      "gun": 0.2,
-      "gun-heavy": 0.1
+      "greatblade": 0.5,
+      "axe": 0.5,
+      "twin": 0.5,
+      "spear": 0.4,
+      "polehook": 0.3,
+      "staff": 0.4,
+      "maul": 0.4,
+      "pistol": 0.2,
+      "musket": 0.1,
+      "bow": 0.2,
+      "scatter": 0.3
     }
   },
   "cast": {
@@ -165,11 +179,18 @@
       }
     },
     "styles": {
-      "gun": 1.0,
-      "gun-heavy": 0.8,
       "blade": 0.3,
-      "hook": 0.2,
-      "heavy": 0.1
+      "greatblade": 0.1,
+      "axe": 0.2,
+      "twin": 0.3,
+      "spear": 0.3,
+      "polehook": 0.2,
+      "staff": 0.1,
+      "maul": 0.1,
+      "pistol": 1.0,
+      "musket": 0.8,
+      "bow": 0.9,
+      "scatter": 0.6
     }
   },
   "read": {
@@ -222,11 +243,18 @@
       }
     },
     "styles": {
-      "gun": 0.6,
-      "hook": 0.5,
-      "heavy": 0.4,
       "blade": 0.3,
-      "gun-heavy": 0.4
+      "greatblade": 0.2,
+      "axe": 0.2,
+      "twin": 0.4,
+      "spear": 0.5,
+      "polehook": 0.5,
+      "staff": 0.5,
+      "maul": 0.1,
+      "pistol": 0.6,
+      "musket": 0.4,
+      "bow": 0.6,
+      "scatter": 0.2
     }
   },
   "bind": {
@@ -280,11 +308,18 @@
       }
     },
     "styles": {
-      "hook": 1.0,
-      "gun": 0.4,
       "blade": 0.3,
-      "heavy": 0.2,
-      "gun-heavy": 0.2
+      "greatblade": 0.2,
+      "axe": 0.2,
+      "twin": 0.5,
+      "spear": 0.5,
+      "polehook": 1.0,
+      "staff": 0.4,
+      "maul": 0.2,
+      "pistol": 0.4,
+      "musket": 0.2,
+      "bow": 0.3,
+      "scatter": 0.3
     }
   },
   "make": {
@@ -336,11 +371,18 @@
       }
     },
     "styles": {
-      "heavy": 0.6,
       "blade": 0.5,
-      "hook": 0.3,
-      "gun": 0.3,
-      "gun-heavy": 0.2
+      "greatblade": 0.6,
+      "axe": 0.5,
+      "twin": 0.2,
+      "spear": 0.3,
+      "polehook": 0.3,
+      "staff": 0.5,
+      "maul": 0.7,
+      "pistol": 0.3,
+      "musket": 0.2,
+      "bow": 0.2,
+      "scatter": 0.5
     }
   }
 }
