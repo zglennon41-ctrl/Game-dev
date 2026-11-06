@@ -229,7 +229,7 @@ thirds of the frame, rim light in [Shape colour]".
 - [ ] Asset test passes
 - [ ] Credited, with licence
 
-## 9. The kits made here (2026-11-07)
+## 10. The kits made here (2026-11-07)
 
 Three more Blender kits, all run headless with the bpy venv like the genius kit, all
 placeholder quality in the right shape, all dropped in by name so finished art replaces them
