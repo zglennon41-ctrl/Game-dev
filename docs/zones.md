@@ -59,3 +59,15 @@ Every beast has `model` (`game/assets/beasts/<model>.glb`, built on the wolf's r
 `tools/blender/beast_kit.py`; the wolf stands in when the file is missing), `modelScale`,
 a Shape on the wheel (so one Shape's techniques break it), three attacks (the third with
 weight 0 is its counter) and `respawnSeconds` (99 for elites: they stay down).
+
+## The cohort fights on its own
+
+A classmate in the party is an agent (`data/academy.json`, `cohort.fighting`; `Fight.make_ally`
+and `Fight._update_allies`). Each picks a foe (the one hunting them, the one you are locked
+on to by how much their temperament helps, else the nearest), closes to their weapon's reach,
+circles for as long as their aggression lets them, strikes (or shoots, with a gun), spends
+Will on their Shape's technique every few strikes, fires their Pattern once a fight when
+their foe is below half (your genius witnesses it), parries or blocks a bite aimed at them
+by temperament (a parry staggers the beast), and falls back toward you when hurt past their
+nerve. Events: `ally-windup`, `ally-hit`, `ally-pattern`, `ally-parry`, `ally-block`,
+`ally-retreat`, `ally-shot`.

@@ -1239,6 +1239,15 @@ func test_cohort_days_and_crisis() -> void:
 	var e := a.reckoning()
 	check(e["title"] == "The mile is Carroll's" and h["world"]["ending"] == "carroll" and h["world"]["cahokia_line"] == "tolled", "the Reckoning reads the heaviest Ledger and writes the world")
 	check(a.crisis_phase() == "reckoning" and a.reckoning()["title"] == e["title"], "the Reckoning is read once")
+	# A named beast felled is not hunted again; one that escaped is remembered.
+	a.progress["named"] = { "the-ferryman": { "escaped": 2, "felled": false }, "old-grey": { "escaped": 0, "felled": true } }
+	check(a.named_escapes("the-ferryman") == 2, "escapes are counted")
+	var hunts_green := 0
+	for d in range(6, 40):
+		for p in a.postings_for_day(d):
+			if p["type"] == "hunt" and p["zone"] == "green":
+				hunts_green += 1
+	check(hunts_green == 0, "the Green posts no hunt once Old Grey is felled")
 	# Nothing weighed: the default ending.
 	var b := Academy.new()
 	b.hero = Creation.generate([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "", 4)

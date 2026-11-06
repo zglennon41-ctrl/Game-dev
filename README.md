@@ -50,7 +50,7 @@ genius is built by `tools/blender/genius_kit.py` (see `docs/art-bible.md`).
 | F, L | LB | your Shape's stance |
 | R | B | your Pattern (when its Trigger is met) |
 | N | D-pad up | name the foe aloud (some Patterns need it) |
-| Tab, middle click | R3 | lock-on on or off |
+| Tab, middle click | R3 | lock-on on or off; locked on with a pack about, passes the lock to the next of them |
 | Esc | Start | menu |
 | E | X | talk, open a door, rest (at the Academy) |
 | G | D-pad left | your genius's order: Guard or Hunt |

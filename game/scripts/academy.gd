@@ -247,10 +247,15 @@ func go(place_id: String, quiet := false, from := "") -> void:
 		opts["genius"] = genius
 	fight = Fight.new(opts)
 	if not named.is_empty():
+		var escaped := named_escapes(String(named["id"]))
 		fight.beast = fight.beast.duplicate(true)
 		fight.beast["name"] = named["name"]
-		fight.beast["title"] = "named  ·  it remembers"
+		fight.beast["title"] = "named  ·  it remembers" if escaped == 0 else ("named  ·  escaped you once" if escaped == 1 else "named  ·  escaped you %d times" % escaped)
 		fight.beast["modelScale"] = float(fight.beast.get("modelScale", 1.0)) * float(named.get("scale", 1.2))
+		fight.beast["health"] = roundf(float(fight.beast["health"]) * (1.0 + 0.15 * escaped))
+		fight.w_hp = float(fight.beast["health"])
+		fight.beast["walkSpeed"] = float(fight.beast["walkSpeed"]) * (1.0 + 0.1 * escaped)
+		fight.beast["gallopSpeed"] = float(fight.beast["gallopSpeed"]) * (1.0 + 0.08 * escaped)
 		fight.w_named = true
 	if not zone.is_empty() and in_lesson() and _lesson.has("passenger"):
 		var ps: Dictionary = _lesson["passenger"].duplicate()
@@ -1324,9 +1329,10 @@ func _lesson_update(events: Array, dt: float) -> void:
 		"will-full": done = fight.p_will >= float(Data.rules["field"]["willMax"]) - 0.5
 		"stance-seconds": done = done or _held >= float(g["count"])
 		"choose-weapon", "fell", "hold", "extract", "travel", "choose-party", "find", "talk", "reach", "hunt", "decide": done = done or (_choice_done and String(g["type"]) in ["choose-weapon", "extract", "travel", "choose-party", "find", "talk", "hunt", "decide"])
+	var status := _note
 	if _step_limit > 0.0 and _lesson.get("quest", false):
-		_note = "%s%d s left." % [(_note + "  ") if _note != "" else "", ceili(_step_limit)]
-	hud.set_prompt_status(_note, _progress_text(s))
+		status = "%s%d s left." % [(_note + "  ") if _note != "" else "", ceili(_step_limit)]
+	hud.set_prompt_status(status, _progress_text(s))
 	if done:
 		sfx.play("cue-hit", 1.0)
 		hud.set_prompt_status("Done.", "")
@@ -1671,7 +1677,9 @@ func _pick_party(n: int) -> void:
 ## What the HUD says of where you are.
 func place_label() -> String:
 	if _in_zone():
-		return "the Green  ·  the line"
+		var sp := place_spec(progress["place"])
+		var z: Dictionary = sp.get("wild", {})
+		return "%s  ·  %s  ·  %s" % [String(z.get("name", "the line")).to_lower(), String(sp.get("name", "")).to_lower(), String(sp.get("zone", {}).get("colour", "green"))]
 	return "%s  ·  warded" % String(place_spec(progress["place"]).get("name", "the yard")).to_lower()
 
 # --- The Gate ---------------------------------------------------------------------
@@ -2021,7 +2029,9 @@ func postings_for_day(day: int) -> Array:
 			continue
 		var z: Dictionary = fit[rng.randi() % fit.size()]
 		var pname: Array = q["posterNames"].get(t["poster"], ["The board"])
-		var named: Array = z["beasts"].get("named", [])
+		var named: Array = z["beasts"].get("named", []).filter(func(n): return not progress.get("named", {}).get(n["id"], {}).get("felled", false))
+		if tid == "hunt" and named.is_empty():
+			continue
 		var p := {
 			"id": "quest:%d:%d" % [day, out.size()], "day": day, "type": tid, "zone": z["id"], "colour": z["colour"],
 			"poster": pname[rng.randi() % pname.size()], "pay": int(t["pay"].get(z["colour"], 1)),
@@ -2155,6 +2165,10 @@ func _finish_quest() -> void:
 	if not progress.has("writeup_extra"):
 		progress["writeup_extra"] = []
 	progress["writeup_extra"].append(fill_quest(String(t["writeup"]), p))
+	if lesson.has("named"):
+		if not progress.has("named"):
+			progress["named"] = {}
+		progress["named"][String(lesson["named"]["id"])] = { "escaped": named_escapes(String(lesson["named"]["id"])), "felled": true }
 	if genius:
 		genius.bonded("party")
 	_carry_out_fallen()
@@ -2174,6 +2188,12 @@ func _fail_quest(why: String) -> void:
 	progress["quests_failed"].append(p["id"])
 	progress["quest"] = {}
 	progress["record"]["quests_lost"] = int(progress["record"].get("quests_lost", 0)) + 1
+	if lesson.has("named") and why in ["timer", "rescued"]:
+		# The named beast got away: it will remember the car.
+		if not progress.has("named"):
+			progress["named"] = {}
+		var nid := String(lesson["named"]["id"])
+		progress["named"][nid] = { "escaped": named_escapes(nid) + 1, "felled": false }
 	if why == "rescued":
 		progress["record"]["rescued"] = int(progress["record"].get("rescued", 0)) + 1
 	_carry_out_fallen()
@@ -2266,6 +2286,10 @@ func _carry_out_fallen() -> void:
 # from the quests done (the type that serves a Ledger, by the line colour), from a Writ's
 # decision, and from the crisis postings; the Reckoning at the Gate reads the heaviest and
 # writes the ending onto the character for the server.
+
+## How many hunts a named beast has escaped this term.
+func named_escapes(id: String) -> int:
+	return int(progress.get("named", {}).get(id, {}).get("escaped", 0))
 
 func crisis() -> Dictionary:
 	var all: Array = Data.crises()

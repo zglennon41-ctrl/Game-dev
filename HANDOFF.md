@@ -335,13 +335,16 @@ are the tests. The simulator is how the owner tunes the Reading without playing 
 
 Built so far: the rules and simulator, the combat room, the creator and the opening, the whole
 Academy (six lessons, the rite, the Field Examination, the Gate, Commencement), the genius
-system (Reading, Resonance, orders, adaptations, grafts, secondary forms, shadows) and the
-art pipeline with First Form blockouts. Not yet: Amber/Red/Black lines; Disciplines beyond
-the three launch cities; guild founding, Charters, Atmosphere, Standing; the calendar,
-crises, Ledgers, Chronicle; houses, Favor, Writs; economy, gear tiers, the Smith; secondary
-forms, grafts and shadows in play (the rules exist, nothing yet earns them); shades; Rallies
-and PvP; airship routes; cosmetics; the server's mastery progression and the deaths that
-end a life; finished art (the blockouts are placeholders in the right shape).
+system (Reading, Resonance, orders, adaptations, grafts, secondary forms, shadows), the art
+pipeline (First Form blockouts, the wild kit, six beasts on the wolf's rig), and the
+Academy as the MMO offline (2026-11-07): packs, four zones from tile libraries
+(`docs/zones.md`), the board's seven quest types posted daily, the term's crisis with its
+Ledgers and Reckoning, classmates who fight on their own and keep their own days
+(`docs/academy-board.md`). Not yet: Red/Black lines; Disciplines beyond the three launch
+cities; guild founding, Charters, Atmosphere, Standing; houses' Favor as a currency; economy,
+gear tiers, the Smith; Rallies as PvP; airship routes; cosmetics; the server's mastery
+progression and the deaths that end a life; deeper lessons and technique grades (M5); the
+interface redesign (M7); finished art (the kits are placeholders in the right shape).
 
 ---
 
