@@ -1457,7 +1457,7 @@ func test_gear_and_gate() -> void:
 ## Every weapon type holds its own: a skilled bot with any of the twelve fells wolves and
 ## lives a minute (the balance harness, game/tests/balance.tscn, prints the full table).
 func test_weapon_balance() -> void:
-	var harness := load("res://game/tests/balance.gd").new()
+	var harness: Node = load("res://game/tests/balance.gd").new()
 	for st in Data.room["styles"]:
 		if String(st).begins_with("$"):
 			continue

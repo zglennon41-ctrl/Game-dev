@@ -535,8 +535,8 @@
       "ammo": 0,
       "draw": {
         "seconds": 1.1,
-        "min": 7,
-        "max": 19,
+        "min": 6,
+        "max": 20,
         "holdAfter": 0.5
       },
       "shot": {
