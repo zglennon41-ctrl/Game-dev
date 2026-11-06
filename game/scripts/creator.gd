@@ -290,6 +290,13 @@ func _reveal() -> void:
 	v.add_child(lrow)
 	_chip(lrow, "Headgear on", func(): look["headgear"] = not look["headgear"]; changed.emit(hero); _reveal(), look["headgear"])
 	_chip(lrow, "Cape on", func(): look["cape"] = not look["cape"]; changed.emit(hero); _reveal(), look["cape"])
+	var srow := HBoxContainer.new()
+	srow.add_theme_constant_override("separation", 8)
+	v.add_child(srow)
+	_text(srow, "Stature:", 15, DIM)
+	for st in [["slight", 0.94], ["middling", 1.0], ["tall", 1.06], ["towering", 1.12]]:
+		var sv: float = st[1]
+		_chip(srow, st[0], func(): look["stature"] = sv; changed.emit(hero); _reveal(), absf(float(look.get("stature", 1.0)) - sv) < 0.001)
 	var crow := HBoxContainer.new()
 	crow.add_theme_constant_override("separation", 8)
 	v.add_child(crow)

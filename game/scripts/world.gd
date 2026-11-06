@@ -236,6 +236,7 @@ func build_hero(hero: Dictionary) -> void:
 	_player = load(_person_model(hero.get("body", "Knight"))).instantiate()
 	add_child(_player)
 	var look: Dictionary = hero.get("look", { "headgear": true, "cape": true, "cape_color": "shape" })
+	_player.scale = Vector3.ONE * clampf(float(look.get("stature", 1.0)), 0.85, 1.2)
 	for a in _player.find_children("*", "BoneAttachment3D", true, false):
 		var n := String(a.name)
 		var head := n.contains("Helmet") or n.contains("Hat") or n.contains("Hood")

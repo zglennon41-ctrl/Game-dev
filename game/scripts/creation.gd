@@ -162,7 +162,7 @@ static func generate(answers: Array, blood_id := "", spark := 0) -> Dictionary:
 	return {
 		"name": "", "blood": blood_id, "shape": shape, "city": city, "discipline": discipline_of(city),
 		"weapon": best_w["id"], "seed": seed, "pattern": pattern, "body": Data.creation["models"][shape],
-		"look": { "headgear": true, "cape": true, "cape_color": "shape" },
+		"look": { "headgear": true, "cape": true, "cape_color": "shape", "stature": 1.0 },
 		"answers": answers.duplicate(), "spark": spark,
 		"why": { "shape": _unique(shape_why), "city": [city_why], "weapon": _unique(weapon_why.filter(func(x): return x != city_why)),
 			"form": t["why"]["effect"].get(effect, []), "trigger": t["lines"].get("trigger", ""),
