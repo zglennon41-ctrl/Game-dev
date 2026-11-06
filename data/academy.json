@@ -739,6 +739,96 @@
         "Imogen",
         "Fenn",
         "Agatha"
+      ],
+      "colonia": [
+        "Teo",
+        "Ilsa",
+        "Rook",
+        "Vesna",
+        "Anselm",
+        "Greta",
+        "Piet",
+        "Lotte"
+      ],
+      "tiber": [
+        "Cassia",
+        "Lucan",
+        "Drusa",
+        "Marcus",
+        "Livia",
+        "Gaius",
+        "Aurelia",
+        "Tullus"
+      ],
+      "khemet": [
+        "Neferet",
+        "Kemi",
+        "Tahir",
+        "Sitra",
+        "Amani",
+        "Hapi",
+        "Meret",
+        "Senet"
+      ],
+      "baghdad": [
+        "Zahra",
+        "Idris",
+        "Layla",
+        "Omar",
+        "Yusuf",
+        "Nadia",
+        "Samir",
+        "Hind"
+      ],
+      "varanasi": [
+        "Asha",
+        "Dev",
+        "Mira",
+        "Kiran",
+        "Arun",
+        "Priya",
+        "Ravi",
+        "Tara"
+      ],
+      "jiangnan": [
+        "Lin",
+        "Wei",
+        "Mei",
+        "Zhao",
+        "Yun",
+        "Bao",
+        "Xiu",
+        "Ren"
+      ],
+      "kazan": [
+        "Aigul",
+        "Timur",
+        "Zarina",
+        "Ruslan",
+        "Dinara",
+        "Bulat",
+        "Alsu",
+        "Marat"
+      ],
+      "timbuktu": [
+        "Aminata",
+        "Sekou",
+        "Fatou",
+        "Modibo",
+        "Awa",
+        "Oumar",
+        "Kadiatou",
+        "Issa"
+      ],
+      "edo": [
+        "Hana",
+        "Ren",
+        "Sora",
+        "Kaito",
+        "Yui",
+        "Haru",
+        "Aoi",
+        "Kenji"
       ]
     },
     "last": {
@@ -771,6 +861,96 @@
         "Strand",
         "Vesey",
         "Blight"
+      ],
+      "colonia": [
+        "Marrow",
+        "Brandt",
+        "Castell",
+        "Kort",
+        "Vogel",
+        "Steiner",
+        "Hartz",
+        "Roth"
+      ],
+      "tiber": [
+        "Varro",
+        "Petra",
+        "Hale",
+        "Vell",
+        "Corvinus",
+        "Marcellus",
+        "Fabia",
+        "Severin"
+      ],
+      "khemet": [
+        "Ode",
+        "Sabah",
+        "Nile",
+        "Amun",
+        "Khafra",
+        "Set",
+        "Nefer",
+        "Iry"
+      ],
+      "baghdad": [
+        "Qasim",
+        "Fahd",
+        "Noor",
+        "Tariq",
+        "Haddad",
+        "Rashid",
+        "Farouk",
+        "Nasser"
+      ],
+      "varanasi": [
+        "Rai",
+        "Sharan",
+        "Ganga",
+        "Bodh",
+        "Mitra",
+        "Sen",
+        "Das",
+        "Pathak"
+      ],
+      "jiangnan": [
+        "Shu",
+        "Jian",
+        "Huan",
+        "Ren",
+        "Tang",
+        "Shen",
+        "Qian",
+        "Lu"
+      ],
+      "kazan": [
+        "Bek",
+        "Sal",
+        "Kul",
+        "Aktay",
+        "Nur",
+        "Tagir",
+        "Ildar",
+        "Sabir"
+      ],
+      "timbuktu": [
+        "Keita",
+        "Diallo",
+        "Traore",
+        "Sene",
+        "Toure",
+        "Cisse",
+        "Kone",
+        "Maiga"
+      ],
+      "edo": [
+        "Mori",
+        "Takeda",
+        "Ishii",
+        "Shiba",
+        "Sato",
+        "Kuroda",
+        "Hayashi",
+        "Okada"
       ]
     },
     "temperaments": [
