@@ -233,7 +233,7 @@ var _glow_light: OmniLight3D = null
 func build_hero(hero: Dictionary) -> void:
 	if _player:
 		_player.queue_free()
-	_player = load("res://game/assets/kaykit/%s.glb" % hero.get("body", "Knight")).instantiate()
+	_player = load(_person_model(hero.get("body", "Knight"))).instantiate()
 	add_child(_player)
 	for a in _player.find_children("*", "BoneAttachment3D", true, false):
 		var n := String(a.name)
@@ -374,7 +374,7 @@ func set_foe(spec: Dictionary) -> void:
 		_wolf.scale = Vector3.ONE * WOLF_SCALE * float(spec.get("wolf_scale", 1.0))
 		_w_anims = WOLF_ANIMS
 	else:
-		_wolf = load("res://game/assets/kaykit/%s.glb" % spec.get("body", "Knight")).instantiate()
+		_wolf = load(_person_model(spec.get("body", "Knight"))).instantiate()
 		_w_anims = PERSON_ANIMS
 		for a in _wolf.find_children("*", "BoneAttachment3D", true, false):
 			var an := String(a.name)
@@ -397,6 +397,13 @@ func set_foe(spec: Dictionary) -> void:
 		m.material_overlay = _overlay_wolf
 	_w_current = ""
 	_w_oneshot_until = 0.0
+
+## A person's body: the grounded one from the people kit when it exists, else KayKit's.
+func _person_model(body: String) -> String:
+	var path := "res://game/assets/people/%s.glb" % body
+	if ResourceLoader.exists(path):
+		return path
+	return "res://game/assets/kaykit/%s.glb" % body
 
 ## A beast's body: its own model from the beast kit when it exists, else the wolf.
 func _beast_model(model: String) -> String:
@@ -2282,7 +2289,7 @@ func set_allies(specs: Array) -> void:
 		(a["node"] as Node).queue_free()
 	_ally_nodes.clear()
 	for sp in specs:
-		var n: Node3D = load("res://game/assets/kaykit/%s.glb" % sp.get("body", "Knight")).instantiate()
+		var n: Node3D = load(_person_model(sp.get("body", "Knight"))).instantiate()
 		add_child(n)
 		for a in n.find_children("*", "BoneAttachment3D", true, false):
 			var an := String(a.name)
@@ -2437,7 +2444,7 @@ func set_marker(at: Variant) -> void:
 
 ## Someone standing in the place: a body, a weapon, their name and what they are over the head.
 func add_figure(body: String, at: Vector2, facing: float, title: String, sub: String, weapon := "", tint := Color(0, 0, 0, 0)) -> Dictionary:
-	var n: Node3D = load("res://game/assets/kaykit/%s.glb" % body).instantiate()
+	var n: Node3D = load(_person_model(body)).instantiate()
 	_place_root.add_child(n)
 	for a in n.find_children("*", "BoneAttachment3D", true, false):
 		var an := String(a.name)
