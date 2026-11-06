@@ -16,10 +16,25 @@ SHIM = '''<script>
 			});
 		}
 		if (/index\\.pck(\\?|$)/.test(url)) {
-			return realFetch('game.pck.wasm', init).then((r) => {
-				if (!r.ok) return r;
-				return new Response(r.body, { status: 200, headers: { 'Content-Type': 'application/octet-stream' } });
+			// The game data comes in numbered parts, joined into one stream.
+			const parts = [];
+			for (let i = 0; i < PCK_PARTS; i++) parts.push('game.pck.' + String(i).padStart(2, '0') + '.wasm');
+			const stream = new ReadableStream({
+				async start(controller) {
+					for (const name of parts) {
+						const r = await realFetch(name, init);
+						if (!r.ok) { controller.error(new Error('missing ' + name)); return; }
+						const reader = r.body.getReader();
+						for (;;) {
+							const { done, value } = await reader.read();
+							if (done) break;
+							controller.enqueue(value);
+						}
+					}
+					controller.close();
+				},
 			});
+			return Promise.resolve(new Response(stream, { status: 200, headers: { 'Content-Type': 'application/octet-stream' } }));
 		}
 		return realFetch(input, init);
 	};
@@ -27,6 +42,8 @@ SHIM = '''<script>
 </script>
 		<script src="index.js"></script>'''
 
+import os
+SHIM = SHIM.replace('(function () {', '(function () {\n\tconst PCK_PARTS = %d;' % int(os.environ.get('PCK_PARTS', '1')), 1)
 s = open('index.html').read()
 s = s.replace('<script src="index.js"></script>', SHIM, 1)
 s = s.replace('<title>WILDLINE</title>', '<title>WILDLINE Pulse Room</title>')
