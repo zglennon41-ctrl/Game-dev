@@ -10,8 +10,8 @@ const RED := Style.BLOOD
 const BLUE := Style.WILL
 const GOLD := Style.GOLD
 
-const SLOT_W := 92.0
-const SLOT_H := 80.0
+const SLOT_W := 72.0
+const SLOT_H := 62.0
 
 var play_ui := Control.new()
 var _frame := PanelContainer.new()
@@ -47,6 +47,9 @@ var prompt_text := RichTextLabel.new()
 var prompt_note := Label.new()
 var prompt_progress := Label.new()
 var hint := Label.new()
+var objective_title := Label.new()
+var objective_progress := Label.new()
+var _toast_until := 0.0
 var screen := Control.new()
 var _veil := ColorRect.new()
 var _center := CenterContainer.new()
@@ -99,12 +102,14 @@ func _ready() -> void:
 	add_child(play_ui)
 
 	# The hero's frame: a plate, a Shape-coloured sigil, the name, health and Will.
-	_frame.position = Vector2(24, 20)
-	_frame.custom_minimum_size = Vector2(400, 0)
-	_frame.add_theme_stylebox_override("panel", Style.plate(Color(0.04, 0.034, 0.03, 0.72), Style.BRASS_DIM, 1, 12))
+	_frame.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	_frame.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_frame.position = Vector2(24, -24)
+	_frame.custom_minimum_size = Vector2(330, 0)
+	_frame.add_theme_stylebox_override("panel", Style.plate(Color(0.04, 0.034, 0.03, 0.72), Style.BRASS_DIM, 1, 10))
 	play_ui.add_child(_frame)
 	var me := VBoxContainer.new()
-	me.add_theme_constant_override("separation", 5)
+	me.add_theme_constant_override("separation", 4)
 	_frame.add_child(me)
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 12)
@@ -114,31 +119,31 @@ func _ready() -> void:
 	_sigil.rotation = PI / 4.0
 	_sigil.pivot_offset = Vector2(5.5, 5.5)
 	head.add_child(_sigil)
-	Style.label(_name_label, 19, FG, "title", 4)
+	Style.label(_name_label, 17, FG, "title", 4)
 	head.add_child(_name_label)
-	Style.label(_shape_label, 14, DIM, "ui")
+	Style.label(_shape_label, 12, DIM, "ui")
 	_shape_label.size_flags_vertical = Control.SIZE_SHRINK_END
 	head.add_child(_shape_label)
-	me.add_child(_meter(hp_bar, hp_ghost, hp_text, RED, 20, 376))
-	me.add_child(_meter(will_bar, null, null, BLUE, 9, 376))
+	me.add_child(_meter(hp_bar, hp_ghost, hp_text, RED, 14, 310))
+	me.add_child(_meter(will_bar, null, null, BLUE, 6, 310))
 	var srow := HBoxContainer.new()
 	me.add_child(srow)
-	Style.label(status, 14, ACCENT, "ui_bold", 4)
+	Style.label(status, 12, ACCENT, "ui_bold", 3)
 	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	srow.add_child(status)
-	Style.label(will_text, 13, BLUE.lightened(0.3), "ui", 3)
+	Style.label(will_text, 11, BLUE.lightened(0.3), "ui", 3)
 	srow.add_child(will_text)
 	# The genius: its name and form, its Will, its order (G changes it).
 	_g_row.add_theme_constant_override("separation", 3)
 	var grow := HBoxContainer.new()
 	grow.add_theme_constant_override("separation", 10)
 	_g_row.add_child(grow)
-	Style.label(_g_label, 15, FG, "title", 3)
+	Style.label(_g_label, 13, FG, "title", 3)
 	_g_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grow.add_child(_g_label)
-	Style.label(_g_order, 13, GOLD, "ui_bold", 3)
+	Style.label(_g_order, 11, GOLD, "ui_bold", 3)
 	grow.add_child(_g_order)
-	_g_row.add_child(_meter(g_bar, null, null, Style.GOLD, 7, 376))
+	_g_row.add_child(_meter(g_bar, null, null, Style.GOLD, 5, 310))
 	_g_row.visible = false
 	me.add_child(_g_row)
 	# The party: a small bar for each classmate beside you.
@@ -147,13 +152,13 @@ func _ready() -> void:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
 		var l := Label.new()
-		Style.label(l, 13, Style.DIM, "ui", 3)
-		l.custom_minimum_size = Vector2(150, 0)
+		Style.label(l, 11, Style.DIM, "ui", 3)
+		l.custom_minimum_size = Vector2(130, 0)
 		l.clip_text = true
 		row.add_child(l)
 		var b := ProgressBar.new()
 		Style.bar_styles(b, Color(0.55, 0.72, 0.95))
-		b.custom_minimum_size = Vector2(216, 7)
+		b.custom_minimum_size = Vector2(170, 5)
 		b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(b)
 		_party.add_child(row)
@@ -163,23 +168,23 @@ func _ready() -> void:
 
 	# The target frame.
 	target.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	target.custom_minimum_size = Vector2(500, 0)
-	target.position = Vector2(-250, 18)
-	target.add_theme_stylebox_override("panel", Style.plate(Color(0.04, 0.03, 0.03, 0.66), Style.BRASS_DIM, 1, 10))
+	target.custom_minimum_size = Vector2(420, 0)
+	target.position = Vector2(-210, 14)
+	target.add_theme_stylebox_override("panel", Style.plate(Color(0.04, 0.03, 0.03, 0.66), Style.BRASS_DIM, 1, 8))
 	var tv := VBoxContainer.new()
-	tv.add_theme_constant_override("separation", 4)
+	tv.add_theme_constant_override("separation", 3)
 	target.add_child(tv)
 	var trow := HBoxContainer.new()
 	trow.alignment = BoxContainer.ALIGNMENT_CENTER
 	trow.add_theme_constant_override("separation", 12)
 	tv.add_child(trow)
-	Style.label(target_name, 18, FG, "title", 4)
+	Style.label(target_name, 16, FG, "title", 4)
 	trow.add_child(target_name)
-	Style.label(target_sub, 14, DIM, "ui", 3)
+	Style.label(target_sub, 12, DIM, "ui", 3)
 	target_sub.size_flags_vertical = Control.SIZE_SHRINK_END
 	trow.add_child(target_sub)
-	tv.add_child(_meter(target_bar, target_ghost, null, RED, 14, 478))
-	Style.label(target_pips, 15, GOLD, "ui_bold", 4)
+	tv.add_child(_meter(target_bar, target_ghost, null, RED, 10, 400))
+	Style.label(target_pips, 13, GOLD, "ui_bold", 4)
 	target_pips.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	tv.add_child(target_pips)
 	play_ui.add_child(target)
@@ -192,54 +197,66 @@ func _ready() -> void:
 	Style.label(timer_label, 36, FG, "title", 5)
 	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(timer_label)
-	Style.label(score_label, 16, DIM, "italic", 4)
+	Style.label(score_label, 15, DIM, "italic", 4)
 	score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(score_label)
+	var ogap := Control.new()
+	ogap.custom_minimum_size = Vector2(0, 6)
+	right.add_child(ogap)
+	Style.label(objective_title, 15, ACCENT, "title", 4)
+	objective_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	objective_title.autowrap_mode = TextServer.AUTOWRAP_WORD
+	right.add_child(objective_title)
+	Style.label(objective_progress, 13, DIM, "ui", 3)
+	objective_progress.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	objective_progress.autowrap_mode = TextServer.AUTOWRAP_WORD
+	right.add_child(objective_progress)
 	play_ui.add_child(right)
 
 	# The ability bar.
 	bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	bar.add_theme_constant_override("separation", 8)
-	bar.position = Vector2(-((SLOT_W + 8) * SLOTS.size() - 8) / 2.0, -SLOT_H - 40)
+	bar.position = Vector2(-((SLOT_W + 8) * SLOTS.size() - 8) / 2.0, -SLOT_H - 26)
 	for s in SLOTS:
 		bar.add_child(_slot(s))
 	play_ui.add_child(bar)
 
-	Style.label(pattern_banner, 26, GOLD, "title", 6)
+	Style.label(pattern_banner, 20, GOLD, "title", 5)
 	# Above the ability bar, clear of the gold ring at the hero's feet.
 	pattern_banner.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	pattern_banner.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	pattern_banner.position = Vector2(-450, -SLOT_H - 130)
+	pattern_banner.position = Vector2(-450, -SLOT_H - 96)
 	pattern_banner.custom_minimum_size = Vector2(900, 0)
 	pattern_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	play_ui.add_child(pattern_banner)
 
-	Style.label(hint, 13, DIM, "ui", 3)
+	Style.label(hint, 12, DIM, "ui", 3)
 	hint.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	hint.position = Vector2(-500, -26)
+	hint.position = Vector2(-500, -20)
 	hint.custom_minimum_size = Vector2(1000, 0)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.text = "WASD move  ·  mouse look  ·  Tab lock-on  ·  N name the foe  ·  Esc menu      pad: X strike · RB block · A dodge · Y technique · LB stance · B Pattern"
+	hint.text = "WASD move  ·  mouse look  ·  Tab lock-on  ·  H the step again  ·  N name the foe  ·  Esc menu      pad: X strike · RB block · A dodge · Y technique · LB stance · B Pattern"
 	play_ui.add_child(hint)
 
 	# The tutorial box: a plate with a brass edge down its left side.
 	prompt.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	prompt.custom_minimum_size = Vector2(720, 0)
-	prompt.position = Vector2(-360, 128)
-	var ps := Style.plate(Color(0.045, 0.038, 0.034, 0.9), Style.BRASS, 1, 16)
+	prompt.custom_minimum_size = Vector2(600, 0)
+	prompt.position = Vector2(-300, 92)
+	prompt.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var ps := Style.plate(Color(0.045, 0.038, 0.034, 0.9), Style.BRASS, 1, 14)
 	ps.border_width_left = 4
 	ps.content_margin_left = 22
 	prompt.add_theme_stylebox_override("panel", ps)
 	var pv := VBoxContainer.new()
 	pv.add_theme_constant_override("separation", 6)
 	prompt.add_child(pv)
-	Style.label(prompt_title, 20, ACCENT, "title")
+	Style.label(prompt_title, 18, ACCENT, "title")
 	pv.add_child(prompt_title)
 	prompt_text.bbcode_enabled = true
 	prompt_text.fit_content = true
 	prompt_text.scroll_active = false
-	prompt_text.custom_minimum_size = Vector2(676, 0)
-	Style.rich(prompt_text, 18, FG, "body")
+	prompt_text.custom_minimum_size = Vector2(560, 0)
+	Style.rich(prompt_text, 17, FG, "body")
 	pv.add_child(prompt_text)
 	var row := HBoxContainer.new()
 	Style.label(prompt_note, 15, DIM, "italic")
@@ -308,12 +325,12 @@ func _slot(s: Array) -> PanelContainer:
 	v.add_theme_constant_override("separation", -1)
 	p.add_child(v)
 	var key := Label.new()
-	Style.label(key, 20, FG, "title", 4)
+	Style.label(key, 16, FG, "title", 4)
 	key.text = s[1]
 	key.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(key)
 	var name := Label.new()
-	Style.label(name, 13, DIM, "ui", 3)
+	Style.label(name, 11, DIM, "ui", 3)
 	name.text = s[2]
 	name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name.clip_text = true
@@ -321,7 +338,7 @@ func _slot(s: Array) -> PanelContainer:
 	name.custom_minimum_size = Vector2(SLOT_W - 10, 0)
 	v.add_child(name)
 	var cost := Label.new()
-	Style.label(cost, 12, BLUE.lightened(0.2), "ui", 3)
+	Style.label(cost, 10, BLUE.lightened(0.2), "ui", 3)
 	cost.text = ("%s Will" % s[3]) if s[3] != "" else " "
 	cost.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(cost)
@@ -334,7 +351,7 @@ func _slot(s: Array) -> PanelContainer:
 	cd.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	cd_holder.add_child(cd)
 	var cd_text := Label.new()
-	Style.label(cd_text, 24, FG, "title", 5)
+	Style.label(cd_text, 20, FG, "title", 5)
 	cd_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	cd_text.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	cd_text.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -365,7 +382,7 @@ func configure(f: Fight, hero_name: String) -> void:
 	for s in slots.values():
 		if (s["panel"] as PanelContainer).visible:
 			visible_n += 1
-	bar.position = Vector2(-((SLOT_W + 8) * visible_n - 8) / 2.0, -SLOT_H - 40)
+	bar.position = Vector2(-((SLOT_W + 8) * visible_n - 8) / 2.0, -SLOT_H - 26)
 	_hero_name = hero_name if hero_name != "" else "Anchor"
 	_hero_sub = String(f.player_shape).capitalize()
 	_accent = World.SHAPE_COLORS.get(f.player_shape, Style.GOLD)
@@ -465,18 +482,39 @@ func hide_screen() -> void:
 	play_ui.visible = true
 	_play_time = 0.0
 
+## The step: its title stays as the objective line (top right); its words show as a toast for
+## a while and fade, so the fight's middle stays clear.
 func set_prompt(title: String, text: String) -> void:
-	var was := prompt.visible and prompt_title.text == title
-	prompt.visible = title != ""
+	var changed := prompt_title.text != title or prompt_text.text != text
+	objective_title.text = title
 	prompt_title.text = title
 	prompt_text.text = text
-	if prompt.visible and not was and prompt.is_inside_tree():
-		prompt.modulate.a = 0.0
-		prompt.create_tween().tween_property(prompt, "modulate:a", 1.0, 0.3)
+	prompt_note.text = ""
+	if title == "":
+		prompt.visible = false
+		objective_progress.text = ""
+		return
+	if changed:
+		_toast(8.0)
 
 func set_prompt_status(note: String, progress: String) -> void:
-	prompt_note.text = note
+	objective_progress.text = progress
 	prompt_progress.text = progress
+	if note != prompt_note.text:
+		prompt_note.text = note
+		if note != "" and not note.ends_with("s left."):
+			_toast(4.0)
+
+func show_prompt_again() -> void:
+	if prompt_title.text != "":
+		_toast(8.0)
+
+func _toast(seconds: float) -> void:
+	_toast_until = Time.get_ticks_msec() / 1000.0 + seconds
+	if not prompt.visible and prompt.is_inside_tree():
+		prompt.modulate.a = 0.0
+		prompt.create_tween().tween_property(prompt, "modulate:a", 1.0, 0.25)
+	prompt.visible = true
 
 func update_play(f: Fight, timer_text: String, score_text: String, show_target: bool) -> void:
 	var dt := get_process_delta_time()
@@ -549,7 +587,14 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	target_pips.text = "STAGGERED" if stag else (("BREAK  %d / %d" % [f.w_break, int(Data.room["break"]["needed"])]) if f.breaks_beast() else "")
 	timer_label.text = timer_text
 	score_label.text = score_text
-	hint.modulate.a = clampf(1.0 - (_play_time - 12.0) / 3.0, 0.35, 1.0)
+	hint.modulate.a = clampf(1.0 - (_play_time - 14.0) / 3.0, 0.0, 1.0)
+	hint.visible = hint.modulate.a > 0.01
+	if prompt.visible:
+		var left := _toast_until - Time.get_ticks_msec() / 1000.0
+		if left <= 0.0:
+			prompt.visible = false
+		elif left < 0.5:
+			prompt.modulate.a = left / 0.5
 
 	# Ability bar state (a lesson can lock some of it).
 	_fight_allowed = f.allowed

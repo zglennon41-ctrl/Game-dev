@@ -6,6 +6,7 @@ class_name Academy
 extends CanvasLayer
 
 signal leave   # back to the title
+signal open_builder(pattern: Dictionary)   # the Hearthkeeper sits you down with your Pattern
 
 var hero: Dictionary
 var progress: Dictionary
@@ -296,6 +297,8 @@ func go(place_id: String, quiet := false, from := "") -> void:
 	for ins in spec["instructors"]:
 		if ins.has("discipline") and ins["discipline"] != hero.get("discipline", ""):
 			continue
+		if ins.has("after") and not progress["done"].has(String(ins["after"])):
+			continue
 		var data: Dictionary = Data.by_id(Data.academy["instructors"], ins["id"])
 		var at := Vector2(ins["at"][0], ins["at"][1])
 		var fig := world.add_figure(data["body"], at, (spawn - at).angle(), data["name"], data.get("title", ""))
@@ -530,6 +533,15 @@ func _talk_instructor(id: String) -> void:
 	if id == rite["instructor"] and progress["place"] == rite["place"] and not progress["done"].has("rite"):
 		_start_rite()
 		return
+	if id == _school_instructor() and progress["done"].has("discipline") and next_need() != "gate":
+		_teach(id)
+		return
+	if id == "keeper" and progress["done"].has("discipline"):
+		var L: Dictionary = Data.academy.get("mastery", {}).get("lines", {})
+		say(id, [String(L.get("keeperIntro", "")).replace("{pattern}", Builder.sentence(hero["pattern"]))], func():
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			open_builder.emit(hero["pattern"]))
+		return
 	var gate: Dictionary = Data.academy["gate"]
 	if id == gate["instructor"] and progress["place"] == gate["place"] and not progress["done"].has("gate") and next_need() == "gate":
 		_start_gate()
@@ -759,7 +771,96 @@ func in_rite() -> bool:
 func in_lesson() -> bool:
 	return not _lesson.is_empty()
 
+## Technique grades: every use counts; crossing a grade is said aloud.
+func _count_technique(id: String) -> void:
+	if not hero.has("technique_use"):
+		hero["technique_use"] = {}
+	var before: String = fight.grade_of(id)["id"]
+	hero["technique_use"][id] = int(hero["technique_use"].get(id, 0)) + 1
+	var after: Dictionary = fight.grade_of(id)
+	if after["id"] != before:
+		var tname := id
+		for t in [fight.tech] + fight.extra_techs:
+			if t["id"] == id:
+				tname = t["name"]
+		title_card(String(after["name"]).to_upper(), tname, Style.GOLD)
+		sfx.play("cue-hit", 1.3)
+
+## The techniques the school may still teach, and how many the hero may know now.
+func techniques_allowed() -> int:
+	var m: Dictionary = Data.academy.get("mastery", {})
+	var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
+	var all: int = dk.get("techniques", []).size()
+	return mini(all, 3 + int(progress["record"].get("marks", 0)) / maxi(1, int(m.get("learnEveryMarks", 3))))
+
+func techniques_known() -> Array:
+	if not hero.has("techniques_known"):
+		hero["techniques_known"] = hero.get("techniques", []).duplicate()
+	return hero["techniques_known"]
+
+func _school_instructor() -> String:
+	for ins in Data.academy["places"]["yard"]["instructors"]:
+		if ins.get("discipline", "") == hero.get("discipline", ""):
+			return ins["id"]
+	return ""
+
+## The school's instructor: another technique when Marks allow, and the three for the hand.
+func _teach(id: String) -> void:
+	var m: Dictionary = Data.academy.get("mastery", {})
+	var L: Dictionary = m.get("lines", {})
+	var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
+	var known := techniques_known()
+	if known.size() < techniques_allowed():
+		var opts: Array = []
+		for t in dk["techniques"]:
+			if not known.has(t["id"]):
+				opts.append({ "id": t["id"], "label": t["name"], "text": "%s\n[i]%d Will  ·  %.1f s[/i]" % [t["text"], int(t["will"]), float(t["cooldown"])] })
+		say(id, [L.get("learn", "Which?")], func():
+			choose("The school's techniques  ·  %d of %d known" % [known.size(), dk["techniques"].size()], opts, func(tid: String):
+				techniques_known().append(tid)
+				var tname := ""
+				for t in dk["techniques"]:
+					if t["id"] == tid:
+						tname = t["name"]
+				progress["record"]["techniques_learned"] = int(progress["record"].get("techniques_learned", 0)) + 1
+				if genius:
+					genius.studied(String(hero.get("discipline", "")), 1.0)
+				save()
+				say(id, [String(L.get("learned", "{tech} is yours.")).replace("{tech}", tname)], func(): _set_slots(id))))
+		return
+	if known.size() > int(m.get("slots", 3)):
+		_set_slots(id)
+		return
+	say(id, [L.get("nothingNew", "Nothing new yet.")])
+
+## Choose the three techniques for the hand, one at a time.
+func _set_slots(id: String, picked: Array = []) -> void:
+	var m: Dictionary = Data.academy.get("mastery", {})
+	var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
+	var n := int(m.get("slots", 3))
+	var known := techniques_known()
+	if known.size() <= n:
+		return
+	if picked.size() >= n:
+		hero["techniques"] = picked
+		save()
+		go(progress["place"], true, "")
+		sfx.play("done")
+		return
+	var opts: Array = []
+	for t in dk["techniques"]:
+		if known.has(t["id"]) and not picked.has(t["id"]):
+			var g: Dictionary = fight.grade_of(t["id"])
+			opts.append({ "id": t["id"], "label": "%s  ·  %s" % [t["name"], g["name"]], "text": "%s\n[i]%d Will  ·  %.1f s[/i]" % [t["text"], int(t["will"]), float(t["cooldown"])], "on": hero.get("techniques", []).has(t["id"]) and opts.is_empty() })
+	choose("%s  (%d of %d)" % [m.get("lines", {}).get("setSlots", "Set your three."), picked.size() + 1, n], opts, func(tid: String):
+		var p2 := picked.duplicate()
+		p2.append(tid)
+		_set_slots(id, p2))
+
 func update(events: Array, dt: float) -> void:
+	for e in events:
+		if e["type"] == "technique" and fight:
+			_count_technique(String(e.get("id", "")))
 	_objective.text = objective()
 	if _gate and talking() and auto:
 		_auto_wait -= dt
@@ -997,7 +1098,7 @@ func _start_lesson(lesson0: Dictionary) -> void:
 	# The Discipline lesson hands over the school's three techniques to learn.
 	if lesson["id"] == "discipline":
 		var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
-		hero["techniques"] = dk.get("techniques", []).map(func(t): return t["id"])
+		hero["techniques"] = dk.get("techniques", []).slice(0, 3).map(func(t): return t["id"])
 	var spec: Dictionary = place_spec(lesson["place"])
 	var ins: Dictionary = Data.by_id(Data.academy["instructors"], lesson["instructor"])
 	_drill_fight()
@@ -1532,33 +1633,82 @@ func hide_card() -> void:
 
 # --- A choice ----------------------------------------------------------------------
 
-var _choice_box: PanelContainer = null
+var _choice_box: Control = null
 
 ## A choice among a few things, each with a line about it; the autopilot takes the first.
 func choose(title: String, options: Array, then: Callable) -> void:
 	if _choice_box:
 		_choice_box.queue_free()
-	_choice_box = PanelContainer.new()
-	_choice_box.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
-	_choice_box.custom_minimum_size = Vector2(520, 0)
-	_choice_box.position = Vector2(-580, -200)
-	_choice_box.add_theme_stylebox_override("panel", Style.plate(Color(0.04, 0.034, 0.03, 0.95), Style.BRASS, 1, 20))
-	get_child(0).add_child(_choice_box)
+	var veil := ColorRect.new()
+	veil.color = Color(0.02, 0.016, 0.016, 0.55)
+	veil.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_choice_box = veil
+	get_child(0).add_child(veil)
+	var sheet := PanelContainer.new()
+	sheet.set_anchors_preset(Control.PRESET_CENTER)
+	sheet.custom_minimum_size = Vector2(940, 520)
+	sheet.position = Vector2(-470, -260)
+	sheet.add_theme_stylebox_override("panel", Style.plate(Color(0.04, 0.034, 0.03, 0.97), Style.BRASS, 1, 22))
+	veil.add_child(sheet)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 8)
-	_choice_box.add_child(v)
+	v.add_theme_constant_override("separation", 10)
+	sheet.add_child(v)
 	var l := Label.new()
-	Style.label(l, 22, Style.GOLD, "title")
+	Style.label(l, 26, Style.GOLD, "title")
 	l.text = title
 	v.add_child(l)
+	v.add_child(Style.rule(420))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 24)
+	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	v.add_child(row)
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(400, 0)
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	row.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 6)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(list)
+	var desc_panel := PanelContainer.new()
+	desc_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	desc_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	desc_panel.add_theme_stylebox_override("panel", Style.plate(Color(0.03, 0.026, 0.024, 0.9), Style.BRASS_DIM, 1, 18))
+	row.add_child(desc_panel)
+	var dv := VBoxContainer.new()
+	dv.add_theme_constant_override("separation", 8)
+	desc_panel.add_child(dv)
+	var dh := Label.new()
+	Style.label(dh, 20, Style.FG, "title")
+	dh.autowrap_mode = TextServer.AUTOWRAP_WORD
+	dv.add_child(dh)
+	var dt := RichTextLabel.new()
+	dt.bbcode_enabled = true
+	dt.fit_content = true
+	dt.scroll_active = false
+	dt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	Style.rich(dt, 17, Style.FG, "body")
+	dv.add_child(dt)
+	var foot := Label.new()
+	Style.label(foot, 13, Style.DIM, "ui")
+	foot.text = "Up / Down  look      Enter / click  choose"
+	v.add_child(foot)
 	var first: Button = null
 	for o in options:
 		var b := Button.new()
-		b.text = "%s\n%s" % [o["label"], o.get("text", "")]
+		b.text = o["label"]
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		b.autowrap_mode = TextServer.AUTOWRAP_WORD
-		Style.button(b, o.get("on", false), 17, "body")
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		b.custom_minimum_size = Vector2(0, 44)
+		Style.button(b, o.get("on", false), 17)
 		var id: String = o["id"]
+		var show := func():
+			dh.text = o["label"]
+			dt.text = String(o.get("text", ""))
+		b.focus_entered.connect(show)
+		b.mouse_entered.connect(show)
 		b.pressed.connect(func():
 			sfx.play("ui-take", 1.0, -6.0)
 			_choice_box.queue_free()
@@ -1566,7 +1716,7 @@ func choose(title: String, options: Array, then: Callable) -> void:
 			if not auto:
 				Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 			then.call(id))
-		v.add_child(b)
+		list.add_child(b)
 		if first == null or o.get("on", false):
 			first = b
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -1803,7 +1953,11 @@ func settled_sheet() -> void:
 	var g := Genius.for_hero(hero)
 	var b: Dictionary = Data.by_id(Data.bloods, hero["blood"]) if hero.get("blood", "") != "" else { "name": "unmarked" }
 	var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), { "name": String(hero.get("discipline", "")).capitalize() })
-	var techs: Array = dk.get("techniques", []).map(func(t): return t["name"])
+	var techs: Array = []
+	for t in dk.get("techniques", []):
+		if techniques_known().has(t["id"]):
+			var gr: Dictionary = fight.grade_of(t["id"]) if fight else { "id": "learned", "name": "learned" }
+			techs.append(t["name"] + ("" if gr["id"] == "learned" else " (%s)" % gr["name"]))
 	var rec: Dictionary = progress["record"]
 	var body := "[table=2]"
 	for r in [["Blood", b["name"]], ["Shape", "%s  ·  Stage %d" % [String(hero["shape"]).capitalize(), int(hero.get("stage", 2))]],
@@ -2028,6 +2182,8 @@ func postings_for_day(day: int) -> Array:
 		if fit.is_empty():
 			continue
 		var z: Dictionary = fit[rng.randi() % fit.size()]
+		if out.any(func(q): return q["type"] == tid and q["zone"] == z["id"]):
+			continue
 		var pname: Array = q["posterNames"].get(t["poster"], ["The board"])
 		var named: Array = z["beasts"].get("named", []).filter(func(n): return not progress.get("named", {}).get(n["id"], {}).get("felled", false))
 		if tid == "hunt" and named.is_empty():
@@ -2095,8 +2251,9 @@ func _read_postings(posts: Array) -> void:
 	var opts: Array = []
 	for p in posts:
 		var t: Dictionary = Data.quests["types"][p["type"]]
-		opts.append({ "id": p["id"], "label": "%s  ·  %s  ·  %s" % [String(t["name"]).to_upper(), p["title"], String(p["colour"]).capitalize()],
-			"text": "%s\n[i]%s · %d Mark%s[/i]" % [p["posting"], p["poster"], int(p["pay"]), "" if int(p["pay"]) == 1 else "s"] })
+		var zname := String(Data.zone(p["zone"])["name"]) if p["type"] != "rally" else "the yard"
+		opts.append({ "id": p["id"], "label": "%s  ·  %s" % [String(t["name"]).to_upper(), p["title"]],
+			"text": "%s\n[i]%s  ·  %s  ·  %s line  ·  %d Mark%s%s[/i]" % [p["posting"], p["poster"], zname, String(p["colour"]).capitalize(), int(p["pay"]), "" if int(p["pay"]) == 1 else "s", "  ·  CRISIS" if p.has("crisis_ledger") else ""] })
 	choose("The day's postings", opts, func(id: String):
 		for p in posts:
 			if p["id"] == id:
@@ -2146,6 +2303,18 @@ func _begin_quest(p: Dictionary) -> void:
 	hud.target.visible = false
 	_step = -1
 	_next_step()
+
+## The Hearthkeeper's work is done: the Pattern is the hero's, the genius knows, the hall remembers.
+func pattern_built(spec: Dictionary) -> void:
+	hero["pattern"] = spec
+	progress["record"]["pattern_built"] = true
+	if genius:
+		genius.milestone("pattern-built")
+		genius.save_to(hero)
+	save()
+	var L: Dictionary = Data.academy.get("mastery", {}).get("lines", {})
+	go(progress["place"], true, "")
+	say("keeper", [L.get("keeperDone", "Written.")])
 
 ## Carrying the Archive's thing: no Patterns.
 func _apply_carry() -> void:

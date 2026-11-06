@@ -31,7 +31,7 @@ var _bot_move := Vector2.ZERO
 const ACTIONS := {
 	"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN],
 	"attack": [KEY_J], "block": [KEY_K], "dodge": [KEY_SPACE, KEY_SHIFT], "technique": [KEY_Q], "tech1": [KEY_1], "tech2": [KEY_2], "tech3": [KEY_3],
-	"stance": [KEY_F, KEY_L], "pattern": [KEY_R], "name_foe": [KEY_N], "lock_on": [KEY_TAB], "menu": [KEY_ESCAPE], "interact": [KEY_E], "order": [KEY_G], "genius_page": [KEY_J],
+	"stance": [KEY_F, KEY_L], "pattern": [KEY_R], "name_foe": [KEY_N], "lock_on": [KEY_TAB], "menu": [KEY_ESCAPE], "interact": [KEY_E], "order": [KEY_G], "genius_page": [KEY_J], "show_step": [KEY_H],
 }
 const MOUSE := { "attack": MOUSE_BUTTON_LEFT, "block": MOUSE_BUTTON_RIGHT, "lock_on": MOUSE_BUTTON_MIDDLE }
 const PAD := { "attack": JOY_BUTTON_X, "block": JOY_BUTTON_RIGHT_SHOULDER, "dodge": JOY_BUTTON_A, "technique": JOY_BUTTON_Y,
@@ -57,6 +57,9 @@ func _ready() -> void:
 	add_child(academy)
 	academy.visible = false
 	academy.leave.connect(func(): academy.save(); menu())
+	academy.open_builder.connect(func(pat: Dictionary):
+		hud.screen.visible = false
+		builder.open(pat, "", func(): pass))
 	add_child(page)
 	page.closed.connect(func(): if mode == "academy" and not _args.has("bot"): Input.mouse_mode = Input.MOUSE_MODE_CAPTURED)
 	creator.changed.connect(_preview_hero)
@@ -66,7 +69,13 @@ func _ready() -> void:
 	# A soft tick whenever the chosen button moves, by mouse or pad.
 	get_viewport().gui_focus_changed.connect(func(c: Control): if c is Button: sfx.play("ui-move", 1.0, -10.0))
 	builder.done.connect(_pattern_built)
-	builder.cancelled.connect(func(): builder.visible = false; menu())
+	builder.cancelled.connect(func():
+		builder.visible = false
+		if mode == "academy":
+			if not _args.has("bot"):
+				Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		else:
+			menu())
 	_last_ticks = Time.get_ticks_usec()
 	if _args.has("shots"):
 		DirAccess.make_dir_recursive_absolute(_args["shots"])
@@ -164,7 +173,7 @@ func _ready() -> void:
 		if _args.has("gate"):
 			# The morning of the Gate: Stage 3, the term behind you, for automated checks.
 			var dkg: Dictionary = Data.discipline_kits.get(h.get("discipline", "marshal"), {})
-			h["techniques"] = dkg.get("techniques", []).map(func(t): return t["id"])
+			h["techniques"] = dkg.get("techniques", []).slice(0, 3).map(func(t): return t["id"])
 			h["stage"] = 3
 			h["projected"] = true
 			h["academy"] = { "seed": int(_args.get("seed", "4242")), "arrived": true, "done": ["hold", "rite", "shape", "discipline", "line", "project"], "met": ["c0", "c1", "c2"], "day": 7, "rested_after": "project",
@@ -180,7 +189,7 @@ func _ready() -> void:
 		if _args.has("project"):
 			# The morning of Lesson 6: the line behind you, for automated checks.
 			var dk0: Dictionary = Data.discipline_kits.get(h.get("discipline", "marshal"), {})
-			h["techniques"] = dk0.get("techniques", []).map(func(t): return t["id"])
+			h["techniques"] = dk0.get("techniques", []).slice(0, 3).map(func(t): return t["id"])
 			h["stage"] = 2
 			h.erase("projected")
 			h["academy"] = { "seed": int(_args.get("seed", "4242")), "arrived": true, "done": ["hold", "rite", "shape", "discipline", "line"], "met": ["c0", "c1"], "day": 6, "rested_after": "line",
@@ -191,7 +200,7 @@ func _ready() -> void:
 		if _args.has("line"):
 			# The morning of Lesson 5: a genius born, a Discipline learned, for automated checks.
 			var dk: Dictionary = Data.discipline_kits.get(h.get("discipline", "marshal"), {})
-			h["techniques"] = dk.get("techniques", []).map(func(t): return t["id"])
+			h["techniques"] = dk.get("techniques", []).slice(0, 3).map(func(t): return t["id"])
 			h["academy"] = { "seed": int(_args.get("seed", "4242")), "arrived": true, "done": ["hold", "rite", "shape", "discipline"], "met": ["c0", "c1"], "day": 5, "rested_after": "discipline",
 				"place": "quad", "record": { "parries": 8, "blocks": 4, "hurts": 2, "dodges": 1, "talks": 5, "spars_won": 3, "spars_lost": 0 } }
 			if not h.has("genius"):
@@ -490,8 +499,13 @@ func _open_builder() -> void:
 	builder.open(Settings.pattern(), Settings.pattern_lost_text(), func(): Settings.restore_pattern())
 
 func _pattern_built(spec: Dictionary) -> void:
-	Settings.save_pattern(spec)
 	builder.visible = false
+	if mode == "academy":
+		academy.pattern_built(spec)
+		if not _args.has("bot"):
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		return
+	Settings.save_pattern(spec)
 	menu()
 
 func start(which: String) -> void:
@@ -583,6 +597,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed("genius_page") or event.is_action_pressed("menu"):
 			page.hide_page()
 		return
+	if event.is_action_pressed("show_step"):
+		hud.show_prompt_again()
 	if mode == "academy":
 		if event.is_action_pressed("genius_page") and not academy.busy() and not academy.in_lesson() and academy.genius and academy.genius.is_born():
 			page.open(academy.genius, World.SHAPE_COLORS.get(academy.hero["shape"], Color.WHITE), 0, int(academy.progress["record"].get("marks", 0)))

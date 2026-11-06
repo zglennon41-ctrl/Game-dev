@@ -505,7 +505,7 @@ func _press_technique(t: Dictionary) -> void:
 		return
 	p_will -= cost
 	p_double_cost = maxi(0, p_double_cost - 1)
-	p_cooldowns[id] = now + float(t["cooldown"])
+	p_cooldowns[id] = now + float(t["cooldown"]) * grade_of(id).get("cooldown", 1.0)
 	p_state = "technique"
 	p_technique = id
 	p_tech_active = t
@@ -800,10 +800,22 @@ func _update_player(dt: float, move: Vector2) -> void:
 
 ## The field past the skin: a Projected field (Stage 3) puts more into every technique and
 ## reaches farther with it (rules.json: field.stageOutput, stageReach).
+## A technique's grade by how often this hero has used it (data/academy.json, mastery).
+func grade_of(id: String) -> Dictionary:
+	var grades: Array = Data.academy.get("mastery", {}).get("grades", [])
+	var uses := int(hero.get("technique_use", {}).get(id, 0))
+	var out: Dictionary = { "id": "learned", "name": "learned", "damage": 1.0, "cooldown": 1.0 }
+	for g in grades:
+		if uses >= int(g["uses"]):
+			out = g
+	return out
+
 func staged(t: Dictionary) -> Dictionary:
-	if not p_field_open:
-		return t
 	var out := t.duplicate()
+	var g := grade_of(String(t.get("id", "")))
+	if out.has("damage"): out["damage"] = roundf(float(out["damage"]) * float(g.get("damage", 1.0)))
+	if not p_field_open:
+		return out
 	var outs: Array = rules["field"]["stageOutput"]
 	var f := float(outs[2]) / float(outs[1])
 	if out.has("damage"): out["damage"] = roundf(float(out["damage"]) * f)

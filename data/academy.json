@@ -310,6 +310,14 @@
             2.2,
             -1.6
           ]
+        },
+        {
+          "id": "keeper",
+          "at": [
+            -5.0,
+            1.5
+          ],
+          "after": "discipline"
         }
       ]
     },
@@ -481,6 +489,18 @@
         "before:discipline": "Lunden's, are you? Halloway. Aeronauts fall for a living: the line, the drop, the vent. Everything we do is deciding how to land. Pick what you'll land holding.",
         "after:discipline": "You landed on your feet. Most don't, the first week.",
         "default": "The school's for Lunden's fog-born. Mind the ballast."
+      }
+    },
+    {
+      "id": "keeper",
+      "name": "Hearthkeeper Odile Sayre",
+      "title": "Make · keeps the hall's Patterns",
+      "shape": "make",
+      "body": "Rogue_Hooded",
+      "after": "discipline",
+      "lines": {
+        "default": "The hearth is lit. Sit when you want your Pattern looked at; a Pattern is not a thing you write once.",
+        "before:discipline": "Come back when you have a school. A Pattern wants a hand to fire it."
       }
     }
   ],
@@ -1828,6 +1848,43 @@
       "declared_join": "You give {guild} your name. {charter}. The recruiter writes it on a slate, and that is a guild.",
       "declared_found": "You give {a} and {b} your word. When the three of you stand on the line together, the Archive will hear of a founding.",
       "declared_free": "You give nobody your name. The platform clears round you, and the line is all yours."
+    }
+  },
+  "mastery": {
+    "$comment": "M5. Techniques grade by use: learned, then practiced and perfected at `uses`, with the factors on damage and cooldown. The school teaches three in Lesson 4; one more of the school's nine may be learned from the school's instructor for every `learnEveryMarks` Marks earned, and three are set for the slots. The Hearthkeeper builds Patterns at the hearth after Lesson 4.",
+    "grades": [
+      {
+        "id": "learned",
+        "name": "learned",
+        "uses": 0,
+        "damage": 1.0,
+        "cooldown": 1.0
+      },
+      {
+        "id": "practiced",
+        "name": "practiced",
+        "uses": 12,
+        "damage": 1.06,
+        "cooldown": 0.9
+      },
+      {
+        "id": "perfected",
+        "name": "perfected",
+        "uses": 36,
+        "damage": 1.14,
+        "cooldown": 0.8
+      }
+    ],
+    "learnEveryMarks": 3,
+    "slots": 3,
+    "lines": {
+      "graded": "{tech}: {grade}.",
+      "learn": "You have earned another of the school's. Which?",
+      "setSlots": "Set your three for the line.",
+      "nothingNew": "Nothing new to teach you yet. Earn Marks on the line and come back.",
+      "learned": "{tech} is yours. Set it when you want it on your hand.",
+      "keeperIntro": "The Hearthkeeper keeps the Patterns of this hall. Yours is {pattern}. Sit, and we see what else it could be.",
+      "keeperDone": "Written. The hearth will remember it, and so will your genius."
     }
   }
 }

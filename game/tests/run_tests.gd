@@ -51,6 +51,7 @@ func _run() -> void:
 	test_quests()
 	test_cohort_ai()
 	test_cohort_days_and_crisis()
+	test_mastery()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -761,7 +762,7 @@ func test_disciplines() -> void:
 		var h := Fight.default_hero()
 		h["city"] = dk["city"]
 		h["discipline"] = disc
-		h["techniques"] = dk["techniques"].map(func(t): return t["id"])
+		h["techniques"] = dk["techniques"].slice(0, 3).map(func(t): return t["id"])
 		var weapons := Data.weapons.filter(func(w): return w["city"] == dk["city"])
 		h["weapon"] = weapons[0]["id"]
 		var f := Fight.new({ "hero": h, "passive": true, "seed": 3 })
@@ -1256,3 +1257,39 @@ func test_cohort_days_and_crisis() -> void:
 	check(b.crisis_phase() == "crisis" and b.reckoning()["title"] == "The mile is given up", "with nothing weighed the default ending holds")
 	a.free()
 	b.free()
+
+## Mastery: the school's nine techniques, grades by use, learning by Marks, the Hearthkeeper.
+func test_mastery() -> void:
+	for school in ["marshal", "pilot", "aeronaut"]:
+		var techs: Array = Data.discipline_kits[school]["techniques"]
+		check(techs.size() == 9, "%s teaches nine techniques (%d)" % [school, techs.size()])
+		var ids := {}
+		for t in techs:
+			ids[t["id"]] = true
+			check(t["effect"] in ["heavy", "burst", "dash", "tether", "ward", "volley", "mark", "finisher", "sound", "pull", "quake"], "%s: %s has an effect the fight knows" % [school, t["id"]])
+		check(ids.size() == 9, "%s's technique ids are distinct" % school)
+	var h := Fight.default_hero()
+	h["discipline"] = "marshal"
+	h["techniques"] = ["rake", "pin", "enfilade"]
+	var f := Fight.new({ "hero": h, "seed": 1 })
+	check(f.extra_techs.size() == 3 and f.extra_techs[0]["id"] == "rake", "any of the school's nine may be on the hand")
+	check(f.grade_of("rake")["id"] == "learned" and f.staged(f.extra_techs[0])["damage"] == 22.0, "an unused technique is learned, at its own damage")
+	h["technique_use"] = { "rake": 40 }
+	check(f.grade_of("rake")["id"] == "perfected" and f.staged(f.extra_techs[0])["damage"] == roundf(22.0 * 1.14), "a technique used often is perfected and hits harder")
+	f.input("tech1")
+	check(f.p_cooldowns.has("rake") and f.p_cooldowns["rake"] - f.now < 6.0 * 0.81, "a perfected technique comes back sooner")
+	# Learning by Marks.
+	var a := Academy.new()
+	a.hero = h
+	a.cohort = Academy.make_cohort(42, h)
+	a.progress = { "seed": 42, "done": ["hold", "rite", "shape", "discipline"], "met": [], "day": 5, "place": "quad", "record": { "marks": 0, "talks": 0 } }
+	check(a.techniques_allowed() == 3 and a.techniques_known().size() == 3, "the school's three are known at first")
+	a.progress["record"]["marks"] = 7
+	check(a.techniques_allowed() == 5, "every three Marks earn another technique (7 Marks: 5)")
+	a.progress["record"]["marks"] = 40
+	check(a.techniques_allowed() == 9, "never more than the school's nine")
+	check(a._school_instructor() == "rourke", "the marshal's instructor teaches the marshal")
+	a.free()
+	var keeper: Dictionary = Data.by_id(Data.academy["instructors"], "keeper")
+	check(keeper["after"] == "discipline" and Data.academy["places"]["hearth"]["instructors"].any(func(i): return i["id"] == "keeper"), "the Hearthkeeper waits at the hearth after Lesson 4")
+	check(Data.academy["mastery"]["grades"].size() == 3, "three grades")

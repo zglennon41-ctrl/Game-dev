@@ -272,7 +272,11 @@
             "locked": "Not with the Warden still standing.",
             "opensWhen": "cleared"
           }
-        ]
+        ],
+        "pack": {
+          "min": 1,
+          "max": 2
+        }
       }
     ],
     "extraction": "the car, back down the line",
