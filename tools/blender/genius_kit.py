@@ -224,7 +224,7 @@ def far_eyes_part():
 
 # --- Cards --------------------------------------------------------------------------
 
-def render_card(form, objects, path, rim=(0.62, 0.95, 0.7)):
+def render_card(form, objects, path, rim=(0.42, 0.9, 0.55)):
     """The card's portrait: three-quarter view, dark ground, warm key, a rim of field light."""
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
@@ -271,6 +271,15 @@ def render_card(form, objects, path, rim=(0.62, 0.95, 0.7)):
     light("key", "AREA", centre + Vector((-size * 1.5, -size * 1.5, size * 1.2)), (1.0, 0.72, 0.45), 150 * size * size, size)
     light("rim", "AREA", centre + Vector((size * 0.8, size * 1.6, size * 0.9)), rim, 140 * size * size, size * 0.8)
     light("fill", "AREA", centre + Vector((size * 1.6, -size * 0.6, -size * 0.2)), (0.55, 0.62, 0.9), 12 * size * size, size)
+    # The field's materials glow in the Shape's colour on the card, as they do in the game,
+    # and never so bright that they wash out to white.
+    for m in bpy.data.materials:
+        if m.name.startswith("field") and m.use_nodes:
+            bsdf = m.node_tree.nodes.get("Principled BSDF")
+            if bsdf:
+                bsdf.inputs["Emission Color"].default_value = (rim[0], rim[1], rim[2], 1)
+                bsdf.inputs["Emission Strength"].default_value = min(1.6, bsdf.inputs["Emission Strength"].default_value * 0.4 + 0.4)
+                bsdf.inputs["Base Color"].default_value = (rim[0] * 0.25, rim[1] * 0.25, rim[2] * 0.25, 1)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     scene.render.filepath = path
     bpy.ops.render.render(write_still=True)
@@ -302,6 +311,301 @@ def build_hawk():
 
 
 FORMS = {"hawk": build_hawk}
+
+
+
+# ======================================================================================
+# The other First Forms: generic bodies and the parts their features need.
+# ======================================================================================
+
+STONE = (0.16, 0.15, 0.14, 1)
+FUR = (0.08, 0.06, 0.045, 1)
+SLEEK = (0.07, 0.06, 0.05, 1)
+IRON = (0.06, 0.06, 0.065, 1)
+BRASS = (0.26, 0.17, 0.07, 1)
+INK = (0.015, 0.012, 0.018, 1)
+SKIN = (0.22, 0.16, 0.12, 1)
+CLOTH = (0.12, 0.08, 0.06, 1)
+
+
+def field(name, strength=3.0, rough=0.4):
+    return material("field_" + name, (0.02, 0.02, 0.02, 1), rough, emission=(1, 1, 1, 1), strength=strength)
+
+
+def quad_body(name, mat, length=0.9, height=0.55, girth=0.11, head=0.09, neck=0.1, leg=0.3, tail=0.3, leg_r=0.028):
+    """A four-legged body along -Y (the front), standing on Z = 0, with its sockets."""
+    half = length / 2.0
+    spine = [((0, half, height * 0.9), girth * 0.6), ((0, half * 0.5, height), girth), ((0, 0, height * 1.02), girth * 1.05),
+             ((0, -half * 0.55, height), girth), ((0, -half * 0.9, height * 1.05), girth * 0.75),
+             ((0, -half - neck * 0.6, height + neck * 0.7), girth * 0.6), ((0, -half - neck - head * 0.6, height + neck * 0.9), head)]
+    body = skin_body(name + "_body", spine, mat)
+    objs = [body]
+    for sx in (-1, 1):
+        for sy, tag in ((-half * 0.7, "f"), (half * 0.7, "b")):
+            objs.append(skin_body("leg_%s%s" % (tag, "l" if sx < 0 else "r"),
+                                  [((sx * girth * 0.8, sy, height * 0.8), leg_r * 1.6), ((sx * girth * 1.05, sy, height * 0.45), leg_r), ((sx * girth * 1.1, sy, 0.03), leg_r * 0.9)],
+                                  mat, subdiv=1))
+    if tail > 0:
+        objs.append(skin_body(name + "_tail", [((0, half, height * 0.9), girth * 0.45), ((0, half + tail * 0.6, height * 1.05), girth * 0.3), ((0, half + tail, height * 1.15), girth * 0.12)], mat, subdiv=1))
+    hz = height + neck * 0.9
+    hy = -half - neck - head * 0.6
+    socks = [socket("socket_head", (0, hy, hz + head * 0.9)), socket("socket_eyes", (0, hy - head * 0.85, hz + head * 0.25)),
+             socket("socket_back", (0, 0, height + girth)), socket("socket_body", (0, -half * 0.4, height - girth * 0.4)),
+             socket("socket_throat", (0, hy + head * 0.5, hz - head * 0.6)), socket("socket_light", (0, -half * 0.2, height + girth * 1.1)),
+             socket("socket_limb_fl", (-girth * 1.1, -half * 0.7, 0.03)), socket("socket_limb_fr", (girth * 1.1, -half * 0.7, 0.03)),
+             socket("socket_limb_bl", (-girth * 1.1, half * 0.7, 0.03)), socket("socket_limb_br", (girth * 1.1, half * 0.7, 0.03)),
+             socket("socket_arm_l", (-girth * 1.3, -half * 0.6, height * 0.6)), socket("socket_arm_r", (girth * 1.3, -half * 0.6, height * 0.6))]
+    return objs + socks
+
+
+def biped_body(name, mat, height=0.62, bulk=0.07, head=0.07, arm=0.22, leg=0.22):
+    """A small person of the field: torso, head, arms, legs, facing -Y."""
+    hips = leg + 0.02
+    chest = hips + height * 0.32
+    torso = skin_body(name + "_torso", [((0, 0, hips), bulk * 0.9), ((0, 0, (hips + chest) / 2), bulk), ((0, 0, chest), bulk * 1.05), ((0, 0, chest + 0.03), bulk * 0.55)], mat)
+    headobj = skin_body(name + "_head", [((0, 0, chest + 0.06), head * 0.5), ((0, -0.01, chest + 0.06 + head * 0.9), head), ((0, 0, chest + 0.06 + head * 1.6), head * 0.7)], mat)
+    objs = [torso, headobj]
+    for sx in (-1, 1):
+        tag = "l" if sx < 0 else "r"
+        objs.append(skin_body("arm_" + tag, [((sx * bulk * 1.05, 0, chest), bulk * 0.35), ((sx * (bulk + arm * 0.5), -0.02, chest - arm * 0.45), bulk * 0.28), ((sx * (bulk + arm * 0.7), -0.06, chest - arm), bulk * 0.25)], mat, subdiv=1))
+        objs.append(skin_body("leg_" + tag, [((sx * bulk * 0.5, 0, hips), bulk * 0.4), ((sx * bulk * 0.6, 0, hips * 0.5), bulk * 0.3), ((sx * bulk * 0.65, -0.02, 0.03), bulk * 0.3)], mat, subdiv=1))
+    top = chest + 0.06 + head * 1.6
+    socks = [socket("socket_head", (0, 0, top + 0.02)), socket("socket_eyes", (0, -head * 0.95, chest + 0.06 + head * 0.95)),
+             socket("socket_back", (0, bulk * 1.1, chest - 0.02)), socket("socket_body", (0, -bulk * 1.05, chest - height * 0.12)),
+             socket("socket_throat", (0, -bulk * 0.6, chest + 0.03)), socket("socket_light", (0, -bulk * 1.1, chest - 0.02)),
+             socket("socket_arm_l", (-(bulk + arm * 0.7), -0.06, chest - arm)), socket("socket_arm_r", ((bulk + arm * 0.7), -0.06, chest - arm)),
+             socket("socket_limb_fl", (-bulk * 0.65, -0.02, 0.03)), socket("socket_limb_fr", (bulk * 0.65, -0.02, 0.03))]
+    return objs + socks
+
+
+def box(name, size, at, mat, rot=(0, 0, 0)):
+    bpy.ops.mesh.primitive_cube_add(size=1.0, location=at)
+    o = bpy.context.active_object
+    o.name = name
+    o.scale = size
+    o.rotation_euler = rot
+    o.data.materials.append(mat)
+    o.select_set(False)
+    return o
+
+
+def lantern_body():
+    """A walking lantern: a brass housing with a lit core, on three root-like legs."""
+    brass = material("brass", BRASS, 0.45)
+    glass = material("glass", (0.3, 0.35, 0.4, 1), 0.1)
+    core = field("core", 5.0)
+    objs = [box("housing", (0.26, 0.26, 0.3), (0, 0, 0.5), brass), box("cap", (0.32, 0.32, 0.05), (0, 0, 0.68), brass),
+            cone("finial", (0, 0, 0.7), (0, 0, 0.84), 0.09, brass)]
+    for sx, sy in ((-1, -1), (1, -1), (-1, 1), (1, 1)):
+        objs.append(box("post_%d%d" % (sx, sy), (0.03, 0.03, 0.3), (sx * 0.12, sy * 0.12, 0.5), brass))
+    objs.append(sphere("core", (0, 0, 0.5), 0.085, core))
+    for i, a in enumerate((0.0, 2.1, 4.2)):
+        objs.append(skin_body("leg_%d" % i, [((math.sin(a) * 0.08, math.cos(a) * 0.08, 0.36), 0.03), ((math.sin(a) * 0.16, math.cos(a) * 0.16, 0.18), 0.022), ((math.sin(a) * 0.2, math.cos(a) * 0.2, 0.02), 0.02)], brass, subdiv=1))
+    socks = [socket("socket_head", (0, 0, 0.9)), socket("socket_eyes", (0, -0.14, 0.56)), socket("socket_back", (0, 0.15, 0.55)),
+             socket("socket_body", (0, -0.15, 0.45)), socket("socket_throat", (0, -0.14, 0.62)), socket("socket_light", (0, 0, 0.5)),
+             socket("socket_limb_fl", (-0.17, -0.1, 0.02)), socket("socket_limb_fr", (0.17, -0.1, 0.02)), socket("socket_limb_bl", (0, 0.2, 0.02)),
+             socket("socket_arm_l", (-0.18, 0, 0.5)), socket("socket_arm_r", (0.18, 0, 0.5))]
+    return objs + socks
+
+
+def aspect_body(kind):
+    """The field with no body: a core and wisps. The game adds the particles."""
+    core = field("core", 0.6 if kind == "flame" else 0.2)
+    wisp = material("field_wisp" if kind == "flame" else "field_shade", (0.02, 0.02, 0.02, 1), 0.5, emission=(1, 1, 1, 1), strength=0.8 if kind == "flame" else 0.3)
+    husk = material("husk", (0.03, 0.025, 0.03, 1), 0.9)
+    objs = [sphere("core", (0, 0, 0.45), 0.09, core)]
+    # Tongues of the field, standing up from the core like flame, or hanging like shadow.
+    for i in range(7):
+        a = i * 0.898
+        up = 1.0 if kind == "flame" else -0.6
+        pts = [(0, 0), (-0.07, 0.14 * up), (-0.03, (0.34 + 0.06 * (i % 3)) * up), (0.06, 0.16 * up)]
+        w = slab("wisp_%d" % i, pts, 0.035, wisp if i % 2 == 0 else husk, z=0.0)
+        w.location = (math.sin(a) * 0.09, math.cos(a) * 0.09, 0.45 if kind == "flame" else 0.62)
+        # Standing up (or hanging), turned to face outward from the core.
+        w.rotation_euler = (math.pi / 2 - 0.2, 0, a)
+        objs.append(w)
+    if kind == "shadow":
+        objs.append(sphere("head", (0, 0, 0.66), 0.11, husk))
+    socks = [socket("socket_head", (0, 0, 0.85)), socket("socket_eyes", (0, -0.16, 0.56)), socket("socket_back", (0, 0.14, 0.55)),
+             socket("socket_body", (0, -0.1, 0.45)), socket("socket_throat", (0, -0.12, 0.6)), socket("socket_light", (0, 0, 0.5))]
+    return objs + socks
+
+
+# --- Parts -----------------------------------------------------------------------------
+
+def horn_brow_part():
+    m = material("horn", HORN, 0.5)
+    return [skin_body("horn_%s" % t, [((s * 0.03, 0.0, 0.0), 0.028), ((s * 0.09, 0.02, 0.05), 0.022), ((s * 0.13, 0.08, 0.02), 0.014), ((s * 0.11, 0.12, -0.04), 0.008)], m, subdiv=1) for s, t in ((-1, "l"), (1, "r"))]
+
+
+def horns_part():
+    m = material("horn", HORN, 0.5)
+    return [cone("horn_%s" % t, (s * 0.04, 0, 0), (s * 0.08, -0.02, 0.16), 0.022, m, verts=8) for s, t in ((-1, "l"), (1, "r"))]
+
+
+def broad_chest_part():
+    m = material("plate", STONE, 0.7)
+    p = slab("chest_plate", [(-0.14, -0.1), (-0.17, 0.02), (-0.1, 0.1), (0.1, 0.1), (0.17, 0.02), (0.14, -0.1), (0, -0.14)], 0.04, m)
+    p.rotation_euler = (math.pi / 2, 0, 0)
+    return [p]
+
+
+def long_legs_part():
+    m = material("horn", HORN, 0.5)
+    return [cone("greave", (0, 0, 0.0), (0, 0, 0.14), 0.03, m, verts=8)]
+
+
+def fangs_part():
+    m = material("bone", BONE, 0.4)
+    return [cone("fang_%s" % t, (s * 0.03, -0.09, -0.06), (s * 0.03, -0.1, -0.11), 0.012, m, verts=6) for s, t in ((-1, "l"), (1, "r"))]
+
+
+def fins_part():
+    m = material("fin", SLEEK, 0.6)
+    f = slab("fin", [(-0.01, -0.02), (-0.09, 0.0), (-0.1, 0.04), (0.0, 0.06), (0.02, 0.0)], 0.012, m)
+    return [f]
+
+
+def small_hands_part():
+    m = material("skin", SKIN, 0.7)
+    objs = [sphere("palm", (0, -0.01, 0), 0.025, m)]
+    for i in range(3):
+        objs.append(cone("finger_%d" % i, (-0.015 + i * 0.015, -0.025, 0), (-0.02 + i * 0.02, -0.065, -0.01), 0.007, m, verts=6))
+    return objs
+
+
+def lantern_part():
+    brass = material("brass", BRASS, 0.45)
+    core = field("core", 5.0)
+    return [box("cage", (0.06, 0.06, 0.085), (0, 0, 0), brass), sphere("flame", (0, 0, 0), 0.025, core), box("ring", (0.03, 0.01, 0.01), (0, 0, 0.055), brass)]
+
+
+def voice_part():
+    m = field("voice", 2.5)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.05, minor_radius=0.008, location=(0, -0.01, 0), rotation=(math.pi / 2, 0, 0))
+    o = bpy.context.active_object
+    o.name = "voice_ring"
+    o.data.materials.append(m)
+    o.select_set(False)
+    return [o]
+
+
+def brush_part():
+    m = material("bristle", FUR, 0.9)
+    return [cone("brush", (0, 0, 0), (0, 0, -0.16), 0.03, m, verts=10), box("ferrule", (0.03, 0.03, 0.03), (0, 0, 0.01), material("brass", BRASS, 0.45))]
+
+
+def old_eyes_part():
+    eye = field("eye", 1.2)
+    lid = material("skin", SKIN, 0.8)
+    objs = []
+    for s in (-1, 1):
+        objs.append(sphere("eye_%d" % s, (s * 0.04, 0, 0), 0.016, eye))
+        l = sphere("lid_%d" % s, (s * 0.04, 0.004, 0.006), 0.019, lid)
+        l.scale = (1, 1, 0.5)
+        objs.append(l)
+    return objs
+
+
+def roots_part():
+    m = material("root", (0.1, 0.07, 0.05, 1), 0.9)
+    return [cone("root_%d" % i, (0, 0, 0.02), (math.sin(a) * 0.08, math.cos(a) * 0.08, -0.02), 0.012, m, verts=6) for i, a in enumerate((0, 2.1, 4.2))]
+
+
+def cold_core_part():
+    return [sphere("cold_core", (0, 0, 0), 0.05, field("cold", 2.0, 0.2))]
+
+
+def tail_part():
+    m = material("skin", SKIN, 0.7)
+    return [skin_body("tail", [((0, 0, 0), 0.02), ((0, 0.1, -0.03), 0.016), ((0, 0.2, -0.02), 0.012), ((0, 0.26, 0.02), 0.02)], m, subdiv=1)]
+
+
+def ember_part():
+    return [sphere("ember", (0, 0, 0), 0.04, field("ember", 6.0))]
+
+
+def glow_part():
+    m = field("glow", 1.5)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.16, minor_radius=0.006, location=(0, 0, 0))
+    o = bpy.context.active_object
+    o.name = "halo"
+    o.data.materials.append(m)
+    o.select_set(False)
+    return [o]
+
+
+PARTS = {"horn-brow": horn_brow_part, "horns": horns_part, "broad-chest": broad_chest_part, "long-legs": long_legs_part, "fangs": fangs_part,
+         "fins": fins_part, "small-hands": small_hands_part, "lantern": lantern_part, "voice": voice_part, "brush": brush_part,
+         "old-eyes": old_eyes_part, "roots": roots_part, "cold-core": cold_core_part, "tail": tail_part, "ember": ember_part, "glow": glow_part,
+         "wings": wings_part, "beak": beak_part, "talons": talons_part, "far-eyes": far_eyes_part}
+
+PART_SOCKETS = {"horn-brow": ["socket_head"], "horns": ["socket_head"], "broad-chest": ["socket_body"], "long-legs": ["socket_limb_fl", "socket_limb_fr", "socket_limb_bl", "socket_limb_br"],
+                "fangs": ["socket_head"], "fins": ["socket_limb_fl", "socket_limb_fr", "socket_limb_bl", "socket_limb_br"], "small-hands": ["socket_arm_l", "socket_arm_r"],
+                "lantern": ["socket_light"], "voice": ["socket_throat"], "brush": ["socket_arm_r"], "old-eyes": ["socket_eyes"], "roots": ["socket_limb_fl", "socket_limb_fr", "socket_limb_bl"],
+                "cold-core": ["socket_light"], "tail": ["socket_back"], "ember": ["socket_light"], "glow": ["socket_light"],
+                "wings": ["socket_back"], "beak": ["socket_head"], "talons": ["socket_limb_fl", "socket_limb_fr"], "far-eyes": ["socket_eyes"]}
+
+BODIES = {
+    "beast-flier": hawk_body,
+    "beast-grazer": lambda: quad_body("ram", material("stone_hide", STONE, 0.85), length=0.8, height=0.5, girth=0.13, head=0.09, neck=0.08, tail=0.08),
+    "beast-runner": lambda: quad_body("wolf", material("fur", FUR, 0.9), length=0.9, height=0.52, girth=0.095, head=0.08, neck=0.12, tail=0.32, leg_r=0.024),
+    "beast-swimmer": lambda: quad_body("otter", material("sleek", SLEEK, 0.35), length=0.85, height=0.3, girth=0.1, head=0.07, neck=0.06, tail=0.4, leg_r=0.02),
+    "engine-quadruped": lambda: quad_body("hound", material("iron", IRON, 0.4), length=0.9, height=0.55, girth=0.12, head=0.09, neck=0.1, tail=0.1, leg_r=0.03),
+    "kith-fey": lambda: biped_body("fey", material("fey_skin", (0.2, 0.22, 0.18, 1), 0.7), height=0.6, bulk=0.05, head=0.07),
+    "kith-homunculus": lambda: biped_body("homunculus", material("clay", (0.2, 0.14, 0.1, 1), 0.9), height=0.55, bulk=0.085, head=0.085),
+    "daemon-small": lambda: biped_body("imp", material("ink_skin", INK, 0.3), height=0.6, bulk=0.06, head=0.07),
+    "engine-lantern": lantern_body,
+    "aspect-flame": lambda: aspect_body("flame"),
+    "aspect-shadow": lambda: aspect_body("shadow"),
+}
+
+FIRST_FORMS = {"hawk": "beast-flier", "ram": "beast-grazer", "field-wolf": "beast-runner", "otter": "beast-swimmer", "lantern-sprite": "kith-fey",
+               "homunculus": "kith-homunculus", "iron-hound": "engine-quadruped", "walking-lantern": "engine-lantern", "ledger-imp": "daemon-small",
+               "ember": "aspect-flame", "shadow": "aspect-shadow"}
+
+
+def form_features(form_id):
+    import json
+    with open(os.path.join(ROOT, "data", "forms.json")) as f:
+        for x in json.load(f):
+            if x["id"] == form_id:
+                return x["features"]
+    return []
+
+
+def build_form(form_id):
+    """A First Form: its body, each of its parts that is not yet built, and its card."""
+    sil = FIRST_FORMS[form_id]
+    reset()
+    export(os.path.join(OUT, "bodies", sil + ".glb"), BODIES[sil]())
+    feats = [f for f in form_features(form_id) if f in PARTS]
+    for feature in feats:
+        reset()
+        objs = PARTS[feature]()
+        export(os.path.join(OUT, "parts", feature + ".glb"), objs + [c for o in objs for c in o.children])
+    # The card: the body with its parts on their sockets.
+    reset()
+    body = BODIES[sil]()
+    sockets = {o.name: o for o in body if o.type == "EMPTY"}
+    meshes = [o for o in body if o.type == "MESH"]
+    for feature in feats:
+        for sname in PART_SOCKETS.get(feature, ["socket_body"]):
+            if sname not in sockets:
+                continue
+            for o in PARTS[feature]():
+                o.location = Vector(o.location) + sockets[sname].location
+                if o.name.startswith("wing_"):
+                    o.rotation_euler = (0.25, (1.05 if o.name.endswith("l") else -1.05), 0)
+                meshes.append(o)
+                meshes.extend(o.children)
+    render_card(form_id, meshes, os.path.join(OUT, "cards", form_id + ".png"))
+
+
+for _f in FIRST_FORMS:
+    if _f != "hawk":
+        FORMS[_f] = (lambda fid: (lambda: build_form(fid)))(_f)
+
 
 if __name__ == "__main__":
     wanted = sys.argv[1:] or list(FORMS)

@@ -2190,7 +2190,11 @@ void fragment() {
 func make_form(info: Dictionary, color: Color) -> Node3D:
 	var gb := GeniusBody.build(info, color, int(info.get("instar", 1)))
 	for m in gb.find_children("*", "MeshInstance3D", true, false):
-		(m as MeshInstance3D).material_overlay = _ink(1.6)
+		var mi := m as MeshInstance3D
+		if mi.material_overlay:
+			mi.material_overlay.next_pass = _ink(1.6)
+		else:
+			mi.material_overlay = _ink(1.6)
 	return gb
 
 func _sphere(r: float) -> SphereMesh:

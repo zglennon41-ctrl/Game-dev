@@ -198,9 +198,12 @@ It needs Blender's Python module (`pip install bpy` in a Python 3.13 environment
 
     python tools/blender/genius_kit.py hawk
 
-The hawk (body, wings, beak, talons, far eyes, and its card) is the first form built this
-way: placeholder quality, proving the pipeline. Each new form is a function in that file;
-the same steps take an AI-made or hand-made model through cleanup, sockets and export.
+All eleven First Forms are built this way (`python tools/blender/genius_kit.py` with no
+arguments builds every one): generic four-legged, small-humanoid, construct and aspect
+bodies with their sockets, a part for each feature, and a card each. They are blockouts in
+the right proportions, not finished art: the next pass is AI concept art over each card's
+framing and a hand or image-to-3D sculpt replacing each blockout, exported to the same file
+names. The game needs no change for that.
 
 ### Prompt template (concept art)
 

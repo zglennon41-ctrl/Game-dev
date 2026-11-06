@@ -188,3 +188,6 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
     cuts Hold to three bites and the ladder to one win, and keeps the rite, the Field
     Examination and the Gate. The offer appears after the questionnaire once any character
     has left the Academy settled.
+58. **First Form blockouts**: all eleven First Forms now have Blender-built bodies, parts and
+    cards (placeholder quality, proportions and sockets right). An art body with no rig walks
+    with a bob and a lean the game gives it; rigged art will replace that.

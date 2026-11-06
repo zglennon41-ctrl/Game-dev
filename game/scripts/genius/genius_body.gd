@@ -31,6 +31,19 @@ void fragment() {
 }
 """
 
+const RIM := """
+shader_type spatial;
+// Over an art body: the partner's Shape colour at the edges, as the placeholder shadow has.
+render_mode blend_add, unshaded, cull_back, depth_draw_never;
+uniform vec4 glow : source_color = vec4(1.0, 0.7, 0.3, 1.0);
+uniform float strength = 1.0;
+void fragment() {
+	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 2.6);
+	ALBEDO = glow.rgb * rim * 1.6 * strength;
+}
+"""
+static var _rim_shader: Shader
+
 var info: Dictionary = {}
 var color := Color.WHITE
 var kind := ""
@@ -113,16 +126,23 @@ func _assemble(instar: int) -> void:
 ## Art follows the bible's conventions: materials named field* glow in the partner's Shape
 ## colour; wing_l and wing_r beat.
 func _adopt_art(n: Node) -> void:
+	if not _rim_shader:
+		_rim_shader = Shader.new()
+		_rim_shader.code = RIM
+	var rim := ShaderMaterial.new()
+	rim.shader = _rim_shader
+	rim.set_shader_parameter("glow", color)
 	for m in n.find_children("*", "MeshInstance3D", true, false):
 		var mi := m as MeshInstance3D
+		mi.material_overlay = rim
 		for i in mi.get_surface_override_material_count():
 			var mat: Material = mi.mesh.surface_get_material(i)
 			if mat and mat.resource_name.begins_with("field") and mat is StandardMaterial3D:
 				var t := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
 				t.emission_enabled = true
 				t.emission = color
-				t.emission_energy_multiplier = maxf(2.0, t.emission_energy_multiplier)
-				t.albedo_color = color.darkened(0.6)
+				t.emission_energy_multiplier = 1.8
+				t.albedo_color = color.darkened(0.7)
 				mi.set_surface_override_material(i, t)
 	for side in [["wing_l", -1.0], ["wing_r", 1.0]]:
 		var w: Node = n.find_child(side[0], true, false)
@@ -132,10 +152,15 @@ func _adopt_art(n: Node) -> void:
 
 ## Whether it walks (and so follows at the heel) or floats and flies (at the shoulder).
 func walks() -> bool:
-	return anim != null and not hover and kind in ["quadruped", "humanoid"]
+	return not hover and kind in ["quadruped", "humanoid", "construct"]
 
-## Play idle, walk or run by how fast it is moving.
+var _gait := 0.0
+var _gait_speed := 0.0
+
+## Play idle, walk or run by how fast it is moving. An art body with no rig gets a gait of
+## its own: a bob and a lean that read as walking.
 func move_at(speed: float) -> void:
+	_gait_speed = speed
 	if not anim:
 		return
 	var want: String = anim_names.get("run" if speed > 4.0 else ("walk" if speed > 0.4 else "idle"), "")
@@ -158,6 +183,13 @@ func _process(dt: float) -> void:
 		(sp as Node3D).rotate_object_local(Vector3.UP, dt * float(sp.get_meta("spin")))
 	if hover and _model:
 		_model.position.y = 0.06 * sin(_t * 2.2)
+	elif _model and anim == null and uses_art:
+		# No rig: a gait from the body itself.
+		_gait += dt * clampf(_gait_speed, 0.0, 6.0) * 3.0
+		var k := clampf(_gait_speed / 2.0, 0.0, 1.0)
+		_model.position.y = absf(sin(_gait)) * 0.04 * k
+		_model.rotation.z = sin(_gait) * 0.06 * k
+		_model.rotation.x = -0.08 * k
 
 # --- Placeholders ------------------------------------------------------------------
 
