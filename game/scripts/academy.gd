@@ -1111,8 +1111,27 @@ func _leads_out(pid: String, depth: int) -> bool:
 			return true
 	return false
 
-## Walk round what is in the way: a pillar, a brazier, a person.
+var _steer_last_pos := Vector2.INF
+var _steer_stuck_t := 0.0
+var _unstick_until := 0.0
+var _unstick_dir := Vector2.ZERO
+
+## Walk round what is in the way: a pillar, a brazier, a person. Boxed in (no ground gained
+## for a while), take a sidestep for a moment and try again.
 func _steer(dir: Vector2) -> Vector2:
+	var now := Time.get_ticks_msec() / 1000.0
+	if now < _unstick_until:
+		return _unstick_dir
+	if _steer_last_pos != Vector2.INF and fight.p_pos.distance_to(_steer_last_pos) < 0.06:
+		_steer_stuck_t += get_process_delta_time()
+		if _steer_stuck_t > 1.2:
+			_steer_stuck_t = 0.0
+			_unstick_until = now + 0.9
+			_unstick_dir = dir.rotated((PI / 2.0) * (1.0 if randf() < 0.5 else -1.0)).normalized()
+			return _unstick_dir
+	else:
+		_steer_stuck_t = 0.0
+	_steer_last_pos = fight.p_pos
 	for o in fight.obstacles:
 		var c := Vector2(o.x, o.y)
 		var to := c - fight.p_pos

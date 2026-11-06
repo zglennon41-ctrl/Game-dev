@@ -83,6 +83,12 @@ genius is built by `tools/blender/genius_kit.py` (see `docs/art-bible.md`).
 The feel numbers are in `data/combat-room.json` and `data/beasts.json`. Change one, press
 F5 again, and the room plays differently.
 
+## Checking the balance
+
+`npm run balance:game` plays every weapon type, every Discipline technique and every
+temperament headlessly and prints tables (`docs/weapons.md`, "Validation"); `npm run
+test:game` holds the floors.
+
 ## The rules simulator (Step 0)
 
 Needs Node.js 18 or newer.

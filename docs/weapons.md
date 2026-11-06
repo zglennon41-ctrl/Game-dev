@@ -10,7 +10,7 @@ Disciplines (`data/disciplines.json`) teach their city's three.
 | Blade | 1 | three cuts, the third wide; a shield in the other hand for some |
 | Greatblade | 2 | long and heavy; the wheel at the end throws the foe back |
 | Axe | 1 | chops that bite deep; the cleave throws the foe back |
-| Twin | 2 | two short blades: four fast cuts, the last leaves a bleed |
+| Twin | 2 | two short blades: four fast cuts, the last leaves a bleed; a block drops any swing (the quick guard) |
 | Spear | 2 | reach: thrusts that land first, a lunge that pushes |
 | Polehook | 2 | reach, the rake, and the wheel that clears a circle |
 | Staff | 2 | fast and sweeping; the parry window is half again as wide |
@@ -60,3 +60,15 @@ Each Discipline is a kit of nine techniques (`data/discipline-kits.json`): three
 Lesson 4, the rest learned from the school's instructor in the yard for Marks. The twelve
 Disciplines are the game's twelve base classes; a Shape and a Discipline together make one
 of the seventy-two archetypes in `data/archetypes.json`.
+
+## Validation
+
+`npm run balance:game` plays every weapon type for two minutes with a skilled bot that
+knows its weapon (melee closes and strikes in the openings; ranged keeps its distance,
+shoots and reloads; the bow draws), fires every Discipline's techniques against a standing
+wolf, and runs two classmates of each temperament, and prints the tables. Every type fells
+seven to eleven wolves in the two minutes and the test suite holds the floor (three in a
+minute, alive at fifty seconds). The techniques' damage per Will sits between 0.7 and 1.6
+for those that deal damage; marks, sounds, tethers and wards are utility and show 0.
+Temperaments read distinct: the reckless strike most, the scared and the kind fall back
+most, nobody is useless.

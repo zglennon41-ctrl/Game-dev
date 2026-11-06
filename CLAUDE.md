@@ -79,6 +79,7 @@ and JSON Schema for data. The rules a designer tunes live in `data/` and are sha
 - `npm test` — rules and simulator tests (TypeScript)
 - `npm run sim -- --life data/lives/mira.json` — run a scripted life through a year
 - `npm run validate` — schema-check every file in `data/`
+- `npm run balance:game` — play every weapon type, technique and temperament headlessly and print the tables
 
 ## Layout
 
