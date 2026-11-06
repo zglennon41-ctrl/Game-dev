@@ -579,16 +579,14 @@ func bot_mode() -> String:
 		"will-full", "choose-weapon", "choose-party", "travel": return "still"
 		"fell": return "fight"
 		"reach-hits": return "technique"
-		"event":
-			var want0: Array = g["event"] if g["event"] is Array else [g["event"]]
-			if "field-open" in want0:
-				return "stance"
 		"hold": return "fight" if _holding else "walk"
 		"extract": return "walk"
 		"stance-seconds": return "stance"
 		"spar": return "fight"
 		"event":
 			var want: Array = g["event"] if g["event"] is Array else [g["event"]]
+			if "field-open" in want:
+				return "stance"
 			return "technique" if "technique" in want else "guard"
 	return "guard"
 

@@ -158,11 +158,9 @@ func _ready() -> void:
 		# Automated checks: walk into the Academy with the saved hero (or a made one), fresh.
 		var h := Settings.hero()
 		if h.is_empty() or _args.has("fresh"):
+			# Fresh: a character straight from the questionnaire, nothing of an earlier run on it.
 			h = Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0])
 			h["name"] = "Test"
-		if _args.has("fresh"):
-			h.erase("academy")
-			h.erase("genius")
 		if _args.has("gate"):
 			# The morning of the Gate: Stage 3, the term behind you, for automated checks.
 			var dkg: Dictionary = Data.discipline_kits.get(h.get("discipline", "marshal"), {})
