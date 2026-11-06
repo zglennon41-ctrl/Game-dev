@@ -222,6 +222,8 @@ func go(place_id: String, quiet := false, from := "") -> void:
 	world.cam_yaw = atan2(spawn.x, spawn.y) if spawn.length() > 0.1 else 0.0
 	world.snap_camera_behind(fight)
 	for ins in spec["instructors"]:
+		if ins.has("discipline") and ins["discipline"] != hero.get("discipline", ""):
+			continue
 		var data: Dictionary = Data.by_id(Data.academy["instructors"], ins["id"])
 		var at := Vector2(ins["at"][0], ins["at"][1])
 		var fig := world.add_figure(data["body"], at, (spawn - at).angle(), data["name"], data.get("title", ""))
@@ -279,6 +281,11 @@ func say(who: Variant, lines: Array, then: Callable = Callable()) -> void:
 func fill(t: String, c: Dictionary = {}) -> String:
 	t = Prologue.fill(t, hero)
 	t = t.replace("{your_shape}", String(hero["shape"]).capitalize()).replace("{your_blood}", Data.by_id(Data.bloods, hero["blood"])["name"] if hero.get("blood", "") != "" else "unmarked")
+	var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
+	if not dk.is_empty():
+		t = t.replace("{discipline}", dk["name"]).replace("{discipline_school}", dk["school"])
+		for i in dk["techniques"].size():
+			t = t.replace("{tech%d}" % (i + 1), dk["techniques"][i]["name"]).replace("{tech%d_text}" % (i + 1), dk["techniques"][i]["text"])
 	if not c.is_empty():
 		t = t.replace("{my_name}", c["name"]).replace("{my_shape}", String(c["shape"]).capitalize()).replace("{my_blood}", c["blood_name"]).replace("{my_city}", String(c["city"]).capitalize())
 	return t
@@ -349,7 +356,7 @@ func _talk_instructor(id: String) -> void:
 	var lines: Dictionary = data["lines"]
 	# The Instructor who teaches the next lesson starts it.
 	for lesson in Data.academy["lessons"]:
-		if lesson["instructor"] == id and not progress["done"].has(lesson["id"]) and lesson["place"] == progress["place"] and lesson_available(lesson):
+		if lesson_instructor(lesson) == id and not progress["done"].has(lesson["id"]) and lesson["place"] == progress["place"] and lesson_available(lesson):
 			var intro: Array = [lines.get("before:" + String(lesson["id"]), "")] + lesson["intro"]
 			say(id, intro.filter(func(x): return x != ""), func(): _start_lesson(lesson))
 			return
@@ -400,6 +407,14 @@ func next_lesson() -> Dictionary:
 			return lesson
 		return {}
 	return {}
+
+## Who teaches a lesson: an Instructor id, or "$discipline" for the hero's city's school.
+func lesson_instructor(lesson: Dictionary) -> String:
+	if lesson["instructor"] == "$discipline":
+		for ins in Data.academy["instructors"]:
+			if ins.get("discipline", "") == hero.get("discipline", ""):
+				return ins["id"]
+	return lesson["instructor"]
 
 func lesson_available(lesson: Dictionary) -> bool:
 	var req: Dictionary = lesson.get("requires", {})
@@ -458,7 +473,7 @@ func objective() -> String:
 			return "Day %d · The rite: go to the Hearth Hall (the north door of the quad)." % day
 	var nl := next_lesson()
 	if not nl.is_empty():
-		var ins: Dictionary = Data.by_id(Data.academy["instructors"], nl["instructor"])
+		var ins: Dictionary = Data.by_id(Data.academy["instructors"], lesson_instructor(nl))
 		var place: Dictionary = Data.academy["places"][nl["place"]]
 		if progress["place"] == nl["place"]:
 			return "Day %d · Lesson %d, %s: speak to %s." % [day, int(nl["number"]), nl["title"], ins["name"]]
@@ -476,7 +491,7 @@ func bot_mode() -> String:
 		return "walk"
 	var g: Dictionary = _lesson["steps"][_step]["goal"]
 	match String(g["type"]):
-		"will-full": return "still"
+		"will-full", "choose-weapon": return "still"
 		"stance-seconds": return "stance"
 		"spar": return "fight"
 		"event":
@@ -484,8 +499,19 @@ func bot_mode() -> String:
 			return "technique" if "technique" in want else "guard"
 	return "guard"
 
+## The technique the autopilot should use now, and the action that presses it.
+func bot_tech() -> Dictionary:
+	var g: Dictionary = _lesson["steps"][_step]["goal"]
+	if g.has("tech") and int(g["tech"]) - 1 < fight.extra_techs.size():
+		return fight.extra_techs[int(g["tech"]) - 1]
+	return fight.tech
+
+func bot_action() -> String:
+	var g: Dictionary = _lesson["steps"][_step]["goal"]
+	return "tech%d" % int(g["tech"]) if g.has("tech") else "technique"
+
 func busy() -> bool:
-	return talking() or _rite != null or _naming
+	return talking() or _rite != null or _naming or _choice_box != null
 
 func in_rite() -> bool:
 	return _rite != null
@@ -565,7 +591,12 @@ func auto_move() -> Vector2:
 		if want_place == "dorm":
 			goal = Vector2(_rest["at"][0], _rest["at"][1])
 		else:
-			goal = _people.filter(func(p): return p["kind"] == "instructor")[0]["pos"]
+			var nl2 := next_lesson()
+			var who := lesson_instructor(nl2) if not nl2.is_empty() else ""
+			var teachers := _people.filter(func(p): return p["kind"] == "instructor" and (who == "" or p["id"] == who))
+			if teachers.is_empty():
+				teachers = _people.filter(func(p): return p["kind"] == "instructor")
+			goal = teachers[0]["pos"]
 	elif place == "quad":
 		# Greet two classmates on the way out, the first time.
 		var unmet := _people.filter(func(p): return p["kind"] == "classmate" and not progress["met"].has(p["id"]))
@@ -591,6 +622,10 @@ func auto_move() -> Vector2:
 
 func _start_lesson(lesson: Dictionary) -> void:
 	_lesson = lesson
+	# The Discipline lesson hands over the school's three techniques to learn.
+	if lesson["id"] == "discipline":
+		var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
+		hero["techniques"] = dk.get("techniques", []).map(func(t): return t["id"])
 	var spec: Dictionary = Data.academy["places"][lesson["place"]]
 	var ins: Dictionary = Data.by_id(Data.academy["instructors"], lesson["instructor"])
 	_drill_fight()
@@ -603,7 +638,7 @@ func _start_lesson(lesson: Dictionary) -> void:
 ## The Instructor's genius sits in the ring: the fight the drills are done in.
 func _drill_fight() -> void:
 	var spec: Dictionary = Data.academy["places"][_lesson["place"]]
-	var ins: Dictionary = Data.by_id(Data.academy["instructors"], _lesson["instructor"])
+	var ins: Dictionary = Data.by_id(Data.academy["instructors"], lesson_instructor(_lesson))
 	var p := fight.p_pos if fight else Vector2(-1.5, 0.5)
 	world.set_foe({})
 	fight = Fight.new({ "hero": hero, "beast": ins.get("genius", {}).get("beast", "millstone"), "passive": true, "respawn": true, "genius": genius if genius and genius.is_born() else null,
@@ -626,6 +661,8 @@ var _spar_rung := 0
 var _spar_wins := 0
 var _spar_hold := 0.0
 var _spar_who: Dictionary = {}
+var _spar_mode := "cohort"
+var _choice_done := false
 
 ## The cohort in the order they step up: the shy ones first, the proud last.
 func spar_order() -> Array:
@@ -635,10 +672,17 @@ func spar_order() -> Array:
 	return out
 
 func _spar_begin() -> void:
-	var line := spar_order()
-	_spar_who = line[_spar_rung % line.size()]
 	var spec: Dictionary = Data.academy["places"][_lesson["place"]]
 	var scale := 1.0 + _spar_rung * float(_lesson.get("spar", {}).get("scalePerRung", 0.18))
+	if _spar_mode == "instructor":
+		var ins: Dictionary = Data.by_id(Data.academy["instructors"], lesson_instructor(_lesson))
+		_spar_who = { "name": ins["name"], "shape": ins["shape"], "body": ins["body"], "weapon": ins.get("weapon", "saber"),
+			"blood_name": ins.get("title", "Instructor"), "city": Data.discipline_kits.get(ins.get("discipline", ""), {}).get("city", hero["city"]),
+			"discipline": ins.get("discipline", ""), "temperament": "" }
+		scale = float(_lesson.get("spar", {}).get("scale", 1.9))
+	else:
+		var line := spar_order()
+		_spar_who = line[_spar_rung % line.size()]
 	var foe := _spar_who.duplicate()
 	foe["title"] = "%s · %s" % [_spar_who["blood_name"], Data.academy["term"]["cohort"]]
 	var keep := fight.p_pos if fight else Vector2(-1.5, 0.5)
@@ -707,9 +751,21 @@ func _next_step() -> void:
 				fight._wolf_set("prowl", 0.8)
 	_held = 0.0
 	if setup.get("spar", false):
+		_spar_mode = "instructor" if str(setup["spar"]) == "instructor" else "cohort"
 		_spar_rung = 0
 		_spar_wins = 0
 		_spar_begin()
+	if String(s["goal"]["type"]) == "choose-weapon":
+		_choice_done = false
+		var opts: Array = []
+		for w in Data.weapons:
+			if w["city"] == hero["city"]:
+				opts.append({ "id": w["id"], "label": w["name"], "text": w["text"], "on": w["id"] == hero["weapon"] })
+		choose("Your weapon", opts, func(id: String):
+			hero["weapon"] = id
+			world.build_hero(hero)
+			_drill_fight()
+			_choice_done = true)
 	hud.set_prompt("%d/%d · %s" % [_step + 1, steps.size(), fill(s["title"])], fill(s["text"]))
 	hud.set_prompt_status("", _progress_text(s))
 
@@ -771,7 +827,11 @@ func _lesson_update(events: Array, dt: float) -> void:
 		match String(g["type"]):
 			"event":
 				var want: Array = g["event"] if g["event"] is Array else [g["event"]]
-				if t in want:
+				var ok := t in want
+				if ok and g.has("tech"):
+					var i := int(g["tech"]) - 1
+					ok = i < fight.extra_techs.size() and e.get("id", "") == fight.extra_techs[i]["id"]
+				if ok:
 					_count += 1
 					_note = ""
 			"streak":
@@ -783,6 +843,7 @@ func _lesson_update(events: Array, dt: float) -> void:
 		"event", "streak": done = _count >= int(g["count"])
 		"will-full": done = fight.p_will >= float(Data.rules["field"]["willMax"]) - 0.5
 		"stance-seconds": done = done or _held >= float(g["count"])
+		"choose-weapon": done = _choice_done
 	hud.set_prompt_status(_note, _progress_text(s))
 	if done:
 		sfx.play("cue-hit", 1.0)
@@ -800,7 +861,9 @@ func _finish_lesson() -> void:
 	world.lock_on = false
 	fight.w_state = "idle"
 	sfx.play("done")
-	say(lesson["instructor"], lesson["outro"], func():
+	if lesson["id"] == "discipline" and genius:
+		genius.studied(String(hero.get("discipline", "")), 3.0)
+	say(lesson_instructor(lesson), lesson["outro"], func():
 		_lesson = {}
 		hud.play_ui.visible = false
 		save())
@@ -968,3 +1031,48 @@ func hide_card() -> void:
 	if _card:
 		_card.queue_free()
 		_card = null
+
+# --- A choice ----------------------------------------------------------------------
+
+var _choice_box: PanelContainer = null
+
+## A choice among a few things, each with a line about it; the autopilot takes the first.
+func choose(title: String, options: Array, then: Callable) -> void:
+	if _choice_box:
+		_choice_box.queue_free()
+	_choice_box = PanelContainer.new()
+	_choice_box.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	_choice_box.custom_minimum_size = Vector2(520, 0)
+	_choice_box.position = Vector2(-580, -200)
+	_choice_box.add_theme_stylebox_override("panel", Style.plate(Color(0.04, 0.034, 0.03, 0.95), Style.BRASS, 1, 20))
+	get_child(0).add_child(_choice_box)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 8)
+	_choice_box.add_child(v)
+	var l := Label.new()
+	Style.label(l, 22, Style.GOLD, "title")
+	l.text = title
+	v.add_child(l)
+	var first: Button = null
+	for o in options:
+		var b := Button.new()
+		b.text = "%s\n%s" % [o["label"], o.get("text", "")]
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD
+		Style.button(b, o.get("on", false), 17, "body")
+		var id: String = o["id"]
+		b.pressed.connect(func():
+			sfx.play("ui-take", 1.0, -6.0)
+			_choice_box.queue_free()
+			_choice_box = null
+			if not auto:
+				Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+			then.call(id))
+		v.add_child(b)
+		if first == null or o.get("on", false):
+			first = b
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if first:
+		first.call_deferred("grab_focus")
+	if auto:
+		get_tree().create_timer(1.0).timeout.connect(func(): if _choice_box: (first as Button).pressed.emit())

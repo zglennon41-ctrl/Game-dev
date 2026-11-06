@@ -22,6 +22,7 @@ var _adaptations: Array
 var _secondary: Array
 var _shades: Array
 var _bodies: Dictionary
+var discipline_kits: Dictionary
 
 func _init() -> void:
 	rules = _load("res://data/rules.json")
@@ -45,6 +46,7 @@ func _init() -> void:
 	_secondary = _load("res://data/secondary-forms.json")
 	_shades = _load("res://data/shades.json")
 	_bodies = _load("res://data/genius-bodies.json")
+	discipline_kits = _load("res://data/discipline-kits.json")
 
 func rules_reading() -> Dictionary: return _reading
 func forms() -> Array: return _forms

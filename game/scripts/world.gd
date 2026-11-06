@@ -924,6 +924,15 @@ func feedback(f: Fight, events: Array) -> void:
 			"order":
 				floater(P + Vector3(0, 0.3, 0), "ORDER: %s" % String(e["order"]).to_upper(), _g_tint.lightened(0.3), 44, 1.0)
 				genius_react("cue")
+			"marked":
+				floater(W + Vector3(0, 0.9, 0), "UNDER WARRANT", C_GOLD, 56, 1.4)
+				_ring_wave(_v3(f.w_pos), C_GOLD, 2.0)
+			"sounded":
+				floater(W + Vector3(0, 0.9, 0), "SOUNDED", Color(0.6, 0.85, 1.0), 56, 1.2)
+				_ring_wave(_v3(f.w_pos), Color(0.6, 0.85, 1.0), 3.0)
+			"pulled":
+				floater(W + Vector3(0, 0.9, 0), "LINE ACROSS", Color(0.8, 0.55, 1.0), 56, 1.0)
+				_tracer(_v3(f.p_pos, 1.3), _v3(f.w_pos, 1.0), true)
 			"named":
 				floater(_v3(f.p_pos, 2.6), "%s!" % String(e["who"]).to_upper(), C_TEXT, 64, 1.0)
 			"bar-warning":

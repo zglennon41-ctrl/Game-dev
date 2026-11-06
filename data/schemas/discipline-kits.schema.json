@@ -1,0 +1,48 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "title": "discipline-kits",
+ "type": "object",
+ "required": [
+  "marshal",
+  "pilot",
+  "aeronaut"
+ ],
+ "additionalProperties": {
+  "anyOf": [
+   {
+    "type": "string"
+   },
+   {
+    "type": "object",
+    "required": [
+     "name",
+     "city",
+     "techniques",
+     "studentAttacks"
+    ],
+    "properties": {
+     "techniques": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+       "type": "object",
+       "required": [
+        "id",
+        "name",
+        "effect",
+        "will",
+        "cooldown",
+        "startup",
+        "active",
+        "recovery",
+        "anim",
+        "text"
+       ]
+      }
+     }
+    }
+   }
+  ]
+ }
+}

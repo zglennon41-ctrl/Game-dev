@@ -42,10 +42,11 @@ sparring ladder against classmates, who fight with their own kits (today: everyo
 at close reach with a strike and a heavy blow; their Shape's techniques come with the
 Discipline lesson).
 
-**D. Lesson 4, Discipline** (next) — your city's school, your first weapon proper, the
-Discipline's first three techniques; the Instructor's test.
+**D. Lesson 4, Discipline** (built) — your city's school, your first weapon proper (any
+the school teaches), the Discipline's first three techniques on keys 1, 2, 3; the
+Instructor's test, a bout against them.
 
-**E. Lesson 5, the line** — the car, the post, extraction, orders for the genius, a
+**E. Lesson 5, the line** (next) — the car, the post, extraction, orders for the genius, a
 party of three: you and two classmates you choose. The Field Examination in the Green
 zone (three areas, a post, a boss), the rescue team on standby.
 

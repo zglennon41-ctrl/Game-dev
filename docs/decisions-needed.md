@@ -169,3 +169,11 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
     their own techniques and ranged styles are still to build.
 52. **Rest closes every day**: the Hearth Hall opens after sleeping on Lesson 1, Lesson 3 after
     sleeping on the rite, and so on. The dormitory line for each night is in `rest.next`.
+53. **The Disciplines' first three techniques are mine** (`data/discipline-kits.json`), on keys
+    1, 2, 3: Marshal (Covering Fire, Warrant, Last Round), Pilot (Sounding, Line Across,
+    Capstan), Aeronaut (Grapple Line, Vent, Ballast), and their Instructors (Captain Ada
+    Rourke, Pilot Oyelaran Tane, Dockmaster Wren Halloway). The names in `disciplines.json`
+    stand; the effects and numbers are placeholders for you to tune.
+54. **Lesson 4 lets you change your weapon** to any your city's school teaches, then ends in
+    a bout against your Instructor (health ×1.9). Classmates now bring their school's attack
+    to the ladder (a Columbia shot, a Cahokia hook, a Lunden lunge).

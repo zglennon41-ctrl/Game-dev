@@ -30,7 +30,7 @@ var _bot_move := Vector2.ZERO
 
 const ACTIONS := {
 	"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN],
-	"attack": [KEY_J], "block": [KEY_K], "dodge": [KEY_SPACE, KEY_SHIFT], "technique": [KEY_Q, KEY_1],
+	"attack": [KEY_J], "block": [KEY_K], "dodge": [KEY_SPACE, KEY_SHIFT], "technique": [KEY_Q], "tech1": [KEY_1], "tech2": [KEY_2], "tech3": [KEY_3],
 	"stance": [KEY_F, KEY_L], "pattern": [KEY_R], "name_foe": [KEY_N], "lock_on": [KEY_TAB], "menu": [KEY_ESCAPE], "interact": [KEY_E], "order": [KEY_G], "genius_page": [KEY_J],
 }
 const MOUSE := { "attack": MOUSE_BUTTON_LEFT, "block": MOUSE_BUTTON_RIGHT, "lock_on": MOUSE_BUTTON_MIDDLE }
@@ -162,6 +162,13 @@ func _ready() -> void:
 		if _args.has("fresh"):
 			h.erase("academy")
 			h.erase("genius")
+		if _args.has("discipline"):
+			# The morning of Lesson 4, with a genius born, for automated checks.
+			h["academy"] = { "seed": int(_args.get("seed", "4242")), "arrived": true, "done": ["hold", "rite", "shape"], "met": [], "day": 4, "rested_after": "shape",
+				"place": "yard", "record": { "parries": 8, "blocks": 4, "hurts": 2, "dodges": 1, "talks": 3, "spars_won": 2, "spars_lost": 0 } }
+			if not h.has("genius"):
+				var ff2 := Rite.first_form(h, h["shape"], 11)
+				Rite.birth(h, ff2["reading"], ff2["name"])
 		if _args.has("shape"):
 			# Straight to the morning of Lesson 3, with a genius born, for automated checks.
 			h["academy"] = { "seed": int(_args.get("seed", "4242")), "arrived": true, "done": ["hold", "rite"], "met": [], "day": 3, "rested_after": "rite",
@@ -367,11 +374,12 @@ func _academy_frame(delta: float, real_dt: float) -> void:
 					fight.input("stance")
 				move = Vector2.ZERO
 			"technique":
-				if fight.p_state == "free" and fight.p_will >= float(fight.tech["will"]) and fight.now >= float(fight.p_cooldowns.get(fight.tech["id"], 0.0)):
+				var bt := academy.bot_tech()
+				if fight.p_state == "free" and fight.p_will >= float(bt["will"]) and fight.now >= float(fight.p_cooldowns.get(bt["id"], 0.0)):
 					if fight.dist() > 2.2:
 						move = (fight.w_pos - fight.p_pos).normalized()
 					else:
-						fight.input("technique")
+						fight.input(academy.bot_action())
 			"fight": move = _bot()
 			_: move = academy.auto_move()
 	fight.update(minf(delta, 0.1), move)
@@ -538,7 +546,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("lock_on"):
 		fight.input("lock")
 		world.lock_on = fight.p_lock
-	for pair in [["attack", "attack"], ["technique", "technique"], ["dodge", "dodge"], ["stance", "stance"], ["pattern", "pattern"], ["block", "block-down"], ["name_foe", "name"], ["order", "order"]]:
+	for pair in [["attack", "attack"], ["technique", "technique"], ["dodge", "dodge"], ["stance", "stance"], ["pattern", "pattern"], ["block", "block-down"], ["name_foe", "name"], ["order", "order"], ["tech1", "tech1"], ["tech2", "tech2"], ["tech3", "tech3"]]:
 		if event.is_action_pressed(pair[0], false, true):
 			fight.input(pair[1])
 	if event.is_action_released("block", true):
@@ -692,7 +700,15 @@ func _bot() -> Vector2:
 				f.input("stance")
 	var punish := f.w_state in ["recover", "stagger", "flinch", "idle"] and (f.w_state != "recover" or f.w_duration - f.w_timer > 0.45)
 	if to_w.length() < 2.3 and punish and f.p_state in ["free", "attack"]:
-		if (step == 4 or step == 99) and f.p_will > 40 and f.now >= float(f.p_cooldowns.get(f.tech["id"], 0.0)):
+		var used := false
+		for i in f.extra_techs.size():
+			var et: Dictionary = f.extra_techs[i]
+			if not used and f.p_will > float(et["will"]) + 20.0 and f.now >= float(f.p_cooldowns.get(et["id"], 0.0)) and randf() < 0.5:
+				f.input("tech%d" % (i + 1))
+				used = true
+		if used:
+			pass
+		elif (step == 4 or step == 99) and f.p_will > 40 and f.now >= float(f.p_cooldowns.get(f.tech["id"], 0.0)):
 			f.input("technique")
 		elif step != 4:
 			f.input("attack")

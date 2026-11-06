@@ -37,6 +37,7 @@ func _run() -> void:
 	test_genius_assembly()
 	test_genius_art()
 	test_sparring()
+	test_disciplines()
 	test_shape_kits()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
@@ -431,9 +432,9 @@ func test_academy() -> void:
 	# Every lesson is in a place that exists, taught by an Instructor who exists, with goals it knows.
 	for lesson in Data.academy["lessons"]:
 		check(Data.academy["places"].has(lesson["place"]), "lesson %s has its place" % lesson["id"])
-		check(not Data.by_id(Data.academy["instructors"], lesson["instructor"]).is_empty(), "lesson %s has its Instructor" % lesson["id"])
+		check(lesson["instructor"] == "$discipline" or not Data.by_id(Data.academy["instructors"], lesson["instructor"]).is_empty(), "lesson %s has its Instructor" % lesson["id"])
 		for st in lesson["steps"]:
-			check(st["goal"]["type"] in ["event", "streak", "will-full", "stance-seconds", "spar"], "step %s has a goal the Academy knows" % st["title"])
+			check(st["goal"]["type"] in ["event", "streak", "will-full", "stance-seconds", "spar", "choose-weapon"], "step %s has a goal the Academy knows" % st["title"])
 	# A lesson can lock the moves it is not teaching.
 	var f := Fight.new({ "hero": h, "beast": "millstone", "passive": true, "mercy": true })
 	f.allowed = ["block-down", "block-up", "dodge", "lock"]
@@ -740,3 +741,38 @@ func test_sparring() -> void:
 	var lesson: Dictionary = Data.by_id(Data.academy["lessons"], "shape")
 	check(lesson["requires"]["done"] == ["rite"] and lesson["requires"]["rested_after"] == "rite", "Lesson 3 needs the rite and a night's rest")
 	check(lesson["spar"]["order"][0] == "scared" and lesson["spar"]["order"].back() == "proud", "the ladder starts with the shy and ends with the proud")
+
+## The Disciplines' techniques: every launch school has three the fight can run, on keys 1-3.
+func test_disciplines() -> void:
+	for disc in ["marshal", "pilot", "aeronaut"]:
+		var dk: Dictionary = Data.discipline_kits[disc]
+		var h := Fight.default_hero()
+		h["city"] = dk["city"]
+		h["discipline"] = disc
+		h["techniques"] = dk["techniques"].map(func(t): return t["id"])
+		var weapons := Data.weapons.filter(func(w): return w["city"] == dk["city"])
+		h["weapon"] = weapons[0]["id"]
+		var f := Fight.new({ "hero": h, "passive": true, "seed": 3 })
+		check(f.extra_techs.size() == 3, "%s hands over three techniques" % disc)
+		for i in 3:
+			var g := Fight.new({ "hero": h, "passive": true, "seed": 3 })
+			g.w_state = "idle"
+			g.w_pos = g.p_pos + Vector2(2.0, 0)
+			g.p_facing = 0.0
+			g.p_lock = true
+			var hp0 := g.w_hp
+			g.input("tech%d" % (i + 1))
+			var evs := run_for(g, 1.5)
+			var t: Dictionary = dk["techniques"][i]
+			var fired := evs.any(func(e): return e["type"] == "technique" and e["id"] == t["id"])
+			var effect_seen := g.w_hp < hp0 or g.w_mark_until > 0.0 or g.w_slow_until > 0.0
+			check(fired and effect_seen, "%s: %s (%s) fires and does something" % [disc, t["name"], t["effect"]])
+			check(g.p_cooldowns.has(t["id"]) and g.p_will < 100.0, "%s: %s costs Will and starts a cooldown" % [disc, t["name"]])
+	# A locked slot stays locked; a classmate from each city brings their school's attack.
+	var c := { "name": "Pell", "city": "columbia", "shape": "cast", "body": "Knight", "weapon": "pistol" }
+	var sb := Fight.student_beast(c)
+	check(sb["attacks"].any(func(a): return a["id"] == "shot"), "a Columbia classmate shoots in the ladder")
+	var lesson: Dictionary = Data.by_id(Data.academy["lessons"], "discipline")
+	check(lesson["instructor"] == "$discipline" and lesson["steps"][0]["goal"]["type"] == "choose-weapon" and lesson["steps"].back()["setup"]["spar"] == "instructor", "Lesson 4 is taught by your school, starts with a weapon and ends with the Instructor's test")
+	var schools: Array = Data.academy["instructors"].filter(func(i): return i.has("discipline")).map(func(i): return i["discipline"])
+	check(schools.has("marshal") and schools.has("pilot") and schools.has("aeronaut"), "every launch Discipline has an Instructor")

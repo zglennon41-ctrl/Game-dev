@@ -66,6 +66,9 @@ const SLOTS := [
 	["block", "RMB", "Block · Parry", ""],
 	["dodge", "Space", "Dodge", "8"],
 	["technique", "Q", "Technique", "18"],
+	["tech1", "1", "", ""],
+	["tech2", "2", "", ""],
+	["tech3", "3", "", ""],
 	["stance", "F", "Stance", "2/s"],
 	["pattern", "R", "Pattern", ""],
 ]
@@ -329,6 +332,19 @@ func configure(f: Fight, hero_name: String) -> void:
 	(slots["technique"]["name"] as Label).text = f.tech["name"]
 	(slots["technique"]["cost"] as Label).text = "%d Will" % int(f.tech["will"])
 	(slots["stance"]["name"] as Label).text = f.kit["stance"]["name"]
+	# The Discipline's three, once learned.
+	var visible_n := 0
+	for i in 3:
+		var sid := "tech%d" % (i + 1)
+		var have := i < f.extra_techs.size()
+		(slots[sid]["panel"] as PanelContainer).visible = have
+		if have:
+			(slots[sid]["name"] as Label).text = f.extra_techs[i]["name"]
+			(slots[sid]["cost"] as Label).text = "%d Will" % int(f.extra_techs[i]["will"])
+	for s in slots.values():
+		if (s["panel"] as PanelContainer).visible:
+			visible_n += 1
+	bar.position = Vector2(-((SLOT_W + 8) * visible_n - 8) / 2.0, -SLOT_H - 40)
 	_hero_name = hero_name if hero_name != "" else "Anchor"
 	_hero_sub = String(f.player_shape).capitalize()
 	_accent = World.SHAPE_COLORS.get(f.player_shape, Style.GOLD)
@@ -507,6 +523,10 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	var tech: Dictionary = f.tech
 	var cd_left := maxf(0.0, float(f.p_cooldowns.get(tech["id"], 0.0)) - f.now)
 	_set_slot("technique", cd_left / float(tech["cooldown"]), f.p_will >= float(tech["will"]) and not f.p_fainted, false, Color(0, 0, 0, 0), cd_left)
+	for i in f.extra_techs.size():
+		var et: Dictionary = f.extra_techs[i]
+		var left := maxf(0.0, float(f.p_cooldowns.get(et["id"], 0.0)) - f.now)
+		_set_slot("tech%d" % (i + 1), left / float(et["cooldown"]), f.p_will >= float(et["will"]) and not f.p_fainted, f.p_state == "technique" and f.p_technique == et["id"], Color(0, 0, 0, 0), left)
 	_set_slot("dodge", 0.0, f.p_will >= float(Data.room["dodge"]["will"]), f.p_state == "dodge")
 	_set_slot("block", 0.0, not f.p_fainted, f.p_block_held)
 	_set_slot("attack", 0.0, true, f.p_state == "attack")
@@ -525,7 +545,7 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	else:
 		pattern_banner.text = ""
 
-const SLOT_ACTION := { "attack": "attack", "block": "block-down", "dodge": "dodge", "technique": "technique", "stance": "stance", "pattern": "pattern" }
+const SLOT_ACTION := { "attack": "attack", "block": "block-down", "dodge": "dodge", "technique": "technique", "stance": "stance", "pattern": "pattern", "tech1": "tech1", "tech2": "tech2", "tech3": "tech3" }
 var _fight_allowed: Array = []
 
 func _set_slot(id: String, cooldown: float, usable: bool, active: bool, glow := Color(0, 0, 0, 0), seconds := 0.0) -> void:

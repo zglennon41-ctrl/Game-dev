@@ -35,6 +35,7 @@ will stand beside you, and your Pattern), then the night your field wakes. After
 | E | X | talk, open a door, rest (at the Academy) |
 | G | D-pad left | your genius's order: Guard or Hunt |
 | J | Back | your genius's page |
+| 1, 2, 3 | | your Discipline's techniques (from Lesson 4) |
 
 The feel numbers are in `data/combat-room.json` and `data/beasts.json`. Change one, press
 F5 again, and the room plays differently.

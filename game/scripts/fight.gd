@@ -89,6 +89,10 @@ var crit_until := -9.0
 var ward_until := -9.0
 var second_heart_used := false
 var w_shouted := false
+var extra_techs: Array = []  # the Discipline's techniques (keys 1, 2, 3), once learned
+var p_tech_active: Dictionary = {}
+var w_mark_until := -9.0
+var w_mark_factor := 1.0
 var genius: Genius = null   # the hero's genius, if the rite has given it a body
 var g_will := 0.0
 var g_will_max := 0.0
@@ -116,6 +120,11 @@ func _init(opts: Dictionary = {}) -> void:
 	ranged = style["kind"] == "ranged"
 	combo = style.get("combo", [style.get("shot", {})])
 	tech = kit["technique"]
+	for tid in hero.get("techniques", []):
+		var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
+		for t in dk.get("techniques", []):
+			if t["id"] == tid:
+				extra_techs.append(t)
 	if hero.get("blood", "") != "":
 		bc = Data.by_id(Data.bloods, hero["blood"]).get("combat", {})
 	w_shape = opts.get("beast_shape", beast["shape"] if opts.has("foe") else Data.opposite(player_shape))
@@ -249,6 +258,10 @@ static func student_beast(c: Dictionary, scale := 1.0) -> Dictionary:
 	b["shape"] = c.get("shape", "anchor")
 	b["health"] = roundf(float(b["health"]) * scale)
 	b["person"] = { "body": c.get("body", "Knight"), "weapon": c.get("weapon", "saber"), "name": c.get("name", "") }
+	# What their city's school taught them, if they have a city.
+	var disc: String = c.get("discipline", Creation.CITY_DISCIPLINE.get(c.get("city", ""), ""))
+	for a in Data.discipline_kits.get(disc, {}).get("studentAttacks", []):
+		b["attacks"].append(a.duplicate(true))
 	b["title"] = c.get("title", "of the cohort")
 	return b
 
@@ -303,7 +316,7 @@ func input(action: String) -> void:
 		return
 	# Pressed a little early (mid-swing, mid-dodge, mid-flinch): remember it briefly and fire
 	# it the moment it is allowed, so no press is lost.
-	if action in ["attack", "technique", "dodge", "pattern", "block-down"] and _busy(action):
+	if action in ["attack", "technique", "dodge", "pattern", "block-down", "tech1", "tech2", "tech3"] and _busy(action):
 		p_queued = action
 		p_queued_until = now + float(room.get("inputBufferSeconds", 0.25))
 		if action == "block-down":
@@ -311,7 +324,11 @@ func input(action: String) -> void:
 		return
 	match action:
 		"attack": _press_attack()
-		"technique": _press_technique()
+		"technique": _press_technique(tech)
+		"tech1", "tech2", "tech3":
+			var i := int(action.substr(4)) - 1
+			if i < extra_techs.size():
+				_press_technique(extra_techs[i])
 		"dodge": _press_dodge()
 		"block-down":
 			p_block_held = true
@@ -425,8 +442,7 @@ func _face_target_if_near() -> void:
 	elif p_dodge_dir.length() > 0.3:
 		p_facing = p_dodge_dir.angle()
 
-func _press_technique() -> void:
-	var t := tech
+func _press_technique(t: Dictionary) -> void:
 	var id: String = t["id"]
 	if not _can_start_action():
 		return
@@ -442,6 +458,7 @@ func _press_technique() -> void:
 	p_cooldowns[id] = now + float(t["cooldown"])
 	p_state = "technique"
 	p_technique = id
+	p_tech_active = t
 	p_timer = 0.0
 	p_hit_done = false
 	_face_target_if_near()
@@ -697,7 +714,7 @@ func _update_player(dt: float, move: Vector2) -> void:
 				p_state = "free"
 				p_last_attack_end = now
 		"technique":
-			var t := tech
+			var t := p_tech_active if not p_tech_active.is_empty() else tech
 			if t["effect"] == "dash" and p_timer < float(t["startup"]) + float(t["active"]) and w_state not in ["down", "absent"]:
 				# Closing Strike: the field throws you at the foe.
 				if dist() > float(t["reach"]) * 0.7:
@@ -752,6 +769,35 @@ func _resolve_technique(t: Dictionary) -> void:
 			ward_until = now + float(t["wardSeconds"])
 			_emit({ "type": "ward-up", "at": p_pos, "seconds": float(t["wardSeconds"]) })
 			_resolve_swing(float(t["damage"]), float(t["reach"]), float(t["arc"]), true, 0.0)
+		# The Disciplines' techniques.
+		"volley":
+			for i in int(t.get("shots", 3)):
+				_resolve_shot(float(t["damage"]), float(t["range"]), 50.0, i == 0)
+		"mark":
+			if w_state not in ["down", "absent"] and dist() <= float(t["range"]):
+				w_mark_until = now + float(t["markSeconds"])
+				w_mark_factor = float(t["markFactor"])
+				w_named = true
+				_emit({ "type": "marked", "seconds": float(t["markSeconds"]) })
+		"finisher":
+			var finish := w_state == "stagger" or w_hp <= float(beast["health"]) * float(t.get("finishBelow", 0.3))
+			_resolve_shot(float(t["damage"]) * (float(t.get("finishFactor", 2.0)) if finish else 1.0), float(t["range"]), 40.0, true)
+		"sound":
+			if w_state not in ["down", "absent"] and dist() <= float(t["range"]):
+				w_slow_until = now + float(t["slowSeconds"])
+				w_slow = float(t["slow"])
+				_emit({ "type": "sounded", "seconds": float(t["slowSeconds"]) })
+		"pull":
+			if _resolve_shot(float(t["damage"]), float(t["range"]), 40.0, true) and w_state not in ["down", "absent"]:
+				var dir := (w_pos - p_pos).normalized()
+				w_pos = _clamp_in(p_pos + dir * float(t["pullTo"]))
+				if w_state in ["prowl", "approach", "idle", "recover"]:
+					_wolf_set("flinch", float(beast["flinchTime"]) * 1.5)
+				_emit({ "type": "pulled" })
+		"quake":
+			if _resolve_swing(float(t["damage"]), float(t["reach"]), float(t["arc"]), true, float(t.get("knockback", 0.0))) and breaks_beast():
+				w_break += int(t.get("breakPlus", 0))
+			_emit({ "type": "quake", "at": p_pos })
 
 ## A shot: straight at the foe if it is in range and roughly in front.
 func _resolve_shot(damage: float, rng_m: float, arc: float, breaks := false) -> bool:
@@ -807,6 +853,8 @@ func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
 	var crit := now < crit_until and not from_pattern
 	if crit:
 		dmg = roundf(dmg * float(tech.get("crit", 1.5)))
+	if now < w_mark_until:
+		dmg = roundf(dmg * w_mark_factor)
 	w_hp = maxf(w_floor, w_hp - dmg)
 	stats["hits"] += 1
 	stats["damage_dealt"] += dmg
@@ -855,6 +903,7 @@ func _spawn_wolf() -> void:
 	w_shouted = false
 	w_burn_until = -9.0
 	w_slow_until = -9.0
+	w_mark_until = -9.0
 	w_pattern_hits = 0
 	p_struck_this_foe = false
 	_wolf_prowl()
