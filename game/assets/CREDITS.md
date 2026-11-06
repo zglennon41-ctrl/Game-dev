@@ -28,3 +28,10 @@ Placeholder quality, as the genius kit: a proof of the outdoor pipeline in `docs
 is built by `tools/blender/beast_kit.py` from the CC0 Quaternius wolf above: its skeleton and
 animations, reshaped and given new parts in Blender. Owned by the project; the wolf's CC0
 licence covers the base.
+
+## People (made for WILDLINE, on the KayKit rig)
+
+`game/assets/people/` (Knight, Mage, Rogue, Rogue_Hooded, Barbarian) is built by
+`tools/blender/people_kit.py` from the CC0 KayKit Adventurers above: the same rig, animations,
+textures and accessories, the bodies reshaped in Blender from chibi to grounded proportions
+(about six and a half heads tall). Owned by the project; KayKit's CC0 licence covers the base.

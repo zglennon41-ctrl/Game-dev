@@ -137,11 +137,11 @@ class Rig:
 
     def legs(self, side=None):
         sides = [side] if side else ["l", "r"]
-        return [b for s in sides for b in self.family("upperleg." + s) + LEG_HELPERS[s]]
+        return [b for s in sides for b in self.family("upperleg." + s, *LEG_HELPERS[s])]
 
     def arms(self, side=None):
         sides = [side] if side else ["l", "r"]
-        return [b for s in sides for b in self.family("upperarm." + s) + ARM_HELPERS[s]]
+        return [b for s in sides for b in self.family("upperarm." + s, *ARM_HELPERS[s])]
 
     def head(self):
         return self.family("head")
@@ -357,7 +357,9 @@ def check_glb(path, src_path=None):
         return json.loads(d[20:20 + length])
     j = parse(path)
     names = [a.get("name") for a in j.get("animations", [])]
-    missing = [a for a in ANIMS if a not in names]
+    # The game's names the source has must survive (KayKit has no 2H_Melee_Attack_Slam, say).
+    have = [a.get("name") for a in parse(src_path).get("animations", [])] if src_path else ANIMS
+    missing = [a for a in ANIMS if a in have and a not in names]
     skins = j.get("skins", [])
     mesh_nodes = [n for n in j["nodes"] if "mesh" in n]
     skinned = [n for n in mesh_nodes if "skin" in n]
@@ -503,16 +505,16 @@ def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, re
     from bpy_extras.object_utils import world_to_camera_view
     direction = Vector((0.8, -1.0, 0.35)).normalized()
     aim = centre
-    corners = [Vector((x, y, z)) for x in (lo.x - 0.1, hi.x + 0.1) for y in (lo.y - 0.9, hi.y + 0.1) for z in (0, hi.z + 0.1)]
-    dist = size * 1.2
+    corners = [Vector((x, y, z)) for x in (lo.x - 0.05, hi.x + 0.05) for y in (lo.y - 0.7, hi.y + 0.05) for z in (0, hi.z + 0.05)]
+    dist = size * 1.0
     for _ in range(100):
         cam.location = aim + direction * dist
         cam.rotation_euler = (aim - cam.location).to_track_quat("-Z", "Y").to_euler()
         bpy.context.view_layer.update()
         ndc = [world_to_camera_view(scene, cam, c) for c in corners]
-        if all(0.04 < p.x < 0.96 and 0.04 < p.y < 0.96 for p in ndc):
+        if all(0.02 < p.x < 0.98 and 0.02 < p.y < 0.98 for p in ndc):
             break
-        dist *= 1.04
+        dist *= 1.03
 
     def light(name, kind, at, color, energy, size_=1.0):
         ld = bpy.data.lights.new(name, kind)
@@ -569,12 +571,13 @@ def tile(cards, path, cols, res):
 
 
 def render_sheets(bodies=None, samples=32, res=(400, 640)):
-    """Two sheets: the five before (KayKit) over the five after (ours) in the rest pose; then
-    the five after mid-stride in Running_A over mid-swing in 1H_Melee_Attack_Slice_Horizontal."""
+    """Two sheets: the five before (KayKit) over the five after (ours), standing at the start
+    of Idle; then the five after mid-stride in Running_A over mid-swing in
+    1H_Melee_Attack_Slice_Horizontal, the one-handed weapon in hand."""
     bodies = bodies or BODIES
     cards = os.path.join(SCRATCH, "people_cards")
-    rest = [render_card(os.path.join(SRC, b + ".glb"), b + " (KayKit)", os.path.join(cards, b + "_before.png"), samples=samples, res=res) for b in bodies]
-    rest += [render_card(os.path.join(OUT, b + ".glb"), b, os.path.join(cards, b + "_after.png"), samples=samples, res=res) for b in bodies]
+    rest = [render_card(os.path.join(SRC, b + ".glb"), b + " (KayKit)", os.path.join(cards, b + "_before.png"), anim="Idle", samples=samples, res=res) for b in bodies]
+    rest += [render_card(os.path.join(OUT, b + ".glb"), b, os.path.join(cards, b + "_after.png"), anim="Idle", samples=samples, res=res) for b in bodies]
     tile(rest, os.path.join(SCRATCH, "people_sheet.png"), len(bodies), res)
     motion = [render_card(os.path.join(OUT, b + ".glb"), b + " run", os.path.join(cards, b + "_run.png"), anim="Running_A", at=0.3, weapon=WEAPON_SHOWN.get(b), samples=samples, res=res) for b in bodies]
     motion += [render_card(os.path.join(OUT, b + ".glb"), b + " slice", os.path.join(cards, b + "_slice.png"), anim="1H_Melee_Attack_Slice_Horizontal", at=0.45, weapon=WEAPON_SHOWN.get(b), samples=samples, res=res) for b in bodies]

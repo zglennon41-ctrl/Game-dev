@@ -1,0 +1,68 @@
+## A check on the people art: every body in game/assets/people must load, carry an
+## AnimationPlayer with the animations the game plays by name, a Skeleton3D with the hand slots
+## the game hangs weapons from, and skinned meshes; the bone attachments (helmet, hat, cape,
+## the pack's weapons) are listed so a lost one shows.
+## Run: godot --headless --path . -s res://game/tests/check_people.gd
+extends SceneTree
+
+const DIR := "res://game/assets/people"
+const BODIES := ["Knight", "Mage", "Rogue", "Rogue_Hooded", "Barbarian"]
+const MUST := ["Idle", "Running_A", "1H_Melee_Attack_Slice_Horizontal", "Walking_A", "Walking_Backwards", "Blocking",
+	"Block_Hit", "Hit_A", "Hit_B", "Death_A", "Dodge_Forward", "Dodge_Backward"]
+const BONES := ["handslot.r", "handslot.l", "head"]
+
+
+func _init() -> void:
+	var ok := true
+	for body: String in BODIES:
+		var path := DIR + "/" + body + ".glb"
+		if not ResourceLoader.exists(path):
+			printerr(body, ": missing ", path)
+			ok = false
+			continue
+		var scene: PackedScene = load(path)
+		if scene == null:
+			printerr(body, ": does not load")
+			ok = false
+			continue
+		var inst: Node = scene.instantiate()
+		var ap: AnimationPlayer = inst.find_child("AnimationPlayer", true, false)
+		var skel: Skeleton3D = inst.find_child("Skeleton3D", true, false)
+		var missing: Array[String] = []
+		if ap == null:
+			missing.append("(no AnimationPlayer)")
+		else:
+			for a in MUST:
+				if not ap.has_animation(a):
+					missing.append(a)
+		var lost_bones: Array[String] = []
+		if skel == null:
+			lost_bones.append("(no Skeleton3D)")
+		else:
+			for b in BONES:
+				if skel.find_bone(b) < 0:
+					lost_bones.append(b)
+		var meshes := inst.find_children("*", "MeshInstance3D", true, false)
+		var skinned := 0
+		var textured := 0
+		for m in meshes:
+			var mi := m as MeshInstance3D
+			if mi.skin != null:
+				skinned += 1
+			if mi.mesh != null and mi.mesh.get_surface_count() > 0:
+				var mat := mi.mesh.surface_get_material(0) as StandardMaterial3D
+				if mat != null and mat.albedo_texture != null:
+					textured += 1
+		var attachments: Array[String] = []
+		for a in inst.find_children("*", "BoneAttachment3D", true, false):
+			attachments.append(String(a.name))
+		attachments.sort()
+		print(body, ": animations=", ap.get_animation_list().size() if ap else 0, " bones=", skel.get_bone_count() if skel else 0,
+			" meshes=", meshes.size(), " skinned=", skinned, " textured=", textured)
+		print("    attachments=", attachments)
+		if not missing.is_empty() or not lost_bones.is_empty() or skinned == 0 or textured == 0:
+			printerr(body, ": FAIL missing animations=", missing, " lost bones=", lost_bones, " skinned=", skinned, " textured=", textured)
+			ok = false
+		inst.free()
+	print("people: ", "all good" if ok else "FAILED")
+	quit(0 if ok else 1)
