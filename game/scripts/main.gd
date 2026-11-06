@@ -498,6 +498,10 @@ func _open_builder() -> void:
 	hud.screen.visible = false
 	builder.open(Settings.pattern(), Settings.pattern_lost_text(), func(): Settings.restore_pattern())
 
+func open_genius_page() -> void:
+	if academy.genius and academy.genius.is_born():
+		page.open(academy.genius, World.SHAPE_COLORS.get(academy.hero["shape"], Color.WHITE), 0, int(academy.progress["record"].get("marks", 0)))
+
 func _pattern_built(spec: Dictionary) -> void:
 	builder.visible = false
 	if mode == "academy":
@@ -604,8 +608,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			page.open(academy.genius, World.SHAPE_COLORS.get(academy.hero["shape"], Color.WHITE), 0, int(academy.progress["record"].get("marks", 0)))
 			return
 		if event.is_action_pressed("menu"):
-			academy.save()
-			menu()
+			if hud.screen.visible:
+				academy.unpause()
+			elif not academy.busy():
+				academy.pause()
 			return
 		if event is InputEventMouseButton and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED and not _args.has("bot"):
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -639,6 +645,9 @@ func _process(delta: float) -> void:
 	var real_dt := minf(0.1, (t - _last_ticks) / 1e6)
 	_last_ticks = t
 	if mode == "academy":
+		if get_tree().paused:
+			world.draw(fight, 0.0, Vector2.ZERO, Vector2.ZERO)
+			return
 		_academy_frame(delta, real_dt)
 		return
 	if mode == "gallery":

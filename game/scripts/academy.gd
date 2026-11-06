@@ -1824,6 +1824,41 @@ func _pick_party(n: int) -> void:
 		save()
 		_pick_party(n))
 
+# --- The pause sheet ---------------------------------------------------------------
+
+## Esc: the term so far, the genius, and the way out. The fight stands still while it is up.
+func pause() -> void:
+	save()
+	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	var rec: Dictionary = progress["record"]
+	var lines: Array = []
+	lines.append("[color=#a8803f]%s[/color]   %s, %s" % ["Today", date_line(), objective()])
+	lines.append("[color=#a8803f]Marks[/color]   %d  ·  %s, %s" % [int(rec.get("marks", 0)), Marks.archetype_for(hero["shape"], hero.get("discipline", "")).get("name", "no archetype yet"), String(Marks.rank_for(int(rec.get("marks", 0)), int(hero.get("stage", 2)), rec.get("pattern_built", false))).capitalize()])
+	lines.append("[color=#a8803f]The term[/color]   %d parries, %d blocks, bitten %d  ·  %d bouts won, %d lost  ·  %d posts held, %d runs out" % [int(rec.get("parries", 0)), int(rec.get("blocks", 0)), int(rec.get("hurts", 0)), int(rec.get("spars_won", 0)), int(rec.get("spars_lost", 0)), int(rec.get("posts_held", 0)), int(rec.get("runs_out", 0))])
+	if int(rec.get("quests", 0)) + int(rec.get("quests_lost", 0)) > 0:
+		lines.append("[color=#a8803f]The board[/color]   %d postings done, %d lost  ·  %d troubles seen to" % [int(rec.get("quests", 0)), int(rec.get("quests_lost", 0)), int(rec.get("troubles", 0))])
+	var q: Dictionary = progress.get("quest", {}) if progress.get("quest", {}) is Dictionary else {}
+	if not q.is_empty():
+		lines.append("[color=#a8803f]In hand[/color]   %s" % q.get("title", ""))
+	if not crisis().is_empty():
+		lines.append("[color=#a8803f]%s[/color]   %s" % [crisis()["name"], ledgers_text()])
+	var g: Dictionary = hero.get("genius", {})
+	if genius and genius.is_born():
+		lines.append("[color=#a8803f]Genius[/color]   %s, %s  ·  %s" % [genius.name if genius.name != "" else genius.form_name(), genius.form_name(), genius.instar_name()])
+	var buttons: Array = [["Continue", unpause]]
+	if genius and genius.is_born():
+		buttons.append(["The genius's page  (J)", func(): unpause(); get_parent().call("open_genius_page")])
+	buttons.append(["Leave by the line  (to the title, the term saved)", func(): get_tree().paused = false; leave.emit()])
+	hud.show_screen("THE TERM SO FAR", "%s  ·  %s" % [hero["name"], Data.academy["term"]["cohort"]], "\n".join(lines), buttons)
+
+func unpause() -> void:
+	get_tree().paused = false
+	hud.hide_screen()
+	hud.play_ui.visible = _in_zone() or in_lesson()
+	if not auto:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
 ## What the HUD says of where you are.
 func place_label() -> String:
 	if _in_zone():

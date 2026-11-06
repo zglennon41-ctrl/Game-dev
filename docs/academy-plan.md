@@ -24,6 +24,11 @@ Twelve classmates live through the same term as agents of their own.
 
 ## The milestones
 
+> Status (2026-11-07): M1 to M5 are built (`docs/zones.md`, `docs/academy-board.md`); M6 is
+> under way (the wild kit, the beasts and the people reshaped in Blender; lighting per zone);
+> M7 is under way (the fight HUD, the chooser sheet and the pause sheet are redone; the pages
+> and the title remain).
+
 **M1. The world.** Packs: fights with several foes at once, each with its own behaviour.
 Four zones around Alexandria, each a tile library (12–20 tiles) assembled into 3–5 areas with
 fixed set pieces, three variants, a post, and the beasts of the zone:
