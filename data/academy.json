@@ -1887,7 +1887,8 @@
         "Commencement. There is no ceremony in it; there is the line, and the car, and the fact that you are on it.",
         "You leave with a Shape, a field at Stage three, a school, a Pattern, a genius with a name, {marks} Marks to your record, and twelve people who will remember you. The Archive will call you a {archetype}, a Journeyman one, until you make it call you something else.",
         "Go on, {name}. Mind the line."
-      ]
+      ],
+      "not_yet": "The Gate waits: {n} more posting{s} from the board, and one of each kind. The term is not a thing you finish early."
     },
     "writeup": [
       {
@@ -1995,7 +1996,12 @@
         "text": "Never read the board. Head down, straight through the term."
       }
     ],
-    "closing": "Would found a guild with them. Signed, the Hundred-and-Fourth Cohort."
+    "closing": "Would found a guild with them. Signed, the Hundred-and-Fourth Cohort.",
+    "requires": {
+      "postings": 10,
+      "eachType": true,
+      "$comment": "The Gate opens after this many of the board's postings are done, with at least one of each quest type the term has opened (the Rally and the Deep Run count when they were posted)."
+    }
   },
   "advanced": {
     "$comment": "Advanced standing (owner, 2026-11-06): a second character may replay a shorter term. The rite, the Field Examination and the Gate are never skipped. skipLessons are passed over entirely; skipSteps names, by lesson, the drill steps left out (by their titles as written in the lessons); counts shortens what remains.",

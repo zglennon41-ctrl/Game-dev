@@ -84,6 +84,9 @@ var p_ammo_max := 0
 var p_draw := 0.0            # seconds the bow has been drawn
 var p_charge := 1.0          # the last loosed shot's draw, 0..1
 var p_reload_t := 0.0
+var gear: Dictionary = {}        # the weapon's tier and name
+var gear_damage := 1.0
+var gear_trait: Dictionary = {}
 var tech: Dictionary = {}    # the Shape's technique
 var bc: Dictionary = {}      # the blood's combat passives
 var w_burn_until := -9.0
@@ -134,6 +137,20 @@ func _init(opts: Dictionary = {}) -> void:
 	combo = style.get("combo", [style.get("shot", {})])
 	p_ammo_max = int(style.get("ammo", 0))
 	p_ammo = p_ammo_max
+	# The weapon's tier and trait (data/gear.json): a fine or a named weapon hits harder; a
+	# trait changes the moveset a little.
+	gear = hero.get("gear", { "tier": "plain" })
+	var tier: Dictionary = Data.gear["tiers"].get(String(gear.get("tier", "plain")), Data.gear["tiers"]["plain"])
+	gear_damage = float(tier.get("damage", 1.0))
+	gear_trait = Data.gear["traits"].get(String(gear.get("trait", "")), {})
+	if not gear_trait.is_empty():
+		combo = combo.map(func(c): return c.duplicate())
+		for c in combo:
+			if gear_trait.has("reach") and c.has("reach"): c["reach"] = float(c["reach"]) + float(gear_trait["reach"])
+			if gear_trait.has("range") and c.has("range"): c["range"] = float(c["range"]) + float(gear_trait["range"])
+			if gear_trait.has("recovery"): c["recovery"] = float(c["recovery"]) * float(gear_trait["recovery"])
+			if gear_trait.has("knockback"): c["knockback"] = float(c.get("knockback", 0.0)) + float(gear_trait["knockback"])
+			if gear_trait.has("burnSeconds"): c["burnSeconds"] = maxf(float(c.get("burnSeconds", 0.0)), float(gear_trait["burnSeconds"]))
 	tech = kit["technique"]
 	for tid in hero.get("techniques", []):
 		var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
@@ -996,6 +1013,7 @@ func p_invulnerable() -> bool:
 	return p_timer >= float(d["iframeStart"]) and p_timer <= float(d["iframeEnd"])
 
 func _resolve_swing(damage: float, reach: float, arc: float, breaks: bool, knockback: float) -> bool:
+	damage *= gear_damage
 	var heavy := breaks or knockback > 0.0
 	if p_stance:
 		match kit["stance"]["effect"]:
@@ -1046,6 +1064,8 @@ func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
 	p_combo_count += 1
 	stats["longest_combo"] = maxi(stats["longest_combo"], p_combo_count)
 	_emit({ "type": "hit", "damage": dmg, "pattern": from_pattern, "heavy": heavy, "staggered": w_state == "stagger", "combo": p_combo, "crit": crit, "dist": dist(), "technique": p_state == "technique" })
+	if gear_trait.has("willOnHit"):
+		p_will = minf(float(rules["field"]["willMax"]), p_will + float(gear_trait["willOnHit"]))
 	if w_hp == 0.0:
 		stats["wolves_down"] += 1
 		_wolf_set("down", float(beast["respawnSeconds"]))

@@ -358,6 +358,15 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   weapons carry magazines and reload; the bow draws. Creation and development must show in
   the art: the body, the headgear, the cape and its colour, the weapon in the hand, the
   field glowing in the weapon with mastery. The bar is a AAA studio game.
+- **Answers of 2026-11-07** (owner): one weapon at a time (chosen at creation, changed at the
+  school); gear tiers at the Academy, visible: named weapons from Hunts and the Archive
+  (three Salvage fragments), fine ones bought with Marks at the yard, no armour yet; one
+  Discipline for life, the archetypes grow from it; the Gate opens after ten postings done
+  with at least one of each type open; difficulty is the line colour only, the same for
+  everyone; the art steers by cel-shaded stylized high detail (Zelda, Genshin: clean shapes,
+  banded light, outlines kept, bright colour); the score first (a theme per place and zone,
+  stingers for the Pattern, the rite and the Reckoning), generated here as placeholders in
+  the right shape, then the cohort's barks.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.

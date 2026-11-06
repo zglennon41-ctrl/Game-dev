@@ -35,3 +35,11 @@ licence covers the base.
 `tools/blender/people_kit.py` from the CC0 KayKit Adventurers above: the same rig, animations,
 textures and accessories, the bodies reshaped in Blender from chibi to grounded proportions
 (about six and a half heads tall). Owned by the project; KayKit's CC0 licence covers the base.
+
+## Weapons (made for WILDLINE)
+
+`game/assets/weapons/` (thirty-three weapons: the cities' blades, guns, poles and bows, the
+Academy disciplines' needles, dividers, brushes, ledgers and astrolabes) is built by
+`tools/blender/weapon_kit.py` in Blender and owned by the project. Flat-shaded low poly, no
+textures, materials from a small named palette; hung from the KayKit hand slots on KayKit's
+axes and scale. Placeholder quality, as the wild kit.

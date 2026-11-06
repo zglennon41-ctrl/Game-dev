@@ -53,6 +53,7 @@ func _run() -> void:
 	test_cohort_days_and_crisis()
 	test_mastery()
 	test_weapons()
+	test_gear_and_gate()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -1419,3 +1420,35 @@ func test_weapons() -> void:
 		c["weapon"] = w["id"]
 		var al := Fight.make_ally(c, Vector2.ZERO)
 		check(float(al["reach"]) > 1.0, "a classmate with a %s has a reach" % w["name"])
+
+## Gear tiers and the Gate's wait: a fine weapon hits a tenth harder, a named one carries its
+## trait; the Gate waits for ten postings with one of each type the term has posted.
+func test_gear_and_gate() -> void:
+	var h := Fight.default_hero()
+	var plain := Fight.new({ "hero": h, "seed": 1 })
+	h["gear"] = { "tier": "fine", "name": "", "trait": "" }
+	var fine := Fight.new({ "hero": h, "seed": 1 })
+	check(fine.gear_damage > plain.gear_damage and absf(fine.gear_damage - 1.1) < 0.001, "a fine weapon hits a tenth harder")
+	h["gear"] = { "tier": "named", "name": "Old Grey's Tooth", "trait": "bleed" }
+	var named := Fight.new({ "hero": h, "seed": 1 })
+	check(named.gear_damage > fine.gear_damage and named.combo[0].has("burnSeconds"), "a named weapon hits harder still and its trait is in the moveset")
+	h["gear"] = { "tier": "named", "name": "The Ferryman's Hook", "trait": "reach" }
+	var reach := Fight.new({ "hero": h, "seed": 1 })
+	check(float(reach.combo[0]["reach"]) > float(plain.combo[0]["reach"]), "a reaching weapon reaches")
+	for z in Data.zones():
+		check(Data.gear["named"].has(z["id"]), "%s has a named weapon" % z["id"])
+	# The Gate.
+	var a := Academy.new()
+	a.hero = Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
+	a.cohort = Academy.make_cohort(42, a.hero)
+	a.progress = { "seed": 42, "arrived": true, "done": ["hold", "rite", "shape", "discipline", "line", "project"], "met": [], "day": 9, "rested_after": "project", "place": "quad",
+		"record": { "marks": 7, "talks": 0 }, "quests_done": [], "quest_types_seen": ["linework", "hunt"], "quest_types_done": [] }
+	check(a.next_need() == "board" and a.gate_short() == 10, "the Gate waits for ten postings")
+	a.progress["quests_done"] = range(10).map(func(i): return "quest:%d:0" % i)
+	a.progress["quest_types_done"] = ["linework"]
+	check(a.next_need() == "board" and a.gate_types_missing() == ["hunt"], "and for one of each type posted")
+	a.progress["quest_types_done"] = ["linework", "hunt"]
+	check(a.gate_ready() and a.next_need() == "gate", "ten done and every type met: the Gate opens")
+	check(a.objective().contains("Gate"), "the objective says so")
+	check(a.marks_spendable() == 7, "Marks to spend are the record's less what the smith took")
+	a.free()

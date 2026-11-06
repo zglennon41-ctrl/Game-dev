@@ -1,0 +1,95 @@
+{
+  "$comment": "Gear at the Academy (owner, 2026-11-07): weapons come in three tiers that show. plain is what creation gives; fine is bought from the yard's smith for Marks; named comes from a Hunt's named beast (the zone's named weapon) or from the Archive for three Salvage fragments. A tier multiplies damage; a named weapon carries a trait. The hero keeps one weapon; a better tier replaces the worse. Traits: bleed (every hit burns), reach (longer), quick (shorter recoveries), heavy (more knockback), field (every hit gives Will).",
+  "tiers": {
+    "plain": {
+      "name": "plain",
+      "damage": 1.0,
+      "finish": 0.0
+    },
+    "fine": {
+      "name": "fine",
+      "damage": 1.1,
+      "finish": 0.35,
+      "costMarks": 3
+    },
+    "named": {
+      "name": "named",
+      "damage": 1.2,
+      "finish": 1.0
+    }
+  },
+  "traits": {
+    "bleed": {
+      "name": "bleeds",
+      "burnSeconds": 2.5,
+      "text": "every hit leaves the foe burning a while"
+    },
+    "reach": {
+      "name": "reaches",
+      "reach": 0.3,
+      "range": 1.5,
+      "text": "longer than it looks"
+    },
+    "quick": {
+      "name": "quick",
+      "recovery": 0.8,
+      "text": "comes back to the guard sooner"
+    },
+    "heavy": {
+      "name": "heavy",
+      "knockback": 0.7,
+      "text": "throws the foe back on every hit"
+    },
+    "field": {
+      "name": "field-bound",
+      "willOnHit": 2.0,
+      "text": "every hit gives a little Will"
+    }
+  },
+  "named": {
+    "green": {
+      "name": "Old Grey's Tooth",
+      "trait": "bleed",
+      "text": "cut from the named wolf of the Green; it remembers the bite"
+    },
+    "shenandoah": {
+      "name": "The Ferryman's Hook",
+      "trait": "reach",
+      "text": "taken from the river-thing that ferried the drowned town"
+    },
+    "harpers-cut": {
+      "name": "The Yard Dog's Jaw",
+      "trait": "heavy",
+      "text": "the junction's hound, set in iron"
+    },
+    "cahokia-river": {
+      "name": "Long Mother's Spine",
+      "trait": "quick",
+      "text": "the eel's spine, quick as the current"
+    }
+  },
+  "archive": {
+    "name": "The Archive's Own",
+    "trait": "field",
+    "fragments": 3,
+    "text": "made at the Archive from three things carried out of the ruin"
+  },
+  "smith": {
+    "id": "smith",
+    "name": "Smith Hollis Crane",
+    "title": "the yard's smith",
+    "body": "Barbarian",
+    "weapon": "hammer",
+    "at": [
+      -6,
+      4
+    ],
+    "lines": {
+      "default": "The smith's bench is open. A fine edge costs Marks; a named one costs a beast.",
+      "offer": "A fine {weapon}: {cost} Marks. It hits a tenth harder and it shows.",
+      "bought": "Done. Carry it where it can be seen.",
+      "short": "Come back with {cost} Marks.",
+      "have": "Nothing finer than what you carry; bring me a beast's name."
+    }
+  }
+}

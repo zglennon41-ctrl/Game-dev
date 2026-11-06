@@ -397,7 +397,9 @@ func configure(f: Fight, hero_name: String) -> void:
 			visible_n += 1
 	_place_bar(visible_n)
 	_hero_name = hero_name if hero_name != "" else "Anchor"
-	_hero_sub = String(f.player_shape).capitalize()
+	var wname := String(Data.by_id(Data.weapons, f.hero.get("weapon", "saber")).get("name", ""))
+	var gtier := String(f.gear.get("tier", "plain"))
+	_hero_sub = "%s  ·  %s" % [String(f.player_shape).capitalize(), (String(f.gear.get("name", wname)) if gtier == "named" else ("fine " + wname.to_lower() if gtier == "fine" else wname))]
 	_accent = World.SHAPE_COLORS.get(f.player_shape, Style.GOLD)
 	_sigil.color = _accent
 	_last_hp = -1.0

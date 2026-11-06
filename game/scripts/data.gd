@@ -26,6 +26,7 @@ var discipline_kits: Dictionary
 var _archetypes: Array
 var _zones: Array
 var disciplines: Array
+var gear: Dictionary
 var quests: Dictionary
 var _crises: Array
 
@@ -55,6 +56,7 @@ func _init() -> void:
 	_archetypes = _load("res://data/archetypes.json")
 	_zones = _load("res://data/zones.json")
 	disciplines = _load("res://data/disciplines.json")
+	gear = _load("res://data/gear.json")
 	quests = _load("res://data/quests.json")
 	_crises = _load("res://data/crises.json")
 

@@ -312,6 +312,11 @@ func go(place_id: String, quiet := false, from := "") -> void:
 			fight.w_pos = at + Vector2(1.6, 0.8)
 			fight.w_facing = (spawn - fight.w_pos).angle()
 			world.show_wolf = true
+	var smith: Dictionary = Data.gear.get("smith", {})
+	if place_id == "yard" and not smith.is_empty() and progress["done"].has("discipline"):
+		var sm_at := Vector2(smith["at"][0], smith["at"][1])
+		world.add_figure(smith["body"], sm_at, (spawn - sm_at).angle(), smith["name"], smith["title"], smith["weapon"])
+		_people.append({ "kind": "smith", "id": "smith", "name": smith["name"], "pos": sm_at })
 	var sh: Dictionary = Data.academy.get("shade", {})
 	if place_id == sh.get("place", "") and progress["done"].has("rite"):
 		var sd := shade()
@@ -485,6 +490,7 @@ func interact() -> void:
 		"post": _take_post()
 		"board": _read_board()
 		"shade": _visit_shade()
+		"smith": _smith()
 		"find": _pick_up()
 		"instructor": _talk_instructor(_target["id"])
 		"classmate": _talk_classmate(_target["c"])
@@ -651,9 +657,29 @@ func next_need() -> String:
 			if not lesson_done(lesson["id"]):
 				return "rest" if lesson.get("requires", {}).has("rested_after") and not rested_on(lesson["requires"]["rested_after"]) else ""
 		if not progress["done"].has("gate"):
+			if not gate_ready():
+				return "board"
 			return "gate" if rested_on("project") else "rest"
 		return ""
 	return ""
+
+## The Gate opens after the term's postings are done: ten, with one of each type the term has
+## posted (data/academy.json, gate.requires).
+func gate_ready() -> bool:
+	return gate_short() == 0 and gate_types_missing().is_empty()
+
+func gate_short() -> int:
+	var req: Dictionary = Data.academy["gate"].get("requires", {})
+	return maxi(0, int(req.get("postings", 0)) - progress.get("quests_done", []).size())
+
+func gate_types_missing() -> Array:
+	var req: Dictionary = Data.academy["gate"].get("requires", {})
+	if not req.get("eachType", false):
+		return []
+	var done_types := {}
+	for t in progress.get("quest_types_done", []):
+		done_types[t] = true
+	return progress.get("quest_types_seen", []).filter(func(t): return not done_types.has(t))
 
 func _rest_now() -> void:
 	var r: Dictionary = Data.academy["rest"]
@@ -706,6 +732,11 @@ func objective() -> String:
 			if progress["place"] == "gate":
 				return "Day %d · The Gate: speak to Instructor Varga on the platform." % day
 			return "Day %d · The Gate: the south door of the quad. Your cohort is gathering." % day
+		"board":
+			var n := gate_short()
+			var missing := gate_types_missing()
+			var kinds := ("" if missing.is_empty() else "  (still to do: %s)" % ", ".join(missing.map(func(t): return String(Data.quests["types"][t]["name"]).to_lower())))
+			return "Day %d · %s%s" % [day, String(Data.academy["gate"]["lines"].get("not_yet", "The Gate waits: {n} more posting{s}.")).replace("{n}", str(n)).replace("{s}", "" if n == 1 else "s"), kinds]
 		"rite":
 			if progress["place"] == "hearth":
 				return "Day %d · The rite: speak to Instructor Varga at the bowl." % day
@@ -940,6 +971,7 @@ func update(events: Array, dt: float) -> void:
 			"post": _prompt_label.text = "E   Take %s" % _post["label"]
 			"board": _prompt_label.text = "E   Read the board"
 			"shade": _prompt_label.text = "E   Speak with the shade"
+			"smith": _prompt_label.text = "E   The smith's bench"
 			"find": _prompt_label.text = "E   Pick up %s" % _lost_label
 			_: _prompt_label.text = "E   Talk to %s" % _target["name"]
 
@@ -993,6 +1025,7 @@ func auto_move() -> Vector2:
 		"rest": want_place = "dorm"
 		"rite": want_place = "hearth"
 		"gate": want_place = "gate"
+		"board": want_place = "quad"
 		_:
 			var nl := next_lesson()
 			want_place = nl["place"] if not nl.is_empty() else ""
@@ -1012,7 +1045,8 @@ func auto_move() -> Vector2:
 		if goal != Vector2.INF:
 			return _walk_or_act(goal, 2.2)
 	var quests_so_far := int(progress["record"].get("quests", 0)) + int(progress["record"].get("quests_lost", 0))
-	if auto_troubles and board_open() and progress.get("trouble", "") == "" and (progress.get("quest", {}) is Dictionary and progress.get("quest", {}).is_empty()) and (troubles_open().size() > 0 or (postings_open().size() > 0 and quests_so_far < auto_quest_cap)):
+	var term_needs_board := next_need() == "board"
+	if (auto_troubles or term_needs_board) and board_open() and progress.get("trouble", "") == "" and (progress.get("quest", {}) is Dictionary and progress.get("quest", {}).is_empty()) and (troubles_open().size() > 0 or (postings_open().size() > 0 and (quests_so_far < auto_quest_cap or term_needs_board))):
 		var bspec: Dictionary = place_spec("quad").get("board", {})
 		if place == "quad":
 			goal = Vector2(bspec["at"][0], bspec["at"][1])
@@ -2260,6 +2294,12 @@ func postings_for_day(day: int) -> Array:
 	var cp := crisis_posting(day, rng)
 	if not cp.is_empty():
 		out.append(cp)
+	if day == int(progress["day"]):
+		if not progress.has("quest_types_seen"):
+			progress["quest_types_seen"] = []
+		for q2 in out:
+			if not progress["quest_types_seen"].has(q2["type"]):
+				progress["quest_types_seen"].append(q2["type"])
 	return out
 
 func weekday_of(day: int) -> String:
@@ -2373,8 +2413,13 @@ func _finish_quest() -> void:
 		progress["quests_done"] = []
 	progress["quests_done"].append(p["id"])
 	progress["quest"] = {}
+	if not progress.has("quest_types_done"):
+		progress["quest_types_done"] = []
+	if not progress["quest_types_done"].has(p["type"]):
+		progress["quest_types_done"].append(p["type"])
 	var rec: Dictionary = progress["record"]
 	rec["quests"] = int(rec.get("quests", 0)) + 1
+	_gear_from_run(p)
 	rec["quests_" + String(p["type"])] = int(rec.get("quests_" + String(p["type"]), 0)) + 1
 	if not progress.has("writeup_extra"):
 		progress["writeup_extra"] = []
@@ -2671,6 +2716,73 @@ func reckoning() -> Dictionary:
 	hero["world"] = world_state
 	save()
 	return e
+
+# --- Gear: the yard's smith, named weapons, the Archive's fragments ---------------------------
+
+## Marks spent at the smith are kept apart from the record's Marks (ranks read the record).
+func marks_spendable() -> int:
+	return int(progress["record"].get("marks", 0)) - int(progress.get("marks_spent", 0))
+
+func weapon_name() -> String:
+	var g: Dictionary = hero.get("gear", {})
+	var w: Dictionary = Data.by_id(Data.weapons, hero.get("weapon", "saber"))
+	match String(g.get("tier", "plain")):
+		"fine": return "a fine %s" % String(w["name"]).to_lower()
+		"named": return String(g.get("name", w["name"]))
+	return String(w["name"])
+
+func _smith() -> void:
+	var sm: Dictionary = Data.gear["smith"]
+	var L: Dictionary = sm["lines"]
+	var g: Dictionary = hero.get("gear", { "tier": "plain" })
+	var cost := int(Data.gear["tiers"]["fine"].get("costMarks", 3))
+	var w: Dictionary = Data.by_id(Data.weapons, hero["weapon"])
+	progress["record"]["talks"] += 1
+	if String(g.get("tier", "plain")) != "plain":
+		say({ "name": sm["name"], "sub": sm["title"] }, [L["have"]])
+		return
+	say({ "name": sm["name"], "sub": sm["title"] }, [L["default"], String(L["offer"]).replace("{weapon}", String(w["name"]).to_lower()).replace("{cost}", str(cost))], func():
+		var opts: Array = [{ "id": "buy", "label": "A fine %s  ·  %d Marks" % [String(w["name"]).to_lower(), cost], "text": "%s\n[i]You have %d Marks to spend.[/i]" % [Data.gear["tiers"]["fine"].get("text", "It hits a tenth harder and it shows."), marks_spendable()] },
+			{ "id": "no", "label": "Not today", "text": "The bench will be here." }]
+		choose("The smith's bench", opts, func(id: String):
+			if id != "buy":
+				return
+			if marks_spendable() < cost:
+				say({ "name": sm["name"], "sub": sm["title"] }, [String(L["short"]).replace("{cost}", str(cost))])
+				return
+			progress["marks_spent"] = int(progress.get("marks_spent", 0)) + cost
+			hero["gear"] = { "tier": "fine", "name": "", "trait": "" }
+			progress["record"]["gear_bought"] = int(progress["record"].get("gear_bought", 0)) + 1
+			save()
+			go(progress["place"], true, "")
+			title_card("A FINE %s" % String(w["name"]).to_upper(), "it shows", Style.GOLD)
+			sfx.play("done")
+			say({ "name": sm["name"], "sub": sm["title"] }, [L["bought"]])))
+
+## What a run leaves in the hand: a Hunt's named beast gives the zone's named weapon; three
+## Salvage fragments make the Archive's own.
+func _gear_from_run(p: Dictionary) -> void:
+	var order := { "plain": 0, "fine": 1, "named": 2 }
+	var have := int(order.get(String(hero.get("gear", {}).get("tier", "plain")), 0))
+	var grant: Dictionary = {}
+	if p["type"] == "hunt" and Data.gear["named"].has(p["zone"]):
+		grant = Data.gear["named"][p["zone"]]
+	elif p["type"] == "salvage":
+		progress["fragments"] = int(progress.get("fragments", 0)) + 1
+		if int(progress["fragments"]) >= int(Data.gear["archive"].get("fragments", 3)):
+			progress["fragments"] = 0
+			grant = Data.gear["archive"]
+	if grant.is_empty():
+		return
+	progress["record"]["named_weapons"] = int(progress["record"].get("named_weapons", 0)) + 1
+	if have >= 2 and String(hero.get("gear", {}).get("name", "")) == grant["name"]:
+		return
+	hero["gear"] = { "tier": "named", "name": grant["name"], "trait": grant["trait"] }
+	if not progress.has("writeup_extra"):
+		progress["writeup_extra"] = []
+	progress["writeup_extra"].append("Carries %s, %s." % [grant["name"], grant.get("text", "")])
+	title_card(String(grant["name"]).to_upper(), "a named weapon: %s" % Data.gear["traits"][grant["trait"]]["text"], Style.GOLD)
+	sfx.play("done")
 
 # --- The hearth's shade ---------------------------------------------------------------
 

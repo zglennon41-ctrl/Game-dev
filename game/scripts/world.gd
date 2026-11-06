@@ -435,8 +435,16 @@ func _glow_weapon(hero: Dictionary) -> void:
 	for id in hero.get("technique_use", {}):
 		if int(hero["technique_use"][id]) >= top:
 			perfected += 1
-	var strength := minf(1.0, 0.35 * perfected)
+	var tier: Dictionary = Data.gear["tiers"].get(String(hero.get("gear", {}).get("tier", "plain")), {})
+	var strength := minf(1.0, 0.35 * perfected + float(tier.get("finish", 0.0)))
 	var col := _shape_color(hero.get("shape", "anchor"))
+	# A fine weapon takes a brass finish; a named one glows whether or not its model has a field material.
+	if float(tier.get("finish", 0.0)) > 0.0:
+		for m in _sword.find_children("*", "MeshInstance3D", true, false):
+			var mi2: MeshInstance3D = m
+			if mi2.material_overlay == null:
+				var ov := _mat(Color(1.0, 0.85, 0.5) if String(hero["gear"]["tier"]) == "fine" else col, 1.6 if String(hero["gear"]["tier"]) == "fine" else 2.2, true, 0.18 if String(hero["gear"]["tier"]) == "fine" else 0.3)
+				mi2.material_overlay = ov
 	for m in _sword.find_children("*", "MeshInstance3D", true, false):
 		var mi: MeshInstance3D = m
 		for i in mi.get_surface_override_material_count():

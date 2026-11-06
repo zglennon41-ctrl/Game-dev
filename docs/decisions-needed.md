@@ -245,3 +245,9 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
     weapon's field glows brighter for every technique perfected. More that could show:
     skin and hair (the KayKit heads are one texture each; new heads would need the people
     kit), a rank's trim at Commencement, the genius's colour on the cloak.
+
+**Resolved on 2026-11-07** (see HANDOFF §9): 61 (ten postings before the Gate, one of each
+type), 66–67 (one weapon at a time; gear tiers at the Academy: named from Hunts and the
+Archive, fine for Marks, no armour), 68 (one Discipline for life), 69 (the art steers by
+cel-shaded stylized high detail; the next people effort is open), and sound: the score
+first, then barks.

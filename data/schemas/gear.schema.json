@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "gear",
+  "type": "object",
+  "required": [
+    "tiers",
+    "traits",
+    "named",
+    "archive",
+    "smith"
+  ],
+  "properties": {
+    "tiers": {
+      "type": "object",
+      "required": [
+        "plain",
+        "fine",
+        "named"
+      ]
+    },
+    "named": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "name",
+          "trait"
+        ]
+      }
+    }
+  }
+}

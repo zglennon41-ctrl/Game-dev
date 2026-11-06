@@ -104,6 +104,14 @@ export function validateData(dir = 'data'): Problem[] {
     }
     if (!D('academy').instructors.some((i: { discipline?: string }) => i.discipline === d.id)) problems.push({ file: 'academy.json', message: `no instructor teaches ${d.id}` });
   }
+  const gear = D('gear');
+  for (const [z, n] of Object.entries(gear.named as Record<string, { trait: string }>)) {
+    if (!gear.traits[n.trait]) problems.push({ file: 'gear.json', message: `named weapon of ${z}: unknown trait ${n.trait}` });
+    if (!zones.some((zz: { id: string }) => zz.id === z)) problems.push({ file: 'gear.json', message: `named weapon for unknown zone ${z}` });
+  }
+  if (!gear.traits[gear.archive.trait]) problems.push({ file: 'gear.json', message: `the Archive's weapon has an unknown trait` });
+  need('gear.json', weaponIds, gear.smith.weapon, 'the smith\'s weapon');
+  for (const z of zones) if (!gear.named[z.id]) problems.push({ file: 'gear.json', message: `no named weapon for the zone ${z.id}` });
   const questTypes = new Set<string>(Object.keys(D('quests').types));
   for (const c of D('crises')) {
     for (const [k, l] of Object.entries(c.ledgers as Record<string, { serves: string[] }>)) for (const t of l.serves) if (!questTypes.has(t)) problems.push({ file: 'crises.json', message: `${c.id}: ledger ${k} served by unknown quest type ${t}` });
