@@ -719,7 +719,12 @@ func floater(at: Vector3, text: String, color: Color, size := 56, life := 0.9, r
 	l.outline_modulate = Color(0, 0, 0, 0.85)
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	l.no_depth_test = true
-	l.position = at + Vector3(randf_range(-0.25, 0.25), 0, 0)
+	# Several at once near the same spot stack upward instead of piling on one another.
+	var lift := 0.0
+	for f in _floaters:
+		if float(f["age"]) < 0.5 and (f["l"] as Node3D).position.distance_to(at) < 2.5:
+			lift += 0.45
+	l.position = at + Vector3(randf_range(-0.25, 0.25), lift, 0)
 	add_child(l)
 	_floaters.append({ "l": l, "age": 0.0, "life": life, "rise": rise })
 

@@ -214,12 +214,11 @@ func _ready() -> void:
 	play_ui.add_child(right)
 
 	# The ability bar.
-	bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	bar.add_theme_constant_override("separation", 8)
-	bar.position = Vector2(-((SLOT_W + 8) * SLOTS.size() - 8) / 2.0, -SLOT_H - 26)
 	for s in SLOTS:
 		bar.add_child(_slot(s))
 	play_ui.add_child(bar)
+	_place_bar(SLOTS.size())
 
 	Style.label(pattern_banner, 20, GOLD, "title", 5)
 	# Above the ability bar, clear of the gold ring at the hero's feet.
@@ -316,6 +315,19 @@ func _meter(b: ProgressBar, ghost: ProgressBar, text: Label, color: Color, h: in
 		holder.add_child(text)
 	return holder
 
+## The ability bar sits centred at the bottom; all four offsets are set so no layout pass can
+## leave it at the origin.
+func _place_bar(n: int) -> void:
+	var w := (SLOT_W + 8) * n - 8
+	bar.anchor_left = 0.5
+	bar.anchor_right = 0.5
+	bar.anchor_top = 1.0
+	bar.anchor_bottom = 1.0
+	bar.offset_left = -w / 2.0
+	bar.offset_right = w / 2.0
+	bar.offset_top = -SLOT_H - 26
+	bar.offset_bottom = -26
+
 func _slot(s: Array) -> PanelContainer:
 	var p := PanelContainer.new()
 	p.custom_minimum_size = Vector2(SLOT_W, SLOT_H)
@@ -382,7 +394,7 @@ func configure(f: Fight, hero_name: String) -> void:
 	for s in slots.values():
 		if (s["panel"] as PanelContainer).visible:
 			visible_n += 1
-	bar.position = Vector2(-((SLOT_W + 8) * visible_n - 8) / 2.0, -SLOT_H - 26)
+	_place_bar(visible_n)
 	_hero_name = hero_name if hero_name != "" else "Anchor"
 	_hero_sub = String(f.player_shape).capitalize()
 	_accent = World.SHAPE_COLORS.get(f.player_shape, Style.GOLD)
