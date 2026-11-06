@@ -160,10 +160,17 @@ var _screen := ""
 func _reveal() -> void:
 	var keep_name: String = hero.get("name", "")
 	var keep_body: String = hero.get("body_override", "")
+	var keep_weapon: String = hero.get("weapon_override", "")
+	var keep_look: Dictionary = hero.get("look", {})
 	hero = Creation.generate(answers, blood_choice, spark)
 	if keep_body != "":
 		hero["body"] = keep_body
 		hero["body_override"] = keep_body
+	if keep_weapon != "":
+		hero["weapon"] = keep_weapon
+		hero["weapon_override"] = keep_weapon
+	if not keep_look.is_empty():
+		hero["look"] = keep_look
 	if keep_name == "":
 		keep_name = Creation.name_for(hero["city"], spark)
 	hero["name"] = keep_name
@@ -234,8 +241,19 @@ func _reveal() -> void:
 	_line(v, "Because %s. (The rite at the Academy will read it, and may not agree.)" % ", ".join(hero["why"]["shape"]), DIM)
 	var w := Creation.weapon(hero["weapon"])
 	_section(v, "HOME AND WEAPON", "%s  ·  %s" % [String(hero["city"]).capitalize(), w["name"]])
-	_line(v, "%s The %s Discipline teaches it." % [w["text"], String(hero["discipline"]).capitalize()])
+	var wtype: Dictionary = Data.room["styles"].get(w["style"], {})
+	_line(v, "%s %s The %s Discipline teaches it." % [w["text"], wtype.get("text", ""), String(hero["discipline"]).capitalize()])
 	_line(v, "Because %s." % ", ".join(hero["why"]["city"] + hero["why"]["weapon"]), DIM)
+	# The city's other weapons, in the hand at once.
+	var wrow := HBoxContainer.new()
+	wrow.add_theme_constant_override("separation", 8)
+	v.add_child(wrow)
+	_text(wrow, "Or carry:", 15, DIM)
+	for cw in Data.weapons:
+		if cw["city"] != hero["city"]:
+			continue
+		var wid: String = cw["id"]
+		_chip(wrow, cw["name"], func(): hero["weapon_override"] = wid; hero["weapon"] = wid; changed.emit(hero); _reveal(), hero["weapon"] == wid)
 	# Technique and stance.
 	var kit: Dictionary = Data.kits[hero["shape"]]
 	_line(v, "Technique: [b]%s[/b]. %s" % [kit["technique"]["name"], kit["technique"]["text"]])
@@ -263,6 +281,22 @@ func _reveal() -> void:
 	for body in Data.creation["bodies"]:
 		var bid: String = body
 		_chip(bodies, bid.replace("_", " "), func(): hero["body_override"] = bid; hero["body"] = bid; changed.emit(hero); _reveal(), hero["body"] == bid)
+	# The look: what the body wears, and the cape's colour. It shows at once, on the left.
+	var look: Dictionary = hero.get("look", { "headgear": true, "cape": true, "cape_color": "shape" })
+	hero["look"] = look
+	_section(v, "LOOK", "")
+	var lrow := HBoxContainer.new()
+	lrow.add_theme_constant_override("separation", 8)
+	v.add_child(lrow)
+	_chip(lrow, "Headgear on", func(): look["headgear"] = not look["headgear"]; changed.emit(hero); _reveal(), look["headgear"])
+	_chip(lrow, "Cape on", func(): look["cape"] = not look["cape"]; changed.emit(hero); _reveal(), look["cape"])
+	var crow := HBoxContainer.new()
+	crow.add_theme_constant_override("separation", 8)
+	v.add_child(crow)
+	_text(crow, "Cape:", 15, DIM)
+	for cc in [["shape", "your Shape's colour"], ["city", "your city's colour"], ["blood", "your blood's colour"], ["plain", "plain cloth"]]:
+		var cid: String = cc[0]
+		_chip(crow, cc[1], func(): look["cape_color"] = cid; changed.emit(hero); _reveal(), look["cape_color"] == cid)
 	var end := HBoxContainer.new()
 	end.add_theme_constant_override("separation", 12)
 	v.add_child(end)

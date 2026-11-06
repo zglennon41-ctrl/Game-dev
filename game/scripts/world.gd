@@ -235,9 +235,14 @@ func build_hero(hero: Dictionary) -> void:
 		_player.queue_free()
 	_player = load(_person_model(hero.get("body", "Knight"))).instantiate()
 	add_child(_player)
+	var look: Dictionary = hero.get("look", { "headgear": true, "cape": true, "cape_color": "shape" })
 	for a in _player.find_children("*", "BoneAttachment3D", true, false):
 		var n := String(a.name)
-		a.visible = n.contains("Helmet") or n.contains("Hat") or n.contains("Cape") or n.contains("Hood")
+		var head := n.contains("Helmet") or n.contains("Hat") or n.contains("Hood")
+		var cape := n.contains("Cape")
+		a.visible = (head and look.get("headgear", true)) or (cape and look.get("cape", true))
+		if cape:
+			_tint_cape(a, hero, String(look.get("cape_color", "shape")))
 	var skel: Skeleton3D = _player.find_child("Skeleton3D", true, false)
 	var w: Dictionary = Data.by_id(Data.weapons, hero.get("weapon", "saber"))
 	_sword = _attach(skel, "handslot.r", _weapon_model(w["model"]))
@@ -265,6 +270,7 @@ func build_hero(hero: Dictionary) -> void:
 	_player.add_child(_aura)
 	_dress_blood(skel, hero.get("blood", ""))
 	_measure_weapon()
+	_glow_weapon(hero)
 	_p_skel = skel
 	_head_bone = skel.find_bone("head")
 	_tint_genius(_shape_color(hero.get("shape", "anchor")))
@@ -397,6 +403,56 @@ func set_foe(spec: Dictionary) -> void:
 		m.material_overlay = _overlay_wolf
 	_w_current = ""
 	_w_oneshot_until = 0.0
+
+const CITY_COLORS := { "columbia": Color(0.2, 0.35, 0.75), "cahokia": Color(0.25, 0.55, 0.5), "lunden": Color(0.55, 0.55, 0.6), "colonia": Color(0.7, 0.45, 0.2),
+	"tiber": Color(0.7, 0.15, 0.15), "khemet": Color(0.15, 0.4, 0.2), "baghdad": Color(0.2, 0.5, 0.7), "varanasi": Color(0.85, 0.5, 0.15), "jiangnan": Color(0.5, 0.15, 0.3),
+	"kazan": Color(0.45, 0.3, 0.15), "timbuktu": Color(0.75, 0.6, 0.25), "edo": Color(0.15, 0.15, 0.2) }
+
+## The cape takes a colour: the Shape's, the city's, the blood's, or plain cloth.
+func _tint_cape(att: Node, hero: Dictionary, which: String) -> void:
+	var col := Color(0.5, 0.42, 0.36)
+	match which:
+		"shape": col = _shape_color(hero.get("shape", "anchor")).darkened(0.25)
+		"city": col = CITY_COLORS.get(hero.get("city", "columbia"), col)
+		"blood":
+			var b: Dictionary = Data.by_id(Data.bloods, hero["blood"]) if hero.get("blood", "") != "" else {}
+			col = Color(0.35, 0.1, 0.12) if b.is_empty() else Color(0.25, 0.12, 0.14).lerp(_shape_color(String(b.get("shapeLean", {}).keys()[0]) if not b.get("shapeLean", {}).is_empty() else "anchor"), 0.5)
+		"plain": col = Color(0.5, 0.42, 0.36)
+	for m in att.find_children("*", "MeshInstance3D", true, false):
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = col
+		mat.roughness = 0.9
+		(m as MeshInstance3D).material_override = mat
+
+## Mastery shows on the weapon: every perfected technique makes the field in it glow brighter.
+func _glow_weapon(hero: Dictionary) -> void:
+	if not _sword:
+		return
+	var grades: Array = Data.academy.get("mastery", {}).get("grades", [])
+	var top := int(grades[grades.size() - 1]["uses"]) if not grades.is_empty() else 999999
+	var perfected := 0
+	for id in hero.get("technique_use", {}):
+		if int(hero["technique_use"][id]) >= top:
+			perfected += 1
+	var strength := minf(1.0, 0.35 * perfected)
+	var col := _shape_color(hero.get("shape", "anchor"))
+	for m in _sword.find_children("*", "MeshInstance3D", true, false):
+		var mi: MeshInstance3D = m
+		for i in mi.get_surface_override_material_count():
+			var mat := mi.get_active_material(i)
+			if mat and String(mat.resource_name).begins_with("field"):
+				var g := StandardMaterial3D.new()
+				g.albedo_color = col.darkened(0.3)
+				g.emission_enabled = true
+				g.emission = col
+				g.emission_energy_multiplier = 0.4 + 2.6 * strength
+				mi.set_surface_override_material(i, g)
+	if perfected > 0:
+		var lamp := OmniLight3D.new()
+		lamp.light_color = col
+		lamp.light_energy = 0.6 * strength
+		lamp.omni_range = 2.5
+		_sword.add_child(lamp)
 
 ## A weapon's model: the weapon kit's when it exists, else KayKit's of that name.
 func _weapon_model(model: String) -> String:

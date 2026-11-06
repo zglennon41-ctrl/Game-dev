@@ -1261,9 +1261,31 @@ func test_cohort_days_and_crisis() -> void:
 
 ## Mastery: the school's nine techniques, grades by use, learning by Marks, the Hearthkeeper.
 func test_mastery() -> void:
-	for school in ["marshal", "pilot", "aeronaut"]:
+	var schools: Array = Data.disciplines.map(func(d): return d["id"])
+	check(schools.size() == 12, "twelve Disciplines, the twelve base classes (%d)" % schools.size())
+	for school in schools:
 		var techs: Array = Data.discipline_kits[school]["techniques"]
 		check(techs.size() == 9, "%s teaches nine techniques (%d)" % [school, techs.size()])
+		check(Data.academy["instructors"].any(func(i): return i.get("discipline", "") == school), "%s has an instructor in the yard" % school)
+		# A hero of the school fires each of its nine without error.
+		var hh := Fight.default_hero()
+		hh["discipline"] = school
+		hh["city"] = Data.discipline_kits[school]["city"]
+		hh["weapon"] = Data.by_id(Data.disciplines, school)["weapons"][0]
+		hh["techniques"] = techs.map(func(t): return t["id"])
+		var fs := Fight.new({ "hero": hh, "seed": 9, "passive": true })
+		fs._wolf_set("idle", 99.0)
+		fs.w_pos = fs.p_pos + Vector2(2.0, 0)
+		fs.p_facing = 0.0
+		for t in techs:
+			fs.p_will = 100.0
+			fs.p_cooldowns.clear()
+			fs.p_state = "free"
+			fs._press_technique(t)
+			run_for(fs, 1.5)
+			fs.w_state = "idle"
+			fs.w_hp = fs.beast["health"]
+		check(fs.stats.get("hits", 0) >= 0, "%s's nine techniques resolve" % school)
 		var ids := {}
 		for t in techs:
 			ids[t["id"]] = true

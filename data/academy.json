@@ -195,6 +195,78 @@
             -4.5
           ],
           "discipline": "aeronaut"
+        },
+        {
+          "id": "engineer-master",
+          "at": [
+            6,
+            -4.5
+          ],
+          "discipline": "engineer"
+        },
+        {
+          "id": "legionary-master",
+          "at": [
+            6,
+            -4.5
+          ],
+          "discipline": "legionary"
+        },
+        {
+          "id": "grower-master",
+          "at": [
+            6,
+            -4.5
+          ],
+          "discipline": "grower"
+        },
+        {
+          "id": "geometer-master",
+          "at": [
+            6,
+            -4.5
+          ],
+          "discipline": "geometer"
+        },
+        {
+          "id": "ascetic-master",
+          "at": [
+            6,
+            -4.5
+          ],
+          "discipline": "ascetic"
+        },
+        {
+          "id": "examiner-master",
+          "at": [
+            6,
+            -4.5
+          ],
+          "discipline": "examiner"
+        },
+        {
+          "id": "rider-master",
+          "at": [
+            6,
+            -4.5
+          ],
+          "discipline": "rider"
+        },
+        {
+          "id": "archivist-master",
+          "at": [
+            6,
+            -4.5
+          ],
+          "discipline": "archivist"
+        },
+        {
+          "id": "blade-master",
+          "at": [
+            6,
+            -4.5
+          ],
+          "discipline": "blade"
         }
       ]
     },
@@ -501,6 +573,132 @@
       "lines": {
         "default": "The hearth is lit. Sit when you want your Pattern looked at; a Pattern is not a thing you write once.",
         "before:discipline": "Come back when you have a school. A Pattern wants a hand to fire it."
+      }
+    },
+    {
+      "id": "engineer-master",
+      "name": "Foreman Ilse Brandt",
+      "title": "Engineer · Colonia's school",
+      "shape": "make",
+      "body": "Barbarian",
+      "weapon": "hammer",
+      "discipline": "engineer",
+      "lines": {
+        "before:discipline": "Colonia's. Good: I am Brandt. An Engineer's field runs in pipes, and the first thing you learn is the gauge. Pick what you will hit with.",
+        "after:discipline": "You hold pressure. The works will take you on a Writ when you have a post to your name.",
+        "default": "The works are open to Colonia's own. The rest of you, mind the steam."
+      }
+    },
+    {
+      "id": "legionary-master",
+      "name": "Centurion Lucan Petra",
+      "title": "Legionary · Tiber's school",
+      "shape": "anchor",
+      "body": "Knight",
+      "weapon": "shield",
+      "discipline": "legionary",
+      "lines": {
+        "before:discipline": "Tiber. Then you know what a line is. I am Petra. A Legionary's field is held three beats at a time, with the person beside you. Weapon first.",
+        "after:discipline": "You held with the line. Tiber will hear of it.",
+        "default": "Tiber's own, fall in. Others, keep behind the shields."
+      }
+    },
+    {
+      "id": "grower-master",
+      "name": "Keeper Neferet Ode",
+      "title": "Grower · Khemet's school",
+      "shape": "make",
+      "body": "Mage",
+      "weapon": "ward-staff",
+      "discipline": "grower",
+      "lines": {
+        "before:discipline": "Khemet's fields sent you. I am Ode. A Grower's field is planted, not thrown: the ward first, the thorns after. Choose your tool.",
+        "after:discipline": "You plant well. The black fields will have you back.",
+        "default": "Khemet's own, come to the ward. Others, do not step on the seedlings."
+      }
+    },
+    {
+      "id": "geometer-master",
+      "name": "Master Idris Fahd",
+      "title": "Geometer · Baghdad's school",
+      "shape": "read",
+      "body": "Mage",
+      "weapon": "astrolabe",
+      "discipline": "geometer",
+      "lines": {
+        "before:discipline": "Baghdad. You have measured things before, then. I am Fahd. A Geometer's field is a figure: drawn, bisected, solved. Choose the instrument.",
+        "after:discipline": "The figure closed. Baghdad will want it written up.",
+        "default": "Baghdad's own, bring your instruments. Others, you are in the margin."
+      }
+    },
+    {
+      "id": "ascetic-master",
+      "name": "Elder Asha Rai",
+      "title": "Ascetic · Varanasi's school",
+      "shape": "anchor",
+      "body": "Rogue_Hooded",
+      "weapon": "unarmed",
+      "discipline": "ascetic",
+      "lines": {
+        "before:discipline": "From the steps. Sit, then; I am Rai. An Ascetic's field is the breath, and the body its only instrument. Choose how the body strikes.",
+        "after:discipline": "You held the breath. The night in Still is yours when you want it.",
+        "default": "Varanasi's own, breathe. Others, be quiet; it is the same lesson."
+      }
+    },
+    {
+      "id": "examiner-master",
+      "name": "Examiner Lin Shu",
+      "title": "Examiner · Jiangnan's school",
+      "shape": "bind",
+      "body": "Mage",
+      "weapon": "fan",
+      "discipline": "examiner",
+      "lines": {
+        "before:discipline": "Jiangnan sent a candidate. I am Lin. An Examiner's field is a sentence: written, sealed, read aloud. Choose what you write with.",
+        "after:discipline": "The sentence stands. Your examination will be set.",
+        "default": "Jiangnan's own, present your papers. Others, the hall is closed."
+      }
+    },
+    {
+      "id": "rider-master",
+      "name": "Khan's Rider Aigul Bek",
+      "title": "Rider · Kazan's school",
+      "shape": "cast",
+      "body": "Rogue",
+      "weapon": "horse-bow",
+      "discipline": "rider",
+      "lines": {
+        "before:discipline": "Steppe-born. Then you can sit a charge. I am Bek. A Rider's field carries you the way a horse would, and the bow is loosed at the gallop. Choose.",
+        "after:discipline": "You ride well on foot; on a beast you will ride better.",
+        "default": "Kazan's own, mount up. Others, out of the way of the wheel."
+      }
+    },
+    {
+      "id": "archivist-master",
+      "name": "Librarian Sekou Diallo",
+      "title": "Archivist · Timbuktu's school",
+      "shape": "read",
+      "body": "Rogue_Hooded",
+      "weapon": "book",
+      "discipline": "archivist",
+      "lines": {
+        "before:discipline": "From the library. I am Diallo. An Archivist's field is written down, annotated, and where it must be, erased. Choose the instrument of record.",
+        "after:discipline": "Filed. Timbuktu will canonize what you found.",
+        "default": "Timbuktu's own, to the shelves. Others, quiet in the reading room."
+      }
+    },
+    {
+      "id": "blade-master",
+      "name": "Master Hana Mori",
+      "title": "Blade · Edo's school",
+      "shape": "turn",
+      "body": "Knight",
+      "weapon": "katana",
+      "discipline": "blade",
+      "lines": {
+        "before:discipline": "Edo. Then the draw is already in your hands. I am Mori. A Blade's field is the beat; the cut is made on it or not at all. Choose the steel.",
+        "after:discipline": "The draw was on the beat. The duel will be yours when you want it.",
+        "default": "Edo's own, draw. Others, watch the beat."
       }
     }
   ],

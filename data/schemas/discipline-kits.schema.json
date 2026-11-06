@@ -3,9 +3,18 @@
   "title": "discipline-kits",
   "type": "object",
   "required": [
+    "aeronaut",
+    "archivist",
+    "ascetic",
+    "blade",
+    "engineer",
+    "examiner",
+    "geometer",
+    "grower",
+    "legionary",
     "marshal",
     "pilot",
-    "aeronaut"
+    "rider"
   ],
   "additionalProperties": {
     "anyOf": [

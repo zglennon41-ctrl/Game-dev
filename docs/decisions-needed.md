@@ -228,3 +228,20 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
     rig are placeholders in the right shape, made here in Blender. Whether the final look
     comes from refining these in Blender or from your own tools' renders dropped in by name
     is your call; both paths keep the names.
+66. **Twelve weapon types** (`data/combat-room.json`, "styles", mine; `docs/weapons.md`):
+    the movesets, the magazines (pistol 6, musket 2, scatter 2), the reload times (1.6 /
+    2.4 / 2.2 s), the bow's draw (1.1 s, 7 to 21 damage), the staff's wider parry window, the
+    maul's break. All numbers to be played; the twelve names are a proposal.
+67. **Thirty-six weapons, three a city** (`data/weapons.json`): the ids follow
+    `data/disciplines.json`; the names and words are mine (a geometer's astrolabe drawn
+    like a bow, an archivist's iron-bound ledger). Whether some cities should carry four is
+    yours.
+68. **The nine new Disciplines' kits** (`data/discipline-kits.json`): eighty-one techniques
+    named and numbered by me on the eleven effects the fight knows, nine instructors in the
+    yard with their lines, and the twelve cities offered at the first question of the
+    creator with names for each. The twelve Disciplines are the twelve base classes.
+69. **The look** (creation, "LOOK"): headgear on or off, the cape on or off and its colour
+    (the Shape's, the city's, the blood's, plain); the city's three weapons to carry; the
+    weapon's field glows brighter for every technique perfected. More that could show:
+    skin and hair (the KayKit heads are one texture each; new heads would need the people
+    kit), a rank's trim at Commencement, the genius's colour on the cloak.

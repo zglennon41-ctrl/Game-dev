@@ -87,6 +87,23 @@ export function validateData(dir = 'data'): Problem[] {
   for (const q of D('creation').questions) for (const an of q.answers) for (const st of Object.keys(an.style ?? {})) if (!styleIds.has(st)) problems.push({ file: 'creation.json', message: `${q.id}: unknown weapon type ${st}` });
   for (const ins of D('academy').instructors) if (ins.weapon) need('academy.json', weaponIds, ins.weapon, `weapon of instructor ${ins.id}`);
   for (const st of styleIds) if (!D('academy').cohort.fighting.weapons[st]) problems.push({ file: 'academy.json', message: `cohort.fighting.weapons has no entry for ${st}` });
+  // Every Discipline has a kit of nine techniques whose effects the fight knows, with the keys each reads.
+  const effectKeys: Record<string, string[]> = { heavy: ['damage', 'reach', 'arc'], burst: ['damage', 'reach', 'arc', 'burnSeconds'], dash: ['damage', 'reach', 'arc', 'dash'],
+    tether: ['damage', 'range', 'slowSeconds', 'slow'], ward: ['wardSeconds', 'damage', 'reach', 'arc'], volley: ['damage', 'range'], mark: ['range', 'markSeconds', 'markFactor'],
+    finisher: ['damage', 'range'], sound: ['range', 'slowSeconds', 'slow'], pull: ['damage', 'range', 'pullTo'], quake: ['damage', 'reach', 'arc'], 'bolt-crit': ['damage', 'range', 'critSeconds'] };
+  const kitsAll = D('discipline-kits');
+  for (const d of D('disciplines')) {
+    const kit = kitsAll[d.id];
+    if (!kit || typeof kit !== 'object') { problems.push({ file: 'discipline-kits.json', message: `no kit for ${d.id}` }); continue; }
+    if (kit.techniques.length !== 9) problems.push({ file: 'discipline-kits.json', message: `${d.id}: ${kit.techniques.length} techniques, not nine` });
+    const tids = new Set<string>(kit.techniques.map((t: { id: string }) => t.id));
+    for (const t of d.techniques) if (!tids.has(t)) problems.push({ file: 'disciplines.json', message: `${d.id}: taught technique ${t} is not in its kit` });
+    for (const t of kit.techniques) {
+      if (!effectKeys[t.effect]) problems.push({ file: 'discipline-kits.json', message: `${d.id}: ${t.id} has an effect the fight does not know (${t.effect})` });
+      else for (const key of effectKeys[t.effect]) if (t[key] === undefined) problems.push({ file: 'discipline-kits.json', message: `${d.id}: ${t.id} (${t.effect}) lacks ${key}` });
+    }
+    if (!D('academy').instructors.some((i: { discipline?: string }) => i.discipline === d.id)) problems.push({ file: 'academy.json', message: `no instructor teaches ${d.id}` });
+  }
   const questTypes = new Set<string>(Object.keys(D('quests').types));
   for (const c of D('crises')) {
     for (const [k, l] of Object.entries(c.ledgers as Record<string, { serves: string[] }>)) for (const t of l.serves) if (!questTypes.has(t)) problems.push({ file: 'crises.json', message: `${c.id}: ledger ${k} served by unknown quest type ${t}` });
