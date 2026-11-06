@@ -32,11 +32,28 @@ Then **the Academy at Alexandria**, a term of play that ends with a settled char
   Warden's den, extraction. No one dies: the rescue team carries the fallen out.
 - **Lesson 6, Project**: the field opened past the skin, and the Field Examination with it
   open: Stage 3.
-- **The Gate**: your genius's Second Form read from how you played, the cohort's write-up of
-  you, Commencement.
+- **The Gate**: your genius's Second Form read from how you played, the Reckoning of the
+  season's crisis, the cohort's write-up of you, Commencement.
 
-Between lessons, talk to anyone (E), rest in the dormitory, and press J for your genius's
-page. **Practice yard** lets your character fight cut-wolves at any time; the art for every
+And between the lessons, the term itself (`docs/academy-board.md`, `docs/zones.md`):
+
+- **The board** in the quad: your classmates' troubles, and from Lesson 5 three to five
+  postings a day (Linework, Salvage, Hunt, Escort, Writ, the Deep Run, the Friday Rally)
+  into four zones around Alexandria: the Green hills, the Shenandoah ruin, Harper's Cut
+  junction and the Cahokia river line, each with its own beasts, its pack and its named
+  beast that remembers. Marks for every one done.
+- **The crisis of the Dark Mile**: rumours, then Ledgers that every posting weighs, then
+  the Reckoning at the Gate that writes the world your server will know.
+- **Your cohort**: twelve classmates with their own days (the yard, the quad, the hearth;
+  out on runs of their own; the infirmary when carried out) who fight on their own beside
+  you: their own targets, techniques, Patterns, parries, and a retreat when hurt.
+- **Mastery**: nine techniques a school (one more from your school's instructor in the yard
+  for every three Marks; three set for your hand), grades by use, and the Hearthkeeper at
+  the hearth who sits you down with your Pattern.
+
+Between it all, talk to anyone (E), rest in the dormitory (the day turns and the board
+changes), press J for your genius's page, H for the step's words again, and Esc for the
+term so far. **Practice yard** lets your character fight cut-wolves at any time; the art for every
 genius is built by `tools/blender/genius_kit.py` (see `docs/art-bible.md`).
 
 | Keyboard and mouse | Gamepad | Verb |
@@ -51,7 +68,8 @@ genius is built by `tools/blender/genius_kit.py` (see `docs/art-bible.md`).
 | R | B | your Pattern (when its Trigger is met) |
 | N | D-pad up | name the foe aloud (some Patterns need it) |
 | Tab, middle click | R3 | lock-on on or off; locked on with a pack about, passes the lock to the next of them |
-| Esc | Start | menu |
+| Esc | Start | the term so far (the Academy), or the menu |
+| H | | the step's words again |
 | E | X | talk, open a door, rest (at the Academy) |
 | G | D-pad left | your genius's order: Guard or Hunt |
 | J | Back | your genius's page |

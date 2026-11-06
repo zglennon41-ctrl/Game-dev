@@ -205,3 +205,26 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
     graft); Marks and the Journeyman archetype; the record (parries, bouts, posts, runs,
     troubles, rumours heard, the shade's acceptance); the cohort's write-up; the declaration
     (a guild joined, a founding promised with two named classmates, or free).
+61. **The board's pay and pace** (`data/quests.json`, mine): three to five postings a day;
+    Linework, Salvage and Escort pay 1 Mark on the Green and 2 on Amber, Hunt and Writ one
+    more, the Deep Run 3 and 4, the Rally 1; a Hunt's named beast has 240 seconds; a Writ's
+    clock is 200 seconds a step. A classmate takes a posting with you about a third of the
+    time. Whether a lost posting should cost anything beyond its Marks is yours.
+62. **The crisis's weights and endings** (`data/crises.json`, mine): Green 1, Amber 3, the
+    crisis's own postings threefold, a Writ's decision 2; the heaviest Ledger with a quarter
+    of the weight wins, else the mile is abandoned. The three endings' words and what they
+    write onto the character (the line, the house, the lamps, Enoch Vane) are placeholders
+    in the right shape.
+63. **The cohort's days** (`data/academy.json`, cohort.schedule, mine): haunts by temperament
+    and weekday; two classmates out on runs of their own each day; two days in the infirmary
+    for one carried out. Their fighting styles (cohort.fighting): aggression, caution, parry
+    and block by temperament; a Pattern once a fight below half. All numbers to be played.
+64. **Mastery's pace** (`data/academy.json`, mastery, mine): one more technique for every
+    three Marks, up to the school's nine; practiced at twelve uses, perfected at thirty-six
+    (+6% / +14% damage, cooldowns 0.9 / 0.8). The eighteen new techniques' names and numbers
+    are mine.
+65. **The art kits** (`tools/blender/wild_kit.py`, `beast_kit.py`, `people_kit.py`): the
+    outdoor pieces, the six beasts on the wolf's rig and the people reshaped on the KayKit
+    rig are placeholders in the right shape, made here in Blender. Whether the final look
+    comes from refining these in Blender or from your own tools' renders dropped in by name
+    is your call; both paths keep the names.

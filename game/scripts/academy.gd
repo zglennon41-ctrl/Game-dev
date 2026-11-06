@@ -1005,7 +1005,8 @@ func auto_move() -> Vector2:
 					goal = Vector2(d["at"][0], d["at"][1]) * 0.86
 		if goal != Vector2.INF:
 			return _walk_or_act(goal, 2.2)
-	if auto_troubles and board_open() and progress.get("trouble", "") == "" and (progress.get("quest", {}) is Dictionary and progress.get("quest", {}).is_empty()) and (troubles_open().size() > 0 or postings_open().size() > 0):
+	var quests_so_far := int(progress["record"].get("quests", 0)) + int(progress["record"].get("quests_lost", 0))
+	if auto_troubles and board_open() and progress.get("trouble", "") == "" and (progress.get("quest", {}) is Dictionary and progress.get("quest", {}).is_empty()) and (troubles_open().size() > 0 or (postings_open().size() > 0 and quests_so_far < auto_quest_cap)):
 		var bspec: Dictionary = place_spec("quad").get("board", {})
 		if place == "quad":
 			goal = Vector2(bspec["at"][0], bspec["at"][1])
@@ -2019,6 +2020,7 @@ func settled_sheet() -> void:
 # --- The board: classmates' troubles ---------------------------------------------------
 
 var auto_troubles := false
+var auto_quest_cap := 4   # the autopilot takes this many postings, then gets on with the term
 var _lost_at := Vector2.INF
 var _lost_label := ""
 
