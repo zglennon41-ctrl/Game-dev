@@ -253,9 +253,13 @@ func go(place_id: String, quiet := false, from := "") -> void:
 		fight.beast["modelScale"] = float(fight.beast.get("modelScale", 1.0)) * float(named.get("scale", 1.2))
 		fight.w_named = true
 	if not zone.is_empty() and in_lesson() and _lesson.has("passenger"):
-		var ps: Dictionary = _lesson["passenger"]
-		fight.allies.append({ "id": ps["id"], "name": ps["name"], "shape": ps["shape"], "body": ps["body"], "weapon": ps["weapon"], "hp": 70.0, "hp_max": 70.0,
-			"pos": spawn + Vector2(-1.6, 0.0), "facing": 0.0, "down": false, "hit_at": 0.0, "damage": 0.0, "interval": 9.0, "moving": false, "passenger": true })
+		var ps: Dictionary = _lesson["passenger"].duplicate()
+		ps["temperament"] = "scared"
+		var pa := Fight.make_ally(ps, spawn + Vector2(-1.6, 0.0))
+		pa["hp"] = 70.0
+		pa["hp_max"] = 70.0
+		pa["passenger"] = true
+		fight.allies.append(pa)
 	if _carrying:
 		_apply_carry()
 	fight.p_pos = spawn
@@ -485,6 +489,13 @@ func _use_door(d: Dictionary) -> void:
 		return
 	var from: String = progress["place"]
 	if d["to"] == "extraction":
+		# The car only leaves when the run says so: the extraction step, or no run at all.
+		if in_lesson() and _step_goal_type() != "extract":
+			say("", ["Not yet. %s" % objective()])
+			return
+		if not in_lesson():
+			say("", ["The car is not here for you tonight."])
+			return
 		_extract()
 		return
 	go(d["to"], false, from)
@@ -831,6 +842,12 @@ func auto_move() -> Vector2:
 				for d in _doors:
 					if d["to"] == "extraction":
 						goal = Vector2(d["at"][0], d["at"][1]) * 0.86
+				if goal == Vector2.INF:
+					# No way out here: back through an open door toward an area that has one.
+					for d in _doors:
+						if door_open(d) and Zones.is_zone(String(d["to"])) and _leads_out(String(d["to"]), 4):
+							goal = Vector2(d["at"][0], d["at"][1]) * 0.86
+							break
 			elif gt == "find" and _lost_at != Vector2.INF:
 				goal = _lost_at
 			elif gt == "talk":
@@ -924,6 +941,19 @@ func _walk_or_act(goal: Vector2, reach: float) -> Vector2:
 	if dist < 0.35:
 		return Vector2.ZERO
 	return _steer((goal - fight.p_pos).normalized())
+
+## Does a zone area reach extraction within a few doors?
+func _leads_out(pid: String, depth: int) -> bool:
+	if depth <= 0 or not Zones.is_zone(pid):
+		return false
+	var area: Dictionary = Zones.area_of(Zones.zone_of(pid), pid.split("/")[1])
+	for d in area["doors"]:
+		if d["to"] == "extraction":
+			return true
+	for d in area["doors"]:
+		if d["to"] != "extraction" and _leads_out("%s/%s" % [Zones.zone_of(pid), d["to"]], depth - 1):
+			return true
+	return false
 
 ## Walk round what is in the way: a pillar, a brazier, a person.
 func _steer(dir: Vector2) -> Vector2:
@@ -1091,8 +1121,7 @@ func _next_step() -> void:
 		# The poster walks beside you.
 		fight.allies = []
 		var c: Dictionary = _lesson["poster"]
-		fight.allies.append({ "id": c["id"], "name": c["name"], "shape": c["shape"], "body": c["body"], "weapon": c["weapon"], "hp": 90.0, "hp_max": 90.0,
-			"pos": fight.p_pos + Vector2(-1.2, 1.2), "facing": 0.0, "down": false, "hit_at": 0.0, "damage": 0.0, "interval": 9.0, "moving": false })
+		fight.allies.append(Fight.make_ally(c, fight.p_pos + Vector2(-1.2, 1.2)))
 		world.set_allies(fight.allies)
 	if setup.get("spar", false):
 		_spar_mode = "poster" if str(setup["spar"]) == "poster" else ("instructor" if str(setup["spar"]) == "instructor" else "cohort")
@@ -1147,7 +1176,7 @@ func _next_step() -> void:
 			world.build_hero(hero)
 			_drill_fight()
 			_choice_done = true)
-	hud.set_prompt("%d/%d · %s" % [_step + 1, steps.size(), fill(s["title"])], fill(s["text"]))
+	hud.set_prompt("%d/%d · %s" % [_step + 1, steps.size(), fill(s["title"])], fill(String(s.get("text", ""))))
 	hud.set_prompt_status("", _progress_text(s))
 
 func _progress_text(s: Dictionary) -> String:

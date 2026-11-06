@@ -149,6 +149,14 @@
             ],
             "label": "the Hollow",
             "side": true
+          },
+          {
+            "to": "extraction",
+            "at": [
+              -13,
+              0
+            ],
+            "label": "the car, back down the line"
           }
         ]
       },
@@ -222,6 +230,14 @@
             "label": "the Den",
             "locked": "Hold the post first.",
             "opensWhen": "cleared"
+          },
+          {
+            "to": "extraction",
+            "at": [
+              -9,
+              0
+            ],
+            "label": "the line back"
           }
         ]
       },

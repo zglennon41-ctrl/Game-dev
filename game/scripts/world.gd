@@ -933,7 +933,7 @@ func feedback(f: Fight, events: Array) -> void:
 			"order":
 				floater(P + Vector3(0, 0.3, 0), "ORDER: %s" % String(e["order"]).to_upper(), _g_tint.lightened(0.3), 44, 1.0)
 				genius_react("cue")
-			"ally-hit", "ally-hurt", "ally-down", "ally-up":
+			"ally-hit", "ally-hurt", "ally-down", "ally-up", "ally-windup", "ally-pattern", "ally-parry", "ally-block", "ally-retreat", "ally-shot", "ally-miss":
 				_ally_event(f, e)
 			"foe-spawn", "foe-windup", "foe-strike", "foe-hit", "foe-down", "foe-stagger", "retarget":
 				_pack_event(f, e)
@@ -2322,14 +2322,56 @@ func _ally_event(f: Fight, e: Dictionary) -> void:
 	var a: Dictionary = _ally_nodes[i]
 	var ap: AnimationPlayer = a["anim"]
 	var at := _v3(f.allies[i]["pos"], 1.2)
+	var col: Color = SHAPE_COLORS.get(f.allies[i].get("shape", "anchor"), Color(0.8, 0.9, 1.0))
 	match String(e["type"]):
+		"ally-windup":
+			ap.play("2H_Melee_Attack_Chop" if e.get("technique", false) else "1H_Melee_Attack_Slice_Horizontal", 0.05)
+			ap.speed_scale = 0.6
+			a["cur"] = "windup"
+			a["until"] = _clock + 0.6
+			if e.get("technique", false):
+				_ring_wave(_v3(f.allies[i]["pos"]), Color(col, 0.6), 1.6)
 		"ally-hit":
-			ap.play("1H_Melee_Attack_Slice_Horizontal", 0.05)
+			if a["cur"] != "windup":
+				ap.play("1H_Melee_Attack_Slice_Horizontal", 0.05)
+			ap.speed_scale = 1.6
 			a["cur"] = "attack"
-			a["until"] = _clock + 0.5
+			a["until"] = _clock + 0.4
 			var fp := _foe_pos(f, int(e.get("foe", -1)))
-			impact(_v3(fp, 0.9), Color(0.8, 0.9, 1.0), 0.5)
-			floater(_v3(fp, 1.8) + Vector3(-0.4, 0.3, 0), "%d" % int(e["damage"]), Color(0.75, 0.85, 1.0), 40, 0.7)
+			var heavy: bool = e.get("heavy", false)
+			var patt: bool = e.get("pattern", false)
+			impact(_v3(fp, 0.9), C_GOLD if patt else (col if heavy else Color(0.8, 0.9, 1.0)), 1.2 if patt else (0.8 if heavy else 0.5))
+			if heavy or patt:
+				burst(_v3(fp, 0.9), C_GOLD if patt else col, 30 if patt else 14, 7.0 if patt else 5.0)
+			floater(_v3(fp, 1.8) + Vector3(-0.4, 0.3, 0), "%d" % int(e["damage"]), C_GOLD if patt else (col.lightened(0.3) if heavy else Color(0.75, 0.85, 1.0)), 64 if patt else (48 if heavy else 40), 0.8)
+		"ally-pattern":
+			floater(at + Vector3(0, 1.0, 0), "%s  ·  %s" % [String(f.allies[i]["name"]).to_upper(), String(e["name"]).to_upper()], C_GOLD, 52, 1.4)
+			_ring_wave(_v3(f.allies[i]["pos"]), C_GOLD, 3.5)
+			burst(at, C_GOLD, 40, 6.0)
+			ap.play("2H_Melee_Attack_Spin", 0.05)
+			a["cur"] = "pattern"
+			a["until"] = _clock + 1.1
+		"ally-parry":
+			ap.play("Block_Hit", 0.05)
+			a["cur"] = "parry"
+			a["until"] = _clock + 0.5
+			floater(at + Vector3(0, 0.5, 0), "PARRY", C_GUARD, 56, 0.9)
+			burst(at, C_GUARD, 24, 6.0)
+			impact(at, C_GUARD, 0.9)
+		"ally-block":
+			ap.play("Block_Hit", 0.05)
+			a["cur"] = "block"
+			a["until"] = _clock + 0.4
+			floater(at + Vector3(0, 0.4, 0), "BLOCKED", C_GUARD, 40, 0.7)
+		"ally-retreat":
+			floater(at + Vector3(0, 0.8, 0), "%s FALLS BACK" % String(f.allies[i]["name"]).to_upper(), C_WINDUP, 44, 1.2)
+		"ally-shot":
+			ap.play("1H_Ranged_Shoot", 0.05)
+			a["cur"] = "shot"
+			a["until"] = _clock + 0.4
+			_tracer(_v3(e["from"], 1.3), _v3(e["to"], 1.0), e["hit"])
+		"ally-miss":
+			pass
 		"ally-hurt":
 			ap.play("Hit_A", 0.05)
 			a["cur"] = "hurt"

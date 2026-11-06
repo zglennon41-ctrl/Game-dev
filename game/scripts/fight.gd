@@ -153,9 +153,7 @@ func _init(opts: Dictionary = {}) -> void:
 	stage = int(hero.get("stage", 2))
 	p_field_open = stage >= 3 or hero.get("projected", false)
 	for c in opts.get("allies", []):
-		allies.append({ "id": c.get("id", ""), "name": c.get("name", "Classmate"), "shape": c.get("shape", "anchor"), "body": c.get("body", "Knight"),
-			"weapon": c.get("weapon", "saber"), "hp": 90.0, "hp_max": 90.0, "pos": p_pos + Vector2(-1.5, 1.5 * (1 if allies.is_empty() else -1)),
-			"facing": 0.0, "down": false, "hit_at": 0.0, "damage": 7.0, "interval": 1.9, "moving": false })
+		allies.append(make_ally(c, p_pos + Vector2(-1.5, 1.5 * (1 if allies.is_empty() else -1))))
 	var gn: Variant = opts.get("genius", null)
 	if gn is Genius and (gn as Genius).is_born():
 		genius = gn
@@ -1110,7 +1108,7 @@ func _update_wolf(dt: float) -> void:
 					for i in allies.size():
 						if not allies[i]["down"] and mouth.distance_to(allies[i]["pos"]) <= 1.3:
 							w_hit_done = true
-							_hurt_ally(i, float(w_attack["damage"]))
+							_hurt_ally(i, float(w_attack["damage"]), -1)
 							break
 			if w_timer >= w_duration:
 				if not w_hit_done:
@@ -1136,50 +1134,268 @@ func _update_wolf(dt: float) -> void:
 
 ## Classmates beside you: they keep to your flanks, strike the foe when it is near, and take
 ## the bites meant for them. Down, they stay down until the post.
+# ===================================================================== the cohort's own fighting
+# A classmate beside you fights on their own (data/academy.json, cohort.fighting): they pick
+# a foe (the one hunting them, else, by how much they help, the one you are locked on to,
+# else the nearest), close, circle for as long as their temperament lets them, strike with
+# their weapon's reach, spend Will on their Shape's technique every few strikes, fire their
+# Pattern once a fight when their foe is below half, turn a bite aimed at them with a parry
+# or a block by their temperament, and fall back when they are hurt.
+
+static func make_ally(c: Dictionary, at: Vector2) -> Dictionary:
+	var F: Dictionary = Data.academy["cohort"].get("fighting", {})
+	var style: Dictionary = F.get("styles", {}).get(c.get("temperament", "earnest"), { "aggression": 0.5, "caution": 0.5, "parry": 0.25, "block": 0.4, "help": 0.7 })
+	var wid: String = c.get("weapon", "saber")
+	var wstyle := "blade"
+	for w in Data.weapons:
+		if w["id"] == wid:
+			wstyle = w["style"]
+	var weapon: Dictionary = F.get("weapons", {}).get(wstyle, { "reach": 2.0, "damage": 8, "windup": 0.28, "recover": 0.55 })
+	var shape: String = c.get("shape", "anchor")
+	var kit: Dictionary = Data.kits.get(shape, Data.kits["anchor"])
+	var forms: Dictionary = kit["forms"]
+	var fid: String = forms.keys()[0]
+	return { "id": c.get("id", ""), "name": c.get("name", "Classmate"), "shape": shape, "body": c.get("body", "Knight"), "weapon": wid,
+		"hp": float(F.get("health", 90)), "hp_max": float(F.get("health", 90)), "pos": at, "facing": 0.0, "down": false, "hit_at": 0.0,
+		"damage": float(weapon["damage"]), "interval": 1.9, "moving": false,
+		"style": style, "reach": float(weapon["reach"]), "ranged": weapon.get("ranged", false), "windup": float(weapon["windup"]), "recover": float(weapon["recover"]),
+		"technique": kit["technique"], "pattern": { "name": forms[fid]["name"], "form": fid, "terms": [Data.academy.get("cohort", {}).get("patterns", {}).get("trigger", "below-half")] },
+		"state": "ease", "timer": 0.0, "duration": 0.0, "target": -2, "will": float(F.get("will", 60)), "strikes": 0, "pattern_used": false,
+		"side": 1.0, "retreat_until": -1.0, "next_strike_at": 0.0 }
+
+## Where a foe is: the locked one (-1) or one of the pack; INF if it is not standing.
+func _threat_pos(idx: int) -> Vector2:
+	if idx == -1:
+		return w_pos if w_state not in ["down", "absent"] else Vector2.INF
+	if idx >= 0 and idx < foes.size() and (foes[idx] as Foe).alive():
+		return (foes[idx] as Foe).pos
+	return Vector2.INF
+
+func _threat_hp_ratio(idx: int) -> float:
+	if idx == -1:
+		return w_hp / maxf(1.0, float(beast["health"]))
+	var fo: Foe = foes[idx]
+	return fo.hp / maxf(1.0, float(fo.beast["health"]))
+
+## Is this foe winding up at this ally?
+func _threat_aims_at(idx: int, ally: int) -> bool:
+	if idx == -1:
+		return w_state == "windup" and w_target == ally
+	var fo: Foe = foes[idx]
+	return fo.state == "windup" and fo.target == ally
+
+func _ally_pick_target(i: int) -> int:
+	var al: Dictionary = allies[i]
+	var style: Dictionary = al["style"]
+	var best := -2
+	var best_score := -INF
+	var idxs: Array = [-1]
+	for j in foes.size():
+		idxs.append(j)
+	for idx in idxs:
+		var tp := _threat_pos(idx)
+		if tp == Vector2.INF:
+			continue
+		var d: float = tp.distance_to(al["pos"])
+		if d > 16.0:
+			continue
+		var score := -d
+		if _threat_aims_at(idx, i) or (idx == -1 and w_target == i) or (idx >= 0 and (foes[idx] as Foe).target == i):
+			score += 8.0
+		if idx == -1 and p_lock:
+			score += 6.0 * float(style["help"])
+		if score > best_score:
+			best_score = score
+			best = idx
+	return best
+
 func _update_allies(dt: float) -> void:
-	var foe_up := w_state not in ["down", "absent"]
+	var F: Dictionary = Data.academy["cohort"].get("fighting", {})
+	var speed := float(F.get("speed", 5.2))
 	for i in allies.size():
 		var al: Dictionary = allies[i]
 		if al["down"]:
 			continue
-		var side := 1.0 if i % 2 == 0 else -1.0
-		var want: Vector2
-		if foe_up:
-			var to_w := (w_pos - p_pos).normalized() if dist() > 0.1 else Vector2.RIGHT
-			want = w_pos - to_w.rotated(side * 1.1) * 2.0
+		if not al.has("state"):
+			continue
+		al["timer"] = float(al["timer"]) + dt
+		al["will"] = minf(float(F.get("will", 60)), float(al["will"]) + float(F.get("willRegen", 4.0)) * dt)
+		var style: Dictionary = al["style"]
+		var side := float(al["side"]) * (1.0 if i % 2 == 0 else -1.0)
+		# The target: keep it while it stands, else choose.
+		if _threat_pos(int(al["target"])) == Vector2.INF or (int(al["target"]) == -2):
+			al["target"] = _ally_pick_target(i)
+		var tgt := int(al["target"])
+		var tp := _threat_pos(tgt)
+		var reach := float(al["reach"])
+		# Hurt past their nerve: fall back toward the hero for a while.
+		var nerve := float(al["hp_max"]) * (0.15 + 0.35 * float(style["caution"]))
+		if tp != Vector2.INF and float(al["hp"]) < nerve and al["state"] not in ["retreat", "pattern", "guard"] and (float(al["retreat_until"]) < 0.0 or now > float(al["retreat_until"]) + 6.0):
+			al["state"] = "retreat"
+			al["timer"] = 0.0
+			al["retreat_until"] = now + float(F.get("retreatSeconds", 3.0))
+			_emit({ "type": "ally-retreat", "who": i })
+		# A bite coming at them: a parry or a block, by temperament, decided as the wind-up ends.
+		if tp != Vector2.INF and _threat_aims_at(tgt, i) and al["state"] in ["approach", "circle", "recover", "ease"]:
+			var left := (w_duration - w_timer) if tgt == -1 else ((foes[tgt] as Foe).duration - (foes[tgt] as Foe).timer)
+			if left < 0.3:
+				var r := rng.randf()
+				if r < float(style["parry"]):
+					al["state"] = "parry"
+					al["timer"] = 0.0
+				elif r < float(style["parry"]) + float(style["block"]):
+					al["state"] = "block"
+					al["timer"] = 0.0
+		var want := Vector2.INF
+		var facing_target := tp != Vector2.INF
+		match String(al["state"]):
+			"ease":
+				# At ease: ahead of the hero on either side, never behind where the camera sits.
+				want = p_pos + Vector2.from_angle(p_facing).rotated(side * 0.85) * 2.3
+				facing_target = false
+				if tp != Vector2.INF:
+					al["state"] = "approach"
+					al["timer"] = 0.0
+			"approach", "circle":
+				if tp == Vector2.INF:
+					al["state"] = "ease"
+				else:
+					var standoff := reach * (0.85 if not al["ranged"] else 0.8)
+					var dist_t: float = al["pos"].distance_to(tp)
+					if String(al["state"]) == "approach":
+						want = tp + (al["pos"] - tp).normalized() * standoff if dist_t > 0.1 else tp
+						if dist_t <= standoff + 0.4:
+							al["state"] = "circle"
+					else:
+						var ang := _angle_to(tp, al["pos"]) + side * 1.2 * dt
+						want = tp + Vector2.from_angle(ang) * standoff
+						if dist_t > reach * 1.6:
+							al["state"] = "approach"
+					if dist_t <= reach + 0.3 and now >= float(al["next_strike_at"]):
+						al["strikes"] = int(al["strikes"]) + 1
+						var tech: Dictionary = al["technique"]
+						var use_tech: bool = int(al["strikes"]) % int(F.get("techniqueEvery", 3)) == 0 and float(al["will"]) >= float(tech.get("will", 18))
+						var below_half := _threat_hp_ratio(tgt) < 0.5
+						if below_half and not al["pattern_used"] and float(al["will"]) >= float(F.get("patternWill", 30)):
+							al["state"] = "pattern"
+							al["timer"] = 0.0
+							al["duration"] = 1.1
+							al["pattern_used"] = true
+							al["will"] = float(al["will"]) - float(F.get("patternWill", 30))
+							_emit({ "type": "ally-pattern", "who": i, "name": al["pattern"]["name"], "form": al["pattern"]["form"], "foe": tgt })
+							if genius:
+								genius.witness(al["pattern"])
+						else:
+							al["state"] = "technique" if use_tech else "windup"
+							al["timer"] = 0.0
+							al["duration"] = float(al["windup"]) * (1.3 if use_tech else 1.0)
+							if use_tech:
+								al["will"] = float(al["will"]) - float(tech.get("will", 18))
+							_emit({ "type": "ally-windup", "who": i, "technique": use_tech })
+						al["next_strike_at"] = now + float(al["recover"]) + lerpf(1.5, 0.35, float(style["aggression"])) * rng.randf_range(0.7, 1.3)
+			"windup", "technique":
+				want = al["pos"]
+				if float(al["timer"]) >= float(al["duration"]):
+					var tech := String(al["state"]) == "technique"
+					var dmg := float(al["damage"]) * (float(F.get("techniqueDamage", 2.2)) if tech else 1.0)
+					_ally_strike(i, tgt, dmg, tech)
+					al["state"] = "recover"
+					al["timer"] = 0.0
+					al["duration"] = float(al["recover"]) * (1.4 if tech else 1.0)
+			"pattern":
+				want = al["pos"]
+				if float(al["timer"]) >= float(al["duration"]):
+					_ally_strike(i, tgt, float(al["damage"]) * float(F.get("patternDamage", 5.0)), true, true)
+					al["state"] = "recover"
+					al["timer"] = 0.0
+					al["duration"] = 0.8
+			"recover":
+				want = al["pos"]
+				if float(al["timer"]) >= float(al["duration"]):
+					al["state"] = "approach"
+					al["side"] = -1.0 if rng.randf() < 0.3 else 1.0
+			"parry", "block":
+				want = al["pos"]
+				if float(al["timer"]) >= 0.7:
+					al["state"] = "approach"
+			"retreat":
+				var away: Vector2 = (al["pos"] - tp).normalized() if tp != Vector2.INF and al["pos"].distance_to(tp) > 0.1 else Vector2.from_angle(p_facing + PI)
+				want = p_pos + away * 3.5
+				facing_target = true
+				if now >= float(al["retreat_until"]):
+					al["state"] = "approach" if float(al["hp"]) >= nerve * 0.8 else "guard"
+			"guard":
+				# Hurt and staying back: beside the hero, blocking what comes.
+				want = p_pos + Vector2.from_angle(p_facing).rotated(side * 1.6) * 1.8
+				if tp == Vector2.INF or float(al["hp"]) > nerve * 1.5:
+					al["state"] = "ease"
+		# Walk there.
+		if want != Vector2.INF:
+			var d: Vector2 = want - al["pos"]
+			var step := speed * dt * (0.8 if String(al["state"]) == "circle" else 1.0)
+			al["moving"] = d.length() > 0.3 and String(al["state"]) not in ["windup", "technique", "pattern", "recover", "parry", "block"]
+			if al["moving"]:
+				al["pos"] = _clamp_in(al["pos"] + (d.normalized() * minf(step, d.length())))
 		else:
-			# At ease: ahead of the hero on either side, never behind where the camera sits.
-			want = p_pos + Vector2.from_angle(p_facing).rotated(side * 0.85) * 2.3
-		var d: Vector2 = want - al["pos"]
-		var step := 5.2 * dt
-		al["moving"] = d.length() > 0.3
-		if d.length() > step:
-			al["pos"] = _clamp_in(al["pos"] + d.normalized() * step)
-		else:
-			al["pos"] = _clamp_in(want)
-		al["facing"] = _angle_to(al["pos"], w_pos) if foe_up else p_facing
-		if foe_up and now >= float(al["hit_at"]) and al["pos"].distance_to(w_pos) < 2.4:
-			al["hit_at"] = now + float(al["interval"]) * rng.randf_range(0.85, 1.15)
-			var dmg := float(al["damage"])
-			if w_state == "stagger":
-				dmg = roundf(dmg * float(room["break"]["staggerDamageFactor"]))
-			w_hp = maxf(w_floor, w_hp - dmg)
-			stats["damage_dealt"] += dmg
-			_emit({ "type": "ally-hit", "who": i, "damage": dmg })
-			if w_hp == 0.0:
-				_fell_wolf()
-		elif now >= float(al["hit_at"]):
-			# Or one of the pack beside them.
-			for j in foes.size():
-				var fo: Foe = foes[j]
-				if fo.alive() and al["pos"].distance_to(fo.pos) < 2.4:
-					al["hit_at"] = now + float(al["interval"]) * rng.randf_range(0.85, 1.15)
-					_damage_other(j, float(al["damage"]), false)
-					_emit({ "type": "ally-hit", "who": i, "damage": float(al["damage"]), "foe": j })
-					break
+			al["moving"] = false
+		al["facing"] = _angle_to(al["pos"], tp) if facing_target and tp != Vector2.INF else (p_facing if String(al["state"]) == "ease" else al["facing"])
+		# Not on top of each other or the hero.
+		for k in allies.size():
+			if k != i and not allies[k]["down"]:
+				var dd: float = al["pos"].distance_to(allies[k]["pos"])
+				if dd < 1.1 and dd > 1e-4:
+					al["pos"] = _clamp_in(allies[k]["pos"] + (al["pos"] - allies[k]["pos"]) / dd * 1.1)
+		var dp: float = al["pos"].distance_to(p_pos)
+		if dp < 1.0 and dp > 1e-4:
+			al["pos"] = _clamp_in(p_pos + (al["pos"] - p_pos) / dp * 1.0)
 
-func _hurt_ally(i: int, dmg: float) -> void:
+## A classmate's blow lands on their foe if it is in reach (a shot if they are ranged).
+func _ally_strike(i: int, tgt: int, dmg: float, heavy: bool, pattern := false) -> void:
 	var al: Dictionary = allies[i]
+	var tp := _threat_pos(tgt)
+	if tp == Vector2.INF:
+		return
+	var in_reach: bool = al["pos"].distance_to(tp) <= float(al["reach"]) + 0.8
+	if al["ranged"]:
+		_emit({ "type": "ally-shot", "who": i, "from": al["pos"], "to": tp, "hit": in_reach })
+	if not in_reach:
+		_emit({ "type": "ally-miss", "who": i })
+		return
+	if tgt == -1:
+		if w_state == "stagger":
+			dmg = roundf(dmg * float(room["break"]["staggerDamageFactor"]))
+		w_hp = maxf(w_floor, w_hp - dmg)
+		stats["damage_dealt"] += dmg
+		_emit({ "type": "ally-hit", "who": i, "damage": dmg, "heavy": heavy, "pattern": pattern })
+		if heavy and w_state in ["prowl", "approach", "recover", "idle"] and not pattern:
+			_wolf_set("flinch", float(beast.get("flinchTime", 0.3)))
+		if pattern and w_state not in ["down", "absent"]:
+			_wolf_set("stagger", float(room["break"]["staggerSeconds"]) * 0.6)
+			_emit({ "type": "stagger", "seconds": float(room["break"]["staggerSeconds"]) * 0.6, "cause": "ally-pattern" })
+		if w_hp == 0.0:
+			_fell_wolf()
+	else:
+		_damage_other(tgt, dmg, heavy)
+		_emit({ "type": "ally-hit", "who": i, "damage": dmg, "foe": tgt, "heavy": heavy, "pattern": pattern })
+
+## A bite at a classmate: turned if they were parrying (the foe staggers), softened if they
+## were blocking, else it lands.
+func _hurt_ally(i: int, dmg: float, from_idx := -1) -> void:
+	var al: Dictionary = allies[i]
+	match String(al.get("state", "")):
+		"parry":
+			_emit({ "type": "ally-parry", "who": i, "foe": from_idx })
+			stats["ally_parries"] = int(stats.get("ally_parries", 0)) + 1
+			if from_idx == -1:
+				_wolf_set("stagger", float(room["break"]["staggerSeconds"]) * 0.5)
+				_emit({ "type": "stagger", "seconds": float(room["break"]["staggerSeconds"]) * 0.5, "cause": "ally-parry" })
+			elif from_idx < foes.size():
+				(foes[from_idx] as Foe).set_state("stagger", float(room["break"]["staggerSeconds"]) * 0.5)
+				_emit({ "type": "foe-stagger", "foe": from_idx })
+			return
+		"block":
+			dmg = roundf(dmg * 0.3)
+			_emit({ "type": "ally-block", "who": i, "damage": dmg })
 	al["hp"] = maxf(0.0, float(al["hp"]) - dmg)
 	_emit({ "type": "ally-hurt", "who": i, "damage": dmg })
 	if al["hp"] == 0.0:
@@ -1195,6 +1411,8 @@ func allies_recover() -> void:
 			_emit({ "type": "ally-up", "who": i })
 		al["down"] = false
 		al["hp"] = al["hp_max"]
+		al["pattern_used"] = false
+		al["state"] = "ease"
 	p_hp = float(room["player"]["health"])
 
 func allies_standing() -> int:
@@ -1406,7 +1624,7 @@ func _update_others(dt: float) -> void:
 						for k in allies.size():
 							if not allies[k]["down"] and mouth.distance_to(allies[k]["pos"]) <= 1.3:
 								fo.hit_done = true
-								_hurt_ally(k, float(fo.attack["damage"]))
+								_hurt_ally(k, float(fo.attack["damage"]), i)
 								break
 				if fo.timer >= fo.duration:
 					fo.set_state("recover", float(fo.attack["recover"]))

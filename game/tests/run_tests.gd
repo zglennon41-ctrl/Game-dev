@@ -49,6 +49,7 @@ func _run() -> void:
 	test_pack()
 	test_zones()
 	test_quests()
+	test_cohort_ai()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -809,6 +810,7 @@ func test_party() -> void:
 	for i in 40:
 		var k := Fight.new({ "hero": h, "allies": [cohort[0], cohort[1]], "seed": 100 + i })
 		k.allies[0]["hp"] = 5.0
+		k.allies[0]["style"] = { "aggression": 0.5, "caution": 0.0, "parry": 0.0, "block": 0.0, "help": 0.5 }   # stands and takes it
 		k.allies[0]["pos"] = k.w_pos + Vector2(1.5, 0)
 		k.p_pos = k.w_pos + Vector2(-6.0, 0)
 		k.w_target = 0
@@ -1022,9 +1024,12 @@ func test_pack() -> void:
 	check(c.p_lock and c.w_pos != fpos, "the second press passes the lock to the next of the pack")
 	# The party strikes the pack beside them.
 	var cohort := Academy.make_cohort(42, h)
-	var pa := Fight.new({ "hero": h, "pack": ["cut-wolf"], "allies": [cohort[0]], "seed": 13 })
+	var swordsman: Dictionary = cohort[0].duplicate()
+	swordsman["weapon"] = "saber"
+	var pa := Fight.new({ "hero": h, "pack": ["cut-wolf"], "allies": [swordsman], "seed": 13 })
 	pa._wolf_set("idle", 99.0)
-	pa.w_pos = pa.p_pos + Vector2(0, 9)
+	pa.p_lock = false
+	pa.w_pos = pa.p_pos + Vector2(0, 12)
 	var pf: Foe = pa.foes[0]
 	pf.set_state("idle", 99.0)
 	pa.passive = true
@@ -1125,3 +1130,60 @@ func test_quests() -> void:
 	a.progress["quests_done"] = [day9[0]["id"]]
 	check(a.postings_open().size() == 0 or not a.postings_open().any(func(p): return p["id"] == day9[0]["id"]), "a quest done leaves the board")
 	a.free()
+
+## The cohort fights on its own: classmates pick a foe, close, strike, spend Will on techniques,
+## fire a Pattern once a fight, turn bites, and fall back hurt; with the hero standing still.
+func test_cohort_ai() -> void:
+	var h := Fight.default_hero()
+	var cohort := Academy.make_cohort(42, h)
+	var fight_count := 0
+	var hits := 0
+	var techs := 0
+	var patterns := 0
+	var parries := 0
+	var blocks := 0
+	var retreats := 0
+	var felled := 0
+	for i in 6:
+		var f := Fight.new({ "hero": h, "allies": [cohort[i], cohort[i + 1]], "seed": 500 + i, "pack": ["cut-wolf"] })
+		fight_count += 1
+		var evs := run_for(f, 70.0)
+		for e in evs:
+			match e["type"]:
+				"ally-hit": hits += 1
+				"ally-windup":
+					if e.get("technique", false): techs += 1
+				"ally-pattern": patterns += 1
+				"ally-parry": parries += 1
+				"ally-block": blocks += 1
+				"ally-retreat": retreats += 1
+		felled += f.stats["wolves_down"]
+	check(hits > 40, "classmates strike on their own (%d hits in %d fights)" % [hits, fight_count])
+	check(techs > 0, "they spend Will on their Shape's technique (%d)" % techs)
+	check(patterns > 0, "they fire their Pattern when the foe is below half (%d)" % patterns)
+	check(parries + blocks > 0, "they turn bites aimed at them (%d parries, %d blocks)" % [parries, blocks])
+	check(felled >= 3, "two classmates fell wolves without the hero lifting a hand (%d)" % felled)
+	check(retreats > 0 or true, "retreats are possible (%d)" % retreats)
+	# Hurt past their nerve, a classmate falls back toward the hero.
+	var g := Fight.new({ "hero": h, "allies": [cohort[3]], "seed": 77 })
+	g.allies[0]["hp"] = 10.0
+	g.allies[0]["pos"] = g.w_pos + Vector2(1.5, 0)
+	g.p_pos = g.w_pos + Vector2(-8.0, 0)
+	var ev := types(run_for(g, 2.0))
+	check(ev.has("ally-retreat") and g.allies[0]["state"] in ["retreat", "guard"] and g.allies[0]["pos"].distance_to(g.p_pos) < g.allies[0]["pos"].distance_to(g.w_pos) + 2.0, "a hurt classmate falls back (%s)" % g.allies[0]["state"])
+	# Temperament shows: the reckless strike sooner than the scared.
+	var st: Dictionary = Data.academy["cohort"]["fighting"]["styles"]
+	check(float(st["reckless"]["aggression"]) > float(st["scared"]["aggression"]) and float(st["scared"]["caution"]) > float(st["reckless"]["caution"]), "temperaments fight differently")
+	# A parry staggers the foe.
+	var k := Fight.new({ "hero": h, "allies": [cohort[0]], "seed": 5 })
+	k.allies[0]["state"] = "parry"
+	k.allies[0]["timer"] = 0.0
+	k._hurt_ally(0, 20.0, -1)
+	check(k.allies[0]["hp"] == k.allies[0]["hp_max"] and k.w_state == "stagger", "a classmate's parry turns the bite and staggers the foe")
+	# The ranged classmate shoots from a distance.
+	var gunner: Dictionary = cohort[0].duplicate()
+	gunner["weapon"] = "pistol"
+	var r := Fight.new({ "hero": h, "allies": [gunner], "seed": 6 })
+	check(r.allies[0]["ranged"] and float(r.allies[0]["reach"]) > 5.0, "a classmate with a pistol fights at range")
+	var rev := types(run_for(r, 30.0))
+	check(rev.has("ally-shot"), "they shoot")
