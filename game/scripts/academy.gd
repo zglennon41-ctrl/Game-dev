@@ -214,6 +214,10 @@ func place_spec(id: String) -> Dictionary:
 func go(place_id: String, quiet := false, from := "") -> void:
 	var spec: Dictionary = place_spec(place_id)
 	progress["place"] = place_id
+	# The shade stays at its hearth.
+	if _shade_node:
+		_shade_node.queue_free()
+		_shade_node = null
 	world.open_doors = {}
 	for d in spec["doors"]:
 		if door_open(d):
