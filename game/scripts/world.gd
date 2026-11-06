@@ -2525,6 +2525,12 @@ func _ally_event(f: Fight, e: Dictionary) -> void:
 	var ap: AnimationPlayer = a["anim"]
 	var at := _v3(f.allies[i]["pos"], 1.2)
 	var col: Color = SHAPE_COLORS.get(f.allies[i].get("shape", "anchor"), Color(0.8, 0.9, 1.0))
+	# Until the voices exist, a classmate's call shows as words over their head.
+	var calls: Dictionary = Data.academy["cohort"].get("fighting", {}).get("calls", {})
+	var call_kind := { "ally-windup": "technique" if e.get("technique", false) else "", "ally-pattern": "pattern", "ally-parry": "parry", "ally-retreat": "retreat", "ally-down": "down" }.get(String(e["type"]), "")
+	if call_kind != "" and calls.has(call_kind) and randf() < 0.6:
+		var lines: Array = calls[call_kind]
+		floater(at + Vector3(0, 1.3, 0), "\"%s\"" % String(lines[randi() % lines.size()]), Color(0.9, 0.9, 0.85), 34, 1.3, 0.5)
 	match String(e["type"]):
 		"ally-windup":
 			ap.play("2H_Melee_Attack_Chop" if e.get("technique", false) else "1H_Melee_Attack_Slice_Horizontal", 0.05)

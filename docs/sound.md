@@ -12,9 +12,10 @@ lasts. `python3 tools/score/compose.py --ogg` renders them all (ffmpeg writes th
 **The barks** (`game/assets/voice/<temperament>_<kind>_<n>.ogg`, kinds: technique, hurt,
 retreat, down, pattern, parry): a classmate speaks for the moment in their temperament's
 voice; `Sfx.play_bark` picks one of up to four takes and will not speak twice within two
-seconds. The lines are in `data/academy.json` (`cohort.fighting.calls`); the clips are made
-by `tools/score/barks.py` when a speech synthesizer is available here, and nothing plays
-until they exist.
+seconds. The lines are in `data/academy.json` (`cohort.fighting.calls`). This environment has no
+speech synthesizer and the voice-model hosts are blocked, so no clips exist yet; until
+they do, a classmate's call shows as words over their head in the fight. The clips can be
+made with any synthesizer outside and dropped in by name.
 
 **The effects** (`game/scripts/sfx.gd`): synthesized at start; the ambience is the halls' hum
 or the line's wind.
