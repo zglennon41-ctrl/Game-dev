@@ -157,7 +157,7 @@
     }
   },
   "styles": {
-    "$comment": "The twelve weapon types (docs/weapons.md). kind melee: a combo of swings (reach in metres, arc in degrees, startup/active/recovery in seconds; knockback pushes; burnSeconds bleeds). kind ranged: one shot, a magazine (ammo; 0 is a quiver that never empties), a reload (seconds and the animation), and for bows a draw (hold to draw: damage from min to max over seconds; the bow looses on its own a little after full draw). cone: the shot hits everything in its arc. guard: the parry window is this many times wider. Every weapon in data/weapons.json names one of these.",
+    "$comment": "The twelve weapon types (docs/weapons.md). kind melee: a combo of swings (reach in metres, arc in degrees, startup/active/recovery in seconds; knockback pushes; burnSeconds bleeds). kind ranged: one shot, a magazine (ammo; 0 is a quiver that never empties), a reload (seconds and the animation), and for bows a draw (hold to draw: damage from min to max over seconds; the bow looses on its own a little after full draw). cone: the shot hits everything in its arc. guard: the parry window is this many times wider. Every weapon in data/weapons.json names one of these. quickGuard: a block cuts a swing short at any point, not only in its recovery.",
     "blade": {
       "kind": "melee",
       "hands": 1,
@@ -236,7 +236,7 @@
           "lunge": 0.9,
           "reach": 2.5,
           "arc": 300,
-          "knockback": 1.2
+          "knockback": 1.0
         }
       ]
     },
@@ -248,8 +248,8 @@
         {
           "name": "Chop",
           "anim": "1H_Melee_Attack_Chop",
-          "damage": 11,
-          "startup": 0.2,
+          "damage": 13,
+          "startup": 0.18,
           "active": 0.12,
           "recovery": 0.36,
           "lunge": 0.7,
@@ -259,10 +259,10 @@
         {
           "name": "Backhand",
           "anim": "1H_Melee_Attack_Slice_Horizontal",
-          "damage": 12,
-          "startup": 0.18,
+          "damage": 14,
+          "startup": 0.16,
           "active": 0.12,
-          "recovery": 0.34,
+          "recovery": 0.3,
           "lunge": 0.6,
           "reach": 1.9,
           "arc": 140
@@ -270,8 +270,8 @@
         {
           "name": "Cleave",
           "anim": "2H_Melee_Attack_Chop",
-          "damage": 20,
-          "startup": 0.3,
+          "damage": 24,
+          "startup": 0.28,
           "active": 0.14,
           "recovery": 0.56,
           "lunge": 0.9,
@@ -285,54 +285,55 @@
       "kind": "melee",
       "hands": 2,
       "paired": true,
-      "text": "Two short blades: four fast cuts, the last leaves a bleed.",
+      "text": "Two short blades: four fast cuts, the last leaves a bleed; a block cuts any swing short.",
       "combo": [
         {
           "name": "Left",
           "anim": "1H_Melee_Attack_Slice_Diagonal",
-          "damage": 6,
+          "damage": 7,
           "startup": 0.12,
           "active": 0.1,
-          "recovery": 0.22,
+          "recovery": 0.2,
           "lunge": 0.5,
-          "reach": 1.6,
+          "reach": 1.8,
           "arc": 100
         },
         {
           "name": "Right",
           "anim": "1H_Melee_Attack_Slice_Horizontal",
-          "damage": 6,
+          "damage": 7,
           "startup": 0.12,
           "active": 0.1,
-          "recovery": 0.22,
+          "recovery": 0.2,
           "lunge": 0.5,
-          "reach": 1.6,
+          "reach": 1.8,
           "arc": 100
         },
         {
           "name": "Cross",
           "anim": "1H_Melee_Attack_Chop",
-          "damage": 7,
+          "damage": 8,
           "startup": 0.14,
           "active": 0.1,
-          "recovery": 0.24,
+          "recovery": 0.22,
           "lunge": 0.6,
-          "reach": 1.6,
+          "reach": 1.8,
           "arc": 110
         },
         {
           "name": "Twist",
           "anim": "2H_Melee_Attack_Spin",
-          "damage": 10,
+          "damage": 12,
           "startup": 0.18,
           "active": 0.14,
-          "recovery": 0.44,
+          "recovery": 0.4,
           "lunge": 0.8,
           "reach": 1.8,
           "arc": 220,
           "burnSeconds": 3.0
         }
-      ]
+      ],
+      "quickGuard": true
     },
     "spear": {
       "kind": "melee",
@@ -383,8 +384,8 @@
         {
           "name": "Reach",
           "anim": "2H_Melee_Attack_Stab",
-          "damage": 8,
-          "startup": 0.2,
+          "damage": 11,
+          "startup": 0.18,
           "active": 0.12,
           "recovery": 0.32,
           "lunge": 0.3,
@@ -394,8 +395,8 @@
         {
           "name": "Rake",
           "anim": "2H_Melee_Attack_Slice",
-          "damage": 10,
-          "startup": 0.22,
+          "damage": 14,
+          "startup": 0.2,
           "active": 0.12,
           "recovery": 0.38,
           "lunge": 0.3,
@@ -405,13 +406,14 @@
         {
           "name": "Wheel",
           "anim": "2H_Melee_Attack_Spin",
-          "damage": 13,
-          "startup": 0.28,
+          "damage": 18,
+          "startup": 0.26,
           "active": 0.2,
           "recovery": 0.5,
           "lunge": 0.2,
           "reach": 2.9,
-          "arc": 360
+          "arc": 360,
+          "knockback": 0.8
         }
       ]
     },
@@ -483,7 +485,7 @@
           "lunge": 0.8,
           "reach": 2.4,
           "arc": 160,
-          "knockback": 2.2,
+          "knockback": 1.8,
           "breaks": true
         }
       ]
@@ -534,7 +536,7 @@
       "draw": {
         "seconds": 1.1,
         "min": 7,
-        "max": 21,
+        "max": 19,
         "holdAfter": 0.5
       },
       "shot": {

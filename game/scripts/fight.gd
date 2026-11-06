@@ -392,7 +392,8 @@ func input(action: String) -> void:
 		"block-down":
 			p_block_held = true
 			# A block cancels the end of a swing, as a dodge does; it cancels a reload or a draw too.
-			if p_state == "attack" and _can_start_action():
+			# Twin blades (quickGuard) can drop any swing for the guard.
+			if p_state == "attack" and (_can_start_action() or style.get("quickGuard", false)):
 				p_state = "free"
 				p_last_attack_end = now
 			if p_state in ["reload", "draw"]:
@@ -438,6 +439,8 @@ func _busy(action: String) -> bool:
 			# Attack presses chain into the combo; everything else waits for the recovery.
 			if ranged:
 				return not _can_start_action()
+			if action == "block-down" and style.get("quickGuard", false):
+				return false
 			return action != "attack" and not _can_start_action()
 		"pattern":
 			return action != "attack"

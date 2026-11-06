@@ -54,6 +54,7 @@ func _run() -> void:
 	test_mastery()
 	test_weapons()
 	test_gear_and_gate()
+	test_weapon_balance()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -1452,3 +1453,15 @@ func test_gear_and_gate() -> void:
 	check(a.objective().contains("Gate"), "the objective says so")
 	check(a.marks_spendable() == 7, "Marks to spend are the record's less what the smith took")
 	a.free()
+
+## Every weapon type holds its own: a skilled bot with any of the twelve fells wolves and
+## lives a minute (the balance harness, game/tests/balance.tscn, prints the full table).
+func test_weapon_balance() -> void:
+	var harness := load("res://game/tests/balance.gd").new()
+	for st in Data.room["styles"]:
+		if String(st).begins_with("$"):
+			continue
+		var w: Dictionary = harness._weapon_of_type(st)
+		var f: Fight = harness._bot(60.0, w["id"])
+		check(f.stats["wolves_down"] >= 3 and f.now >= 50.0, "%s: the bot fells wolves and lives a minute (%d felled, %.0f s)" % [st, f.stats["wolves_down"], f.now])
+	harness.free()
