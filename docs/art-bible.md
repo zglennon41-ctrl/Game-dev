@@ -228,3 +228,18 @@ thirds of the frame, rim light in [Shape colour]".
 - [ ] Exported as `.glb` to the right folder
 - [ ] Asset test passes
 - [ ] Credited, with licence
+
+## 9. The kits made here (2026-11-07)
+
+Three more Blender kits, all run headless with the bpy venv like the genius kit, all
+placeholder quality in the right shape, all dropped in by name so finished art replaces them
+without a code change:
+
+| Kit | Script | Makes | Where the game looks |
+| --- | --- | --- | --- |
+| The wild kit | `tools/blender/wild_kit.py` | thirty-nine outdoor pieces: ground tiles, edge pieces, trees, rocks, ruins, the line's furniture, six set pieces (the den, the bridge, the junction, the crossing, the post, the car) | `game/assets/wild/<name>.glb`; the dungeon kit stands in for a missing piece |
+| The beast kit | `tools/blender/beast_kit.py` | six beasts reshaped from the Quaternius wolf on its own rig (every animation kept): the cut-wolf, the river-thing, the ruin-stag, the molted hound, the post-breaker, the eel of the current | `game/assets/beasts/<model>.glb` (`model` in `data/beasts.json`); the wolf stands in |
+| The people kit | `tools/blender/people_kit.py` | the five KayKit bodies reshaped to grounded proportions (about seven heads tall) on their own rig, textures, accessories and the hand slots kept | `game/assets/people/<Body>.glb`; KayKit's own stands in |
+
+Checks: `godot --headless --path . -s res://game/tests/check_beasts.gd` and
+`check_people.gd` list each file's animations, bones and attachments and end "all good".
