@@ -56,6 +56,38 @@ export function validateData(dir = 'data'): Problem[] {
   for (const f of forms) if (!bodies.silhouettes[f.silhouette]) problems.push({ file: 'genius-bodies.json', message: `no body for silhouette ${f.silhouette} (form ${f.id})` });
   for (const ft of D('features')) if (ft.slot !== 'surface' && !bodies.slotSockets[ft.slot]) problems.push({ file: 'genius-bodies.json', message: `no sockets for slot ${ft.slot}` });
   for (const [sil, sp] of Object.entries(bodies.silhouettes as Record<string, { kind: string }>)) if (!bodies.kinds[sp.kind]) problems.push({ file: 'genius-bodies.json', message: `${sil}: unknown kind ${sp.kind}` });
+  // Zones: their beasts exist, their doors lead somewhere, their libraries are not empty; the
+  // Academy's lessons travel to places that exist, of the Academy or of a zone.
+  const beasts = ids('beasts');
+  const zones = D('zones');
+  const zoneAreas = new Set<string>();
+  for (const z of zones) {
+    need('zones.json', beasts, z.beasts.common, `common beast of ${z.id}`);
+    need('zones.json', beasts, z.beasts.elite, `elite beast of ${z.id}`);
+    for (const n of z.beasts.named ?? []) need('zones.json', beasts, n.beast, `named beast ${n.id} of ${z.id}`);
+    const areaIds = new Set<string>(z.areas.map((a: { id: string }) => a.id));
+    for (const a of z.areas) {
+      zoneAreas.add(`${z.id}/${a.id}`);
+      for (const d of a.doors) if (d.to !== 'extraction' && !areaIds.has(d.to)) problems.push({ file: 'zones.json', message: `${z.id}/${a.id}: door to unknown area ${d.to}` });
+      if (a.beast && !['common', 'elite'].includes(a.beast)) need('zones.json', beasts, a.beast, `beast of ${z.id}/${a.id}`);
+      if (a.pack && a.pack.min > a.pack.max) problems.push({ file: 'zones.json', message: `${z.id}/${a.id}: pack.min > max` });
+    }
+    for (const k of ['floor', 'edge'] as const) if (!z.tiles[k].length) problems.push({ file: 'zones.json', message: `${z.id}: no ${k} tiles` });
+  }
+  const academy = D('academy');
+  const placeKnown = (p: string) => Boolean(academy.places[p]) || zoneAreas.has(p);
+  for (const l of academy.lessons) {
+    if (!placeKnown(l.place)) problems.push({ file: 'academy.json', message: `lesson ${l.id}: unknown place ${l.place}` });
+    for (const st of l.steps) {
+      if (st.place && !placeKnown(st.place)) problems.push({ file: 'academy.json', message: `lesson ${l.id}, ${st.title}: unknown place ${st.place}` });
+      if (st.goal?.to && !placeKnown(st.goal.to)) problems.push({ file: 'academy.json', message: `lesson ${l.id}, ${st.title}: travels to unknown place ${st.goal.to}` });
+      if (st.goal?.place && !placeKnown(st.goal.place)) problems.push({ file: 'academy.json', message: `lesson ${l.id}, ${st.title}: unknown goal place ${st.goal.place}` });
+    }
+  }
+  for (const [pid, p] of Object.entries(academy.places as Record<string, { doors: { to: string }[] }>)) {
+    // A door that never opens (locked, no opensWhen) may lead to a place that is only a name.
+    for (const d of p.doors as { to: string; locked?: string; opensWhen?: string }[]) if (d.to !== 'extraction' && !(d.locked && !d.opensWhen) && !placeKnown(d.to)) problems.push({ file: 'academy.json', message: `${pid}: door to unknown place ${d.to}` });
+  }
   const archetypes = ids('archetypes');
   const shades = ids('shades');
   const terms = ids('terms');

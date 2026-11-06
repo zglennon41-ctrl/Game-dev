@@ -1,0 +1,468 @@
+{
+  "$comment": "The board's quests: the seven types the hall's board will carry on the server, as excursions into the zones around Alexandria (data/zones.json). A posting is a template filled for a zone and a day: {zone} the zone's name, {entry}/{post}/{elite} its areas, {beast} the zone's common beast, {named} the zone's named beast, {poster} who posted it. Steps run on the Academy's step engine (goal types: travel, fell, hold, reach, find, talk, extract, spar, escort, carry). limit is a step's timer in seconds: when it runs out the quest fails. pay is in Marks by line colour; witness is what the genius takes from it.",
+  "perDay": {
+    "min": 3,
+    "max": 5
+  },
+  "posterNames": {
+    "compact": [
+      "The Compact, Alexandria section",
+      "The Compact's linewalker, Alexandria",
+      "The Compact, by the station clerk"
+    ],
+    "archive": [
+      "The Archive of the Old Hall",
+      "An archivist, by letter",
+      "The Archive's field office"
+    ],
+    "town": [
+      "The town of Harper's Ferry",
+      "A river town's council",
+      "Three farms past the cutting",
+      "The ferry at the crossing"
+    ],
+    "house": [
+      "House Varro",
+      "House Keel",
+      "House Okonkwo",
+      "House Marchetti"
+    ],
+    "guild": [
+      "The Academy, by Instructor Varga"
+    ],
+    "classmate": [
+      "A classmate"
+    ]
+  },
+  "types": {
+    "linework": {
+      "name": "Linework",
+      "poster": "compact",
+      "weight": 4,
+      "minColour": "green",
+      "title": "Relight {post}",
+      "posting": "The post at {post} went dark two nights ago. Reach it, clear the ground, and hold it until the resonance takes. The Compact pays Standing and the line stays lit.",
+      "pay": {
+        "green": 1,
+        "amber": 2
+      },
+      "witness": "ground",
+      "steps": [
+        {
+          "title": "The car",
+          "goal": {
+            "type": "travel",
+            "to": "{entry}",
+            "lines": [
+              "The car runs out under the lamps and then past them. {zone} at night: the line's own dark.",
+              "The Compact's walker rides the tender. \"The post is dark. Clear what hunts it and hold it till it takes. Nobody is a hero tonight.\""
+            ]
+          }
+        },
+        {
+          "title": "The approach",
+          "place": "{entry}",
+          "text": "Fell what hunts the way in. Your party fights beside you; [b]Tab[/b] passes the lock round a pack.",
+          "goal": {
+            "type": "fell",
+            "count": 2
+          }
+        },
+        {
+          "title": "The post",
+          "place": "{post}",
+          "text": "Take the post ([b]E[/b]) and hold it for three beats: a minute, whatever comes.",
+          "goal": {
+            "type": "hold",
+            "seconds": 60
+          }
+        },
+        {
+          "title": "Extraction",
+          "place": "{post}",
+          "text": "The post holds. Back to the car ([b]E[/b] at the line back).",
+          "goal": {
+            "type": "extract",
+            "lines": [
+              "The post's flame steadies to blue behind you. The walker signs the ledger without looking up.",
+              "On the way back the line is lit as far as you can see."
+            ]
+          }
+        }
+      ],
+      "writeup": "Relit a dark post on {zone} for the Compact and held it until it took.",
+      "failed": "The post stayed dark. The Compact sent a crew in the morning."
+    },
+    "salvage": {
+      "name": "Salvage",
+      "poster": "archive",
+      "weight": 3,
+      "minColour": "green",
+      "title": "A thing from {post}",
+      "posting": "Something of the Archive's lies in {post}: a page, a plate, a piece of the old hall. Find it and carry it out. Whoever carries it may not fire a Pattern; the field would take it.",
+      "pay": {
+        "green": 1,
+        "amber": 2
+      },
+      "witness": "ground",
+      "steps": [
+        {
+          "title": "The car",
+          "goal": {
+            "type": "travel",
+            "to": "{entry}",
+            "lines": [
+              "The archivist rides with you and does not say what the thing is. \"You will know it. Do not fire a Pattern with it in your hands.\""
+            ]
+          }
+        },
+        {
+          "title": "The way in",
+          "place": "{entry}",
+          "text": "Fell what hunts the way in.",
+          "goal": {
+            "type": "fell",
+            "count": 1
+          }
+        },
+        {
+          "title": "The thing",
+          "place": "{post}",
+          "text": "It is here somewhere, in {post}. Find it ([b]E[/b] to pick it up). Once you carry it, no Patterns.",
+          "goal": {
+            "type": "find",
+            "item": "the Archive's thing",
+            "carry": true
+          }
+        },
+        {
+          "title": "Carry it out",
+          "place": "{post}",
+          "text": "Back to the car with it, through whatever is between. No Patterns while you carry.",
+          "goal": {
+            "type": "extract",
+            "carry": true,
+            "lines": [
+              "The archivist takes the thing in both hands and says nothing for a long moment.",
+              "\"Three of these make a technique, at the Archive. Remember that, after the Gate.\""
+            ]
+          }
+        }
+      ],
+      "writeup": "Carried a thing of the Archive's out of {zone} without a Pattern fired.",
+      "failed": "The thing was dropped and the field took it. The Archive will post it again."
+    },
+    "hunt": {
+      "name": "Hunt",
+      "poster": "town",
+      "weight": 3,
+      "minColour": "green",
+      "title": "{named}",
+      "posting": "{named} has come down to the line again. It has a name because it has been hunted before and lived. Fell it, and fell it quickly: it remembers parties that run. The town pays in kind and the hall keeps the trophy.",
+      "pay": {
+        "green": 2,
+        "amber": 3
+      },
+      "witness": "families",
+      "steps": [
+        {
+          "title": "The car",
+          "goal": {
+            "type": "travel",
+            "to": "{entry}",
+            "lines": [
+              "A woman from the town rides out with you to point the way and will not go further than the car. \"It took two dogs and a boy's hand. It knows the sound of the car now.\""
+            ]
+          }
+        },
+        {
+          "title": "Its ground",
+          "place": "{entry}",
+          "text": "Its pack hunts the way in. Fell them.",
+          "goal": {
+            "type": "fell",
+            "count": 2
+          }
+        },
+        {
+          "title": "{named}",
+          "place": "{elite}",
+          "text": "{named} itself. You have the time it takes to lose its patience: fell it before the timer runs out, or it goes to ground for another season.",
+          "goal": {
+            "type": "fell",
+            "count": 1,
+            "named": true
+          },
+          "limit": 240
+        },
+        {
+          "title": "Extraction",
+          "place": "{elite}",
+          "text": "Back to the car.",
+          "goal": {
+            "type": "extract",
+            "lines": [
+              "The woman from the town looks at what you carry and sits down on the tender's step.",
+              "\"Then it's done. Then it's done.\""
+            ]
+          }
+        }
+      ],
+      "writeup": "Hunted {named} on {zone} and felled it before it went to ground.",
+      "failed": "{named} went to ground. It will remember the car."
+    },
+    "escort": {
+      "name": "Escort",
+      "poster": "house",
+      "weight": 3,
+      "minColour": "green",
+      "title": "A passenger to {post}",
+      "posting": "A passenger of ours must reach the post at {post} tonight and must not be touched. Walk beside them. If they fall, the house will not forget it; if they arrive, the house will not forget that either.",
+      "pay": {
+        "green": 1,
+        "amber": 2
+      },
+      "witness": "company",
+      "steps": [
+        {
+          "title": "The car",
+          "goal": {
+            "type": "travel",
+            "to": "{entry}",
+            "lines": [
+              "The passenger is a classmate's age and does not give a name. The house's man says: \"To the post. Then they are the Compact's problem.\""
+            ]
+          }
+        },
+        {
+          "title": "Beside them",
+          "place": "{entry}",
+          "text": "{passenger} walks beside you. Fell what comes, and keep them standing: if they fall, the quest is lost.",
+          "goal": {
+            "type": "fell",
+            "count": 2
+          },
+          "escort": true
+        },
+        {
+          "title": "To the post",
+          "place": "{post}",
+          "text": "Get {passenger} to the post ([b]E[/b] to take it) and hold it until the car comes.",
+          "goal": {
+            "type": "hold",
+            "seconds": 30
+          },
+          "escort": true
+        },
+        {
+          "title": "Extraction",
+          "place": "{post}",
+          "text": "They are the Compact's now. Back to the car.",
+          "goal": {
+            "type": "extract",
+            "lines": [
+              "{passenger} says a name at the post, to the Compact's walker, and not to you.",
+              "The house's man meets the car at Alexandria and counts you, and then the passenger, and nods."
+            ]
+          }
+        }
+      ],
+      "writeup": "Walked a house's passenger through {zone} to the post, untouched.",
+      "failed": "The passenger fell on the way. The house noticed."
+    },
+    "writ": {
+      "name": "Writ",
+      "poster": "house",
+      "weight": 2,
+      "minColour": "green",
+      "title": "A writ for {post}",
+      "posting": "The house wants a thing retrieved from {post} before the other house's party reaches it. A decision will be asked of you at the end, and the Charter gives you the time it takes the car to come. Favour with the house either way; its rival will know your name.",
+      "pay": {
+        "green": 2,
+        "amber": 3
+      },
+      "witness": "orders",
+      "steps": [
+        {
+          "title": "The car",
+          "goal": {
+            "type": "travel",
+            "to": "{entry}",
+            "lines": [
+              "The house's clerk gives you a sealed writ and a time. \"Before the other car. What you do with it after is between you and the Charter.\""
+            ]
+          }
+        },
+        {
+          "title": "Before the other car",
+          "place": "{entry}",
+          "text": "Fell what is between you and {post}. The other house's party is an hour behind: the timer.",
+          "goal": {
+            "type": "fell",
+            "count": 2
+          },
+          "limit": 200
+        },
+        {
+          "title": "The thing",
+          "place": "{post}",
+          "text": "The writ's thing is in {post}. Find it.",
+          "goal": {
+            "type": "find",
+            "item": "the writ's thing"
+          },
+          "limit": 200
+        },
+        {
+          "title": "The decision",
+          "place": "{post}",
+          "text": "The writ says the thing is the house's. The Archive would say otherwise. Decide.",
+          "goal": {
+            "type": "decide",
+            "options": [
+              {
+                "id": "house",
+                "label": "Give it to the house",
+                "text": "The writ is the writ. Favour with the house; its rival will remember."
+              },
+              {
+                "id": "archive",
+                "label": "Send it to the Archive",
+                "text": "The Charter allows it. The house will not pay; the Archive will know your name."
+              }
+            ]
+          }
+        },
+        {
+          "title": "Extraction",
+          "place": "{post}",
+          "text": "Back to the car.",
+          "goal": {
+            "type": "extract",
+            "lines": [
+              "The other house's car passes yours on the way in. Nobody waves."
+            ]
+          }
+        }
+      ],
+      "writeup": "Served a house's writ on {zone} and made the decision the Charter leaves to the hand that carries it.",
+      "failed": "The other car got there first. The house will not post with you again this season."
+    },
+    "deep-run": {
+      "name": "Deep Run",
+      "poster": "guild",
+      "weight": 1,
+      "minColour": "amber",
+      "requires": "project",
+      "title": "The deep run: {zone}",
+      "posting": "Varga's posting, for those with the field open: {zone} to its heart in one run, the post and the beast that holds it, one extraction. Amber. The rescue team rides the tender and nobody is a hero.",
+      "pay": {
+        "green": 3,
+        "amber": 4
+      },
+      "witness": "ground",
+      "steps": [
+        {
+          "title": "The car",
+          "goal": {
+            "type": "travel",
+            "to": "{entry}",
+            "lines": [
+              "Varga rides out with you and says nothing until the lamps are gone. \"To the heart of it. One extraction. If I say we go, we go.\""
+            ]
+          }
+        },
+        {
+          "title": "The way in",
+          "place": "{entry}",
+          "text": "Fell what hunts the way in.",
+          "goal": {
+            "type": "fell",
+            "count": 3
+          }
+        },
+        {
+          "title": "The post",
+          "place": "{post}",
+          "text": "Take the post and hold it.",
+          "goal": {
+            "type": "hold",
+            "seconds": 45
+          }
+        },
+        {
+          "title": "The heart",
+          "place": "{elite}",
+          "text": "What holds {zone}. Fell it.",
+          "goal": {
+            "type": "fell",
+            "count": 1
+          }
+        },
+        {
+          "title": "Extraction",
+          "place": "{elite}",
+          "text": "Back to the car.",
+          "goal": {
+            "type": "extract",
+            "lines": [
+              "Varga counts you onto the car, twice. \"That was a run. Write it down tonight; you will want it later.\""
+            ]
+          }
+        }
+      ],
+      "writeup": "Ran {zone} to its heart with the field open and came back with everyone.",
+      "failed": "The deep run was cut short. Varga called the extraction."
+    },
+    "rally": {
+      "name": "Rally",
+      "poster": "compact",
+      "weight": 2,
+      "minColour": "green",
+      "weekday": "Friday",
+      "place": "yard",
+      "title": "The Friday rally",
+      "posting": "Friday in the yard: three bouts against the cohort's best, in front of whoever is watching. The Compact keeps the standings. Win two of three.",
+      "pay": {
+        "green": 1,
+        "amber": 1
+      },
+      "witness": "families",
+      "steps": [
+        {
+          "title": "The rally",
+          "place": "yard",
+          "text": "Three bouts. Win two.",
+          "goal": {
+            "type": "spar",
+            "count": 2
+          },
+          "setup": {
+            "spar": "cohort"
+          }
+        },
+        {
+          "title": "Standings",
+          "place": "yard",
+          "text": "Bask has the standings. Hear them ([b]E[/b] with Instructor Bask).",
+          "goal": {
+            "type": "talk",
+            "who": "bask"
+          }
+        }
+      ],
+      "writeup": "Took the Friday rally and won it.",
+      "failed": "Lost the Friday rally. The standings are the standings."
+    }
+  },
+  "lines": {
+    "taken": "Taken. The car leaves from the quad's south door; your party is whoever you choose.",
+    "inHand": "You have a posting in hand already: {title}.",
+    "nothing": "Nothing on the board for you today. Rest, and it will be posted again.",
+    "done": "{title}: done. {pay} Marks, and the hall knows it.",
+    "failed": "{title}: lost. No Marks; the board will carry it again.",
+    "timer": "The time is nearly gone.",
+    "carrying": "You carry the thing: no Patterns.",
+    "passengerDown": "The passenger is down."
+  }
+}

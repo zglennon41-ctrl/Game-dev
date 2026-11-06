@@ -370,7 +370,7 @@ func set_foe(spec: Dictionary) -> void:
 	if _wolf:
 		_wolf.queue_free()
 	if not spec.has("body"):
-		_wolf = load("res://game/assets/quaternius/Wolf.glb").instantiate()
+		_wolf = load(_beast_model(String(spec.get("model", "")))).instantiate()
 		_wolf.scale = Vector3.ONE * WOLF_SCALE * float(spec.get("wolf_scale", 1.0))
 		_w_anims = WOLF_ANIMS
 	else:
@@ -397,6 +397,13 @@ func set_foe(spec: Dictionary) -> void:
 		m.material_overlay = _overlay_wolf
 	_w_current = ""
 	_w_oneshot_until = 0.0
+
+## A beast's body: its own model from the beast kit when it exists, else the wolf.
+func _beast_model(model: String) -> String:
+	var path := "res://game/assets/beasts/%s.glb" % model
+	if model != "" and ResourceLoader.exists(path):
+		return path
+	return "res://game/assets/quaternius/Wolf.glb"
 
 func _wa(key: String) -> String:
 	return _w_anims.get(key, key)
@@ -1601,7 +1608,7 @@ func _update_genius(f: Fight, dt: float) -> void:
 
 ## Leave the current place and build another: "cut" (the chamber of the opening and the
 ## practice yard) or a place of the Academy from data/academy.json.
-func set_place(id: String) -> void:
+func set_place(id: String, spec: Dictionary = {}) -> void:
 	if id == place and _place_root.get_child_count() > 0:
 		return
 	place = id
@@ -1624,7 +1631,7 @@ func set_place(id: String) -> void:
 		_env.fog_density = 0.022
 		_moon.light_energy = 0.28
 	else:
-		_build_academy_place(Data.academy["places"][id])
+		_build_academy_place(spec if not spec.is_empty() else Data.academy["places"][id])
 	_motes.emission_box_extents = Vector3(arena.x / 2.0, 1.8, arena.y / 2.0)
 	_motes.restart()
 
@@ -1635,8 +1642,12 @@ func _build_academy_place(spec: Dictionary) -> void:
 	var hw := arena.x / 2.0 + 1.0
 	var hd := arena.y / 2.0 + 1.0
 	var floor_piece: String = spec["floor"]
+	var in_zone := spec.has("wild")
 	var x := -hw + 2.0
 	var i := 0
+	if in_zone:
+		_build_zone_ground(spec, hw, hd)
+		x = hw
 	while x < hw:
 		var z := -hd + 2.0
 		while z < hd:
@@ -1661,6 +1672,8 @@ func _build_academy_place(spec: Dictionary) -> void:
 		kinds = ["wall_broken", "rubble_large", "wall_cracked", "rubble_large", "wall_broken", "wall_broken"]
 	var k := 0
 	var wx := -hw + 2.0
+	if in_zone:
+		wx = hw
 	while wx < hw:
 		for side in [-1, 1]:
 			var kind: String = "wall_arched" if is_door.call(wx, side * (hd - 1.0)) else kinds[(k + (3 if side > 0 else 0)) % kinds.size()]
@@ -1670,6 +1683,8 @@ func _build_academy_place(spec: Dictionary) -> void:
 		wx += 4.0
 		k += 1
 	var ez := -hd + 2.0
+	if in_zone:
+		ez = hd
 	while ez < hd:
 		for side in [-1, 1]:
 			var kind: String = "wall_arched" if is_door.call(side * (hw - 1.0), ez) else kinds[(k + 1) % kinds.size()]
@@ -1703,6 +1718,9 @@ func _build_academy_place(spec: Dictionary) -> void:
 		"The Yard": _furnish_yard()
 		"The Dormitory": _furnish_dorm(spec)
 		"The Hearth Hall": _furnish_hearth()
+	if in_zone:
+		_furnish_zone(spec)
+		return
 	if wild:
 		_furnish_wild(spec)
 		_env.background_color = Color(0.03, 0.045, 0.06)
@@ -1798,9 +1816,22 @@ func _furnish_wild(spec: Dictionary) -> void:
 			_piece("rubble_half" if i % 2 == 0 else "rubble_large", at, rng.randf_range(0, 360), 0.5)
 			obstacles.append(Vector3(at.x, at.z, 0.7))
 	if spec.has("post"):
-		var pa := Vector3(float(spec["post"]["at"][0]), 0, float(spec["post"]["at"][1]))
+		_build_post(Vector3(float(spec["post"]["at"][0]), 0, float(spec["post"]["at"][1])))
+
+## The post: an iron lamp column with the line's blue flame, and the ring the party holds.
+func _build_post(pa: Vector3) -> void:
+	var flame_y := 1.55
+	var lamp_y := 2.2
+	if ResourceLoader.exists(WILD_DIR % "set_post"):
+		var post := _wild_piece("set_post", pa, 0.0)
+		var sock: Node3D = post.find_child("socket_flame", true, false)
+		if sock:
+			flame_y = sock.position.y
+			lamp_y = flame_y + 0.3
+	else:
 		_piece("column", pa, 0.0, 0.45)
-		obstacles.append(Vector3(pa.x, pa.z, 0.6))
+	obstacles.append(Vector3(pa.x, pa.z, 0.6))
+	if true:
 		var ring := MeshInstance3D.new()
 		var tm := TorusMesh.new()
 		tm.inner_radius = 3.4
@@ -1814,7 +1845,7 @@ func _furnish_wild(spec: Dictionary) -> void:
 		lamp.light_color = Color(0.6, 0.78, 1.0)
 		lamp.light_energy = 1.8
 		lamp.omni_range = 8.0
-		lamp.position = pa + Vector3(0, 2.2, 0)
+		lamp.position = pa + Vector3(0, lamp_y, 0)
 		_place_root.add_child(lamp)
 		var flame := MeshInstance3D.new()
 		var sm := SphereMesh.new()
@@ -1822,8 +1853,160 @@ func _furnish_wild(spec: Dictionary) -> void:
 		sm.height = 0.4
 		flame.mesh = sm
 		flame.material_override = _mat(Color(0.6, 0.8, 1.0), 4.0, true)
-		flame.position = pa + Vector3(0, 1.55, 0)
+		flame.position = pa + Vector3(0, flame_y, 0)
 		_place_root.add_child(flame)
+
+# --- Zones: areas drawn from a tile library ---------------------------------------------
+# A zone's area (data/zones.json via Zones.area_place) comes with the zone's tiles: ground
+# tiles by weight, edge pieces round the rim with a gap at every door, props scattered by the
+# area's density and the run's variant, a set piece, the post, the line's ballast and rails,
+# water along a side. Until the wild kit is built, the dungeon kit stands in for every piece.
+
+const WILD_DIR := "res://game/assets/wild/%s.glb"
+
+func _wild_piece(name: String, pos: Vector3, rot_deg := 0.0, scale := 1.0) -> Node3D:
+	var path := WILD_DIR % name
+	if ResourceLoader.exists(path):
+		var n: Node3D = load(path).instantiate()
+		n.position = pos
+		n.rotation_degrees.y = rot_deg
+		n.scale = Vector3.ONE * scale
+		_place_root.add_child(n)
+		return n
+	var sub := "rubble_half"
+	var sub_scale := scale
+	if name.begins_with("ground_"):
+		sub = "floor_dirt_large_rocky"
+	elif name.begins_with("edge_"):
+		sub = "wall_broken" if name != "edge_rocks" and name != "edge_cliff" else "rubble_large"
+	elif name.begins_with("tree_") or name in ["ruin_column", "signal_post", "lamp_post", "fence_post"]:
+		sub = "column"
+		sub_scale = scale * 0.55
+	elif name.begins_with("set_"):
+		sub = "rubble_large"
+		sub_scale = scale * 1.6
+	elif name in ["boulder_a", "boulder_b", "cairn", "rail_car", "ruin_arch"]:
+		sub = "rubble_large"
+		sub_scale = scale * 0.6
+	else:
+		sub_scale = scale * 0.5
+	return _piece(sub, pos, rot_deg, sub_scale)
+
+## One of a weighted list [[name, weight], ...] or [[name, radius, weight], ...].
+func _pick(options: Array, rng: RandomNumberGenerator) -> Array:
+	var total := 0.0
+	for o in options:
+		total += float(o[o.size() - 1])
+	var r := rng.randf() * total
+	for o in options:
+		r -= float(o[o.size() - 1])
+		if r <= 0.0:
+			return o
+	return options[0]
+
+func _zone_rng(spec: Dictionary) -> RandomNumberGenerator:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(spec.get("variant", 0))
+	return rng
+
+func _build_zone_ground(spec: Dictionary, hw: float, hd: float) -> void:
+	var z: Dictionary = spec["wild"]
+	var area: Dictionary = spec["area"]
+	var rng := _zone_rng(spec)
+	var water := String(area.get("water", ""))
+	var x := -hw + 2.0
+	while x < hw:
+		var zz := -hd + 2.0
+		while zz < hd:
+			var name: String = _pick(z["tiles"]["floor"], rng)[0]
+			if area.get("rails", false) and absf(zz) < 2.0:
+				name = "ground_ballast"
+			if (water == "north" and zz < -hd + 4.5) or (water == "south" and zz > hd - 4.5):
+				name = "ground_water"
+			_wild_piece(name, Vector3(x, 0, zz), 90.0 * (rng.randi() % 4))
+			zz += 4.0
+		x += 4.0
+	# The rim: an edge piece every four metres, none where a door is.
+	var doors: Array = spec["doors"]
+	var is_door := func(px: float, pz: float) -> bool:
+		for d in doors:
+			if absf(float(d["at"][0]) - px) < 2.6 and absf(float(d["at"][1]) - pz) < 2.6:
+				return true
+		return false
+	var wx := -hw + 2.0
+	while wx < hw:
+		for side in [-1, 1]:
+			if is_door.call(wx, side * (hd - 1.0)):
+				continue
+			var name: String = _pick(z["tiles"]["edge"], rng)[0]
+			if water == "north" and side < 0:
+				name = "edge_reeds"
+			_wild_piece(name, Vector3(wx, 0, side * hd), 0.0 if side < 0 else 180.0)
+		wx += 4.0
+	var ez := -hd + 2.0
+	while ez < hd:
+		for side in [-1, 1]:
+			if is_door.call(side * (hw - 1.0), ez):
+				continue
+			_wild_piece(_pick(z["tiles"]["edge"], rng)[0], Vector3(side * hw, 0, ez), 90.0 if side < 0 else -90.0)
+		ez += 4.0
+
+func _furnish_zone(spec: Dictionary) -> void:
+	var z: Dictionary = spec["wild"]
+	var area: Dictionary = spec["area"]
+	var rng := _zone_rng(spec)
+	rng.state = rng.state + 7
+	var keep: Array = []   # [Vector2, radius] nothing may stand in
+	keep.append([Vector2(float(spec["spawn"][0]), float(spec["spawn"][1])), 3.0])
+	for d in spec["doors"]:
+		keep.append([Vector2(float(d["at"][0]), float(d["at"][1])), 3.0])
+	if spec.has("post"):
+		var pa := Vector2(float(spec["post"]["at"][0]), float(spec["post"]["at"][1]))
+		keep.append([pa, 4.2])
+		_build_post(Vector3(pa.x, 0, pa.y))
+	for ins in spec.get("instructors", []):
+		keep.append([Vector2(float(ins["at"][0]), float(ins["at"][1])), 1.5])
+	if area.has("set"):
+		var sa := Vector2(float(area["setAt"][0]), float(area["setAt"][1]))
+		_wild_piece(area["set"], Vector3(sa.x, 0, sa.y), float(area.get("setRot", 0.0)))
+		obstacles.append(Vector3(sa.x, sa.y, 2.4))
+		keep.append([sa, 4.0])
+	var water := String(area.get("water", ""))
+	var props: Array = z["tiles"]["props"]
+	var count := int(float(area.get("density", 0.4)) * arena.x * arena.y / 16.0)
+	var placed := 0
+	var tries := 0
+	while placed < count and tries < count * 12 and not props.is_empty():
+		tries += 1
+		var o: Array = _pick(props, rng)
+		var at := Vector2(rng.randf_range(-arena.x / 2.0 + 1.2, arena.x / 2.0 - 1.2), rng.randf_range(-arena.y / 2.0 + 1.2, arena.y / 2.0 - 1.2))
+		if area.get("rails", false) and absf(at.y) < 2.6:
+			continue
+		if (water == "north" and at.y < -arena.y / 2.0 + 3.0) or (water == "south" and at.y > arena.y / 2.0 - 3.0):
+			continue
+		var blocked := false
+		for k in keep:
+			if at.distance_to(k[0]) < float(k[1]):
+				blocked = true
+				break
+		if blocked:
+			continue
+		var r := float(o[1])
+		_wild_piece(o[0], Vector3(at.x, 0, at.y), rng.randf_range(0, 360), rng.randf_range(0.85, 1.15))
+		if r > 0.0:
+			obstacles.append(Vector3(at.x, at.y, r))
+		keep.append([at, maxf(r, 0.6) + 0.8])
+		placed += 1
+	# The zone's night.
+	var L: Dictionary = z["light"]
+	_env.background_color = Color(L["sky"][0], L["sky"][1], L["sky"][2])
+	_env.ambient_light_energy = float(L["ambientEnergy"])
+	_env.ambient_light_color = Color(L["ambient"][0], L["ambient"][1], L["ambient"][2])
+	_env.fog_density = float(L["fog"])
+	_moon.light_energy = float(L["moon"])
+	if L.has("moonColor"):
+		_moon.light_color = Color(L["moonColor"][0], L["moonColor"][1], L["moonColor"][2])
+	_moonlight([[Vector3(-arena.x * 0.2, 0, -arena.y * 0.15), 1.4], [Vector3(arena.x * 0.28, 0, arena.y * 0.2), 1.0], [Vector3(0, 0, 0), 0.8]])
 
 func _furnish_quad() -> void:
 	# The middle of the quad: a brazier that never goes out; the decorated pillars stand in its corners.
@@ -1908,7 +2091,7 @@ func _furnish_dorm(spec: Dictionary) -> void:
 var _pack: Array = []   # one per fight.foes: {node, anim, meshes, overlay, label, alert, flash, cur, until, spec}
 
 func _pack_make(fo: Foe) -> Dictionary:
-	var n: Node3D = load("res://game/assets/quaternius/Wolf.glb").instantiate()
+	var n: Node3D = load(_beast_model(String(fo.beast.get("model", "")))).instantiate()
 	n.scale = Vector3.ONE * WOLF_SCALE * float(fo.beast.get("modelScale", 1.0))
 	add_child(n)
 	var ap: AnimationPlayer = n.find_child("AnimationPlayer", true, false)
@@ -1943,7 +2126,7 @@ func _pack_make(fo: Foe) -> Dictionary:
 	al.visible = false
 	add_child(al)
 	return { "node": n, "anim": ap, "meshes": meshes, "overlay": ov, "label": l, "alert": al, "flash": 0.0, "cur": "", "until": 0.0,
-		"spec": { "wolf_scale": float(fo.beast.get("modelScale", 1.0)) } }
+		"spec": { "wolf_scale": float(fo.beast.get("modelScale", 1.0)), "model": String(fo.beast.get("model", "")) } }
 
 func _pack_free(d: Dictionary) -> void:
 	for k in ["node", "label", "alert"]:

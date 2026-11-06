@@ -1,250 +1,626 @@
 [
- {
-  "id": "cut-wolf",
-  "name": "Cut-wolf",
-  "shape": "read",
-  "molt": 1,
-  "health": 300,
-  "$comment": "Shape is read (not bind as in the HANDOFF sketch) so an Anchor can break it: breaks come from techniques of the Shape opposite the beast's. Distances in meters, times in seconds. flinchEvery 0: only heavy hits (techniques) make it flinch; light hits it shrugs off and, after counterAfterHits of them, snaps back.",
-  "radius": 0.7,
-  "walkSpeed": 2.2,
-  "gallopSpeed": 7.5,
-  "circleRadius": 4.5,
-  "prowl": {
-   "min": 0.8,
-   "max": 2.0
+  {
+    "id": "cut-wolf",
+    "name": "Cut-wolf",
+    "shape": "read",
+    "molt": 1,
+    "health": 300,
+    "$comment": "Shape is read (not bind as in the HANDOFF sketch) so an Anchor can break it: breaks come from techniques of the Shape opposite the beast's. Distances in meters, times in seconds. flinchEvery 0: only heavy hits (techniques) make it flinch; light hits it shrugs off and, after counterAfterHits of them, snaps back.",
+    "radius": 0.7,
+    "walkSpeed": 2.2,
+    "gallopSpeed": 7.5,
+    "circleRadius": 4.5,
+    "prowl": {
+      "min": 0.8,
+      "max": 2.0
+    },
+    "attacks": [
+      {
+        "id": "bite",
+        "name": "Bite",
+        "weight": 3,
+        "range": 1.9,
+        "windup": 0.5,
+        "active": 0.15,
+        "recover": 0.85,
+        "damage": 14,
+        "lunge": 1.2,
+        "knockback": 0.8
+      },
+      {
+        "id": "pounce",
+        "name": "Pounce",
+        "weight": 1,
+        "range": 5.5,
+        "minRange": 3.0,
+        "windup": 0.8,
+        "active": 0.25,
+        "recover": 1.2,
+        "damage": 20,
+        "lunge": 4.5,
+        "knockback": 1.6
+      },
+      {
+        "id": "snap",
+        "name": "Snap",
+        "weight": 0,
+        "range": 2.2,
+        "windup": 0.32,
+        "active": 0.12,
+        "recover": 0.7,
+        "damage": 10,
+        "lunge": 0.9,
+        "knockback": 0.6,
+        "$comment": "The counter: when struck while circling or recovering, the wolf snaps back."
+      }
+    ],
+    "flinchEvery": 0,
+    "flinchTime": 0.35,
+    "respawnSeconds": 3.0,
+    "counterAfterHits": 2,
+    "model": "cut-wolf"
   },
-  "attacks": [
-   {
-    "id": "bite",
-    "name": "Bite",
-    "weight": 3,
-    "range": 1.9,
-    "windup": 0.5,
-    "active": 0.15,
-    "recover": 0.85,
-    "damage": 14,
-    "lunge": 1.2,
-    "knockback": 0.8
-   },
-   {
-    "id": "pounce",
-    "name": "Pounce",
-    "weight": 1,
-    "range": 5.5,
-    "minRange": 3.0,
-    "windup": 0.8,
-    "active": 0.25,
-    "recover": 1.2,
-    "damage": 20,
-    "lunge": 4.5,
-    "knockback": 1.6
-   },
-   {
-    "id": "snap",
-    "name": "Snap",
-    "weight": 0,
-    "range": 2.2,
-    "windup": 0.32,
-    "active": 0.12,
-    "recover": 0.7,
-    "damage": 10,
-    "lunge": 0.9,
-    "knockback": 0.6,
-    "$comment": "The counter: when struck while circling or recovering, the wolf snaps back."
-   }
-  ],
-  "flinchEvery": 0,
-  "flinchTime": 0.35,
-  "respawnSeconds": 3.0,
-  "counterAfterHits": 2
- },
- {
-  "id": "yard-wolf",
-  "name": "Yard-wolf (on a chain)",
-  "shape": "read",
-  "molt": 1,
-  "health": 99999,
-  "$comment": "The tutorial's training beast. Never dies; bites slowly, for no damage.",
-  "radius": 0.7,
-  "walkSpeed": 1.6,
-  "gallopSpeed": 4.0,
-  "circleRadius": 3.0,
-  "prowl": {
-   "min": 1.8,
-   "max": 2.6
+  {
+    "id": "yard-wolf",
+    "name": "Yard-wolf (on a chain)",
+    "shape": "read",
+    "molt": 1,
+    "health": 99999,
+    "$comment": "The tutorial's training beast. Never dies; bites slowly, for no damage.",
+    "radius": 0.7,
+    "walkSpeed": 1.6,
+    "gallopSpeed": 4.0,
+    "circleRadius": 3.0,
+    "prowl": {
+      "min": 1.8,
+      "max": 2.6
+    },
+    "attacks": [
+      {
+        "id": "bite",
+        "name": "Bite",
+        "weight": 1,
+        "range": 2.0,
+        "windup": 0.8,
+        "active": 0.15,
+        "recover": 1.2,
+        "damage": 0,
+        "lunge": 1.0,
+        "knockback": 0.4
+      }
+    ],
+    "flinchEvery": 0,
+    "flinchTime": 0.35,
+    "respawnSeconds": 2.0,
+    "counterAfterHits": 0,
+    "model": "cut-wolf"
   },
-  "attacks": [
-   {
-    "id": "bite",
-    "name": "Bite",
-    "weight": 1,
-    "range": 2.0,
-    "windup": 0.8,
-    "active": 0.15,
-    "recover": 1.2,
-    "damage": 0,
-    "lunge": 1.0,
-    "knockback": 0.4
-   }
-  ],
-  "flinchEvery": 0,
-  "flinchTime": 0.35,
-  "respawnSeconds": 2.0,
-  "counterAfterHits": 0
- },
- {
-  "id": "millstone",
-  "name": "Millstone",
-  "shape": "read",
-  "molt": 1,
-  "health": 99999,
-  "$comment": "Yardmaster Bask's genius, for the Academy's Hold drill. Never falls; bites for a little, and the wards stop it mattering.",
-  "radius": 0.7,
-  "walkSpeed": 1.6,
-  "gallopSpeed": 4.0,
-  "circleRadius": 3.0,
-  "prowl": {
-   "min": 1.4,
-   "max": 2.2
+  {
+    "id": "millstone",
+    "name": "Millstone",
+    "shape": "read",
+    "molt": 1,
+    "health": 99999,
+    "$comment": "Yardmaster Bask's genius, for the Academy's Hold drill. Never falls; bites for a little, and the wards stop it mattering.",
+    "radius": 0.7,
+    "walkSpeed": 1.6,
+    "gallopSpeed": 4.0,
+    "circleRadius": 3.0,
+    "prowl": {
+      "min": 1.4,
+      "max": 2.2
+    },
+    "attacks": [
+      {
+        "id": "bite",
+        "name": "Bite",
+        "weight": 1,
+        "range": 2.0,
+        "windup": 0.85,
+        "active": 0.15,
+        "recover": 1.2,
+        "damage": 8,
+        "lunge": 1.0,
+        "knockback": 0.4
+      }
+    ],
+    "flinchEvery": 0,
+    "flinchTime": 0.35,
+    "respawnSeconds": 2.0,
+    "counterAfterHits": 0,
+    "model": "cut-wolf"
   },
-  "attacks": [
-   {
-    "id": "bite",
-    "name": "Bite",
-    "weight": 1,
-    "range": 2.0,
-    "windup": 0.85,
-    "active": 0.15,
-    "recover": 1.2,
-    "damage": 8,
-    "lunge": 1.0,
-    "knockback": 0.4
-   }
-  ],
-  "flinchEvery": 0,
-  "flinchTime": 0.35,
-  "respawnSeconds": 2.0,
-  "counterAfterHits": 0
- },
- {
-  "id": "student",
-  "name": "Student",
-  "shape": "anchor",
-  "molt": 1,
-  "health": 140,
-  "$comment": "A classmate to spar with (the Academy's ladder). The fight fills in the name, Shape, body and weapon from the classmate. Fights at close reach like a person: a quick strike, a heavy one.",
-  "radius": 0.5,
-  "walkSpeed": 2.2,
-  "gallopSpeed": 4.6,
-  "circleRadius": 3.2,
-  "prowl": {
-   "min": 1.2,
-   "max": 2.4
+  {
+    "id": "student",
+    "name": "Student",
+    "shape": "anchor",
+    "molt": 1,
+    "health": 140,
+    "$comment": "A classmate to spar with (the Academy's ladder). The fight fills in the name, Shape, body and weapon from the classmate. Fights at close reach like a person: a quick strike, a heavy one.",
+    "radius": 0.5,
+    "walkSpeed": 2.2,
+    "gallopSpeed": 4.6,
+    "circleRadius": 3.2,
+    "prowl": {
+      "min": 1.2,
+      "max": 2.4
+    },
+    "attacks": [
+      {
+        "id": "strike",
+        "name": "Strike",
+        "weight": 3,
+        "range": 2.1,
+        "windup": 0.55,
+        "active": 0.12,
+        "recover": 0.9,
+        "damage": 9,
+        "lunge": 0.8,
+        "knockback": 0.5,
+        "anim": "1H_Melee_Attack_Slice_Horizontal"
+      },
+      {
+        "id": "heavy",
+        "name": "Heavy blow",
+        "weight": 1,
+        "range": 2.4,
+        "windup": 0.95,
+        "active": 0.15,
+        "recover": 1.3,
+        "damage": 16,
+        "lunge": 1.0,
+        "knockback": 1.4,
+        "anim": "2H_Melee_Attack_Chop"
+      }
+    ],
+    "flinchEvery": 3,
+    "flinchTime": 0.3,
+    "respawnSeconds": 3.0,
+    "counterAfterHits": 0,
+    "pattern": {
+      "$comment": "The classmate's Pattern, fired once below half health: a heavy blow with a gold ring. The fight fills name and form from the classmate.",
+      "damage": 22,
+      "range": 2.6,
+      "windup": 1.1,
+      "active": 0.15,
+      "recover": 1.4,
+      "lunge": 1.2,
+      "knockback": 1.8,
+      "anim": "2H_Melee_Attack_Spin"
+    }
   },
-  "attacks": [
-   {
-    "id": "strike",
-    "name": "Strike",
-    "weight": 3,
-    "range": 2.1,
-    "windup": 0.55,
-    "active": 0.12,
-    "recover": 0.9,
-    "damage": 9,
-    "lunge": 0.8,
-    "knockback": 0.5,
-    "anim": "1H_Melee_Attack_Slice_Horizontal"
-   },
-   {
-    "id": "heavy",
-    "name": "Heavy blow",
-    "weight": 1,
-    "range": 2.4,
-    "windup": 0.95,
-    "active": 0.15,
-    "recover": 1.3,
-    "damage": 16,
-    "lunge": 1.0,
-    "knockback": 1.4,
-    "anim": "2H_Melee_Attack_Chop"
-   }
-  ],
-  "flinchEvery": 3,
-  "flinchTime": 0.3,
-  "respawnSeconds": 3.0,
-  "counterAfterHits": 0,
-  "pattern": {
-   "$comment": "The classmate's Pattern, fired once below half health: a heavy blow with a gold ring. The fight fills name and form from the classmate.",
-   "damage": 22,
-   "range": 2.6,
-   "windup": 1.1,
-   "active": 0.15,
-   "recover": 1.4,
-   "lunge": 1.2,
-   "knockback": 1.8,
-   "anim": "2H_Melee_Attack_Spin"
+  {
+    "id": "green-warden",
+    "name": "The Warden of the Cutting",
+    "shape": "turn",
+    "molt": 2,
+    "health": 520,
+    "$comment": "The beast of the Green at the Field Examination's den: a second-molt cut-wolf, half again as big, named. modelScale draws it larger.",
+    "modelScale": 1.45,
+    "title": "second molt · named",
+    "radius": 0.95,
+    "walkSpeed": 2.4,
+    "gallopSpeed": 7.0,
+    "circleRadius": 5.0,
+    "prowl": {
+      "min": 0.7,
+      "max": 1.6
+    },
+    "attacks": [
+      {
+        "id": "bite",
+        "name": "Bite",
+        "weight": 3,
+        "range": 2.3,
+        "windup": 0.55,
+        "active": 0.15,
+        "recover": 0.9,
+        "damage": 18,
+        "lunge": 1.4,
+        "knockback": 1.0
+      },
+      {
+        "id": "pounce",
+        "name": "Pounce",
+        "weight": 2,
+        "range": 6.5,
+        "minRange": 3.0,
+        "windup": 0.9,
+        "active": 0.28,
+        "recover": 1.3,
+        "damage": 26,
+        "lunge": 5.0,
+        "knockback": 2.0
+      },
+      {
+        "id": "snap",
+        "name": "Snap",
+        "weight": 0,
+        "range": 2.4,
+        "windup": 0.3,
+        "active": 0.12,
+        "recover": 0.7,
+        "damage": 12,
+        "lunge": 1.0,
+        "knockback": 0.7
+      }
+    ],
+    "flinchEvery": 0,
+    "flinchTime": 0.3,
+    "respawnSeconds": 99.0,
+    "counterAfterHits": 3,
+    "model": "cut-wolf"
+  },
+  {
+    "id": "river-thing",
+    "name": "River-thing",
+    "shape": "read",
+    "molt": 1,
+    "health": 320,
+    "$comment": "The Shenandoah's common beast: low and long, it rolls into you from the water.",
+    "model": "river-thing",
+    "modelScale": 1.1,
+    "title": "first molt · of the shallows",
+    "radius": 0.8,
+    "walkSpeed": 2.0,
+    "gallopSpeed": 7.0,
+    "circleRadius": 4.5,
+    "prowl": {
+      "min": 0.8,
+      "max": 2.0
+    },
+    "attacks": [
+      {
+        "id": "bite",
+        "name": "Bite",
+        "weight": 3,
+        "range": 2.0,
+        "windup": 0.5,
+        "active": 0.15,
+        "recover": 0.9,
+        "damage": 15,
+        "lunge": 1.2,
+        "knockback": 0.8
+      },
+      {
+        "id": "roll",
+        "name": "Roll",
+        "weight": 1,
+        "range": 5.0,
+        "minRange": 2.8,
+        "windup": 0.75,
+        "active": 0.25,
+        "recover": 1.2,
+        "damage": 20,
+        "lunge": 4.0,
+        "knockback": 2.0
+      },
+      {
+        "id": "snap",
+        "name": "Snap",
+        "weight": 0,
+        "range": 2.2,
+        "windup": 0.3,
+        "active": 0.12,
+        "recover": 0.7,
+        "damage": 10,
+        "lunge": 0.9,
+        "knockback": 0.6
+      }
+    ],
+    "flinchEvery": 0,
+    "flinchTime": 0.35,
+    "respawnSeconds": 3.0,
+    "counterAfterHits": 2
+  },
+  {
+    "id": "ruin-stag",
+    "name": "The Ruin-stag",
+    "shape": "bind",
+    "molt": 2,
+    "health": 560,
+    "$comment": "The Shenandoah's elite: tall, gaunt, a rack of antlers; it charges from the far side of the ruin.",
+    "model": "ruin-stag",
+    "modelScale": 1.35,
+    "title": "second molt · named",
+    "radius": 0.95,
+    "walkSpeed": 2.4,
+    "gallopSpeed": 7.5,
+    "circleRadius": 5.5,
+    "prowl": {
+      "min": 0.7,
+      "max": 1.6
+    },
+    "attacks": [
+      {
+        "id": "gore",
+        "name": "Gore",
+        "weight": 3,
+        "range": 2.5,
+        "windup": 0.7,
+        "active": 0.18,
+        "recover": 1.0,
+        "damage": 24,
+        "lunge": 1.6,
+        "knockback": 2.2
+      },
+      {
+        "id": "charge",
+        "name": "Charge",
+        "weight": 2,
+        "range": 7.0,
+        "minRange": 3.5,
+        "windup": 0.9,
+        "active": 0.3,
+        "recover": 1.4,
+        "damage": 30,
+        "lunge": 6.0,
+        "knockback": 2.6
+      },
+      {
+        "id": "snap",
+        "name": "Kick",
+        "weight": 0,
+        "range": 2.4,
+        "windup": 0.3,
+        "active": 0.12,
+        "recover": 0.7,
+        "damage": 12,
+        "lunge": 1.0,
+        "knockback": 0.8
+      }
+    ],
+    "flinchEvery": 0,
+    "flinchTime": 0.3,
+    "respawnSeconds": 99.0,
+    "counterAfterHits": 3
+  },
+  {
+    "id": "molted-hound",
+    "name": "Molted hound",
+    "shape": "cast",
+    "molt": 1,
+    "health": 340,
+    "$comment": "Harper's Cut's common beast: a wolf that has molted once already, faster, its seams showing the field.",
+    "model": "molted-hound",
+    "modelScale": 1.15,
+    "title": "first molt · of the yards",
+    "radius": 0.75,
+    "walkSpeed": 2.3,
+    "gallopSpeed": 8.5,
+    "circleRadius": 4.5,
+    "prowl": {
+      "min": 0.8,
+      "max": 2.0
+    },
+    "attacks": [
+      {
+        "id": "bite",
+        "name": "Bite",
+        "weight": 3,
+        "range": 2.0,
+        "windup": 0.45,
+        "active": 0.15,
+        "recover": 0.85,
+        "damage": 16,
+        "lunge": 1.4,
+        "knockback": 0.9
+      },
+      {
+        "id": "pounce",
+        "name": "Pounce",
+        "weight": 1,
+        "range": 6.0,
+        "minRange": 3.0,
+        "windup": 0.8,
+        "active": 0.25,
+        "recover": 1.2,
+        "damage": 22,
+        "lunge": 5.0,
+        "knockback": 1.8
+      },
+      {
+        "id": "snap",
+        "name": "Snap",
+        "weight": 0,
+        "range": 2.2,
+        "windup": 0.3,
+        "active": 0.12,
+        "recover": 0.7,
+        "damage": 11,
+        "lunge": 0.9,
+        "knockback": 0.6
+      }
+    ],
+    "flinchEvery": 0,
+    "flinchTime": 0.35,
+    "respawnSeconds": 3.0,
+    "counterAfterHits": 2
+  },
+  {
+    "id": "post-breaker",
+    "name": "The Post-breaker",
+    "shape": "make",
+    "molt": 2,
+    "health": 720,
+    "$comment": "Harper's Cut's elite: squat and armoured; it took the last post and it will take this one.",
+    "model": "post-breaker",
+    "modelScale": 1.5,
+    "title": "second molt · named",
+    "radius": 1.1,
+    "walkSpeed": 1.8,
+    "gallopSpeed": 6.0,
+    "circleRadius": 5.0,
+    "prowl": {
+      "min": 0.7,
+      "max": 1.6
+    },
+    "attacks": [
+      {
+        "id": "slam",
+        "name": "Slam",
+        "weight": 3,
+        "range": 2.6,
+        "windup": 0.9,
+        "active": 0.2,
+        "recover": 1.3,
+        "damage": 32,
+        "lunge": 1.6,
+        "knockback": 2.5
+      },
+      {
+        "id": "charge",
+        "name": "Charge",
+        "weight": 2,
+        "range": 7.5,
+        "minRange": 3.5,
+        "windup": 1.0,
+        "active": 0.3,
+        "recover": 1.6,
+        "damage": 36,
+        "lunge": 6.5,
+        "knockback": 3.0
+      },
+      {
+        "id": "snap",
+        "name": "Shove",
+        "weight": 0,
+        "range": 2.6,
+        "windup": 0.35,
+        "active": 0.12,
+        "recover": 0.8,
+        "damage": 14,
+        "lunge": 1.0,
+        "knockback": 1.2
+      }
+    ],
+    "flinchEvery": 0,
+    "flinchTime": 0.3,
+    "respawnSeconds": 99.0,
+    "counterAfterHits": 3
+  },
+  {
+    "id": "current-eel",
+    "name": "Eel of the current",
+    "shape": "turn",
+    "molt": 1,
+    "health": 260,
+    "$comment": "The Cahokia river's common beast: long, quick, it comes up the bank in twos.",
+    "model": "current-eel",
+    "modelScale": 1.0,
+    "title": "first molt · of the current",
+    "radius": 0.6,
+    "walkSpeed": 2.6,
+    "gallopSpeed": 8.0,
+    "circleRadius": 5.0,
+    "prowl": {
+      "min": 0.8,
+      "max": 2.0
+    },
+    "attacks": [
+      {
+        "id": "lash",
+        "name": "Lash",
+        "weight": 3,
+        "range": 2.6,
+        "windup": 0.4,
+        "active": 0.15,
+        "recover": 0.8,
+        "damage": 12,
+        "lunge": 1.0,
+        "knockback": 0.7
+      },
+      {
+        "id": "surge",
+        "name": "Surge",
+        "weight": 1,
+        "range": 6.0,
+        "minRange": 3.0,
+        "windup": 0.7,
+        "active": 0.25,
+        "recover": 1.1,
+        "damage": 18,
+        "lunge": 5.0,
+        "knockback": 1.5
+      },
+      {
+        "id": "snap",
+        "name": "Snap",
+        "weight": 0,
+        "range": 2.4,
+        "windup": 0.28,
+        "active": 0.12,
+        "recover": 0.65,
+        "damage": 9,
+        "lunge": 0.9,
+        "knockback": 0.5
+      }
+    ],
+    "flinchEvery": 0,
+    "flinchTime": 0.35,
+    "respawnSeconds": 3.0,
+    "counterAfterHits": 2
+  },
+  {
+    "id": "barge-heart",
+    "name": "The Barge-Heart",
+    "shape": "anchor",
+    "molt": 2,
+    "health": 820,
+    "$comment": "The Cahokia river's elite: a river-thing grown huge in a barge hull, named by the river towns.",
+    "model": "river-thing",
+    "modelScale": 1.8,
+    "title": "second molt · named",
+    "radius": 1.2,
+    "walkSpeed": 1.6,
+    "gallopSpeed": 5.5,
+    "circleRadius": 5.0,
+    "prowl": {
+      "min": 0.7,
+      "max": 1.6
+    },
+    "attacks": [
+      {
+        "id": "crush",
+        "name": "Crush",
+        "weight": 3,
+        "range": 2.8,
+        "windup": 1.0,
+        "active": 0.2,
+        "recover": 1.4,
+        "damage": 34,
+        "lunge": 1.4,
+        "knockback": 2.6
+      },
+      {
+        "id": "surge",
+        "name": "Surge",
+        "weight": 2,
+        "range": 7.0,
+        "minRange": 3.5,
+        "windup": 1.0,
+        "active": 0.3,
+        "recover": 1.6,
+        "damage": 34,
+        "lunge": 6.0,
+        "knockback": 2.8
+      },
+      {
+        "id": "snap",
+        "name": "Snap",
+        "weight": 0,
+        "range": 2.8,
+        "windup": 0.35,
+        "active": 0.12,
+        "recover": 0.8,
+        "damage": 14,
+        "lunge": 1.0,
+        "knockback": 1.2
+      }
+    ],
+    "flinchEvery": 0,
+    "flinchTime": 0.3,
+    "respawnSeconds": 99.0,
+    "counterAfterHits": 3
   }
- },
- {
-  "id": "green-warden",
-  "name": "The Warden of the Cutting",
-  "shape": "turn",
-  "molt": 2,
-  "health": 520,
-  "$comment": "The beast of the Green at the Field Examination's den: a second-molt cut-wolf, half again as big, named. modelScale draws it larger.",
-  "modelScale": 1.45,
-  "title": "second molt \u00b7 named",
-  "radius": 0.95,
-  "walkSpeed": 2.4,
-  "gallopSpeed": 7.0,
-  "circleRadius": 5.0,
-  "prowl": {
-   "min": 0.7,
-   "max": 1.6
-  },
-  "attacks": [
-   {
-    "id": "bite",
-    "name": "Bite",
-    "weight": 3,
-    "range": 2.3,
-    "windup": 0.55,
-    "active": 0.15,
-    "recover": 0.9,
-    "damage": 18,
-    "lunge": 1.4,
-    "knockback": 1.0
-   },
-   {
-    "id": "pounce",
-    "name": "Pounce",
-    "weight": 2,
-    "range": 6.5,
-    "minRange": 3.0,
-    "windup": 0.9,
-    "active": 0.28,
-    "recover": 1.3,
-    "damage": 26,
-    "lunge": 5.0,
-    "knockback": 2.0
-   },
-   {
-    "id": "snap",
-    "name": "Snap",
-    "weight": 0,
-    "range": 2.4,
-    "windup": 0.3,
-    "active": 0.12,
-    "recover": 0.7,
-    "damage": 12,
-    "lunge": 1.0,
-    "knockback": 0.7
-   }
-  ],
-  "flinchEvery": 0,
-  "flinchTime": 0.3,
-  "respawnSeconds": 99.0,
-  "counterAfterHits": 3
- }
 ]

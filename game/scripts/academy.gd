@@ -194,15 +194,24 @@ static func _shuffle(a: Array, rng: RandomNumberGenerator) -> void:
 		a[j] = t
 
 ## Walk into a place: build it, fill it with the people who are there, put the hero at the door.
+## A place by id: the Academy's own (data/academy.json) or an area of a zone ("green/cutting"),
+## drawn for this run and this day.
+func place_spec(id: String) -> Dictionary:
+	if Data.academy["places"].has(id):
+		return Data.academy["places"][id]
+	if Zones.is_zone(id):
+		return Zones.area_place(id, int(progress.get("seed", 0)) + int(progress.get("day", 1)) * 7)
+	return {}
+
 func go(place_id: String, quiet := false, from := "") -> void:
-	var spec: Dictionary = Data.academy["places"][place_id]
+	var spec: Dictionary = place_spec(place_id)
 	progress["place"] = place_id
 	world.open_doors = {}
 	for d in spec["doors"]:
 		if door_open(d):
 			world.open_doors[d["to"]] = true
 	world.place = ""
-	world.set_place(place_id)
+	world.set_place(place_id, spec)
 	_people.clear()
 	_doors = spec["doors"]
 	_rest = spec.get("rest", {})
@@ -230,7 +239,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 	world.lock_on = false
 	world.portrait = false
 	world.genius_visible = true
-	world.set_foe({ "wolf_scale": float(fight.beast.get("modelScale", 1.0)) })
+	world.set_foe({ "wolf_scale": float(fight.beast.get("modelScale", 1.0)), "model": String(fight.beast.get("model", "")) })
 	world.set_allies(fight.allies)
 	world.build_hero(hero)
 	if not zone.is_empty():
@@ -630,7 +639,7 @@ func objective() -> String:
 	var nl := next_lesson()
 	if not nl.is_empty():
 		var ins: Dictionary = Data.by_id(Data.academy["instructors"], lesson_instructor(nl))
-		var place: Dictionary = Data.academy["places"][nl["place"]]
+		var place: Dictionary = place_spec(nl["place"])
 		if progress["place"] == nl["place"]:
 			return "Day %d · Lesson %d, %s: speak to %s." % [day, int(nl["number"]), nl["title"], ins["name"]]
 		return "Day %d · Lesson %d, %s: find %s in %s." % [day, int(nl["number"]), nl["title"], ins["name"], place["name"]]
@@ -751,7 +760,7 @@ func update(events: Array, dt: float) -> void:
 			if (fight.p_pos - pa).length() < minf(best, 2.6):
 				_target = { "kind": "post", "pos": pa }
 		if board_open() and not in_lesson():
-			var bspec: Dictionary = Data.academy["places"][progress["place"]].get("board", {})
+			var bspec: Dictionary = place_spec(progress["place"]).get("board", {})
 			if not bspec.is_empty():
 				var ba := Vector2(bspec["at"][0], bspec["at"][1])
 				if (fight.p_pos - ba).length() < minf(best, 2.8):
@@ -830,7 +839,7 @@ func auto_move() -> Vector2:
 		if goal != Vector2.INF:
 			return _walk_or_act(goal, 2.2)
 	if auto_troubles and board_open() and progress.get("trouble", "") == "" and troubles_open().size() > 0:
-		var bspec: Dictionary = Data.academy["places"].get("quad", {}).get("board", {})
+		var bspec: Dictionary = place_spec("quad").get("board", {})
 		if place == "quad":
 			goal = Vector2(bspec["at"][0], bspec["at"][1])
 		else:
@@ -910,7 +919,7 @@ func _start_lesson(lesson0: Dictionary) -> void:
 	if lesson["id"] == "discipline":
 		var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
 		hero["techniques"] = dk.get("techniques", []).map(func(t): return t["id"])
-	var spec: Dictionary = Data.academy["places"][lesson["place"]]
+	var spec: Dictionary = place_spec(lesson["place"])
 	var ins: Dictionary = Data.by_id(Data.academy["instructors"], lesson["instructor"])
 	_drill_fight()
 	hud.play_ui.visible = true
@@ -921,7 +930,7 @@ func _start_lesson(lesson0: Dictionary) -> void:
 
 ## The Instructor's genius sits in the ring: the fight the drills are done in.
 func _drill_fight() -> void:
-	var spec: Dictionary = Data.academy["places"][_lesson["place"]]
+	var spec: Dictionary = place_spec(_lesson["place"])
 	var ins: Dictionary = Data.by_id(Data.academy["instructors"], lesson_instructor(_lesson))
 	var p := fight.p_pos if fight else Vector2(-1.5, 0.5)
 	world.set_foe({})
@@ -956,7 +965,7 @@ func spar_order() -> Array:
 	return out
 
 func _spar_begin() -> void:
-	var spec: Dictionary = Data.academy["places"][_lesson["place"]]
+	var spec: Dictionary = place_spec(_lesson["place"])
 	var scale := 1.0 + _spar_rung * float(_lesson.get("spar", {}).get("scalePerRung", 0.18))
 	if _spar_mode == "poster":
 		_spar_who = _lesson["poster"].duplicate()
@@ -1058,7 +1067,7 @@ func _next_step() -> void:
 			_choice_done = false
 			var rng := RandomNumberGenerator.new()
 			rng.seed = int(progress["seed"]) + 77
-			var a: Dictionary = Data.academy["places"][progress["place"]]
+			var a: Dictionary = place_spec(progress["place"])
 			_lost_at = Vector2(rng.randf_range(-a["size"][0] / 2.0 + 2.0, a["size"][0] / 2.0 - 2.0), rng.randf_range(-a["size"][1] / 2.0 + 2.0, a["size"][1] / 2.0 - 2.0))
 			_lost_label = fill(String(s["goal"]["item"]), _lesson.get("poster", {}))
 			world.set_marker(_lost_at)
@@ -1457,7 +1466,7 @@ func choose(title: String, options: Array, then: Callable) -> void:
 # --- The line: zones, the post, extraction, the rescue team --------------------------------
 
 func _in_zone() -> bool:
-	return Data.academy["places"].get(progress["place"], {}).has("zone")
+	return place_spec(progress["place"]).has("zone")
 
 func _clear_place() -> void:
 	if not progress.has("cleared"):
@@ -1554,7 +1563,7 @@ func _pick_party(n: int) -> void:
 func place_label() -> String:
 	if _in_zone():
 		return "the Green  ·  the line"
-	return "%s  ·  warded" % String(Data.academy["places"].get(progress["place"], {}).get("name", "the yard")).to_lower()
+	return "%s  ·  warded" % String(place_spec(progress["place"]).get("name", "the yard")).to_lower()
 
 # --- The Gate ---------------------------------------------------------------------
 
@@ -1791,7 +1800,7 @@ func _pick_up() -> void:
 
 ## A beast loose in the yard, wards up: a small hunt.
 func _hunt_begin(beast: String, scale: float) -> void:
-	var spec: Dictionary = Data.academy["places"][progress["place"]]
+	var spec: Dictionary = place_spec(progress["place"])
 	var keep := fight.p_pos
 	fight = Fight.new({ "hero": hero, "beast": beast, "passive": false, "respawn": false, "mercy": true, "allow_breach": false,
 		"genius": genius if genius and genius.is_born() else null, "arena": Vector2(spec["size"][0], spec["size"][1]), "seed": randi(), "beast_health": roundf(float(Data.beast(beast)["health"]) * scale) })

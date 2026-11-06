@@ -47,6 +47,7 @@ func _run() -> void:
 	test_calendar_and_declaration()
 	test_shape_kits()
 	test_pack()
+	test_zones()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -439,7 +440,7 @@ func test_academy() -> void:
 	check(shapes.size() == 6 and shapes.values().all(func(n): return n == 2), "two classmates of every Shape")
 	# Every lesson is in a place that exists, taught by an Instructor who exists, with goals it knows.
 	for lesson in Data.academy["lessons"]:
-		check(Data.academy["places"].has(lesson["place"]), "lesson %s has its place" % lesson["id"])
+		check(Data.academy["places"].has(lesson["place"]) or Zones.is_zone(lesson["place"]), "lesson %s has its place" % lesson["id"])
 		check(lesson["instructor"] == "$discipline" or not Data.by_id(Data.academy["instructors"], lesson["instructor"]).is_empty(), "lesson %s has its Instructor" % lesson["id"])
 		for st in lesson["steps"]:
 			check(st["goal"]["type"] in ["event", "streak", "will-full", "stance-seconds", "spar", "choose-weapon", "choose-party", "travel", "fell", "hold", "extract", "reach-hits"], "step %s has a goal the Academy knows" % st["title"])
@@ -826,8 +827,8 @@ func test_party() -> void:
 	var together := run_bot(60.0, true, h, { "allies": [cohort[0], cohort[1]] })
 	check(together.stats["wolves_down"] >= alone.stats["wolves_down"], "a party fells at least as many wolves (%d with, %d alone)" % [together.stats["wolves_down"], alone.stats["wolves_down"]])
 	# The Green's places and Lesson 5 are declared.
-	for pid in ["green-1", "green-2", "green-3"]:
-		check(Data.academy["places"][pid].has("zone"), "%s is a zone of the line" % pid)
+	for pid in ["green/cutting", "green/post", "green/den"]:
+		check(Zones.area_place(pid, 1).has("zone"), "%s is an area of the Green" % pid)
 	var l: Dictionary = Data.by_id(Data.academy["lessons"], "line")
 	check(l["steps"][0]["goal"]["type"] == "choose-party" and l["steps"].back()["goal"]["type"] == "extract" and l.has("rescue"), "Lesson 5 chooses a party, ends in extraction, and has a rescue team")
 
@@ -1032,4 +1033,43 @@ func test_pack() -> void:
 	var ally_on_pack := ev3.any(func(e): return e["type"] == "ally-hit" and int(e.get("foe", -1)) == 0)
 	check(ally_on_pack and pf.hp < php, "a classmate strikes the pack beside them")
 	# The Green's zones carry packs.
-	check(Data.academy["places"]["green-2"]["zone"]["pack"].size() == 2, "the second Green zone runs a pack of three wolves")
+	var post_place := Zones.area_place("green/post", 3)
+	check(post_place["zone"]["pack"].size() >= 2, "the Green's post runs a pack beside the locked wolf")
+
+## The zones: four around Alexandria, each a tile library and a chain of areas; an area becomes
+## a place for the run, its pack and its props drawn from a seed.
+func test_zones() -> void:
+	check(Data.zones().size() == 4, "four zones around Alexandria")
+	var all: Array = Zones.all_places()
+	check(all.size() >= 13, "at least thirteen areas across them (%d)" % all.size())
+	for pid in all:
+		var sp: Dictionary = Zones.area_place(pid, 5)
+		for key in ["name", "size", "floor", "spawn", "doors", "spots", "instructors", "zone", "wild", "area", "variant"]:
+			check(sp.has(key), "%s has %s" % [pid, key])
+		check(not Data.beast(sp["zone"]["beast"]).is_empty(), "%s's beast exists" % pid)
+		for d in sp["doors"]:
+			check(d["to"] == "extraction" or Zones.all_places().has(d["to"]), "%s's door leads somewhere (%s)" % [pid, d["to"]])
+	# Every zone ends in an elite that does not come back, reachable from its entrance.
+	for z in Data.zones():
+		var elites: Array = z["areas"].filter(func(a): return a.get("beast", "") == "elite")
+		check(elites.size() == 1 and elites[0].get("respawn", true) == false, "%s has one elite area whose beast stays down" % z["id"])
+		check(z["areas"].any(func(a): return a.has("post")), "%s has a post" % z["id"])
+	# The pack and the variant follow the seed: the same seed, the same place; another seed, another.
+	var a1 := Zones.area_place("green/post", 10)
+	var a2 := Zones.area_place("green/post", 10)
+	check(a1["variant"] == a2["variant"] and a1["zone"]["pack"] == a2["zone"]["pack"], "the same seed draws the same area")
+	var differs := false
+	for sd in range(11, 40):
+		var a3 := Zones.area_place("green/post", sd)
+		if a3["variant"] != a1["variant"] and a3["zone"]["pack"].size() != a1["zone"]["pack"].size():
+			differs = true
+			break
+	check(differs, "another seed draws another pack and another layout")
+	# A zone fight runs: the Academy resolves a zone area as a place and the fight gets its pack.
+	var h := Fight.default_hero()
+	var f := Fight.new({ "hero": h, "beast": a1["zone"]["beast"], "pack": a1["zone"]["pack"], "seed": 3 })
+	check(f.foes.size() == a1["zone"]["pack"].size() and f.threats() == 1 + f.foes.size(), "a zone area's pack comes into the fight")
+	# The new beasts are whole: each has a model, a Shape on the wheel, and a counter.
+	for bid in ["river-thing", "ruin-stag", "molted-hound", "post-breaker", "current-eel", "barge-heart"]:
+		var b := Data.beast(bid)
+		check(b.has("model") and b["attacks"].size() == 3 and Data.wheel.has(b["shape"]), "%s is a whole beast" % bid)

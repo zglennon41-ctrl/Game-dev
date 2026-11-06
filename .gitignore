@@ -4,3 +4,4 @@ dist/
 .godot/
 *.import
 build/
+__pycache__/

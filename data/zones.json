@@ -1,0 +1,943 @@
+[
+  {
+    "id": "green",
+    "name": "The Green hills",
+    "line": "columbia",
+    "colour": "green",
+    "ground": "wild",
+    "night": true,
+    "$comment": "The cutting through the hills north of Alexandria: the Academy's own ground, the line's gentlest colour. Areas chain by their doors; a door that opensWhen cleared waits for the area's beasts to fall. pack is how many of the zone's common beast come beside the locked one, drawn by the run's seed.",
+    "light": {
+      "sky": [
+        0.03,
+        0.045,
+        0.06
+      ],
+      "ambient": [
+        0.5,
+        0.6,
+        0.75
+      ],
+      "ambientEnergy": 0.42,
+      "fog": 0.018,
+      "moon": 0.9,
+      "moonColor": [
+        0.62,
+        0.74,
+        1.0
+      ]
+    },
+    "tiles": {
+      "floor": [
+        [
+          "ground_grass_a",
+          4
+        ],
+        [
+          "ground_grass_b",
+          3
+        ],
+        [
+          "ground_grass_rocky",
+          1
+        ],
+        [
+          "ground_earth",
+          1
+        ]
+      ],
+      "edge": [
+        [
+          "edge_treeline",
+          3
+        ],
+        [
+          "edge_treeline_pine",
+          1
+        ],
+        [
+          "edge_rocks",
+          1
+        ]
+      ],
+      "props": [
+        [
+          "tree_oak",
+          0.7,
+          2
+        ],
+        [
+          "tree_pine",
+          0.6,
+          1
+        ],
+        [
+          "boulder_a",
+          0.8,
+          2
+        ],
+        [
+          "boulder_b",
+          0.6,
+          1
+        ],
+        [
+          "stump",
+          0.45,
+          1
+        ],
+        [
+          "bush",
+          0.5,
+          2
+        ],
+        [
+          "fern",
+          0.0,
+          2
+        ]
+      ]
+    },
+    "beasts": {
+      "common": "cut-wolf",
+      "elite": "green-warden",
+      "named": [
+        {
+          "id": "old-grey",
+          "beast": "cut-wolf",
+          "name": "Old Grey",
+          "scale": 1.25,
+          "health": 1.6,
+          "$comment": "A named beast remembers: it comes back on a later run with its scars, until it is felled for good."
+        }
+      ]
+    },
+    "areas": [
+      {
+        "id": "cutting",
+        "name": "The Cutting",
+        "size": [
+          26,
+          16
+        ],
+        "spawn": [
+          -11,
+          0
+        ],
+        "density": 0.45,
+        "rails": true,
+        "pack": {
+          "min": 1,
+          "max": 2
+        },
+        "doors": [
+          {
+            "to": "post",
+            "at": [
+              13,
+              0
+            ],
+            "label": "the Post, ahead",
+            "locked": "The cutting is not clear. Fell what hunts in it.",
+            "opensWhen": "cleared"
+          },
+          {
+            "to": "hollow",
+            "at": [
+              0,
+              -8
+            ],
+            "label": "the Hollow",
+            "side": true
+          }
+        ]
+      },
+      {
+        "id": "hollow",
+        "name": "The Hollow",
+        "size": [
+          22,
+          18
+        ],
+        "spawn": [
+          0,
+          8
+        ],
+        "density": 0.7,
+        "pack": {
+          "min": 2,
+          "max": 2
+        },
+        "doors": [
+          {
+            "to": "cutting",
+            "at": [
+              0,
+              9
+            ],
+            "label": "back to the Cutting"
+          }
+        ]
+      },
+      {
+        "id": "post",
+        "name": "The Post",
+        "size": [
+          18,
+          18
+        ],
+        "spawn": [
+          -7,
+          0
+        ],
+        "density": 0.3,
+        "post": {
+          "at": [
+            0,
+            0
+          ],
+          "label": "the post"
+        },
+        "waitForPost": true,
+        "pack": {
+          "min": 2,
+          "max": 3
+        },
+        "instructors": [
+          {
+            "id": "varga",
+            "at": [
+              -3,
+              -3.5
+            ]
+          }
+        ],
+        "doors": [
+          {
+            "to": "den",
+            "at": [
+              0,
+              -9
+            ],
+            "label": "the Den",
+            "locked": "Hold the post first.",
+            "opensWhen": "cleared"
+          }
+        ]
+      },
+      {
+        "id": "den",
+        "name": "The Den",
+        "size": [
+          20,
+          14
+        ],
+        "spawn": [
+          -8,
+          0
+        ],
+        "density": 0.35,
+        "beast": "elite",
+        "respawn": false,
+        "set": "set_den",
+        "setAt": [
+          7,
+          -4
+        ],
+        "setRot": 255,
+        "doors": [
+          {
+            "to": "extraction",
+            "at": [
+              -10,
+              0
+            ],
+            "label": "the line back",
+            "locked": "Not with the Warden still standing.",
+            "opensWhen": "cleared"
+          }
+        ]
+      }
+    ],
+    "extraction": "the car, back down the line",
+    "opensAfter": "line"
+  },
+  {
+    "id": "shenandoah",
+    "name": "The Shenandoah ruin",
+    "line": "cahokia",
+    "colour": "green",
+    "colourDeep": "amber",
+    "ground": "ruin",
+    "night": true,
+    "$comment": "A drowned town on the Cahokia line where the river took the bridge. River-things in the shallows, the ruin-stag on the high ground.",
+    "light": {
+      "sky": [
+        0.035,
+        0.04,
+        0.05
+      ],
+      "ambient": [
+        0.55,
+        0.6,
+        0.65
+      ],
+      "ambientEnergy": 0.4,
+      "fog": 0.026,
+      "moon": 0.75,
+      "moonColor": [
+        0.7,
+        0.78,
+        0.95
+      ]
+    },
+    "tiles": {
+      "floor": [
+        [
+          "ground_ruin_floor",
+          3
+        ],
+        [
+          "ground_earth",
+          2
+        ],
+        [
+          "ground_mud",
+          1
+        ],
+        [
+          "ground_grass_rocky",
+          1
+        ]
+      ],
+      "edge": [
+        [
+          "edge_ruin_wall",
+          3
+        ],
+        [
+          "edge_reeds",
+          1
+        ],
+        [
+          "edge_treeline",
+          1
+        ]
+      ],
+      "props": [
+        [
+          "ruin_column",
+          0.5,
+          2
+        ],
+        [
+          "ruin_arch",
+          1.2,
+          1
+        ],
+        [
+          "boulder_b",
+          0.6,
+          1
+        ],
+        [
+          "tree_willow",
+          0.7,
+          1
+        ],
+        [
+          "tree_dead",
+          0.5,
+          1
+        ],
+        [
+          "bush",
+          0.5,
+          1
+        ],
+        [
+          "bones",
+          0.0,
+          1
+        ]
+      ]
+    },
+    "beasts": {
+      "common": "river-thing",
+      "elite": "ruin-stag",
+      "named": [
+        {
+          "id": "the-ferryman",
+          "beast": "river-thing",
+          "name": "The Ferryman",
+          "scale": 1.3,
+          "health": 1.7
+        }
+      ]
+    },
+    "areas": [
+      {
+        "id": "bank",
+        "name": "The Bank",
+        "size": [
+          24,
+          16
+        ],
+        "spawn": [
+          -10,
+          0
+        ],
+        "density": 0.4,
+        "water": "north",
+        "pack": {
+          "min": 1,
+          "max": 2
+        },
+        "doors": [
+          {
+            "to": "ruin",
+            "at": [
+              12,
+              0
+            ],
+            "label": "into the ruin",
+            "locked": "The bank is not clear.",
+            "opensWhen": "cleared"
+          }
+        ]
+      },
+      {
+        "id": "ruin",
+        "name": "The Drowned Town",
+        "size": [
+          22,
+          22
+        ],
+        "spawn": [
+          -9,
+          0
+        ],
+        "density": 0.55,
+        "post": {
+          "at": [
+            0,
+            0
+          ],
+          "label": "the post"
+        },
+        "waitForPost": true,
+        "set": "set_bridge",
+        "setAt": [
+          0,
+          -8
+        ],
+        "setRot": 90,
+        "pack": {
+          "min": 2,
+          "max": 3
+        },
+        "doors": [
+          {
+            "to": "high-ground",
+            "at": [
+              10,
+              0
+            ],
+            "label": "the high ground",
+            "locked": "Hold the post first.",
+            "opensWhen": "cleared"
+          },
+          {
+            "to": "extraction",
+            "at": [
+              -11,
+              0
+            ],
+            "label": "the line back"
+          }
+        ]
+      },
+      {
+        "id": "high-ground",
+        "name": "The High Ground",
+        "size": [
+          20,
+          18
+        ],
+        "spawn": [
+          -8,
+          0
+        ],
+        "density": 0.45,
+        "beast": "elite",
+        "respawn": false,
+        "doors": [
+          {
+            "to": "extraction",
+            "at": [
+              -10,
+              0
+            ],
+            "label": "the line back",
+            "locked": "Not with the stag still standing.",
+            "opensWhen": "cleared"
+          }
+        ]
+      }
+    ],
+    "extraction": "the car at the bridge's good end",
+    "opensAfter": "line"
+  },
+  {
+    "id": "harpers-cut",
+    "name": "Harper's Cut junction",
+    "line": "columbia",
+    "colour": "green",
+    "colourDeep": "amber",
+    "ground": "junction",
+    "night": true,
+    "$comment": "Where the Columbia line splits: a dark junction, molted hounds in the yards, and the post-breaker that took the last post.",
+    "light": {
+      "sky": [
+        0.03,
+        0.03,
+        0.045
+      ],
+      "ambient": [
+        0.5,
+        0.5,
+        0.62
+      ],
+      "ambientEnergy": 0.36,
+      "fog": 0.02,
+      "moon": 0.7,
+      "moonColor": [
+        0.75,
+        0.75,
+        0.9
+      ]
+    },
+    "tiles": {
+      "floor": [
+        [
+          "ground_ballast",
+          3
+        ],
+        [
+          "ground_earth",
+          3
+        ],
+        [
+          "ground_grass_rocky",
+          1
+        ],
+        [
+          "ground_mud",
+          1
+        ]
+      ],
+      "edge": [
+        [
+          "edge_fence",
+          2
+        ],
+        [
+          "edge_rocks",
+          1
+        ],
+        [
+          "edge_treeline_pine",
+          1
+        ],
+        [
+          "edge_cliff",
+          1
+        ]
+      ],
+      "props": [
+        [
+          "signal_post",
+          0.3,
+          2
+        ],
+        [
+          "rail_car",
+          1.6,
+          1
+        ],
+        [
+          "lamp_post",
+          0.25,
+          2
+        ],
+        [
+          "boulder_a",
+          0.8,
+          1
+        ],
+        [
+          "cairn",
+          0.4,
+          1
+        ],
+        [
+          "fence_post",
+          0.15,
+          2
+        ],
+        [
+          "stump",
+          0.45,
+          1
+        ]
+      ]
+    },
+    "beasts": {
+      "common": "molted-hound",
+      "elite": "post-breaker",
+      "named": [
+        {
+          "id": "the-yard-dog",
+          "beast": "molted-hound",
+          "name": "The Yard Dog",
+          "scale": 1.2,
+          "health": 1.6
+        }
+      ]
+    },
+    "areas": [
+      {
+        "id": "approach",
+        "name": "The Approach",
+        "size": [
+          26,
+          14
+        ],
+        "spawn": [
+          -11,
+          0
+        ],
+        "density": 0.35,
+        "rails": true,
+        "pack": {
+          "min": 2,
+          "max": 2
+        },
+        "doors": [
+          {
+            "to": "junction",
+            "at": [
+              13,
+              0
+            ],
+            "label": "the junction",
+            "locked": "The approach is not clear.",
+            "opensWhen": "cleared"
+          }
+        ]
+      },
+      {
+        "id": "junction",
+        "name": "The Dark Junction",
+        "size": [
+          24,
+          24
+        ],
+        "spawn": [
+          -10,
+          0
+        ],
+        "density": 0.4,
+        "rails": true,
+        "post": {
+          "at": [
+            0,
+            0
+          ],
+          "label": "the post"
+        },
+        "waitForPost": true,
+        "set": "set_junction",
+        "setAt": [
+          4,
+          0
+        ],
+        "setRot": 0,
+        "pack": {
+          "min": 2,
+          "max": 3
+        },
+        "doors": [
+          {
+            "to": "breaker-yard",
+            "at": [
+              0,
+              12
+            ],
+            "label": "the breaker's yard",
+            "locked": "Hold the post first.",
+            "opensWhen": "cleared"
+          },
+          {
+            "to": "extraction",
+            "at": [
+              -12,
+              0
+            ],
+            "label": "the line back"
+          }
+        ]
+      },
+      {
+        "id": "breaker-yard",
+        "name": "The Breaker's Yard",
+        "size": [
+          22,
+          18
+        ],
+        "spawn": [
+          0,
+          -8
+        ],
+        "density": 0.5,
+        "beast": "elite",
+        "respawn": false,
+        "doors": [
+          {
+            "to": "extraction",
+            "at": [
+              0,
+              -9
+            ],
+            "label": "the line back",
+            "locked": "Not with the post-breaker still standing.",
+            "opensWhen": "cleared"
+          }
+        ]
+      }
+    ],
+    "extraction": "the car on the Columbia side",
+    "opensAfter": "project"
+  },
+  {
+    "id": "cahokia-river",
+    "name": "The Cahokia river line",
+    "line": "cahokia",
+    "colour": "amber",
+    "ground": "river",
+    "night": true,
+    "$comment": "The line runs along the great river. Eels of the current come up the bank; the Barge-Heart sleeps in a hull at the crossing. Amber: the first colour past Green.",
+    "light": {
+      "sky": [
+        0.05,
+        0.035,
+        0.03
+      ],
+      "ambient": [
+        0.75,
+        0.6,
+        0.45
+      ],
+      "ambientEnergy": 0.4,
+      "fog": 0.03,
+      "moon": 0.6,
+      "moonColor": [
+        1.0,
+        0.8,
+        0.6
+      ]
+    },
+    "tiles": {
+      "floor": [
+        [
+          "ground_reeds",
+          2
+        ],
+        [
+          "ground_mud",
+          2
+        ],
+        [
+          "ground_earth",
+          2
+        ],
+        [
+          "ground_ballast",
+          1
+        ]
+      ],
+      "edge": [
+        [
+          "edge_reeds",
+          3
+        ],
+        [
+          "edge_treeline",
+          1
+        ],
+        [
+          "edge_fence",
+          1
+        ]
+      ],
+      "props": [
+        [
+          "tree_willow",
+          0.7,
+          2
+        ],
+        [
+          "boulder_b",
+          0.6,
+          1
+        ],
+        [
+          "bush",
+          0.5,
+          2
+        ],
+        [
+          "lamp_post",
+          0.25,
+          1
+        ],
+        [
+          "bones",
+          0.0,
+          1
+        ],
+        [
+          "cairn",
+          0.4,
+          1
+        ]
+      ]
+    },
+    "beasts": {
+      "common": "current-eel",
+      "elite": "barge-heart",
+      "named": [
+        {
+          "id": "long-mother",
+          "beast": "current-eel",
+          "name": "Long Mother",
+          "scale": 1.4,
+          "health": 1.8
+        }
+      ]
+    },
+    "areas": [
+      {
+        "id": "shore",
+        "name": "The Shore",
+        "size": [
+          24,
+          16
+        ],
+        "spawn": [
+          -10,
+          0
+        ],
+        "density": 0.4,
+        "water": "north",
+        "pack": {
+          "min": 1,
+          "max": 2
+        },
+        "doors": [
+          {
+            "to": "crossing",
+            "at": [
+              12,
+              0
+            ],
+            "label": "the crossing",
+            "locked": "The shore is not clear.",
+            "opensWhen": "cleared"
+          }
+        ]
+      },
+      {
+        "id": "crossing",
+        "name": "The Crossing",
+        "size": [
+          22,
+          20
+        ],
+        "spawn": [
+          -9,
+          0
+        ],
+        "density": 0.35,
+        "water": "north",
+        "post": {
+          "at": [
+            0,
+            2
+          ],
+          "label": "the post"
+        },
+        "waitForPost": true,
+        "set": "set_crossing",
+        "setAt": [
+          2,
+          -7
+        ],
+        "setRot": 10,
+        "pack": {
+          "min": 2,
+          "max": 3
+        },
+        "doors": [
+          {
+            "to": "hull",
+            "at": [
+              10,
+              -4
+            ],
+            "label": "the hull",
+            "locked": "Hold the post first.",
+            "opensWhen": "cleared"
+          },
+          {
+            "to": "extraction",
+            "at": [
+              -10,
+              0
+            ],
+            "label": "the line back"
+          }
+        ]
+      },
+      {
+        "id": "hull",
+        "name": "The Hull",
+        "size": [
+          18,
+          18
+        ],
+        "spawn": [
+          -7,
+          0
+        ],
+        "density": 0.25,
+        "beast": "elite",
+        "respawn": false,
+        "doors": [
+          {
+            "to": "extraction",
+            "at": [
+              -8,
+              0
+            ],
+            "label": "the line back",
+            "locked": "Not with the Barge-Heart still beating.",
+            "opensWhen": "cleared"
+          }
+        ]
+      }
+    ],
+    "extraction": "the car at the crossing",
+    "opensAfter": "project"
+  }
+]

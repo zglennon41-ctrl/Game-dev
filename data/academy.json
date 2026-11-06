@@ -313,126 +313,6 @@
         }
       ]
     },
-    "green-1": {
-      "name": "The Cutting",
-      "size": [
-        26,
-        16
-      ],
-      "floor": "floor_dirt_large_rocky",
-      "walls": "wild",
-      "spawn": [
-        -11,
-        0
-      ],
-      "doors": [
-        {
-          "to": "green-2",
-          "at": [
-            13,
-            0
-          ],
-          "label": "the Post, ahead",
-          "locked": "The cutting is not clear. Fell what hunts in it.",
-          "opensWhen": "cleared"
-        }
-      ],
-      "spots": [],
-      "instructors": [],
-      "zone": {
-        "beast": "cut-wolf",
-        "ground": "wild",
-        "night": true,
-        "pack": [
-          "cut-wolf"
-        ]
-      }
-    },
-    "green-2": {
-      "name": "The Post",
-      "size": [
-        18,
-        18
-      ],
-      "floor": "floor_dirt_large_rocky",
-      "walls": "wild",
-      "spawn": [
-        -7,
-        0
-      ],
-      "doors": [
-        {
-          "to": "green-3",
-          "at": [
-            0,
-            -9
-          ],
-          "label": "the Den",
-          "locked": "Hold the post first.",
-          "opensWhen": "cleared"
-        }
-      ],
-      "post": {
-        "at": [
-          0,
-          0
-        ],
-        "label": "the post"
-      },
-      "spots": [],
-      "instructors": [
-        {
-          "id": "varga",
-          "at": [
-            -3,
-            -3.5
-          ]
-        }
-      ],
-      "zone": {
-        "beast": "cut-wolf",
-        "ground": "wild",
-        "night": true,
-        "waitForPost": true,
-        "pack": [
-          "cut-wolf",
-          "cut-wolf"
-        ]
-      }
-    },
-    "green-3": {
-      "name": "The Den",
-      "size": [
-        20,
-        14
-      ],
-      "floor": "floor_dirt_large_rocky",
-      "walls": "wild",
-      "spawn": [
-        -8,
-        0
-      ],
-      "doors": [
-        {
-          "to": "extraction",
-          "at": [
-            -10,
-            0
-          ],
-          "label": "the line back",
-          "locked": "Not with the Warden still standing.",
-          "opensWhen": "cleared"
-        }
-      ],
-      "spots": [],
-      "instructors": [],
-      "zone": {
-        "beast": "green-warden",
-        "ground": "wild",
-        "night": true,
-        "respawn": false
-      }
-    },
     "gate": {
       "name": "The Gate",
       "size": [
@@ -1085,7 +965,7 @@
           "text": "The car waits at the Gate.",
           "goal": {
             "type": "travel",
-            "to": "green-1",
+            "to": "green/cutting",
             "lines": [
               "The car takes you out of Alexandria at lamp hour: three of you, Instructor Varga, and the rescue team riding the tender.",
               "The Green is the line’s gentlest colour. It is still the line. The lamps thin out, and then there are none, and then the car stops at a cutting in the hills.",
@@ -1095,7 +975,7 @@
         },
         {
           "title": "The cutting",
-          "place": "green-1",
+          "place": "green/cutting",
           "text": "Fell [b]two[/b] of what hunts here. Your party fights beside you; [b]Tab[/b] locks on, [b]G[/b] gives your genius its order. Classmates who fall stay down until the post.",
           "goal": {
             "type": "fell",
@@ -1104,7 +984,7 @@
         },
         {
           "title": "The post",
-          "place": "green-2",
+          "place": "green/post",
           "text": "Take the post ([b]E[/b]): whoever is down stands up there, and everyone is whole. Then hold it for [b]forty-five seconds[/b], whatever comes.",
           "goal": {
             "type": "hold",
@@ -1116,7 +996,7 @@
         },
         {
           "title": "The den",
-          "place": "green-3",
+          "place": "green/den",
           "text": "The Warden of the Cutting. A second-molt beast, named. Everything you have, and everyone with you.",
           "goal": {
             "type": "fell",
@@ -1125,7 +1005,7 @@
         },
         {
           "title": "Extraction",
-          "place": "green-3",
+          "place": "green/den",
           "text": "Back to the line ([b]E[/b] at the way out). The car is waiting, and so is Varga.",
           "goal": {
             "type": "extract",
@@ -1209,7 +1089,7 @@
           "text": "The car waits at the Gate.",
           "goal": {
             "type": "travel",
-            "to": "green-1",
+            "to": "green/cutting",
             "lines": [
               "The car again, at lamp hour. Nobody says it is the Examination. Everybody knows.",
               "Varga, at the door of the car: “Field open from the moment your boots touch the cutting. I will be at the post. I will not help.”"
@@ -1218,7 +1098,7 @@
         },
         {
           "title": "The cutting",
-          "place": "green-1",
+          "place": "green/cutting",
           "text": "Fell [b]two[/b]. Your field is open: your techniques reach past the skin.",
           "goal": {
             "type": "fell",
@@ -1227,7 +1107,7 @@
         },
         {
           "title": "The post",
-          "place": "green-2",
+          "place": "green/post",
           "text": "Take the post ([b]E[/b]) and hold it for [b]forty-five seconds[/b]. Varga is watching.",
           "goal": {
             "type": "hold",
@@ -1236,7 +1116,7 @@
         },
         {
           "title": "The den",
-          "place": "green-3",
+          "place": "green/den",
           "text": "The Warden. This time it is the Examination.",
           "goal": {
             "type": "fell",
@@ -1245,7 +1125,7 @@
         },
         {
           "title": "Extraction",
-          "place": "green-3",
+          "place": "green/den",
           "text": "Back to the line ([b]E[/b] at the way out).",
           "goal": {
             "type": "extract",
