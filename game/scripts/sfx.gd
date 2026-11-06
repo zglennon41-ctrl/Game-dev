@@ -30,6 +30,29 @@ func set_ambience(kind: String) -> void:
 func stop_ambience() -> void:
 	_ambience.stop()
 
+## A classmate's bark: a spoken line for the moment, by temperament, from game/assets/voice
+## (<temperament>_<kind>_<n>.ogg, n from 1); nothing if the voice is not there yet.
+var _bark_player := AudioStreamPlayer.new()
+var _bark_next_at := 0.0
+func play_bark(temperament: String, kind: String) -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	if now < _bark_next_at:
+		return
+	var options: Array = []
+	for n in range(1, 5):
+		var path := "res://game/assets/voice/%s_%s_%d.ogg" % [temperament, kind, n]
+		if ResourceLoader.exists(path):
+			options.append(path)
+	if options.is_empty():
+		return
+	if not _bark_player.is_inside_tree():
+		add_child(_bark_player)
+	_bark_player.stream = load(options[randi() % options.size()])
+	_bark_player.volume_db = -4.0
+	_bark_player.pitch_scale = randf_range(0.97, 1.03)
+	_bark_player.play()
+	_bark_next_at = now + 1.6
+
 func play(name: String, pitch := 1.0, volume_db := 0.0) -> void:
 	if not _sfx.has(name):
 		return

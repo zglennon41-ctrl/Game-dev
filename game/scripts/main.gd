@@ -510,6 +510,18 @@ func open_genius_page() -> void:
 	if academy.genius and academy.genius.is_born():
 		page.open(academy.genius, World.SHAPE_COLORS.get(academy.hero["shape"], Color.WHITE), 0, int(academy.progress["record"].get("marks", 0)))
 
+## A classmate speaks for the moment, in their temperament's voice.
+func _bark(e: Dictionary, kind: String) -> void:
+	var i := int(e.get("who", -1))
+	if fight == null or i < 0 or i >= fight.allies.size():
+		return
+	var al: Dictionary = fight.allies[i]
+	var temper := String(al.get("temperament", ""))
+	if temper == "" and mode == "academy":
+		var c := academy._classmate(String(al.get("id", "")))
+		temper = String(c.get("temperament", "earnest"))
+	sfx.play_bark(temper if temper != "" else "earnest", kind)
+
 func _stings(events: Array) -> void:
 	for e in events:
 		match e["type"]:
@@ -745,9 +757,18 @@ func _sounds(events: Array) -> void:
 				if e.get("pattern", false): sfx.play("heavy", 0.8, -4.0)
 				elif e.get("heavy", false): sfx.play("hit", 0.9, -4.0)
 				else: sfx.play("hit", 1.1, -8.0)
-			"ally-windup": sfx.play("swish", 1.0, -8.0)
-			"ally-pattern": sfx.play("pattern", 1.1, -4.0)
-			"ally-parry": sfx.play("parry", 1.1, -4.0)
+			"ally-windup":
+				sfx.play("swish", 1.0, -8.0)
+				if e.get("technique", false): _bark(e, "technique")
+			"ally-hurt": _bark(e, "hurt")
+			"ally-retreat": _bark(e, "retreat")
+			"ally-down": _bark(e, "down")
+			"ally-pattern":
+				sfx.play("pattern", 1.1, -4.0)
+				_bark(e, "pattern")
+			"ally-parry":
+				sfx.play("parry", 1.1, -4.0)
+				_bark(e, "parry")
 			"ally-block": sfx.play("block", 1.1, -6.0)
 			"ally-shot": sfx.play("swish", 1.6, -6.0)
 			"foe-windup": sfx.play("growl", 1.1, -4.0)
