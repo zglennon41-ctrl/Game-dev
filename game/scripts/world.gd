@@ -2629,9 +2629,9 @@ func add_figure(body: String, at: Vector2, facing: float, title: String, sub: St
 	var skel: Skeleton3D = n.find_child("Skeleton3D", true, false)
 	if weapon != "":
 		var w: Dictionary = Data.by_id(Data.weapons, weapon)
-		_attach(skel, "handslot.r", "res://game/assets/kaykit/weapons/%s.gltf" % w["model"])
+		_attach(skel, "handslot.r", _weapon_model(w["model"]))
 		if w.has("offhand"):
-			_attach(skel, "handslot.l", "res://game/assets/kaykit/weapons/%s.gltf" % w["offhand"])
+			_attach(skel, "handslot.l", _weapon_model(w["offhand"]))
 	var over := _mat(C_HIT, 0.0, true, 0.0)
 	over.albedo_color = tint
 	over.next_pass = _ink(2.0)

@@ -1061,10 +1061,11 @@ def analyse(y: np.ndarray, loop: bool) -> dict:
         "clipped": int(np.sum(np.abs(mono) >= 0.999)),
     }
     if loop:
-        # The step across the seam against the steps the music takes anyway (its 99.9th percentile).
-        body = np.percentile(np.abs(np.diff(mono)), 99.9)
+        # The step across the seam against the steps the waveform takes just beside it: a click
+        # would be many times the local step; a continuous wave is about 1x.
+        local = 0.5 * (np.mean(np.abs(np.diff(mono[-300:]))) + np.mean(np.abs(np.diff(mono[:300]))))
         info["seam"] = round(float(abs(mono[-1] - mono[0])), 5)
-        info["seam_vs_body"] = round(float(abs(mono[-1] - mono[0]) / (body + 1e-9)), 2)
+        info["seam_vs_local"] = round(float(abs(mono[-1] - mono[0]) / (local + 1e-9)), 2)
     return info
 
 
@@ -1096,7 +1097,7 @@ def main(argv=None):
         info.update(seconds=round(len(y) / SR, 3), bytes=os.path.getsize(path), tempo=tempo, key=key, kind=kind)
         report[name] = info
         print(f"{name:20s} {info['seconds']:6.2f}s {info['bytes']/1e6:5.2f}MB peak {info['peak_dbfs']:6.2f} rms {info['rms_dbfs']:6.2f} dc {info['dc']:+.5f} clip {info['clipped']}"
-              + (f" seam {info['seam']:.5f} ({info['seam_vs_body']:.2f}x a normal step)" if loop else ""), flush=True)
+              + (f" seam {info['seam']:.5f} ({info['seam_vs_local']:.2f}x the local step)" if loop else ""), flush=True)
     if args.report:
         with open(args.report, "w") as f:
             json.dump(report, f, indent=1)
