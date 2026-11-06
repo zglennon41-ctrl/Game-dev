@@ -995,6 +995,8 @@ func feedback(f: Fight, events: Array) -> void:
 				anim_event(e)
 			"hit":
 				var heavy: bool = e["heavy"] or e["pattern"]
+				if f.beast.has("guard") and f.w_state != "stagger":
+					floater(W + Vector3(0, 0.95, 0), "THROUGH THE GUARD" if e["pattern"] else "guarded", C_GOLD if e["pattern"] else C_DIM, 40 if e["pattern"] else 30, 0.7)
 				floater(W + Vector3(0, 0.2, 0), ("%d!" if e.get("crit", false) else "%d") % int(e["damage"]), C_GOLD if e["pattern"] else (C_STAGGER if e["staggered"] else (Color(0.85, 0.85, 1.0) if e.get("crit", false) else C_TEXT)), 84 if heavy or e.get("crit", false) else 60)
 				burst(_v3(f.w_pos, 0.9), C_GOLD if heavy else C_HIT, 30 if heavy else 14, 7.0 if heavy else 5.0)
 				impact(_v3(f.w_pos, 0.9) + _v3((f.p_pos - f.w_pos).normalized() * 0.4), C_GOLD if heavy else C_HIT, 1.1 if heavy else 0.7)
