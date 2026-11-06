@@ -589,7 +589,7 @@ func _press_technique(t: Dictionary) -> void:
 	p_hit_done = false
 	_face_target_if_near()
 	_emit({ "type": "anim", "who": "player", "name": t["anim"], "duration": float(t["startup"]) + float(t["active"]) + float(t["recovery"]) })
-	_emit({ "type": "technique", "id": id, "effect": t["effect"] })
+	_emit({ "type": "technique", "id": id, "effect": t["effect"], "dist": dist() })
 
 func _press_dodge() -> void:
 	var d: Dictionary = room["dodge"]

@@ -9,6 +9,7 @@ var world := World.new()
 var hud := Hud.new()
 var sfx := Sfx.new()
 var builder := Builder.new()
+var music := Music.new()
 var creator := Creator.new()
 var academy := Academy.new()
 var page := GeniusPage.new()
@@ -68,6 +69,7 @@ func _ready() -> void:
 	creator.clicked.connect(func(): sfx.play("ui-take", 1.0, -6.0))
 	# A soft tick whenever the chosen button moves, by mouse or pad.
 	get_viewport().gui_focus_changed.connect(func(c: Control): if c is Button: sfx.play("ui-move", 1.0, -10.0))
+	add_child(music)
 	builder.done.connect(_pattern_built)
 	builder.cancelled.connect(func():
 		builder.visible = false
@@ -282,6 +284,8 @@ func menu() -> void:
 	mode = "menu"
 	Engine.time_scale = 1.0
 	sfx.stop_ambience()
+	music.play_track(String(Data.music.get("places", {}).get("title", "title")) if not Data.music.is_empty() else "title")
+	music.set_fight(false)
 	creator.visible = false
 	academy.visible = false
 	world.set_place("cut")
@@ -445,17 +449,21 @@ func _academy_frame(delta: float, real_dt: float) -> void:
 				if fight.p_state == "free" and fight.p_will >= float(bt["will"]) and fight.now >= float(fight.p_cooldowns.get(bt["id"], 0.0)):
 					if not fight.p_lock:
 						fight.input("lock")
-					if fight.dist() > want_d + 0.3:
+					if fight.dist() > want_d + 0.5:
 						move = (fight.w_pos - fight.p_pos).normalized()
-					elif fight.dist() < want_d - 0.4:
+					elif fight.dist() < want_d - 0.1:
 						move = -(fight.w_pos - fight.p_pos).normalized()
 					else:
 						fight.input(academy.bot_action())
+				elif fight.p_state == "free" and fight.dist() < want_d - 0.1:
+					move = -(fight.w_pos - fight.p_pos).normalized()
 			"fight": move = _bot()
 			_: move = academy.auto_move()
 	fight.update(minf(delta, 0.1), move)
 	var events := fight.drain()
 	_sounds(events)
+	_stings(events)
+	music.set_fight(fight.threats() > 0 and not fight.passive and academy._in_zone())
 	world.feedback(fight, events)
 	academy.update(events, real_dt)
 	if _args.has("debug") and Engine.get_process_frames() % 90 == 0:
@@ -501,6 +509,13 @@ func _open_builder() -> void:
 func open_genius_page() -> void:
 	if academy.genius and academy.genius.is_born():
 		page.open(academy.genius, World.SHAPE_COLORS.get(academy.hero["shape"], Color.WHITE), 0, int(academy.progress["record"].get("marks", 0)))
+
+func _stings(events: Array) -> void:
+	for e in events:
+		match e["type"]:
+			"pattern-start": music.sting("pattern")
+			"quest-done": music.sting("done")
+			"quest-lost": music.sting("lost")
 
 func _pattern_built(spec: Dictionary) -> void:
 	builder.visible = false

@@ -73,6 +73,7 @@ func _reckoning() -> void:
 		_writeup()
 		return
 	ac.title_card(String(e["title"]).to_upper(), "the Reckoning", Color(0.85, 0.75, 0.5))
+	ac._sting("reckoning")
 	ac.say(cfg["instructor"], ["The Ledgers were read at the lamp hour, while you were on the platform.", "[i]%s[/i]" % e["text"]], _writeup)
 
 ## The cohort's write-up: what the term saw, from the record.

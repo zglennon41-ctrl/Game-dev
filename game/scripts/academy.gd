@@ -360,6 +360,9 @@ func go(place_id: String, quiet := false, from := "") -> void:
 		hud.target.visible = true
 	_show_place(spec["name"])
 	sfx.set_ambience("wild" if not zone.is_empty() else "hall")
+	var mus: Node = get_parent().get("music") if get_parent() and "music" in get_parent() else null
+	if mus:
+		mus.call("play_for", place_id)
 	# Arrive out of the dark.
 	if _fade.is_inside_tree():
 		_fade.modulate.a = 1.0
@@ -1461,7 +1464,11 @@ func _lesson_update(events: Array, dt: float) -> void:
 				elif t == "hurt":
 					_count = 0
 			"reach-hits":
-				if t == "hit" and e.get("technique", false) and float(e.get("dist", 0.0)) >= float(g.get("distance", 2.5)):
+				# Reach is measured where the technique was thrown from, so a dash or a lunge
+				# that closes the gap still counts for the distance it crossed.
+				if t == "technique":
+					_tech_from = float(e.get("dist", 0.0))
+				if t == "hit" and e.get("technique", false) and maxf(float(e.get("dist", 0.0)), _tech_from) >= float(g.get("distance", 2.5)):
 					_count += 1
 					_note = ""
 				elif t == "hit" and e.get("technique", false):
@@ -1571,6 +1578,7 @@ func _start_rite() -> void:
 func _rite_done() -> void:
 	progress["done"].append("rite")
 	_rite = null
+	_sting("rite")
 	world.cine = false
 	save()
 	# The hall comes back, with the genius in it.
@@ -2223,6 +2231,7 @@ func _finish_trouble() -> void:
 # field open. A quest is run on the lesson step engine with a few more goal types.
 
 var _step_limit := 0.0
+var _tech_from := 0.0
 var _carrying := false
 
 ## The zones the hero may be sent to.
@@ -2436,6 +2445,7 @@ func _finish_quest() -> void:
 	_end_quest_run()
 	earn_marks_n(int(p["pay"]), p["title"])
 	sfx.play("done")
+	_sting("done")
 	save()
 	_run_sheet(p, true, carried, before)
 
@@ -2464,6 +2474,7 @@ func _fail_quest(why: String) -> void:
 		"timer": line = String(L["timer"]) + "  " + line
 	_end_quest_run()
 	fight.allowed = []
+	_sting("lost")
 	say("", [line, fill_quest(String(t["failed"]), p)], func():
 		if _in_zone():
 			progress["cleared"] = {}
@@ -2718,6 +2729,12 @@ func reckoning() -> Dictionary:
 	return e
 
 # --- Gear: the yard's smith, named weapons, the Archive's fragments ---------------------------
+
+## A stinger from the score, when the game has one.
+func _sting(name: String) -> void:
+	var par := get_parent()
+	if par and "music" in par and par.music:
+		par.music.sting(name)
 
 ## Marks spent at the smith are kept apart from the record's Marks (ranks read the record).
 func marks_spendable() -> int:
