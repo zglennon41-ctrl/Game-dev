@@ -360,7 +360,7 @@ func say(who: Variant, lines: Array, then: Callable = Callable()) -> void:
 	elif who is Dictionary:
 		c = who
 		speaker = c["name"]
-		sub = "%s · %s · %s" % [c["blood_name"], String(c["shape"]).capitalize(), String(c["city"]).capitalize()]
+		sub = c["sub"] if c.has("sub") else "%s · %s · %s" % [c.get("blood_name", ""), String(c.get("shape", "")).capitalize(), String(c.get("city", "")).capitalize()]
 	for l in lines:
 		_lines.append({ "speaker": speaker, "sub": sub, "text": fill(String(l), c) })
 	_line_i = 0
@@ -1854,7 +1854,7 @@ func _visit_shade() -> void:
 	progress["shade_visits"] = visits + 1
 	progress["record"]["talks"] += 1
 	var fires := visits < lines_all.size() - 1
-	say(sd["name"], lines, func():
+	say({ "name": sd["name"], "sub": "a shade of the hearth · once a %s" % String(sd["discipline"]).capitalize() }, lines, func():
 		if fires:
 			_shade_fires(sd)
 		if visits + 1 == int(sh["acceptVisits"]) and genius:
