@@ -292,7 +292,11 @@ func _attach(skel: Skeleton3D, bone: String, path: String) -> Node3D:
 	var att := BoneAttachment3D.new()
 	att.bone_name = bone
 	skel.add_child(att)
-	var model: Node3D = load(path).instantiate()
+	var scene := load(path)
+	if scene == null:
+		push_warning("WEAPON MODEL MISSING: %s" % path)
+		return att
+	var model: Node3D = scene.instantiate()
 	# Guns and bows are built along the back of the hand (KayKit's crossbow convention) and
 	# would point across the body when aimed: turned a quarter so the barrel points forward.
 	var base := path.get_file().get_basename()
