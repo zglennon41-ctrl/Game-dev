@@ -41,6 +41,7 @@ func _run() -> void:
 	test_party()
 	test_project_and_gate()
 	test_advanced_standing()
+	test_marks()
 	test_shape_kits()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
@@ -876,3 +877,14 @@ func test_advanced_standing() -> void:
 		var left: Array = titles[lid].filter(func(t): return not adv["skipSteps"][lid].has(t))
 		check(left.size() >= 1, "%s keeps at least one step under advanced standing (%s)" % [lid, str(left)])
 	check(titles["project"].filter(func(t): return not adv["skipSteps"]["project"].has(t)).has("Extraction"), "the Field Examination survives advanced standing")
+
+## Marks and ranks match the server's rules; every Shape and launch school has an archetype.
+func test_marks() -> void:
+	check(Marks.for_run("green") == 1 and Marks.for_run("black") == 5 and Marks.for_run("amber", true) == 4, "Marks by line colour, doubled for the Sworn")
+	check(Marks.rank_for(9, 4, false) == "journeyman" and Marks.rank_for(10, 4, false) == "adept" and Marks.rank_for(10, 3, false) == "journeyman", "Adept needs ten Marks and Stage 4")
+	check(Marks.rank_for(50, 4, true) == "master" and Marks.rank_for(50, 4, false) == "adept", "Master needs fifty, Stage 4, and a Pattern built in it")
+	for d in ["marshal", "pilot", "aeronaut"]:
+		for s in Creation.SHAPES:
+			check(not Marks.archetype_for(s, d).is_empty(), "a %s %s has an archetype" % [s, d])
+	check(Marks.archetype_for("cast", "marshal")["name"] == "Deadeye", "a Cast Marshal is a Deadeye")
+	check(Marks.academy("lesson") == 1 and Marks.academy("exam") == 2, "the Academy pays Marks for lessons and the Examination")

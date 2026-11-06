@@ -1327,7 +1327,7 @@
       "writeup_intro": "Your cohort has written you up, as every cohort does. They do not know you will read it. Here.",
       "commencement": [
         "Commencement. There is no ceremony in it; there is the line, and the car, and the fact that you are on it.",
-        "You leave with a Shape, a field at Stage three, a school, a Pattern, a genius with a name, and twelve people who will remember you. That is what the Academy is for.",
+        "You leave with a Shape, a field at Stage three, a school, a Pattern, a genius with a name, {marks} Marks to your record, and twelve people who will remember you. The Archive will call you a {archetype}, a Journeyman one, until you make it call you something else.",
         "Go on, {name}. Mind the line."
       ]
     },
@@ -1460,5 +1460,13 @@
       "full": "The whole term  (8 to 12 hours)",
       "short": "Advanced standing  (a short term)"
     }
+  },
+  "marks": {
+    "$comment": "Marks the Academy pays: a lesson passed, a bout won on the ladder or against an Instructor, a run out on the line (green), the Field Examination, a trouble of a classmate's seen through. On the server a green run pays 1 (rules.json).",
+    "lesson": 1,
+    "bout": 1,
+    "run": 1,
+    "exam": 2,
+    "quest": 1
   }
 }

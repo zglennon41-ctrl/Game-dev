@@ -285,6 +285,20 @@ func go(place_id: String, quiet := false, from := "") -> void:
 		tw.tween_property(_fade, "modulate:a", 0.0, 0.7).set_trans(Tween.TRANS_SINE)
 	save()
 
+## Marks earned: counted on the record, logged by day, and shown as they land.
+func earn_marks(what: String, label: String) -> void:
+	var n := Marks.academy(what)
+	if n <= 0:
+		return
+	var rec: Dictionary = progress["record"]
+	rec["marks"] = int(rec.get("marks", 0)) + n
+	if not progress.has("marks_log"):
+		progress["marks_log"] = []
+	progress["marks_log"].append({ "day": int(progress["day"]), "what": label, "n": n })
+	if fight:
+		world.floater(world._v3(fight.p_pos, 2.6), ("%d MARK" if n == 1 else "%d MARKS") % n, Style.GOLD, 48, 1.6, 0.5)
+	sfx.play("cue-hit", 1.2, -4.0)
+
 ## The two classmates chosen for the party, as classmate dictionaries.
 func party() -> Array:
 	var out: Array = []
@@ -332,6 +346,8 @@ func say(who: Variant, lines: Array, then: Callable = Callable()) -> void:
 func fill(t: String, c: Dictionary = {}) -> String:
 	t = Prologue.fill(t, hero)
 	t = t.replace("{your_shape}", String(hero["shape"]).capitalize()).replace("{your_blood}", Data.by_id(Data.bloods, hero["blood"])["name"] if hero.get("blood", "") != "" else "unmarked")
+	var arch := Marks.archetype_for(hero["shape"], hero.get("discipline", ""))
+	t = t.replace("{archetype}", arch.get("name", "Journeyman")).replace("{marks}", str(int(progress["record"].get("marks", 0))))
 	var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
 	if not dk.is_empty():
 		t = t.replace("{discipline}", dk["name"]).replace("{discipline_school}", dk["school"])
@@ -855,6 +871,7 @@ func _spar_result(won: bool) -> void:
 		_spar_wins += 1
 		_count = _spar_wins
 		_spar_rung += 1
+		earn_marks("bout", "a bout won against %s" % _spar_who["name"])
 		title_card("THE BOUT IS YOURS", fill(sl.get("won", ""), _spar_who), Style.GOLD)
 		sfx.play("done")
 	else:
@@ -1047,6 +1064,7 @@ func _lesson_update(events: Array, dt: float) -> void:
 func _finish_lesson() -> void:
 	var lesson := _lesson
 	progress["done"].append(lesson["id"])
+	earn_marks("lesson", "Lesson %d, %s" % [int(lesson["number"]), lesson["title"]])
 	save()
 	hud.set_prompt("", "")
 	fight.passive = true
@@ -1320,6 +1338,7 @@ func _extract() -> void:
 	say("", lines, func():
 		_choice_done = true
 		progress["record"]["runs_out"] = int(progress["record"].get("runs_out", 0)) + 1
+		earn_marks("exam" if award == "stage3" else "run", "the Field Examination" if award == "stage3" else "a run out on the Green")
 		if award == "stage3":
 			hero["stage"] = 3
 			hero["projected"] = true
@@ -1392,6 +1411,11 @@ func _gate_done() -> void:
 	progress["done"].append("gate")
 	progress["day"] = int(progress["day"]) + 1
 	hero["settled"] = true
+	# The Archive's name for what you are: the Journeyman archetype of your Shape and school.
+	var arch := Marks.archetype_for(hero["shape"], hero.get("discipline", ""))
+	if not arch.is_empty():
+		hero["archetypes"] = [{ "archetype": arch["id"], "marks": int(progress["record"].get("marks", 0)), "rank": "journeyman", "takenDay": int(progress["day"]) }]
+	hero["marks"] = int(progress["record"].get("marks", 0))
 	Settings.mark_settled()
 	_gate = null
 	world.cine = false
@@ -1491,7 +1515,9 @@ func settled_sheet() -> void:
 	var body := "[table=2]"
 	for r in [["Blood", b["name"]], ["Shape", "%s  ·  Stage %d" % [String(hero["shape"]).capitalize(), int(hero.get("stage", 2))]],
 			["School", "%s  ·  %s" % [dk["name"], Creation.weapon(hero["weapon"])["name"]]], ["Techniques", ", ".join([Data.kits[hero["shape"]]["technique"]["name"]] + techs)],
-			["Pattern", Builder.sentence(hero["pattern"])], ["Genius", "%s, a %s (%s), %s" % [g.name, g.form_name(), String(g.body.get("expression", "")).capitalize(), g.instar_name()]],
+			["Pattern", Builder.sentence(hero["pattern"])],
+			["Archetype", "%s, Journeyman  ·  %d Marks" % [Marks.archetype_for(hero["shape"], hero.get("discipline", "")).get("name", "none"), int(rec.get("marks", 0))]],
+			["Genius", "%s, a %s (%s), %s" % [g.name, g.form_name(), String(g.body.get("expression", "")).capitalize(), g.instar_name()]],
 			["The term", "%d parries, %d blocks, bitten %d; %d bouts won, %d lost; %d posts held, %d runs out%s" % [int(rec.get("parries", 0)), int(rec.get("blocks", 0)), int(rec.get("hurts", 0)), int(rec.get("spars_won", 0)), int(rec.get("spars_lost", 0)), int(rec.get("posts_held", 0)), int(rec.get("runs_out", 0)), ", carried out %d" % int(rec["rescued"]) if int(rec.get("rescued", 0)) > 0 else ""]]]:
 		body += "[cell][color=#a8803f]%s[/color]   [/cell][cell]%s[/cell]" % [r[0], r[1]]
 	body += "[/table]"

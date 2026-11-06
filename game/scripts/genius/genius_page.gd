@@ -23,7 +23,7 @@ func _ready() -> void:
 	add_child(_root)
 	visible = false
 
-func open(g: Genius, color: Color, tier := 0) -> void:
+func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 	for c in _root.get_children():
 		c.queue_free()
 	visible = true
@@ -49,6 +49,8 @@ func open(g: Genius, color: Color, tier := 0) -> void:
 	scroll.add_child(v)
 	_h(v, "%s, %s" % [g.name if g.name != "" else g.form_name(), g.instar_name()], 36)
 	v.add_child(Style.rule(420))
+	if marks > 0:
+		_p(v, "Your record: %d Marks." % marks, Style.DIM)
 	_p(v, "A %s, %s. Resonance %d: it fights with %d Will and can carry %d shadow%s. Day %d since the rite." % [
 		String(g.body.get("expression", "")).capitalize(), g.form_name(), g.resonance(tier), int(g.will_max(tier)), g.shadow_cap(tier), "" if g.shadow_cap(tier) == 1 else "s", g.day])
 	# The next Reading.

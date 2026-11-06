@@ -111,7 +111,7 @@ func _ready() -> void:
 	if _args.has("page"):
 		var ph := Settings.hero()
 		menu()
-		page.open(Genius.for_hero(ph), World.SHAPE_COLORS.get(ph.get("shape", "anchor"), Color.WHITE))
+		page.open(Genius.for_hero(ph), World.SHAPE_COLORS.get(ph.get("shape", "anchor"), Color.WHITE), 0, int(ph.get("academy", {}).get("record", {}).get("marks", 0)))
 		if _args.has("shots"):
 			await get_tree().create_timer(1.5).timeout
 			_shot("page")
@@ -284,7 +284,7 @@ func menu() -> void:
 		buttons.append(["Practice yard: fight cut-wolves as %s  (two minutes)" % saved["name"], func(): hero = saved; start("fight")])
 	if saved.has("genius") and Genius.from_dict(saved["genius"]).is_born():
 		var sg := Genius.for_hero(saved)
-		buttons.append(["Your genius: %s" % (sg.name if sg.name != "" else sg.form_name()), func(): page.open(sg, World.SHAPE_COLORS.get(saved["shape"], Color.WHITE))])
+		buttons.append(["Your genius: %s" % (sg.name if sg.name != "" else sg.form_name()), func(): page.open(sg, World.SHAPE_COLORS.get(saved["shape"], Color.WHITE), 0, int(saved.get("academy", {}).get("record", {}).get("marks", 0)))])
 	buttons.append(["Combat tutorial  (as an Anchor)", func(): hero = {}; start("tutorial")])
 	buttons.append(["Quit", func(): get_tree().quit()])
 	hud.show_screen("WILDLINE", "The Cumberland Cut", body, buttons, "title")
@@ -569,7 +569,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if mode == "academy":
 		if event.is_action_pressed("genius_page") and not academy.busy() and not academy.in_lesson() and academy.genius and academy.genius.is_born():
-			page.open(academy.genius, World.SHAPE_COLORS.get(academy.hero["shape"], Color.WHITE))
+			page.open(academy.genius, World.SHAPE_COLORS.get(academy.hero["shape"], Color.WHITE), 0, int(academy.progress["record"].get("marks", 0)))
 			return
 		if event.is_action_pressed("menu"):
 			academy.save()
