@@ -112,6 +112,7 @@ func _piece(name: String, pos: Vector3, rot_deg := 0.0, scale := 1.0) -> Node3D:
 	n.rotation_degrees.y = rot_deg
 	n.scale = Vector3.ONE * scale
 	_place_root.add_child(n)
+	toonify(n)
 	return n
 
 func _build_environment() -> void:
@@ -235,6 +236,7 @@ func build_hero(hero: Dictionary) -> void:
 		_player.queue_free()
 	_player = load(_person_model(hero.get("body", "Knight"))).instantiate()
 	add_child(_player)
+	toonify(_player)
 	var look: Dictionary = hero.get("look", { "headgear": true, "cape": true, "cape_color": "shape" })
 	_player.scale = Vector3.ONE * clampf(float(look.get("stature", 1.0)), 0.85, 1.2)
 	for a in _player.find_children("*", "BoneAttachment3D", true, false):
@@ -291,8 +293,16 @@ func _attach(skel: Skeleton3D, bone: String, path: String) -> Node3D:
 	att.bone_name = bone
 	skel.add_child(att)
 	var model: Node3D = load(path).instantiate()
+	# Guns and bows are built along the back of the hand (KayKit's crossbow convention) and
+	# would point across the body when aimed: turned a quarter so the barrel points forward.
+	var base := path.get_file().get_basename()
+	if base in RANGED_MODELS:
+		model.rotate_y(PI / 2.0)
 	att.add_child(model)
+	toonify(model)
 	return att
+
+const RANGED_MODELS := ["pistol", "air_pistol", "musket", "bolt_thrower", "seed_sling", "bow_short", "bow_long", "astrolabe", "chakram", "crossbow_1handed", "crossbow_2handed"]
 
 const SHAPE_COLORS := { "anchor": Color(0.95, 0.68, 0.25), "turn": Color(1.0, 0.42, 0.15), "cast": Color(0.55, 0.85, 1.0),
 	"read": Color(0.85, 0.85, 1.0), "bind": Color(0.75, 0.45, 1.0), "make": Color(0.5, 1.0, 0.6) }
@@ -393,6 +403,7 @@ func set_foe(spec: Dictionary) -> void:
 			if w.has("offhand"):
 				_attach(skel, "handslot.l", _weapon_model(w["offhand"]))
 	add_child(_wolf)
+	toonify(_wolf)
 	_w_anim = _wolf.find_child("AnimationPlayer", true, false)
 	for key in ["idle", "walk", "gallop", "windup", "stagger", "flinch"]:
 		if _w_anim.has_animation(_w_anims[key]):
@@ -543,6 +554,76 @@ void fragment() {
 	COLOR = vec4(g, 1.0);
 }
 """
+
+const TOON := """
+shader_type spatial;
+// Cel shading: light in bands, a tinted shadow side, the albedo kept clean; the ink lines
+// are drawn by the overlay's next pass as before.
+render_mode cull_back;
+uniform vec4 albedo : source_color = vec4(1.0);
+uniform sampler2D albedo_tex : source_color, filter_linear_mipmap;
+uniform bool use_tex = false;
+uniform float bands = 3.0;
+uniform vec4 shadow_tint : source_color = vec4(0.5, 0.55, 0.78, 1.0);
+uniform vec4 emission : source_color = vec4(0.0);
+uniform float emission_energy = 0.0;
+void fragment() {
+	vec3 col = albedo.rgb;
+	if (use_tex) { col *= texture(albedo_tex, UV).rgb; }
+	ALBEDO = col;
+	EMISSION = emission.rgb * emission_energy;
+	ROUGHNESS = 0.9;
+	SPECULAR = 0.1;
+}
+void light() {
+	float ndl = dot(NORMAL, LIGHT);
+	float t = clamp(ndl * 0.5 + 0.5, 0.0, 1.0);
+	float stepped = clamp(floor(t * bands) / max(bands - 1.0, 1.0), 0.0, 1.0);
+	vec3 lit = mix(ALBEDO * shadow_tint.rgb, ALBEDO, stepped);
+	DIFFUSE_LIGHT += lit * LIGHT_COLOR * ATTENUATION;
+}
+"""
+
+var _toon_shader: Shader = null
+
+## The cel look: every StandardMaterial3D under the node becomes a banded toon material that
+## keeps its colour, its texture and its emission. Off when data/rules.json art.cel is false.
+func toonify(node: Node) -> void:
+	var art: Dictionary = Data.rules.get("art", {})
+	if not art.get("cel", false) or node == null:
+		return
+	if _toon_shader == null:
+		_toon_shader = Shader.new()
+		_toon_shader.code = TOON
+	var tint: Array = art.get("shadowTint", [0.5, 0.55, 0.78])
+	var meshes := node.find_children("*", "MeshInstance3D", true, false)
+	if node is MeshInstance3D:
+		meshes.append(node)
+	for m in meshes:
+		var mi: MeshInstance3D = m
+		if mi.mesh == null:
+			continue
+		for i in mi.mesh.get_surface_count():
+			var mat := mi.get_active_material(i)
+			if mat == null or not (mat is StandardMaterial3D):
+				continue
+			var sm: StandardMaterial3D = mat
+			if sm.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED or sm.shading_mode == BaseMaterial3D.SHADING_MODE_UNSHADED or sm.blend_mode != BaseMaterial3D.BLEND_MODE_MIX:
+				continue
+			var t := ShaderMaterial.new()
+			t.shader = _toon_shader
+			t.resource_name = sm.resource_name
+			t.set_shader_parameter("albedo", sm.albedo_color)
+			t.set_shader_parameter("use_tex", sm.albedo_texture != null)
+			if sm.albedo_texture:
+				t.set_shader_parameter("albedo_tex", sm.albedo_texture)
+			t.set_shader_parameter("bands", float(art.get("bands", 3)))
+			t.set_shader_parameter("shadow_tint", Color(tint[0], tint[1], tint[2]))
+			if sm.emission_enabled:
+				t.set_shader_parameter("emission", sm.emission)
+				t.set_shader_parameter("emission_energy", sm.emission_energy_multiplier)
+			t.next_pass = sm.next_pass
+			mi.set_surface_override_material(i, t)
 
 const INK := """
 shader_type spatial;
@@ -1972,6 +2053,7 @@ func _wild_piece(name: String, pos: Vector3, rot_deg := 0.0, scale := 1.0) -> No
 		n.rotation_degrees.y = rot_deg
 		n.scale = Vector3.ONE * scale
 		_place_root.add_child(n)
+		toonify(n)
 		return n
 	var sub := "rubble_half"
 	var sub_scale := scale
@@ -2208,6 +2290,7 @@ func _pack_make(fo: Foe) -> Dictionary:
 	var n: Node3D = load(_beast_model(String(fo.beast.get("model", "")))).instantiate()
 	n.scale = Vector3.ONE * WOLF_SCALE * float(fo.beast.get("modelScale", 1.0))
 	add_child(n)
+	toonify(n)
 	var ap: AnimationPlayer = n.find_child("AnimationPlayer", true, false)
 	for key in ["idle", "walk", "gallop", "windup", "stagger", "flinch"]:
 		if ap.has_animation(WOLF_ANIMS[key]):
@@ -2379,6 +2462,7 @@ func set_allies(specs: Array) -> void:
 	for sp in specs:
 		var n: Node3D = load(_person_model(sp.get("body", "Knight"))).instantiate()
 		add_child(n)
+		toonify(n)
 		for a in n.find_children("*", "BoneAttachment3D", true, false):
 			var an := String(a.name)
 			a.visible = an.contains("Helmet") or an.contains("Hat") or an.contains("Cape") or an.contains("Hood")
@@ -2534,6 +2618,7 @@ func set_marker(at: Variant) -> void:
 func add_figure(body: String, at: Vector2, facing: float, title: String, sub: String, weapon := "", tint := Color(0, 0, 0, 0)) -> Dictionary:
 	var n: Node3D = load(_person_model(body)).instantiate()
 	_place_root.add_child(n)
+	toonify(n)
 	for a in n.find_children("*", "BoneAttachment3D", true, false):
 		var an := String(a.name)
 		a.visible = an.contains("Helmet") or an.contains("Hat") or an.contains("Cape") or an.contains("Hood")

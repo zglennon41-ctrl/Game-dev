@@ -243,3 +243,13 @@ without a code change:
 
 Checks: `godot --headless --path . -s res://game/tests/check_beasts.gd` and
 `check_people.gd` list each file's animations, bones and attachments and end "all good".
+
+## 11. The look, decided (2026-11-07)
+
+The owner chose **cel-shaded stylized high detail** (Zelda, Genshin): clean shapes, light in
+bands, a tinted shadow side, bright colour, and the ink outlines kept. The game applies it
+in `World.toonify`: every standard material on people, beasts, weapons and places becomes a
+banded toon material that keeps its colour, texture and emission (`data/rules.json`, `art`:
+`cel`, `bands`, `shadowTint`, `outlines`). The kits made here are the first pass at the
+shapes; the next passes are higher detail on the same rigs (hair, cloth, faces for creation),
+PBR-free, built for the bands.
