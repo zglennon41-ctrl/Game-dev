@@ -404,7 +404,13 @@ func enter_academy() -> void:
 	Engine.time_scale = 1.0
 	sfx.start_ambience()
 	academy.auto = _args.has("bot")
-	academy.auto_troubles = _args.has("troubles")
+	academy.auto_troubles = _args.has("troubles") or _args.has("quests")
+	if _args.has("quests") and hero.has("academy"):
+		# Straight to the postings: the cohort's troubles seen to, the shade accepted, the quad.
+		var pr: Dictionary = hero["academy"]
+		pr["troubles_done"] = Academy.make_troubles(int(pr["seed"]), Academy.make_cohort(int(pr["seed"]), hero)).map(func(t): return t["id"])
+		pr["shade_visits"] = 3
+		pr["place"] = "quad"
 	academy.enter(hero)
 	fight = academy.fight
 	if not _args.has("bot"):
@@ -719,7 +725,7 @@ func _shot(label: String) -> void:
 	await RenderingServer.frame_post_draw
 	var img := get_viewport().get_texture().get_image()
 	_shot_n += 1
-	img.save_png("%s/%02d-%s.png" % [_args["shots"], _shot_n, label])
+	img.save_png("%s/%02d-%s.png" % [_args["shots"], _shot_n, label.replace("/", "-")])
 	if _args.has("debug"):
 		print("SHOT %d %s mode=%s at %.1f" % [_shot_n, label, mode, Time.get_ticks_msec() / 1000.0])
 

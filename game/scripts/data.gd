@@ -25,6 +25,7 @@ var _bodies: Dictionary
 var discipline_kits: Dictionary
 var _archetypes: Array
 var _zones: Array
+var quests: Dictionary
 
 func _init() -> void:
 	rules = _load("res://data/rules.json")
@@ -51,6 +52,7 @@ func _init() -> void:
 	discipline_kits = _load("res://data/discipline-kits.json")
 	_archetypes = _load("res://data/archetypes.json")
 	_zones = _load("res://data/zones.json")
+	quests = _load("res://data/quests.json")
 
 func rules_reading() -> Dictionary: return _reading
 func forms() -> Array: return _forms

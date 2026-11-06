@@ -48,6 +48,7 @@ func _run() -> void:
 	test_shape_kits()
 	test_pack()
 	test_zones()
+	test_quests()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -1073,3 +1074,54 @@ func test_zones() -> void:
 	for bid in ["river-thing", "ruin-stag", "molted-hound", "post-breaker", "current-eel", "barge-heart"]:
 		var b := Data.beast(bid)
 		check(b.has("model") and b["attacks"].size() == 3 and Data.wheel.has(b["shape"]), "%s is a whole beast" % bid)
+
+## The board's postings: the seven quest types, drawn daily by the seed for the zones open.
+func test_quests() -> void:
+	var h := Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
+	var a := Academy.new()
+	a.hero = h
+	a.cohort = Academy.make_cohort(42, h)
+	a.progress = { "seed": 42, "arrived": true, "done": ["hold", "rite", "shape", "discipline"], "met": [], "day": 5, "rested_after": "discipline", "place": "quad",
+		"record": { "parries": 0, "blocks": 0, "hurts": 0, "dodges": 0, "talks": 0 } }
+	check(a.postings_for_day(5).is_empty() and a.zones_open().is_empty(), "nothing is posted before the line is walked")
+	a.progress["done"].append("line")
+	check(a.zones_open().size() == 2, "Lesson 5 opens the Green and the Shenandoah (%d)" % a.zones_open().size())
+	var posts: Array = a.postings_for_day(5)
+	var q: Dictionary = Data.quests
+	check(posts.size() >= int(q["perDay"]["min"]) and posts.size() <= int(q["perDay"]["max"]), "three to five postings a day (%d)" % posts.size())
+	check(str(posts) == str(a.postings_for_day(5)) and str(posts) != str(a.postings_for_day(6)), "the seed and the day decide the postings")
+	for p in posts:
+		check(not p["title"].contains("{") and not p["posting"].contains("{"), "%s is filled in: %s" % [p["id"], p["title"]])
+		check(p["zone"] in ["green", "shenandoah"] and Zones.all_places().has(p["entry"]) and Zones.all_places().has(p["post"]) and Zones.all_places().has(p["elite"]) or p["type"] == "rally", "%s points at a zone's areas" % p["id"])
+		check(p["type"] != "deep-run", "no deep run before the field is open")
+		check(int(p["pay"]) >= 1, "%s pays" % p["id"])
+	# With the field open, over a month, every type is posted, the rally on Fridays only.
+	a.progress["done"].append("project")
+	check(a.zones_open().size() == 4, "Project opens the junction and the river")
+	var seen := {}
+	var rally_days := []
+	for day in range(1, 36):
+		for p in a.postings_for_day(day):
+			seen[p["type"]] = true
+			if p["type"] == "rally":
+				rally_days.append(day)
+				check(a.weekday_of(day) == "Friday", "the rally posts on a Friday (day %d is %s)" % [day, a.weekday_of(day)])
+	check(seen.size() == q["types"].size(), "every type is posted in a month (%s)" % str(seen.keys()))
+	check(not rally_days.is_empty(), "the rally was posted")
+	# A posting's steps fill to real places and read without a brace left.
+	var day9: Array = a.postings_for_day(9)
+	for p in day9:
+		var t: Dictionary = q["types"][p["type"]]
+		for st in t["steps"]:
+			var g: Dictionary = st["goal"]
+			check(g["type"] in ["travel", "fell", "hold", "reach", "find", "talk", "extract", "spar", "decide"], "quest %s: step %s has a goal the Academy knows" % [p["type"], st["title"]])
+			if g.has("to"):
+				var to: String = a.fill_quest(g["to"], p, true)
+				check(Zones.all_places().has(to) or Data.academy["places"].has(to), "%s travels to %s" % [p["type"], to])
+			if st.has("text"):
+				check(not a.fill_quest(st["text"], p).contains("{"), "%s: %s reads clean" % [p["type"], st["title"]])
+		check(not a.fill_quest(t["writeup"], p).contains("{") and not a.fill_quest(t["failed"], p).contains("{"), "%s's write-up reads clean" % p["type"])
+	# Taken, done and lost postings leave the board.
+	a.progress["quests_done"] = [day9[0]["id"]]
+	check(a.postings_open().size() == 0 or not a.postings_open().any(func(p): return p["id"] == day9[0]["id"]), "a quest done leaves the board")
+	a.free()
