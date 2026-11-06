@@ -1971,6 +1971,20 @@ func _furnish_zone(spec: Dictionary) -> void:
 		_build_post(Vector3(pa.x, 0, pa.y))
 	for ins in spec.get("instructors", []):
 		keep.append([Vector2(float(ins["at"][0]), float(ins["at"][1])), 1.5])
+	# The car waits beyond the door that leads back to the line, lamps lit.
+	for d in spec["doors"]:
+		if d["to"] == "extraction":
+			var da := Vector2(float(d["at"][0]), float(d["at"][1]))
+			var out_dir := da.normalized() if da.length() > 0.1 else Vector2(-1, 0)
+			var ca := da + out_dir * 4.5
+			var along_x := absf(out_dir.x) > absf(out_dir.y)
+			_wild_piece("set_car", Vector3(ca.x, 0, ca.y), 0.0 if along_x else 90.0)
+			var lamp := OmniLight3D.new()
+			lamp.light_color = Color(1.0, 0.8, 0.55)
+			lamp.light_energy = 1.4
+			lamp.omni_range = 9.0
+			lamp.position = Vector3(ca.x, 2.4, ca.y) - Vector3(out_dir.x, 0, out_dir.y) * 2.0
+			_place_root.add_child(lamp)
 	if area.has("set"):
 		var sa := Vector2(float(area["setAt"][0]), float(area["setAt"][1]))
 		_wild_piece(area["set"], Vector3(sa.x, 0, sa.y), float(area.get("setRot", 0.0)))

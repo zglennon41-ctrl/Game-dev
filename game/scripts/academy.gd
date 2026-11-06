@@ -861,6 +861,8 @@ func update(events: Array, dt: float) -> void:
 	for e in events:
 		if e["type"] == "technique" and fight:
 			_count_technique(String(e.get("id", "")))
+		elif e["type"] in ["wolf-down", "foe-down"] and _in_zone():
+			progress["record"]["wolves_felled"] = int(progress["record"].get("wolves_felled", 0)) + 1
 	_objective.text = objective()
 	if _gate and talking() and auto:
 		_auto_wait -= dt
@@ -2335,6 +2337,8 @@ func _begin_quest(p: Dictionary) -> void:
 		var c: Dictionary = cohort[rng.randi() % cohort.size()]
 		_lesson["passenger"] = { "id": "passenger", "name": "the passenger", "shape": c["shape"], "body": c["body"], "weapon": c["weapon"] }
 	progress["party"] = [p["with"]] if p.has("with") and not party_unavailable(String(p["with"])) else []
+	_run_rec = progress["record"].duplicate()
+	_run_t0 = Time.get_ticks_msec() / 1000.0
 	_carrying = false
 	hud.play_ui.visible = true
 	hud.target.visible = false
@@ -2377,13 +2381,14 @@ func _finish_quest() -> void:
 		progress["named"][String(lesson["named"]["id"])] = { "escaped": named_escapes(String(lesson["named"]["id"])), "felled": true }
 	if genius:
 		genius.bonded("party")
-	_carry_out_fallen()
+	var carried := _carry_out_fallen()
+	var before := ledgers()
 	weigh_ledgers(p)
 	_end_quest_run()
 	earn_marks_n(int(p["pay"]), p["title"])
-	title_card(String(t["name"]).to_upper(), String(Data.quests["lines"]["done"]).replace("{title}", p["title"]).replace("{pay}", str(int(p["pay"]))), Style.GOLD)
 	sfx.play("done")
 	save()
+	_run_sheet(p, true, carried, before)
 
 func _fail_quest(why: String) -> void:
 	var lesson := _lesson
@@ -2402,7 +2407,7 @@ func _fail_quest(why: String) -> void:
 		progress["named"][nid] = { "escaped": named_escapes(nid) + 1, "felled": false }
 	if why == "rescued":
 		progress["record"]["rescued"] = int(progress["record"].get("rescued", 0)) + 1
-	_carry_out_fallen()
+	var carried := _carry_out_fallen()
 	var L: Dictionary = Data.quests["lines"]
 	var line := String(L["failed"]).replace("{title}", p["title"])
 	match why:
@@ -2414,7 +2419,45 @@ func _fail_quest(why: String) -> void:
 		if _in_zone():
 			progress["cleared"] = {}
 			go("quad", true, "")
-		save())
+		save()
+		_run_sheet(p, false, carried, ledgers()))
+
+var _run_rec: Dictionary = {}
+var _run_t0 := 0.0
+
+## The hearth's tally after a run: what it paid, what it cost, what it weighed, what was seen.
+func _run_sheet(p: Dictionary, won: bool, carried: Array, before: Dictionary) -> void:
+	var t: Dictionary = Data.quests["types"][p["type"]]
+	var rec: Dictionary = progress["record"]
+	var d := func(k: String) -> int: return int(rec.get(k, 0)) - int(_run_rec.get(k, 0))
+	var minutes := int((Time.get_ticks_msec() / 1000.0 - _run_t0) / 60.0)
+	var lines: Array = []
+	lines.append("[color=#a8803f]%s[/color]   %s  ·  %s" % [t["name"], p["title"], p["poster"]])
+	lines.append("[color=#a8803f]Pay[/color]   %s" % (("%d Mark%s" % [int(p["pay"]), "" if int(p["pay"]) == 1 else "s"]) if won else "none: the posting was lost"))
+	lines.append("[color=#a8803f]The run[/color]   %d minute%s  ·  %d parries, %d blocks, bitten %d  ·  %d beast%s felled" % [minutes, "" if minutes == 1 else "s", d.call("parries"), d.call("blocks"), d.call("hurts"), d.call("wolves_felled"), "" if d.call("wolves_felled") == 1 else "s"])
+	if not carried.is_empty():
+		lines.append("[color=#a8803f]Carried out[/color]   %s: the infirmary for two days" % ", ".join(carried))
+	var after := ledgers()
+	var weighed: Array = []
+	for k in after:
+		if int(after[k]) != int(before.get(k, 0)):
+			weighed.append("%s +%d" % [crisis()["ledgers"][k]["name"], int(after[k]) - int(before.get(k, 0))])
+	if not weighed.is_empty():
+		lines.append("[color=#a8803f]The Ledgers[/color]   %s" % ", ".join(weighed))
+	if genius and genius.is_born():
+		lines.append("[color=#a8803f]Witness[/color]   %s ran %s with you" % [genius.name if genius.name != "" else genius.form_name(), String(Data.zone(p["zone"])["name"]) if p["type"] != "rally" else "the yard"])
+	lines.append("\n[i]%s[/i]" % fill_quest(String(t["writeup"] if won else t["failed"]), p))
+	hud.show_screen("THE RUN" if won else "THE RUN, LOST", "the hearth's tally", "\n".join(lines), [["Continue", func():
+		hud.hide_screen()
+		hud.play_ui.visible = _in_zone()
+		if not auto:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED]])
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if auto:
+		get_tree().create_timer(2.0).timeout.connect(func():
+			if hud.screen.visible:
+				hud.hide_screen()
+				hud.play_ui.visible = _in_zone())
 
 func _end_quest_run() -> void:
 	_lesson = {}
@@ -2471,14 +2514,17 @@ func party_unavailable(id: String, day := -1) -> bool:
 			return classmate_status(c, d)["away"] != ""
 	return true
 
-## After a run: whoever was down is carried out by the rescue team and spends days in the infirmary.
-func _carry_out_fallen() -> void:
+## After a run: whoever was down is carried out by the rescue team and spends days in the
+## infirmary. Returns their names.
+func _carry_out_fallen() -> Array:
+	var out: Array = []
 	if not fight or fight.allies.is_empty():
-		return
+		return out
 	var sch: Dictionary = Data.academy["cohort"].get("schedule", {})
 	for al in fight.allies:
 		if not al["down"] or al.get("passenger", false) or String(al.get("id", "")) == "":
 			continue
+		out.append(String(al["name"]))
 		if not progress.has("infirmary"):
 			progress["infirmary"] = {}
 		progress["infirmary"][al["id"]] = int(progress["day"]) + int(sch.get("infirmaryDays", 2))
@@ -2486,6 +2532,7 @@ func _carry_out_fallen() -> void:
 		if not progress.has("writeup_extra"):
 			progress["writeup_extra"] = []
 		progress["writeup_extra"].append(fill(String(sch.get("lines", {}).get("carriedOut", "")), _classmate(al["id"])))
+	return out
 
 # --- The season's crisis: the Omen, Pressure, the Crisis, the Reckoning ---------------------
 # One crisis a term (data/crises.json). Its phase follows the term; its Ledgers take weight
