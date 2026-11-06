@@ -219,7 +219,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 		"arena": Vector2(spec["size"][0], spec["size"][1]) }
 	if not zone.is_empty():
 		opts = { "hero": hero, "beast": zone["beast"], "passive": false, "respawn": zone.get("respawn", true), "mercy": false, "allow_breach": false,
-			"arena": Vector2(spec["size"][0], spec["size"][1]), "seed": randi(), "allies": party() }
+			"arena": Vector2(spec["size"][0], spec["size"][1]), "seed": randi(), "allies": party(), "pack": zone.get("pack", []) }
 	if genius and genius.is_born():
 		opts["genius"] = genius
 	fight = Fight.new(opts)
@@ -380,7 +380,7 @@ func fill(t: String, c: Dictionary = {}) -> String:
 		for i in dk["techniques"].size():
 			t = t.replace("{tech%d}" % (i + 1), dk["techniques"][i]["name"]).replace("{tech%d_text}" % (i + 1), dk["techniques"][i]["text"])
 	if not c.is_empty():
-		t = t.replace("{my_name}", c["name"]).replace("{my_shape}", String(c["shape"]).capitalize()).replace("{my_blood}", c["blood_name"]).replace("{my_city}", String(c["city"]).capitalize())
+		t = t.replace("{my_name}", String(c.get("name", ""))).replace("{my_shape}", String(c.get("shape", "")).capitalize()).replace("{my_blood}", String(c.get("blood_name", ""))).replace("{my_city}", String(c.get("city", "")).capitalize())
 	return t
 
 func _show_line() -> void:
@@ -805,11 +805,7 @@ func auto_move() -> Vector2:
 						goal = Vector2(d["at"][0], d["at"][1]) * 0.86
 		if goal == Vector2.INF:
 			return Vector2.ZERO
-		if (goal - fight.p_pos).length() < 1.8:
-			if not _target.is_empty():
-				interact()
-			return Vector2.ZERO
-		return _steer((goal - fight.p_pos).normalized())
+		return _walk_or_act(goal, 1.8)
 	var want_place := ""
 	match next_need():
 		"rest": want_place = "dorm"
@@ -832,10 +828,7 @@ func auto_move() -> Vector2:
 				if d["to"] == "quad":
 					goal = Vector2(d["at"][0], d["at"][1]) * 0.86
 		if goal != Vector2.INF:
-			if (goal - fight.p_pos).length() < 2.2 and not _target.is_empty():
-				interact()
-				return Vector2.ZERO
-			return _steer((goal - fight.p_pos).normalized())
+			return _walk_or_act(goal, 2.2)
 	if auto_troubles and board_open() and progress.get("trouble", "") == "" and troubles_open().size() > 0:
 		var bspec: Dictionary = Data.academy["places"].get("quad", {}).get("board", {})
 		if place == "quad":
@@ -844,10 +837,7 @@ func auto_move() -> Vector2:
 			for d in _doors:
 				if d["to"] == "quad":
 					goal = Vector2(d["at"][0], d["at"][1]) * 0.86
-		if (goal - fight.p_pos).length() < 2.2 and not _target.is_empty():
-			interact()
-			return Vector2.ZERO
-		return _steer((goal - fight.p_pos).normalized()) if goal != Vector2.INF else Vector2.ZERO
+		return _walk_or_act(goal, 2.2) if goal != Vector2.INF else Vector2.ZERO
 	if want_place == "":
 		return Vector2.ZERO
 	if place == want_place:
@@ -875,9 +865,16 @@ func auto_move() -> Vector2:
 				goal = Vector2(d["at"][0], d["at"][1]) * 0.86
 	if goal == Vector2.INF:
 		return Vector2.ZERO
-	if (goal - fight.p_pos).length() < 1.6:
-		if not _target.is_empty():
-			interact()
+	return _walk_or_act(goal, 1.6)
+
+## Within reach of the goal and it is what is in reach: act on it. Otherwise keep walking
+## (a classmate standing nearer than the door must not be talked to in the door's place).
+func _walk_or_act(goal: Vector2, reach: float) -> Vector2:
+	var dist := (goal - fight.p_pos).length()
+	if dist < reach and not _target.is_empty() and (Vector2(_target["pos"]) - goal).length() < 1.3:
+		interact()
+		return Vector2.ZERO
+	if dist < 0.35:
 		return Vector2.ZERO
 	return _steer((goal - fight.p_pos).normalized())
 

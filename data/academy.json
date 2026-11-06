@@ -342,7 +342,10 @@
       "zone": {
         "beast": "cut-wolf",
         "ground": "wild",
-        "night": true
+        "night": true,
+        "pack": [
+          "cut-wolf"
+        ]
       }
     },
     "green-2": {
@@ -390,7 +393,11 @@
         "beast": "cut-wolf",
         "ground": "wild",
         "night": true,
-        "waitForPost": true
+        "waitForPost": true,
+        "pack": [
+          "cut-wolf",
+          "cut-wolf"
+        ]
       }
     },
     "green-3": {

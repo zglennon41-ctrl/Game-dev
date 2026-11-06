@@ -93,6 +93,7 @@ var stage := 2               # the field's Stage: 2 after the rite, 3 once the f
 var p_field_open := false    # the field past the skin (Stage 3, or opened in the Project drill)
 var project_training := false
 var p_project_t := 0.0
+var foes: Array = []         # the rest of the pack (Foe), beside the locked foe in w_*
 var allies: Array = []       # the party: classmates fighting beside the hero (see _update_allies)
 var w_target := -1           # whom the foe is after: -1 the hero, else an ally's index
 var extra_techs: Array = []  # the Discipline's techniques (keys 1, 2, 3), once learned
@@ -165,6 +166,8 @@ func _init(opts: Dictionary = {}) -> void:
 		if genius.fallen:
 			g_up_at = float(Data.genius()["fall"]["roomRecoverSeconds"])
 	_spawn_wolf()
+	for bid in opts.get("pack", []):
+		spawn_foe(bid, w_pos + Vector2.from_angle(rng.randf() * TAU) * 2.5, float(opts.get("pack_scale", 1.0)))
 
 func _emit(e: Dictionary) -> void:
 	e["t"] = now
@@ -387,7 +390,15 @@ func input(action: String) -> void:
 					_wolf_set("flinch", 0.8)
 					_emit({ "type": "hesitates" })
 		"lock":
-			p_lock = not p_lock
+			# Lock on; locked already with a pack about, pass the lock to the next of them.
+			var live: Array = []
+			for i in foes.size():
+				if (foes[i] as Foe).alive():
+					live.append(i)
+			if p_lock and not live.is_empty():
+				swap_target(live[0])
+			else:
+				p_lock = not p_lock
 
 func _busy(action: String) -> bool:
 	match p_state:
@@ -462,11 +473,24 @@ func _start_swing(i: int) -> void:
 	var sw: Dictionary = combo[i]
 	_emit({ "type": "anim", "who": "player", "name": sw["anim"], "duration": float(sw["startup"]) + float(sw.get("active", 0.0)) + float(sw["recovery"]) })
 
-## Swings go toward the wolf when locked on or when it is close; otherwise where you steer.
+## Swings go toward the wolf when locked on; unlocked, toward whichever foe is close, of the
+## pack or the locked one; otherwise where you steer.
 func _face_target_if_near() -> void:
 	var wolf_there := w_state != "down" and w_state != "absent"
-	if wolf_there and (p_lock or dist() < 3.0):
+	if wolf_there and p_lock:
 		p_facing = _angle_to(p_pos, w_pos)
+		return
+	var best_d := 3.0
+	var best := Vector2.INF
+	if wolf_there and dist() < best_d:
+		best_d = dist()
+		best = w_pos
+	for fo in foes:
+		if (fo as Foe).alive() and (fo as Foe).pos.distance_to(p_pos) < best_d:
+			best_d = (fo as Foe).pos.distance_to(p_pos)
+			best = (fo as Foe).pos
+	if best != Vector2.INF:
+		p_facing = _angle_to(p_pos, best)
 	elif p_dodge_dir.length() > 0.3:
 		p_facing = p_dodge_dir.angle()
 
@@ -646,6 +670,8 @@ func update(dt: float, move: Vector2 = Vector2.ZERO) -> void:
 		p_vel = Vector2.ZERO
 	_try_queued()
 	_update_wolf(dt * _wolf_time_scale())
+	_update_others(dt * _wolf_time_scale())
+	_retarget_if_down()
 	_update_burn(dt)
 	_update_genius(dt)
 	_update_allies(dt)
@@ -877,9 +903,6 @@ func p_invulnerable() -> bool:
 	return p_timer >= float(d["iframeStart"]) and p_timer <= float(d["iframeEnd"])
 
 func _resolve_swing(damage: float, reach: float, arc: float, breaks: bool, knockback: float) -> bool:
-	if w_state in ["down", "absent"] or not _in_arc(p_pos, p_facing, w_pos, reach + float(beast["radius"]), arc):
-		_emit({ "type": "whiff" })
-		return false
 	var heavy := breaks or knockback > 0.0
 	if p_stance:
 		match kit["stance"]["effect"]:
@@ -887,6 +910,19 @@ func _resolve_swing(damage: float, reach: float, arc: float, breaks: bool, knock
 			"blade": damage += float(kit["stance"]["extraDamage"])
 			"burn": w_burn_until = maxf(w_burn_until, now) + float(kit["stance"]["burnSeconds"])
 	if p_disarmed and not breaks: damage *= 0.4
+	# The rest of the pack, in the arc, take the swing too.
+	var any_other := false
+	for i in foes.size():
+		var fo: Foe = foes[i]
+		if fo.alive() and _in_arc(p_pos, p_facing, fo.pos, reach + float(fo.beast["radius"]), arc):
+			_damage_other(i, roundf(damage), heavy)
+			if knockback > 0.0 and fo.alive():
+				fo.pos = _clamp_in(fo.pos + (fo.pos - p_pos).normalized() * knockback)
+			any_other = true
+	if w_state in ["down", "absent"] or not _in_arc(p_pos, p_facing, w_pos, reach + float(beast["radius"]), arc):
+		if not any_other:
+			_emit({ "type": "whiff" })
+		return any_other
 	_damage_wolf(roundf(damage), false, heavy)
 	if knockback > 0.0 and w_state not in ["down", "pinned"]:
 		w_pos = _clamp_in(w_pos + (w_pos - p_pos).normalized() * knockback)
@@ -1132,6 +1168,15 @@ func _update_allies(dt: float) -> void:
 			_emit({ "type": "ally-hit", "who": i, "damage": dmg })
 			if w_hp == 0.0:
 				_fell_wolf()
+		elif now >= float(al["hit_at"]):
+			# Or one of the pack beside them.
+			for j in foes.size():
+				var fo: Foe = foes[j]
+				if fo.alive() and al["pos"].distance_to(fo.pos) < 2.4:
+					al["hit_at"] = now + float(al["interval"]) * rng.randf_range(0.85, 1.15)
+					_damage_other(j, float(al["damage"]), false)
+					_emit({ "type": "ally-hit", "who": i, "damage": float(al["damage"]), "foe": j })
+					break
 
 func _hurt_ally(i: int, dmg: float) -> void:
 	var al: Dictionary = allies[i]
@@ -1173,7 +1218,10 @@ func _wolf_step_toward(target: Vector2, step: float) -> void:
 
 ## The bite lands: dodged, parried, blocked, or taken.
 func _resolve_bite() -> void:
-	var a := w_attack
+	_resolve_bite_from(w_attack, w_pos, -1)
+
+## A bite from the locked foe (index -1) or one of the pack: dodged, parried, blocked, or taken.
+func _resolve_bite_from(a: Dictionary, from_pos: Vector2, idx: int) -> void:
 	if p_state == "down":
 		return
 	if p_invulnerable():
@@ -1187,19 +1235,24 @@ func _resolve_bite() -> void:
 		return
 	if p_state == "pattern" and not chain.is_empty() and chain["effect"] == "guard":
 		_emit({ "type": "turned" })
-		_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 1.0 })
+		if idx < 0:
+			_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 1.0 })
 		return
-	var facing_wolf := absf(angle_difference(p_facing, _angle_to(p_pos, w_pos))) <= deg_to_rad(float(room["block"]["arc"])) / 2.0
+	var facing_wolf := absf(angle_difference(p_facing, _angle_to(p_pos, from_pos))) <= deg_to_rad(float(room["block"]["arc"])) / 2.0
 	if now <= p_parry_until and facing_wolf:
 		var pr: Dictionary = room["parry"]
 		p_will = minf(float(rules["field"]["willMax"]), p_will + float(pr["will"]))
 		p_parry_until = -9.0
 		stats["parries"] += 1
-		_wolf_set("stagger", float(pr["staggerSeconds"]))
+		if idx < 0:
+			_wolf_set("stagger", float(pr["staggerSeconds"]))
+			_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 0.8 })
+		else:
+			(foes[idx] as Foe).set_state("stagger", float(pr["staggerSeconds"]))
+			_emit({ "type": "foe-stagger", "foe": idx })
 		parried_until = now + float(room["pattern"]["afterParrySeconds"])
-		_emit({ "type": "parry" })
+		_emit({ "type": "parry", "foe": idx })
 		_emit({ "type": "anim", "who": "player", "name": "Block_Hit", "speed": 1.3 })
-		_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 0.8 })
 		return
 	var dmg := float(a["damage"]) * _b("damageTaken", 1.0)
 	if not (_blocking() and facing_wolf) and _genius_guards(dmg):
@@ -1216,7 +1269,7 @@ func _resolve_bite() -> void:
 		_emit({ "type": "hurt", "damage": dmg })
 		p_combo_count = 0
 		if not (p_stance and kit["stance"].get("noFlinch", false)):
-			p_pos = _clamp_in(p_pos + (p_pos - w_pos).normalized() * float(a["knockback"]))
+			p_pos = _clamp_in(p_pos + (p_pos - from_pos).normalized() * float(a["knockback"]))
 			if p_state != "pattern":
 				p_state = "flinch"
 				p_timer = 0.0
@@ -1237,12 +1290,245 @@ func _resolve_bite() -> void:
 
 ## Bodies do not overlap.
 func _separate() -> void:
+	# A little personal space, so the wolf reads clearly beside the Anchor; the pack keeps
+	# off the hero and off each other.
+	for i in foes.size():
+		var fo: Foe = foes[i]
+		if not fo.alive():
+			continue
+		var mf := float(room["player"]["radius"]) + float(fo.beast["radius"]) + 0.3
+		var df := fo.pos.distance_to(p_pos)
+		if df < mf:
+			fo.pos = _clamp_in(p_pos + Vector2.from_angle(_angle_to(p_pos, fo.pos) if df > 1e-6 else float(i)) * mf)
+		for j in foes.size():
+			if j == i:
+				continue
+			var g: Foe = foes[j]
+			if not g.alive():
+				continue
+			var dd := fo.pos.distance_to(g.pos)
+			var mm := float(fo.beast["radius"]) + float(g.beast["radius"])
+			if dd < mm and dd > 1e-6:
+				fo.pos = _clamp_in(g.pos + (fo.pos - g.pos) / dd * mm)
+		if w_state not in ["absent", "down"]:
+			var dw := fo.pos.distance_to(w_pos)
+			var mw := float(fo.beast["radius"]) + float(beast["radius"])
+			if dw < mw and dw > 1e-6:
+				fo.pos = _clamp_in(w_pos + (fo.pos - w_pos) / dw * mw)
 	if w_state in ["absent", "down"]:
 		return
-	# A little personal space, so the wolf reads clearly beside the Anchor.
 	var m := float(room["player"]["radius"]) + float(beast["radius"]) + 0.3
 	var d := dist()
 	if d >= m:
 		return
 	var a := _angle_to(p_pos, w_pos) if d > 1e-6 else 0.0
 	w_pos = _clamp_in(p_pos + Vector2.from_angle(a) * m)
+
+# ===================================================================== the pack
+
+## One more of the pack, at a place, at a fraction of its health.
+func spawn_foe(beast_id: String, at: Vector2, health_scale := 1.0) -> Foe:
+	var fo := Foe.new()
+	fo.beast = Data.beast(beast_id).duplicate(true)
+	fo.beast["health"] = roundf(float(fo.beast["health"]) * health_scale)
+	fo.hp = fo.beast["health"]
+	fo.pos = _clamp_in(at)
+	fo.facing = _angle_to(fo.pos, p_pos)
+	fo.shape = fo.beast["shape"]
+	fo.angle = rng.randf() * TAU
+	fo.dir = -1.0 if rng.randf() < 0.5 else 1.0
+	fo.set_state("idle" if passive else "prowl", rng.randf_range(0.5, 1.5))
+	foes.append(fo)
+	_emit({ "type": "foe-spawn", "foe": foes.size() - 1, "name": fo.beast["name"] })
+	return fo
+
+func foes_alive() -> int:
+	var n := 0
+	for fo in foes:
+		if (fo as Foe).alive():
+			n += 1
+	return n
+
+## Everything standing against the hero: the locked foe and the live pack.
+func threats() -> int:
+	return (1 if w_state not in ["down", "absent"] else 0) + foes_alive()
+
+## The rest of the pack: circle, pick someone, come in, bite, recover.
+func _update_others(dt: float) -> void:
+	for i in foes.size():
+		var fo: Foe = foes[i]
+		fo.timer += dt
+		var b := fo.beast
+		match fo.state:
+			"absent", "down":
+				continue
+			"idle":
+				fo.facing = lerp_angle(fo.facing, _angle_to(fo.pos, p_pos), 1.0 - exp(-6.0 * dt))
+				if not passive and fo.timer >= fo.duration:
+					fo.set_state("prowl", rng.randf_range(float(b["prowl"]["min"]), float(b["prowl"]["max"])))
+			"prowl":
+				fo.angle += fo.dir * float(b["walkSpeed"]) / float(b["circleRadius"]) * dt
+				var want := p_pos + Vector2.from_angle(fo.angle) * (float(b["circleRadius"]) + 1.0)
+				var before := fo.pos
+				_foe_step(fo, want, float(b["walkSpeed"]) * 1.4 * dt)
+				if (fo.pos - before).length() > 0.001:
+					fo.facing = lerp_angle(fo.facing, (fo.pos - before).angle(), 1.0 - exp(-6.0 * dt))
+				if fo.timer >= fo.duration:
+					_foe_choose(fo)
+			"approach":
+				var tp := _foe_target_pos(fo)
+				var rng_a := float(fo.attack["range"])
+				if fo.pos.distance_to(tp) > rng_a * 0.85:
+					_foe_step(fo, tp, float(b["gallopSpeed"]) * dt)
+					fo.facing = _angle_to(fo.pos, tp)
+				else:
+					fo.set_state("windup", float(fo.attack["windup"]))
+					fo.facing = _angle_to(fo.pos, tp)
+					_emit({ "type": "foe-windup", "foe": i, "attack": fo.attack["id"], "name": fo.attack["name"], "seconds": fo.duration })
+				if fo.timer > 6.0:
+					fo.set_state("prowl", 1.0)
+			"windup":
+				if fo.timer < fo.duration * 0.8:
+					fo.facing = lerp_angle(fo.facing, _angle_to(fo.pos, _foe_target_pos(fo)), 1.0 - exp(-10.0 * dt))
+				if fo.timer >= fo.duration:
+					fo.set_state("strike", float(fo.attack["active"]))
+					fo.hit_done = false
+					_emit({ "type": "foe-strike", "foe": i, "anim": fo.attack.get("anim", "") })
+			"strike":
+				var lunge := float(fo.attack["lunge"]) / float(fo.attack["active"]) * dt
+				fo.pos = _clamp_in(fo.pos + Vector2.from_angle(fo.facing) * lunge)
+				if not fo.hit_done:
+					var mouth := fo.pos + Vector2.from_angle(fo.facing) * (float(b["radius"]) + 0.4)
+					if mouth.distance_to(p_pos) <= float(room["player"]["radius"]) + 1.0:
+						fo.hit_done = true
+						_resolve_bite_from(fo.attack, fo.pos, i)
+					else:
+						for k in allies.size():
+							if not allies[k]["down"] and mouth.distance_to(allies[k]["pos"]) <= 1.3:
+								fo.hit_done = true
+								_hurt_ally(k, float(fo.attack["damage"]))
+								break
+				if fo.timer >= fo.duration:
+					fo.set_state("recover", float(fo.attack["recover"]))
+			"recover", "stagger", "flinch":
+				if fo.timer >= fo.duration:
+					fo.set_state("prowl", rng.randf_range(float(b["prowl"]["min"]), float(b["prowl"]["max"])))
+					fo.dir = -1.0 if rng.randf() < 0.5 else 1.0
+
+func _foe_target_pos(fo: Foe) -> Vector2:
+	if fo.target >= 0 and fo.target < allies.size() and not allies[fo.target]["down"]:
+		return allies[fo.target]["pos"]
+	return p_pos
+
+func _foe_step(fo: Foe, target: Vector2, step: float) -> void:
+	var d := fo.pos.distance_to(target)
+	if d < 1e-6:
+		return
+	fo.pos = _clamp_in(fo.pos + (target - fo.pos) / d * minf(step, d))
+
+func _foe_choose(fo: Foe) -> void:
+	fo.target = -1
+	var standing: Array = []
+	for i in allies.size():
+		if not allies[i]["down"]:
+			standing.append(i)
+	if not standing.is_empty() and rng.randf() < 0.35:
+		fo.target = standing[rng.randi() % standing.size()]
+	var tp := _foe_target_pos(fo)
+	var options: Array = []
+	var total := 0.0
+	for a in fo.beast["attacks"]:
+		if fo.pos.distance_to(tp) < float(a.get("minRange", 0.0)) or float(a["weight"]) <= 0.0:
+			continue
+		options.append(a)
+		total += float(a["weight"])
+	if options.is_empty():
+		fo.set_state("prowl", 1.0)
+		return
+	var r := rng.randf() * total
+	fo.attack = options[0]
+	for a in options:
+		r -= float(a["weight"])
+		if r <= 0.0:
+			fo.attack = a
+			break
+	fo.set_state("approach", 6.0)
+
+## A hit on one of the pack: it flinches from a heavy blow and falls at nothing.
+func _damage_other(i: int, dmg: float, heavy: bool) -> void:
+	var fo: Foe = foes[i]
+	if not fo.alive():
+		return
+	if fo.state == "stagger":
+		dmg = roundf(dmg * float(room["break"]["staggerDamageFactor"]))
+	fo.hp = maxf(0.0, fo.hp - dmg)
+	fo.hits_taken += 1
+	stats["hits"] += 1
+	stats["damage_dealt"] += dmg
+	p_combo_count += 1
+	_emit({ "type": "foe-hit", "foe": i, "damage": dmg, "heavy": heavy, "dist": fo.pos.distance_to(p_pos) })
+	if fo.hp == 0.0:
+		stats["wolves_down"] += 1
+		fo.set_state("down", 99.0)
+		_emit({ "type": "foe-down", "foe": i, "name": fo.beast["name"] })
+	elif heavy and fo.state in ["prowl", "approach", "recover", "idle"]:
+		fo.set_state("flinch", float(fo.beast["flinchTime"]))
+
+## The locked foe fell: the nearest of the pack takes its place under the lock.
+func _retarget_if_down() -> void:
+	if w_state != "down" or w_timer < 0.6 or foes_alive() == 0:
+		return
+	var best := -1
+	var best_d := INF
+	for i in foes.size():
+		var fo: Foe = foes[i]
+		if fo.alive() and fo.pos.distance_to(p_pos) < best_d:
+			best_d = fo.pos.distance_to(p_pos)
+			best = i
+	if best >= 0:
+		swap_target(best)
+
+## Exchange the locked foe (w_*) with one of the pack.
+func swap_target(i: int) -> void:
+	var fo: Foe = foes[i]
+	var old := Foe.new()
+	old.beast = beast
+	old.pos = w_pos
+	old.facing = w_facing
+	old.hp = w_hp
+	old.state = w_state
+	old.timer = w_timer
+	old.duration = w_duration
+	old.attack = w_attack
+	old.hit_done = w_hit_done
+	old.angle = w_angle
+	old.dir = w_dir
+	old.target = w_target
+	old.burn_until = w_burn_until
+	old.hits_taken = w_hits_taken
+	old.breaks = w_break
+	old.named = w_named
+	old.pattern_hits = w_pattern_hits
+	old.shape = w_shape
+	beast = fo.beast
+	w_pos = fo.pos
+	w_facing = fo.facing
+	w_hp = fo.hp
+	w_state = fo.state
+	w_timer = fo.timer
+	w_duration = fo.duration
+	w_attack = fo.attack
+	w_hit_done = fo.hit_done
+	w_angle = fo.angle
+	w_dir = fo.dir
+	w_target = fo.target
+	w_burn_until = fo.burn_until
+	w_hits_taken = fo.hits_taken
+	w_break = fo.breaks
+	w_named = fo.named
+	w_pattern_hits = fo.pattern_hits
+	w_shape = fo.shape if fo.shape != "" else fo.beast["shape"]
+	w_slow_until = -9.0
+	w_mark_until = -9.0
+	foes[i] = old
+	_emit({ "type": "retarget", "foe": i })

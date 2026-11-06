@@ -861,11 +861,12 @@ func feedback(f: Fight, events: Array) -> void:
 			"parry":
 				genius_react("parry")
 				floater(P + Vector3(0, 0.3, 0), "PARRY", C_GUARD, 96, 1.0)
-				burst((_v3(f.p_pos, 1.2) + _v3(f.w_pos, 1.2)) / 2.0, C_GUARD, 50, 8.0)
+				var from := _foe_pos(f, int(e.get("foe", -1)))
+				burst((_v3(f.p_pos, 1.2) + _v3(from, 1.2)) / 2.0, C_GUARD, 50, 8.0)
 				_ring_wave(_v3(f.p_pos), C_GUARD, 3.5)
 				_shake = 0.12
 				slowmo(float(feel["parrySlowmo"]), 0.3)
-				impact((_v3(f.p_pos, 1.2) + _v3(f.w_pos, 1.2)) / 2.0, C_GUARD, 1.4)
+				impact((_v3(f.p_pos, 1.2) + _v3(from, 1.2)) / 2.0, C_GUARD, 1.4)
 				flash_screen(Color(0.4, 0.7, 1.0), 0.35)
 			"block":
 				floater(P, "BLOCKED  -%d" % int(e["damage"]), C_GUARD, 48)
@@ -927,6 +928,8 @@ func feedback(f: Fight, events: Array) -> void:
 				genius_react("cue")
 			"ally-hit", "ally-hurt", "ally-down", "ally-up":
 				_ally_event(f, e)
+			"foe-spawn", "foe-windup", "foe-strike", "foe-hit", "foe-down", "foe-stagger", "retarget":
+				_pack_event(f, e)
 			"field-open":
 				_ring_wave(_v3(f.p_pos), _shape_color(f.player_shape), 5.0)
 				burst(P, _shape_color(f.player_shape), 60, 6.0)
@@ -1088,6 +1091,7 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 		"stagger": state_text = "  ·  STAGGERED"
 		"windup": state_text = "  ·  %s" % String(f.w_attack["name"]).to_upper()
 	_wolf_label.text = "%s  ·  %s%s" % [String(f.beast["name"]).to_upper(), String(f.w_shape).capitalize(), state_text]
+	_update_pack(f, dt)
 	_lock_ring.visible = _wolf.visible and f.p_lock and f.w_state != "down"
 	_lock_ring.position = _v3(f.w_pos, 0.07)
 	_lock_ring.scale = Vector3(1.0 + 0.05 * sin(_clock * 5.0), 0.04, 1.0 + 0.05 * sin(_clock * 5.0))
@@ -1896,6 +1900,181 @@ func _furnish_dorm(spec: Dictionary) -> void:
 	_piece("barrel_small_stack", Vector3(5.6, 0, 0.0), 0.0, 0.6)
 
 ## The party beside the hero: bodies that follow the fight's allies.
+# --- The pack ------------------------------------------------------------------------
+# The rest of the pack: a body each, on the wolf rig, drawn from the fight's foes. The one the
+# hero is locked on to is the wolf above (w_*); when it falls and the lock moves, the bodies
+# swap with the data so nothing jumps.
+
+var _pack: Array = []   # one per fight.foes: {node, anim, meshes, overlay, label, alert, flash, cur, until, spec}
+
+func _pack_make(fo: Foe) -> Dictionary:
+	var n: Node3D = load("res://game/assets/quaternius/Wolf.glb").instantiate()
+	n.scale = Vector3.ONE * WOLF_SCALE * float(fo.beast.get("modelScale", 1.0))
+	add_child(n)
+	var ap: AnimationPlayer = n.find_child("AnimationPlayer", true, false)
+	for key in ["idle", "walk", "gallop", "windup", "stagger", "flinch"]:
+		if ap.has_animation(WOLF_ANIMS[key]):
+			ap.get_animation(WOLF_ANIMS[key]).loop_mode = Animation.LOOP_LINEAR
+	var meshes := n.find_children("*", "MeshInstance3D", true, false)
+	var ov := _mat(C_WINDUP, 2.0, true, 0.0)
+	ov.next_pass = _ink(2.4)
+	for m in meshes:
+		m.material_overlay = ov
+	var l := Label3D.new()
+	l.font = Style.font("title")
+	l.font_size = 22
+	l.fixed_size = true
+	l.pixel_size = 0.0011
+	l.modulate = C_DIM
+	l.outline_size = 8
+	l.outline_modulate = Color(0, 0, 0, 0.85)
+	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	l.no_depth_test = true
+	add_child(l)
+	var al := Label3D.new()
+	al.font_size = 96
+	al.text = "!"
+	al.modulate = C_WINDUP
+	al.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	al.no_depth_test = true
+	al.pixel_size = 0.004
+	al.outline_size = 10
+	al.outline_modulate = Color(0, 0, 0, 0.85)
+	al.visible = false
+	add_child(al)
+	return { "node": n, "anim": ap, "meshes": meshes, "overlay": ov, "label": l, "alert": al, "flash": 0.0, "cur": "", "until": 0.0,
+		"spec": { "wolf_scale": float(fo.beast.get("modelScale", 1.0)) } }
+
+func _pack_free(d: Dictionary) -> void:
+	for k in ["node", "label", "alert"]:
+		(d[k] as Node).queue_free()
+
+func _pack_loop(d: Dictionary, name: String, speed: float) -> void:
+	var ap: AnimationPlayer = d["anim"]
+	if d["cur"] == name and ap.is_playing():
+		ap.speed_scale = speed
+		return
+	_play(ap, name, 1.0, 0.18)
+	ap.speed_scale = speed
+	d["cur"] = name
+
+func _pack_oneshot(d: Dictionary, name: String, speed := 1.0, hold := 0.9) -> void:
+	var ap: AnimationPlayer = d["anim"]
+	ap.speed_scale = 1.0
+	_play(ap, name, speed, 0.06)
+	d["cur"] = name
+	var len: float = ap.get_animation(name).length if ap.has_animation(name) else 0.4
+	d["until"] = _clock + len / speed * hold
+
+## Where a foe stands: the locked one (-1) or one of the pack.
+func _foe_pos(f: Fight, i: int) -> Vector2:
+	if i >= 0 and i < f.foes.size():
+		return (f.foes[i] as Foe).pos
+	return f.w_pos
+
+func _update_pack(f: Fight, dt: float) -> void:
+	while _pack.size() > f.foes.size():
+		_pack_free(_pack.pop_back())
+	while _pack.size() < f.foes.size():
+		_pack.append(_pack_make(f.foes[_pack.size()]))
+	for i in _pack.size():
+		var fo: Foe = f.foes[i]
+		var d: Dictionary = _pack[i]
+		var n: Node3D = d["node"]
+		n.visible = show_wolf and fo.state != "absent"
+		var l: Label3D = d["label"]
+		var al: Label3D = d["alert"]
+		if not n.visible:
+			l.visible = false
+			al.visible = false
+			continue
+		n.position = _v3(fo.pos)
+		if fo.state == "down" and fo.timer > 1.4:
+			n.position.y -= (fo.timer - 1.4) * 0.6
+		n.rotation.y = _yaw(fo.facing)
+		n.rotation.z = sin(_clock * 22.0) * 0.06 if fo.state == "stagger" else 0.0
+		d["flash"] = maxf(0.0, float(d["flash"]) - dt * 7.0)
+		var glow := 0.0
+		if fo.state == "windup":
+			glow = clampf(fo.timer / maxf(0.01, fo.duration), 0.0, 1.0)
+		var overlay := Color(C_WINDUP, 0.6 * glow * glow)
+		if fo.state == "stagger":
+			overlay = Color(C_STAGGER, 0.25 + 0.15 * sin(_clock * 18.0))
+		if float(d["flash"]) > 0.0:
+			overlay = Color(C_HIT, 0.7 * float(d["flash"]))
+		(d["overlay"] as StandardMaterial3D).albedo_color = overlay
+		if _clock >= float(d["until"]):
+			match fo.state:
+				"prowl": _pack_loop(d, WOLF_ANIMS["walk"], 1.2)
+				"approach": _pack_loop(d, WOLF_ANIMS["gallop"], 1.3)
+				"windup": _pack_loop(d, WOLF_ANIMS["windup"], 0.6)
+				"recover", "idle": _pack_loop(d, WOLF_ANIMS["idle"], 1.0)
+				"stagger": _pack_loop(d, WOLF_ANIMS["stagger"], 0.3)
+				"flinch": _pack_loop(d, WOLF_ANIMS["flinch"], 1.0)
+		al.visible = fo.state == "windup"
+		if al.visible:
+			al.position = _v3(fo.pos, 2.3 + 0.15 * sin(_clock * 20.0))
+			al.modulate = Color(C_WINDUP, 0.5 + 0.5 * glow)
+		l.visible = fo.state != "down"
+		l.position = _v3(fo.pos, 1.9)
+		var state_text := ""
+		match fo.state:
+			"stagger": state_text = "  ·  STAGGERED"
+			"windup": state_text = "  ·  %s" % String(fo.attack.get("name", "")).to_upper()
+		l.text = "%s%s" % [String(fo.beast["name"]).to_upper(), state_text]
+
+func _pack_event(f: Fight, e: Dictionary) -> void:
+	var i := int(e.get("foe", -1))
+	if String(e["type"]) == "retarget":
+		_pack_swap(i)
+		return
+	while _pack.size() < f.foes.size():
+		_pack.append(_pack_make(f.foes[_pack.size()]))
+	if i < 0 or i >= _pack.size():
+		return
+	var d: Dictionary = _pack[i]
+	var fo: Foe = f.foes[i]
+	var at := _v3(fo.pos, 1.0)
+	match String(e["type"]):
+		"foe-spawn":
+			dust(_v3(fo.pos, 0.1), 14)
+		"foe-strike":
+			_pack_oneshot(d, WOLF_ANIMS["Attack"], 1.0)
+		"foe-hit":
+			var heavy: bool = e.get("heavy", false)
+			floater(at + Vector3(0, 0.8, 0), "%d" % int(e["damage"]), C_TEXT, 72 if heavy else 52)
+			burst(at, C_GOLD if heavy else C_HIT, 24 if heavy else 10, 6.0 if heavy else 4.5)
+			impact(at + _v3((f.p_pos - fo.pos).normalized() * 0.4), C_GOLD if heavy else C_HIT, 0.9 if heavy else 0.6)
+			d["flash"] = 1.0
+			if fo.state != "down":
+				_pack_oneshot(d, WOLF_ANIMS["HitReact" if randf() < 0.5 else "HitReact2"], 1.0, 0.6)
+		"foe-stagger":
+			floater(at + Vector3(0, 1.0, 0), "BROKEN", C_STAGGER, 60, 1.1)
+			_ring_wave(_v3(fo.pos), C_STAGGER, 2.4)
+		"foe-down":
+			_pack_oneshot(d, WOLF_ANIMS["Death"], 1.0, 99.0)
+			floater(at + Vector3(0, 1.0, 0), "%s FALLS" % String(fo.beast["name"]).to_upper(), C_GOLD, 52, 1.5)
+			_ring_wave(_v3(fo.pos), C_GOLD, 2.5)
+			dust(_v3(fo.pos, 0.1), 24)
+
+## The lock moved to one of the pack: the fight swapped their data, so the bodies swap too.
+func _pack_swap(i: int) -> void:
+	if i < 0 or i >= _pack.size() or _foe_spec.has("body"):
+		return
+	var d: Dictionary = _pack[i]
+	var mine := { "node": _wolf, "anim": _w_anim, "meshes": _w_meshes, "overlay": _overlay_wolf, "label": d["label"], "alert": d["alert"],
+		"flash": _wolf_flash, "cur": _w_current, "until": _w_oneshot_until, "spec": _foe_spec }
+	_wolf = d["node"]
+	_w_anim = d["anim"]
+	_w_meshes = d["meshes"]
+	_overlay_wolf = d["overlay"]
+	_wolf_flash = float(d["flash"])
+	_w_current = String(d["cur"])
+	_w_oneshot_until = float(d["until"])
+	_foe_spec = d["spec"]
+	_w_anims = WOLF_ANIMS
+	_pack[i] = mine
+
 func set_allies(specs: Array) -> void:
 	for a in _ally_nodes:
 		(a["node"] as Node).queue_free()
@@ -1965,8 +2144,9 @@ func _ally_event(f: Fight, e: Dictionary) -> void:
 			ap.play("1H_Melee_Attack_Slice_Horizontal", 0.05)
 			a["cur"] = "attack"
 			a["until"] = _clock + 0.5
-			impact(_v3(f.w_pos, 0.9), Color(0.8, 0.9, 1.0), 0.5)
-			floater(_v3(f.w_pos, 1.8) + Vector3(-0.4, 0.3, 0), "%d" % int(e["damage"]), Color(0.75, 0.85, 1.0), 40, 0.7)
+			var fp := _foe_pos(f, int(e.get("foe", -1)))
+			impact(_v3(fp, 0.9), Color(0.8, 0.9, 1.0), 0.5)
+			floater(_v3(fp, 1.8) + Vector3(-0.4, 0.3, 0), "%d" % int(e["damage"]), Color(0.75, 0.85, 1.0), 40, 0.7)
 		"ally-hurt":
 			ap.play("Hit_A", 0.05)
 			a["cur"] = "hurt"

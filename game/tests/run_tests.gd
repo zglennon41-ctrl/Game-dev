@@ -46,6 +46,7 @@ func _run() -> void:
 	test_shade_and_witness()
 	test_calendar_and_declaration()
 	test_shape_kits()
+	test_pack()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -955,3 +956,80 @@ func test_calendar_and_declaration() -> void:
 		check(cm["lines"].has(k), "Commencement has its %s line" % k)
 	for d in ["marshal", "pilot", "aeronaut"]:
 		check(Data.discipline_kits[d].has("rite"), "%s has its rite named" % d)
+
+## The pack: more than one foe at once. They bite on their own, fall to the hero's swings and
+## the party's, and when the locked foe falls the nearest of them takes the lock.
+func test_pack() -> void:
+	var h := Fight.default_hero()
+	var f := Fight.new({ "hero": h, "pack": ["cut-wolf", "cut-wolf"], "seed": 7 })
+	check(f.foes.size() == 2 and f.threats() == 3 and f.foes_alive() == 2, "a pack of two beside the locked foe makes three threats")
+	check(types(f.drain()).count("foe-spawn") == 2, "each of the pack announces itself")
+	# One of the pack bites a hero who stands still, with a wind-up first.
+	var bites := 0
+	var hurt := 0
+	for i in 12:
+		var k := Fight.new({ "hero": h, "pack": ["cut-wolf"], "seed": 200 + i })
+		k._wolf_set("idle", 99.0)
+		k.w_pos = k.p_pos + Vector2(9, 0)
+		(k.foes[0] as Foe).pos = k.p_pos + Vector2(-2.5, 0)
+		var hp0 := k.p_hp
+		var ev := types(run_for(k, 8.0))
+		if ev.has("foe-windup") and ev.has("foe-strike"):
+			bites += 1
+			check(ev.find("foe-windup") < ev.find("foe-strike"), "the wind-up comes before the strike")
+		if ev.has("hurt") and k.p_hp < hp0:
+			hurt += 1
+	check(bites >= 10 and hurt >= 6, "the pack bites on its own (%d wind-ups, %d hurt in 12)" % [bites, hurt])
+	# Swings land on the pack in the arc; enough of them fell one.
+	var g := Fight.new({ "hero": h, "pack": ["cut-wolf"], "seed": 9 })
+	g._wolf_set("idle", 99.0)
+	g.w_pos = g.p_pos + Vector2(0, 9)
+	var fo: Foe = g.foes[0]
+	fo.set_state("idle", 99.0)
+	g.passive = true
+	g.p_lock = false
+	fo.pos = g.p_pos + Vector2(1.4, 0)
+	g.p_facing = 0.0
+	var hits := 0
+	var fell := false
+	for i in 60:
+		fo.pos = g.p_pos + Vector2(1.4, 0)
+		g.input("attack")
+		var ev := types(run_for(g, 0.8))
+		hits += ev.count("foe-hit")
+		if ev.has("foe-down"):
+			fell = true
+			break
+	check(hits > 0 and fell and not fo.alive() and g.stats["wolves_down"] >= 1, "swings fell one of the pack (%d hits)" % hits)
+	# The locked foe falls: the nearest of the pack takes the lock, and the fallen one keeps its body.
+	var r := Fight.new({ "hero": h, "pack": ["cut-wolf"], "seed": 11, "respawn": false })
+	r.p_lock = true
+	var pack_hp := (r.foes[0] as Foe).hp
+	(r.foes[0] as Foe).hp = pack_hp - 10.0
+	r._wolf_set("down", 99.0)
+	var ev2 := types(run_for(r, 1.0))
+	check(ev2.has("retarget") and r.w_state != "down" and r.w_hp == pack_hp - 10.0 and (r.foes[0] as Foe).state == "down", "when the locked foe falls the pack's nearest takes the lock, data and all")
+	check(r.p_lock and r.threats() == 1, "the lock holds through the swap and the fallen one counts no more")
+	# The lock button passes the lock round a live pack.
+	var c := Fight.new({ "hero": h, "pack": ["cut-wolf"], "seed": 12 })
+	c.input("lock")
+	check(c.p_lock, "the first press locks on")
+	var first := c.beast.duplicate()
+	var fpos := c.w_pos
+	c.input("lock")
+	check(c.p_lock and c.w_pos != fpos, "the second press passes the lock to the next of the pack")
+	# The party strikes the pack beside them.
+	var cohort := Academy.make_cohort(42, h)
+	var pa := Fight.new({ "hero": h, "pack": ["cut-wolf"], "allies": [cohort[0]], "seed": 13 })
+	pa._wolf_set("idle", 99.0)
+	pa.w_pos = pa.p_pos + Vector2(0, 9)
+	var pf: Foe = pa.foes[0]
+	pf.set_state("idle", 99.0)
+	pa.passive = true
+	pf.pos = pa.allies[0]["pos"] + Vector2(1.2, 0)
+	var php := pf.hp
+	var ev3 := run_for(pa, 4.0)
+	var ally_on_pack := ev3.any(func(e): return e["type"] == "ally-hit" and int(e.get("foe", -1)) == 0)
+	check(ally_on_pack and pf.hp < php, "a classmate strikes the pack beside them")
+	# The Green's zones carry packs.
+	check(Data.academy["places"]["green-2"]["zone"]["pack"].size() == 2, "the second Green zone runs a pack of three wolves")
