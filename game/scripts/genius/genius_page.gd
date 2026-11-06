@@ -28,27 +28,59 @@ func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 		c.queue_free()
 	visible = true
 	var veil := ColorRect.new()
-	veil.color = Color(0.02, 0.016, 0.016, 0.94)
+	veil.color = Color(0.02, 0.016, 0.016, 0.8)
 	veil.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.add_child(veil)
+	# One sheet, like the board's: the card on the left, the page on the right.
+	var sheet := PanelContainer.new()
+	sheet.set_anchors_preset(Control.PRESET_FULL_RECT)
+	sheet.offset_left = 40
+	sheet.offset_right = -40
+	sheet.offset_top = 30
+	sheet.offset_bottom = -30
+	sheet.add_theme_stylebox_override("panel", Style.plate(Color(0.04, 0.034, 0.03, 0.97), Style.BRASS, 1, 22))
+	_root.add_child(sheet)
+	var outer := VBoxContainer.new()
+	outer.add_theme_constant_override("separation", 8)
+	sheet.add_child(outer)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 16)
+	outer.add_child(head)
+	var title := Label.new()
+	Style.label(title, 26, Style.GOLD, "title")
+	title.text = "%s, %s" % [g.name if g.name != "" else g.form_name(), g.instar_name()]
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(title)
+	var kicker := Label.new()
+	Style.label(kicker, 14, Style.DIM, "italic")
+	kicker.text = "your genius  ·  everything it is and everything it is learning"
+	kicker.size_flags_vertical = Control.SIZE_SHRINK_END
+	head.add_child(kicker)
+	outer.add_child(Style.rule(420))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 28)
+	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	outer.add_child(row)
 	var info := g.to_dict()
-	var card := GeniusCard.make(info, color, "YOUR GENIUS")
-	card.position = Vector2(70, 60)
-	_root.add_child(card)
+	var card := GeniusCard.make(info, color, "")
+	card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	row.add_child(card)
 	var scroll := ScrollContainer.new()
-	scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
-	scroll.offset_left = 500
-	scroll.offset_right = -60
-	scroll.offset_top = 50
-	scroll.offset_bottom = -90
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_root.add_child(scroll)
+	row.add_child(scroll)
 	var v := VBoxContainer.new()
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.add_theme_constant_override("separation", 6)
 	scroll.add_child(v)
-	_h(v, "%s, %s" % [g.name if g.name != "" else g.form_name(), g.instar_name()], 36)
-	v.add_child(Style.rule(420))
+	var foot := HBoxContainer.new()
+	outer.add_child(foot)
+	var hint := Label.new()
+	Style.label(hint, 13, Style.DIM, "ui")
+	hint.text = "J or Esc  close      scroll the page with the wheel or the stick"
+	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	foot.add_child(hint)
 	if marks > 0:
 		_p(v, "Your record: %d Marks." % marks, Style.DIM)
 	_p(v, "A %s, %s. Resonance %d: it fights with %d Will and can carry %d shadow%s. Day %d since the rite." % [
@@ -120,12 +152,10 @@ func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 		_p(v, "Day %d: the %s, a %s%s." % [int(h["day"]), GeniusResonance.instar_rule(int(h["instar"]))["name"], h["name"], " (settled)" if h.get("settled", false) else " (chosen)"])
 	var close := Button.new()
 	close.text = "Close   (J)"
-	Style.button(close, false, 18)
-	close.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	close.position = Vector2(-260, -70)
-	close.custom_minimum_size = Vector2(200, 46)
+	Style.button(close, false, 17)
+	close.custom_minimum_size = Vector2(180, 40)
 	close.pressed.connect(hide_page)
-	_root.add_child(close)
+	foot.add_child(close)
 	close.call_deferred("grab_focus")
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
