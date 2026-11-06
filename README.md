@@ -15,9 +15,12 @@ A real-time party RPG with guild management. Read `HANDOFF.md` for what the game
    imports the project.
 
 Turn the sound on and choose **New character**: ten questions about who you were before
-your field woke, then the reveal of who your answers made (your blood, Shape, weapon, what
-will stand beside you, and your Pattern), then the night your field wakes, and the
-Instructor who takes you in.
+your field woke (home is one of twelve cities, each with its own Discipline and three
+weapons), then the reveal of who your answers made (your blood, Shape, weapon, what will
+stand beside you, and your Pattern), where you can change your weapon, your body, your
+headgear and your cape and see it on the figure, then the night your field wakes, and the
+Instructor who takes you in. The twelve weapon types, with magazines, reloads and the bow's
+draw, are in `docs/weapons.md`.
 
 Then **the Academy at Alexandria**, a term of play that ends with a settled character:
 
@@ -60,7 +63,8 @@ genius is built by `tools/blender/genius_kit.py` (see `docs/art-bible.md`).
 | --- | --- | --- |
 | WASD / arrows | left stick | move |
 | mouse | right stick | look around (when lock-on is off) |
-| left click, J | X | strike, or shoot if you carry a gun |
+| left click, J | X | strike; shoot if you carry a gun (hold to draw a bow) |
+| X | | reload (a gun reloads by itself when its magazine is empty) |
 | right click, K | RB | hold to block; tap just before a blow lands to parry |
 | Space, Shift | A | dodge |
 | Q, 1 | Y | your Shape's technique; it breaks the beast |

@@ -351,6 +351,13 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
 ## 9. Decisions
 
 **Decided** (do not ask again):
+- **Twelve is the base number** (owner, 2026-11-07): twelve cities and their twelve
+  Disciplines are the twelve base classes (a Shape and a Discipline make one of the
+  seventy-two archetypes); twelve weapon types, three weapons a city; the twelve
+  Disciplines fully realized at the Academy (kits of nine, instructors, rites). Ranged
+  weapons carry magazines and reload; the bow draws. Creation and development must show in
+  the art: the body, the headgear, the cape and its colour, the weapon in the hand, the
+  field glowing in the weapon with mastery. The bar is a AAA studio game.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.
