@@ -237,15 +237,7 @@ func build_hero(hero: Dictionary) -> void:
 	_player = load(_person_model(hero.get("body", "Knight"))).instantiate()
 	add_child(_player)
 	toonify(_player)
-	var look: Dictionary = hero.get("look", { "headgear": true, "cape": true, "cape_color": "shape" })
-	_player.scale = Vector3.ONE * clampf(float(look.get("stature", 1.0)), 0.85, 1.2)
-	for a in _player.find_children("*", "BoneAttachment3D", true, false):
-		var n := String(a.name)
-		var head := n.contains("Helmet") or n.contains("Hat") or n.contains("Hood")
-		var cape := n.contains("Cape")
-		a.visible = (head and look.get("headgear", true)) or (cape and look.get("cape", true))
-		if cape:
-			_tint_cape(a, hero, String(look.get("cape_color", "shape")))
+	dress(_player, hero.get("look", {}), hero)
 	var skel: Skeleton3D = _player.find_child("Skeleton3D", true, false)
 	var w: Dictionary = Data.by_id(Data.weapons, hero.get("weapon", "saber"))
 	_sword = _attach(skel, "handslot.r", _weapon_model(w["model"]))
@@ -397,9 +389,7 @@ func set_foe(spec: Dictionary) -> void:
 	else:
 		_wolf = load(_person_model(spec.get("body", "Knight"))).instantiate()
 		_w_anims = PERSON_ANIMS
-		for a in _wolf.find_children("*", "BoneAttachment3D", true, false):
-			var an := String(a.name)
-			a.visible = an.contains("Helmet") or an.contains("Hat") or an.contains("Cape") or an.contains("Hood")
+		dress(_wolf, spec["look"] if not spec.get("look", {}).is_empty() else look_for(String(spec.get("name", ""))))
 		var skel: Skeleton3D = _wolf.find_child("Skeleton3D", true, false)
 		if spec.get("weapon", "") != "":
 			var w: Dictionary = Data.by_id(Data.weapons, spec["weapon"])
@@ -424,6 +414,71 @@ const CITY_COLORS := { "columbia": Color(0.2, 0.35, 0.75), "cahokia": Color(0.25
 	"tiber": Color(0.7, 0.15, 0.15), "khemet": Color(0.15, 0.4, 0.2), "baghdad": Color(0.2, 0.5, 0.7), "varanasi": Color(0.85, 0.5, 0.15), "jiangnan": Color(0.5, 0.15, 0.3),
 	"kazan": Color(0.45, 0.3, 0.15), "timbuktu": Color(0.75, 0.6, 0.25), "edo": Color(0.15, 0.15, 0.2) }
 
+## Every person wears their look: headgear and cape on or off, the hair and beard the look
+## names and the hair's colour, the cape's colour, and the stature. The hair's cap hides under
+## headgear and under a hood; its fall hangs from under them either way.
+func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
+	var headgear: bool = look.get("headgear", true)
+	var hooded := node.find_child("*Hooded*", true, false) != null
+	var hair := String(look.get("hair", "crop"))
+	var beard := String(look.get("beard", "none"))
+	var col := hair_color(String(look.get("hair_color", "brown")))
+	node.scale = Vector3.ONE * clampf(float(look.get("stature", 1.0)), 0.85, 1.2)
+	for a in node.find_children("*", "BoneAttachment3D", true, false):
+		var n := String(a.name)
+		if n.begins_with("Hair_"):
+			a.visible = n.begins_with("Hair_%s_" % hair) and not hooded and (n.ends_with("_fall") or not headgear)
+			if a.visible:
+				_recolor(a, col)
+		elif n.begins_with("Beard_"):
+			a.visible = n == "Beard_%s" % beard
+			if a.visible:
+				_recolor(a, col)
+		else:
+			var head := n.contains("Helmet") or n.contains("Hat") or n.contains("Hood")
+			var cape := n.contains("Cape")
+			a.visible = (head and headgear) or (cape and look.get("cape", true))
+			if cape and a.visible and not hero.is_empty():
+				_tint_cape(a, hero, String(look.get("cape_color", "shape")))
+
+## A hair colour by its name in data/creation.json.
+func hair_color(id: String) -> Color:
+	var cols: Dictionary = Data.creation.get("look", {}).get("hairColors", {})
+	var c: Array = cols.get(id, cols.get("brown", [0.2, 0.12, 0.07]))
+	return Color(c[0], c[1], c[2])
+
+## A look for someone the player did not make (a classmate, an instructor, the smith), the same
+## every time for the same name: hair, beard, colour, stature, and whether they go bare-headed.
+func look_for(name: String) -> Dictionary:
+	var L: Dictionary = Data.creation.get("look", {})
+	var h := absi(name.hash())
+	var hairs: Array = L.get("hair", ["crop"])
+	var beards: Array = L.get("beards", ["none"])
+	var cols: Array = L.get("hairColors", { "brown": [] }).keys()
+	var sts: Array = L.get("statures", { "middling": 1.0 }).values()
+	return { "headgear": (h / 7) % 5 < 2, "cape": (h / 11) % 3 != 0, "cape_color": "plain",
+		"hair": hairs[h % hairs.size()], "beard": beards[(h / 3) % beards.size()] if (h / 13) % 3 == 0 else beards[0],
+		"hair_color": cols[(h / 5) % cols.size()], "stature": sts[(h / 17) % sts.size()] }
+
+## Recolour an attachment's meshes, keeping the cel shading when it has it.
+func _recolor(att: Node, col: Color) -> void:
+	for m in att.find_children("*", "MeshInstance3D", true, false):
+		var mi: MeshInstance3D = m
+		if mi.mesh == null:
+			continue
+		for i in mi.mesh.get_surface_count():
+			var mat := mi.get_active_material(i)
+			if mat is ShaderMaterial and (mat as ShaderMaterial).shader == _toon_shader and _toon_shader != null:
+				var t: ShaderMaterial = (mat as ShaderMaterial).duplicate()
+				t.set_shader_parameter("albedo", col)
+				t.set_shader_parameter("use_tex", false)
+				mi.set_surface_override_material(i, t)
+			else:
+				var sm := StandardMaterial3D.new()
+				sm.albedo_color = col
+				sm.roughness = 0.9
+				mi.set_surface_override_material(i, sm)
+
 ## The cape takes a colour: the Shape's, the city's, the blood's, or plain cloth.
 func _tint_cape(att: Node, hero: Dictionary, which: String) -> void:
 	var col := Color(0.5, 0.42, 0.36)
@@ -434,11 +489,7 @@ func _tint_cape(att: Node, hero: Dictionary, which: String) -> void:
 			var b: Dictionary = Data.by_id(Data.bloods, hero["blood"]) if hero.get("blood", "") != "" else {}
 			col = Color(0.35, 0.1, 0.12) if b.is_empty() else Color(0.25, 0.12, 0.14).lerp(_shape_color(String(b.get("shapeLean", {}).keys()[0]) if not b.get("shapeLean", {}).is_empty() else "anchor"), 0.5)
 		"plain": col = Color(0.5, 0.42, 0.36)
-	for m in att.find_children("*", "MeshInstance3D", true, false):
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = col
-		mat.roughness = 0.9
-		(m as MeshInstance3D).material_override = mat
+	_recolor(att, col)
 
 ## Mastery shows on the weapon: every perfected technique makes the field in it glow brighter.
 func _glow_weapon(hero: Dictionary) -> void:
@@ -2469,9 +2520,7 @@ func set_allies(specs: Array) -> void:
 		var n: Node3D = load(_person_model(sp.get("body", "Knight"))).instantiate()
 		add_child(n)
 		toonify(n)
-		for a in n.find_children("*", "BoneAttachment3D", true, false):
-			var an := String(a.name)
-			a.visible = an.contains("Helmet") or an.contains("Hat") or an.contains("Cape") or an.contains("Hood")
+		dress(n, sp["look"] if not sp.get("look", {}).is_empty() else look_for(String(sp.get("name", ""))))
 		var skel: Skeleton3D = n.find_child("Skeleton3D", true, false)
 		var w: Dictionary = Data.by_id(Data.weapons, sp.get("weapon", "saber"))
 		_attach(skel, "handslot.r", _weapon_model(w["model"]))
@@ -2627,13 +2676,11 @@ func set_marker(at: Variant) -> void:
 	add_child(_marker)
 
 ## Someone standing in the place: a body, a weapon, their name and what they are over the head.
-func add_figure(body: String, at: Vector2, facing: float, title: String, sub: String, weapon := "", tint := Color(0, 0, 0, 0)) -> Dictionary:
+func add_figure(body: String, at: Vector2, facing: float, title: String, sub: String, weapon := "", tint := Color(0, 0, 0, 0), look := {}) -> Dictionary:
 	var n: Node3D = load(_person_model(body)).instantiate()
 	_place_root.add_child(n)
 	toonify(n)
-	for a in n.find_children("*", "BoneAttachment3D", true, false):
-		var an := String(a.name)
-		a.visible = an.contains("Helmet") or an.contains("Hat") or an.contains("Cape") or an.contains("Hood")
+	dress(n, look if not look.is_empty() else look_for(title))
 	var skel: Skeleton3D = n.find_child("Skeleton3D", true, false)
 	if weapon != "":
 		var w: Dictionary = Data.by_id(Data.weapons, weapon)

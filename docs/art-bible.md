@@ -239,7 +239,7 @@ without a code change:
 | --- | --- | --- | --- |
 | The wild kit | `tools/blender/wild_kit.py` | thirty-nine outdoor pieces: ground tiles, edge pieces, trees, rocks, ruins, the line's furniture, six set pieces (the den, the bridge, the junction, the crossing, the post, the car) | `game/assets/wild/<name>.glb`; the dungeon kit stands in for a missing piece |
 | The beast kit | `tools/blender/beast_kit.py` | six beasts reshaped from the Quaternius wolf on its own rig (every animation kept): the cut-wolf, the river-thing, the ruin-stag, the molted hound, the post-breaker, the eel of the current | `game/assets/beasts/<model>.glb` (`model` in `data/beasts.json`); the wolf stands in |
-| The people kit | `tools/blender/people_kit.py` | the five KayKit bodies reshaped to grounded proportions (about seven heads tall) on their own rig, textures, accessories and the hand slots kept | `game/assets/people/<Body>.glb`; KayKit's own stands in |
+| The people kit | `tools/blender/people_kit.py` | the five KayKit bodies reshaped to grounded proportions (about seven heads tall) on their own rig, textures, accessories and the hand slots kept; on every body, five hair styles (crop, long, braid, knot, tail) and two beards hung from the head bone, each its own node, the hair's cap apart from its fall so the fall hangs from under a helmet | `game/assets/people/<Body>.glb`; KayKit's own stands in |
 
 Checks: `godot --headless --path . -s res://game/tests/check_beasts.gd` and
 `check_people.gd` list each file's animations, bones and attachments and end "all good".
@@ -251,5 +251,15 @@ bands, a tinted shadow side, bright colour, and the ink outlines kept. The game 
 in `World.toonify`: every standard material on people, beasts, weapons and places becomes a
 banded toon material that keeps its colour, texture and emission (`data/rules.json`, `art`:
 `cel`, `bands`, `shadowTint`, `outlines`). The kits made here are the first pass at the
-shapes; the next passes are higher detail on the same rigs (hair, cloth, faces for creation),
+shapes; the next passes are higher detail on the same rigs (cloth, faces for creation),
 PBR-free, built for the bands.
+
+**The look, in the art (2026-11-07).** What creation chooses and the game dresses
+(`World.dress`, the options in `data/creation.json` under `look`): headgear and cape on or
+off, the cape's colour, the stature (four steps), the hair (bare or five styles), the beard
+(none, short, full) and the hair's colour (seven). A cap hides under headgear and under a
+hood; a fall (long, braid, bun, tail) hangs from under them. Classmates are drawn a look with
+the cohort (most bare-headed, so faces and hair show across the quad); instructors and the
+smith take one from their name. The hair takes the cel bands like everything else. Sheet:
+`python tools/blender/people_kit.py hair` renders every style on the Knight, bare and under
+the helm, with close-ups. Skin tone is still the texture's (one per body).

@@ -191,8 +191,20 @@ static func make_cohort(seed_value: int, h: Dictionary) -> Array:
 		var bodies: Array = Data.creation["bodies"]
 		out.append({ "id": "c%d" % i, "name": name, "city": city, "blood": blood["id"], "blood_name": blood["name"],
 			"shape": shapes[i % shapes.size()], "temperament": temps[i % temps.size()]["id"],
-			"body": bodies[rng.randi() % bodies.size()], "weapon": weapons[rng.randi() % weapons.size()]["id"] })
+			"body": bodies[rng.randi() % bodies.size()], "weapon": weapons[rng.randi() % weapons.size()]["id"],
+			"look": random_look(rng) })
 	return out
+
+## A classmate's look, drawn with the cohort: most go bare-headed so their faces and hair show.
+static func random_look(rng: RandomNumberGenerator) -> Dictionary:
+	var L: Dictionary = Data.creation.get("look", {})
+	var hairs: Array = L.get("hair", ["crop"])
+	var beards: Array = L.get("beards", ["none"])
+	var cols: Array = L.get("hairColors", { "brown": [] }).keys()
+	var sts: Array = L.get("statures", { "middling": 1.0 }).values()
+	return { "headgear": rng.randf() < 0.3, "cape": rng.randf() < 0.6, "cape_color": ["city", "plain", "shape"][rng.randi() % 3],
+		"hair": hairs[rng.randi() % hairs.size()], "beard": beards[rng.randi() % beards.size()] if rng.randf() < 0.35 else beards[0],
+		"hair_color": cols[rng.randi() % cols.size()], "stature": sts[rng.randi() % sts.size()] }
 
 static func _shuffle(a: Array, rng: RandomNumberGenerator) -> void:
 	for i in range(a.size() - 1, 0, -1):
@@ -350,7 +362,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 			var c: Dictionary = here[i]
 			var at := Vector2(spots[i][0], spots[i][1])
 			var fig := world.add_figure(c["body"], at, (Vector2.ZERO - at).angle() + randf_range(-0.6, 0.6), c["name"],
-				"%s · %s" % [c["blood_name"], String(c["shape"]).capitalize()], c["weapon"])
+				"%s · %s" % [c["blood_name"], String(c["shape"]).capitalize()], c["weapon"], Color(0, 0, 0, 0), c.get("look", {}))
 			_people.append({ "kind": "classmate", "id": c["id"], "name": c["name"], "pos": at, "c": c })
 	fight.obstacles = world.obstacles
 	hud.hide_screen()

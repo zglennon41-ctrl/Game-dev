@@ -5,6 +5,7 @@ headless with Blender's Python module:
     python tools/blender/people_kit.py              # every body, then the contact sheets
     python tools/blender/people_kit.py Knight       # one body
     python tools/blender/people_kit.py sheet        # only the sheets, from the exported files
+    python tools/blender/people_kit.py hair         # the hair and beard sheet, from the exported Knight
 
 Method (the beast kit's): import game/assets/kaykit/<Body>.glb, then move groups of vertices by
 their vertex-group weights together with the rest positions of the matching bones, so the baked
@@ -45,6 +46,8 @@ ANIMS = ["Idle", "Walking_A", "Running_A", "Walking_Backwards", "Blocking", "Blo
          "Spellcasting"]
 # Accessory nodes the game shows (world.gd hides every other bone attachment).
 ACCESSORY_WORDS = ("Helmet", "Hat", "Cape", "Hood")
+# The hair and beards built below hang from the head bone too; the game shows the one the look names.
+HAIR_WORDS = ("Hair_", "Beard_")
 # The one-handed weapon each body carries in the file, shown on the motion sheet only.
 WEAPON_SHOWN = {"Knight": "1H_Sword", "Mage": "1H_Wand", "Rogue": "Knife", "Rogue_Hooded": "Knife", "Barbarian": "1H_Axe"}
 
@@ -413,8 +416,156 @@ def check_glb(path, src_path=None):
             "materials": [m.get("name") for m in j.get("materials", [])], "images": [(im.get("name"), im.get("mimeType"), "embedded" if "bufferView" in im else im.get("uri")) for im in images]}
 
 
+# ======================================================================================
+# Hair and beards: low-poly pieces hung from the head bone, one node per style, the game
+# shows the one the character's look names and tints it. Each is built about the head mesh
+# as measured after the reshaping, so every body wears the same styles at the same place.
+# A style with a fall (long, braid, tail) is two nodes: the cap, hidden under a helmet, and
+# the fall, which hangs from under it either way.
+# ======================================================================================
+
+HAIR_STYLES = ["crop", "long", "braid", "knot", "tail"]
+BEARD_STYLES = ["short", "full"]
+
+
+def _bm_object(name, bm, material):
+    import bmesh  # noqa: F401 - bmesh is used by the callers; imported here to keep the module light
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    me.materials.append(material)
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.collection.objects.link(ob)
+    return ob
+
+
+def _smooth(ob):
+    for poly in ob.data.polygons:
+        poly.use_smooth = True
+
+
+def _cap_bm(c, rx, ry, rz, cut_z, tilt):
+    """The top of a squashed sphere about centre c, cut by a plane through z=cut_z that
+    tilts down toward the back (+Y) by `tilt`: a hairline higher at the brow than the nape."""
+    import bmesh
+    bm = bmesh.new()
+    bmesh.ops.create_uvsphere(bm, u_segments=18, v_segments=10, radius=1.0)
+    bmesh.ops.scale(bm, vec=(rx, ry, rz), verts=bm.verts)
+    bmesh.ops.translate(bm, vec=c, verts=bm.verts)
+    no = Vector((0, -tilt, 1)).normalized()
+    bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], plane_co=(0, c.y, cut_z), plane_no=no, clear_inner=True)
+    # Close the cut with a flat underside so the cap is solid from every angle.
+    edges = [e for e in bm.edges if e.is_boundary]
+    if edges:
+        bmesh.ops.holes_fill(bm, edges=edges)
+    return bm
+
+
+def _tube_bm(points, radii, segments=10):
+    """A tube through `points` (world), ring radius radii[i] at each: braids and tails."""
+    import bmesh
+    bm = bmesh.new()
+    rings = []
+    for i, (p, r) in enumerate(zip(points, radii)):
+        d = (points[min(i + 1, len(points) - 1)] - points[max(i - 1, 0)]).normalized()
+        u = d.cross(Z if abs(d.dot(Z)) < 0.9 else X).normalized()
+        w = d.cross(u).normalized()
+        ring = []
+        for k in range(segments):
+            a = 2 * math.pi * k / segments
+            ring.append(bm.verts.new(p + (u * math.cos(a) + w * math.sin(a)) * r))
+        rings.append(ring)
+    for a, b in zip(rings, rings[1:]):
+        for k in range(segments):
+            bm.faces.new((a[k], a[(k + 1) % segments], b[(k + 1) % segments], b[k]))
+    bm.faces.new(rings[0][::-1])
+    bm.faces.new(rings[-1])
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    return bm
+
+
+def _box_bm(lo, hi, taper=(1.0, 1.0)):
+    """A box from lo to hi (world); the bottom face scaled across by taper (x, y) about its centre."""
+    import bmesh
+    bm = bmesh.new()
+    bmesh.ops.create_cube(bm, size=1.0)
+    c = (lo + hi) / 2
+    sz = hi - lo
+    for v in bm.verts:
+        t = v.co.z + 0.5  # 0 at the bottom, 1 at the top
+        kx = taper[0] + (1 - taper[0]) * t
+        ky = taper[1] + (1 - taper[1]) * t
+        v.co = Vector((c.x + v.co.x * sz.x * kx, c.y + v.co.y * sz.y * ky, c.z + v.co.z * sz.z))
+    bmesh.ops.bevel(bm, geom=bm.edges[:], offset=min(sz) * 0.18, segments=2, affect="EDGES")
+    return bm
+
+
+def add_hair(r):
+    """Every style on the body, each hung from the head bone. The game shows one."""
+    heads = r.mesh_named("Head")
+    x0, x1 = r.extent(heads, 0)
+    y0, y1 = r.extent(heads, 1)
+    z0, z1 = r.extent(heads, 2)
+    hw, hd, hh = (x1 - x0) / 2, (y1 - y0) / 2, z1 - z0
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    brow = z0 + hh * 0.66               # the hairline at the brow, above the eyes
+    crown = Vector((cx, cy + hd * 0.05, z0 + hh * 0.62))
+    chin = z0 + hh * 0.08
+    front = y0                          # the face is at -Y
+    back = y1
+    hair = _material("hair", (0.16, 0.11, 0.08), rough=0.85)
+    pieces = []
+
+    def cap(name):
+        bm = _cap_bm(crown, hw * 1.08, hd * 1.07, hh * 0.46, brow, 0.5)
+        ob = _bm_object(name, bm, hair)
+        _smooth(ob)
+        return ob
+
+    for style in HAIR_STYLES:
+        pieces.append(cap("Hair_%s_cap" % style))
+    # long: a fall down the back to the shoulder blades, wider at the bottom
+    pieces.append(_bm_object("Hair_long_fall", _box_bm(Vector((cx - hw * 1.0, back - hd * 0.5, z0 - hh * 0.75)), Vector((cx + hw * 1.0, back + hd * 0.25, brow + hh * 0.3)), taper=(1.1, 0.7)), hair))
+    # braid: a plait from the nape, thick and thin by turns
+    n = 9
+    pts = [Vector((cx, back + hd * 0.2 + 0.02 * math.sin(i / 2.0), brow + hh * 0.1 - (i / (n - 1)) * hh * 1.25)) for i in range(n)]
+    rad = [hw * (0.3 if i % 2 == 0 else 0.22) * (1.0 - 0.35 * i / (n - 1)) for i in range(n)]
+    ob = _bm_object("Hair_braid_fall", _tube_bm(pts, rad), hair)
+    _smooth(ob)
+    pieces.append(ob)
+    # knot: a bun high on the back of the head
+    import bmesh
+    bm = bmesh.new()
+    bmesh.ops.create_uvsphere(bm, u_segments=12, v_segments=8, radius=1.0)
+    bmesh.ops.scale(bm, vec=(hw * 0.5, hd * 0.45, hh * 0.22), verts=bm.verts)
+    bmesh.ops.translate(bm, vec=Vector((cx, back + hd * 0.25, z0 + hh * 0.86)), verts=bm.verts)
+    ob = _bm_object("Hair_knot_fall", bm, hair)
+    _smooth(ob)
+    pieces.append(ob)
+    # tail: a high tail that swings out and down behind
+    pts = [Vector((cx, back + hd * 0.15 + hd * 0.9 * math.sin(math.pi * i / 8.0), z0 + hh * 0.85 - (i / 7.0) * hh * 0.95)) for i in range(8)]
+    rad = [hw * 0.34 * (1.0 - 0.6 * i / 7.0) for i in range(8)]
+    ob = _bm_object("Hair_tail_fall", _tube_bm(pts, rad), hair)
+    _smooth(ob)
+    pieces.append(ob)
+    # beards: short along the jaw; full, hanging to the collarbone
+    pieces.append(_bm_object("Beard_short", _box_bm(Vector((cx - hw * 0.92, front - hd * 0.03, z0 - hh * 0.03)), Vector((cx + hw * 0.92, front + hd * 0.6, z0 + hh * 0.16)), taper=(0.85, 0.85)), hair))
+    pieces.append(_bm_object("Beard_full", _box_bm(Vector((cx - hw * 0.85, front - hd * 0.08, z0 - hh * 0.5)), Vector((cx + hw * 0.85, front + hd * 0.6, z0 + hh * 0.2)), taper=(0.5, 0.5)), hair))
+    bpy.context.view_layer.update()
+    for ob in pieces:
+        ob.parent = r.arm
+        ob.parent_type = "BONE"
+        ob.parent_bone = "head"
+        bpy.context.view_layer.update()
+        ob.matrix_world = Matrix.Identity(4)
+    r.attached += pieces
+    r.measured["hair"] = len(pieces)
+    return pieces
+
+
 def build(body):
     r = reshape(Rig(body))
+    add_hair(r)
     return r.export(os.path.join(OUT, body + ".glb"))
 
 
@@ -434,7 +585,7 @@ def _material(name, color, rough=0.8, emission=None, strength=0.0):
     return m
 
 
-def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, res=(400, 640)):
+def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, res=(400, 640), hair=None, beard=None, headgear=True, focus=0.0):
     """One body from a file, three-quarter from the front right, in moonlight with a faint lamp
     from the other side; in the rest pose, or `at` (0..1) of the way through `anim`. The
     accessories are shown as the game shows them (helmet, hat, cape, hood), plus `weapon`."""
@@ -448,7 +599,12 @@ def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, re
         if o not in set(scene.objects) or o.name.startswith("Icosphere"):
             o.hide_render = True
         elif o.parent_type == "BONE":
-            o.hide_render = not (any(w in o.name for w in ACCESSORY_WORDS) or (weapon and o.name == weapon))
+            shown = (any(w in o.name for w in ACCESSORY_WORDS) and headgear) or (weapon and o.name == weapon)
+            if o.name.startswith("Hair_"):
+                shown = hair is not None and o.name.startswith("Hair_%s_" % hair) and (headgear is False or o.name.endswith("_fall"))
+            elif o.name.startswith("Beard_"):
+                shown = beard is not None and o.name == "Beard_%s" % beard
+            o.hide_render = not shown
     frame = 1
     if arm and arm.animation_data:
         arm.animation_data.action = None
@@ -505,7 +661,12 @@ def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, re
     from bpy_extras.object_utils import world_to_camera_view
     direction = Vector((0.8, -1.0, 0.35)).normalized()
     aim = centre
-    corners = [Vector((x, y, z)) for x in (lo.x - 0.05, hi.x + 0.05) for y in (lo.y - 0.7, hi.y + 0.05) for z in (0, hi.z + 0.05)]
+    # `focus`: fit the frame from this height up (0.75 frames the head and shoulders).
+    zlo = hi.z * focus
+    if focus > 0:
+        aim = Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, (zlo + hi.z) / 2))
+        size = max(hi.z - zlo, 0.5)
+    corners = [Vector((x, y, z)) for x in (lo.x - 0.05, hi.x + 0.05) for y in (lo.y - (0.7 if focus == 0 else 0.1), hi.y + 0.05) for z in (zlo, hi.z + 0.05)]
     dist = size * 1.0
     for _ in range(100):
         cam.location = aim + direction * dist
@@ -584,10 +745,25 @@ def render_sheets(bodies=None, samples=32, res=(400, 640)):
     tile(motion, os.path.join(SCRATCH, "people_sheet_motion.png"), len(bodies), res)
 
 
+def render_hair_sheet(body="Knight", samples=32, res=(400, 640)):
+    """One body wearing every hair style bare-headed, then under its headgear, then the beards."""
+    cards = os.path.join(SCRATCH, "people_cards")
+    glb = os.path.join(OUT, body + ".glb")
+    row1 = [render_card(glb, "%s %s" % (body, h), os.path.join(cards, "hair_%s.png" % h), anim="Idle", samples=samples, res=res, hair=h, headgear=False) for h in HAIR_STYLES]
+    row2 = [render_card(glb, "%s %s, helm" % (body, h), os.path.join(cards, "hair_%s_helm.png" % h), anim="Idle", samples=samples, res=res, hair=h, headgear=True) for h in HAIR_STYLES]
+    row3 = [render_card(glb, "%s bare" % body, os.path.join(cards, "hair_bare.png"), anim="Idle", samples=samples, res=res, hair=None, headgear=False)]
+    row3 += [render_card(glb, "%s %s beard" % (body, b), os.path.join(cards, "beard_%s.png" % b), anim="Idle", samples=samples, res=res, hair="crop", beard=b, headgear=False) for b in BEARD_STYLES]
+    row3 += [render_card(glb, "%s run, braid" % body, os.path.join(cards, "hair_run.png"), anim="Running_A", at=0.3, samples=samples, res=res, hair="braid", beard="short", headgear=False)]
+    row3 += [render_card(glb, "%s slice, long" % body, os.path.join(cards, "hair_slice.png"), anim="1H_Melee_Attack_Slice_Horizontal", at=0.45, weapon=WEAPON_SHOWN.get(body), samples=samples, res=res, hair="long", headgear=False)]
+    row4 = [render_card(glb, "%s %s, close" % (body, h), os.path.join(cards, "hair_%s_close.png" % h), anim="Idle", samples=samples, res=res, hair=h, beard=("full" if h == "crop" else "short" if h == "tail" else None), headgear=False, focus=0.72) for h in HAIR_STYLES]
+    tile(row1 + row2 + row3 + row4, os.path.join(SCRATCH, "people_sheet_hair.png"), len(HAIR_STYLES), res)
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     want_sheet = not args or "sheet" in args
-    wanted = [a for a in args if a != "sheet"] or (BODIES if not args else [])
+    want_hair = "hair" in args
+    wanted = [a for a in args if a not in ("sheet", "hair")] or (BODIES if not args else [])
     results = {}
     for body in wanted:
         results[body] = build(body)
@@ -595,3 +771,5 @@ if __name__ == "__main__":
         log(body, info)
     if want_sheet:
         render_sheets()
+    if want_hair:
+        render_hair_sheet()

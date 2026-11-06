@@ -301,7 +301,7 @@ static func student_beast(c: Dictionary, scale := 1.0) -> Dictionary:
 	b["name"] = c.get("name", "Student")
 	b["shape"] = c.get("shape", "anchor")
 	b["health"] = roundf(float(b["health"]) * scale)
-	b["person"] = { "body": c.get("body", "Knight"), "weapon": c.get("weapon", "saber"), "name": c.get("name", "") }
+	b["person"] = { "body": c.get("body", "Knight"), "weapon": c.get("weapon", "saber"), "name": c.get("name", ""), "look": c.get("look", {}) }
 	# What their city's school taught them, if they have a city.
 	var disc: String = c.get("discipline", Creation.discipline_of(c.get("city", "")))
 	for a in Data.discipline_kits.get(disc, {}).get("studentAttacks", []):
@@ -1283,7 +1283,7 @@ static func make_ally(c: Dictionary, at: Vector2) -> Dictionary:
 	var kit: Dictionary = Data.kits.get(shape, Data.kits["anchor"])
 	var forms: Dictionary = kit["forms"]
 	var fid: String = forms.keys()[0]
-	return { "id": c.get("id", ""), "name": c.get("name", "Classmate"), "shape": shape, "body": c.get("body", "Knight"), "weapon": wid,
+	return { "id": c.get("id", ""), "name": c.get("name", "Classmate"), "shape": shape, "body": c.get("body", "Knight"), "weapon": wid, "look": c.get("look", {}),
 		"hp": float(F.get("health", 90)), "hp_max": float(F.get("health", 90)), "pos": at, "facing": 0.0, "down": false, "hit_at": 0.0,
 		"damage": float(weapon["damage"]), "interval": 1.9, "moving": false,
 		"style": style, "reach": float(weapon["reach"]), "ranged": weapon.get("ranged", false), "windup": float(weapon["windup"]), "recover": float(weapon["recover"]),

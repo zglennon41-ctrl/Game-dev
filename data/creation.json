@@ -792,6 +792,71 @@
     "Rogue",
     "Rogue_Hooded"
   ],
+  "look": {
+    "comment": "The look: what shows on the body and is chosen at creation. Hair styles and beards are pieces hung from the head bone of every body (tools/blender/people_kit.py); a cap hides under headgear, a fall hangs from under it. Colours are linear RGB.",
+    "hair": [
+      "bare",
+      "crop",
+      "long",
+      "braid",
+      "knot",
+      "tail"
+    ],
+    "beards": [
+      "none",
+      "short",
+      "full"
+    ],
+    "hairColors": {
+      "black": [
+        0.05,
+        0.045,
+        0.05
+      ],
+      "brown": [
+        0.2,
+        0.12,
+        0.07
+      ],
+      "chestnut": [
+        0.38,
+        0.18,
+        0.08
+      ],
+      "fair": [
+        0.8,
+        0.66,
+        0.38
+      ],
+      "red": [
+        0.55,
+        0.17,
+        0.07
+      ],
+      "grey": [
+        0.55,
+        0.55,
+        0.58
+      ],
+      "white": [
+        0.9,
+        0.9,
+        0.86
+      ]
+    },
+    "statures": {
+      "slight": 0.94,
+      "middling": 1.0,
+      "tall": 1.06,
+      "towering": 1.12
+    },
+    "capeColors": {
+      "shape": "your Shape's colour",
+      "city": "your city's colour",
+      "blood": "your blood's colour",
+      "plain": "plain cloth"
+    }
+  },
   "names": {
     "columbia": [
       "Mira Hale",

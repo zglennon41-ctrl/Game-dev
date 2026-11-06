@@ -6,6 +6,20 @@
     "questions",
     "models",
     "bodies",
-    "names"
-  ]
+    "names",
+    "look"
+  ],
+  "properties": {
+    "look": {
+      "type": "object",
+      "required": ["hair", "beards", "hairColors", "statures", "capeColors"],
+      "properties": {
+        "hair": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "beards": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "hairColors": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 } },
+        "statures": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0.8, "maximum": 1.25 } },
+        "capeColors": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    }
+  }
 }

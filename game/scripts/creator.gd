@@ -290,20 +290,42 @@ func _reveal() -> void:
 	v.add_child(lrow)
 	_chip(lrow, "Headgear on", func(): look["headgear"] = not look["headgear"]; changed.emit(hero); _reveal(), look["headgear"])
 	_chip(lrow, "Cape on", func(): look["cape"] = not look["cape"]; changed.emit(hero); _reveal(), look["cape"])
+	var L: Dictionary = Data.creation.get("look", {})
+	var hrow := HBoxContainer.new()
+	hrow.add_theme_constant_override("separation", 8)
+	v.add_child(hrow)
+	_text(hrow, "Hair:", 15, DIM)
+	for hs in L.get("hair", []):
+		var hid: String = hs
+		_chip(hrow, hid, func(): look["hair"] = hid; changed.emit(hero); _reveal(), String(look.get("hair", "crop")) == hid)
+	var brow := HBoxContainer.new()
+	brow.add_theme_constant_override("separation", 8)
+	v.add_child(brow)
+	_text(brow, "Beard:", 15, DIM)
+	for bs in L.get("beards", []):
+		var bid2: String = bs
+		_chip(brow, bid2, func(): look["beard"] = bid2; changed.emit(hero); _reveal(), String(look.get("beard", "none")) == bid2)
+	var hcrow := HBoxContainer.new()
+	hcrow.add_theme_constant_override("separation", 8)
+	v.add_child(hcrow)
+	_text(hcrow, "Colour:", 15, DIM)
+	for hc in L.get("hairColors", {}):
+		var cid0: String = hc
+		_chip(hcrow, cid0, func(): look["hair_color"] = cid0; changed.emit(hero); _reveal(), String(look.get("hair_color", "brown")) == cid0)
 	var srow := HBoxContainer.new()
 	srow.add_theme_constant_override("separation", 8)
 	v.add_child(srow)
 	_text(srow, "Stature:", 15, DIM)
-	for st in [["slight", 0.94], ["middling", 1.0], ["tall", 1.06], ["towering", 1.12]]:
-		var sv: float = st[1]
-		_chip(srow, st[0], func(): look["stature"] = sv; changed.emit(hero); _reveal(), absf(float(look.get("stature", 1.0)) - sv) < 0.001)
+	for st in L.get("statures", {}):
+		var sv: float = float(L["statures"][st])
+		_chip(srow, st, func(): look["stature"] = sv; changed.emit(hero); _reveal(), absf(float(look.get("stature", 1.0)) - sv) < 0.001)
 	var crow := HBoxContainer.new()
 	crow.add_theme_constant_override("separation", 8)
 	v.add_child(crow)
 	_text(crow, "Cape:", 15, DIM)
-	for cc in [["shape", "your Shape's colour"], ["city", "your city's colour"], ["blood", "your blood's colour"], ["plain", "plain cloth"]]:
-		var cid: String = cc[0]
-		_chip(crow, cc[1], func(): look["cape_color"] = cid; changed.emit(hero); _reveal(), look["cape_color"] == cid)
+	for cc in L.get("capeColors", {}):
+		var cid: String = cc
+		_chip(crow, L["capeColors"][cc], func(): look["cape_color"] = cid; changed.emit(hero); _reveal(), look["cape_color"] == cid)
 	var end := HBoxContainer.new()
 	end.add_theme_constant_override("separation", 12)
 	v.add_child(end)

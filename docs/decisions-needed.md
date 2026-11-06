@@ -242,9 +242,11 @@ Calls I made building real-time combat. Every number is in `data/combat-room.jso
     creator with names for each. The twelve Disciplines are the twelve base classes.
 69. **The look** (creation, "LOOK"): headgear on or off, the cape on or off and its colour
     (the Shape's, the city's, the blood's, plain); the city's three weapons to carry; the
-    weapon's field glows brighter for every technique perfected. More that could show:
-    skin and hair (the KayKit heads are one texture each; new heads would need the people
-    kit), a rank's trim at Commencement, the genius's colour on the cloak.
+    weapon's field glows brighter for every technique perfected; the stature; the hair
+    (five styles), the beard (two) and the hair's colour (seven), built on every body by the
+    people kit. More that could show: skin tone (the KayKit heads are one texture each; a
+    painted set of faces would need the people kit), a rank's trim at Commencement, the
+    genius's colour on the cloak.
 
 **Resolved on 2026-11-07** (see HANDOFF §9): 61 (ten postings before the Gate, one of each
 type), 66–67 (one weapon at a time; gear tiers at the Academy: named from Hunts and the

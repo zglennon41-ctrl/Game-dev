@@ -356,8 +356,9 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   seventy-two archetypes); twelve weapon types, three weapons a city; the twelve
   Disciplines fully realized at the Academy (kits of nine, instructors, rites). Ranged
   weapons carry magazines and reload; the bow draws. Creation and development must show in
-  the art: the body, the headgear, the cape and its colour, the weapon in the hand, the
-  field glowing in the weapon with mastery. The bar is a AAA studio game.
+  the art: the body, the headgear, the cape and its colour, the stature, the hair, beard
+  and their colour, the weapon in the hand, the field glowing in the weapon with mastery.
+  The bar is a AAA studio game.
 - **Answers of 2026-11-07** (owner): one weapon at a time (chosen at creation, changed at the
   school); gear tiers at the Academy, visible: named weapons from Hunts and the Archive
   (three Salvage fragments), fine ones bought with Marks at the yard, no armour yet; one

@@ -55,6 +55,7 @@ func _run() -> void:
 	test_weapons()
 	test_gear_and_gate()
 	test_weapon_balance()
+	test_look()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -1487,3 +1488,58 @@ func test_weapon_balance() -> void:
 		var f: Fight = harness._bot(60.0, w["id"])
 		check(f.stats["wolves_down"] >= 3 and f.now >= 50.0, "%s: the bot fells wolves and lives a minute (%d felled, %.0f s)" % [st, f.stats["wolves_down"], f.now])
 	harness.free()
+
+
+## The look shows in the art: the hair and beard the look names hang from the head of every
+## body, the cap hides under headgear, the fall hangs from under it, a hood hides the hair, and
+## classmates drawn with the cohort each have a look of their own.
+func test_look() -> void:
+	var L: Dictionary = Data.creation["look"]
+	check(L["hair"].size() == 6 and L["beards"].size() == 3 and L["hairColors"].size() == 7, "six hair styles, three beards, seven colours in the data")
+	var w := World.new()
+	add_child(w)
+	var seen := {}
+	for body in Data.creation["bodies"]:
+		var hero := Fight.default_hero()
+		hero["body"] = body
+		hero["look"] = { "headgear": true, "cape": true, "cape_color": "city", "hair": "long", "beard": "full", "hair_color": "red", "stature": 1.06 }
+		w.build_hero(hero)
+		var vis := {}
+		for a in w._player.find_children("*", "BoneAttachment3D", true, false):
+			if String(a.name).begins_with("Hair_") or String(a.name).begins_with("Beard_"):
+				vis[String(a.name)] = (a as Node3D).visible
+		seen[body] = vis.size()
+		check(vis.size() == 11, "%s carries the eleven hair and beard pieces (%d)" % [body, vis.size()])
+		var hooded := String(body).contains("Hooded")
+		check(vis.get("Hair_long_fall", false) == (not hooded), "%s: the long fall hangs under the helmet, unless hooded" % body)
+		check(vis.get("Hair_long_cap", true) == false, "%s: the cap hides under headgear" % body)
+		check(vis.get("Beard_full", false) and not vis.get("Beard_short", true), "%s: the full beard shows, the short one not" % body)
+		check(not vis.get("Hair_braid_fall", true) and not vis.get("Hair_knot_fall", true), "%s: no other style shows" % body)
+		check(absf(w._player.scale.x - 1.06) < 0.001, "%s stands tall" % body)
+		hero["look"]["headgear"] = false
+		hero["look"]["hair"] = "knot"
+		hero["look"]["beard"] = "none"
+		w.build_hero(hero)
+		var cap: Node3D = w._player.find_child("Hair_knot_cap", true, false)
+		var fall: Node3D = w._player.find_child("Hair_knot_fall", true, false)
+		var beard: Node3D = w._player.find_child("Beard_full", true, false)
+		check(cap and cap.visible == (not hooded) and fall and fall.visible == (not hooded), "%s: bare-headed, the knot's cap and bun show (unless hooded)" % body)
+		check(beard and not beard.visible, "%s: no beard when the look says none" % body)
+		if not hooded:
+			var mi: MeshInstance3D = cap.find_child("*", true, false)
+			var mat := mi.get_active_material(0)
+			check(mat is ShaderMaterial and (mat as ShaderMaterial).get_shader_parameter("albedo") == w.hair_color("red"), "%s: the hair takes the look's colour under cel shading" % body)
+	# Classmates differ from each other, the same cohort every time for the same seed.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var looks: Array = []
+	for i in 12:
+		looks.append(Academy.random_look(rng))
+	var distinct := {}
+	for lk in looks:
+		distinct["%s/%s/%s" % [lk["hair"], lk["beard"], lk["hair_color"]]] = true
+	check(distinct.size() >= 8, "twelve classmates wear at least eight different looks (%d)" % distinct.size())
+	rng.seed = 7
+	check(Academy.random_look(rng) == looks[0], "the same seed draws the same look")
+	check(w.look_for("Imre Toth") == w.look_for("Imre Toth") and w.look_for("Imre Toth") != w.look_for("Sefu Adeyemi"), "an instructor's look follows from the name")
+	w.queue_free()

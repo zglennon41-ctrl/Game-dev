@@ -99,6 +99,13 @@ func _ready() -> void:
 		new_character()
 		creator.answers = ra
 		creator._reveal()
+		# --look=hair:long,beard:full,hair_color:red,headgear:0 dresses the revealed character.
+		if _args.has("look"):
+			for kv in String(_args["look"]).split(","):
+				var parts := kv.split(":")
+				if parts.size() == 2:
+					creator.hero["look"][parts[0]] = (parts[1] == "1") if parts[0] in ["headgear", "cape"] else (float(parts[1]) if parts[0] == "stature" else parts[1])
+			creator._reveal()
 		await get_tree().create_timer(1.2).timeout
 		_shot("reveal")
 		await get_tree().create_timer(0.3).timeout
