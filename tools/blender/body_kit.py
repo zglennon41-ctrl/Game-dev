@@ -648,7 +648,39 @@ def part_claws():
     return out
 
 
+
+
+def part_trim():
+    """The rank's trim: a collar ring at the neck's base and a band at each cuff would need
+    the arms; the collar alone reads at the game's distance. Material "trim": the game colours
+    it by the archetype's Shape."""
+    mat = pk._material("trim", (0.85, 0.7, 0.3, 1), rough=0.5)
+    pts = []
+    n = 20
+    for i in range(n + 1):
+        a = 2 * math.pi * i / n
+        pts.append(Vector((0.085 * math.cos(a), 0.075 * math.sin(a) + 0.01, -0.055 - 0.01 * math.cos(a))))
+    ob = _ob("Trim_collar", pk._tube_bm(pts, [0.012] * (n + 1), segments=8), mat)
+    pk._smooth(ob)
+    return [ob]
+
+
+def part_cape():
+    """A cloak from the shoulders to the calves, hung from the back socket; material "cape",
+    which the game colours by the look (and threads with the bonded genius's colour)."""
+    mat = pk._material("cape", (0.5, 0.42, 0.36, 1), rough=0.95)
+    rings = []
+    spine = [(0.0, 0.03), (0.08, 0.02), (0.3, 0.015), (0.6, 0.02), (0.85, 0.03)]   # drop below the socket, y-offset back
+    widths = [0.2, 0.24, 0.26, 0.3, 0.34]
+    for (drop, back), w in zip(spine, widths):
+        rings.append((Vector((0, back, -drop)), Vector((w / 2, 0, 0)), Vector((0, 0.012, 0))))
+    ob = loft("Cape", rings)
+    ob.data.materials.append(mat)
+    return [ob]
+
+
 PARTS = {
+    "trim": part_trim, "cape": part_cape,
     "horns": part_horns, "tail": part_tail, "wings": part_wings, "scales-throat": part_scales_throat,
     "scales-hand": part_scales_hand, "gill-lines": part_gill_lines, "fur-ears": part_fur_ears, "claws": part_claws,
 }

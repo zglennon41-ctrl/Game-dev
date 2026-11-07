@@ -110,6 +110,14 @@ colours), one 512 texture at most on a dress.
   also reads `hero["features"]` for what instars and ranks will write. The blood sheet is
   `python tools/blender/body_kit.py bloods`; the suite proves every mark on both bodies.
 
+- **The life on the body (2026-11-07)**: `World.features_of` adds, beyond the blood, the
+  Journeyman's trim at the collar once an archetype is taken at the Gate (a part on the throat
+  socket in the Shape's colour), the bonded genius's colour threading the cloak once it is
+  born, its light in the eyes from its second instar, and the field under the skin from its
+  third (`data/people-features.json`, `shapeColor`). The cloak is a part on the back socket,
+  in the colour the look names. Anything else a Reading writes goes on `hero["features"]`
+  by id and is worn the same way. Tested in `test_life_features`.
+
 ## Order of work
 
 1. **v1, one home**: the masculine and feminine Alexandria bodies at 7.5 heads on the rig,

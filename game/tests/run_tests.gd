@@ -58,6 +58,7 @@ func _run() -> void:
 	test_look()
 	test_rest()
 	test_blood_marks()
+	test_life_features()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -1610,4 +1611,44 @@ func test_blood_marks() -> void:
 						var em: float = float((mat2 as ShaderMaterial).get_shader_parameter("emission_energy"))
 						check((f["kind"] == "tint" and not alb.is_equal_approx(plain_tone)) or (f["kind"] == "glow" and em > 0.0), "%s on %s: the skin shows %s" % [b["id"], body, fid])
 	check(marked >= 15, "fifteen bloods show marks (%d)" % marked)
+	w.queue_free()
+
+
+## What the life writes onto the body: the rank's trim at the Gate, the bonded genius's
+## colour in the cloak, its light in the eyes from the second instar, the field under the
+## skin from the third; the cloak itself hangs on a kit body when the look says so.
+func test_life_features() -> void:
+	var w := World.new()
+	add_child(w)
+	var hero := Fight.default_hero()
+	hero["body"] = "alexandria-f"
+	hero["shape"] = "turn"
+	hero["look"] = { "cape": true, "cape_color": "plain", "skin": "fair" }
+	check(w.features_of(hero).is_empty(), "a fresh character carries nothing")
+	hero["archetypes"] = [{ "archetype": "turn-marshal", "rank": "journeyman" }]
+	hero["genius"] = { "instar": 3 }
+	var feats := w.features_of(hero)
+	for f in ["trim-journeyman", "cloak-genius", "eyes-genius", "skin-field"]:
+		check(feats.has(f), "the life writes %s" % f)
+	w.build_hero(hero)
+	var skel: Skeleton3D = w._player.find_child("Skeleton3D", true, false)
+	var trim: Node = skel.find_child("feature_trim-journeyman_socket_throat", false, false)
+	check(trim != null and trim.get_child_count() > 0, "the trim hangs at the collar")
+	var tms := trim.find_children("*", "MeshInstance3D", true, false) if trim else []
+	var tm: MeshInstance3D = tms[0] if not tms.is_empty() else null
+	check(tm != null and (tm.get_active_material(0) as ShaderMaterial).get_shader_parameter("albedo").is_equal_approx(World.SHAPE_COLORS["turn"]), "the trim takes the Shape's colour")
+	var cape: Node = skel.find_child("feature_cape_socket_back", false, false)
+	check(cape != null and cape.get_child_count() > 0, "the cloak hangs from the back")
+	var cms := cape.find_children("*", "MeshInstance3D", true, false) if cape else []
+	var cm: MeshInstance3D = cms[0] if not cms.is_empty() else null
+	var cape_col: Color = (cm.get_active_material(0) as ShaderMaterial).get_shader_parameter("albedo") if cm else Color.BLACK
+	check(not cape_col.is_equal_approx(Color(0.5, 0.42, 0.36)) and cape_col.r > 0.6, "the genius's colour threads the plain cloak")
+	var iris: MeshInstance3D = w._player.find_child("Iris_l", true, false).find_children("*", "MeshInstance3D", true, false)[0]
+	check((iris.get_active_material(0) as ShaderMaterial).get_shader_parameter("albedo").is_equal_approx(World.SHAPE_COLORS["turn"]), "the eyes take the genius's light")
+	var head: MeshInstance3D = w._player.find_child("Head", true, false)
+	check(float((head.get_active_material(0) as ShaderMaterial).get_shader_parameter("emission_energy")) > 0.0, "the field shows under the skin")
+	hero["look"]["cape"] = false
+	w.build_hero(hero)
+	skel = w._player.find_child("Skeleton3D", true, false)
+	check(skel.find_child("feature_cape_socket_back", false, false) == null, "no cloak when the look says none")
 	w.queue_free()

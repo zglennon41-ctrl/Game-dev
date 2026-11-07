@@ -1,5 +1,5 @@
 {
- "comment": "Everything a body can take beyond its look, from any source: a blood's marks (data/bloods.json, marks), the rank's trim, the bonded genius's colour, the changes of instars. kind: part (a model from game/assets/people/parts/<part>.glb at each socket bone), tint (blended into the skin tone by strength), eyes (the iris colour, with emission), glow (emissive skin and a light), trim and cape (applied by the game). Built by tools/blender/body_kit.py parts.",
+ "comment": "Everything a body can take beyond its look, from any source: a blood's marks (data/bloods.json, marks), the rank's trim, the bonded genius's colour, the changes of instars. kind: part (a model from game/assets/people/parts/<part>.glb at each socket bone), tint (blended into the skin tone by strength), eyes (the iris colour, with emission), glow (emissive skin and a light), trim and cape (applied by the game). Built by tools/blender/body_kit.py parts. shapeColor names which colour the hero's Shape overrides (trim, iris, glow). Derived features: World.features_of adds eyes-genius and skin-field from the genius's instar, trim-journeyman is written at the Gate, cloak-genius when a genius is born.",
  "features": {
   "skin-stone": {
    "slot": "surface",
@@ -208,16 +208,44 @@
    ]
   },
   "trim-journeyman": {
-   "slot": "surface",
-   "kind": "trim",
-   "label": "the Journeyman's trim at collar and hem",
-   "strength": 1.0
+   "slot": "collar",
+   "kind": "part",
+   "label": "the Journeyman's trim at the collar, in the archetype's colour",
+   "part": "trim",
+   "sockets": [
+    "socket_throat"
+   ],
+   "shapeColor": "trim"
   },
   "cloak-genius": {
    "slot": "cape",
    "kind": "cape",
-   "label": "the bonded genius's colour in the cloak",
-   "strength": 1.0
+   "label": "the bonded genius's colour threading the cloak",
+   "strength": 0.5
+  },
+  "eyes-genius": {
+   "slot": "eyes",
+   "kind": "eyes",
+   "label": "the genius's light in the eyes (from its second instar)",
+   "iris": [
+    0.9,
+    0.9,
+    0.9
+   ],
+   "emission": 0.9,
+   "shapeColor": "iris"
+  },
+  "skin-field": {
+   "slot": "surface",
+   "kind": "glow",
+   "label": "the field under the skin (from the third instar)",
+   "glow": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "strength": 0.18,
+   "shapeColor": "glow"
   }
  }
 }

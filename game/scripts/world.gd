@@ -446,10 +446,12 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 	# (data/people-features.json). Tints blend into the skin; eyes colour the iris; parts hang
 	# on the sockets; a glow lights the skin.
 	var feats := features_of(hero, look)
+	var shape_col := _shape_color(String(hero.get("shape", "anchor")))
 	var iris := Color(0.12, 0.09, 0.07)
 	var iris_glow := 0.0
 	var glow := Color(0, 0, 0)
 	var glow_k := 0.0
+	var cape_thread := 0.0
 	for fid in feats:
 		var f: Dictionary = Data.people_features.get(fid, {})
 		match String(f.get("kind", "")):
@@ -458,12 +460,14 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 				tone = tone.lerp(Color(t[0], t[1], t[2]), float(f.get("strength", 0.5)))
 			"eyes":
 				var c: Array = f.get("iris", [0.1, 0.1, 0.1])
-				iris = Color(c[0], c[1], c[2])
+				iris = shape_col if f.get("shapeColor", "") == "iris" else Color(c[0], c[1], c[2])
 				iris_glow = float(f.get("emission", 0.0))
 			"glow":
 				var g: Array = f.get("glow", [1.0, 0.85, 0.55])
-				glow = Color(g[0], g[1], g[2])
+				glow = shape_col if f.get("shapeColor", "") == "glow" else Color(g[0], g[1], g[2])
 				glow_k = float(f.get("strength", 0.35))
+			"cape":
+				cape_thread = float(f.get("strength", 0.5))
 	var skel: Skeleton3D = node.find_child("Skeleton3D", true, false)
 	for m in node.find_children("*", "MeshInstance3D", true, false):
 		var mi: MeshInstance3D = m
@@ -491,6 +495,18 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 				# A hand part is built for the left hand; the right wears its mirror.
 				if String(sock).ends_with("_r") and att.get_child_count() > 0:
 					(att.get_child(0) as Node3D).scale.x = -1.0
+				if f.get("shapeColor", "") == "trim":
+					for m2 in att.find_children("*", "MeshInstance3D", true, false):
+						_recolor_named(m2, "trim", shape_col, shape_col, 0.6)
+		# A kit body's cloak is a part on the back socket, in the colour the look names, and
+		# threaded with the bonded genius's colour once there is one.
+		if look.get("cape", true) and skel.find_bone("socket_back") >= 0:
+			var cape := _attach(skel, "socket_back", "res://game/assets/people/parts/cape.glb")
+			cape.name = "feature_cape_socket_back"
+			var col := cape_color_for(hero, String(look.get("cape_color", "shape")))
+			if cape_thread > 0.0:
+				col = col.lerp(shape_col, cape_thread)
+			_recolor(cape, col)
 	if glow_k > 0.0 and node == _player:
 		if _glow_light == null:
 			_glow_light = OmniLight3D.new()
@@ -537,6 +553,19 @@ func features_of(hero: Dictionary, look: Dictionary = {}) -> Array:
 		var b: Dictionary = Data.by_id(Data.bloods, blood_id)
 		for m in b.get("marks", []):
 			out.append(m)
+	# What the life writes onto the body: the rank's trim once an archetype is taken at the
+	# Gate; the bonded genius's colour in the cloak once it is born; its light in the eyes from
+	# its second instar; the field under the skin from its third.
+	if not hero.get("archetypes", []).is_empty():
+		out.append("trim-journeyman")
+	var g: Dictionary = hero.get("genius", {}) if hero.get("genius", {}) is Dictionary else {}
+	var instar := int(g.get("instar", 0))
+	if instar >= 1:
+		out.append("cloak-genius")
+	if instar >= 2:
+		out.append("eyes-genius")
+	if instar >= 3:
+		out.append("skin-field")
 	for f in hero.get("features", []):
 		if not out.has(f):
 			out.append(f)
@@ -612,6 +641,9 @@ func _recolor(att: Node, col: Color) -> void:
 
 ## The cape takes a colour: the Shape's, the city's, the blood's, or plain cloth.
 func _tint_cape(att: Node, hero: Dictionary, which: String) -> void:
+	_recolor(att, cape_color_for(hero, which))
+
+func cape_color_for(hero: Dictionary, which: String) -> Color:
 	var col := Color(0.5, 0.42, 0.36)
 	match which:
 		"shape": col = _shape_color(hero.get("shape", "anchor")).darkened(0.25)
@@ -620,7 +652,7 @@ func _tint_cape(att: Node, hero: Dictionary, which: String) -> void:
 			var b: Dictionary = Data.by_id(Data.bloods, hero["blood"]) if hero.get("blood", "") != "" else {}
 			col = Color(0.35, 0.1, 0.12) if b.is_empty() else Color(0.25, 0.12, 0.14).lerp(_shape_color(String(b.get("shapeLean", {}).keys()[0]) if not b.get("shapeLean", {}).is_empty() else "anchor"), 0.5)
 		"plain": col = Color(0.5, 0.42, 0.36)
-	_recolor(att, col)
+	return col
 
 ## Mastery shows on the weapon: every perfected technique makes the field in it glow brighter.
 func _glow_weapon(hero: Dictionary) -> void:
