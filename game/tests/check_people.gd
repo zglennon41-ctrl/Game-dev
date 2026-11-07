@@ -75,7 +75,12 @@ func _init() -> void:
 			if pieces.size() < dress.get("pieces", []).size():
 				missing.append("(dress: %d of %d pieces)" % [pieces.size(), dress.get("pieces", []).size()])
 			for pc in pieces:
-				if (pc as MeshInstance3D).skin == null:
+				# rigid pieces (buttons, a badge, knots, tools, pauldrons, pteruges) hang from bones
+				var rigid := false
+				for word in ["_button_", "_badge", "_knot", "_tail_", "_tool_", "_pauldron_", "_strip_"]:
+					if String(pc.name).contains(word):
+						rigid = true
+				if not rigid and (pc as MeshInstance3D).skin == null:
 					missing.append("(dress piece %s not skinned)" % pc.name)
 					break
 			if dress.has("headgear") and inst.find_child("Headgear_*", true, false) == null:
