@@ -6,7 +6,8 @@
 extends SceneTree
 
 const DIR := "res://game/assets/people"
-const BODIES := ["alexandria-m", "alexandria-f"]
+const HOMES := ["alexandria", "columbia", "cahokia", "lunden", "colonia", "tiber", "khemet", "baghdad", "varanasi", "jiangnan", "kazan", "timbuktu", "edo"]
+const BODIES := ["alexandria-m", "alexandria-f", "columbia-m", "columbia-f", "cahokia-m", "cahokia-f", "lunden-m", "lunden-f", "colonia-m", "colonia-f", "tiber-m", "tiber-f", "khemet-m", "khemet-f", "baghdad-m", "baghdad-f", "varanasi-m", "varanasi-f", "jiangnan-m", "jiangnan-f", "kazan-m", "kazan-f", "timbuktu-m", "timbuktu-f", "edo-m", "edo-f"]
 const SOCKETS := ["socket_head", "socket_eyes", "socket_throat", "socket_back", "socket_tail", "socket_hand_l", "socket_hand_r", "socket_light"]
 const MUST := ["Idle", "Running_A", "1H_Melee_Attack_Slice_Horizontal", "Walking_A", "Walking_Backwards", "Blocking",
 	"Block_Hit", "Hit_A", "Hit_B", "Death_A", "Dodge_Forward", "Dodge_Backward"]
@@ -65,6 +66,23 @@ func _init() -> void:
 		var body_mesh: MeshInstance3D = inst.find_child("Body", true, false)
 		if body_mesh == null or body_mesh.find_blend_shape_by_name("lean") < 0 or body_mesh.find_blend_shape_by_name("heavy") < 0:
 			missing.append("(lean/heavy shape keys)")
+		# The home's dress (data/bodies.json): its pieces skinned, its headgear on the head.
+		var home := body.get_slice("-", 0)
+		var homes: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/bodies.json")).get("homes", {})
+		var dress: Dictionary = homes.get(home, {}).get("dress", {})
+		if not dress.is_empty():
+			var pieces := inst.find_children("Dress_*", "MeshInstance3D", true, false)
+			if pieces.size() < dress.get("pieces", []).size():
+				missing.append("(dress: %d of %d pieces)" % [pieces.size(), dress.get("pieces", []).size()])
+			for pc in pieces:
+				if (pc as MeshInstance3D).skin == null:
+					missing.append("(dress piece %s not skinned)" % pc.name)
+					break
+			if dress.has("headgear") and inst.find_child("Headgear_*", true, false) == null:
+				missing.append("(headgear %s)" % dress["headgear"]["type"])
+		for fc in ["Face_nose", "Face_brow", "Face_ear_l", "Eye_l", "Iris_r"]:
+			if inst.find_child(fc, true, false) == null:
+				missing.append(fc)
 		print(body, ": animations=", ap.get_animation_list().size() if ap else 0, " bones=", skel.get_bone_count() if skel else 0,
 			" meshes=", meshes.size(), " skinned=", skinned, " textured=", textured)
 		print("    attachments=", attachments)

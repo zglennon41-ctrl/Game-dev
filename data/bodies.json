@@ -1,5 +1,5 @@
 {
- "comment": "The bodies of the thirteen homes (docs/bodies-plan.md): a carving brief for each face, the face parameters the body kit reads for the masculine and feminine body (multipliers on the base carving: brow ridge, nose length and width, lips, ears, jaw width, head length, cheekbones), and the skin palette offered at creation (tone ids from data/creation.json, look.skinTones). Every sentence is the owner's to rewrite.",
+ "comment": "The bodies of the thirteen homes (docs/bodies-plan.md): a carving brief for each face, the face parameters the body kit reads for the masculine and feminine body (multipliers on the base carving: brow ridge, nose length and width, lips, ears, jaw width, head length, cheekbones), and the skin palette offered at creation (tone ids from data/creation.json, look.skinTones). Every sentence is the owner's to rewrite. dress: the home's outfit as pieces the body kit builds as shells on the body's own rings (tunic, coat, robe, kilt, cuirass, apron, hakama, greaves, boots, belt, sash, collar) in named colours, and a headgear piece hung from the head (cap, hat, turban, furhat), which the look's headgear toggle shows or hides.",
  "homes": {
   "alexandria": {
    "name": "Alexandria",
@@ -34,6 +34,31 @@
      "headLength": 1.0,
      "cheek": 1.0
     }
+   },
+   "dress": {
+    "colors": {
+     "main": [
+      0.3,
+      0.26,
+      0.34
+     ],
+     "second": [
+      0.16,
+      0.15,
+      0.17
+     ]
+    },
+    "pieces": [
+     {
+      "type": "tunic",
+      "color": "main",
+      "sleeves": 2
+     },
+     {
+      "type": "belt",
+      "color": "second"
+     }
+    ]
    }
   },
   "columbia": {
@@ -67,6 +92,49 @@
      "headLength": 1.03,
      "cheek": 1.0
     }
+   },
+   "dress": {
+    "colors": {
+     "main": [
+      0.16,
+      0.2,
+      0.36
+     ],
+     "second": [
+      0.72,
+      0.6,
+      0.3
+     ],
+     "metal": [
+      0.7,
+      0.65,
+      0.5
+     ]
+    },
+    "pieces": [
+     {
+      "type": "coat",
+      "color": "main",
+      "hem": 0.55,
+      "sleeves": 6
+     },
+     {
+      "type": "collar",
+      "color": "second"
+     },
+     {
+      "type": "belt",
+      "color": "second"
+     },
+     {
+      "type": "boots",
+      "color": "second"
+     }
+    ],
+    "headgear": {
+     "type": "hat",
+     "color": "main"
+    }
    }
   },
   "cahokia": {
@@ -99,6 +167,44 @@
      "headLength": 1.0,
      "cheek": 1.15
     }
+   },
+   "dress": {
+    "colors": {
+     "main": [
+      0.28,
+      0.3,
+      0.24
+     ],
+     "second": [
+      0.55,
+      0.42,
+      0.25
+     ]
+    },
+    "pieces": [
+     {
+      "type": "coat",
+      "color": "main",
+      "hem": 0.95,
+      "sleeves": 6
+     },
+     {
+      "type": "collar",
+      "color": "main"
+     },
+     {
+      "type": "belt",
+      "color": "second"
+     },
+     {
+      "type": "boots",
+      "color": "second"
+     }
+    ],
+    "headgear": {
+     "type": "cap",
+     "color": "main"
+    }
    }
   },
   "lunden": {
@@ -129,6 +235,39 @@
      "jaw": 0.92,
      "headLength": 1.05,
      "cheek": 0.92
+    }
+   },
+   "dress": {
+    "colors": {
+     "main": [
+      0.22,
+      0.22,
+      0.26
+     ],
+     "second": [
+      0.5,
+      0.3,
+      0.2
+     ]
+    },
+    "pieces": [
+     {
+      "type": "tunic",
+      "color": "main",
+      "sleeves": 6
+     },
+     {
+      "type": "belt",
+      "color": "second"
+     },
+     {
+      "type": "boots",
+      "color": "second"
+     }
+    ],
+    "headgear": {
+     "type": "cap",
+     "color": "second"
     }
    }
   },
@@ -162,6 +301,48 @@
      "headLength": 1.0,
      "cheek": 1.05
     }
+   },
+   "dress": {
+    "colors": {
+     "main": [
+      0.35,
+      0.22,
+      0.12
+     ],
+     "second": [
+      0.2,
+      0.18,
+      0.16
+     ],
+     "metal": [
+      0.55,
+      0.45,
+      0.3
+     ]
+    },
+    "pieces": [
+     {
+      "type": "tunic",
+      "color": "second",
+      "sleeves": 2
+     },
+     {
+      "type": "apron",
+      "color": "main"
+     },
+     {
+      "type": "belt",
+      "color": "metal"
+     },
+     {
+      "type": "boots",
+      "color": "second"
+     }
+    ],
+    "headgear": {
+     "type": "cap",
+     "color": "second"
+    }
    }
   },
   "tiber": {
@@ -192,6 +373,49 @@
      "jaw": 1.0,
      "headLength": 0.97,
      "cheek": 1.0
+    }
+   },
+   "dress": {
+    "colors": {
+     "main": [
+      0.6,
+      0.14,
+      0.12
+     ],
+     "second": [
+      0.4,
+      0.3,
+      0.2
+     ],
+     "metal": [
+      0.68,
+      0.62,
+      0.45
+     ]
+    },
+    "pieces": [
+     {
+      "type": "tunic",
+      "color": "main",
+      "sleeves": 1
+     },
+     {
+      "type": "cuirass",
+      "color": "metal"
+     },
+     {
+      "type": "kilt",
+      "color": "second",
+      "hem": 0.85
+     },
+     {
+      "type": "greaves",
+      "color": "metal"
+     }
+    ],
+    "headgear": {
+     "type": "hat",
+     "color": "metal"
     }
    }
   },
@@ -225,6 +449,40 @@
      "headLength": 1.08,
      "cheek": 1.05
     }
+   },
+   "dress": {
+    "colors": {
+     "main": [
+      0.85,
+      0.78,
+      0.6
+     ],
+     "second": [
+      0.2,
+      0.4,
+      0.25
+     ]
+    },
+    "pieces": [
+     {
+      "type": "tunic",
+      "color": "main",
+      "sleeves": 0
+     },
+     {
+      "type": "kilt",
+      "color": "main",
+      "hem": 0.7
+     },
+     {
+      "type": "belt",
+      "color": "second"
+     }
+    ],
+    "headgear": {
+     "type": "cap",
+     "color": "second"
+    }
    }
   },
   "baghdad": {
@@ -256,6 +514,36 @@
      "jaw": 0.9,
      "headLength": 1.0,
      "cheek": 0.98
+    }
+   },
+   "dress": {
+    "colors": {
+     "main": [
+      0.2,
+      0.35,
+      0.5
+     ],
+     "second": [
+      0.85,
+      0.75,
+      0.5
+     ]
+    },
+    "pieces": [
+     {
+      "type": "robe",
+      "color": "main",
+      "hem": 0.2,
+      "sleeves": 6
+     },
+     {
+      "type": "belt",
+      "color": "second"
+     }
+    ],
+    "headgear": {
+     "type": "turban",
+     "color": "second"
     }
    }
   },
@@ -289,6 +577,36 @@
      "headLength": 1.03,
      "cheek": 0.92
     }
+   },
+   "dress": {
+    "colors": {
+     "main": [
+      0.85,
+      0.55,
+      0.2
+     ],
+     "second": [
+      0.9,
+      0.85,
+      0.7
+     ]
+    },
+    "pieces": [
+     {
+      "type": "tunic",
+      "color": "second",
+      "sleeves": 0
+     },
+     {
+      "type": "kilt",
+      "color": "main",
+      "hem": 0.3
+     },
+     {
+      "type": "sash",
+      "color": "main"
+     }
+    ]
    }
   },
   "jiangnan": {
@@ -320,6 +638,37 @@
      "jaw": 0.92,
      "headLength": 1.02,
      "cheek": 1.05
+    }
+   },
+   "dress": {
+    "colors": {
+     "main": [
+      0.35,
+      0.15,
+      0.3
+     ],
+     "second": [
+      0.9,
+      0.88,
+      0.8
+     ]
+    },
+    "pieces": [
+     {
+      "type": "robe",
+      "color": "main",
+      "hem": 0.25,
+      "sleeves": 6,
+      "wide": true
+     },
+     {
+      "type": "belt",
+      "color": "second"
+     }
+    ],
+    "headgear": {
+     "type": "cap",
+     "color": "main"
     }
    }
   },
@@ -353,6 +702,40 @@
      "headLength": 0.98,
      "cheek": 1.18
     }
+   },
+   "dress": {
+    "colors": {
+     "main": [
+      0.45,
+      0.3,
+      0.15
+     ],
+     "second": [
+      0.25,
+      0.2,
+      0.15
+     ]
+    },
+    "pieces": [
+     {
+      "type": "coat",
+      "color": "main",
+      "hem": 0.75,
+      "sleeves": 6
+     },
+     {
+      "type": "belt",
+      "color": "second"
+     },
+     {
+      "type": "boots",
+      "color": "second"
+     }
+    ],
+    "headgear": {
+     "type": "furhat",
+     "color": "second"
+    }
    }
   },
   "timbuktu": {
@@ -383,6 +766,37 @@
      "jaw": 1.0,
      "headLength": 1.06,
      "cheek": 1.02
+    }
+   },
+   "dress": {
+    "colors": {
+     "main": [
+      0.2,
+      0.25,
+      0.5
+     ],
+     "second": [
+      0.85,
+      0.75,
+      0.4
+     ]
+    },
+    "pieces": [
+     {
+      "type": "robe",
+      "color": "main",
+      "hem": 0.25,
+      "sleeves": 6,
+      "wide": true
+     },
+     {
+      "type": "collar",
+      "color": "second"
+     }
+    ],
+    "headgear": {
+     "type": "cap",
+     "color": "second"
     }
    }
   },
@@ -415,6 +829,36 @@
      "headLength": 1.03,
      "cheek": 1.02
     }
+   },
+   "dress": {
+    "colors": {
+     "main": [
+      0.15,
+      0.15,
+      0.2
+     ],
+     "second": [
+      0.6,
+      0.55,
+      0.5
+     ]
+    },
+    "pieces": [
+     {
+      "type": "tunic",
+      "color": "main",
+      "sleeves": 5,
+      "wide": true
+     },
+     {
+      "type": "hakama",
+      "color": "main"
+     },
+     {
+      "type": "belt",
+      "color": "second"
+     }
+    ]
    }
   }
  }

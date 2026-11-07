@@ -228,6 +228,36 @@ def rings_y(table, x):
 
 
 # ======================================================================================
+# Dress: the home's outfit (data/bodies.json, dress) as shells on the body's own rings, so a
+# garment fits every build and takes the lean and heavy keys with the body; headgear hangs
+# from the head bone and the look's toggle shows or hides it.
+# ======================================================================================
+
+def home_dress(home):
+    import json
+    try:
+        return json.load(open(os.path.join(ROOT, "data", "bodies.json")))["homes"][home].get("dress", {})
+    except (KeyError, OSError):
+        return {}
+
+
+def _shell(rings, grow, lo=0, hi=None):
+    """Rings lo..hi of a (z, hw, hd, yo) table, each grown by `grow` across."""
+    sub = rings[lo:(hi + 1 if hi is not None else None)]
+    return [(z, hw + grow, hd + grow, yo) for z, hw, hd, yo in sub]
+
+
+def _skirt(z_top, hw, hd, yo, hem, flare, steps=4):
+    """A loft from a ring down to the hem, widening by `flare`."""
+    out = []
+    for i in range(steps + 1):
+        t = i / steps
+        k = 1.0 + (flare - 1.0) * t
+        out.append((z_top + (hem - z_top) * t, hw * k, hd * k, yo))
+    return out
+
+
+# ======================================================================================
 # Weights: every vertex to the bones of its chain, blended across the joints
 # ======================================================================================
 
@@ -377,7 +407,136 @@ class Body:
             objs["Leg_" + side] = leg
             foot = add(loft("Foot_" + side, rings_y(self.scaled(foot_rings(sex)), x_leg), lambda i: slot["boots"]))
             objs["Foot_" + side] = foot
+        self.dress_pieces(objs, build, add, slot)
         return objs
+
+    def dress_pieces(self, objs, build, add, slot):
+        """The garments for one build, named Dress_<n>_<type>, with their chain in self.chains."""
+        D = home_dress(self.home)
+        if not D:
+            return
+        sex = self.sex
+        colors = D.get("colors", {})
+        mats = {}
+        for cname, c in colors.items():
+            mats[cname] = pk._material("dress_%s_%s" % (self.home, cname), tuple(c) + (1,), rough=0.9)
+        tr = self.scaled(trunk_rings(sex, build))
+        ar = self.scaled(arm_rings(sex, build))
+        lr = self.scaled(leg_rings(sex, build))
+        z_arm = self.joint("upperarm.l", "z")
+        x_leg = self.joint("upperleg.l", "x")
+        if not hasattr(self, "chains"):
+            self.chains = {}
+        n = 0
+
+        def put(name, ob, chain, cname):
+            ob.data.materials.clear()
+            ob.data.materials.append(mats.get(cname, self.mats["tunic"]))
+            objs[name] = ob
+            self.chains[name] = chain
+
+        def sleeves(k, cname, wide=False):
+            if k <= 0:
+                return
+            for side, sign in (("l", 1), ("r", -1)):
+                rings = []
+                for i, (x, hd, hz) in enumerate(ar[:k + 1]):
+                    g = 0.012 + (0.03 if wide and i == k else 0.0)
+                    rings.append((x, hd + g, hz + g))
+                ob = loft("Dress_%d_sleeve_%s" % (n, side), rings_x(rings, z_arm, sign))
+                put("Dress_%d_sleeve_%s" % (n, side), ob, "arm." + side, cname)
+
+        for piece in D.get("pieces", []):
+            n += 1
+            t, cname = piece["type"], piece["color"]
+            hem = float(piece.get("hem", 0.5)) * self.k
+            if t == "tunic":
+                ob = loft("Dress_%d_tunic" % n, rings_z(_shell(tr, 0.012, 1, 8)))
+                put("Dress_%d_tunic" % n, ob, "trunk", cname)
+                sleeves(int(piece.get("sleeves", 2)), cname, piece.get("wide", False))
+            elif t in ("coat", "robe"):
+                top = _shell(tr, 0.014, 2, 8)
+                z2, hw2, hd2, yo2 = top[0]
+                skirt = _skirt(z2, hw2, hd2, yo2, hem, 1.25 if t == "coat" else 1.15)
+                ob = loft("Dress_%d_%s" % (n, t), rings_z(skirt[::-1][:-1] + top))
+                put("Dress_%d_%s" % (n, t), ob, "trunk", cname)
+                sleeves(int(piece.get("sleeves", 6)), cname, piece.get("wide", t == "robe"))
+            elif t == "kilt":
+                z2, hw2, hd2, yo2 = tr[1]
+                ob = loft("Dress_%d_kilt" % n, rings_z(_skirt(z2, hw2 + 0.014, hd2 + 0.014, yo2, hem, 1.2)[::-1]))
+                put("Dress_%d_kilt" % n, ob, "trunk", cname)
+            elif t == "cuirass":
+                ob = loft("Dress_%d_cuirass" % n, rings_z(_shell(tr, 0.022, 4, 8)))
+                put("Dress_%d_cuirass" % n, ob, "trunk", cname)
+            elif t == "apron":
+                z_hi = tr[6][0]
+                z_lo = 0.6 * self.k
+                w = tr[3][1] + 0.02
+                ob = pk._bm_object("Dress_%d_apron" % n, pk._box_bm(Vector((-w, tr[3][2] * -1.0 - 0.03, z_lo)), Vector((w, -tr[3][2] * 1.0 + 0.0, z_hi)), taper=(1.1, 1.0)), self.mats["tunic"])
+                put("Dress_%d_apron" % n, ob, "trunk", cname)
+            elif t == "hakama":
+                for side, sign in (("l", 1), ("r", -1)):
+                    rings = [(z, hw * 1.6 + 0.02, hd * 1.5 + 0.02) for z, hw, hd in lr[:6]]
+                    ob = loft("Dress_%d_hakama_%s" % (n, side), [(Vector((sign * x_leg, 0, 0)) + c, u, v) for c, u, v in rings_z(rings)])
+                    put("Dress_%d_hakama_%s" % (n, side), ob, "leg." + side, cname)
+            elif t in ("greaves", "boots"):
+                for side, sign in (("l", 1), ("r", -1)):
+                    rings = [(z, hw + 0.012, hd + 0.012) for z, hw, hd in lr[4:]]
+                    ob = loft("Dress_%d_%s_%s" % (n, t, side), [(Vector((sign * x_leg, 0, 0)) + c, u, v) for c, u, v in rings_z(rings)])
+                    put("Dress_%d_%s_%s" % (n, t, side), ob, "leg." + side, cname)
+            elif t in ("belt", "sash"):
+                z2, hw2, hd2, yo2 = tr[3]
+                h = 0.03 if t == "belt" else 0.07
+                ob = loft("Dress_%d_%s" % (n, t), rings_z([(z2 - h, hw2 + 0.02, hd2 + 0.02, yo2), (z2 + h, hw2 + 0.02, hd2 + 0.02, yo2)]))
+                put("Dress_%d_%s" % (n, t), ob, "trunk", cname)
+            elif t == "collar":
+                z2, hw2, hd2, yo2 = tr[9]
+                ob = loft("Dress_%d_collar" % n, rings_z([(z2 - 0.02, hw2 + 0.03, hd2 + 0.03, yo2), (z2 + 0.05, hw2 + 0.02, hd2 + 0.02, yo2)]))
+                put("Dress_%d_collar" % n, ob, "trunk", cname)
+
+    def headgear(self):
+        """The home's headgear, if any, hung from the head bone: Headgear_<type>."""
+        D = home_dress(self.home)
+        hg = D.get("headgear")
+        if not hg:
+            return []
+        head = self.parts["Head"]
+        x0, x1 = self.r.extent([head], 0)
+        y0, y1 = self.r.extent([head], 1)
+        z0, z1 = self.r.extent([head], 2)
+        hw, hd, hh = (x1 - x0) / 2, (y1 - y0) / 2, z1 - z0
+        c = Vector(((x0 + x1) / 2, (y0 + y1) / 2, z0 + hh * 0.62))
+        col = D["colors"].get(hg["color"], [0.3, 0.3, 0.3])
+        mat = pk._material("dress_%s_%s" % (self.home, hg["color"]), tuple(col) + (1,), rough=0.9)
+        t = hg["type"]
+        if t == "cap":
+            bm = pk._cap_bm(c, hw * 1.12, hd * 1.1, hh * 0.46, z0 + hh * 0.72, 0.1)
+        elif t == "hat":
+            bm = pk._cap_bm(c, hw * 1.12, hd * 1.1, hh * 0.5, z0 + hh * 0.7, 0.0)
+            brim = bmesh.new()
+            bmesh.ops.create_cone(brim, cap_ends=True, segments=20, radius1=hw * 1.7, radius2=hw * 1.7, depth=0.012)
+            bmesh.ops.translate(brim, vec=Vector((c.x, c.y, z0 + hh * 0.7)), verts=brim.verts)
+            ob2 = pk._bm_object("Headgear_hat_brim", brim, mat)
+            ob = pk._bm_object("Headgear_hat", bm, mat)
+            pk._smooth(ob)
+            return [ob, ob2]
+        elif t == "turban":
+            bm = bmesh.new()
+            for i, (r, dz) in enumerate(((1.25, 0.72), (1.3, 0.84), (1.15, 0.96))):
+                ring = bmesh.new()
+                bmesh.ops.create_torus(ring, major_radius=hw * r * 0.85, minor_radius=hw * 0.3, major_segments=18, minor_segments=8)
+                bmesh.ops.translate(ring, vec=Vector((c.x, c.y, z0 + hh * dz)), verts=ring.verts)
+                me = bpy.data.meshes.new("t%d" % i)
+                ring.to_mesh(me)
+                bm.from_mesh(me)
+                bpy.data.meshes.remove(me)
+        elif t == "furhat":
+            bm = pk._cap_bm(Vector((c.x, c.y, c.z + hh * 0.12)), hw * 1.3, hd * 1.25, hh * 0.5, z0 + hh * 0.66, 0.0)
+        else:
+            bm = pk._cap_bm(c, hw * 1.15, hd * 1.15, hh * 0.5, z0 + hh * 0.45, 0.2)
+        ob = pk._bm_object("Headgear_%s" % t, bm, mat)
+        pk._smooth(ob)
+        return [ob]
 
     def weight(self, objs):
         r = self.r
@@ -394,6 +553,18 @@ class Body:
             joints = lz[:3]
             weight_chain_down(objs["Leg_" + side], joints, bones)
             weight_all(objs["Foot_" + side], "foot." + side)
+        zj = [self.joint(b, "z") for b in DEFORM["trunk"]]
+        for name, chain in getattr(self, "chains", {}).items():
+            ob = objs[name]
+            if chain == "trunk":
+                weight_chain(ob, zj, "z", DEFORM["trunk"])
+            elif chain.startswith("arm."):
+                side = chain[-1]
+                sign = 1 if side == "l" else -1
+                weight_chain(ob, [self.joint(b, "x") for b in DEFORM[chain]], "x", DEFORM[chain], sign)
+            elif chain.startswith("leg."):
+                lz = [self.joint(b, "z") for b in DEFORM[chain]]
+                weight_chain_down(ob, lz[:3], DEFORM[chain][:3])
         for o in objs.values():
             skin_to(o, r.arm)
             r.skinned.append(o)
@@ -449,9 +620,9 @@ class Body:
         skin = self.mats["skin"]
         pieces = []
         # the brow: a ridge across the eyes, heavier for a heavy brow
-        bz = z0 + hh * 0.62
+        bz = z0 + hh * 0.67
         brow = self.fp("brow")
-        pieces.append(pk._bm_object("Face_brow", pk._box_bm(Vector((-hw * 0.62, front - 0.008 * brow, bz - 0.008 * brow)), Vector((hw * 0.62, front + 0.02, bz + 0.01 * brow)), taper=(1.0, 1.0)), skin))
+        pieces.append(pk._bm_object("Face_brow", pk._box_bm(Vector((-hw * 0.6, front - 0.004 * brow, bz - 0.005 * brow)), Vector((hw * 0.6, front + 0.025, bz + 0.007 * brow)), taper=(1.0, 1.0)), skin))
         # the nose: a wedge down the middle, longer or shorter, wider or narrower
         nose, nw = self.fp("nose"), self.fp("noseWidth")
         nz_top = z0 + hh * 0.58
@@ -532,6 +703,7 @@ class Body:
         self.weight(self.parts)
         self.hang([(e, "head") for e in self.eyes()])
         self.hang([(f, "head") for f in self.face()])
+        self.hang([(h, "head") for h in self.headgear()])
         self.hang(self.sockets())
         pk.add_hair(self.r)
         self.r.measured["body"] = self.id

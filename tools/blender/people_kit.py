@@ -45,7 +45,7 @@ ANIMS = ["Idle", "Walking_A", "Running_A", "Walking_Backwards", "Blocking", "Blo
          "Dodge_Backward", "Running_Strafe_Left", "Running_Strafe_Right", "Death_A_Pose", "1H_Ranged_Aiming", "2H_Ranged_Aiming",
          "Spellcasting"]
 # Accessory nodes the game shows (world.gd hides every other bone attachment).
-ACCESSORY_WORDS = ("Helmet", "Hat", "Cape", "Hood")
+ACCESSORY_WORDS = ("Helmet", "Hat", "Cape", "Hood", "Headgear_")
 # The hair and beards built below hang from the head bone too; the game shows the one the look names.
 HAIR_WORDS = ("Hair_", "Beard_")
 # The one-handed weapon each body carries in the file, shown on the motion sheet only.

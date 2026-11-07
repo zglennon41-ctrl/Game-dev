@@ -436,7 +436,7 @@ func _has_skin(node: Node) -> bool:
 ## names and the hair's colour, the cape's colour, and the stature. The hair's cap hides under
 ## headgear and under a hood; its fall hangs from under them either way.
 func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
-	var has_headgear := node.find_child("*Helmet*", true, false) != null or node.find_child("*Hat*", true, false) != null
+	var has_headgear := node.find_child("*Helmet*", true, false) != null or node.find_child("*Hat*", true, false) != null or node.find_child("Headgear_*", true, false) != null
 	var headgear: bool = look.get("headgear", true) and has_headgear
 	var hooded := node.find_child("*Hooded*", true, false) != null
 	# The build blends the body's lean and heavy shape keys; the skin takes the chosen tone.
@@ -532,7 +532,7 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 			if a.visible:
 				_recolor(a, col)
 		else:
-			var head := n.contains("Helmet") or n.contains("Hat") or n.contains("Hood")
+			var head := n.contains("Helmet") or n.contains("Hat") or n.contains("Hood") or n.begins_with("Headgear_")
 			var cape := n.contains("Cape")
 			a.visible = (head and headgear) or (cape and look.get("cape", true))
 			if cape and a.visible and not hero.is_empty():
