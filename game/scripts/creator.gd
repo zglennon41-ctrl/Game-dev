@@ -358,8 +358,14 @@ func _reveal() -> void:
 	wrow.add_theme_constant_override("separation", 8)
 	v.add_child(wrow)
 	_text(wrow, "Or carry:", 15, DIM)
+	# A home without a school of its own (Alexandria) carries the weapons of the school it took.
+	var school_city: String = hero["city"]
+	if Data.weapons.filter(func(cw): return cw["city"] == hero["city"]).is_empty():
+		for d in Data.disciplines:
+			if d["id"] == hero["discipline"]:
+				school_city = d["city"]
 	for cw in Data.weapons:
-		if cw["city"] != hero["city"]:
+		if cw["city"] != school_city:
 			continue
 		var wid: String = cw["id"]
 		_chip(wrow, cw["name"], func(): hero["weapon_override"] = wid; hero["weapon"] = wid; changed.emit(hero); _reveal(), hero["weapon"] == wid)

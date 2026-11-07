@@ -144,7 +144,8 @@ static func generate(answers: Array, blood_id := "", spark := 0) -> Dictionary:
 			best_ws = ws
 			best_w = w
 	var weapon_why: Array = t["why"]["style"].get(best_w["style"], []).duplicate()
-	weapon_why.append("a %s reaches for a %s" % [shape.capitalize(), best_w["name"].to_lower()])
+	var wname := String(best_w["name"]).to_lower().trim_prefix("the ").trim_prefix("a ")
+	weapon_why.append("a %s reaches for %s %s" % [shape.capitalize(), "an" if wname.substr(0, 1) in ["a", "e", "i", "o", "u"] else "a", wname])
 	# The Pattern: a Form of the Shape by how you would rather fight, and the Terms you named.
 	var effect := _top(t["effect"], ["strikes", "guard", "mend"])
 	if effect == "":
@@ -163,7 +164,7 @@ static func generate(answers: Array, blood_id := "", spark := 0) -> Dictionary:
 	var pattern := { "name": form["name"], "form": form_id, "terms": terms, "sworn": false }
 	var seed: String = t["seed"] if t["seed"] != "" else "stands-between"
 	return {
-		"name": "", "blood": blood_id, "shape": shape, "city": city, "discipline": discipline_of(city) if discipline_of(city) != "" else discipline_of(best_w["city"]),
+		"name": "", "blood": blood_id, "shape": shape, "city": city, "discipline": discipline_of(best_w["city"] if any_city else city),
 		"weapon": best_w["id"], "seed": seed, "pattern": pattern, "body": Data.creation["models"][shape],
 		"look": { "headgear": true, "cape": true, "cape_color": "shape", "stature": 1.0, "hair": "crop", "beard": "none", "hair_color": "brown" },
 		"answers": answers.duplicate(), "spark": spark,
