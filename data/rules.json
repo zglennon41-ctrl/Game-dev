@@ -230,7 +230,7 @@
     "$comment": "Simulator day 0 is the first day of a Thaw, the day of the rite."
   },
   "art": {
-    "$comment": "The look (owner, 2026-11-07): cel-shaded stylized. cel turns the banded toon shading on for people, beasts and places; bands is how many steps of light; shadowTint colours the shadow side; outlines keeps the ink lines.",
+    "$comment": "The look (owner, 2026-11-07): cel-shaded stylized. cel turns the banded toon shading on for people, beasts and places; bands is how many steps of light; shadowTint colours the shadow side; outlines keeps the ink lines. rim is the rim light's strength and colour; specular the two-band highlight by surface (strength, gloss); detail the triplanar textures by material word (file, scale, strength); ambientOcclusion scales the baked cavity darkening; sky lights the ambient from above.",
     "cel": true,
     "bands": 3,
     "shadowTint": [
@@ -238,6 +238,93 @@
       0.55,
       0.78
     ],
-    "outlines": true
+    "outlines": true,
+    "rim": {
+      "strength": 0.35,
+      "color": [
+        0.85,
+        0.9,
+        1.0
+      ],
+      "power": 3.0
+    },
+    "specular": {
+      "metal": [
+        0.6,
+        48.0
+      ],
+      "leather": [
+        0.22,
+        18.0
+      ],
+      "skin": [
+        0.12,
+        10.0
+      ],
+      "hair": [
+        0.25,
+        14.0
+      ],
+      "eye": [
+        0.8,
+        60.0
+      ],
+      "cloth": [
+        0.05,
+        8.0
+      ],
+      "stone": [
+        0.08,
+        6.0
+      ],
+      "wood": [
+        0.1,
+        10.0
+      ]
+    },
+    "detail": {
+      "skin": [
+        "skin",
+        6.0,
+        0.35
+      ],
+      "hair": [
+        "wool",
+        8.0,
+        0.4
+      ],
+      "metal": [
+        "bronze",
+        5.0,
+        0.45
+      ],
+      "leather": [
+        "leather",
+        5.0,
+        0.5
+      ],
+      "fur": [
+        "wool",
+        6.0,
+        0.5
+      ],
+      "cloth": [
+        "linen",
+        7.0,
+        0.3
+      ],
+      "stone": [
+        "stone",
+        1.2,
+        0.45
+      ],
+      "wood": [
+        "wood",
+        2.0,
+        0.4
+      ]
+    },
+    "ambientOcclusion": 0.8,
+    "sky": true
   }
 }

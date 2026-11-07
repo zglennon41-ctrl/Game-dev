@@ -261,6 +261,62 @@ def _skirt(z_top, hw, hd, yo, hem, flare, steps=4):
 
 
 # ======================================================================================
+# Finish: a cavity occlusion baked into every mesh's vertex colour (the shader darkens by
+# it), and folds displaced into the garments (docs/graphics-comparison.md).
+# ======================================================================================
+
+def bake_cavity(ob, radius=0.06, strength=1.0):
+    """Vertex colour = how open the surface is: a vertex whose neighbours lie above its
+    tangent plane (a crease, an armpit, under a collar) goes dark; a ridge stays light.
+    Cheap, no ray casts; reads as ambient occlusion under the bands."""
+    me = ob.data
+    normals = [n.vector.copy() for n in me.vertex_normals]
+    coords = [v.co.copy() for v in me.vertices]
+    nbrs = [set() for _ in me.vertices]
+    for e in me.edges:
+        a, b = e.vertices
+        nbrs[a].add(b)
+        nbrs[b].add(a)
+    occ = [1.0] * len(coords)
+    for i, p in enumerate(coords):
+        if not nbrs[i]:
+            continue
+        acc = 0.0
+        for j in nbrs[i]:
+            d = coords[j] - p
+            L = d.length
+            if L < 1e-6:
+                continue
+            acc += max(0.0, d.dot(normals[i]) / L)
+        cav = acc / len(nbrs[i])          # 0 flat or convex, up to ~1 in a crease
+        occ[i] = max(0.35, 1.0 - cav * 2.2 * strength)
+    # a little spread, so the darkening is soft
+    for _ in range(2):
+        new = occ[:]
+        for i in range(len(occ)):
+            if nbrs[i]:
+                new[i] = 0.5 * occ[i] + 0.5 * sum(occ[j] for j in nbrs[i]) / len(nbrs[i])
+        occ = new
+    if not me.color_attributes:
+        me.color_attributes.new(name="Col", type="FLOAT_COLOR", domain="POINT")
+    col = me.color_attributes[0]
+    for i, c in enumerate(col.data):
+        c.color = (occ[i], occ[i], occ[i], 1.0)
+
+
+def displace_folds(ob, amplitude=0.006, around=9.0, along=14.0, seed=0.0):
+    """Folds down a garment: the shell's vertices pushed in and out along their normals by
+    a wave round the body and a slower one down it, so a coat hangs rather than fits."""
+    me = ob.data
+    normals = [n.vector.copy() for n in me.vertex_normals]
+    for v, n in zip(me.vertices, normals):
+        p = ob.matrix_world @ v.co
+        a = math.atan2(p.y, p.x) if (abs(p.x) + abs(p.y)) > 1e-6 else 0.0
+        w = math.sin(a * around + seed) * (0.6 + 0.4 * math.sin(p.z * along + seed * 0.7))
+        v.co = v.co + n * (amplitude * w)
+
+
+# ======================================================================================
 # Weights: every vertex to the bones of its chain, blended across the joints
 # ======================================================================================
 
@@ -696,6 +752,11 @@ class Body:
 
     def build(self):
         self.parts = self.shape_keys()
+        # the finish: folds in the hanging garments, the cavity occlusion in every mesh
+        for name, ob in self.parts.items():
+            if name.startswith("Dress_") and any(w in name for w in ("coat", "robe", "kaftan", "kilt", "wrapskirt", "hakama", "tunic", "vest")):
+                displace_folds(ob, 0.006, 9.0, 14.0, float(hash(name) % 7))
+            bake_cavity(ob)
         self.weight(self.parts)
         if self.ANATOMY:
             self.hang([(e, "head") for e in self.head_pieces])

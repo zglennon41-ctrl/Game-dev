@@ -119,9 +119,26 @@ func _build_environment() -> void:
 	var env := Environment.new()
 	env.background_mode = Environment.BG_COLOR
 	env.background_color = Color(0.02, 0.018, 0.02)
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.5, 0.44, 0.48)
-	env.ambient_light_energy = 0.2
+	# The ambient from a sky: the tops of forms lit cooler and lighter than their undersides.
+	var art: Dictionary = Data.rules.get("art", {})
+	if art.get("sky", false):
+		var sky_mat := ProceduralSkyMaterial.new()
+		sky_mat.sky_top_color = Color(0.18, 0.22, 0.4)
+		sky_mat.sky_horizon_color = Color(0.3, 0.26, 0.3)
+		sky_mat.ground_bottom_color = Color(0.05, 0.04, 0.05)
+		sky_mat.ground_horizon_color = Color(0.16, 0.13, 0.14)
+		sky_mat.sun_angle_max = 10.0
+		sky_mat.sun_curve = 0.2
+		var sky := Sky.new()
+		sky.sky_material = sky_mat
+		env.sky = sky
+		env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+		env.ambient_light_sky_contribution = 1.0
+		env.ambient_light_energy = 0.55
+	else:
+		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		env.ambient_light_color = Color(0.5, 0.44, 0.48)
+		env.ambient_light_energy = 0.2
 	env.fog_enabled = true
 	env.fog_light_color = Color(0.06, 0.05, 0.06)
 	env.fog_density = 0.022
@@ -144,6 +161,9 @@ func _build_environment() -> void:
 	moon.light_energy = 0.28
 	moon.shadow_enabled = true
 	moon.directional_shadow_max_distance = 40.0
+	moon.shadow_blur = 2.0
+	moon.shadow_normal_bias = 1.5
+	moon.light_energy = 0.42
 	add_child(moon)
 	_moon = moon
 
@@ -783,8 +803,11 @@ void fragment() {
 
 const TOON := """
 shader_type spatial;
-// Cel shading: light in bands, a tinted shadow side, the albedo kept clean; the ink lines
-// are drawn by the overlay's next pass as before.
+// Cel shading, second pass (docs/graphics-comparison.md): light in bands with a tinted
+// shadow side; a sky-lit ambient wrap; a two-band specular by surface; a rim light; a
+// tileable detail texture laid on by world-space triplanar projection, so no UVs are needed;
+// and the baked cavity occlusion in the vertex colour. The ink lines are the overlay's next
+// pass as before.
 render_mode cull_back;
 uniform vec4 albedo : source_color = vec4(1.0);
 uniform sampler2D albedo_tex : source_color, filter_linear_mipmap;
@@ -793,11 +816,44 @@ uniform float bands = 3.0;
 uniform vec4 shadow_tint : source_color = vec4(0.5, 0.55, 0.78, 1.0);
 uniform vec4 emission : source_color = vec4(0.0);
 uniform float emission_energy = 0.0;
+uniform sampler2D detail_tex : hint_default_white, filter_linear_mipmap, repeat_enable;
+uniform float detail_scale = 6.0;
+uniform float detail_strength = 0.0;
+uniform float spec_strength = 0.05;
+uniform float spec_gloss = 8.0;
+uniform float rim_strength = 0.35;
+uniform float rim_power = 3.0;
+uniform vec4 rim_color : source_color = vec4(0.85, 0.9, 1.0, 1.0);
+uniform float ao_strength = 0.8;
+uniform bool use_ao = false;
+varying vec3 world_pos;
+varying vec3 world_nrm;
+varying float ao;
+void vertex() {
+	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	world_nrm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
+	ao = use_ao ? COLOR.r : 1.0;
+}
+float triplanar(vec3 p, vec3 n) {
+	vec3 w = abs(n);
+	w = w / max(w.x + w.y + w.z, 0.001);
+	float x = texture(detail_tex, p.yz * detail_scale).r;
+	float y = texture(detail_tex, p.xz * detail_scale).r;
+	float z = texture(detail_tex, p.xy * detail_scale).r;
+	return x * w.x + y * w.y + z * w.z;
+}
 void fragment() {
 	vec3 col = albedo.rgb;
 	if (use_tex) { col *= texture(albedo_tex, UV).rgb; }
-	ALBEDO = col;
+	if (detail_strength > 0.0) {
+		float d = triplanar(world_pos, world_nrm);
+		col *= mix(1.0, d * 2.0, detail_strength);
+	}
+	float occ = mix(1.0, ao, ao_strength);
+	ALBEDO = col * occ;
 	EMISSION = emission.rgb * emission_energy;
+	float fres = pow(1.0 - clamp(dot(normalize(NORMAL), normalize(VIEW)), 0.0, 1.0), rim_power);
+	EMISSION += rim_color.rgb * fres * rim_strength * col;
 	ROUGHNESS = 0.9;
 	SPECULAR = 0.1;
 }
@@ -807,10 +863,57 @@ void light() {
 	float stepped = clamp(floor(t * bands) / max(bands - 1.0, 1.0), 0.0, 1.0);
 	vec3 lit = mix(ALBEDO * shadow_tint.rgb, ALBEDO, stepped);
 	DIFFUSE_LIGHT += lit * LIGHT_COLOR * ATTENUATION;
+	vec3 h = normalize(LIGHT + VIEW);
+	float s = pow(max(dot(NORMAL, h), 0.0), spec_gloss);
+	float sb = s > 0.5 ? 1.0 : (s > 0.2 ? 0.4 : 0.0);
+	SPECULAR_LIGHT += sb * spec_strength * LIGHT_COLOR * ATTENUATION * (stepped > 0.0 ? 1.0 : 0.3);
 }
 """
 
 var _toon_shader: Shader = null
+var _detail_cache: Dictionary = {}
+
+## Which surface a material is, by its name: metal, leather, skin, hair, fur, eye, or cloth.
+static func surface_of(name: String) -> String:
+	var n := name.to_lower()
+	for word in ["metal", "leather", "skin", "hair", "fur", "iris", "eye", "horn", "scale", "feather", "hide", "trim", "cape", "boots", "tunic", "trousers", "stone", "rock", "floor", "wall", "tile", "pillar", "brick", "wood", "plank", "crate", "barrel", "beam", "door", "bone", "ground", "dirt", "grass", "bark", "trunk", "leaf"]:
+		if n.contains(word):
+			match word:
+				"metal", "trim": return "metal"
+				"leather", "boots", "horn", "hide": return "leather"
+				"skin": return "skin"
+				"hair", "feather": return "hair"
+				"fur": return "fur"
+				"iris", "eye", "scale": return "eye"
+				"stone", "rock", "floor", "wall", "tile", "pillar", "brick", "ground", "dirt", "bone": return "stone"
+				"wood", "plank", "crate", "barrel", "beam", "door", "bark", "trunk": return "wood"
+				"grass", "leaf": return "cloth"
+				_: return "cloth"
+	return "cloth"
+
+## The surface's specular, detail texture and occlusion on a toon material (data/rules.json, art).
+func _surface_look(t: ShaderMaterial, name: String, art: Dictionary, mi: MeshInstance3D) -> void:
+	var kind := surface_of(name)
+	var spec: Array = art.get("specular", {}).get(kind, [0.05, 8.0])
+	t.set_shader_parameter("spec_strength", float(spec[0]))
+	t.set_shader_parameter("spec_gloss", float(spec[1]))
+	var rim: Dictionary = art.get("rim", {})
+	var rc: Array = rim.get("color", [0.85, 0.9, 1.0])
+	t.set_shader_parameter("rim_strength", float(rim.get("strength", 0.35)))
+	t.set_shader_parameter("rim_power", float(rim.get("power", 3.0)))
+	t.set_shader_parameter("rim_color", Color(rc[0], rc[1], rc[2]))
+	var det: Array = art.get("detail", {}).get(kind if kind != "eye" else "", [])
+	if det.size() == 3:
+		var path := "res://game/assets/textures/detail/%s.png" % String(det[0])
+		if not _detail_cache.has(path):
+			_detail_cache[path] = load(path) if ResourceLoader.exists(path) else null
+		if _detail_cache[path] != null:
+			t.set_shader_parameter("detail_tex", _detail_cache[path])
+			t.set_shader_parameter("detail_scale", float(det[1]))
+			t.set_shader_parameter("detail_strength", float(det[2]))
+	t.set_shader_parameter("ao_strength", float(art.get("ambientOcclusion", 0.8)))
+	var has_color := mi.mesh != null and mi.mesh is ArrayMesh and (mi.mesh as ArrayMesh).surface_get_format(0) & Mesh.ARRAY_FORMAT_COLOR
+	t.set_shader_parameter("use_ao", bool(has_color))
 
 ## The cel look: every StandardMaterial3D under the node becomes a banded toon material that
 ## keeps its colour, its texture and its emission. Off when data/rules.json art.cel is false.
@@ -845,6 +948,7 @@ func toonify(node: Node) -> void:
 				t.set_shader_parameter("albedo_tex", sm.albedo_texture)
 			t.set_shader_parameter("bands", float(art.get("bands", 3)))
 			t.set_shader_parameter("shadow_tint", Color(tint[0], tint[1], tint[2]))
+			_surface_look(t, String(sm.resource_name), art, mi)
 			if sm.emission_enabled:
 				t.set_shader_parameter("emission", sm.emission)
 				t.set_shader_parameter("emission_energy", sm.emission_energy_multiplier)
