@@ -368,6 +368,14 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   banded light, outlines kept, bright colour); the score first (a theme per place and zone,
   stingers for the Pattern, the rite and the Reckoning), generated here as placeholders in
   the right shape, then the cohort's barks.
+- **Answers of 2026-11-07, later** (owner, after the term first held end to end): the owner
+  plays the term before anything is added, and reports in their own words; after Lesson 6
+  the day turns only in the dormitory, and the bunk takes you once the day's work is done
+  (a posting or a trouble finished that day, or the board bare); three weapons a city stays;
+  the look grows by skin tone first (painted faces later), a rank's trim at Commencement,
+  and the bonded genius's colour on the cloak; the crisis's three endings are drafted after
+  the owner has played the arc; the cohort's barks stay as floating text until the project
+  has voices.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.

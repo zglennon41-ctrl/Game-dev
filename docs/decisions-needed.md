@@ -253,6 +253,13 @@ type), 66–67 (one weapon at a time; gear tiers at the Academy: named from Hunt
 Archive, fine for Marks, no armour), 68 (one Discipline for life), 69 (the art steers by
 cel-shaded stylized high detail; the next people effort is open), and sound: the score
 first, then barks.
+
+**Resolved on 2026-11-07, later** (see HANDOFF §9): the owner plays the term before
+anything is added; the board phase's days (sleep once the day's work is done) stand; 67
+(three weapons a city); 69 (next: skin tone, then painted faces; a rank's trim at
+Commencement; the genius's colour on the cloak); 62 (the endings drafted after the owner has
+played the arc); barks stay as floating text. Still to be played rather than decided: 66
+(the weapon numbers), 70 (packs and elites).
 70. **Packs, elites and the harness** (mine, 2026-11-07): the pack takes turns at the hero
     (one bite in flight), bites for 0.6, and goes for whoever is nearest; elites are guarded
     (a third of damage lands) until broken; `npm run balance:game` prints the tables that
