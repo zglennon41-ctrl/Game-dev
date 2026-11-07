@@ -148,6 +148,16 @@ out along its normals with a rim, so it fits the carved head; the long fall, bra
 tail hang from it; a beard is the jaw's surface the same way. The whole head is one object
 skinned to the head bone; its pieces hang from the bone.
 
+## Status, 2026-11-07, end of day
+
+All twenty-six bodies are built on the anatomy with the carved heads, hair from the skull,
+each home's face parameters, skin palette and dress; the game loads them for everyone;
+`check_people.gd` is all good and the suite is at 1386. The owner's ratings before the
+head pass: bodies 7/10, heads 4/10. The next passes, in order of what the ratings ask for:
+finer faces (eyelids that close over the ball, a nose with a bridge that reads in profile,
+a mouth corner, brows as hair), a hairline that is not stepped, the dress shells cut to
+the body (the shoulder notch), and the owner's sentences for the thirteen faces.
+
 ## Order of work
 
 1. **v1, one home**: the masculine and feminine Alexandria bodies at 7.5 heads on the rig,
