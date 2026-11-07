@@ -458,8 +458,14 @@ class Body:
         # full size on the feminine rig too (7.25 heads); its pieces hang from the head bone.
         head_ob, pieces, centre = hd.build_head(2.085 * k, sex, self.face_p, self.mats)
         objs["Head"] = head_ob
-        self.head_pieces = pieces
-        self.head_centre = centre
+        if build == "fit":
+            # the pieces hang from the head bone once, with their plain names; the other
+            # builds' copies (the head does not change with the build) go at once
+            self.head_pieces = pieces
+            self.head_centre = centre
+        else:
+            for ob2 in pieces:
+                bpy.data.objects.remove(ob2)
         pts = [head_ob.matrix_world @ v.co for v in head_ob.data.vertices]
         self.head_box = ((min(p.x for p in pts), max(p.x for p in pts)), (min(p.y for p in pts), max(p.y for p in pts)), (min(p.z for p in pts), max(p.z for p in pts)))
         self.dress_pieces(objs, build, None, slot)
@@ -811,9 +817,6 @@ class Body:
         self.parts = self.shape_keys()
         self.weight(self.parts)
         if self.ANATOMY:
-            # the head's pieces were built with the fit body; the other builds' copies go
-            for ob in [o for o in bpy.data.objects if o.type == "MESH" and o.name.split(".")[0] in {p.name.split(".")[0] for p in self.head_pieces} and o not in self.head_pieces]:
-                bpy.data.objects.remove(ob)
             self.hang([(e, "head") for e in self.head_pieces])
         else:
             self.hang([(e, "head") for e in self.eyes()])
