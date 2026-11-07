@@ -387,6 +387,9 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   `docs/bodies-plan.md`. Then (same day): the bodies must be anatomically accurate, the heads
   and the joints above all, or they break immersion; the first lofted bodies are replaced by
   one continuous body grown from a skeleton graph and carved (`tools/blender/anatomy.py`).
+  Ratings after that: bodies 7/10, heads 4/10; the head was rebuilt from silhouettes
+  (`head.py`). Then: the characters fully realized, the outfits marking the culture they
+  grew up in; each home's dress is data (`data/bodies.json`) built by `wardrobe.py`.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.
