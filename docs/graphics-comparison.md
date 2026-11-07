@@ -53,8 +53,9 @@ close-up, and motion that does not slide.
 - The cel shader becomes `TOON2`: sky-tinted ambient wrap, two-band specular with a
   per-material gloss (metal, leather, skin, cloth), a rim light, a world-space triplanar
   detail texture chosen by material name, and vertex-colour ambient occlusion.
-- Five tileable detail textures generated here (`tools/textures.py`): linen, wool, leather,
-  bronze, skin.
+- Seven tileable detail textures generated here (`tools/textures.py`): linen, wool,
+  leather, bronze, skin, stone, wood; the surface is read from the material's name, so the
+  places' floors and walls take stone and their crates and beams wood without any edit.
 - The environment: a sky for ambient, soft shadows, exposure and grading tuned for the
   bands.
 - The body kit bakes a cavity ambient occlusion into every body's vertex colours and
