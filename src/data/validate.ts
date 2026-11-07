@@ -85,6 +85,12 @@ export function validateData(dir = 'data'): Problem[] {
   for (const d of D('disciplines')) for (const w of d.weapons) need('disciplines.json', weaponIds, w, `weapon of ${d.id}`);
   for (const [sh, kit] of Object.entries(D('shape-kits') as Record<string, { styles?: Record<string, number> }>)) if (kit.styles) for (const st of Object.keys(kit.styles)) if (!styleIds.has(st)) problems.push({ file: 'shape-kits.json', message: `${sh}: unknown weapon type ${st} in styles` });
   for (const q of D('creation').questions) for (const an of q.answers) for (const st of Object.keys(an.style ?? {})) if (!styleIds.has(st)) problems.push({ file: 'creation.json', message: `${q.id}: unknown weapon type ${st}` });
+  // Every creation answer carries a title and an emblem the game can draw.
+  const emblems = new Set(Object.keys(D('emblems').emblems));
+  for (const q of D('creation').questions) for (const an of q.answers) {
+    if (!an.title) problems.push({ file: 'creation.json', message: `${q.id}: an answer without a title` });
+    if (!emblems.has(an.emblem)) problems.push({ file: 'creation.json', message: `${q.id}: unknown emblem ${an.emblem}` });
+  }
   for (const ins of D('academy').instructors) if (ins.weapon) need('academy.json', weaponIds, ins.weapon, `weapon of instructor ${ins.id}`);
   for (const st of styleIds) if (!D('academy').cohort.fighting.weapons[st]) problems.push({ file: 'academy.json', message: `cohort.fighting.weapons has no entry for ${st}` });
   // Every Discipline has a kit of nine techniques whose effects the fight knows, with the keys each reads.

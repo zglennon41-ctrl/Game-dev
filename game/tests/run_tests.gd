@@ -444,7 +444,8 @@ func test_academy() -> void:
 	for m in a:
 		names[m["name"]] = true
 		shapes[m["shape"]] = int(shapes.get(m["shape"], 0)) + 1
-		check(Data.by_id(Data.weapons, m["weapon"])["city"] == m["city"], "%s carries a weapon of %s" % [m["name"], m["city"]])
+		var own_school := not Data.weapons.filter(func(w): return w["city"] == m["city"]).is_empty()
+		check(Data.by_id(Data.weapons, m["weapon"])["city"] == m["city"] or not own_school, "%s carries a weapon of %s (or of any city, from Alexandria)" % [m["name"], m["city"]])
 	check(names.size() == 12 and not names.has("Test"), "every classmate has their own name")
 	check(shapes.size() == 6 and shapes.values().all(func(n): return n == 2), "two classmates of every Shape")
 	# Every lesson is in a place that exists, taught by an Instructor who exists, with goals it knows.

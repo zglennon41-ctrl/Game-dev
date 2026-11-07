@@ -188,6 +188,8 @@ static func make_cohort(seed_value: int, h: Dictionary) -> Array:
 		used[name] = true
 		var blood: Dictionary = Data.bloods[rng.randi() % Data.bloods.size()]
 		var weapons: Array = Data.weapons.filter(func(w): return w["city"] == city)
+		if weapons.is_empty():
+			weapons = Data.weapons   # a home without a school of its own (Alexandria) carries any city's
 		var bodies: Array = Data.creation["bodies"]
 		out.append({ "id": "c%d" % i, "name": name, "city": city, "blood": blood["id"], "blood_name": blood["name"],
 			"shape": shapes[i % shapes.size()], "temperament": temps[i % temps.size()]["id"],

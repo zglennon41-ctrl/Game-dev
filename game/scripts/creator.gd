@@ -82,36 +82,145 @@ func _intro() -> void:
 
 # --- The questions ----------------------------------------------------------------
 
-func _ask(i: int) -> void:
+func _ask(i: int, all_shown := false) -> void:
 	_screen = "other"
 	_q = i
 	_clear()
 	_backdrop()
 	var qs: Array = Data.creation["questions"]
 	var q: Dictionary = qs[i]
-	var box := _centered(780)
+	var box := _centered(860)
 	box.add_child(_progress(i, qs.size()))
 	_text(box, q["ask"], 34, FG, "body")
 	box.add_child(Style.rule(300, Style.BRASS_DIM))
 	var gap := Control.new()
-	gap.custom_minimum_size = Vector2(0, 8)
+	gap.custom_minimum_size = Vector2(0, 6)
 	box.add_child(gap)
-	# The answers come in a different order for every character, numbered like an old ledger.
+	# Five of the answers, drawn by this character's spark, each a card with its emblem; the
+	# rest wait behind "the others". An answer already given is always among the five.
 	var order: Array = range(q["answers"].size())
 	var rng := RandomNumberGenerator.new()
 	rng.seed = spark + i * 101
 	Academy._shuffle(order, rng)
-	var numerals := ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"]
-	for n in order.size():
-		var ai: int = order[n]
-		var a: Dictionary = q["answers"][ai]
-		var chosen: bool = answers.size() > i and int(answers[i]) == ai
-		var b := _button(box, "%s.   %s" % [numerals[n], a["text"]], func(): _answer(i, ai), chosen)
-		b.add_theme_font_override("font", Style.font("body"))
+	var given: int = int(answers[i]) if answers.size() > i else -1
+	if given >= 0 and order.find(given) >= CARDS_SHOWN:
+		order.erase(given)
+		order.insert(0, given)
+	var shown: Array = order if (all_shown or order.size() <= CARDS_SHOWN) else order.slice(0, CARDS_SHOWN)
+	var grid := GridContainer.new()
+	grid.columns = 1
+	grid.add_theme_constant_override("v_separation", 8)
+	box.add_child(grid)
+	var numerals := ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII"]
+	for n in shown.size():
+		var ai: int = shown[n]
+		grid.add_child(_card(q["answers"][ai], numerals[n], ai == given, func(): _answer(i, ai)))
+	var foot := HBoxContainer.new()
+	foot.add_theme_constant_override("separation", 12)
+	box.add_child(foot)
+	if shown.size() < order.size():
+		var more := _button(foot, "The others  (%d)" % (order.size() - shown.size()), func(): _ask(i, true))
+		more.autowrap_mode = TextServer.AUTOWRAP_OFF
+		more.add_theme_color_override("font_color", DIM)
 	if i > 0:
-		var back := _button(box, "Back", func(): _ask(i - 1))
+		var back := _button(foot, "Back", func(): _ask(i - 1))
+		back.autowrap_mode = TextServer.AUTOWRAP_OFF
 		back.add_theme_color_override("font_color", DIM)
 	_arrive(box)
+
+const CARDS_SHOWN := 5
+
+## One answer as a card: its emblem in the colour of its lean, a numeral, its title, its words.
+func _card(a: Dictionary, numeral: String, chosen: bool, cb: Callable) -> Control:
+	var b := Button.new()
+	b.custom_minimum_size = Vector2(0, 92)
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_style(b, chosen, 17, "body")
+	b.pressed.connect(func(): clicked.emit(); cb.call())
+	var col := _lean_color(a)
+	var row := HBoxContainer.new()
+	row.set_anchors_preset(Control.PRESET_FULL_RECT)
+	row.offset_left = 12
+	row.offset_right = -12
+	row.offset_top = 8
+	row.offset_bottom = -8
+	row.add_theme_constant_override("separation", 16)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(row)
+	var em := emblem(String(a.get("emblem", "")), col, 68.0)
+	em.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(em)
+	var v := VBoxContainer.new()
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	v.add_theme_constant_override("separation", 2)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(v)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 10)
+	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(head)
+	var num := _text(head, numeral, 13, col.lerp(Style.BRASS, 0.5), "title_light")
+	num.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var title := _text(head, String(a.get("title", "")).to_upper(), 14, col, "title")
+	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var words := _text(v, String(a["text"]), 17, FG if not chosen else GOLD, "body")
+	words.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return b
+
+## The colour an answer leans: its Shape's, else its city's, else the blood's, else brass.
+func _lean_color(a: Dictionary) -> Color:
+	var shapes: Dictionary = a.get("shape", {})
+	if not shapes.is_empty():
+		var best := ""
+		for sh in shapes:
+			if best == "" or float(shapes[sh]) > float(shapes[best]):
+				best = sh
+		return World.SHAPE_COLORS.get(best, Style.BRASS)
+	if a.has("city"):
+		return World.CITY_COLORS.get(a["city"], Style.BRASS).lightened(0.25)
+	if a.has("blood") or a.has("tier"):
+		return Style.BLOOD.lightened(0.2)
+	if a.has("style") or a.has("effect"):
+		return Style.GOLD
+	return Style.BRASS
+
+## An emblem drawn from its strokes (data/emblems.json), `size` across, in `col`.
+static func emblem(id: String, col: Color, size: float) -> Control:
+	var c := Control.new()
+	c.custom_minimum_size = Vector2(size, size)
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var strokes: Array = Data.emblems.get(id, {}).get("strokes", [])
+	c.draw.connect(func():
+		var w := maxf(2.0, size / 28.0)
+		c.draw_circle(Vector2(size / 2.0, size / 2.0), size / 2.0, Color(col, 0.08))
+		c.draw_arc(Vector2(size / 2.0, size / 2.0), size / 2.0 - 1.0, 0.0, TAU, 48, Color(col, 0.35), 1.0, true)
+		for st in strokes:
+			var fill: bool = st.get("fill", false)
+			if st.has("line"):
+				var pts := PackedVector2Array()
+				for p in st["line"]:
+					pts.append(Vector2(p[0], p[1]) * size)
+				c.draw_polyline(pts, col, w, true)
+			elif st.has("poly"):
+				var pts2 := PackedVector2Array()
+				for p in st["poly"]:
+					pts2.append(Vector2(p[0], p[1]) * size)
+				if fill:
+					c.draw_colored_polygon(pts2, col)
+				else:
+					pts2.append(pts2[0])
+					c.draw_polyline(pts2, col, w, true)
+			elif st.has("circle"):
+				var cc: Array = st["circle"]
+				if fill:
+					c.draw_circle(Vector2(cc[0], cc[1]) * size, cc[2] * size, col)
+				else:
+					c.draw_arc(Vector2(cc[0], cc[1]) * size, cc[2] * size, 0.0, TAU, 40, col, w, true)
+			elif st.has("arc"):
+				var ar: Array = st["arc"]
+				c.draw_arc(Vector2(ar[0], ar[1]) * size, ar[2] * size, deg_to_rad(float(ar[3])), deg_to_rad(float(ar[4])), 32, col, w, true))
+	return c
 
 ## Where you are in the questions: a row of lozenges, the answered ones lit.
 func _progress(i: int, n: int) -> Control:

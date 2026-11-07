@@ -133,8 +133,11 @@ static func generate(answers: Array, blood_id := "", spark := 0) -> Dictionary:
 	var kit: Dictionary = Data.kits[shape]
 	var best_w: Dictionary = {}
 	var best_ws := -INF
+	# A home with no school of its own (Alexandria: everyone passes through) reaches for any
+	# city's weapon, and takes that city's Discipline.
+	var any_city := Data.weapons.filter(func(w): return w["city"] == city).is_empty()
 	for w in Data.weapons:
-		if w["city"] != city:
+		if w["city"] != city and not any_city:
 			continue
 		var ws := float(t["style"].get(w["style"], 0.0)) + float(kit["styles"].get(w["style"], 0.0))
 		if ws > best_ws:
@@ -160,7 +163,7 @@ static func generate(answers: Array, blood_id := "", spark := 0) -> Dictionary:
 	var pattern := { "name": form["name"], "form": form_id, "terms": terms, "sworn": false }
 	var seed: String = t["seed"] if t["seed"] != "" else "stands-between"
 	return {
-		"name": "", "blood": blood_id, "shape": shape, "city": city, "discipline": discipline_of(city),
+		"name": "", "blood": blood_id, "shape": shape, "city": city, "discipline": discipline_of(city) if discipline_of(city) != "" else discipline_of(best_w["city"]),
 		"weapon": best_w["id"], "seed": seed, "pattern": pattern, "body": Data.creation["models"][shape],
 		"look": { "headgear": true, "cape": true, "cape_color": "shape", "stature": 1.0, "hair": "crop", "beard": "none", "hair_color": "brown" },
 		"answers": answers.duplicate(), "spark": spark,
