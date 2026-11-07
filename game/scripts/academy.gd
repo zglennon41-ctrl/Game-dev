@@ -129,7 +129,7 @@ func enter(h: Dictionary) -> void:
 		_name_box.visible = false
 	progress = hero.get("academy", {})
 	if progress.is_empty():
-		progress = { "seed": randi() % 1000000, "arrived": false, "done": [], "met": [], "day": 1, "rested_after": "",
+		progress = { "seed": fixed_seed if fixed_seed >= 0 else randi() % 1000000, "arrived": false, "done": [], "met": [], "day": 1, "rested_after": "",
 			"place": "quad", "record": { "parries": 0, "blocks": 0, "hurts": 0, "dodges": 0, "talks": 0 } }
 		hero["academy"] = progress
 	# Saves from before rest was per stage.
@@ -223,8 +223,9 @@ func place_spec(id: String) -> Dictionary:
 		return Zones.area_place(id, int(progress.get("seed", 0)) + int(progress.get("day", 1)) * 7)
 	return {}
 
-## Automated checks print what the Academy does (--debug).
+## Automated checks print what the Academy does (--debug), and may fix a fresh run's seed.
 var debug := OS.get_cmdline_user_args().has("--debug")
+var fixed_seed := -1
 
 func go(place_id: String, quiet := false, from := "") -> void:
 	var spec: Dictionary = place_spec(place_id)
@@ -914,6 +915,8 @@ func _set_slots(id: String, picked: Array = []) -> void:
 
 func update(events: Array, dt: float) -> void:
 	for e in events:
+		if debug and e["type"] in ["wolf-down", "player-down", "second-heart", "foe-down", "ally-down"]:
+			print("EVENT %s at %s (lesson %s step %d)" % [e["type"], str(fight.p_pos), _lesson.get("id", ""), _step])
 		if e["type"] == "technique" and fight:
 			_count_technique(String(e.get("id", "")))
 		elif e["type"] in ["wolf-down", "foe-down"] and _in_zone():
@@ -981,7 +984,8 @@ func update(events: Array, dt: float) -> void:
 				var ba := Vector2(bspec["at"][0], bspec["at"][1])
 				if (fight.p_pos - ba).length() < minf(best, 2.8):
 					_target = { "kind": "board", "pos": ba }
-		if _lost_at != Vector2.INF and (fight.p_pos - _lost_at).length() < minf(best, 2.0):
+		# The lost thing is the errand: within reach it wins over whoever stands beside it.
+		if _lost_at != Vector2.INF and (fight.p_pos - _lost_at).length() < 2.0:
 			_target = { "kind": "find", "pos": _lost_at }
 	_prompt.visible = not _target.is_empty()
 	if _prompt.visible:
@@ -1339,7 +1343,18 @@ func _next_step() -> void:
 			var rng := RandomNumberGenerator.new()
 			rng.seed = int(progress["seed"]) + 77
 			var a: Dictionary = place_spec(progress["place"])
-			_lost_at = Vector2(rng.randf_range(-a["size"][0] / 2.0 + 2.0, a["size"][0] / 2.0 - 2.0), rng.randf_range(-a["size"][1] / 2.0 + 2.0, a["size"][1] / 2.0 - 2.0))
+			# Somewhere in the open: clear of the people standing about and of what is in the way.
+			for tries in 24:
+				_lost_at = Vector2(rng.randf_range(-a["size"][0] / 2.0 + 2.0, a["size"][0] / 2.0 - 2.0), rng.randf_range(-a["size"][1] / 2.0 + 2.0, a["size"][1] / 2.0 - 2.0))
+				var clear := true
+				for pp in _people:
+					if (Vector2(pp["pos"]) - _lost_at).length() < 3.0:
+						clear = false
+				for o in fight.obstacles:
+					if (Vector2(o.x, o.y) - _lost_at).length() < float(o.z) + 1.0:
+						clear = false
+				if clear:
+					break
 			_lost_label = fill(String(s["goal"]["item"]), _lesson.get("poster", {}))
 			world.set_marker(_lost_at)
 		"talk", "reach":

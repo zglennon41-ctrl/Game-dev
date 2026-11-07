@@ -425,6 +425,8 @@ func enter_academy() -> void:
 	sfx.start_ambience()
 	academy.auto = _args.has("bot")
 	academy.auto_troubles = _args.has("troubles") or _args.has("quests")
+	if _args.has("seed"):
+		academy.fixed_seed = int(_args["seed"])
 	if _args.has("quests") and hero.has("academy"):
 		# Straight to the postings: the cohort's troubles seen to, the shade accepted, the quad.
 		var pr: Dictionary = hero["academy"]
