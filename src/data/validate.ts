@@ -37,6 +37,11 @@ export function validateData(dir = 'data'): Problem[] {
   for (const a of D('adaptations')) need('adaptations.json', features, a.id, 'adaptation feature');
   for (const s of D('shades')) need('shades.json', features, s.graftFeature, `graft of ${s.id}`);
   for (const b of D('bloods')) if (b.graft) need('bloods.json', features, b.graft, `graft of ${b.id}`);
+  // Every home with a body has a palette of tones the creator knows, and every city answer a home.
+  const tones = new Set(Object.keys(D('creation').look.skinTones));
+  for (const [hid, h] of Object.entries<any>(D('bodies').homes)) for (const t of h.palette) need('bodies.json', tones, t, `tone of ${hid}`);
+  const homes = new Set(Object.keys(D('bodies').homes));
+  for (const an of D('creation').questions[0].answers) if (an.city) need('creation.json', homes, an.city, 'home body');
   // Every mark a blood shows is a feature the body can take.
   const peopleFeatures = new Set(Object.keys(D('people-features').features));
   for (const b of D('bloods')) for (const m of b.marks ?? []) need('bloods.json', peopleFeatures, m, `mark of ${b.id}`);

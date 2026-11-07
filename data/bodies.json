@@ -1,0 +1,421 @@
+{
+ "comment": "The bodies of the thirteen homes (docs/bodies-plan.md): a carving brief for each face, the face parameters the body kit reads for the masculine and feminine body (multipliers on the base carving: brow ridge, nose length and width, lips, ears, jaw width, head length, cheekbones), and the skin palette offered at creation (tone ids from data/creation.json, look.skinTones). Every sentence is the owner's to rewrite.",
+ "homes": {
+  "alexandria": {
+   "name": "Alexandria",
+   "brief": "Everyone passes through: a face from anywhere, even-featured, a little tired.",
+   "palette": [
+    "pale",
+    "fair",
+    "olive",
+    "tan",
+    "brown",
+    "deep",
+    "dark"
+   ],
+   "face": {
+    "m": {
+     "brow": 1.0,
+     "nose": 1.0,
+     "noseWidth": 1.0,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 1.0,
+     "headLength": 1.0,
+     "cheek": 1.0
+    },
+    "f": {
+     "brow": 1.0,
+     "nose": 1.0,
+     "noseWidth": 1.0,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 1.0,
+     "headLength": 1.0,
+     "cheek": 1.0
+    }
+   }
+  },
+  "columbia": {
+   "name": "Columbia",
+   "brief": "The marshals' city: a long jaw, a straight nose, brows that have heard a verdict.",
+   "palette": [
+    "pale",
+    "fair",
+    "olive",
+    "tan",
+    "brown"
+   ],
+   "face": {
+    "m": {
+     "brow": 1.1,
+     "nose": 1.05,
+     "noseWidth": 1.0,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 1.08,
+     "headLength": 1.04,
+     "cheek": 1.0
+    },
+    "f": {
+     "brow": 1.0,
+     "nose": 1.0,
+     "noseWidth": 1.0,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 1.0,
+     "headLength": 1.03,
+     "cheek": 1.0
+    }
+   }
+  },
+  "cahokia": {
+   "name": "Cahokia",
+   "brief": "The river: broad cheekbones, a wide calm mouth, eyes used to reading a current.",
+   "palette": [
+    "olive",
+    "tan",
+    "brown",
+    "deep"
+   ],
+   "face": {
+    "m": {
+     "brow": 1.0,
+     "nose": 0.95,
+     "noseWidth": 1.1,
+     "lips": 1.1,
+     "ears": 1.0,
+     "jaw": 1.05,
+     "headLength": 1.0,
+     "cheek": 1.15
+    },
+    "f": {
+     "brow": 1.0,
+     "nose": 0.9,
+     "noseWidth": 1.05,
+     "lips": 1.15,
+     "ears": 1.0,
+     "jaw": 1.0,
+     "headLength": 1.0,
+     "cheek": 1.15
+    }
+   }
+  },
+  "lunden": {
+   "name": "Lunden",
+   "brief": "Fog and docks: a narrow pale face, a sharp nose, ears that stick out under a cap.",
+   "palette": [
+    "pale",
+    "fair",
+    "olive"
+   ],
+   "face": {
+    "m": {
+     "brow": 1.0,
+     "nose": 1.15,
+     "noseWidth": 0.9,
+     "lips": 1.0,
+     "ears": 1.15,
+     "jaw": 0.95,
+     "headLength": 1.06,
+     "cheek": 0.92
+    },
+    "f": {
+     "brow": 1.0,
+     "nose": 1.1,
+     "noseWidth": 0.9,
+     "lips": 1.0,
+     "ears": 1.1,
+     "jaw": 0.92,
+     "headLength": 1.05,
+     "cheek": 0.92
+    }
+   }
+  },
+  "colonia": {
+   "name": "Colonia",
+   "brief": "The engine-works: a square jaw, a heavy brow, a short nose; soot in the creases.",
+   "palette": [
+    "fair",
+    "olive",
+    "tan",
+    "brown"
+   ],
+   "face": {
+    "m": {
+     "brow": 1.2,
+     "nose": 0.9,
+     "noseWidth": 1.1,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 1.15,
+     "headLength": 1.0,
+     "cheek": 1.05
+    },
+    "f": {
+     "brow": 1.1,
+     "nose": 0.92,
+     "noseWidth": 1.05,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 1.08,
+     "headLength": 1.0,
+     "cheek": 1.05
+    }
+   }
+  },
+  "tiber": {
+   "name": "Tiber",
+   "brief": "The old walls: a Roman nose, a firm mouth, a round head held still.",
+   "palette": [
+    "fair",
+    "olive",
+    "tan"
+   ],
+   "face": {
+    "m": {
+     "brow": 1.0,
+     "nose": 1.2,
+     "noseWidth": 1.0,
+     "lips": 0.95,
+     "ears": 1.0,
+     "jaw": 1.05,
+     "headLength": 0.97,
+     "cheek": 1.0
+    },
+    "f": {
+     "brow": 1.0,
+     "nose": 1.12,
+     "noseWidth": 1.0,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 1.0,
+     "headLength": 0.97,
+     "cheek": 1.0
+    }
+   }
+  },
+  "khemet": {
+   "name": "Khemet",
+   "brief": "The black fields: a long head, full lips, wide-set eyes, a high forehead.",
+   "palette": [
+    "tan",
+    "brown",
+    "deep",
+    "dark"
+   ],
+   "face": {
+    "m": {
+     "brow": 0.95,
+     "nose": 0.95,
+     "noseWidth": 1.15,
+     "lips": 1.2,
+     "ears": 1.0,
+     "jaw": 1.0,
+     "headLength": 1.08,
+     "cheek": 1.05
+    },
+    "f": {
+     "brow": 0.9,
+     "nose": 0.9,
+     "noseWidth": 1.1,
+     "lips": 1.25,
+     "ears": 1.0,
+     "jaw": 1.0,
+     "headLength": 1.08,
+     "cheek": 1.05
+    }
+   }
+  },
+  "baghdad": {
+   "name": "Baghdad",
+   "brief": "The house of figures: a fine straight nose, arched brows, a narrow chin.",
+   "palette": [
+    "fair",
+    "olive",
+    "tan",
+    "brown"
+   ],
+   "face": {
+    "m": {
+     "brow": 1.05,
+     "nose": 1.1,
+     "noseWidth": 0.92,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 0.95,
+     "headLength": 1.0,
+     "cheek": 0.98
+    },
+    "f": {
+     "brow": 1.08,
+     "nose": 1.05,
+     "noseWidth": 0.9,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 0.9,
+     "headLength": 1.0,
+     "cheek": 0.98
+    }
+   }
+  },
+  "varanasi": {
+   "name": "Varanasi",
+   "brief": "The steps: a lean face, deep-set eyes, a mouth that has sat through the night.",
+   "palette": [
+    "olive",
+    "tan",
+    "brown",
+    "deep"
+   ],
+   "face": {
+    "m": {
+     "brow": 1.1,
+     "nose": 1.0,
+     "noseWidth": 1.0,
+     "lips": 0.95,
+     "ears": 1.0,
+     "jaw": 0.95,
+     "headLength": 1.04,
+     "cheek": 0.9
+    },
+    "f": {
+     "brow": 1.05,
+     "nose": 1.0,
+     "noseWidth": 1.0,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 0.92,
+     "headLength": 1.03,
+     "cheek": 0.92
+    }
+   }
+  },
+  "jiangnan": {
+   "name": "Jiangnan",
+   "brief": "The examination halls: a smooth oval face, a small nose, a composed mouth.",
+   "palette": [
+    "pale",
+    "fair",
+    "olive",
+    "tan"
+   ],
+   "face": {
+    "m": {
+     "brow": 0.9,
+     "nose": 0.85,
+     "noseWidth": 0.95,
+     "lips": 0.95,
+     "ears": 1.0,
+     "jaw": 0.95,
+     "headLength": 1.02,
+     "cheek": 1.05
+    },
+    "f": {
+     "brow": 0.88,
+     "nose": 0.8,
+     "noseWidth": 0.92,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 0.92,
+     "headLength": 1.02,
+     "cheek": 1.05
+    }
+   }
+  },
+  "kazan": {
+   "name": "Kazan",
+   "brief": "The steppe: broad flat cheekbones, a wide short nose, a strong jaw, weathered.",
+   "palette": [
+    "fair",
+    "olive",
+    "tan",
+    "brown"
+   ],
+   "face": {
+    "m": {
+     "brow": 1.0,
+     "nose": 0.9,
+     "noseWidth": 1.15,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 1.1,
+     "headLength": 0.98,
+     "cheek": 1.2
+    },
+    "f": {
+     "brow": 1.0,
+     "nose": 0.88,
+     "noseWidth": 1.1,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 1.02,
+     "headLength": 0.98,
+     "cheek": 1.18
+    }
+   }
+  },
+  "timbuktu": {
+   "name": "Timbuktu",
+   "brief": "The library: a long calm face, full lips, a broad nose, a high brow.",
+   "palette": [
+    "brown",
+    "deep",
+    "dark"
+   ],
+   "face": {
+    "m": {
+     "brow": 1.0,
+     "nose": 0.95,
+     "noseWidth": 1.2,
+     "lips": 1.2,
+     "ears": 1.0,
+     "jaw": 1.0,
+     "headLength": 1.06,
+     "cheek": 1.0
+    },
+    "f": {
+     "brow": 1.0,
+     "nose": 0.9,
+     "noseWidth": 1.15,
+     "lips": 1.25,
+     "ears": 1.0,
+     "jaw": 1.0,
+     "headLength": 1.06,
+     "cheek": 1.02
+    }
+   }
+  },
+  "edo": {
+   "name": "Edo",
+   "brief": "The sword schools: a narrow still face, a small mouth, eyes that do not move first.",
+   "palette": [
+    "pale",
+    "fair",
+    "olive"
+   ],
+   "face": {
+    "m": {
+     "brow": 0.95,
+     "nose": 0.9,
+     "noseWidth": 0.95,
+     "lips": 0.85,
+     "ears": 1.0,
+     "jaw": 0.95,
+     "headLength": 1.03,
+     "cheek": 1.0
+    },
+    "f": {
+     "brow": 0.9,
+     "nose": 0.85,
+     "noseWidth": 0.92,
+     "lips": 0.9,
+     "ears": 1.0,
+     "jaw": 0.9,
+     "headLength": 1.03,
+     "cheek": 1.02
+    }
+   }
+  }
+ }
+}

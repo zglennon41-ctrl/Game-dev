@@ -603,7 +603,7 @@ def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, re
         elif o.name.startswith(tuple(shown_prefixes)) if shown_prefixes else False:
             o.hide_render = False
         elif o.parent_type == "BONE" or (o.parent is not None and o.parent.type == "EMPTY"):
-            shown = (any(w in o.name for w in ACCESSORY_WORDS) and headgear) or (weapon and o.name == weapon) or o.name.startswith(("Eye", "Iris"))
+            shown = (any(w in o.name for w in ACCESSORY_WORDS) and headgear) or (weapon and o.name == weapon) or o.name.startswith(("Eye", "Iris", "Face_"))
             if o.name.startswith("Hair_"):
                 shown = hair is not None and o.name.startswith("Hair_%s_" % hair) and (headgear is False or o.name.endswith("_fall"))
             elif o.name.startswith("Beard_"):
@@ -675,7 +675,9 @@ def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, re
     if focus > 0:
         aim = Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, (zlo + hi.z) / 2))
         size = max(hi.z - zlo, 0.5)
-    corners = [Vector((x, y, z)) for x in (lo.x - 0.05, hi.x + 0.05) for y in (lo.y - (0.7 if focus == 0 else 0.1), hi.y + 0.05) for z in (zlo, hi.z + 0.05)]
+    # Past 0.85 the frame is the head alone: the arms' span is left out of the fit.
+    xr = (lo.x - 0.05, hi.x + 0.05) if focus <= 0.85 else (-0.16, 0.16)
+    corners = [Vector((x, y, z)) for x in xr for y in (lo.y - (0.7 if focus == 0 else 0.1), hi.y + 0.05) for z in (zlo, hi.z + 0.05)]
     dist = size * 1.0
     for _ in range(100):
         cam.location = aim + direction * dist

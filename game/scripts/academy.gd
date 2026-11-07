@@ -190,7 +190,7 @@ static func make_cohort(seed_value: int, h: Dictionary) -> Array:
 		var weapons: Array = Data.weapons.filter(func(w): return w["city"] == city)
 		if weapons.is_empty():
 			weapons = Data.weapons   # a home without a school of its own (Alexandria) carries any city's
-		var lk := random_look(rng)
+		var lk := random_look(rng, city)
 		lk["blood"] = blood["id"]
 		out.append({ "id": "c%d" % i, "name": name, "city": city, "blood": blood["id"], "blood_name": blood["name"],
 			"shape": shapes[i % shapes.size()], "temperament": temps[i % temps.size()]["id"],
@@ -199,13 +199,13 @@ static func make_cohort(seed_value: int, h: Dictionary) -> Array:
 	return out
 
 ## A classmate's look, drawn with the cohort: most go bare-headed so their faces and hair show.
-static func random_look(rng: RandomNumberGenerator) -> Dictionary:
+static func random_look(rng: RandomNumberGenerator, city := "") -> Dictionary:
 	var L: Dictionary = Data.creation.get("look", {})
 	var hairs: Array = L.get("hair", ["crop"])
 	var beards: Array = L.get("beards", ["none"])
 	var cols: Array = L.get("hairColors", { "brown": [] }).keys()
 	var sts: Array = L.get("statures", { "middling": 1.0 }).values()
-	var tones: Array = L.get("skinTones", { "olive": [] }).keys()
+	var tones: Array = Data.bodies.get(city, {}).get("palette", L.get("skinTones", { "olive": [] }).keys())
 	var builds: Array = L.get("builds", { "fit": 0.0 }).values()
 	var sexes: Array = L.get("sexes", { "m": "", "f": "" }).keys()
 	var sex: String = sexes[rng.randi() % sexes.size()]

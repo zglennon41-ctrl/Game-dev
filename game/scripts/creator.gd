@@ -411,7 +411,9 @@ func _reveal() -> void:
 	srow0.add_theme_constant_override("separation", 8)
 	v.add_child(srow0)
 	_text(srow0, "Skin:", 15, DIM)
-	for tn in L.get("skinTones", {}):
+	# The home's palette (data/bodies.json); every tone if the home has none.
+	var palette: Array = Data.bodies.get(hero["city"], {}).get("palette", L.get("skinTones", {}).keys())
+	for tn in palette:
 		var tid: String = tn
 		_chip(srow0, tid, func(): look["skin"] = tid; changed.emit(hero); _reveal(), String(look.get("skin", "olive")) == tid)
 	_section(v, "LOOK", "")

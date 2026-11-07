@@ -167,12 +167,17 @@ static func generate(answers: Array, blood_id := "", spark := 0) -> Dictionary:
 		"name": "", "blood": blood_id, "shape": shape, "city": city, "discipline": discipline_of(best_w["city"] if any_city else city),
 		"weapon": best_w["id"], "seed": seed, "pattern": pattern, "body": "%s-%s" % [city, "m" if spark % 2 == 0 else "f"],
 		"look": { "headgear": true, "cape": true, "cape_color": "shape", "stature": 1.0, "hair": "crop", "beard": "none", "hair_color": "brown",
-			"sex": "m" if spark % 2 == 0 else "f", "skin": ["olive", "fair", "tan", "brown", "pale", "deep", "dark"][(spark / 3) % 7], "build": 0.0 },
+			"sex": "m" if spark % 2 == 0 else "f", "skin": skin_of(city, spark), "build": 0.0 },
 		"answers": answers.duplicate(), "spark": spark,
 		"why": { "shape": _unique(shape_why), "city": [city_why], "weapon": _unique(weapon_why.filter(func(x): return x != city_why)),
 			"form": t["why"]["effect"].get(effect, []), "trigger": t["lines"].get("trigger", ""),
 			"toll": t["lines"].get("toll", ""), "bar": t["lines"].get("bar", ""), "seed": t["lines"].get("seed", "") },
 	}
+
+## A skin tone from the home's palette (data/bodies.json), by the spark.
+static func skin_of(city: String, spark: int) -> String:
+	var palette: Array = Data.bodies.get(city, {}).get("palette", ["olive"])
+	return palette[(spark / 3) % palette.size()]
 
 static func weapon(id: String) -> Dictionary:
 	return Data.by_id(Data.weapons, id)

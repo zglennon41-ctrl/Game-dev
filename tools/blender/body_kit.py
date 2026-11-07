@@ -276,10 +276,21 @@ def skin_to(ob, arm):
 # A body
 # ======================================================================================
 
+def home_face(home, sex):
+    """The face parameters of a home and sex (data/bodies.json), 1.0 everywhere if unknown."""
+    import json
+    try:
+        homes = json.load(open(os.path.join(ROOT, "data", "bodies.json")))["homes"]
+        return dict(homes[home]["face"][sex])
+    except (KeyError, OSError):
+        return {}
+
+
 class Body:
     def __init__(self, home, sex):
         self.home, self.sex = home, sex
         self.id = "%s-%s" % (home, sex)
+        self.face_p = home_face(home, sex)
         self.r = pk.reshape(pk.Rig("Knight"))
         # The feminine figure stands 7.25 heads: a touch shorter on the same head.
         self.k = 1.0
@@ -301,6 +312,28 @@ class Body:
         b = self.r.arm.data.bones[bone]
         p = self.r.MA @ b.head_local
         return p.z if axis == "z" else abs(p.x)
+
+    def fp(self, key):
+        return float(self.face_p.get(key, 1.0))
+
+    def carved_head(self, rings):
+        """The home's carving on the head's rings: the jaw ring narrower or broader, the
+        cheek ring wider, the whole head longer (rings above the jaw stretched up)."""
+        out = []
+        jaw, cheek, length = self.fp("jaw"), self.fp("cheek"), self.fp("headLength")
+        base = rings[0][0]
+        for i, r in enumerate(rings):
+            z, hw, hd, yo = r
+            k = 1.0
+            if i == 1:
+                k = jaw
+            elif i == 2:
+                k = (jaw + cheek) / 2.0
+            elif i == 3:
+                k = cheek
+            z2 = base + (z - base) * length if i >= 2 else z
+            out.append((z2, hw * k, hd * (1.0 + (k - 1.0) * 0.5), yo))
+        return out
 
     def scaled(self, rings, head=False):
         """The ring tables are written for the masculine rig; the feminine rig is k times
@@ -330,7 +363,7 @@ class Body:
         tr = self.scaled(trunk_rings(sex, build))
         trunk = add(loft("Body", rings_z(tr), lambda i: slot["trousers"] if i < 2 else (slot["tunic"] if i < 8 else slot["skin"])))
         objs["Body"] = trunk
-        head = add(loft("Head", rings_z(self.scaled(head_rings(sex), head=True)), lambda i: slot["skin"]))
+        head = add(loft("Head", rings_z(self.scaled(self.carved_head(head_rings(sex)), head=True)), lambda i: slot["skin"]))
         objs["Head"] = head
         z_arm = self.joint("upperarm.l", "z")
         for side, sign in (("l", 1), ("r", -1)):
@@ -404,6 +437,51 @@ class Body:
                 pieces.append(ob)
         return pieces
 
+    def face(self):
+        """The carved features: a brow ridge, a nose, lips and ears, each a small mesh at the
+        front of the head, sized by the home's parameters. Skin material, so the tone covers them."""
+        head = self.parts["Head"]
+        x0, x1 = self.r.extent([head], 0)
+        y0, y1 = self.r.extent([head], 1)
+        z0, z1 = self.r.extent([head], 2)
+        hw, hh = (x1 - x0) / 2, z1 - z0
+        front = y0
+        skin = self.mats["skin"]
+        pieces = []
+        # the brow: a ridge across the eyes, heavier for a heavy brow
+        bz = z0 + hh * 0.62
+        brow = self.fp("brow")
+        pieces.append(pk._bm_object("Face_brow", pk._box_bm(Vector((-hw * 0.62, front - 0.008 * brow, bz - 0.008 * brow)), Vector((hw * 0.62, front + 0.02, bz + 0.01 * brow)), taper=(1.0, 1.0)), skin))
+        # the nose: a wedge down the middle, longer or shorter, wider or narrower
+        nose, nw = self.fp("nose"), self.fp("noseWidth")
+        nz_top = z0 + hh * 0.58
+        nz_tip = nz_top - 0.075 * nose
+        pts = [Vector((0, front + 0.004, nz_top)), Vector((0, front - 0.012 * nose, (nz_top + nz_tip) / 2)), Vector((0, front - 0.024 * nose, nz_tip))]
+        rad = [0.012 * nw, 0.017 * nw, 0.02 * nw]
+        ob = pk._bm_object("Face_nose", pk._tube_bm(pts, rad, segments=8), skin)
+        pk._smooth(ob)
+        pieces.append(ob)
+        # the lips: two short tubes across the mouth, fuller for full lips
+        lips = self.fp("lips")
+        mz = z0 + hh * 0.33
+        for name, dz, r in (("Face_lip_upper", 0.006, 0.007 * lips), ("Face_lip_lower", -0.006, 0.009 * lips)):
+            pts2 = [Vector((-hw * 0.3, front - 0.004, mz + dz)), Vector((0, front - 0.009 * lips, mz + dz)), Vector((hw * 0.3, front - 0.004, mz + dz))]
+            ob2 = pk._bm_object(name, pk._tube_bm(pts2, [r * 0.6, r, r * 0.6], segments=8), skin)
+            pk._smooth(ob2)
+            pieces.append(ob2)
+        # the ears: flattened discs at the sides, at eye height
+        ears = self.fp("ears")
+        ez = z0 + hh * 0.55
+        for sign in (1, -1):
+            bm = bmesh.new()
+            bmesh.ops.create_uvsphere(bm, u_segments=10, v_segments=6, radius=0.022 * ears)
+            bmesh.ops.scale(bm, vec=(0.35, 0.9, 1.25), verts=bm.verts)
+            bmesh.ops.translate(bm, vec=Vector((sign * (hw * 0.98 + 0.004), (y0 + y1) / 2 + 0.01, ez)), verts=bm.verts)
+            ob3 = pk._bm_object("Face_ear_%s" % ("l" if sign > 0 else "r"), bm, skin)
+            pk._smooth(ob3)
+            pieces.append(ob3)
+        return pieces
+
     def sockets(self):
         """Empties where marks and changes hang, each on its bone (docs/bodies-plan.md)."""
         head = self.parts["Head"]
@@ -453,6 +531,7 @@ class Body:
         self.parts = self.shape_keys()
         self.weight(self.parts)
         self.hang([(e, "head") for e in self.eyes()])
+        self.hang([(f, "head") for f in self.face()])
         self.hang(self.sockets())
         pk.add_hair(self.r)
         self.r.measured["body"] = self.id
@@ -769,12 +848,27 @@ def render_blood_sheet(home="alexandria", samples=24, res=(360, 560)):
     pk.tile(out, os.path.join(SCRATCH, "blood_sheet.png"), 6, res)
 
 
+def render_faces_sheet(samples=24, res=(300, 420)):
+    """Every home's two faces, close, bare-headed."""
+    cards = os.path.join(SCRATCH, "face_cards")
+    out = []
+    for home in HOMES:
+        for sex in SEXES:
+            glb = os.path.join(OUT, "%s-%s.glb" % (home, sex))
+            if not os.path.exists(glb):
+                continue
+            out.append(pk.render_card(glb, "%s %s" % (home, sex), os.path.join(cards, "%s_%s.png" % (home, sex)), anim="Idle", samples=samples, res=res, hair="crop", headgear=False, focus=0.8))
+    pk.tile(out, os.path.join(SCRATCH, "faces_sheet.png"), 8, res)
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     want_sheet = not args or "sheet" in args
     if not args or "parts" in args:
         build_parts()
-    wanted = [a for a in args if a not in ("sheet", "parts", "bloods")] or (["alexandria-m", "alexandria-f"] if not args else [])
+    wanted = [a for a in args if a not in ("sheet", "parts", "bloods", "faces")] or (["%s-%s" % (h, x) for h in HOMES for x in SEXES] if not args else [])
+    if "all" in wanted:
+        wanted = ["%s-%s" % (h, x) for h in HOMES for x in SEXES]
     results = {}
     for body_id in wanted:
         results[body_id] = build(body_id)
@@ -784,3 +878,5 @@ if __name__ == "__main__":
         render_sheet()
     if "bloods" in args:
         render_blood_sheet()
+    if "faces" in args:
+        render_faces_sheet()

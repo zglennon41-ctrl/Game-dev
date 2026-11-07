@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "bodies",
+  "type": "object",
+  "required": [
+    "homes"
+  ],
+  "properties": {
+    "homes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "name",
+          "brief",
+          "palette",
+          "face"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "brief": {
+            "type": "string"
+          },
+          "palette": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "face": {
+            "type": "object",
+            "required": [
+              "m",
+              "f"
+            ],
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 1.5
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
