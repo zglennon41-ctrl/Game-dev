@@ -498,6 +498,7 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 		if hi >= 0:
 			mi.set_blend_shape_value(hi, maxf(0.0, build))
 		_recolor_named(mi, "skin", tone, glow, glow_k)
+		_recolor_named(mi, "lips", lip_color(tone), glow, glow_k * 0.5)
 		_recolor_named(mi, "iris", iris, iris, iris_glow)
 	if skel:
 		for a in skel.get_children():
@@ -617,6 +618,11 @@ func _recolor_named(mi: MeshInstance3D, name: String, col: Color, glow := Color(
 				sm.emission_energy_multiplier = glow_k
 			sm.resource_name = name
 			mi.set_surface_override_material(i, sm)
+
+## The lips' colour from the skin's tone: a little darker and warmer, so they read on every tone.
+static func lip_color(tone: Color) -> Color:
+	var warm := Color(0.62, 0.3, 0.32)
+	return tone.darkened(0.18).lerp(warm, 0.3)
 
 ## A hair colour by its name in data/creation.json.
 func hair_color(id: String) -> Color:
@@ -876,13 +882,14 @@ var _detail_cache: Dictionary = {}
 ## Which surface a material is, by its name: metal, leather, skin, hair, fur, eye, or cloth.
 static func surface_of(name: String) -> String:
 	var n := name.to_lower()
-	for word in ["metal", "leather", "skin", "hair", "fur", "iris", "eye", "horn", "scale", "feather", "hide", "trim", "cape", "boots", "tunic", "trousers", "stone", "rock", "floor", "wall", "tile", "pillar", "brick", "wood", "plank", "crate", "barrel", "beam", "door", "bone", "ground", "dirt", "grass", "bark", "trunk", "leaf"]:
+	for word in ["metal", "leather", "skin", "lips", "hair", "fur", "iris", "eye", "pupil", "horn", "scale", "feather", "hide", "trim", "cape", "boots", "tunic", "trousers", "stone", "rock", "floor", "wall", "tile", "pillar", "brick", "wood", "plank", "crate", "barrel", "beam", "door", "bone", "ground", "dirt", "grass", "bark", "trunk", "leaf"]:
 		if n.contains(word):
 			match word:
 				"metal", "trim": return "metal"
 				"leather", "boots", "horn", "hide": return "leather"
-				"skin": return "skin"
+				"skin", "lips": return "skin"
 				"hair", "feather": return "hair"
+				"pupil": return "eye"
 				"fur": return "fur"
 				"iris", "eye", "scale": return "eye"
 				"stone", "rock", "floor", "wall", "tile", "pillar", "brick", "ground", "dirt", "bone": return "stone"
@@ -1185,6 +1192,23 @@ func anim_event(e: Dictionary) -> void:
 		_w_current = name
 		var len := _w_anim.get_animation(name).length if _w_anim.has_animation(name) else 0.4
 		_w_oneshot_until = _clock + len / speed * (0.9 if e["name"] != "Death" else 99.0)
+
+## The gait for a ground speed: a walk below the walk-run line, a run above (data/rules.json, motion).
+static func gait_for(v: float) -> String:
+	var m: Dictionary = Data.rules.get("motion", {})
+	return "Walking_A" if v < float(m.get("runAbove", 2.6)) else "Running_A"
+
+## The clip's playback rate that plants the feet at this ground speed: the clip's own stride
+## speed (how fast the feet move over the ground in the clip, data/rules.json, motion) scaled
+## to the speed the body moves, within limits so a slow walk never crawls nor a sprint blurs.
+static func stride_scale(clip: String, v: float) -> float:
+	var m: Dictionary = Data.rules.get("motion", {})
+	var strides: Dictionary = m.get("strides", {})
+	var stride := float(strides.get(clip, 0.0))
+	if stride <= 0.0 or v <= 0.0:
+		return 1.0
+	var lim: Array = m.get("rateLimits", [0.6, 1.6])
+	return clampf(v / stride, float(lim[0]), float(lim[1]))
 
 func _loop(ap: AnimationPlayer, name: String, speed := 1.0, is_wolf := false) -> void:
 	var current := _w_current if is_wolf else _p_current
@@ -1548,13 +1572,15 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 					_loop(_p_anim, "Blocking")
 				elif move_input.length() > 0.1:
 					var rel := angle_difference(f.p_facing, move_input.angle())
+					var v := f.p_vel.length() / _player.scale.y
 					if f.p_lock and f.w_state not in ["down", "absent"] and absf(rel) > PI * 0.3:
 						if absf(rel) > PI * 0.75:
-							_loop(_p_anim, "Walking_Backwards", 1.3)
+							_loop(_p_anim, "Walking_Backwards", stride_scale("Walking_Backwards", v))
 						else:
-							_loop(_p_anim, "Running_Strafe_Right" if rel > 0 else "Running_Strafe_Left", 1.0)
+							_loop(_p_anim, "Running_Strafe_Right" if rel > 0 else "Running_Strafe_Left", stride_scale("Running_Strafe_Left", v))
 					else:
-						_loop(_p_anim, "Running_A", 1.0 if not f.p_stance else 0.8)
+						var clip := gait_for(v)
+						_loop(_p_anim, clip, stride_scale(clip, v) * (0.9 if f.p_stance else 1.0))
 				elif f.ranged and f.p_lock:
 					_loop(_p_anim, "2H_Ranged_Aiming" if f.weapon["style"] == "gun-heavy" else "1H_Ranged_Aiming")
 				else:
@@ -2836,12 +2862,20 @@ func _update_allies(f: Fight, dt: float) -> void:
 		var ap: AnimationPlayer = a["anim"]
 		if _clock < float(a["until"]):
 			continue
-		var want := "Death_A" if al["down"] else ("Running_A" if al["moving"] else "Idle")
+		var v := 0.0
+		if a.has("last_pos"):
+			v = (n.position - (a["last_pos"] as Vector3)).length() / maxf(dt, 1e-4)
+		a["last_pos"] = n.position
+		var want := "Death_A" if al["down"] else (gait_for(v) if al["moving"] else "Idle")
 		if want != a["cur"]:
 			a["cur"] = want
 			ap.play(want, 0.15)
 			if want == "Death_A":
 				a["until"] = _clock + 99.0
+		if al["moving"] and not al["down"]:
+			ap.speed_scale = stride_scale(want, v)
+		elif not al["down"]:
+			ap.speed_scale = 1.0
 
 func _ally_event(f: Fight, e: Dictionary) -> void:
 	var i := int(e.get("who", -1))

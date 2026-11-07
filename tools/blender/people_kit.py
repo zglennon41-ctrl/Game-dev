@@ -606,7 +606,7 @@ def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, re
         elif o.name.startswith(tuple(shown_prefixes)) if shown_prefixes else False:
             o.hide_render = False
         elif o.parent_type == "BONE" or (o.parent is not None and o.parent.type == "EMPTY"):
-            shown = (any(w in o.name for w in ACCESSORY_WORDS) and headgear) or (weapon and o.name == weapon) or o.name.startswith(("Eye", "Iris", "Face_", "Lid_", "Nose", "Nostril", "Lip_", "Ear", "Concha"))
+            shown = (any(w in o.name for w in ACCESSORY_WORDS) and headgear) or (weapon and o.name == weapon) or o.name.startswith(("Eye", "Iris", "Pupil", "Face_", "Lid_", "Lash_", "Brow_", "Nose", "Nostril", "Lip_", "Mouth", "Ear", "Concha"))
             if o.name.startswith("Hair_"):
                 shown = hair is not None and o.name.startswith("Hair_%s_" % hair) and (headgear is False or o.name.endswith("_fall"))
             elif o.name.startswith("Beard_"):

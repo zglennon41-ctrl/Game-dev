@@ -51,7 +51,15 @@ DEFORM = {
     "leg.l": ["upperleg.l", "lowerleg.l", "foot.l", "toes.l"],
     "leg.r": ["upperleg.r", "lowerleg.r", "foot.r", "toes.r"],
 }
-BLEND = 0.07   # how far either side of a joint two bones share a vertex
+BLEND = 0.07   # how far either side of a joint two bones share a vertex (v1 lofts)
+# v2: the blend half-width at each joint of a chain, in order (the elbow and the knee wide,
+# so a bend folds over a stretch of skin rather than creasing at a line)
+# A bend folds the skin on its inner side and stretches it on the outer: the blend is narrow
+# on the folding side (the elbow's front, the knee's back, the hip's front) so the fold does
+# not pass through itself, and wide on the stretching side (the point of the elbow, the
+# kneecap, the glute) so the stretch spreads.
+BLENDS = {"trunk": [0.08, 0.09, 0.04], "arm": [0.05, 0.05, 0.04], "leg": [0.05, 0.06]}
+BLEND_WIDE = {"arm": 0.11, "leg": 0.12}
 
 SKIN = (0.72, 0.52, 0.40, 1)        # a middle tone; the game sets the chosen one
 TUNIC = (0.30, 0.26, 0.34, 1)
@@ -59,6 +67,9 @@ TROUSERS = (0.16, 0.15, 0.17, 1)
 BOOTS = (0.12, 0.09, 0.07, 1)
 EYE_WHITE = (0.92, 0.9, 0.86, 1)
 IRIS = (0.12, 0.09, 0.07, 1)
+HAIR = (0.16, 0.11, 0.08, 1)
+LIPS = (0.6, 0.38, 0.36, 1)         # the game tints it from the skin tone
+PUPIL = (0.02, 0.02, 0.02, 1)
 
 
 def log(*a):
@@ -350,6 +361,12 @@ def _smooth(x):
     return x * x * (3.0 - 2.0 * x)
 
 
+def _s01(t):
+    """A smooth step from 0 at t <= 0 to 1 at t >= 1."""
+    t = max(0.0, min(1.0, t))
+    return t * t * (3.0 - 2.0 * t)
+
+
 def weight_all(ob, bone, w=1.0):
     g = ob.vertex_groups.new(name=bone)
     g.add([v.index for v in ob.data.vertices], w, "REPLACE")
@@ -392,7 +409,8 @@ class Body:
         self.r.skinned = []
         self.r.attached = []
         self.mats = {n: pk._material(n, c, rough=0.85) for n, c in
-                     [("skin", SKIN), ("tunic", TUNIC), ("trousers", TROUSERS), ("boots", BOOTS), ("eye_white", EYE_WHITE), ("iris", IRIS)]}
+                     [("skin", SKIN), ("tunic", TUNIC), ("trousers", TROUSERS), ("boots", BOOTS), ("eye_white", EYE_WHITE), ("iris", IRIS),
+                      ("hair", HAIR), ("lips", LIPS), ("pupil", PUPIL)]}
         self.parts = {}
 
     # --- the meshes ------------------------------------------------------------------
@@ -540,44 +558,67 @@ class Body:
         head = self.parts["Head"]
         return (self.r.extent([head], 0), self.r.extent([head], 1), self.r.extent([head], 2))
 
-    def weight_anatomy(self, ob):
-        """Every vertex of the one body to its chain by where it is: the head above the neck,
-        the arms out past the shoulders, the legs below the hips, the trunk between; blended
-        across the joints by the chain functions."""
+    def weights_at(self, p):
+        """The bone weights of one point of the body: the head above the neck, the arms out
+        past the shoulders, the legs below the hips, the trunk between, each chain blended
+        across its joints; the shoulder shared between the upper arm and the chest (so the
+        deltoid and a sleeve's top rise with the arm, the ribs stay), the hip between the
+        thigh and the pelvis, the toes taking the front of the foot."""
         k = self.k
+        if p.z > 2.045 * k:
+            return {"head": 1.0}
+        zj = [self.joint(b, "z") for b in DEFORM["trunk"]]
+        trunk = _chain_weights(p.z, zj, DEFORM["trunk"], BLENDS["trunk"])
+        ax = abs(p.x)
+        # the arm's share: out past the shoulder, and not down the ribs under the armpit
+        arm = 0.0
+        if ax > 0.12 * k and p.z > 1.5 * k:
+            arm = _s01((ax - 0.13 * k) / (0.12 * k))
+            if ax < 0.32 * k:
+                arm *= _s01((p.z - 1.58 * k) / (0.17 * k))
+        if arm > 1e-3:
+            side = "l" if p.x > 0 else "r"
+            bones = DEFORM["arm." + side]
+            xj = [self.joint(b, "x") for b in bones]
+            blends = list(BLENDS["arm"])
+            if p.y > 0.0:
+                blends[0] = BLEND_WIDE["arm"]      # the elbow's point is behind
+            limb = _chain_weights(ax, xj, bones, blends)
+            return _mix(trunk, limb, arm)
+        # the leg's share: below the hips, and not the crotch's middle
+        leg = 0.0
+        if p.z < 1.13 * k and (ax > 0.015 * k or p.z < 0.85 * k):
+            hip_band = 0.08 if p.y < 0.0 else 0.16   # the fold at the hip's front, the stretch at the glute
+            leg = _s01((1.12 * k - p.z) / (hip_band * k))
+            if p.z > 0.85 * k:
+                # the crotch's middle stays with the pelvis (only up there: a boot's inner
+                # side or a wide hem passes the midline lower down and belongs to its leg)
+                leg *= _s01((ax - 0.015 * k) / (0.05 * k))
+        if leg > 1e-3:
+            side = "l" if p.x > 0 else "r"
+            bones = DEFORM["leg." + side][:3]
+            lz = [self.joint(b, "z") for b in bones]
+            blends = list(BLENDS["leg"])
+            if p.y < 0.0:
+                blends[0] = BLEND_WIDE["leg"]      # the kneecap is in front
+            limb = _chain_weights_down(p.z, lz, bones, blends)
+            # the toes: the front of the foot, so the foot rolls
+            if p.z < 0.07 * k and p.y < -0.05 * k and "foot." + side in limb:
+                t = _s01((-p.y - 0.05 * k) / (0.06 * k))
+                f = limb["foot." + side]
+                limb["foot." + side] = f * (1.0 - t)
+                limb["toes." + side] = f * t
+            return _mix(trunk, limb, leg)
+        return trunk
+
+    def weight_anatomy(self, ob):
+        """Every vertex of a mesh to the bones by where it is (weights_at)."""
         groups = {}
         for chain in DEFORM.values():
             for b in chain:
                 groups[b] = ob.vertex_groups.new(name=b)
-        zj = [self.joint(b, "z") for b in DEFORM["trunk"]]
         for v in ob.data.vertices:
-            p = ob.matrix_world @ v.co
-            weights = {}
-            if p.z > 2.045 * k:
-                weights["head"] = 1.0
-            elif abs(p.x) > 0.175 * k and p.z > 1.55 * k:
-                side = "l" if p.x > 0 else "r"
-                bones = DEFORM["arm." + side]
-                xj = [self.joint(b, "x") for b in bones]
-                weights = _chain_weights(abs(p.x), xj, bones)
-                # the shoulder itself shares with the chest
-                if abs(p.x) < 0.26 * k:
-                    t = (abs(p.x) - 0.175 * k) / (0.085 * k)
-                    for b in list(weights):
-                        weights[b] *= t
-                    weights["chest"] = weights.get("chest", 0.0) + (1.0 - t)
-            elif p.z < 1.12 * k and abs(p.x) > 0.02 * k:
-                side = "l" if p.x > 0 else "r"
-                bones = DEFORM["leg." + side][:3]
-                lz = [self.joint(b, "z") for b in bones]
-                weights = _chain_weights_down(p.z, lz, bones)
-                if p.z > 1.0 * k:
-                    t = (1.12 * k - p.z) / (0.12 * k)
-                    for b in list(weights):
-                        weights[b] *= t
-                    weights["hips"] = weights.get("hips", 0.0) + (1.0 - t)
-            else:
-                weights = _chain_weights(p.z, zj, DEFORM["trunk"])
+            weights = self.weights_at(ob.matrix_world @ v.co)
             total = sum(weights.values()) or 1.0
             for b, w in weights.items():
                 if w > 1e-4:
@@ -623,7 +664,9 @@ class Body:
         zj = [self.joint(b, "z") for b in DEFORM["trunk"]]
         for name, chain in getattr(self, "chains", {}).items():
             ob = objs[name]
-            if chain == "trunk":
+            if self.ANATOMY:
+                self.weight_anatomy(ob)
+            elif chain == "trunk":
                 weight_chain(ob, zj, "z", DEFORM["trunk"])
             elif chain.startswith("arm."):
                 side = chain[-1]
@@ -768,7 +811,7 @@ class Body:
         self.hang(self.sockets())
         self.r.head_box = self.head_extents()
         if self.ANATOMY:
-            hair_mat = pk._material("hair", (0.16, 0.11, 0.08, 1), rough=0.85)
+            hair_mat = self.mats["hair"]
             centre = self.head_centre
             pieces = hd.hair(self.parts["Head"], centre, self.sex, lambda k: float(self.face_p.get(k, 1.0)), hair_mat)
             self.hang([(h, "head") for h in pieces])
@@ -798,35 +841,46 @@ class Body:
         return info
 
 
-def _chain_weights(t, joints, bones):
-    """The weights of one position along a chain lofted upward (see weight_chain)."""
+def _chain_weights(t, joints, bones, blends=None):
+    """The weights of one position along a chain lofted upward (see weight_chain); blends[i]
+    is the half-width of the blend at joints[i + 1]."""
     weights = {}
     for i, b in enumerate(bones):
         lo = joints[i] if i > 0 else -1e9
         hi = joints[i + 1] if i + 1 < len(bones) else 1e9
         w = 1.0
         if lo > -1e8:
-            w *= _smooth((t - lo) / BLEND)
+            w *= _smooth((t - lo) / (blends[i - 1] if blends else BLEND))
         if hi < 1e8:
-            w *= 1.0 - _smooth((t - hi) / BLEND)
+            w *= 1.0 - _smooth((t - hi) / (blends[i] if blends else BLEND))
         if w > 1e-4:
             weights[b] = w
     return weights
 
 
-def _chain_weights_down(z, joints, bones):
+def _chain_weights_down(z, joints, bones, blends=None):
     weights = {}
     for i, b in enumerate(bones):
         hi = joints[i] if i > 0 else 1e9
         lo = joints[i + 1] if i + 1 < len(bones) else -1e9
         w = 1.0
         if hi < 1e8:
-            w *= 1.0 - _smooth((z - hi) / BLEND)
+            w *= 1.0 - _smooth((z - hi) / (blends[i - 1] if blends else BLEND))
         if lo > -1e8:
-            w *= _smooth((z - lo) / BLEND)
+            w *= _smooth((z - lo) / (blends[i] if blends else BLEND))
         if w > 1e-4:
             weights[b] = w
     return weights
+
+
+def _mix(a, b, t):
+    """Two weight sets blended: (1 - t) of a, t of b."""
+    out = {}
+    for k, w in a.items():
+        out[k] = out.get(k, 0.0) + w * (1.0 - t)
+    for k, w in b.items():
+        out[k] = out.get(k, 0.0) + w * t
+    return out
 
 
 def weight_chain_down(ob, joints, bones):

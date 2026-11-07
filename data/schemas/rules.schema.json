@@ -16,5 +16,40 @@
     "marks",
     "founding",
     "calendar"
-  ]
+  ],
+  "properties": {
+    "motion": {
+      "type": "object",
+      "required": [
+        "runAbove",
+        "rateLimits",
+        "strides"
+      ],
+      "properties": {
+        "$comment": {
+          "type": "string"
+        },
+        "runAbove": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rateLimits": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0.1
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "strides": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        }
+      }
+    }
+  }
 }

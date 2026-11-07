@@ -153,10 +153,43 @@ skinned to the head bone; its pieces hang from the bone.
 All twenty-six bodies are built on the anatomy with the carved heads, hair from the skull,
 each home's face parameters, skin palette and dress; the game loads them for everyone;
 `check_people.gd` is all good and the suite is at 1386. The owner's ratings before the
-head pass: bodies 7/10, heads 4/10. The next passes, in order of what the ratings ask for:
-finer faces (eyelids that close over the ball, a nose with a bridge that reads in profile,
-a mouth corner, brows as hair), a hairline that is not stepped, the dress shells cut to
-the body (the shoulder notch), and the owner's sentences for the thirteen faces.
+head pass: bodies 7/10, heads 4/10. The faces v3 pass (below) answered the face list;
+the body mechanics pass the joints and the feet. Next: the dress shells cut to the body
+(the shoulder notch), expressions as blend shapes, the ears, and the owner's sentences for
+the thirteen faces.
+
+## Faces v3 and the joints (the owner, 2026-11-07: "faces and body mechanics")
+
+**The face.** The eyes are set into the socket (the ball a little deeper, the socket carved
+to hold it) with **eyelids that wrap the ball**: a shell about the eye with an almond
+opening whose rim turns in to the ball, so the lid has an edge and the upper lid rests on
+the top of the iris; **lashes** along the upper lid, a **pupil** on the iris. **Brows are
+hair**: a stroke laid on the brow's bone, thick at the root, arched at two thirds, in the
+hair's colour. The **nose** and the **mouth** are surface patches that follow the skull
+(each vertex the skull's own point lifted by a height): the nose a ridge from the root to a
+bulb at the tip with the wings flaring behind it and the nostrils' shadow under them, so it
+reads in profile; the mouth two lip mounds either side of the mouth's line, the upper with
+a cupid's bow, both tapering into **corners set a little into the cheeks**; the lips take
+their own material, tinted in the game from the skin's tone (darker, warmer), so they read
+on every tone. The skull is finer (96 by 66) and the jaw a touch broader. The **hairline
+is cut along its curve** rather than stepped: the cap is the skull's surface clipped at the
+line, thin at the edge and thick at the crown; the beards the same.
+
+**The joints.** One function gives every vertex of the body *and the garments* its bone
+weights by where it is, so a sleeve's top rises with the arm as the deltoid does (the
+tunic's shoulder no longer tears from the sleeve). The **shoulder** is shared between the
+upper arm and the chest out past the joint, and not down the ribs under the armpit; the
+**hip** between the thigh and the pelvis, with the crotch's middle kept by the pelvis; the
+**toes** take the front of the foot so it rolls. The blend at a joint is **asymmetric**:
+narrow on the folding side (the elbow's front, the knee's back, the hip's front) so a deep
+bend does not pass through itself, wide on the stretching side (the point of the elbow, the
+kneecap, the glute) so the stretch spreads. Checked in a sitting pose, a kick, a block, a
+chop overhead and the run.
+
+**The feet.** The game plays each locomotion clip at the body's ground speed divided by
+the clip's own stride speed (measured in Blender: the walk crosses 1.78 units a second, the
+run 8.44), within limits, and walks below a run line (`data/rules.json`, `motion`), so the
+feet plant instead of sliding; the hero in the fight and the Academy, and the allies, all.
 
 ## Dress as culture (the owner, 2026-11-07: the outfits mark the culture they grew up in)
 

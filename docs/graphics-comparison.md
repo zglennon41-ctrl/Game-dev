@@ -63,6 +63,18 @@ close-up, and motion that does not slide.
 
 Everything stays data: `data/rules.json`, `art` holds the shader's numbers.
 
+## The second pass (the owner: "faces and body mechanics")
+
+- Faces: eyelids that wrap the ball with lashes and a pupil, brows as hair, a nose and a
+  mouth as surface patches on the skull (a bridge that reads in profile, a cupid's bow,
+  corners), lips tinted from the skin, the hairline cut along its curve
+  (`docs/bodies-plan.md`, "Faces v3 and the joints").
+- Joints: one weighting for the body and its garments, the shoulder and the hip shared
+  across the joint, toes that roll, asymmetric blends so a deep bend folds without passing
+  through itself.
+- Feet: every locomotion clip plays at the body's ground speed over the clip's stride, a
+  walk below the run line (`data/rules.json`, `motion`), so the feet plant.
+
 ## What it will not do
 
 It will not reach DW9's character fidelity: that is sculpted art and motion capture. What

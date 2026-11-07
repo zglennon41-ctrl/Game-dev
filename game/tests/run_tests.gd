@@ -57,6 +57,7 @@ func _run() -> void:
 	test_weapon_balance()
 	test_look()
 	test_rest()
+	test_motion()
 	test_blood_marks()
 	test_life_features()
 	test_bots()
@@ -1652,3 +1653,15 @@ func test_life_features() -> void:
 	skel = w._player.find_child("Skeleton3D", true, false)
 	check(skel.find_child("feature_cape_socket_back", false, false) == null, "no cloak when the look says none")
 	w.queue_free()
+
+## The body moves over the ground at the pace the clip's feet cross it (data/rules.json, motion).
+func test_motion() -> void:
+	check(World.gait_for(1.0) == "Walking_A" and World.gait_for(4.6) == "Running_A", "a slow pace walks, the fight's run speed runs")
+	check(is_equal_approx(World.stride_scale("Running_A", 8.44), 1.0), "the run plays at one when the body moves at the clip's own stride")
+	check(World.stride_scale("Walking_A", 1.78 * 2.0) >= 1.5 and World.stride_scale("Walking_A", 0.1) >= 0.6, "the rate stays within the limits")
+	check(World.stride_scale("Nothing", 3.0) == 1.0, "a clip without a stride plays at one")
+	var tone := Color(0.72, 0.52, 0.40)
+	var lips := World.lip_color(tone)
+	check(lips.r < tone.r and lips.g < tone.g and lips.r > lips.g, "the lips are darker than the skin and warmer")
+	var dark := World.lip_color(Color(0.3, 0.2, 0.16))
+	check(dark.r > 0.2, "dark skin keeps lips that read")
