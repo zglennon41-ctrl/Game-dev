@@ -1331,6 +1331,10 @@ func _next_step() -> void:
 		world.set_allies(fight.allies)
 	if s.has("place") and progress["place"] != s["place"]:
 		go(s["place"], false, progress["place"])
+	# A trouble's "talk" step: the poster must be standing here to be talked to (after the
+	# rematch in the yard, where the cohort does not otherwise stand).
+	if _lesson.get("trouble", false) and String(s["goal"]["type"]) == "talk" and String(s.get("place", progress["place"])) == progress["place"]:
+		_ensure_poster_here()
 	# The spar is set up after the walk to its place, or the new place would wipe it.
 	if setup.get("spar", false):
 		_spar_mode = "poster" if str(setup["spar"]) == "poster" else ("instructor" if str(setup["spar"]) == "instructor" else "cohort")
@@ -2166,6 +2170,20 @@ static func make_troubles(seed_value: int, cohort_in: Array) -> Array:
 func troubles_open() -> Array:
 	var done: Array = progress.get("troubles_done", [])
 	return make_troubles(int(progress["seed"]), cohort).filter(func(t): return not done.has(t["id"]))
+
+## The poster of the trouble in hand stands in this place, a few steps off, if not here already.
+func _ensure_poster_here() -> void:
+	var c: Dictionary = _lesson.get("poster", {})
+	if c.is_empty():
+		return
+	for p in _people:
+		if p.get("id", "") == c["id"]:
+			return
+	var at := fight.p_pos + Vector2.from_angle(fight.p_facing) * 2.6
+	var spec: Dictionary = place_spec(progress["place"])
+	at = Vector2(clampf(at.x, -float(spec["size"][0]) / 2.0 + 1.5, float(spec["size"][0]) / 2.0 - 1.5), clampf(at.y, -float(spec["size"][1]) / 2.0 + 1.5, float(spec["size"][1]) / 2.0 - 1.5))
+	world.add_figure(c["body"], at, (fight.p_pos - at).angle(), c["name"], "%s · %s" % [c.get("blood_name", ""), String(c.get("shape", "")).capitalize()], c.get("weapon", ""), Color(0, 0, 0, 0), c.get("look", {}))
+	_people.append({ "kind": "classmate", "id": c["id"], "name": c["name"], "pos": at, "c": c })
 
 func _classmate(id: String) -> Dictionary:
 	for c in cohort:
