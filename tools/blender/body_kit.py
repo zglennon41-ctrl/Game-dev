@@ -5,6 +5,7 @@ headless with Blender's Python module:
     python tools/blender/body_kit.py                 # every body this file knows, then the sheet
     python tools/blender/body_kit.py alexandria-m    # one body
     python tools/blender/body_kit.py sheet           # only the sheet, from the exported files
+    python tools/blender/body_kit.py parts           # the parts the bloods' marks hang on the sockets
 
 Method: import a KayKit body with the people kit, reshape its bones to grounded proportions
 (the people kit's method), throw KayKit's meshes away, and grow our own body around the bones:
@@ -523,10 +524,225 @@ def render_sheet(home="alexandria", samples=32, res=(400, 640)):
     pk.tile(row + motion, os.path.join(SCRATCH, "body_sheet.png"), 6, res)
 
 
+
+
+# ======================================================================================
+# Parts: what a blood's marks hang on the sockets (data/people-features.json). Each is built
+# at its socket's origin in the body's frame (Z up, the face at -Y; a hand part in the left
+# hand's frame, +X along the fingers; the game mirrors it for the right) and exported alone.
+# ======================================================================================
+
+PARTS_OUT = os.path.join(OUT, "parts")
+HORN = (0.62, 0.52, 0.4, 1)   # bone-pale, so it reads against dark hair and skin
+HIDE = (0.38, 0.12, 0.1, 1)
+FEATHER = (0.9, 0.88, 0.82, 1)
+SCALE = (0.25, 0.5, 0.38, 1)
+FUR = (0.42, 0.3, 0.18, 1)
+GILL = (0.55, 0.3, 0.32, 1)
+
+
+def _ob(name, bm, mat):
+    return pk._bm_object(name, bm, mat)
+
+
+def part_horns():
+    mat = pk._material("horn", HORN, rough=0.6)
+    out = []
+    for sign in (1, -1):
+        pts = [Vector((sign * 0.045, 0.0, -0.02)), Vector((sign * 0.07, -0.01, 0.05)), Vector((sign * 0.09, -0.03, 0.12)), Vector((sign * 0.085, -0.07, 0.17))]
+        ob = _ob("Horn_%s" % ("l" if sign > 0 else "r"), pk._tube_bm(pts, [0.022, 0.017, 0.011, 0.003]), mat)
+        pk._smooth(ob)
+        out.append(ob)
+    return out
+
+
+def part_tail():
+    mat = pk._material("hide", HIDE, rough=0.8)
+    pts = [Vector((0, 0.02, 0.0)), Vector((0, 0.16, -0.08)), Vector((0, 0.28, -0.24)), Vector((0, 0.3, -0.42)), Vector((0, 0.24, -0.56))]
+    tail = _ob("Tail", pk._tube_bm(pts, [0.03, 0.026, 0.02, 0.014, 0.008]), mat)
+    pk._smooth(tail)
+    tip = _ob("Tail_tip", pk._box_bm(Vector((-0.035, 0.2, -0.64)), Vector((0.035, 0.28, -0.56)), taper=(0.2, 0.6)), mat)
+    return [tail, tip]
+
+
+def part_wings():
+    mat = pk._material("feather", FEATHER, rough=0.9)
+    out = []
+    for sign in (1, -1):
+        # A folded wing: a flat loft along the wing's spine, broad in the middle, from the back.
+        spine = [Vector((sign * 0.03, 0.02, 0.02)), Vector((sign * 0.16, 0.08, 0.2)), Vector((sign * 0.3, 0.12, 0.26)), Vector((sign * 0.34, 0.16, 0.0)), Vector((sign * 0.3, 0.18, -0.3)), Vector((sign * 0.22, 0.18, -0.5))]
+        chord = [0.03, 0.08, 0.1, 0.12, 0.09, 0.03]
+        rings = []
+        for p, c in zip(spine, chord):
+            rings.append((p, Vector((0, 0.012, 0)), Vector((c * 0.5 * sign, 0, c * 0.2))))
+        ob = loft("Wing_%s" % ("l" if sign > 0 else "r"), rings)
+        ob.data.materials.append(mat)
+        out.append(ob)
+    return out
+
+
+def _scales(name, centres, r, mat):
+    out = []
+    for i, c in enumerate(centres):
+        bm = bmesh.new()
+        bmesh.ops.create_uvsphere(bm, u_segments=8, v_segments=5, radius=r)
+        bmesh.ops.scale(bm, vec=(1.0, 0.45, 1.0), verts=bm.verts)
+        bmesh.ops.translate(bm, vec=c, verts=bm.verts)
+        ob = _ob("%s_%d" % (name, i), bm, mat)
+        pk._smooth(ob)
+        out.append(ob)
+    return out
+
+
+def part_scales_throat():
+    mat = pk._material("scale", SCALE, rough=0.5)
+    cs = [Vector((x, -0.004 + abs(x) * 0.3, z)) for z in (0.0, -0.03, -0.055) for x in (-0.04, -0.013, 0.013, 0.04)]
+    return _scales("Scale", cs, 0.014, mat)
+
+
+def part_scales_hand():
+    mat = pk._material("scale", SCALE, rough=0.5)
+    cs = [Vector((x, y, 0.022)) for x in (0.03, 0.07, 0.11) for y in (-0.02, 0.02)]
+    out = []
+    for i, c in enumerate(cs):
+        bm = bmesh.new()
+        bmesh.ops.create_uvsphere(bm, u_segments=8, v_segments=5, radius=0.013)
+        bmesh.ops.scale(bm, vec=(1.0, 1.0, 0.4), verts=bm.verts)
+        bmesh.ops.translate(bm, vec=c, verts=bm.verts)
+        ob = _ob("Scale_%d" % i, bm, mat)
+        pk._smooth(ob)
+        out.append(ob)
+    return out
+
+
+def part_gill_lines():
+    mat = pk._material("gill", GILL, rough=0.7)
+    out = []
+    for sign in (1, -1):
+        for i, y in enumerate((-0.02, 0.0, 0.02)):
+            lo = Vector((sign * 0.052 - 0.006, y - 0.004, -0.06))
+            hi = Vector((sign * 0.052 + 0.006, y + 0.004, -0.02))
+            out.append(_ob("Gill_%s_%d" % ("l" if sign > 0 else "r", i), pk._box_bm(lo, hi), mat))
+    return out
+
+
+def part_fur_ears():
+    mat = pk._material("fur", FUR, rough=0.95)
+    out = []
+    for sign in (1, -1):
+        pts = [Vector((sign * 0.06, 0.0, -0.02)), Vector((sign * 0.085, 0.0, 0.06)), Vector((sign * 0.1, -0.01, 0.14))]
+        ob = _ob("Ear_%s" % ("l" if sign > 0 else "r"), pk._tube_bm(pts, [0.03, 0.02, 0.004], segments=8), mat)
+        pk._smooth(ob)
+        out.append(ob)
+    return out
+
+
+def part_claws():
+    mat = pk._material("horn", HORN, rough=0.6)
+    out = []
+    for i, y in enumerate((-0.033, -0.011, 0.011, 0.033)):
+        pts = [Vector((0.12, y, -0.004)), Vector((0.155, y, -0.01)), Vector((0.175, y, -0.022))]
+        ob = _ob("Claw_%d" % i, pk._tube_bm(pts, [0.009, 0.006, 0.0015], segments=6), mat)
+        pk._smooth(ob)
+        out.append(ob)
+    return out
+
+
+PARTS = {
+    "horns": part_horns, "tail": part_tail, "wings": part_wings, "scales-throat": part_scales_throat,
+    "scales-hand": part_scales_hand, "gill-lines": part_gill_lines, "fur-ears": part_fur_ears, "claws": part_claws,
+}
+
+
+def build_parts(which=None):
+    os.makedirs(PARTS_OUT, exist_ok=True)
+    for pid, fn in PARTS.items():
+        if which and pid not in which:
+            continue
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        obs = fn()
+        bpy.ops.object.select_all(action="DESELECT")
+        for o in obs:
+            o.select_set(True)
+        bpy.context.view_layer.objects.active = obs[0]
+        path = os.path.join(PARTS_OUT, pid + ".glb")
+        bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_yup=True, export_animations=False, export_materials="EXPORT")
+        log("wrote", os.path.relpath(path, ROOT), "%d KB" % max(1, os.path.getsize(path) // 1024), "%d objects" % len(obs))
+
+
+# ======================================================================================
+# The blood sheet: every blood that shows, on both bodies, its marks hung and its skin tinted
+# as the game does it (data/bloods.json marks, data/people-features.json).
+# ======================================================================================
+
+def _features_data():
+    import json
+    feats = json.load(open(os.path.join(ROOT, "data", "people-features.json")))["features"]
+    bloods = json.load(open(os.path.join(ROOT, "data", "bloods.json")))
+    return feats, bloods
+
+
+def render_blood_card(glb, label, path, marks, feats, samples=32, res=(400, 640), focus=0.0):
+    """A body card with the marks of one blood: the parts imported and parented to their
+    sockets, the skin and iris tinted."""
+    def dress(scene):
+        skin = bpy.data.materials.get("skin")
+        iris = bpy.data.materials.get("iris")
+        tone = Vector((0.66, 0.49, 0.35))
+        arm = next((o for o in bpy.data.objects if o.type == "ARMATURE"), None)
+        for fid in marks:
+            f = feats[fid]
+            if f["kind"] == "tint":
+                t = Vector(f["tint"])
+                tone = tone.lerp(t, f.get("strength", 0.5))
+            elif f["kind"] == "eyes" and iris:
+                iris.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = tuple(f["iris"]) + (1,)
+                if f.get("emission", 0) > 0:
+                    iris.node_tree.nodes["Principled BSDF"].inputs["Emission Color"].default_value = tuple(f["iris"]) + (1,)
+                    iris.node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].default_value = f["emission"]
+            elif f["kind"] == "glow" and skin:
+                skin.node_tree.nodes["Principled BSDF"].inputs["Emission Color"].default_value = tuple(f["glow"]) + (1,)
+                skin.node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].default_value = f.get("strength", 0.35) * 2.0
+            elif f["kind"] == "part" and arm:
+                for sock in f["sockets"]:
+                    before = set(bpy.data.objects)
+                    bpy.ops.import_scene.gltf(filepath=os.path.join(PARTS_OUT, f["part"] + ".glb"))
+                    new = [o for o in bpy.data.objects if o not in before and o.type == "MESH"]
+                    sock_ob = bpy.data.objects.get(sock)
+                    for o in new:
+                        o.name = "Part_" + o.name
+                        if sock_ob is not None:
+                            o.parent = sock_ob
+                            o.matrix_parent_inverse = Matrix.Identity(4)
+                            if sock.endswith("_r"):
+                                o.scale.x = -1.0
+                        else:
+                            o.parent = arm
+                            o.parent_type = "BONE"
+                            o.parent_bone = sock
+        if skin:
+            skin.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (tone.x, tone.y, tone.z, 1)
+    return pk.render_card(glb, label, path, anim="Idle", samples=samples, res=res, hair="crop", headgear=False, focus=focus, after_import=dress, shown_prefixes=("Part_",))
+
+
+def render_blood_sheet(home="alexandria", samples=24, res=(360, 560)):
+    feats, bloods = _features_data()
+    cards = os.path.join(SCRATCH, "blood_cards")
+    showing = [b for b in bloods if b.get("marks")]
+    out = []
+    for b in showing:
+        for sex in SEXES:
+            glb = os.path.join(OUT, "%s-%s.glb" % (home, sex))
+            out.append(render_blood_card(glb, "%s %s" % (b["name"], sex), os.path.join(cards, "%s_%s.png" % (b["id"], sex)), b["marks"], feats, samples=samples, res=res, focus=0.55))
+    pk.tile(out, os.path.join(SCRATCH, "blood_sheet.png"), 6, res)
+
+
 if __name__ == "__main__":
     args = sys.argv[1:]
     want_sheet = not args or "sheet" in args
-    wanted = [a for a in args if a != "sheet"] or (["alexandria-m", "alexandria-f"] if not args else [])
+    if not args or "parts" in args:
+        build_parts()
+    wanted = [a for a in args if a not in ("sheet", "parts", "bloods")] or (["alexandria-m", "alexandria-f"] if not args else [])
     results = {}
     for body_id in wanted:
         results[body_id] = build(body_id)
@@ -534,3 +750,5 @@ if __name__ == "__main__":
         log(body_id, info)
     if want_sheet:
         render_sheet()
+    if "bloods" in args:
+        render_blood_sheet()

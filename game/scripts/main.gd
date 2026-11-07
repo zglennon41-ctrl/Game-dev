@@ -103,7 +103,9 @@ func _ready() -> void:
 		if _args.has("look"):
 			for kv in String(_args["look"]).split(","):
 				var parts := kv.split(":")
-				if parts.size() == 2:
+				if parts.size() == 2 and parts[0] == "blood":
+					creator.blood_choice = parts[1]
+				elif parts.size() == 2:
 					creator.hero["look"][parts[0]] = (parts[1] == "1") if parts[0] in ["headgear", "cape"] else (float(parts[1]) if parts[0] in ["stature", "build"] else parts[1])
 			creator._reveal()
 		await get_tree().create_timer(1.2).timeout
@@ -179,6 +181,8 @@ func _ready() -> void:
 			# Fresh: a character straight from the questionnaire, nothing of an earlier run on it.
 			h = Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0])
 			h["name"] = "Test"
+			if _args.has("blood"):
+				h["blood"] = String(_args["blood"])
 		if _args.has("gate"):
 			# The morning of the Gate: Stage 3, the term behind you, for automated checks.
 			var dkg: Dictionary = Data.discipline_kits.get(h.get("discipline", "marshal"), {})

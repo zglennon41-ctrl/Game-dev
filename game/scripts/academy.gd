@@ -191,6 +191,7 @@ static func make_cohort(seed_value: int, h: Dictionary) -> Array:
 		if weapons.is_empty():
 			weapons = Data.weapons   # a home without a school of its own (Alexandria) carries any city's
 		var lk := random_look(rng)
+		lk["blood"] = blood["id"]
 		out.append({ "id": "c%d" % i, "name": name, "city": city, "blood": blood["id"], "blood_name": blood["name"],
 			"shape": shapes[i % shapes.size()], "temperament": temps[i % temps.size()]["id"],
 			"body": "%s-%s" % [city, lk["sex"]], "weapon": weapons[rng.randi() % weapons.size()]["id"],

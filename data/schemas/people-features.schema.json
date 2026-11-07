@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "people-features",
+  "type": "object",
+  "required": [
+    "features"
+  ],
+  "properties": {
+    "features": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "slot",
+          "kind",
+          "label"
+        ],
+        "properties": {
+          "slot": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "part",
+              "tint",
+              "eyes",
+              "glow",
+              "trim",
+              "cape"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "part": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "sockets": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^socket_[a-z_]+$"
+            }
+          },
+          "tint": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "iris": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "glow": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "strength": {
+            "type": "number"
+          },
+          "emission": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

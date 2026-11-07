@@ -1,0 +1,223 @@
+{
+ "comment": "Everything a body can take beyond its look, from any source: a blood's marks (data/bloods.json, marks), the rank's trim, the bonded genius's colour, the changes of instars. kind: part (a model from game/assets/people/parts/<part>.glb at each socket bone), tint (blended into the skin tone by strength), eyes (the iris colour, with emission), glow (emissive skin and a light), trim and cape (applied by the game). Built by tools/blender/body_kit.py parts.",
+ "features": {
+  "skin-stone": {
+   "slot": "surface",
+   "kind": "tint",
+   "label": "grey, stone-flecked skin",
+   "tint": [
+    0.55,
+    0.55,
+    0.6
+   ],
+   "strength": 0.55
+  },
+  "gill-lines": {
+   "slot": "throat",
+   "kind": "part",
+   "label": "gill-lines at the throat",
+   "part": "gill-lines",
+   "sockets": [
+    "socket_throat"
+   ]
+  },
+  "eyes-mist": {
+   "slot": "eyes",
+   "kind": "eyes",
+   "label": "pale, mist-grey eyes",
+   "iris": [
+    0.75,
+    0.8,
+    0.86
+   ],
+   "emission": 0.0
+  },
+  "skin-ochre": {
+   "slot": "surface",
+   "kind": "tint",
+   "label": "earth-dark skin patterned in ochre",
+   "tint": [
+    0.5,
+    0.3,
+    0.15
+   ],
+   "strength": 0.5
+  },
+  "eyes-cat": {
+   "slot": "eyes",
+   "kind": "eyes",
+   "label": "eyes that shine like a cat's",
+   "iris": [
+    1.0,
+    0.8,
+    0.3
+   ],
+   "emission": 1.6
+  },
+  "eyes-river": {
+   "slot": "eyes",
+   "kind": "eyes",
+   "label": "river-green eyes",
+   "iris": [
+    0.25,
+    0.55,
+    0.35
+   ],
+   "emission": 0.0
+  },
+  "skin-veins": {
+   "slot": "surface",
+   "kind": "tint",
+   "label": "iron-dark veins",
+   "tint": [
+    0.3,
+    0.32,
+    0.4
+   ],
+   "strength": 0.4
+  },
+  "skin-leaf": {
+   "slot": "surface",
+   "kind": "tint",
+   "label": "leaf-green flecks in the skin",
+   "tint": [
+    0.3,
+    0.65,
+    0.3
+   ],
+   "strength": 0.4
+  },
+  "eyes-black": {
+   "slot": "eyes",
+   "kind": "eyes",
+   "label": "black-irised eyes",
+   "iris": [
+    0.03,
+    0.03,
+    0.04
+   ],
+   "emission": 0.0
+  },
+  "skin-soot": {
+   "slot": "surface",
+   "kind": "tint",
+   "label": "soot-dark skin that runs warm",
+   "tint": [
+    0.2,
+    0.12,
+    0.08
+   ],
+   "strength": 0.55
+  },
+  "wings": {
+   "slot": "back",
+   "kind": "part",
+   "label": "wings, folded",
+   "part": "wings",
+   "sockets": [
+    "socket_back"
+   ]
+  },
+  "scales-throat": {
+   "slot": "throat",
+   "kind": "part",
+   "label": "scales at the throat",
+   "part": "scales-throat",
+   "sockets": [
+    "socket_throat"
+   ]
+  },
+  "scales-hands": {
+   "slot": "hands",
+   "kind": "part",
+   "label": "scales on the hands",
+   "part": "scales-hand",
+   "sockets": [
+    "socket_hand_l",
+    "socket_hand_r"
+   ]
+  },
+  "eyes-slit": {
+   "slot": "eyes",
+   "kind": "eyes",
+   "label": "slit eyes",
+   "iris": [
+    0.95,
+    0.65,
+    0.2
+   ],
+   "emission": 0.4
+  },
+  "horns": {
+   "slot": "head",
+   "kind": "part",
+   "label": "horns",
+   "part": "horns",
+   "sockets": [
+    "socket_head"
+   ]
+  },
+  "tail": {
+   "slot": "tail",
+   "kind": "part",
+   "label": "a tail",
+   "part": "tail",
+   "sockets": [
+    "socket_tail"
+   ]
+  },
+  "glow-under-skin": {
+   "slot": "surface",
+   "kind": "glow",
+   "label": "a glow under the skin at night",
+   "glow": [
+    1.0,
+    0.85,
+    0.55
+   ],
+   "strength": 0.35
+  },
+  "fur": {
+   "slot": "surface",
+   "kind": "tint",
+   "label": "fur",
+   "tint": [
+    0.45,
+    0.32,
+    0.2
+   ],
+   "strength": 0.7
+  },
+  "fur-ears": {
+   "slot": "head",
+   "kind": "part",
+   "label": "a beast's ears",
+   "part": "fur-ears",
+   "sockets": [
+    "socket_head"
+   ]
+  },
+  "claws": {
+   "slot": "hands",
+   "kind": "part",
+   "label": "claws",
+   "part": "claws",
+   "sockets": [
+    "socket_hand_l",
+    "socket_hand_r"
+   ]
+  },
+  "trim-journeyman": {
+   "slot": "surface",
+   "kind": "trim",
+   "label": "the Journeyman's trim at collar and hem",
+   "strength": 1.0
+  },
+  "cloak-genius": {
+   "slot": "cape",
+   "kind": "cape",
+   "label": "the bonded genius's colour in the cloak",
+   "strength": 1.0
+  }
+ }
+}

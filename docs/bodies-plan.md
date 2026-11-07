@@ -100,6 +100,16 @@ colours), one 512 texture at most on a dress.
   `godot --headless -s res://game/tests/check_people.gd` proves the animations, bones,
   sockets and keys; the sheet is `python tools/blender/body_kit.py sheet`.
 
+- **Marks (2026-11-07)**: every blood that shows is a list of features (`data/bloods.json`,
+  `marks`; the features in `data/people-features.json`): eight parts built by the body kit
+  (`python tools/blender/body_kit.py parts`) hang on the socket bones (horns, a tail, wings,
+  scales at the throat and on the hands, gill-lines, a beast's ears, claws; a hand part is
+  built for the left hand and mirrored for the right); tints blend into the skin (stone,
+  ochre, iron veins, leaf flecks, soot, fur); eyes colour the iris (cat's eyes shine); the
+  demigod's glow lights the skin. `World.dress` applies them from `features_of(hero)`, which
+  also reads `hero["features"]` for what instars and ranks will write. The blood sheet is
+  `python tools/blender/body_kit.py bloods`; the suite proves every mark on both bodies.
+
 ## Order of work
 
 1. **v1, one home**: the masculine and feminine Alexandria bodies at 7.5 heads on the rig,

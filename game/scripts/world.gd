@@ -314,8 +314,10 @@ func _dress_blood(skel: Skeleton3D, blood_id: String) -> void:
 	if blood_id == "":
 		return
 	var b: Dictionary = Data.by_id(Data.bloods, blood_id)
-	# A kit body takes the blood in its skin (dress); a KayKit body is washed over whole.
-	if BLOOD_TINTS.has(blood_id) and not _has_skin(_player):
+	# A kit body takes the blood as features (dress); a KayKit body is washed over whole.
+	if _has_skin(_player):
+		return
+	if BLOOD_TINTS.has(blood_id):
 		_tint = Color(BLOOD_TINTS[blood_id], 0.22)
 	match b.get("look", ""):
 		"horns":
@@ -440,9 +442,29 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 	# The build blends the body's lean and heavy shape keys; the skin takes the chosen tone.
 	var build := clampf(float(look.get("build", 0.0)), -1.0, 1.0)
 	var tone := skin_color(String(look.get("skin", "")))
-	var blood_id := String(hero.get("blood", ""))
-	if BLOOD_TINTS.has(blood_id):
-		tone = tone.lerp(BLOOD_TINTS[blood_id], 0.4)
+	# The features: the blood's marks and whatever else the character carries
+	# (data/people-features.json). Tints blend into the skin; eyes colour the iris; parts hang
+	# on the sockets; a glow lights the skin.
+	var feats := features_of(hero, look)
+	var iris := Color(0.12, 0.09, 0.07)
+	var iris_glow := 0.0
+	var glow := Color(0, 0, 0)
+	var glow_k := 0.0
+	for fid in feats:
+		var f: Dictionary = Data.people_features.get(fid, {})
+		match String(f.get("kind", "")):
+			"tint":
+				var t: Array = f.get("tint", [0.5, 0.5, 0.5])
+				tone = tone.lerp(Color(t[0], t[1], t[2]), float(f.get("strength", 0.5)))
+			"eyes":
+				var c: Array = f.get("iris", [0.1, 0.1, 0.1])
+				iris = Color(c[0], c[1], c[2])
+				iris_glow = float(f.get("emission", 0.0))
+			"glow":
+				var g: Array = f.get("glow", [1.0, 0.85, 0.55])
+				glow = Color(g[0], g[1], g[2])
+				glow_k = float(f.get("strength", 0.35))
+	var skel: Skeleton3D = node.find_child("Skeleton3D", true, false)
 	for m in node.find_children("*", "MeshInstance3D", true, false):
 		var mi: MeshInstance3D = m
 		var li := mi.find_blend_shape_by_name("lean")
@@ -451,13 +473,40 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 			mi.set_blend_shape_value(li, maxf(0.0, -build))
 		if hi >= 0:
 			mi.set_blend_shape_value(hi, maxf(0.0, build))
-		_recolor_named(mi, "skin", tone)
+		_recolor_named(mi, "skin", tone, glow, glow_k)
+		_recolor_named(mi, "iris", iris, iris, iris_glow)
+	if skel:
+		for a in skel.get_children():
+			if a is BoneAttachment3D and String(a.name).begins_with("feature_"):
+				a.queue_free()
+		for fid in feats:
+			var f: Dictionary = Data.people_features.get(fid, {})
+			if String(f.get("kind", "")) != "part":
+				continue
+			for sock in f.get("sockets", []):
+				if skel.find_bone(sock) < 0:
+					continue
+				var att := _attach(skel, sock, "res://game/assets/people/parts/%s.glb" % String(f["part"]))
+				att.name = "feature_%s_%s" % [fid, sock]
+				# A hand part is built for the left hand; the right wears its mirror.
+				if String(sock).ends_with("_r") and att.get_child_count() > 0:
+					(att.get_child(0) as Node3D).scale.x = -1.0
+	if glow_k > 0.0 and node == _player:
+		if _glow_light == null:
+			_glow_light = OmniLight3D.new()
+			_player.add_child(_glow_light)
+		_glow_light.light_color = glow
+		_glow_light.light_energy = 0.8
+		_glow_light.omni_range = 3.0
+		_glow_light.position = Vector3(0, 1.4, 0)
 	var hair := String(look.get("hair", "crop"))
 	var beard := String(look.get("beard", "none"))
 	var col := hair_color(String(look.get("hair_color", "brown")))
 	node.scale = Vector3.ONE * clampf(float(look.get("stature", 1.0)), 0.85, 1.2)
 	for a in node.find_children("*", "BoneAttachment3D", true, false):
 		var n := String(a.name)
+		if n.begins_with("feature_") or n.begins_with("socket_"):
+			continue
 		if n.begins_with("Hair_"):
 			a.visible = n.begins_with("Hair_%s_" % hair) and not hooded and (n.ends_with("_fall") or not headgear)
 			if a.visible:
@@ -479,8 +528,23 @@ func skin_color(id: String) -> Color:
 	var c: Array = tones.get(id, tones.get("olive", [0.62, 0.46, 0.33]))
 	return Color(c[0], c[1], c[2])
 
-## Recolour the surfaces of one mesh whose material carries a name, keeping the cel shading.
-func _recolor_named(mi: MeshInstance3D, name: String, col: Color) -> void:
+## The features a character carries: the blood's marks, and whatever else was written onto
+## them (hero["features"]: the rank's trim, the genius's colour, the changes of instars).
+func features_of(hero: Dictionary, look: Dictionary = {}) -> Array:
+	var out: Array = []
+	var blood_id := String(hero.get("blood", look.get("blood", "")))
+	if blood_id != "":
+		var b: Dictionary = Data.by_id(Data.bloods, blood_id)
+		for m in b.get("marks", []):
+			out.append(m)
+	for f in hero.get("features", []):
+		if not out.has(f):
+			out.append(f)
+	return out
+
+## Recolour the surfaces of one mesh whose material carries a name, keeping the cel shading;
+## with a glow, the surface shines in that colour.
+func _recolor_named(mi: MeshInstance3D, name: String, col: Color, glow := Color(0, 0, 0), glow_k := 0.0) -> void:
 	if mi.mesh == null:
 		return
 	for i in mi.mesh.get_surface_count():
@@ -490,12 +554,18 @@ func _recolor_named(mi: MeshInstance3D, name: String, col: Color) -> void:
 		if mat is ShaderMaterial and _toon_shader != null and (mat as ShaderMaterial).shader == _toon_shader:
 			var t: ShaderMaterial = (mat as ShaderMaterial).duplicate()
 			t.set_shader_parameter("albedo", col)
+			t.set_shader_parameter("emission", glow)
+			t.set_shader_parameter("emission_energy", glow_k)
 			t.resource_name = name
 			mi.set_surface_override_material(i, t)
 		else:
 			var sm := StandardMaterial3D.new()
 			sm.albedo_color = col
 			sm.roughness = 0.9
+			if glow_k > 0.0:
+				sm.emission_enabled = true
+				sm.emission = glow
+				sm.emission_energy_multiplier = glow_k
 			sm.resource_name = name
 			mi.set_surface_override_material(i, sm)
 

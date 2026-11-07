@@ -37,6 +37,9 @@ export function validateData(dir = 'data'): Problem[] {
   for (const a of D('adaptations')) need('adaptations.json', features, a.id, 'adaptation feature');
   for (const s of D('shades')) need('shades.json', features, s.graftFeature, `graft of ${s.id}`);
   for (const b of D('bloods')) if (b.graft) need('bloods.json', features, b.graft, `graft of ${b.id}`);
+  // Every mark a blood shows is a feature the body can take.
+  const peopleFeatures = new Set(Object.keys(D('people-features').features));
+  for (const b of D('bloods')) for (const m of b.marks ?? []) need('bloods.json', peopleFeatures, m, `mark of ${b.id}`);
   const disciplines = ids('disciplines');
   for (const a of D('archetypes')) need('archetypes.json', disciplines, a.discipline, `discipline of ${a.id}`);
   const reading = D('reading');

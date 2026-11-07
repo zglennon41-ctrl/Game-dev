@@ -57,6 +57,7 @@ func _run() -> void:
 	test_weapon_balance()
 	test_look()
 	test_rest()
+	test_blood_marks()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -1566,3 +1567,47 @@ func test_rest() -> void:
 	prog["worked_day"] = 7
 	check(Academy.rest_reason_for(prog, "board", 0) == "", "or when the board is bare")
 	check(Data.academy["rest"].has("board_waits"), "the line that says why not is in the data")
+
+
+## Every blood's marks show on both bodies: a part hangs on its socket, an eye colours the
+## iris, a tint shifts the skin, a glow lights it; every feature the data names resolves.
+func test_blood_marks() -> void:
+	for fid in Data.people_features:
+		var f: Dictionary = Data.people_features[fid]
+		if f["kind"] == "part":
+			check(ResourceLoader.exists("res://game/assets/people/parts/%s.glb" % f["part"]), "the part %s of %s exists" % [f["part"], fid])
+			check(f.get("sockets", []).size() > 0, "%s names its sockets" % fid)
+	var w := World.new()
+	add_child(w)
+	var marked := 0
+	for b in Data.bloods:
+		if not b.has("marks"):
+			continue
+		marked += 1
+		for body in ["alexandria-m", "alexandria-f"]:
+			var hero := Fight.default_hero()
+			hero["body"] = body
+			hero["blood"] = b["id"]
+			w.build_hero(hero)
+			var skel: Skeleton3D = w._player.find_child("Skeleton3D", true, false)
+			var plain_tone := w.skin_color("olive")
+			for fid in b["marks"]:
+				var f: Dictionary = Data.people_features[fid]
+				match String(f["kind"]):
+					"part":
+						for sock in f["sockets"]:
+							var att: Node = skel.find_child("feature_%s_%s" % [fid, sock], false, false)
+							check(att != null and att.get_child_count() > 0, "%s on %s: %s hangs on %s" % [b["id"], body, fid, sock])
+					"eyes":
+						var iris: MeshInstance3D = w._player.find_child("Iris_l", true, false).find_child("*", true, false) if w._player.find_child("Iris_l", true, false) else null
+						var mat := iris.get_active_material(0) if iris else null
+						var c: Array = f["iris"]
+						check(mat is ShaderMaterial and (mat as ShaderMaterial).get_shader_parameter("albedo").is_equal_approx(Color(c[0], c[1], c[2])), "%s on %s: the iris takes %s" % [b["id"], body, fid])
+					"tint", "glow":
+						var head: MeshInstance3D = w._player.find_child("Head", true, false)
+						var mat2 := head.get_active_material(0)
+						var alb: Color = (mat2 as ShaderMaterial).get_shader_parameter("albedo")
+						var em: float = float((mat2 as ShaderMaterial).get_shader_parameter("emission_energy"))
+						check((f["kind"] == "tint" and not alb.is_equal_approx(plain_tone)) or (f["kind"] == "glow" and em > 0.0), "%s on %s: the skin shows %s" % [b["id"], body, fid])
+	check(marked >= 15, "fifteen bloods show marks (%d)" % marked)
+	w.queue_free()

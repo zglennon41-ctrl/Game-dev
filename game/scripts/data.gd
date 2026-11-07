@@ -29,6 +29,7 @@ var disciplines: Array
 var gear: Dictionary
 var music: Dictionary
 var emblems: Dictionary   # the emblems the creator's cards draw (data/emblems.json)
+var people_features: Dictionary   # what a body can take: a blood's marks, trim, the changes of instars (data/people-features.json)
 var quests: Dictionary
 var _crises: Array
 
@@ -61,6 +62,7 @@ func _init() -> void:
 	gear = _load("res://data/gear.json")
 	music = _load("res://data/music.json") if FileAccess.file_exists("res://data/music.json") else {}
 	emblems = _load("res://data/emblems.json").get("emblems", {}) if FileAccess.file_exists("res://data/emblems.json") else {}
+	people_features = _load("res://data/people-features.json").get("features", {}) if FileAccess.file_exists("res://data/people-features.json") else {}
 	quests = _load("res://data/quests.json")
 	_crises = _load("res://data/crises.json")
 

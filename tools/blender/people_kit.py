@@ -585,7 +585,7 @@ def _material(name, color, rough=0.8, emission=None, strength=0.0):
     return m
 
 
-def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, res=(400, 640), hair=None, beard=None, headgear=True, focus=0.0, shape_key=None):
+def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, res=(400, 640), hair=None, beard=None, headgear=True, focus=0.0, shape_key=None, after_import=None, shown_prefixes=()):
     """One body from a file, three-quarter from the front right, in moonlight with a faint lamp
     from the other side; in the rest pose, or `at` (0..1) of the way through `anim`. The
     accessories are shown as the game shows them (helmet, hat, cape, hood), plus `weapon`."""
@@ -593,12 +593,16 @@ def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, re
     scene = bpy.context.scene
     bpy.ops.import_scene.gltf(filepath=glb)
     arm = next((o for o in bpy.data.objects if o.type == "ARMATURE"), None)
+    if after_import:
+        after_import(scene)
     for o in bpy.data.objects:
         if o.type != "MESH":
             continue
         if o not in set(scene.objects) or o.name.startswith("Icosphere"):
             o.hide_render = True
-        elif o.parent_type == "BONE":
+        elif o.name.startswith(tuple(shown_prefixes)) if shown_prefixes else False:
+            o.hide_render = False
+        elif o.parent_type == "BONE" or (o.parent is not None and o.parent.type == "EMPTY"):
             shown = (any(w in o.name for w in ACCESSORY_WORDS) and headgear) or (weapon and o.name == weapon) or o.name.startswith(("Eye", "Iris"))
             if o.name.startswith("Hair_"):
                 shown = hair is not None and o.name.startswith("Hair_%s_" % hair) and (headgear is False or o.name.endswith("_fall"))
