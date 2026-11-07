@@ -31,6 +31,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import people_kit as pk  # noqa: E402
 import anatomy as an  # noqa: E402
 import head as hd  # noqa: E402
+import wardrobe  # noqa: E402
 
 ROOT = pk.ROOT
 OUT = os.path.join(ROOT, "game", "assets", "people")
@@ -527,132 +528,12 @@ class Body:
                     groups[b].add([v.index], w / total, "REPLACE")
 
     def dress_pieces(self, objs, build, add, slot):
-        """The garments for one build, named Dress_<n>_<type>, with their chain in self.chains."""
-        D = home_dress(self.home)
-        if not D:
-            return
-        sex = self.sex
-        colors = D.get("colors", {})
-        mats = {}
-        for cname, c in colors.items():
-            mats[cname] = pk._material("dress_%s_%s" % (self.home, cname), tuple(c) + (1,), rough=0.9)
-        tr = self.scaled(trunk_rings(sex, build))
-        ar = self.scaled(arm_rings(sex, build))
-        lr = self.scaled(leg_rings(sex, build))
-        z_arm = self.joint("upperarm.l", "z")
-        x_leg = self.joint("upperleg.l", "x")
-        if not hasattr(self, "chains"):
-            self.chains = {}
-        n = 0
-
-        def put(name, ob, chain, cname):
-            ob.data.materials.clear()
-            ob.data.materials.append(mats.get(cname, self.mats["tunic"]))
-            objs[name] = ob
-            self.chains[name] = chain
-
-        def sleeves(k, cname, wide=False):
-            if k <= 0:
-                return
-            for side, sign in (("l", 1), ("r", -1)):
-                rings = []
-                for i, (x, hd, hz) in enumerate(ar[:k + 1]):
-                    g = 0.02 + (0.03 if wide and i == k else 0.0)
-                    rings.append((x, hd + g, hz + g))
-                ob = loft("Dress_%d_sleeve_%s" % (n, side), rings_x(rings, z_arm, sign))
-                put("Dress_%d_sleeve_%s" % (n, side), ob, "arm." + side, cname)
-
-        for piece in D.get("pieces", []):
-            n += 1
-            t, cname = piece["type"], piece["color"]
-            hem = float(piece.get("hem", 0.5)) * self.k
-            if t == "tunic":
-                ob = loft("Dress_%d_tunic" % n, rings_z(_shell(tr, 0.024, 1, 8)))
-                put("Dress_%d_tunic" % n, ob, "trunk", cname)
-                sleeves(int(piece.get("sleeves", 2)), cname, piece.get("wide", False))
-            elif t in ("coat", "robe"):
-                top = _shell(tr, 0.026, 2, 8)
-                z2, hw2, hd2, yo2 = top[0]
-                skirt = _skirt(z2, hw2, hd2, yo2, hem, 1.25 if t == "coat" else 1.15)
-                ob = loft("Dress_%d_%s" % (n, t), rings_z(skirt[::-1][:-1] + top))
-                put("Dress_%d_%s" % (n, t), ob, "trunk", cname)
-                sleeves(int(piece.get("sleeves", 6)), cname, piece.get("wide", t == "robe"))
-            elif t == "kilt":
-                z2, hw2, hd2, yo2 = tr[1]
-                ob = loft("Dress_%d_kilt" % n, rings_z(_skirt(z2, hw2 + 0.014, hd2 + 0.014, yo2, hem, 1.2)[::-1]))
-                put("Dress_%d_kilt" % n, ob, "trunk", cname)
-            elif t == "cuirass":
-                ob = loft("Dress_%d_cuirass" % n, rings_z(_shell(tr, 0.03, 4, 8)))
-                put("Dress_%d_cuirass" % n, ob, "trunk", cname)
-            elif t == "apron":
-                z_hi = tr[6][0]
-                z_lo = 0.6 * self.k
-                w = tr[3][1] + 0.02
-                ob = pk._bm_object("Dress_%d_apron" % n, pk._box_bm(Vector((-w, tr[3][2] * -1.0 - 0.03, z_lo)), Vector((w, -tr[3][2] * 1.0 + 0.0, z_hi)), taper=(1.1, 1.0)), self.mats["tunic"])
-                put("Dress_%d_apron" % n, ob, "trunk", cname)
-            elif t == "hakama":
-                for side, sign in (("l", 1), ("r", -1)):
-                    rings = [(z, hw * 1.6 + 0.02, hd * 1.5 + 0.02) for z, hw, hd in lr[:6]]
-                    ob = loft("Dress_%d_hakama_%s" % (n, side), [(Vector((sign * x_leg, 0, 0)) + c, u, v) for c, u, v in rings_z(rings)])
-                    put("Dress_%d_hakama_%s" % (n, side), ob, "leg." + side, cname)
-            elif t in ("greaves", "boots"):
-                for side, sign in (("l", 1), ("r", -1)):
-                    rings = [(z, hw + 0.012, hd + 0.012) for z, hw, hd in lr[4:]]
-                    ob = loft("Dress_%d_%s_%s" % (n, t, side), [(Vector((sign * x_leg, 0, 0)) + c, u, v) for c, u, v in rings_z(rings)])
-                    put("Dress_%d_%s_%s" % (n, t, side), ob, "leg." + side, cname)
-            elif t in ("belt", "sash"):
-                z2, hw2, hd2, yo2 = tr[3]
-                h = 0.03 if t == "belt" else 0.07
-                ob = loft("Dress_%d_%s" % (n, t), rings_z([(z2 - h, hw2 + 0.02, hd2 + 0.02, yo2), (z2 + h, hw2 + 0.02, hd2 + 0.02, yo2)]))
-                put("Dress_%d_%s" % (n, t), ob, "trunk", cname)
-            elif t == "collar":
-                z2, hw2, hd2, yo2 = tr[9]
-                ob = loft("Dress_%d_collar" % n, rings_z([(z2 - 0.02, hw2 + 0.03, hd2 + 0.03, yo2), (z2 + 0.05, hw2 + 0.02, hd2 + 0.02, yo2)]))
-                put("Dress_%d_collar" % n, ob, "trunk", cname)
+        """The home's garments (wardrobe.py), on the body's own rings."""
+        return wardrobe.dress_pieces(self, objs, build, slot)
 
     def headgear(self):
-        """The home's headgear, if any, hung from the head bone: Headgear_<type>."""
-        D = home_dress(self.home)
-        hg = D.get("headgear")
-        if not hg:
-            return []
-        (x0, x1), (y0, y1), (z0, z1) = self.head_extents()
-        hw, hd, hh = (x1 - x0) / 2, (y1 - y0) / 2, z1 - z0
-        c = Vector(((x0 + x1) / 2, (y0 + y1) / 2, z0 + hh * 0.62))
-        col = D["colors"].get(hg["color"], [0.3, 0.3, 0.3])
-        mat = pk._material("dress_%s_%s" % (self.home, hg["color"]), tuple(col) + (1,), rough=0.9)
-        t = hg["type"]
-        if t == "cap":
-            bm = pk._cap_bm(c, hw * 1.12, hd * 1.1, hh * 0.46, z0 + hh * 0.72, 0.1)
-        elif t == "hat":
-            bm = pk._cap_bm(c, hw * 1.12, hd * 1.1, hh * 0.5, z0 + hh * 0.7, 0.0)
-            brim = bmesh.new()
-            bmesh.ops.create_cone(brim, cap_ends=True, segments=20, radius1=hw * 1.7, radius2=hw * 1.7, depth=0.012)
-            bmesh.ops.translate(brim, vec=Vector((c.x, c.y, z0 + hh * 0.7)), verts=brim.verts)
-            ob2 = pk._bm_object("Headgear_hat_brim", brim, mat)
-            ob = pk._bm_object("Headgear_hat", bm, mat)
-            pk._smooth(ob)
-            return [ob, ob2]
-        elif t == "turban":
-            # Three wound bands: tubes round the head, each a little higher and tighter.
-            out = []
-            for i, (r, dz) in enumerate(((1.25, 0.7), (1.28, 0.82), (1.12, 0.94))):
-                pts = []
-                n = 24
-                for k in range(n + 1):
-                    a = 2 * math.pi * k / n
-                    pts.append(Vector((c.x + hw * r * 0.9 * math.cos(a), c.y + hd * r * 0.9 * math.sin(a), z0 + hh * dz)))
-                ob = pk._bm_object("Headgear_turban_%d" % i, pk._tube_bm(pts, [hw * 0.3] * (n + 1), segments=8), mat)
-                pk._smooth(ob)
-                out.append(ob)
-            return out
-        elif t == "furhat":
-            bm = pk._cap_bm(Vector((c.x, c.y, c.z + hh * 0.12)), hw * 1.3, hd * 1.25, hh * 0.5, z0 + hh * 0.66, 0.0)
-        else:
-            bm = pk._cap_bm(c, hw * 1.15, hd * 1.15, hh * 0.5, z0 + hh * 0.45, 0.2)
-        ob = pk._bm_object("Headgear_%s" % t, bm, mat)
-        pk._smooth(ob)
-        return [ob]
+        """The home's headgear (wardrobe.py), hung from the head bone."""
+        return wardrobe.headgear(self)
 
     def weight(self, objs):
         r = self.r
@@ -818,6 +699,7 @@ class Body:
         self.weight(self.parts)
         if self.ANATOMY:
             self.hang([(e, "head") for e in self.head_pieces])
+            self.hang(list(getattr(self, "dress_rigid", [])))
         else:
             self.hang([(e, "head") for e in self.eyes()])
             self.hang([(f, "head") for f in self.face()])

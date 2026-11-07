@@ -1,5 +1,5 @@
 {
- "comment": "The bodies of the thirteen homes (docs/bodies-plan.md): a carving brief for each face, the face parameters the body kit reads for the masculine and feminine body (multipliers on the base carving: brow ridge, nose length and width, lips, ears, jaw width, head length, cheekbones), and the skin palette offered at creation (tone ids from data/creation.json, look.skinTones). Every sentence is the owner's to rewrite. dress: the home's outfit as pieces the body kit builds as shells on the body's own rings (tunic, coat, robe, kilt, cuirass, apron, hakama, greaves, boots, belt, sash, collar) in named colours, and a headgear piece hung from the head (cap, hat, turban, furhat), which the look's headgear toggle shows or hides.",
+ "comment": "The bodies of the thirteen homes (docs/bodies-plan.md): a carving brief for each face, the face parameters the body kit reads for the masculine and feminine body (multipliers on the base carving: brow ridge, nose length and width, lips, ears, jaw width, head length, cheekbones), and the skin palette offered at creation (tone ids from data/creation.json, look.skinTones). Every sentence is the owner's to rewrite. dress: the home's outfit as pieces the body kit builds as shells on the body's own rings (tunic, coat, robe, kilt, cuirass, apron, hakama, greaves, boots, belt, sash, collar) in named colours, and a headgear piece hung from the head (cap, hat, turban, furhat), which the look's headgear toggle shows or hides. culture: a line on the outfit, the owner's to rewrite. pieces may carry trim (a band colour at hem, cuff or collar), cuffs, stripes (alternate bands), wide, count; types: tunic, vest, coat, robe, kaftan, kilt, wrapskirt, cuirass, apron, hakama, greaves, boots, sandals, belt, sash, obi, collar, scarf, wrap, gloves, buttons, badge, sashknot, toolloop, pauldrons, pteruges. headgear: cap (peak, goggles), hat (trim band), turban (trim, jewel), furhat, scholarcap, hood, headband, helm (crest), with goggles on any.",
  "homes": {
   "alexandria": {
    "name": "Alexandria",
@@ -36,27 +36,39 @@
     }
    },
    "dress": {
+    "culture": "The Academy's grey, the same on everyone who passes through; a brass collar for the cohort, boots for the line.",
     "colors": {
      "main": [
       0.3,
-      0.26,
-      0.34
+      0.28,
+      0.33
      ],
      "second": [
       0.16,
       0.15,
       0.17
+     ],
+     "metal": [
+      0.6,
+      0.5,
+      0.28
      ]
     },
     "pieces": [
      {
       "type": "tunic",
       "color": "main",
-      "sleeves": 2
+      "sleeves": 2,
+      "trim": "metal"
      },
      {
       "type": "belt",
       "color": "second"
+     },
+     {
+      "type": "boots",
+      "color": "second",
+      "cuffs": "main"
      }
     ]
    }
@@ -73,42 +85,48 @@
    ],
    "face": {
     "m": {
-     "brow": 1.1,
-     "nose": 1.05,
+     "brow": 1.15,
+     "nose": 1.1,
      "noseWidth": 1.0,
      "lips": 1.0,
      "ears": 1.0,
-     "jaw": 1.08,
-     "headLength": 1.04,
+     "jaw": 1.15,
+     "headLength": 1.06,
      "cheek": 1.0
     },
     "f": {
      "brow": 1.0,
-     "nose": 1.0,
+     "nose": 1.05,
      "noseWidth": 1.0,
      "lips": 1.0,
      "ears": 1.0,
-     "jaw": 1.0,
-     "headLength": 1.03,
+     "jaw": 1.05,
+     "headLength": 1.05,
      "cheek": 1.0
     }
    },
    "dress": {
+    "culture": "The marshals' city: a long dark-blue coat with brass buttons and a star at the breast, cream cuffs, a gun belt, tall boots, and the broad-brimmed hat with a band.",
     "colors": {
      "main": [
-      0.16,
-      0.2,
+      0.14,
+      0.18,
       0.36
      ],
      "second": [
-      0.72,
-      0.6,
-      0.3
+      0.82,
+      0.74,
+      0.55
      ],
      "metal": [
-      0.7,
-      0.65,
-      0.5
+      0.72,
+      0.6,
+      0.28
+     ],
+     "leather": [
+      0.3,
+      0.2,
+      0.12
      ]
     },
     "pieces": [
@@ -116,24 +134,41 @@
       "type": "coat",
       "color": "main",
       "hem": 0.55,
-      "sleeves": 6
+      "sleeves": 6,
+      "cuffs": "second",
+      "trim": "second"
      },
      {
       "type": "collar",
       "color": "second"
      },
      {
+      "type": "buttons",
+      "color": "metal",
+      "count": 5
+     },
+     {
+      "type": "badge",
+      "color": "metal"
+     },
+     {
       "type": "belt",
-      "color": "second"
+      "color": "leather"
+     },
+     {
+      "type": "toolloop",
+      "color": "leather"
      },
      {
       "type": "boots",
-      "color": "second"
+      "color": "leather",
+      "cuffs": "leather"
      }
     ],
     "headgear": {
      "type": "hat",
-     "color": "main"
+     "color": "main",
+     "trim": "second"
     }
    }
   },
@@ -150,35 +185,41 @@
     "m": {
      "brow": 1.0,
      "nose": 0.95,
-     "noseWidth": 1.1,
-     "lips": 1.1,
+     "noseWidth": 1.15,
+     "lips": 1.15,
      "ears": 1.0,
-     "jaw": 1.05,
+     "jaw": 1.1,
      "headLength": 1.0,
-     "cheek": 1.15
+     "cheek": 1.3
     },
     "f": {
      "brow": 1.0,
      "nose": 0.9,
-     "noseWidth": 1.05,
-     "lips": 1.15,
+     "noseWidth": 1.1,
+     "lips": 1.2,
      "ears": 1.0,
      "jaw": 1.0,
      "headLength": 1.0,
-     "cheek": 1.15
+     "cheek": 1.3
     }
    },
    "dress": {
+    "culture": "The river: a pilot's oilskin coat to the knee, a woven sash in ochre and red, high boots against the water, and a knit cap.",
     "colors": {
      "main": [
+      0.2,
       0.28,
-      0.3,
-      0.24
+      0.22
      ],
      "second": [
-      0.55,
+      0.62,
       0.42,
-      0.25
+      0.2
+     ],
+     "red": [
+      0.55,
+      0.18,
+      0.14
      ]
     },
     "pieces": [
@@ -186,24 +227,31 @@
       "type": "coat",
       "color": "main",
       "hem": 0.95,
-      "sleeves": 6
+      "sleeves": 6,
+      "trim": "second"
      },
      {
       "type": "collar",
       "color": "main"
      },
      {
-      "type": "belt",
-      "color": "second"
+      "type": "sash",
+      "color": "second",
+      "stripes": "red"
+     },
+     {
+      "type": "sashknot",
+      "color": "red"
      },
      {
       "type": "boots",
-      "color": "second"
+      "color": "second",
+      "cuffs": "main"
      }
     ],
     "headgear": {
      "type": "cap",
-     "color": "main"
+     "color": "red"
     }
    }
   },
@@ -218,56 +266,80 @@
    "face": {
     "m": {
      "brow": 1.0,
-     "nose": 1.15,
-     "noseWidth": 0.9,
+     "nose": 1.25,
+     "noseWidth": 0.85,
      "lips": 1.0,
-     "ears": 1.15,
-     "jaw": 0.95,
-     "headLength": 1.06,
-     "cheek": 0.92
+     "ears": 1.2,
+     "jaw": 0.9,
+     "headLength": 1.08,
+     "cheek": 0.88
     },
     "f": {
      "brow": 1.0,
-     "nose": 1.1,
-     "noseWidth": 0.9,
+     "nose": 1.15,
+     "noseWidth": 0.85,
      "lips": 1.0,
-     "ears": 1.1,
-     "jaw": 0.92,
-     "headLength": 1.05,
-     "cheek": 0.92
+     "ears": 1.15,
+     "jaw": 0.88,
+     "headLength": 1.06,
+     "cheek": 0.9
     }
    },
    "dress": {
+    "culture": "Fog and docks: a docker's short charcoal jacket, a red scarf, gloves, heavy boots, and a flat cap with goggles pushed up for the airship rigging.",
     "colors": {
      "main": [
-      0.22,
-      0.22,
-      0.26
+      0.2,
+      0.2,
+      0.24
      ],
      "second": [
-      0.5,
-      0.3,
-      0.2
+      0.6,
+      0.2,
+      0.16
+     ],
+     "leather": [
+      0.28,
+      0.2,
+      0.14
+     ],
+     "metal": [
+      0.6,
+      0.58,
+      0.5
      ]
     },
     "pieces": [
      {
       "type": "tunic",
       "color": "main",
-      "sleeves": 6
+      "sleeves": 6,
+      "cuffs": "leather"
+     },
+     {
+      "type": "scarf",
+      "color": "second"
      },
      {
       "type": "belt",
-      "color": "second"
+      "color": "leather"
+     },
+     {
+      "type": "gloves",
+      "color": "leather"
      },
      {
       "type": "boots",
-      "color": "second"
+      "color": "leather",
+      "cuffs": "main"
      }
     ],
     "headgear": {
      "type": "cap",
-     "color": "second"
+     "color": "main",
+     "trim": "leather",
+     "peak": true,
+     "goggles": true
     }
    }
   },
@@ -282,57 +354,71 @@
    ],
    "face": {
     "m": {
-     "brow": 1.2,
+     "brow": 1.35,
      "nose": 0.9,
-     "noseWidth": 1.1,
+     "noseWidth": 1.15,
+     "lips": 1.0,
+     "ears": 1.0,
+     "jaw": 1.3,
+     "headLength": 1.0,
+     "cheek": 1.05
+    },
+    "f": {
+     "brow": 1.2,
+     "nose": 0.92,
+     "noseWidth": 1.08,
      "lips": 1.0,
      "ears": 1.0,
      "jaw": 1.15,
      "headLength": 1.0,
      "cheek": 1.05
-    },
-    "f": {
-     "brow": 1.1,
-     "nose": 0.92,
-     "noseWidth": 1.05,
-     "lips": 1.0,
-     "ears": 1.0,
-     "jaw": 1.08,
-     "headLength": 1.0,
-     "cheek": 1.05
     }
    },
    "dress": {
+    "culture": "The engine-works: a rust tunic under a heavy leather apron, tools at the belt, gauntlet gloves, boots, and a leather cap with goggles.",
     "colors": {
      "main": [
-      0.35,
-      0.22,
+      0.5,
+      0.26,
       0.12
      ],
      "second": [
-      0.2,
-      0.18,
+      0.22,
+      0.19,
       0.16
      ],
+     "leather": [
+      0.32,
+      0.22,
+      0.12
+     ],
      "metal": [
+      0.6,
       0.55,
-      0.45,
-      0.3
+      0.4
      ]
     },
     "pieces": [
      {
       "type": "tunic",
-      "color": "second",
+      "color": "main",
       "sleeves": 2
      },
      {
       "type": "apron",
-      "color": "main"
+      "color": "leather"
      },
      {
       "type": "belt",
+      "color": "second"
+     },
+     {
+      "type": "toolloop",
       "color": "metal"
+     },
+     {
+      "type": "gloves",
+      "color": "leather"
      },
      {
       "type": "boots",
@@ -341,7 +427,9 @@
     ],
     "headgear": {
      "type": "cap",
-     "color": "second"
+     "color": "leather",
+     "trim": "metal",
+     "goggles": true
     }
    }
   },
@@ -356,66 +444,83 @@
    "face": {
     "m": {
      "brow": 1.0,
-     "nose": 1.2,
+     "nose": 1.3,
      "noseWidth": 1.0,
      "lips": 0.95,
      "ears": 1.0,
-     "jaw": 1.05,
-     "headLength": 0.97,
+     "jaw": 1.1,
+     "headLength": 0.96,
      "cheek": 1.0
     },
     "f": {
      "brow": 1.0,
-     "nose": 1.12,
+     "nose": 1.18,
      "noseWidth": 1.0,
      "lips": 1.0,
      "ears": 1.0,
-     "jaw": 1.0,
-     "headLength": 0.97,
+     "jaw": 1.02,
+     "headLength": 0.96,
      "cheek": 1.0
     }
    },
    "dress": {
+    "culture": "The old walls: a legionary's red tunic under a bronze cuirass with pauldrons, pteruges at the waist, greaves, sandals, and a crested helm.",
     "colors": {
      "main": [
-      0.6,
+      0.62,
       0.14,
       0.12
      ],
      "second": [
-      0.4,
+      0.42,
       0.3,
       0.2
      ],
      "metal": [
-      0.68,
+      0.72,
       0.62,
-      0.45
+      0.4
      ]
     },
     "pieces": [
      {
       "type": "tunic",
       "color": "main",
-      "sleeves": 1
+      "sleeves": 1,
+      "trim": "second"
      },
      {
       "type": "cuirass",
+      "color": "metal",
+      "trim": "second"
+     },
+     {
+      "type": "pauldrons",
       "color": "metal"
      },
      {
-      "type": "kilt",
+      "type": "pteruges",
       "color": "second",
-      "hem": 0.85
+      "count": 12
+     },
+     {
+      "type": "belt",
+      "color": "second"
      },
      {
       "type": "greaves",
       "color": "metal"
+     },
+     {
+      "type": "sandals",
+      "color": "second"
      }
     ],
     "headgear": {
-     "type": "hat",
-     "color": "metal"
+     "type": "helm",
+     "color": "metal",
+     "trim": "main",
+     "crest": true
     }
    }
   },
@@ -430,37 +535,43 @@
    ],
    "face": {
     "m": {
-     "brow": 0.95,
+     "brow": 0.9,
      "nose": 0.95,
-     "noseWidth": 1.15,
-     "lips": 1.2,
+     "noseWidth": 1.25,
+     "lips": 1.3,
      "ears": 1.0,
      "jaw": 1.0,
-     "headLength": 1.08,
-     "cheek": 1.05
+     "headLength": 1.1,
+     "cheek": 1.08
     },
     "f": {
-     "brow": 0.9,
+     "brow": 0.85,
      "nose": 0.9,
-     "noseWidth": 1.1,
-     "lips": 1.25,
+     "noseWidth": 1.2,
+     "lips": 1.35,
      "ears": 1.0,
      "jaw": 1.0,
-     "headLength": 1.08,
-     "cheek": 1.05
+     "headLength": 1.1,
+     "cheek": 1.08
     }
    },
    "dress": {
+    "culture": "The black fields: white linen, a kilt with a striped sash of green and gold, the broad gold collar of the growers, bare arms, and a headband.",
     "colors": {
      "main": [
-      0.85,
-      0.78,
-      0.6
+      0.9,
+      0.84,
+      0.66
      ],
      "second": [
       0.2,
-      0.4,
-      0.25
+      0.42,
+      0.26
+     ],
+     "metal": [
+      0.8,
+      0.66,
+      0.26
      ]
     },
     "pieces": [
@@ -472,16 +583,27 @@
      {
       "type": "kilt",
       "color": "main",
-      "hem": 0.7
+      "hem": 0.7,
+      "trim": "metal"
      },
      {
-      "type": "belt",
+      "type": "sash",
+      "color": "second",
+      "stripes": "metal"
+     },
+     {
+      "type": "collar",
+      "color": "metal",
+      "wide": true
+     },
+     {
+      "type": "sandals",
       "color": "second"
      }
     ],
     "headgear": {
-     "type": "cap",
-     "color": "second"
+     "type": "headband",
+     "color": "metal"
     }
    }
   },
@@ -496,37 +618,43 @@
    ],
    "face": {
     "m": {
-     "brow": 1.05,
-     "nose": 1.1,
-     "noseWidth": 0.92,
+     "brow": 1.1,
+     "nose": 1.15,
+     "noseWidth": 0.9,
      "lips": 1.0,
      "ears": 1.0,
-     "jaw": 0.95,
+     "jaw": 0.92,
      "headLength": 1.0,
      "cheek": 0.98
     },
     "f": {
-     "brow": 1.08,
-     "nose": 1.05,
-     "noseWidth": 0.9,
+     "brow": 1.12,
+     "nose": 1.08,
+     "noseWidth": 0.88,
      "lips": 1.0,
      "ears": 1.0,
-     "jaw": 0.9,
+     "jaw": 0.88,
      "headLength": 1.0,
      "cheek": 0.98
     }
    },
    "dress": {
+    "culture": "The house of figures: a deep-blue layered robe with gold at hem and cuff, a sash, and a folded turban with a jewel at the brow.",
     "colors": {
      "main": [
-      0.2,
-      0.35,
+      0.16,
+      0.3,
       0.5
      ],
      "second": [
+      0.9,
+      0.8,
+      0.55
+     ],
+     "metal": [
       0.85,
-      0.75,
-      0.5
+      0.7,
+      0.3
      ]
     },
     "pieces": [
@@ -534,16 +662,24 @@
       "type": "robe",
       "color": "main",
       "hem": 0.2,
-      "sleeves": 6
+      "sleeves": 6,
+      "trim": "metal",
+      "cuffs": "metal"
      },
      {
-      "type": "belt",
+      "type": "sash",
+      "color": "second"
+     },
+     {
+      "type": "sashknot",
       "color": "second"
      }
     ],
     "headgear": {
      "type": "turban",
-     "color": "second"
+     "color": "second",
+     "trim": "main",
+     "jewel": true
     }
    }
   },
@@ -558,37 +694,38 @@
    ],
    "face": {
     "m": {
-     "brow": 1.1,
+     "brow": 1.15,
      "nose": 1.0,
      "noseWidth": 1.0,
      "lips": 0.95,
      "ears": 1.0,
-     "jaw": 0.95,
-     "headLength": 1.04,
-     "cheek": 0.9
+     "jaw": 0.92,
+     "headLength": 1.06,
+     "cheek": 0.85
     },
     "f": {
-     "brow": 1.05,
+     "brow": 1.08,
      "nose": 1.0,
      "noseWidth": 1.0,
      "lips": 1.0,
      "ears": 1.0,
-     "jaw": 0.92,
-     "headLength": 1.03,
-     "cheek": 0.92
+     "jaw": 0.9,
+     "headLength": 1.05,
+     "cheek": 0.88
     }
    },
    "dress": {
+    "culture": "The steps: a saffron cloth wrapped to the shin and another across the chest, a sash, bare feet, and a headband; ash where the night sat.",
     "colors": {
      "main": [
-      0.85,
-      0.55,
-      0.2
+      0.9,
+      0.52,
+      0.16
      ],
      "second": [
-      0.9,
-      0.85,
-      0.7
+      0.92,
+      0.88,
+      0.74
      ]
     },
     "pieces": [
@@ -598,15 +735,23 @@
       "sleeves": 0
      },
      {
-      "type": "kilt",
+      "type": "wrapskirt",
       "color": "main",
       "hem": 0.3
+     },
+     {
+      "type": "wrap",
+      "color": "main"
      },
      {
       "type": "sash",
       "color": "main"
      }
-    ]
+    ],
+    "headgear": {
+     "type": "headband",
+     "color": "main"
+    }
    }
   },
   "jiangnan": {
@@ -620,37 +765,43 @@
    ],
    "face": {
     "m": {
-     "brow": 0.9,
-     "nose": 0.85,
+     "brow": 0.85,
+     "nose": 0.8,
      "noseWidth": 0.95,
      "lips": 0.95,
      "ears": 1.0,
-     "jaw": 0.95,
-     "headLength": 1.02,
-     "cheek": 1.05
+     "jaw": 0.92,
+     "headLength": 1.03,
+     "cheek": 1.08
     },
     "f": {
-     "brow": 0.88,
-     "nose": 0.8,
+     "brow": 0.82,
+     "nose": 0.75,
      "noseWidth": 0.92,
      "lips": 1.0,
      "ears": 1.0,
-     "jaw": 0.92,
-     "headLength": 1.02,
-     "cheek": 1.05
+     "jaw": 0.88,
+     "headLength": 1.03,
+     "cheek": 1.08
     }
    },
    "dress": {
+    "culture": "The examination halls: a long plum robe with wide white-cuffed sleeves, a jade belt, and the scholar's square cap.",
     "colors": {
      "main": [
-      0.35,
-      0.15,
+      0.36,
+      0.14,
       0.3
      ],
      "second": [
+      0.92,
       0.9,
-      0.88,
-      0.8
+      0.84
+     ],
+     "jade": [
+      0.35,
+      0.6,
+      0.45
      ]
     },
     "pieces": [
@@ -659,16 +810,23 @@
       "color": "main",
       "hem": 0.25,
       "sleeves": 6,
-      "wide": true
+      "wide": true,
+      "cuffs": "second",
+      "trim": "second"
      },
      {
       "type": "belt",
+      "color": "jade"
+     },
+     {
+      "type": "collar",
       "color": "second"
      }
     ],
     "headgear": {
-     "type": "cap",
-     "color": "main"
+     "type": "scholarcap",
+     "color": "main",
+     "trim": "main"
     }
    }
   },
@@ -684,57 +842,75 @@
    "face": {
     "m": {
      "brow": 1.0,
-     "nose": 0.9,
-     "noseWidth": 1.15,
+     "nose": 0.88,
+     "noseWidth": 1.2,
      "lips": 1.0,
      "ears": 1.0,
-     "jaw": 1.1,
-     "headLength": 0.98,
-     "cheek": 1.2
+     "jaw": 1.15,
+     "headLength": 0.97,
+     "cheek": 1.35
     },
     "f": {
      "brow": 1.0,
-     "nose": 0.88,
-     "noseWidth": 1.1,
+     "nose": 0.86,
+     "noseWidth": 1.15,
      "lips": 1.0,
      "ears": 1.0,
-     "jaw": 1.02,
-     "headLength": 0.98,
-     "cheek": 1.18
+     "jaw": 1.05,
+     "headLength": 0.97,
+     "cheek": 1.3
     }
    },
    "dress": {
+    "culture": "The steppe: a belted brown kaftan to the thigh with ochre trim, a cloth across the chest, riding boots with cuffs, and a tall fur hat.",
     "colors": {
      "main": [
-      0.45,
-      0.3,
-      0.15
+      0.44,
+      0.28,
+      0.14
      ],
      "second": [
-      0.25,
+      0.72,
+      0.5,
+      0.22
+     ],
+     "fur": [
+      0.26,
       0.2,
       0.15
      ]
     },
     "pieces": [
      {
-      "type": "coat",
+      "type": "kaftan",
       "color": "main",
       "hem": 0.75,
-      "sleeves": 6
+      "sleeves": 6,
+      "trim": "second",
+      "cuffs": "second"
+     },
+     {
+      "type": "wrap",
+      "color": "second"
      },
      {
       "type": "belt",
+      "color": "fur"
+     },
+     {
+      "type": "sashknot",
       "color": "second"
      },
      {
       "type": "boots",
-      "color": "second"
+      "color": "fur",
+      "cuffs": "second"
      }
     ],
     "headgear": {
      "type": "furhat",
-     "color": "second"
+     "color": "fur",
+     "trim": "second"
     }
    }
   },
@@ -750,35 +926,46 @@
     "m": {
      "brow": 1.0,
      "nose": 0.95,
-     "noseWidth": 1.2,
-     "lips": 1.2,
+     "noseWidth": 1.3,
+     "lips": 1.3,
      "ears": 1.0,
      "jaw": 1.0,
-     "headLength": 1.06,
+     "headLength": 1.08,
      "cheek": 1.0
     },
     "f": {
      "brow": 1.0,
      "nose": 0.9,
-     "noseWidth": 1.15,
-     "lips": 1.25,
+     "noseWidth": 1.25,
+     "lips": 1.35,
      "ears": 1.0,
      "jaw": 1.0,
-     "headLength": 1.06,
+     "headLength": 1.08,
      "cheek": 1.02
     }
    },
    "dress": {
+    "culture": "The library: a wide indigo boubou with gold at the collar and hem, a leather satchel strap, and the round white cap.",
     "colors": {
      "main": [
-      0.2,
-      0.25,
+      0.16,
+      0.22,
       0.5
      ],
      "second": [
+      0.92,
+      0.9,
+      0.8
+     ],
+     "metal": [
       0.85,
-      0.75,
-      0.4
+      0.7,
+      0.32
+     ],
+     "leather": [
+      0.35,
+      0.22,
+      0.12
      ]
     },
     "pieces": [
@@ -787,11 +974,21 @@
       "color": "main",
       "hem": 0.25,
       "sleeves": 6,
-      "wide": true
+      "wide": true,
+      "trim": "metal"
      },
      {
       "type": "collar",
-      "color": "second"
+      "color": "metal",
+      "wide": 1.3
+     },
+     {
+      "type": "wrap",
+      "color": "leather"
+     },
+     {
+      "type": "sandals",
+      "color": "leather"
      }
     ],
     "headgear": {
@@ -810,37 +1007,43 @@
    ],
    "face": {
     "m": {
-     "brow": 0.95,
-     "nose": 0.9,
+     "brow": 0.92,
+     "nose": 0.88,
      "noseWidth": 0.95,
      "lips": 0.85,
      "ears": 1.0,
-     "jaw": 0.95,
-     "headLength": 1.03,
+     "jaw": 0.92,
+     "headLength": 1.04,
      "cheek": 1.0
     },
     "f": {
-     "brow": 0.9,
-     "nose": 0.85,
+     "brow": 0.88,
+     "nose": 0.84,
      "noseWidth": 0.92,
      "lips": 0.9,
      "ears": 1.0,
-     "jaw": 0.9,
-     "headLength": 1.03,
+     "jaw": 0.88,
+     "headLength": 1.04,
      "cheek": 1.02
     }
    },
    "dress": {
+    "culture": "The sword schools: a dark kimono with a white collar, the hakama's wide pleats, and an obi knotted at the hip; no hat, the hair tied.",
     "colors": {
      "main": [
-      0.15,
-      0.15,
+      0.14,
+      0.14,
       0.2
      ],
      "second": [
-      0.6,
+      0.9,
+      0.88,
+      0.82
+     ],
+     "obi": [
       0.55,
-      0.5
+      0.45,
+      0.3
      ]
     },
     "pieces": [
@@ -848,15 +1051,24 @@
       "type": "tunic",
       "color": "main",
       "sleeves": 5,
-      "wide": true
+      "wide": true,
+      "trim": "second"
+     },
+     {
+      "type": "collar",
+      "color": "second"
      },
      {
       "type": "hakama",
       "color": "main"
      },
      {
-      "type": "belt",
-      "color": "second"
+      "type": "obi",
+      "color": "obi"
+     },
+     {
+      "type": "sashknot",
+      "color": "obi"
      }
     ]
    }

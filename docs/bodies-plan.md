@@ -158,6 +158,27 @@ finer faces (eyelids that close over the ball, a nose with a bridge that reads i
 a mouth corner, brows as hair), a hairline that is not stepped, the dress shells cut to
 the body (the shoulder notch), and the owner's sentences for the thirteen faces.
 
+## Dress as culture (the owner, 2026-11-07: the outfits mark the culture they grew up in)
+
+`tools/blender/wardrobe.py` dresses each home from `data/bodies.json` (`dress`): a culture
+line, colours, pieces and headgear. Pieces are shells on the body's own rings (tunic, vest,
+coat, robe, kaftan, kilt, wrap-skirt, cuirass, apron, hakama, greaves, boots, sandals, belt,
+sash, obi, collar, scarf, wrap, gloves) with trim bands at hem, cuff or collar, cuffs and
+stripes; rigid pieces hang from bones (buttons, a badge, a sash's knot and tails, tools at
+the belt, pauldrons, pteruges); the headgear hangs from the head (cap with a peak, hat with a
+band, folded turban with a jewel, tall fur hat, scholar's cap, hood, headband, crested
+helm, goggles on any). The thirteen outfits as written: Alexandria's grey with a brass
+collar; Columbia's marshal coat, brass buttons, star, gun belt, boots and brimmed hat;
+Cahokia's oilskin, striped sash, boots and knit cap; Lunden's docker's jacket, red scarf,
+gloves, peaked cap with goggles; Colonia's leather apron over rust, tools, gauntlets, cap
+with goggles; Tiber's red tunic, bronze cuirass, pauldrons, pteruges, greaves, sandals,
+crested helm; Khemet's white linen, striped sash, broad gold collar, headband; Baghdad's
+deep-blue robe with gold at hem and cuff, sash, folded turban with a jewel; Varanasi's
+saffron wraps, headband; Jiangnan's plum robe with white cuffs, jade belt, scholar's cap;
+Kazan's belted kaftan with ochre trim, wrap, cuffed boots, fur hat; Timbuktu's indigo boubou
+with gold collar, satchel strap, white cap; Edo's dark kimono with white collar, hakama, obi.
+Every line of it is the owner's to rewrite.
+
 ## Order of work
 
 1. **v1, one home**: the masculine and feminine Alexandria bodies at 7.5 heads on the rig,
