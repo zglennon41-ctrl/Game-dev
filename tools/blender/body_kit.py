@@ -543,7 +543,7 @@ class Body:
             for side, sign in (("l", 1), ("r", -1)):
                 rings = []
                 for i, (x, hd, hz) in enumerate(ar[:k + 1]):
-                    g = 0.012 + (0.03 if wide and i == k else 0.0)
+                    g = 0.02 + (0.03 if wide and i == k else 0.0)
                     rings.append((x, hd + g, hz + g))
                 ob = loft("Dress_%d_sleeve_%s" % (n, side), rings_x(rings, z_arm, sign))
                 put("Dress_%d_sleeve_%s" % (n, side), ob, "arm." + side, cname)
@@ -553,11 +553,11 @@ class Body:
             t, cname = piece["type"], piece["color"]
             hem = float(piece.get("hem", 0.5)) * self.k
             if t == "tunic":
-                ob = loft("Dress_%d_tunic" % n, rings_z(_shell(tr, 0.012, 1, 8)))
+                ob = loft("Dress_%d_tunic" % n, rings_z(_shell(tr, 0.024, 1, 8)))
                 put("Dress_%d_tunic" % n, ob, "trunk", cname)
                 sleeves(int(piece.get("sleeves", 2)), cname, piece.get("wide", False))
             elif t in ("coat", "robe"):
-                top = _shell(tr, 0.014, 2, 8)
+                top = _shell(tr, 0.026, 2, 8)
                 z2, hw2, hd2, yo2 = top[0]
                 skirt = _skirt(z2, hw2, hd2, yo2, hem, 1.25 if t == "coat" else 1.15)
                 ob = loft("Dress_%d_%s" % (n, t), rings_z(skirt[::-1][:-1] + top))
@@ -568,7 +568,7 @@ class Body:
                 ob = loft("Dress_%d_kilt" % n, rings_z(_skirt(z2, hw2 + 0.014, hd2 + 0.014, yo2, hem, 1.2)[::-1]))
                 put("Dress_%d_kilt" % n, ob, "trunk", cname)
             elif t == "cuirass":
-                ob = loft("Dress_%d_cuirass" % n, rings_z(_shell(tr, 0.022, 4, 8)))
+                ob = loft("Dress_%d_cuirass" % n, rings_z(_shell(tr, 0.03, 4, 8)))
                 put("Dress_%d_cuirass" % n, ob, "trunk", cname)
             elif t == "apron":
                 z_hi = tr[6][0]
@@ -706,11 +706,11 @@ class Body:
         cz = z0 + hh * 0.56
         pieces = []
         for sign in (1, -1):
-            for name, mat, rad, forward in (("Eye", "eye_white", 0.02, 0.0), ("Iris", "iris", 0.011, 0.012)):
+            for name, mat, rad, forward in (("Eye", "eye_white", 0.0155, 0.0), ("Iris", "iris", 0.0085, 0.0095)):
                 bm = bmesh.new()
                 bmesh.ops.create_uvsphere(bm, u_segments=10, v_segments=6, radius=rad)
-                # The face is at -Y: the eye sits in the front of the head, a little inset.
-                yf = y0 + 0.012 - forward
+                # The face is at -Y: the eye sits in its socket, carved into the head, a little inset.
+                yf = y0 + 0.02 - forward
                 bmesh.ops.translate(bm, vec=Vector((sign * hw * 0.42, yf, cz)), verts=bm.verts)
                 ob = pk._bm_object("%s_%s" % (name, "l" if sign > 0 else "r"), bm, self.mats[mat])
                 pk._smooth(ob)
@@ -725,16 +725,13 @@ class Body:
         front = y0
         skin = self.mats["skin"]
         pieces = []
-        # the brow: a ridge across the eyes, heavier for a heavy brow
-        bz = z0 + hh * 0.67
-        brow = self.fp("brow")
-        pieces.append(pk._bm_object("Face_brow", pk._box_bm(Vector((-hw * 0.6, front - 0.004 * brow, bz - 0.005 * brow)), Vector((hw * 0.6, front + 0.025, bz + 0.007 * brow)), taper=(1.0, 1.0)), skin))
+        # the brow is carved into the head itself (anatomy.py); no piece for it.
         # the nose: a wedge down the middle, longer or shorter, wider or narrower
         nose, nw = self.fp("nose"), self.fp("noseWidth")
-        nz_top = z0 + hh * 0.58
-        nz_tip = nz_top - 0.075 * nose
-        pts = [Vector((0, front + 0.004, nz_top)), Vector((0, front - 0.012 * nose, (nz_top + nz_tip) / 2)), Vector((0, front - 0.024 * nose, nz_tip))]
-        rad = [0.012 * nw, 0.017 * nw, 0.02 * nw]
+        nz_top = z0 + hh * 0.57
+        nz_tip = nz_top - 0.065 * nose
+        pts = [Vector((0, front + 0.006, nz_top)), Vector((0, front - 0.008 * nose, (nz_top + nz_tip) / 2)), Vector((0, front - 0.018 * nose, nz_tip))]
+        rad = [0.009 * nw, 0.013 * nw, 0.016 * nw]
         ob = pk._bm_object("Face_nose", pk._tube_bm(pts, rad, segments=8), skin)
         pk._smooth(ob)
         pieces.append(ob)
