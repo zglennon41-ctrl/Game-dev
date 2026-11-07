@@ -121,8 +121,12 @@ the Deep Run), two crisis postings, two named weapons, the Reckoning and the Gat
 declaration made, in fifty minutes of autopilot and eight talks. Also three troubles,
 Lessons 4–5 and a Linework posting from the board (seeds 4242, 4244, 4251), and the hunt,
 escort and salvage troubles plus Lesson 4 on a fresh character in fifteen minutes (4242).
-The one run still owed is the whole term in one sitting on one seed; the two halves overlap
-at Lesson 6.
+And the whole term in one sitting (seed 777): creation to the Gate in an hour of autopilot,
+with the three troubles, eleven postings of every open kind (Linework, Writ, Salvage, Hunt,
+Escort, the Friday rally, the Deep Run), two crisis postings, two named weapons, fifty-four
+beasts felled, seven posts held, the Examination, the Reckoning and the declaration, with
+no script errors. The term holds from end to end; what the bot cannot judge is whether it
+is fun, which is the owner's play.
 
 ## Pacing to eight hours (the first plan)
 
