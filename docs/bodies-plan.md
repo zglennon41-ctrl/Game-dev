@@ -118,6 +118,20 @@ colours), one 512 texture at most on a dress.
   in the colour the look names. Anything else a Reading writes goes on `hero["features"]`
   by id and is worn the same way. Tested in `test_life_features`.
 
+## Anatomy v2 (the owner, 2026-11-07: accurate heads and joints, or immersion breaks)
+
+The lofted v1 bodies met at seams at every joint and the head was a loft. v2 grows **one
+continuous body** from a skeleton graph with Blender's Skin modifier (`tools/blender/anatomy.py`):
+nodes with radii at the pelvis, the spine, the shoulder girdle, each joint, the hands with
+five fingers, the feet with heel and toes, the neck, the jaw, the skull and the crown; the
+girths come from a 1.8 m frame scaled to the game's 2.4. The surface is subdivided, then
+**carved** by displacement points along the normals: pectorals, deltoids, biceps, trapezius,
+the spine's groove, glutes, quadriceps, calves (scaled by the build), and the face: eye
+sockets, brow ridge, cheekbones, temples, the jaw's corners, the chin, the mouth's line, the
+lips, the nose's ridge, the back of the skull (scaled by the home's face parameters). The
+shoulders, elbows, hips and knees are continuous surfaces that bend with the weights. The
+nose, ears, eyes, hair, sockets and dress hang on it as before.
+
 ## Order of work
 
 1. **v1, one home**: the masculine and feminine Alexandria bodies at 7.5 heads on the rig,

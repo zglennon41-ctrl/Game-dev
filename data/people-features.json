@@ -10,7 +10,7 @@
     0.55,
     0.6
    ],
-   "strength": 0.55
+   "strength": 0.4
   },
   "gill-lines": {
    "slot": "throat",
@@ -41,7 +41,7 @@
     0.3,
     0.15
    ],
-   "strength": 0.5
+   "strength": 0.35
   },
   "eyes-cat": {
    "slot": "eyes",
@@ -74,7 +74,7 @@
     0.32,
     0.4
    ],
-   "strength": 0.4
+   "strength": 0.3
   },
   "skin-leaf": {
    "slot": "surface",
@@ -85,7 +85,7 @@
     0.65,
     0.3
    ],
-   "strength": 0.4
+   "strength": 0.25
   },
   "eyes-black": {
    "slot": "eyes",
@@ -107,7 +107,7 @@
     0.12,
     0.08
    ],
-   "strength": 0.55
+   "strength": 0.4
   },
   "wings": {
    "slot": "back",
@@ -186,7 +186,7 @@
     0.32,
     0.2
    ],
-   "strength": 0.7
+   "strength": 0.5
   },
   "fur-ears": {
    "slot": "head",

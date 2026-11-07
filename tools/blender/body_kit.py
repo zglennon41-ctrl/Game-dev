@@ -29,6 +29,7 @@ from mathutils import Vector, Matrix
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import people_kit as pk  # noqa: E402
+import anatomy as an  # noqa: E402
 
 ROOT = pk.ROOT
 OUT = os.path.join(ROOT, "game", "assets", "people")
@@ -378,8 +379,12 @@ class Body:
                 out.append(tuple(x * k for x in r))
         return out
 
+    ANATOMY = True   # v2: one continuous body from the skeleton graph (anatomy.py)
+
     def build_meshes(self, build):
         """The body's meshes for one build, all named; returns {name: object}."""
+        if self.ANATOMY:
+            return self.build_anatomy(build)
         sex = self.sex
         mats = [self.mats[n] for n in ["skin", "tunic", "trousers", "boots", "eye_white", "iris"]]
         slot = {n: i for i, n in enumerate(["skin", "tunic", "trousers", "boots", "eye_white", "iris"])}
@@ -409,6 +414,103 @@ class Body:
             objs["Foot_" + side] = foot
         self.dress_pieces(objs, build, add, slot)
         return objs
+
+    def build_anatomy(self, build):
+        """One continuous body (anatomy.py), its materials by region; the builds are made from
+        the fit body by displacement, so lean and heavy share its topology for the shape keys."""
+        sex = self.sex
+        names = ["skin", "tunic", "trousers", "boots", "eye_white", "iris"]
+        mats = [self.mats[n] for n in names]
+        slot = {n: i for i, n in enumerate(names)}
+        k = self.k
+        ob = an.grow("Body", an.graph(sex, "fit"), subdiv=2, smooth=1)
+        if k != 1.0:
+            for v in ob.data.vertices:
+                v.co = v.co * k
+        an.carve(ob, [(c * k, r * k, st * k * (1.0 if build == "fit" else {"lean": 0.6, "heavy": 1.5}[build]), a) for c, r, st, a in an.carving(sex, "fit", self.face_p)])
+        # The build: a girth change along the normals, by region (the face keeps its carving).
+        if build != "fit":
+            g_trunk = {"lean": -0.012, "heavy": 0.022}[build] * k
+            g_limb = {"lean": -0.009, "heavy": 0.016}[build] * k
+            normals = [n.vector.copy() for n in ob.data.vertex_normals]
+            for v, n in zip(ob.data.vertices, normals):
+                p = ob.matrix_world @ v.co
+                if p.z > 2.03 * k:
+                    continue
+                limb = abs(p.x) > 0.17 * k or p.z < 1.1 * k
+                v.co = v.co + n * (g_limb if limb else g_trunk)
+        for m in mats:
+            ob.data.materials.append(m)
+        # Materials by region: underclothes on the trunk and legs, boots on the feet, skin elsewhere.
+        for poly in ob.data.polygons:
+            c = ob.matrix_world @ poly.center
+            if c.z < 0.17 * k:
+                poly.material_index = slot["boots"]
+            elif c.z < 1.1 * k and abs(c.x) < 0.3 * k:
+                poly.material_index = slot["trousers"]
+            elif 1.1 * k <= c.z < 1.93 * k and abs(c.x) < 0.17 * k:
+                poly.material_index = slot["tunic"]
+            else:
+                poly.material_index = slot["skin"]
+        self.head_box = self._head_box(ob)
+        objs = {"Body": ob}
+        self.dress_pieces(objs, build, None, slot)
+        return objs
+
+    def _head_box(self, ob):
+        k = self.k
+        pts = [ob.matrix_world @ v.co for v in ob.data.vertices if (ob.matrix_world @ v.co).z > 2.065 * k]
+        return ((min(p.x for p in pts), max(p.x for p in pts)), (min(p.y for p in pts), max(p.y for p in pts)), (min(p.z for p in pts), max(p.z for p in pts)))
+
+    def head_extents(self):
+        """The head's box: from the Head loft (v1) or the body above the neck (v2)."""
+        if self.ANATOMY:
+            return self.head_box
+        head = self.parts["Head"]
+        return (self.r.extent([head], 0), self.r.extent([head], 1), self.r.extent([head], 2))
+
+    def weight_anatomy(self, ob):
+        """Every vertex of the one body to its chain by where it is: the head above the neck,
+        the arms out past the shoulders, the legs below the hips, the trunk between; blended
+        across the joints by the chain functions."""
+        k = self.k
+        groups = {}
+        for chain in DEFORM.values():
+            for b in chain:
+                groups[b] = ob.vertex_groups.new(name=b)
+        zj = [self.joint(b, "z") for b in DEFORM["trunk"]]
+        for v in ob.data.vertices:
+            p = ob.matrix_world @ v.co
+            weights = {}
+            if p.z > 2.045 * k:
+                weights["head"] = 1.0
+            elif abs(p.x) > 0.175 * k and p.z > 1.55 * k:
+                side = "l" if p.x > 0 else "r"
+                bones = DEFORM["arm." + side]
+                xj = [self.joint(b, "x") for b in bones]
+                weights = _chain_weights(abs(p.x), xj, bones)
+                # the shoulder itself shares with the chest
+                if abs(p.x) < 0.26 * k:
+                    t = (abs(p.x) - 0.175 * k) / (0.085 * k)
+                    for b in list(weights):
+                        weights[b] *= t
+                    weights["chest"] = weights.get("chest", 0.0) + (1.0 - t)
+            elif p.z < 1.12 * k and abs(p.x) > 0.02 * k:
+                side = "l" if p.x > 0 else "r"
+                bones = DEFORM["leg." + side][:3]
+                lz = [self.joint(b, "z") for b in bones]
+                weights = _chain_weights_down(p.z, lz, bones)
+                if p.z > 1.0 * k:
+                    t = (1.12 * k - p.z) / (0.12 * k)
+                    for b in list(weights):
+                        weights[b] *= t
+                    weights["hips"] = weights.get("hips", 0.0) + (1.0 - t)
+            else:
+                weights = _chain_weights(p.z, zj, DEFORM["trunk"])
+            total = sum(weights.values()) or 1.0
+            for b, w in weights.items():
+                if w > 1e-4:
+                    groups[b].add([v.index], w / total, "REPLACE")
 
     def dress_pieces(self, objs, build, add, slot):
         """The garments for one build, named Dress_<n>_<type>, with their chain in self.chains."""
@@ -500,10 +602,7 @@ class Body:
         hg = D.get("headgear")
         if not hg:
             return []
-        head = self.parts["Head"]
-        x0, x1 = self.r.extent([head], 0)
-        y0, y1 = self.r.extent([head], 1)
-        z0, z1 = self.r.extent([head], 2)
+        (x0, x1), (y0, y1), (z0, z1) = self.head_extents()
         hw, hd, hh = (x1 - x0) / 2, (y1 - y0) / 2, z1 - z0
         c = Vector(((x0 + x1) / 2, (y0 + y1) / 2, z0 + hh * 0.62))
         col = D["colors"].get(hg["color"], [0.3, 0.3, 0.3])
@@ -540,6 +639,13 @@ class Body:
 
     def weight(self, objs):
         r = self.r
+        if self.ANATOMY:
+            self.weight_anatomy(objs["Body"])
+            self._weight_dress(objs)
+            for o in objs.values():
+                skin_to(o, r.arm)
+                r.skinned.append(o)
+            return
         zj = [self.joint(b, "z") for b in DEFORM["trunk"]]
         weight_chain(objs["Body"], zj, "z", DEFORM["trunk"])
         weight_all(objs["Head"], "head")
@@ -553,6 +659,12 @@ class Body:
             joints = lz[:3]
             weight_chain_down(objs["Leg_" + side], joints, bones)
             weight_all(objs["Foot_" + side], "foot." + side)
+        self._weight_dress(objs)
+        for o in objs.values():
+            skin_to(o, r.arm)
+            r.skinned.append(o)
+
+    def _weight_dress(self, objs):
         zj = [self.joint(b, "z") for b in DEFORM["trunk"]]
         for name, chain in getattr(self, "chains", {}).items():
             ob = objs[name]
@@ -565,9 +677,6 @@ class Body:
             elif chain.startswith("leg."):
                 lz = [self.joint(b, "z") for b in DEFORM[chain]]
                 weight_chain_down(ob, lz[:3], DEFORM[chain][:3])
-        for o in objs.values():
-            skin_to(o, r.arm)
-            r.skinned.append(o)
 
     def shape_keys(self):
         """Three builds of every mesh with the same topology: fit is the base, lean and heavy
@@ -589,10 +698,7 @@ class Body:
     # --- what hangs from the head --------------------------------------------------------
 
     def eyes(self):
-        head = self.parts["Head"]
-        x0, x1 = self.r.extent([head], 0)
-        y0, y1 = self.r.extent([head], 1)
-        z0, z1 = self.r.extent([head], 2)
+        (x0, x1), (y0, y1), (z0, z1) = self.head_extents()
         hw, hh = (x1 - x0) / 2, z1 - z0
         cz = z0 + hh * 0.56
         pieces = []
@@ -611,10 +717,7 @@ class Body:
     def face(self):
         """The carved features: a brow ridge, a nose, lips and ears, each a small mesh at the
         front of the head, sized by the home's parameters. Skin material, so the tone covers them."""
-        head = self.parts["Head"]
-        x0, x1 = self.r.extent([head], 0)
-        y0, y1 = self.r.extent([head], 1)
-        z0, z1 = self.r.extent([head], 2)
+        (x0, x1), (y0, y1), (z0, z1) = self.head_extents()
         hw, hh = (x1 - x0) / 2, z1 - z0
         front = y0
         skin = self.mats["skin"]
@@ -655,10 +758,7 @@ class Body:
 
     def sockets(self):
         """Empties where marks and changes hang, each on its bone (docs/bodies-plan.md)."""
-        head = self.parts["Head"]
-        x0, x1 = self.r.extent([head], 0)
-        y0, y1 = self.r.extent([head], 1)
-        z0, z1 = self.r.extent([head], 2)
+        (x0, x1), (y0, y1), (z0, z1) = self.head_extents()
         body = self.parts["Body"]
         by0, by1 = self.r.extent([body], 1)
         chest_z = self.joint("chest", "z") + 0.12 * self.k
@@ -705,9 +805,11 @@ class Body:
         self.hang([(f, "head") for f in self.face()])
         self.hang([(h, "head") for h in self.headgear()])
         self.hang(self.sockets())
+        self.r.head_box = self.head_extents()
         pk.add_hair(self.r)
         self.r.measured["body"] = self.id
-        self.r.measured["heads_tall"] = round(self.r.extent()[1] / (self.r.extent(self.r.mesh_named("Head"), 2)[1] - self.r.extent(self.r.mesh_named("Head"), 2)[0]), 2)
+        (_, _), (_, _), (hz0, hz1) = self.head_extents()
+        self.r.measured["heads_tall"] = round(self.r.extent()[1] / (hz1 - hz0), 2)
         return self
 
     def export(self):
@@ -726,6 +828,37 @@ class Body:
         info["shape_keys"] = sorted({k.name for o in self.r.skinned if o.data.shape_keys for k in o.data.shape_keys.key_blocks if k.name != "Basis"})
         log("wrote", os.path.relpath(path, ROOT), "%d KB" % (os.path.getsize(path) // 1024), self.r.measured)
         return info
+
+
+def _chain_weights(t, joints, bones):
+    """The weights of one position along a chain lofted upward (see weight_chain)."""
+    weights = {}
+    for i, b in enumerate(bones):
+        lo = joints[i] if i > 0 else -1e9
+        hi = joints[i + 1] if i + 1 < len(bones) else 1e9
+        w = 1.0
+        if lo > -1e8:
+            w *= _smooth((t - lo) / BLEND)
+        if hi < 1e8:
+            w *= 1.0 - _smooth((t - hi) / BLEND)
+        if w > 1e-4:
+            weights[b] = w
+    return weights
+
+
+def _chain_weights_down(z, joints, bones):
+    weights = {}
+    for i, b in enumerate(bones):
+        hi = joints[i] if i > 0 else 1e9
+        lo = joints[i + 1] if i + 1 < len(bones) else -1e9
+        w = 1.0
+        if hi < 1e8:
+            w *= 1.0 - _smooth((z - hi) / BLEND)
+        if lo > -1e8:
+            w *= _smooth((z - lo) / BLEND)
+        if w > 1e-4:
+            weights[b] = w
+    return weights
 
 
 def weight_chain_down(ob, joints, bones):

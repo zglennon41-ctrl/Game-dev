@@ -502,10 +502,13 @@ def _box_bm(lo, hi, taper=(1.0, 1.0)):
 
 def add_hair(r):
     """Every style on the body, each hung from the head bone. The game shows one."""
-    heads = r.mesh_named("Head")
-    x0, x1 = r.extent(heads, 0)
-    y0, y1 = r.extent(heads, 1)
-    z0, z1 = r.extent(heads, 2)
+    if getattr(r, "head_box", None):
+        (x0, x1), (y0, y1), (z0, z1) = r.head_box
+    else:
+        heads = r.mesh_named("Head")
+        x0, x1 = r.extent(heads, 0)
+        y0, y1 = r.extent(heads, 1)
+        z0, z1 = r.extent(heads, 2)
     hw, hd, hh = (x1 - x0) / 2, (y1 - y0) / 2, z1 - z0
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
     brow = z0 + hh * 0.66               # the hairline at the brow, above the eyes
@@ -585,7 +588,7 @@ def _material(name, color, rough=0.8, emission=None, strength=0.0):
     return m
 
 
-def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, res=(400, 640), hair=None, beard=None, headgear=True, focus=0.0, shape_key=None, after_import=None, shown_prefixes=()):
+def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, res=(400, 640), hair=None, beard=None, headgear=True, focus=0.0, shape_key=None, after_import=None, shown_prefixes=(), view=(0.8, -1.0, 0.35)):
     """One body from a file, three-quarter from the front right, in moonlight with a faint lamp
     from the other side; in the rest pose, or `at` (0..1) of the way through `anim`. The
     accessories are shown as the game shows them (helmet, hat, cape, hood), plus `weapon`."""
@@ -668,7 +671,7 @@ def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, re
     scene.camera = cam
     scene.render.resolution_x, scene.render.resolution_y = res
     from bpy_extras.object_utils import world_to_camera_view
-    direction = Vector((0.8, -1.0, 0.35)).normalized()
+    direction = Vector(view).normalized()
     aim = centre
     # `focus`: fit the frame from this height up (0.75 frames the head and shoulders).
     zlo = hi.z * focus

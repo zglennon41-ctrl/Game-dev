@@ -384,7 +384,9 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   genius forms, and both systems taking the marks and changes of instars. Decided: 7.5 heads
   (feminine 7.25); our meshes on the KayKit bones so the animations keep playing; face,
   skin palette and dress differ by city; emblem cards only. The plan is
-  `docs/bodies-plan.md`.
+  `docs/bodies-plan.md`. Then (same day): the bodies must be anatomically accurate, the heads
+  and the joints above all, or they break immersion; the first lofted bodies are replaced by
+  one continuous body grown from a skeleton graph and carved (`tools/blender/anatomy.py`).
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.
