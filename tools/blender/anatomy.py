@@ -43,11 +43,8 @@ def graph(sex="m", build="fit"):
     girdle = node("girdle", (0, 0.0, 1.8), 0.2 * T * S, 0.12 * T, chest)
     neck0 = node("neck0", (0, 0.015, 1.96), 0.075 * T, 0.075 * T, girdle)
     neck1 = node("neck1", (0, 0.015, 2.04), (0.052 if fem else 0.06), (0.058 if fem else 0.065), neck0)
-    # the head as a chain (a branch here would shrink it): the jaw's level, the skull, the crown
-    # (the Skin modifier makes a chain about four fifths of its radii: these are written large)
-    jaw = node("jaw", (0, 0.0, 2.11), (0.088 if fem else 0.096), (0.095 if fem else 0.1), neck1)
-    skull = node("skull", (0, 0.01, 2.245), (0.115 if fem else 0.12), (0.118 if fem else 0.122), jaw)
-    node("crown", (0, 0.012, 2.335), 0.105, 0.108, skull)
+    # the neck reaches up under the chin; the head itself is head.py's, set on it
+    node("neck2", (0, 0.02, 2.1), (0.05 if fem else 0.058), (0.056 if fem else 0.062), neck1)
     # the arms, from the shoulder girdle: deltoid, upper arm, elbow, forearm, wrist, hand, fingers
     for side, sg in (("l", 1), ("r", -1)):
         delt = node("delt_" + side, (sg * 0.21 * S, 0.0, 1.835), 0.08 * L, 0.082 * L, girdle)

@@ -1513,7 +1513,7 @@ func test_look() -> void:
 			if String(a.name).begins_with("Hair_") or String(a.name).begins_with("Beard_"):
 				vis[String(a.name)] = (a as Node3D).visible
 		seen[body] = vis.size()
-		check(vis.size() == 11, "%s carries the eleven hair and beard pieces (%d)" % [body, vis.size()])
+		check(vis.size() >= 11, "%s carries the hair and beard pieces (%d)" % [body, vis.size()])
 		var hooded := String(body).contains("Hooded")
 		check(vis.get("Hair_long_fall", false) == (not hooded), "%s: the long fall hangs under the helmet, unless hooded" % body)
 		var has_gear: bool = w._player.find_child("*Helmet*", true, false) != null or w._player.find_child("*Hat*", true, false) != null or w._player.find_child("Headgear_*", true, false) != null

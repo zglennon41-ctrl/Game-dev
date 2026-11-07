@@ -606,7 +606,7 @@ def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, re
         elif o.name.startswith(tuple(shown_prefixes)) if shown_prefixes else False:
             o.hide_render = False
         elif o.parent_type == "BONE" or (o.parent is not None and o.parent.type == "EMPTY"):
-            shown = (any(w in o.name for w in ACCESSORY_WORDS) and headgear) or (weapon and o.name == weapon) or o.name.startswith(("Eye", "Iris", "Face_"))
+            shown = (any(w in o.name for w in ACCESSORY_WORDS) and headgear) or (weapon and o.name == weapon) or o.name.startswith(("Eye", "Iris", "Face_", "Lid_", "Nose", "Nostril", "Lip_", "Ear", "Concha"))
             if o.name.startswith("Hair_"):
                 shown = hair is not None and o.name.startswith("Hair_%s_" % hair) and (headgear is False or o.name.endswith("_fall"))
             elif o.name.startswith("Beard_"):
@@ -720,6 +720,67 @@ def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, re
     scene.view_settings.look = "None"
     os.makedirs(os.path.dirname(path), exist_ok=True)
     scene.render.filepath = path
+    bpy.ops.render.render(write_still=True)
+    return path
+
+
+def render_object(glb, label, path, view=(0.7, -1.0, 0.3), samples=32, res=(400, 500)):
+    """A file's objects framed on their own bounds (a head, a part), lit like the cards."""
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    scene = bpy.context.scene
+    bpy.ops.import_scene.gltf(filepath=glb)
+    lo = Vector((9e9, 9e9, 9e9))
+    hi = Vector((-9e9, -9e9, -9e9))
+    for o in bpy.data.objects:
+        if o.type != "MESH":
+            continue
+        for v in o.data.vertices:
+            w = o.matrix_world @ v.co
+            lo = Vector(map(min, lo, w))
+            hi = Vector(map(max, hi, w))
+    centre = (lo + hi) / 2
+    size = max((hi - lo).length, 0.1)
+    cam_data = bpy.data.cameras.new("cam")
+    cam_data.lens = 70
+    cam = bpy.data.objects.new("cam", cam_data)
+    bpy.context.collection.objects.link(cam)
+    scene.camera = cam
+    scene.render.resolution_x, scene.render.resolution_y = res
+    direction = Vector(view).normalized()
+    cam.location = centre + direction * size * 1.9
+    cam.rotation_euler = (centre - cam.location).to_track_quat("-Z", "Y").to_euler()
+
+    def light(name, kind, at, color, energy, size_=1.0):
+        ld = bpy.data.lights.new(name, kind)
+        ld.color = color
+        ld.energy = energy
+        if kind == "AREA":
+            ld.size = size_
+        lo_ = bpy.data.objects.new(name, ld)
+        lo_.location = at
+        lo_.rotation_euler = (centre - Vector(at)).to_track_quat("-Z", "Y").to_euler()
+        bpy.context.collection.objects.link(lo_)
+    light("key", "AREA", centre + Vector((0.8, -1.2, 0.9)) * size * 1.5, (1.0, 0.95, 0.88), 40 * size * size, size)
+    light("fill", "AREA", centre + Vector((-1.2, -0.8, 0.3)) * size * 1.5, (0.75, 0.82, 1.0), 12 * size * size, size * 2)
+    light("rim", "AREA", centre + Vector((0.2, 1.2, 0.6)) * size * 1.5, (1.0, 0.9, 0.8), 16 * size * size, size)
+    scene.world = bpy.data.worlds.new("w") if scene.world is None else scene.world
+    scene.world.use_nodes = True
+    scene.world.node_tree.nodes["Background"].inputs[0].default_value = (0.05, 0.055, 0.07, 1)
+    scene.render.engine = "CYCLES"
+    scene.cycles.samples = samples
+    scene.cycles.use_denoising = False
+    scene.render.filepath = path
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    try:
+        fc = bpy.data.curves.new(label, type="FONT")
+        fc.body = label
+        fc.size = size * 0.12
+        fo = bpy.data.objects.new("label", fc)
+        fo.location = Vector((lo.x, lo.y, lo.z - size * 0.12))
+        bpy.context.collection.objects.link(fo)
+        fo.data.materials.append(_material("label", (0.85, 0.75, 0.55), rough=1.0, emission=(0.9, 0.8, 0.6), strength=0.6))
+    except Exception as e:  # noqa: BLE001
+        log("no label:", e)
     bpy.ops.render.render(write_still=True)
     return path
 

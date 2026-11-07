@@ -528,7 +528,7 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 			if a.visible:
 				_recolor(a, col)
 		elif n.begins_with("Beard_"):
-			a.visible = n == "Beard_%s" % beard
+			a.visible = n == "Beard_%s" % beard or n.begins_with("Beard_%s_" % beard)
 			if a.visible:
 				_recolor(a, col)
 		else:

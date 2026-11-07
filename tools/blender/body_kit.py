@@ -30,6 +30,7 @@ from mathutils import Vector, Matrix
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import people_kit as pk  # noqa: E402
 import anatomy as an  # noqa: E402
+import head as hd  # noqa: E402
 
 ROOT = pk.ROOT
 OUT = os.path.join(ROOT, "game", "assets", "people")
@@ -452,8 +453,15 @@ class Body:
                 poly.material_index = slot["tunic"]
             else:
                 poly.material_index = slot["skin"]
-        self.head_box = self._head_box(ob)
         objs = {"Body": ob}
+        # The head: head.py's skull set on the neck (the chin just above the neck's top),
+        # full size on the feminine rig too (7.25 heads); its pieces hang from the head bone.
+        head_ob, pieces, centre = hd.build_head(2.085 * k, sex, self.face_p, self.mats)
+        objs["Head"] = head_ob
+        self.head_pieces = pieces
+        self.head_centre = centre
+        pts = [head_ob.matrix_world @ v.co for v in head_ob.data.vertices]
+        self.head_box = ((min(p.x for p in pts), max(p.x for p in pts)), (min(p.y for p in pts), max(p.y for p in pts)), (min(p.z for p in pts), max(p.z for p in pts)))
         self.dress_pieces(objs, build, None, slot)
         return objs
 
@@ -644,6 +652,7 @@ class Body:
         r = self.r
         if self.ANATOMY:
             self.weight_anatomy(objs["Body"])
+            weight_all(objs["Head"], "head")
             self._weight_dress(objs)
             for o in objs.values():
                 skin_to(o, r.arm)
@@ -801,12 +810,25 @@ class Body:
     def build(self):
         self.parts = self.shape_keys()
         self.weight(self.parts)
-        self.hang([(e, "head") for e in self.eyes()])
-        self.hang([(f, "head") for f in self.face()])
+        if self.ANATOMY:
+            # the head's pieces were built with the fit body; the other builds' copies go
+            for ob in [o for o in bpy.data.objects if o.type == "MESH" and o.name.split(".")[0] in {p.name.split(".")[0] for p in self.head_pieces} and o not in self.head_pieces]:
+                bpy.data.objects.remove(ob)
+            self.hang([(e, "head") for e in self.head_pieces])
+        else:
+            self.hang([(e, "head") for e in self.eyes()])
+            self.hang([(f, "head") for f in self.face()])
         self.hang([(h, "head") for h in self.headgear()])
         self.hang(self.sockets())
         self.r.head_box = self.head_extents()
-        pk.add_hair(self.r)
+        if self.ANATOMY:
+            hair_mat = pk._material("hair", (0.16, 0.11, 0.08, 1), rough=0.85)
+            centre = self.head_centre
+            pieces = hd.hair(self.parts["Head"], centre, self.sex, lambda k: float(self.face_p.get(k, 1.0)), hair_mat)
+            self.hang([(h, "head") for h in pieces])
+            self.r.measured["hair"] = len(pieces)
+        else:
+            pk.add_hair(self.r)
         self.r.measured["body"] = self.id
         (_, _), (_, _), (hz0, hz1) = self.head_extents()
         self.r.measured["heads_tall"] = round(self.r.extent()[1] / (hz1 - hz0), 2)

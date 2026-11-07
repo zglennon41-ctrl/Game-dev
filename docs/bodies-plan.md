@@ -132,6 +132,22 @@ lips, the nose's ridge, the back of the skull (scaled by the home's face paramet
 shoulders, elbows, hips and knees are continuous surfaces that bend with the weights. The
 nose, ears, eyes, hair, sockets and dress hang on it as before.
 
+## The head (the owner, 2026-11-07: bodies 7/10, heads 4/10)
+
+`tools/blender/head.py` builds the head apart from the body's graph and sets it on the
+neck: a **skull from three silhouettes** (the profile, the front, the back, blended round the
+head by azimuth) on a real skull's proportions (the eyes at the middle of its height, the
+face 0.39 of the height ahead of the centre, the occiput 0.39 behind, the sides 0.36 out),
+**carved** (eye sockets, brow ridge, cheekbones, temples, the jaw's angles, the chin, the
+philtrum, under the lip), then the features: **eyeballs set in the sockets** with an iris
+and upper and lower lids, a **nose** lofted from the bridge to the tip with nostril wings,
+**lips** with a cupid's bow, **ears** with helix, concha and lobe. The home's face parameters
+and the sex reshape all of it. **Hair and beards are grown from the skull's own surface**:
+a cap is the skull above a hairline (high at the brow, over the ear, down the nape) pushed
+out along its normals with a rim, so it fits the carved head; the long fall, braid, bun and
+tail hang from it; a beard is the jaw's surface the same way. The whole head is one object
+skinned to the head bone; its pieces hang from the bone.
+
 ## Order of work
 
 1. **v1, one home**: the masculine and feminine Alexandria bodies at 7.5 heads on the rig,
