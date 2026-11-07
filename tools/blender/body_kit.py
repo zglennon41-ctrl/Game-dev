@@ -620,15 +620,18 @@ class Body:
             pk._smooth(ob)
             return [ob, ob2]
         elif t == "turban":
-            bm = bmesh.new()
-            for i, (r, dz) in enumerate(((1.25, 0.72), (1.3, 0.84), (1.15, 0.96))):
-                ring = bmesh.new()
-                bmesh.ops.create_torus(ring, major_radius=hw * r * 0.85, minor_radius=hw * 0.3, major_segments=18, minor_segments=8)
-                bmesh.ops.translate(ring, vec=Vector((c.x, c.y, z0 + hh * dz)), verts=ring.verts)
-                me = bpy.data.meshes.new("t%d" % i)
-                ring.to_mesh(me)
-                bm.from_mesh(me)
-                bpy.data.meshes.remove(me)
+            # Three wound bands: tubes round the head, each a little higher and tighter.
+            out = []
+            for i, (r, dz) in enumerate(((1.25, 0.7), (1.28, 0.82), (1.12, 0.94))):
+                pts = []
+                n = 24
+                for k in range(n + 1):
+                    a = 2 * math.pi * k / n
+                    pts.append(Vector((c.x + hw * r * 0.9 * math.cos(a), c.y + hd * r * 0.9 * math.sin(a), z0 + hh * dz)))
+                ob = pk._bm_object("Headgear_turban_%d" % i, pk._tube_bm(pts, [hw * 0.3] * (n + 1), segments=8), mat)
+                pk._smooth(ob)
+                out.append(ob)
+            return out
         elif t == "furhat":
             bm = pk._cap_bm(Vector((c.x, c.y, c.z + hh * 0.12)), hw * 1.3, hd * 1.25, hh * 0.5, z0 + hh * 0.66, 0.0)
         else:
@@ -1162,7 +1165,7 @@ def render_faces_sheet(samples=24, res=(300, 420)):
             glb = os.path.join(OUT, "%s-%s.glb" % (home, sex))
             if not os.path.exists(glb):
                 continue
-            out.append(pk.render_card(glb, "%s %s" % (home, sex), os.path.join(cards, "%s_%s.png" % (home, sex)), anim="Idle", samples=samples, res=res, hair="crop", headgear=False, focus=0.8))
+            out.append(pk.render_card(glb, "%s %s" % (home, sex), os.path.join(cards, "%s_%s.png" % (home, sex)), anim="Idle", samples=samples, res=res, hair="crop", headgear=False, focus=0.88, view=(0.45, -1.0, 0.2)))
     pk.tile(out, os.path.join(SCRATCH, "faces_sheet.png"), 8, res)
 
 

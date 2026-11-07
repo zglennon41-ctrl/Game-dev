@@ -1516,7 +1516,7 @@ func test_look() -> void:
 		check(vis.size() == 11, "%s carries the eleven hair and beard pieces (%d)" % [body, vis.size()])
 		var hooded := String(body).contains("Hooded")
 		check(vis.get("Hair_long_fall", false) == (not hooded), "%s: the long fall hangs under the helmet, unless hooded" % body)
-		var has_gear: bool = w._player.find_child("*Helmet*", true, false) != null or w._player.find_child("*Hat*", true, false) != null
+		var has_gear: bool = w._player.find_child("*Helmet*", true, false) != null or w._player.find_child("*Hat*", true, false) != null or w._player.find_child("Headgear_*", true, false) != null
 		check(vis.get("Hair_long_cap", true) == (not has_gear), "%s: the cap hides under headgear, when the body has any" % body)
 		check(vis.get("Beard_full", false) and not vis.get("Beard_short", true), "%s: the full beard shows, the short one not" % body)
 		check(not vis.get("Hair_braid_fall", true) and not vis.get("Hair_knot_fall", true), "%s: no other style shows" % body)
@@ -1605,7 +1605,7 @@ func test_blood_marks() -> void:
 						var c: Array = f["iris"]
 						check(mat is ShaderMaterial and (mat as ShaderMaterial).get_shader_parameter("albedo").is_equal_approx(Color(c[0], c[1], c[2])), "%s on %s: the iris takes %s" % [b["id"], body, fid])
 					"tint", "glow":
-						var head: MeshInstance3D = w._player.find_child("Head", true, false)
+						var head: MeshInstance3D = w._player.find_child("Body", true, false)
 						var mat2 := head.get_active_material(0)
 						var alb: Color = (mat2 as ShaderMaterial).get_shader_parameter("albedo")
 						var em: float = float((mat2 as ShaderMaterial).get_shader_parameter("emission_energy"))
@@ -1645,7 +1645,7 @@ func test_life_features() -> void:
 	check(not cape_col.is_equal_approx(Color(0.5, 0.42, 0.36)) and cape_col.r > 0.6, "the genius's colour threads the plain cloak")
 	var iris: MeshInstance3D = w._player.find_child("Iris_l", true, false).find_children("*", "MeshInstance3D", true, false)[0]
 	check((iris.get_active_material(0) as ShaderMaterial).get_shader_parameter("albedo").is_equal_approx(World.SHAPE_COLORS["turn"]), "the eyes take the genius's light")
-	var head: MeshInstance3D = w._player.find_child("Head", true, false)
+	var head: MeshInstance3D = w._player.find_child("Body", true, false)
 	check(float((head.get_active_material(0) as ShaderMaterial).get_shader_parameter("emission_energy")) > 0.0, "the field shows under the skin")
 	hero["look"]["cape"] = false
 	w.build_hero(hero)
