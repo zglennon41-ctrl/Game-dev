@@ -376,6 +376,15 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   and the bonded genius's colour on the cloak; the crisis's three endings are drafted after
   the owner has played the arc; the cohort's barks stay as floating text until the project
   has voices.
+- **First impressions of the play (owner, 2026-11-07)**: the creator's questions are not
+  engaging as a list; each step offers five answers at random as cards with an emblem. The
+  bodies: a proper body system of the game's own in place of the KayKit placeholders, a
+  full-length focus: thirteen homes (the twelve cities and Alexandria), masculine and
+  feminine, a musculature slider, every blood's marks reading cleanly, as robust as the
+  genius forms, and both systems taking the marks and changes of instars. Decided: 7.5 heads
+  (feminine 7.25); our meshes on the KayKit bones so the animations keep playing; face,
+  skin palette and dress differ by city; emblem cards only. The plan is
+  `docs/bodies-plan.md`.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.
