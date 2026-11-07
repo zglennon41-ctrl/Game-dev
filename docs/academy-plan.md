@@ -94,6 +94,28 @@ shade, the calendar, the declaration), advanced standing.
 | The Gate, the Reckoning, Commencement | 1 | 20 min | 0.3 |
 | **A term** | | | **7.7–10.7** |
 
+## Validation: the term played by the autopilot (2026-11-07)
+
+The acceptance test for the term is the autopilot playing it end to end on a fresh
+character (`--academy --fresh --seed=N --bot --troubles --debug`, with `--shots`), and the
+shorter replays from a saved point (`--board`, `--discipline`, `--line`, `--project`,
+`--gate`, `--quests`). Under `--debug` the Academy prints what it does (`GO`, `STEP`,
+`HUNT`, `TROUBLE`, `EVENT`), so a stall shows as a step that never ends. What the runs found
+and what changed, so the next person knows which stalls are real and which are the bot's:
+
+| Found by | What was wrong | Fixed |
+| --- | --- | --- |
+| full term | A trouble's rematch was set up before the walk to the yard, and the yard wiped it | spar set up after the walk |
+| full term | After the rematch, "talk to them" in the yard, where no classmate stands: a step no one could finish | the poster steps into the place for any talk step of a trouble |
+| fresh, 15 min | The keepsake could lie at an instructor's feet, and E talked to him instead (298 times) | the keepsake lies in the open and wins the prompt within reach |
+| full term | The bot, sent from the yard to the hearth, had no door and stood still (the yard opens only on the quad) | the bot goes by way of the quad; a reached place is stayed in |
+| board replays | Postings doubled; the Deep Run was never posted; Lesson 6's "Reach" could not be met by Turn or Cast | deduped; forced every third day; reach measured from the technique's press |
+
+Clean runs so far: three troubles, Lessons 4–5 and a Linework posting from the board (seeds
+4242, 4244, 4251); the hunt, escort and salvage troubles plus Lesson 4 on a fresh character
+in fifteen minutes (seed 4242). The full term to the Gate with ten postings is the run still
+owed; it is the one that catches a stall two hours in.
+
 ## Pacing to eight hours (the first plan)
 
 | Part | Hours |
