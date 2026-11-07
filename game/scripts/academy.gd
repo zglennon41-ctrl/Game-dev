@@ -957,7 +957,10 @@ func update(events: Array, dt: float) -> void:
 		return
 	# What is within reach to act on.
 	_target = {}
-	if not in_lesson() or _in_zone() or _lesson.get("trouble", false):
+	# What is within reach to act on: everything on the grounds, or in a zone, a trouble or a
+	# posting (the Friday rally ends with Bask's standings in the yard); a lesson's drills only
+	# what the lesson allows (interact() keeps to doors, the post, the find and the people).
+	if not in_lesson() or _in_zone() or _lesson.get("trouble", false) or _lesson.get("quest", false):
 		var best := 2.4
 		for p in _people:
 			var d: float = (fight.p_pos - p["pos"]).length()
