@@ -484,7 +484,7 @@
       "name": "Instructor Ilse Varga",
       "title": "Read · the Instructor who found you",
       "shape": "read",
-      "body": "Mage",
+      "body": "alexandria-f",
       "lines": {
         "before:hold": "The Yardmaster is waiting. West door. Don't make him come and get you; he enjoys it.",
         "after:hold": "Bask says you held. He doesn't say that. Rest tonight; tomorrow the hearth.",
@@ -503,7 +503,7 @@
       "name": "Yardmaster Oren Bask",
       "title": "Anchor · master of the yard",
       "shape": "anchor",
-      "body": "Barbarian",
+      "body": "alexandria-m",
       "genius": {
         "name": "Millstone",
         "beast": "millstone"
@@ -526,7 +526,7 @@
       "name": "Captain Ada Rourke",
       "title": "Marshal · Columbia's school",
       "shape": "cast",
-      "body": "Knight",
+      "body": "alexandria-m",
       "weapon": "pistol",
       "discipline": "marshal",
       "lines": {
@@ -540,7 +540,7 @@
       "name": "Pilot Oyelaran Tane",
       "title": "Pilot · Cahokia's school",
       "shape": "bind",
-      "body": "Barbarian",
+      "body": "alexandria-m",
       "weapon": "hook",
       "discipline": "pilot",
       "lines": {
@@ -554,7 +554,7 @@
       "name": "Dockmaster Wren Halloway",
       "title": "Aeronaut · Lunden's school",
       "shape": "turn",
-      "body": "Rogue",
+      "body": "alexandria-f",
       "weapon": "rapier",
       "discipline": "aeronaut",
       "lines": {
@@ -568,7 +568,7 @@
       "name": "Hearthkeeper Odile Sayre",
       "title": "Make · keeps the hall's Patterns",
       "shape": "make",
-      "body": "Rogue_Hooded",
+      "body": "alexandria-m",
       "after": "discipline",
       "lines": {
         "default": "The hearth is lit. Sit when you want your Pattern looked at; a Pattern is not a thing you write once.",
@@ -580,7 +580,7 @@
       "name": "Foreman Ilse Brandt",
       "title": "Engineer · Colonia's school",
       "shape": "make",
-      "body": "Barbarian",
+      "body": "alexandria-m",
       "weapon": "hammer",
       "discipline": "engineer",
       "lines": {
@@ -594,7 +594,7 @@
       "name": "Centurion Lucan Petra",
       "title": "Legionary · Tiber's school",
       "shape": "anchor",
-      "body": "Knight",
+      "body": "alexandria-m",
       "weapon": "shield",
       "discipline": "legionary",
       "lines": {
@@ -608,7 +608,7 @@
       "name": "Keeper Neferet Ode",
       "title": "Grower · Khemet's school",
       "shape": "make",
-      "body": "Mage",
+      "body": "alexandria-f",
       "weapon": "ward-staff",
       "discipline": "grower",
       "lines": {
@@ -622,7 +622,7 @@
       "name": "Master Idris Fahd",
       "title": "Geometer · Baghdad's school",
       "shape": "read",
-      "body": "Mage",
+      "body": "alexandria-f",
       "weapon": "astrolabe",
       "discipline": "geometer",
       "lines": {
@@ -636,7 +636,7 @@
       "name": "Elder Asha Rai",
       "title": "Ascetic · Varanasi's school",
       "shape": "anchor",
-      "body": "Rogue_Hooded",
+      "body": "alexandria-m",
       "weapon": "unarmed",
       "discipline": "ascetic",
       "lines": {
@@ -650,7 +650,7 @@
       "name": "Examiner Lin Shu",
       "title": "Examiner · Jiangnan's school",
       "shape": "bind",
-      "body": "Mage",
+      "body": "alexandria-f",
       "weapon": "fan",
       "discipline": "examiner",
       "lines": {
@@ -664,7 +664,7 @@
       "name": "Khan's Rider Aigul Bek",
       "title": "Rider · Kazan's school",
       "shape": "cast",
-      "body": "Rogue",
+      "body": "alexandria-f",
       "weapon": "horse-bow",
       "discipline": "rider",
       "lines": {
@@ -678,7 +678,7 @@
       "name": "Librarian Sekou Diallo",
       "title": "Archivist · Timbuktu's school",
       "shape": "read",
-      "body": "Rogue_Hooded",
+      "body": "alexandria-m",
       "weapon": "book",
       "discipline": "archivist",
       "lines": {
@@ -692,7 +692,7 @@
       "name": "Master Hana Mori",
       "title": "Blade · Edo's school",
       "shape": "turn",
-      "body": "Knight",
+      "body": "alexandria-m",
       "weapon": "katana",
       "discipline": "blade",
       "lines": {

@@ -190,11 +190,11 @@ static func make_cohort(seed_value: int, h: Dictionary) -> Array:
 		var weapons: Array = Data.weapons.filter(func(w): return w["city"] == city)
 		if weapons.is_empty():
 			weapons = Data.weapons   # a home without a school of its own (Alexandria) carries any city's
-		var bodies: Array = Data.creation["bodies"]
+		var lk := random_look(rng)
 		out.append({ "id": "c%d" % i, "name": name, "city": city, "blood": blood["id"], "blood_name": blood["name"],
 			"shape": shapes[i % shapes.size()], "temperament": temps[i % temps.size()]["id"],
-			"body": bodies[rng.randi() % bodies.size()], "weapon": weapons[rng.randi() % weapons.size()]["id"],
-			"look": random_look(rng) })
+			"body": "%s-%s" % [city, lk["sex"]], "weapon": weapons[rng.randi() % weapons.size()]["id"],
+			"look": lk })
 	return out
 
 ## A classmate's look, drawn with the cohort: most go bare-headed so their faces and hair show.
@@ -204,9 +204,14 @@ static func random_look(rng: RandomNumberGenerator) -> Dictionary:
 	var beards: Array = L.get("beards", ["none"])
 	var cols: Array = L.get("hairColors", { "brown": [] }).keys()
 	var sts: Array = L.get("statures", { "middling": 1.0 }).values()
+	var tones: Array = L.get("skinTones", { "olive": [] }).keys()
+	var builds: Array = L.get("builds", { "fit": 0.0 }).values()
+	var sexes: Array = L.get("sexes", { "m": "", "f": "" }).keys()
+	var sex: String = sexes[rng.randi() % sexes.size()]
 	return { "headgear": rng.randf() < 0.3, "cape": rng.randf() < 0.6, "cape_color": ["city", "plain", "shape"][rng.randi() % 3],
-		"hair": hairs[rng.randi() % hairs.size()], "beard": beards[rng.randi() % beards.size()] if rng.randf() < 0.35 else beards[0],
-		"hair_color": cols[rng.randi() % cols.size()], "stature": sts[rng.randi() % sts.size()] }
+		"hair": hairs[rng.randi() % hairs.size()], "beard": (beards[rng.randi() % beards.size()] if rng.randf() < 0.35 else beards[0]) if sex == "m" else beards[0],
+		"hair_color": cols[rng.randi() % cols.size()], "stature": sts[rng.randi() % sts.size()],
+		"sex": sex, "skin": tones[rng.randi() % tones.size()], "build": builds[rng.randi() % builds.size()] }
 
 static func _shuffle(a: Array, rng: RandomNumberGenerator) -> void:
 	for i in range(a.size() - 1, 0, -1):

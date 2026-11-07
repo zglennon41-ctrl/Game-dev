@@ -351,7 +351,7 @@ def reshape(r, P=PROPORTIONS):
     return r
 
 
-def check_glb(path, src_path=None):
+def check_glb(path, src_path=None, require_texture=True, require_accessories=True):
     """Parse the exported file and prove the game will find what it needs: every animation
     under its name, a skin, the meshes bound to it, and the accessory nodes the source had."""
     def parse(p):
@@ -386,7 +386,7 @@ def check_glb(path, src_path=None):
         s_names = [n.get("name", "") for n in sj["nodes"]]
         s_acc = sorted(n for n in s_names if any(w in n for w in ACCESSORY_WORDS))
         lost = [n for n in s_acc if n not in accessories]
-        if lost:
+        if lost and require_accessories:
             problems.append("accessory nodes lost: %s" % lost)
         s_bones = {s_names[i] for i in sj["skins"][0]["joints"]}
         if s_bones != bones:
@@ -408,7 +408,7 @@ def check_glb(path, src_path=None):
                 if parent_of(sj["nodes"], si) != parent_of(j["nodes"], i):
                     problems.append("%s moved from bone %s to %s" % (nm, parent_of(sj["nodes"], si), parent_of(j["nodes"], i)))
     images = j.get("images", [])
-    if not images or not all("bufferView" in im or "uri" in im for im in images):
+    if require_texture and (not images or not all("bufferView" in im or "uri" in im for im in images)):
         problems.append("no texture image")
     if problems:
         raise RuntimeError("%s: %s" % (path, "; ".join(problems)))
@@ -585,7 +585,7 @@ def _material(name, color, rough=0.8, emission=None, strength=0.0):
     return m
 
 
-def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, res=(400, 640), hair=None, beard=None, headgear=True, focus=0.0):
+def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, res=(400, 640), hair=None, beard=None, headgear=True, focus=0.0, shape_key=None):
     """One body from a file, three-quarter from the front right, in moonlight with a faint lamp
     from the other side; in the rest pose, or `at` (0..1) of the way through `anim`. The
     accessories are shown as the game shows them (helmet, hat, cape, hood), plus `weapon`."""
@@ -599,12 +599,17 @@ def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, re
         if o not in set(scene.objects) or o.name.startswith("Icosphere"):
             o.hide_render = True
         elif o.parent_type == "BONE":
-            shown = (any(w in o.name for w in ACCESSORY_WORDS) and headgear) or (weapon and o.name == weapon)
+            shown = (any(w in o.name for w in ACCESSORY_WORDS) and headgear) or (weapon and o.name == weapon) or o.name.startswith(("Eye", "Iris"))
             if o.name.startswith("Hair_"):
                 shown = hair is not None and o.name.startswith("Hair_%s_" % hair) and (headgear is False or o.name.endswith("_fall"))
             elif o.name.startswith("Beard_"):
                 shown = beard is not None and o.name == "Beard_%s" % beard
             o.hide_render = not shown
+    # A build: the named shape key all the way on (the body kit's lean and heavy).
+    for o in bpy.data.objects:
+        if o.type == "MESH" and o.data.shape_keys:
+            for k in o.data.shape_keys.key_blocks:
+                k.value = 1.0 if (shape_key and k.name == shape_key) else 0.0
     frame = 1
     if arm and arm.animation_data:
         arm.animation_data.action = None

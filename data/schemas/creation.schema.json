@@ -12,12 +12,15 @@
   "properties": {
     "look": {
       "type": "object",
-      "required": ["hair", "beards", "hairColors", "statures", "capeColors"],
+      "required": ["hair", "beards", "hairColors", "skinTones", "builds", "sexes", "statures", "capeColors"],
       "properties": {
         "hair": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
         "beards": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
         "hairColors": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 } },
         "statures": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0.8, "maximum": 1.25 } },
+        "skinTones": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 } },
+        "builds": { "type": "object", "additionalProperties": { "type": "number", "minimum": -1, "maximum": 1 } },
+        "sexes": { "type": "object", "additionalProperties": { "type": "string" } },
         "capeColors": { "type": "object", "additionalProperties": { "type": "string" } }
       }
     }

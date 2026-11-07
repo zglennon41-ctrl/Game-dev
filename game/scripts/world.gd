@@ -314,11 +314,9 @@ func _dress_blood(skel: Skeleton3D, blood_id: String) -> void:
 	if blood_id == "":
 		return
 	var b: Dictionary = Data.by_id(Data.bloods, blood_id)
-	var tints := { "ridgefolk": Color(0.55, 0.55, 0.6), "fogborn": Color(0.75, 0.8, 0.9), "mound-kin": Color(0.6, 0.35, 0.2),
-		"greenwood": Color(0.3, 0.7, 0.3), "forgeborn": Color(0.25, 0.15, 0.1), "ironblooded": Color(0.3, 0.32, 0.4),
-		"tidewater": Color(0.3, 0.6, 0.7), "nightfolk": Color(0.2, 0.1, 0.3), "dragon-blooded": Color(0.2, 0.55, 0.35), "fused": Color(0.45, 0.32, 0.2) }
-	if tints.has(blood_id):
-		_tint = Color(tints[blood_id], 0.22)
+	# A kit body takes the blood in its skin (dress); a KayKit body is washed over whole.
+	if BLOOD_TINTS.has(blood_id) and not _has_skin(_player):
+		_tint = Color(BLOOD_TINTS[blood_id], 0.22)
 	match b.get("look", ""):
 		"horns":
 			var head := BoneAttachment3D.new()
@@ -414,12 +412,46 @@ const CITY_COLORS := { "columbia": Color(0.2, 0.35, 0.75), "cahokia": Color(0.25
 	"tiber": Color(0.7, 0.15, 0.15), "khemet": Color(0.15, 0.4, 0.2), "baghdad": Color(0.2, 0.5, 0.7), "varanasi": Color(0.85, 0.5, 0.15), "jiangnan": Color(0.5, 0.15, 0.3),
 	"kazan": Color(0.45, 0.3, 0.15), "timbuktu": Color(0.75, 0.6, 0.25), "edo": Color(0.15, 0.15, 0.2) }
 
+## What the bloods that show in the skin do to it (until their marks are parts and surfaces).
+const BLOOD_TINTS := { "ridgefolk": Color(0.55, 0.55, 0.6), "fogborn": Color(0.75, 0.8, 0.9), "mound-kin": Color(0.6, 0.35, 0.2),
+	"greenwood": Color(0.3, 0.7, 0.3), "forgeborn": Color(0.25, 0.15, 0.1), "ironblooded": Color(0.3, 0.32, 0.4),
+	"tidewater": Color(0.3, 0.6, 0.7), "nightfolk": Color(0.2, 0.1, 0.3), "dragon-blooded": Color(0.2, 0.55, 0.35), "fused": Color(0.45, 0.32, 0.2) }
+
+## Does a body carry the kit's skin material (a body of the body kit, not KayKit's)?
+func _has_skin(node: Node) -> bool:
+	if node == null:
+		return false
+	for m in node.find_children("*", "MeshInstance3D", true, false):
+		var mi: MeshInstance3D = m
+		if mi.mesh:
+			for i in mi.mesh.get_surface_count():
+				var mat := mi.get_active_material(i)
+				if mat and String(mat.resource_name) == "skin":
+					return true
+	return false
+
 ## Every person wears their look: headgear and cape on or off, the hair and beard the look
 ## names and the hair's colour, the cape's colour, and the stature. The hair's cap hides under
 ## headgear and under a hood; its fall hangs from under them either way.
 func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
-	var headgear: bool = look.get("headgear", true)
+	var has_headgear := node.find_child("*Helmet*", true, false) != null or node.find_child("*Hat*", true, false) != null
+	var headgear: bool = look.get("headgear", true) and has_headgear
 	var hooded := node.find_child("*Hooded*", true, false) != null
+	# The build blends the body's lean and heavy shape keys; the skin takes the chosen tone.
+	var build := clampf(float(look.get("build", 0.0)), -1.0, 1.0)
+	var tone := skin_color(String(look.get("skin", "")))
+	var blood_id := String(hero.get("blood", ""))
+	if BLOOD_TINTS.has(blood_id):
+		tone = tone.lerp(BLOOD_TINTS[blood_id], 0.4)
+	for m in node.find_children("*", "MeshInstance3D", true, false):
+		var mi: MeshInstance3D = m
+		var li := mi.find_blend_shape_by_name("lean")
+		var hi := mi.find_blend_shape_by_name("heavy")
+		if li >= 0:
+			mi.set_blend_shape_value(li, maxf(0.0, -build))
+		if hi >= 0:
+			mi.set_blend_shape_value(hi, maxf(0.0, build))
+		_recolor_named(mi, "skin", tone)
 	var hair := String(look.get("hair", "crop"))
 	var beard := String(look.get("beard", "none"))
 	var col := hair_color(String(look.get("hair_color", "brown")))
@@ -441,6 +473,32 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 			if cape and a.visible and not hero.is_empty():
 				_tint_cape(a, hero, String(look.get("cape_color", "shape")))
 
+## A skin tone by its name in data/creation.json.
+func skin_color(id: String) -> Color:
+	var tones: Dictionary = Data.creation.get("look", {}).get("skinTones", {})
+	var c: Array = tones.get(id, tones.get("olive", [0.62, 0.46, 0.33]))
+	return Color(c[0], c[1], c[2])
+
+## Recolour the surfaces of one mesh whose material carries a name, keeping the cel shading.
+func _recolor_named(mi: MeshInstance3D, name: String, col: Color) -> void:
+	if mi.mesh == null:
+		return
+	for i in mi.mesh.get_surface_count():
+		var mat := mi.get_active_material(i)
+		if mat == null or String(mat.resource_name) != name:
+			continue
+		if mat is ShaderMaterial and _toon_shader != null and (mat as ShaderMaterial).shader == _toon_shader:
+			var t: ShaderMaterial = (mat as ShaderMaterial).duplicate()
+			t.set_shader_parameter("albedo", col)
+			t.resource_name = name
+			mi.set_surface_override_material(i, t)
+		else:
+			var sm := StandardMaterial3D.new()
+			sm.albedo_color = col
+			sm.roughness = 0.9
+			sm.resource_name = name
+			mi.set_surface_override_material(i, sm)
+
 ## A hair colour by its name in data/creation.json.
 func hair_color(id: String) -> Color:
 	var cols: Dictionary = Data.creation.get("look", {}).get("hairColors", {})
@@ -456,9 +514,12 @@ func look_for(name: String) -> Dictionary:
 	var beards: Array = L.get("beards", ["none"])
 	var cols: Array = L.get("hairColors", { "brown": [] }).keys()
 	var sts: Array = L.get("statures", { "middling": 1.0 }).values()
+	var tones: Array = L.get("skinTones", { "olive": [] }).keys()
+	var builds: Array = L.get("builds", { "fit": 0.0 }).values()
 	return { "headgear": (h / 7) % 5 < 2, "cape": (h / 11) % 3 != 0, "cape_color": "plain",
 		"hair": hairs[h % hairs.size()], "beard": beards[(h / 3) % beards.size()] if (h / 13) % 3 == 0 else beards[0],
-		"hair_color": cols[(h / 5) % cols.size()], "stature": sts[(h / 17) % sts.size()] }
+		"hair_color": cols[(h / 5) % cols.size()], "stature": sts[(h / 17) % sts.size()],
+		"skin": tones[(h / 19) % tones.size()], "build": builds[(h / 23) % builds.size()] }
 
 ## Recolour an attachment's meshes, keeping the cel shading when it has it.
 func _recolor(att: Node, col: Color) -> void:
@@ -544,7 +605,15 @@ func _person_model(body: String) -> String:
 	var path := "res://game/assets/people/%s.glb" % body
 	if ResourceLoader.exists(path):
 		return path
+	# A home without a body of its own yet wears Alexandria's of the same sex; the old KayKit
+	# names (saves from before the body kit) take Alexandria's too.
+	var sex: String = body.get_slice("-", 1) if body.contains("-") else String(LEGACY_BODIES.get(body, "m"))
+	var alt := "res://game/assets/people/alexandria-%s.glb" % sex
+	if ResourceLoader.exists(alt):
+		return alt
 	return "res://game/assets/kaykit/%s.glb" % body
+
+const LEGACY_BODIES := { "Knight": "m", "Barbarian": "m", "Rogue_Hooded": "m", "Mage": "f", "Rogue": "f" }
 
 ## A beast's body: its own model from the beast kit when it exists, else the wolf.
 func _beast_model(model: String) -> String:

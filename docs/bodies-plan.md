@@ -87,6 +87,19 @@ blood's marks are features.
 Budgets: body 4–8k triangles, dress 1–3k, a part 200–1,500; no textures on skin (tones are
 colours), one 512 texture at most on a dress.
 
+## Status
+
+- **v1 (2026-11-07)**: `tools/blender/body_kit.py` builds `alexandria-m` and `alexandria-f`:
+  lofts on the reshaped KayKit bones, hand weights blended across the joints, lean and
+  heavy shape keys, eyes and hair on the head bone, eight sockets (Godot folds them into
+  the skeleton as bones), plain materials. The game loads them for the hero, the cohort,
+  the instructors and the smith (`World._person_model`; every other home wears
+  Alexandria's for now; KayKit names from old saves map to them). Creation offers sex,
+  build (five stops) and skin tone (seven); `World.dress` blends the shape keys, tints the
+  skin (a blood that shows in the skin is blended into the tone) and keeps the cel bands.
+  `godot --headless -s res://game/tests/check_people.gd` proves the animations, bones,
+  sockets and keys; the sheet is `python tools/blender/body_kit.py sheet`.
+
 ## Order of work
 
 1. **v1, one home**: the masculine and feminine Alexandria bodies at 7.5 heads on the rig,

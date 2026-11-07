@@ -320,7 +320,7 @@ static func student_beast(c: Dictionary, scale := 1.0) -> Dictionary:
 
 ## The Anchor the room started with, for the tests and the practice yard.
 static func default_hero() -> Dictionary:
-	return { "name": "Anchor", "shape": "anchor", "weapon": "saber", "blood": "", "city": "columbia", "body": "Knight",
+	return { "name": "Anchor", "shape": "anchor", "weapon": "saber", "blood": "", "city": "columbia", "body": "alexandria-m",
 		"pattern": Data.room["pattern"]["default"] }
 
 func breaks_beast() -> bool:

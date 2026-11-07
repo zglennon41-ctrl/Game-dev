@@ -6,7 +6,8 @@
 extends SceneTree
 
 const DIR := "res://game/assets/people"
-const BODIES := ["Knight", "Mage", "Rogue", "Rogue_Hooded", "Barbarian"]
+const BODIES := ["alexandria-m", "alexandria-f"]
+const SOCKETS := ["socket_head", "socket_eyes", "socket_throat", "socket_back", "socket_tail", "socket_hand_l", "socket_hand_r", "socket_light"]
 const MUST := ["Idle", "Running_A", "1H_Melee_Attack_Slice_Horizontal", "Walking_A", "Walking_Backwards", "Blocking",
 	"Block_Hit", "Hit_A", "Hit_B", "Death_A", "Dodge_Forward", "Dodge_Backward"]
 const BONES := ["handslot.r", "handslot.l", "head"]
@@ -57,10 +58,17 @@ func _init() -> void:
 		for a in inst.find_children("*", "BoneAttachment3D", true, false):
 			attachments.append(String(a.name))
 		attachments.sort()
+		# Godot folds an empty under a joint into the skeleton: the sockets are bones.
+		for sk in SOCKETS:
+			if skel == null or skel.find_bone(sk) < 0:
+				missing.append(sk)
+		var body_mesh: MeshInstance3D = inst.find_child("Body", true, false)
+		if body_mesh == null or body_mesh.find_blend_shape_by_name("lean") < 0 or body_mesh.find_blend_shape_by_name("heavy") < 0:
+			missing.append("(lean/heavy shape keys)")
 		print(body, ": animations=", ap.get_animation_list().size() if ap else 0, " bones=", skel.get_bone_count() if skel else 0,
 			" meshes=", meshes.size(), " skinned=", skinned, " textured=", textured)
 		print("    attachments=", attachments)
-		if not missing.is_empty() or not lost_bones.is_empty() or skinned == 0 or textured == 0:
+		if not missing.is_empty() or not lost_bones.is_empty() or skinned == 0:
 			printerr(body, ": FAIL missing animations=", missing, " lost bones=", lost_bones, " skinned=", skinned, " textured=", textured)
 			ok = false
 		inst.free()

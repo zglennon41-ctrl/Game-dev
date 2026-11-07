@@ -1514,7 +1514,8 @@ func test_look() -> void:
 		check(vis.size() == 11, "%s carries the eleven hair and beard pieces (%d)" % [body, vis.size()])
 		var hooded := String(body).contains("Hooded")
 		check(vis.get("Hair_long_fall", false) == (not hooded), "%s: the long fall hangs under the helmet, unless hooded" % body)
-		check(vis.get("Hair_long_cap", true) == false, "%s: the cap hides under headgear" % body)
+		var has_gear: bool = w._player.find_child("*Helmet*", true, false) != null or w._player.find_child("*Hat*", true, false) != null
+		check(vis.get("Hair_long_cap", true) == (not has_gear), "%s: the cap hides under headgear, when the body has any" % body)
 		check(vis.get("Beard_full", false) and not vis.get("Beard_short", true), "%s: the full beard shows, the short one not" % body)
 		check(not vis.get("Hair_braid_fall", true) and not vis.get("Hair_knot_fall", true), "%s: no other style shows" % body)
 		check(absf(w._player.scale.x - 1.06) < 0.001, "%s stands tall" % body)

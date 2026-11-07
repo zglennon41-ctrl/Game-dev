@@ -280,6 +280,7 @@ func _reveal() -> void:
 		hero["weapon_override"] = keep_weapon
 	if not keep_look.is_empty():
 		hero["look"] = keep_look
+		hero["body"] = "%s-%s" % [hero["city"], String(keep_look.get("sex", "m"))]
 	if keep_name == "":
 		keep_name = Creation.name_for(hero["city"], spark)
 	hero["name"] = keep_name
@@ -388,24 +389,37 @@ func _reveal() -> void:
 	if pw.size() > 0:
 		_line(v, "Because %s." % "; ".join(pw), DIM)
 	_line(v, "It is yours from the start. You will outgrow it.", DIM)
-	# Body.
+	# The body: its sex, its build, its skin; then the look. It shows at once, on the left.
+	var look: Dictionary = hero.get("look", { "headgear": true, "cape": true, "cape_color": "shape" })
+	hero["look"] = look
+	var L: Dictionary = Data.creation.get("look", {})
 	_section(v, "BODY", "")
 	var bodies := HBoxContainer.new()
 	bodies.add_theme_constant_override("separation", 8)
 	v.add_child(bodies)
-	for body in Data.creation["bodies"]:
-		var bid: String = body
-		_chip(bodies, bid.replace("_", " "), func(): hero["body_override"] = bid; hero["body"] = bid; changed.emit(hero); _reveal(), hero["body"] == bid)
-	# The look: what the body wears, and the cape's colour. It shows at once, on the left.
-	var look: Dictionary = hero.get("look", { "headgear": true, "cape": true, "cape_color": "shape" })
-	hero["look"] = look
+	for sx in L.get("sexes", {}):
+		var sid: String = sx
+		_chip(bodies, L["sexes"][sx], func(): look["sex"] = sid; hero["body"] = "%s-%s" % [hero["city"], sid]; changed.emit(hero); _reveal(), String(look.get("sex", "m")) == sid)
+	var brow0 := HBoxContainer.new()
+	brow0.add_theme_constant_override("separation", 8)
+	v.add_child(brow0)
+	_text(brow0, "Build:", 15, DIM)
+	for bd in L.get("builds", {}):
+		var bv: float = float(L["builds"][bd])
+		_chip(brow0, bd, func(): look["build"] = bv; changed.emit(hero); _reveal(), absf(float(look.get("build", 0.0)) - bv) < 0.001)
+	var srow0 := HBoxContainer.new()
+	srow0.add_theme_constant_override("separation", 8)
+	v.add_child(srow0)
+	_text(srow0, "Skin:", 15, DIM)
+	for tn in L.get("skinTones", {}):
+		var tid: String = tn
+		_chip(srow0, tid, func(): look["skin"] = tid; changed.emit(hero); _reveal(), String(look.get("skin", "olive")) == tid)
 	_section(v, "LOOK", "")
 	var lrow := HBoxContainer.new()
 	lrow.add_theme_constant_override("separation", 8)
 	v.add_child(lrow)
 	_chip(lrow, "Headgear on", func(): look["headgear"] = not look["headgear"]; changed.emit(hero); _reveal(), look["headgear"])
 	_chip(lrow, "Cape on", func(): look["cape"] = not look["cape"]; changed.emit(hero); _reveal(), look["cape"])
-	var L: Dictionary = Data.creation.get("look", {})
 	var hrow := HBoxContainer.new()
 	hrow.add_theme_constant_override("separation", 8)
 	v.add_child(hrow)
