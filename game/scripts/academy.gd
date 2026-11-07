@@ -1021,17 +1021,13 @@ func auto_move() -> Vector2:
 					who = { "id": st["goal"]["who"] }
 				var want_place := String(st.get("place", progress["place"]))
 				if progress["place"] != want_place:
-					for d in _doors:
-						if d["to"] == want_place:
-							goal = Vector2(d["at"][0], d["at"][1]) * 0.86
+					goal = _door_toward(want_place)
 				else:
 					for p in _people:
 						if p.get("id", "") == who.get("id", "-"):
 							goal = p["pos"]
 			elif gt == "reach":
-				for d in _doors:
-					if d["to"] == st["goal"]["place"]:
-						goal = Vector2(d["at"][0], d["at"][1]) * 0.86
+				goal = _door_toward(String(st["goal"]["place"]))
 		if goal == Vector2.INF:
 			return Vector2.ZERO
 		return _walk_or_act(goal, 1.8)
@@ -1098,6 +1094,18 @@ func auto_move() -> Vector2:
 	if goal == Vector2.INF:
 		return Vector2.ZERO
 	return _walk_or_act(goal, 1.6)
+
+## The door that leads toward an Academy place: its own door, or else the quad's, since every
+## place of the Academy opens on the quad (a trouble taken in the yard may send you to the hearth).
+func _door_toward(place_id: String) -> Vector2:
+	for d in _doors:
+		if d["to"] == place_id:
+			return Vector2(d["at"][0], d["at"][1]) * 0.86
+	if not Zones.is_zone(place_id):
+		for d in _doors:
+			if d["to"] == "quad":
+				return Vector2(d["at"][0], d["at"][1]) * 0.86
+	return Vector2.INF
 
 ## Within reach of the goal and it is what is in reach: act on it. Otherwise keep walking
 ## (a classmate standing nearer than the door must not be talked to in the door's place).
