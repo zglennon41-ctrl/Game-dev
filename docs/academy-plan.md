@@ -113,10 +113,16 @@ and what changed, so the next person knows which stalls are real and which are t
 | full term | The Friday rally ends with Bask's standings in the yard, but nothing on the grounds could be acted on during a posting: a step no one could finish | people, doors, the post and the find are within reach during a posting too |
 | postings replay | After the last lesson you could sleep only once, so the day never turned and the board never refreshed: the Gate's ten postings were out of reach (the bot talked to an instructor 3,466 times) | in the board phase you may sleep once the day's work is done (a posting or trouble finished today, or the board bare); the morning line says the board, not the Gate |
 
-Clean runs so far: three troubles, Lessons 4–5 and a Linework posting from the board (seeds
-4242, 4244, 4251); the hunt, escort and salvage troubles plus Lesson 4 on a fresh character
-in fifteen minutes (seed 4242). The full term to the Gate with ten postings is the run still
-owed; it is the one that catches a stall two hours in.
+Clean runs so far (2026-11-07, seed 777 unless said): a fresh character from creation
+through the rite, the six lessons, the three troubles and two postings (the full-term run,
+until the rally stall, now fixed); and from the morning of Lesson 6 through the Field
+Examination, thirteen postings of every open kind (Linework, Writ, Salvage, Hunt, Escort,
+the Deep Run), two crisis postings, two named weapons, the Reckoning and the Gate, with the
+declaration made, in fifty minutes of autopilot and eight talks. Also three troubles,
+Lessons 4–5 and a Linework posting from the board (seeds 4242, 4244, 4251), and the hunt,
+escort and salvage troubles plus Lesson 4 on a fresh character in fifteen minutes (4242).
+The one run still owed is the whole term in one sitting on one seed; the two halves overlap
+at Lesson 6.
 
 ## Pacing to eight hours (the first plan)
 
