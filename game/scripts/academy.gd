@@ -702,16 +702,30 @@ func gate_types_missing() -> Array:
 		done_types[t] = true
 	return progress.get("quest_types_seen", []).filter(func(t): return not done_types.has(t))
 
+## Whether you may sleep now: after a lesson, once; in the board phase, once the day's work is
+## done (a posting or a trouble finished today, or nothing left on the board). "" when you may,
+## else the key of the line that says why not (data/academy.json, rest).
+static func rest_reason_for(prog: Dictionary, need: String, open_postings: int) -> String:
+	var last: String = prog["done"].back() if not prog["done"].is_empty() else ""
+	if last == "":
+		return "too_early"
+	if need == "board":
+		return "" if int(prog.get("worked_day", 0)) == int(prog["day"]) or open_postings == 0 else "board_waits"
+	return "already" if String(prog.get("rested_after", "")) == last else ""
+
+func rest_reason() -> String:
+	return rest_reason_for(progress, next_need(), postings_open().size())
+
 func _rest_now() -> void:
 	var r: Dictionary = Data.academy["rest"]
 	var last := last_done()
-	if last == "":
-		say("", [r["too_early"]])
+	var why := rest_reason()
+	if why != "":
+		say("", [r.get(why, r["already"])])
 		return
-	if rested_on(last):
-		say("", [r["already"]])
-		return
-	var next_line: String = r["next"].get(last, "") if r["next"] is Dictionary else String(r["next"])
+	# After the last lesson the mornings are the board's, until the Gate's postings are done.
+	var next_key := "board" if last == "project" and not gate_ready() else last
+	var next_line: String = r["next"].get(next_key, "") if r["next"] is Dictionary else String(r["next"])
 	say("", r["lines"] + ([next_line] if next_line != "" else []), func():
 		progress["rested_after"] = last
 		progress["day"] = int(progress["day"]) + 1
@@ -757,7 +771,8 @@ func objective() -> String:
 			var n := gate_short()
 			var missing := gate_types_missing()
 			var kinds := ("" if missing.is_empty() else "  (still to do: %s)" % ", ".join(missing.map(func(t): return String(Data.quests["types"][t]["name"]).to_lower())))
-			return "Day %d · %s%s" % [day, String(Data.academy["gate"]["lines"].get("not_yet", "The Gate waits: {n} more posting{s}.")).replace("{n}", str(n)).replace("{s}", "" if n == 1 else "s"), kinds]
+			var sleep := "  ·  rest when the day's work is done" if rest_reason() == "" else ""
+			return "Day %d · %s%s%s" % [day, String(Data.academy["gate"]["lines"].get("not_yet", "The Gate waits: {n} more posting{s}.")).replace("{n}", str(n)).replace("{s}", "" if n == 1 else "s"), kinds, sleep]
 		"rite":
 			if progress["place"] == "hearth":
 				return "Day %d · The rite: speak to Instructor Varga at the bowl." % day
@@ -1048,7 +1063,7 @@ func auto_move() -> Vector2:
 		"rest": want_place = "dorm"
 		"rite": want_place = "hearth"
 		"gate": want_place = "gate"
-		"board": want_place = "quad"
+		"board": want_place = "dorm" if rest_reason() == "" and postings_open().is_empty() and troubles_open().is_empty() else "quad"
 		_:
 			var nl := next_lesson()
 			want_place = nl["place"] if not nl.is_empty() else ""
@@ -2293,6 +2308,7 @@ func _finish_trouble() -> void:
 		progress["troubles_done"] = []
 	progress["troubles_done"].append(lesson["id"])
 	progress["trouble"] = ""
+	progress["worked_day"] = int(progress["day"])
 	progress["record"]["troubles"] = int(progress["record"].get("troubles", 0)) + 1
 	if not progress.has("writeup_extra"):
 		progress["writeup_extra"] = []
@@ -2509,6 +2525,7 @@ func _finish_quest() -> void:
 		progress["quests_done"] = []
 	progress["quests_done"].append(p["id"])
 	progress["quest"] = {}
+	progress["worked_day"] = int(progress["day"])
 	if not progress.has("quest_types_done"):
 		progress["quest_types_done"] = []
 	if not progress["quest_types_done"].has(p["type"]):
@@ -2543,6 +2560,7 @@ func _fail_quest(why: String) -> void:
 	if not progress.has("quests_failed"):
 		progress["quests_failed"] = []
 	progress["quests_failed"].append(p["id"])
+	progress["worked_day"] = int(progress["day"])
 	progress["quest"] = {}
 	progress["record"]["quests_lost"] = int(progress["record"].get("quests_lost", 0)) + 1
 	if lesson.has("named") and why in ["timer", "rescued"]:

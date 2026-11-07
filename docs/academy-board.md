@@ -59,3 +59,11 @@ always where the step says.
 
 In a fight each classmate is an agent (`cohort.fighting`): see `docs/zones.md`, "The
 cohort fights on its own".
+
+## Days and sleep in the board phase (2026-11-07)
+
+After Lesson 6 the mornings belong to the board until the Gate's ten postings are done. The
+day turns only in the dormitory. You may sleep once a posting or a trouble has been finished
+that day, or when the board is bare; otherwise the bunk says the board still has the day's
+work on it (`data/academy.json`, `rest.board_waits`). The rule is `Academy.rest_reason_for`,
+pure and tested; the autopilot sleeps by it.

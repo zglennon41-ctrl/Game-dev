@@ -56,6 +56,7 @@ func _run() -> void:
 	test_gear_and_gate()
 	test_weapon_balance()
 	test_look()
+	test_rest()
 	test_bots()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
@@ -1543,3 +1544,23 @@ func test_look() -> void:
 	check(Academy.random_look(rng) == looks[0], "the same seed draws the same look")
 	check(w.look_for("Imre Toth") == w.look_for("Imre Toth") and w.look_for("Imre Toth") != w.look_for("Sefu Adeyemi"), "an instructor's look follows from the name")
 	w.queue_free()
+
+
+## Sleep: once after each lesson; in the board phase, once the day's work is done, so the
+## days (and the board's postings) go on until the Gate's ten are met.
+func test_rest() -> void:
+	var prog := { "done": [], "day": 1, "rested_after": "" }
+	check(Academy.rest_reason_for(prog, "", 3) == "too_early", "no sleeping before the first lesson")
+	prog["done"] = ["hold"]
+	check(Academy.rest_reason_for(prog, "rest", 3) == "", "after a lesson you may sleep")
+	prog["rested_after"] = "hold"
+	check(Academy.rest_reason_for(prog, "rite", 3) == "already", "but only once")
+	prog["done"] = ["hold", "rite", "shape", "discipline", "line", "project"]
+	prog["rested_after"] = "project"
+	prog["day"] = 8
+	check(Academy.rest_reason_for(prog, "board", 3) == "board_waits", "in the board phase, not while the day's postings wait")
+	prog["worked_day"] = 8
+	check(Academy.rest_reason_for(prog, "board", 3) == "", "once a posting is done today, you may")
+	prog["worked_day"] = 7
+	check(Academy.rest_reason_for(prog, "board", 0) == "", "or when the board is bare")
+	check(Data.academy["rest"].has("board_waits"), "the line that says why not is in the data")

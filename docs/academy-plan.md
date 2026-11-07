@@ -111,6 +111,7 @@ and what changed, so the next person knows which stalls are real and which are t
 | full term | The bot, sent from the yard to the hearth, had no door and stood still (the yard opens only on the quad) | the bot goes by way of the quad; a reached place is stayed in |
 | board replays | Postings doubled; the Deep Run was never posted; Lesson 6's "Reach" could not be met by Turn or Cast | deduped; forced every third day; reach measured from the technique's press |
 | full term | The Friday rally ends with Bask's standings in the yard, but nothing on the grounds could be acted on during a posting: a step no one could finish | people, doors, the post and the find are within reach during a posting too |
+| postings replay | After the last lesson you could sleep only once, so the day never turned and the board never refreshed: the Gate's ten postings were out of reach (the bot talked to an instructor 3,466 times) | in the board phase you may sleep once the day's work is done (a posting or trouble finished today, or the board bare); the morning line says the board, not the Gate |
 
 Clean runs so far: three troubles, Lessons 4–5 and a Linework posting from the board (seeds
 4242, 4244, 4251); the hunt, escort and salvage troubles plus Lesson 4 on a fresh character

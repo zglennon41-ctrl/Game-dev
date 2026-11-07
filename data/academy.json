@@ -1820,10 +1820,12 @@
       "shape": "Tomorrow: Lesson 4, Discipline. Your city's school takes you.",
       "discipline": "Tomorrow: the line. The car leaves at lamp hour, and you will not be alone in it.",
       "line": "Tomorrow: Project. Varga says the field can go past the skin.",
-      "project": "Tomorrow: the Gate. Your genius is read, your cohort speaks, and the line takes you."
+      "project": "Tomorrow: the Gate. Your genius is read, your cohort speaks, and the line takes you.",
+      "board": "Tomorrow: the board. The Gate waits on the term's postings, ten of them, one of each kind that is open."
     },
     "too_early": "It is too early to sleep. There is work in the yard.",
-    "already": "You are rested. The day is waiting."
+    "already": "You are rested. The day is waiting.",
+    "board_waits": "The board still has the day's work on it. Take a posting, or sleep once the day's are done."
   },
   "rite": {
     "$comment": "The rite in the Hearth Hall: the bowl reads your Shape and your genius takes its First Form. The Shape read is the questionnaire's leans (nudged by your spark), plus how you have played the Academy so far (recordLeans: per thing done, toward a Shape), plus the bowl's own noise. A different Shape from the questionnaire's is a surprise; noise is the main knob for how often that happens. The First Form is read from the Seed, the blood and the Shape (data/reading.json, firstFormWeights) plus formNoise.",
