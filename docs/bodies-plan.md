@@ -191,6 +191,51 @@ the clip's own stride speed (measured in Blender: the walk crosses 1.78 units a 
 run 8.44), within limits, and walks below a run line (`data/rules.json`, `motion`), so the
 feet plant instead of sliding; the hero in the fight and the Academy, and the allies, all.
 
+## Proportions (the owner, 2026-11-07: "see how lanky our current iteration is")
+
+Measured, not eyeballed: the built body and head against adult anthropometry (a 175 cm
+man and a 162 cm woman, each in their own body units of 2.4 tall; the head in
+head-heights, H). The first column is what we had, the second what an adult measures, the
+third what we have now.
+
+| Measure | Before | Adult | Now |
+| --- | --- | --- | --- |
+| Neck width | 0.13 | 0.165 | 0.17 |
+| Chest width | 0.32 | 0.41 | 0.41 |
+| Waist width | 0.245 | 0.36 | 0.35 |
+| Hips width | 0.29 | 0.46 | 0.48 (f 0.52) |
+| Hips depth | 0.18 | 0.32 | 0.30 |
+| Shoulders, deltoid to deltoid | 0.52 | 0.64 | 0.64 |
+| Thigh | 0.19 | 0.23 | 0.205 |
+| Calf | 0.146 | 0.165 | 0.155 |
+| Upper arm | 0.123 | 0.13 | 0.137 |
+| Forearm | 0.095 | 0.115 | 0.11 |
+| Wrist | 0.057 | 0.075 | 0.066 |
+| Upper arm length, shoulder to elbow | 0.367 | 0.45 | 0.424 |
+| Forearm length, elbow to wrist | 0.395 | 0.36 | 0.338 |
+| Head width at the eyes, in H | 0.72 | 0.65 | 0.66 |
+| Jaw width, in H | 0.59 | 0.47 | 0.48 |
+| Pupils apart, in H | 0.34 | 0.29 | 0.29 |
+| Eye opening, in H | 0.16 | 0.13 | 0.135 |
+| Nose, root to base, in H | 0.37 | 0.23 | 0.25 |
+| Nose width, in H | 0.23 | 0.15 | 0.15 |
+| Mouth line below the eyes, in H | 0.26 | 0.30 | 0.305 |
+| Ear height, in H | 0.2 | 0.27 | 0.26 |
+
+So the lankiness was real and it was the trunk: the waist and hips a third too narrow, the
+neck and the shoulders a fifth, with a short upper arm on a long forearm; and the head wide
+at the brow with the eyes too far apart, a nose half again too long and a mouth crowded up
+under it. What changed: the skeleton graph's girths and the **trunk laid on measured
+rings** after it grows (`anatomy.py`, `TRUNK_RINGS`: the skin modifier's hulls at the
+branches came out as boxes however the radii were set, so the trunk's vertices are set
+again on a superellipse of the adult width and depth at each height, blending into the
+thighs, the arms and the neck; the feminine figure has her hips wider than her shoulders);
+the **elbow moved** out to 0.556 of the arm (`people_kit.py`, `elbow`), so the upper arm
+is the longer bone as on an adult; the garments cut on the same rings plus a margin, so
+they fit the wider body; the head's side silhouette narrowed, the eyes, nose, mouth and
+ears set to the adult places. The table is the acceptance test: `tools/blender/measure.py`
+prints it from a built body and marks what is more than a tenth off.
+
 ## Dress as culture (the owner, 2026-11-07: the outfits mark the culture they grew up in)
 
 `tools/blender/wardrobe.py` dresses each home from `data/bodies.json` (`dress`): a culture

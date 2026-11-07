@@ -50,17 +50,17 @@ def silhouettes(sex, fp):
     cheek = fp("cheek")
     brow = fp("brow")
     front = [
-        (-90, 0.42), (-77, 0.46), (-62, 0.56 * (0.96 if fem else 1.0)),  # under the jaw, the chin's point
+        (-90, 0.42), (-77, 0.46), (-62, 0.55 * (0.96 if fem else 1.0)),  # under the jaw, the chin's point
         (-50, 0.53), (-38, 0.49), (-30, 0.465),                          # the chin's front, the lower lip
         (-22, 0.44), (-12, 0.41), (0, 0.39),                             # the upper lip, the nose's base, the eyes
         (14, 0.40 + 0.015 * brow), (28, 0.42), (43, 0.44),               # the brow, the forehead
         (62, 0.47), (78, 0.49), (90, 0.50),                              # the crown
     ]
     side = [
-        (-90, 0.42), (-75, 0.46), (-58, 0.47 * (0.94 if fem else jaw)),  # under the jaw, the jaw's angle
-        (-40, 0.42 * (0.95 if fem else jaw)), (-25, 0.385), (-12, 0.37),  # the jaw, the cheek
-        (0, 0.36 * cheek), (15, 0.37), (30, 0.39), (49, 0.45),           # the ear's level, the temple, the skull's side
-        (70, 0.49), (90, 0.50),
+        (-90, 0.40), (-75, 0.42), (-58, 0.43 * (0.94 if fem else jaw)),  # under the jaw, the jaw's angle
+        (-40, 0.38 * (0.95 if fem else jaw)), (-25, 0.355), (-12, 0.34),  # the jaw, the cheek
+        (0, 0.33 * cheek), (15, 0.335), (30, 0.35), (49, 0.41),          # the ear's level, the temple, the skull's side
+        (70, 0.47), (90, 0.50),
     ]
     back = [
         (-90, 0.42), (-77, 0.45), (-62, 0.42), (-50, 0.39), (-35, 0.38), # the nape
@@ -106,19 +106,19 @@ def carving(centre, sex, fp):
         P.append((centre + Vector(off) * H, r * H, s * H, Vector(aniso)))
 
     for sg in (1, -1):
-        pt((sg * 0.17, -0.37, 0.02), 0.16, -0.06, (1.3, 1, 0.85))            # eye socket: the lids fill it
-        pt((sg * 0.17, -0.38, -0.1), 0.09, 0.012, (1.3, 1, 0.7))             # the cheek under the eye
-        pt((sg * 0.3, -0.26, -0.07), 0.15, 0.03 * fp("cheek"), (1, 1, 1))    # cheekbone
+        pt((sg * 0.145, -0.37, 0.02), 0.145, -0.06, (1.3, 1, 0.85))          # eye socket: the lids fill it
+        pt((sg * 0.145, -0.38, -0.1), 0.085, 0.012, (1.3, 1, 0.7))           # the cheek under the eye
+        pt((sg * 0.27, -0.26, -0.07), 0.14, 0.03 * fp("cheek"), (1, 1, 1))   # cheekbone
         pt((sg * 0.33, -0.08, 0.26), 0.17, -0.025, (1, 1, 1.3))              # temple
         pt((sg * 0.27, 0.02, -0.4), 0.15, 0.025 * (fp("jaw") - 0.4), (1, 1, 1))  # the jaw's angle
         pt((sg * 0.21, -0.33, -0.2), 0.12, -0.02, (1, 1, 1.2))               # the cheek's hollow
-        pt((sg * 0.09, -0.42, -0.16), 0.08, -0.012, (1.4, 1, 0.6))           # the nasolabial fold
-        pt((sg * 0.09, -0.4, 0.1), 0.08, 0.012 * fp("brow"), (1.4, 1, 0.5))  # the brow's bone over each eye
+        pt((sg * 0.085, -0.42, -0.2), 0.08, -0.012, (1.4, 1, 0.6))           # the nasolabial fold
+        pt((sg * 0.08, -0.4, 0.1), 0.075, 0.012 * fp("brow"), (1.4, 1, 0.5)) # the brow's bone over each eye
     pt((0, -0.4, 0.14), 0.2, 0.02 * fp("brow"), (2.2, 1, 0.5))               # the brow ridge
     pt((0, -0.33, -0.45), 0.12, 0.03 * (0.85 if fem else 1.0), (1, 1, 1))    # the chin
     pt((0, -0.41, -0.34), 0.07, -0.02, (1.6, 1, 0.5))                        # under the lower lip
     pt((0, -0.4, 0.04), 0.07, -0.014, (1.1, 1, 0.8))                         # between the eyes, the root of the nose
-    pt((0, -0.42, -0.12), 0.06, -0.012, (1.0, 1, 0.8))                       # the philtrum
+    pt((0, -0.42, -0.25), 0.05, -0.01, (1.0, 1, 0.8))                        # the philtrum
     return P
 
 
@@ -277,13 +277,13 @@ def features(skull_ob, centre, sex, fp, mats):
     Rb = 0.056 * H
     for sg in (1, -1):
         side = "l" if sg > 0 else "r"
-        ex = sg * 0.17 * H
+        ex = sg * 0.145 * H     # the pupils 0.29 of the head's height apart, as on an adult
         ec = Vector((centre.x + ex, face + 0.066 * H, centre.z + 0.015 * H))
         out.append(_ellipsoid("Eye_%s" % side, ec, Rb, Rb, Rb, white, u=20, v=12))
         out.append(_ellipsoid("Iris_%s" % side, ec + Vector((0, -0.05 * H, 0)), 0.027 * H, 0.009 * H, 0.027 * H, iris, u=16, v=8))
         out.append(_ellipsoid("Pupil_%s" % side, ec + Vector((0, -0.0565 * H, 0)), 0.012 * H, 0.004 * H, 0.012 * H, pupil, u=12, v=6))
-        open_w = 0.08 * H
-        up, low = (0.032 if fem else 0.03) * H, 0.022 * H
+        open_w = 0.068 * H     # the opening 0.135 wide
+        up, low = (0.024 if fem else 0.022) * H, 0.02 * H   # the upper lid rests on the iris, the lower touches it
         out.append(_eyelids("Lid_%s" % side, ec, 0.064 * H, Rb, open_w, up, low, 0.006 * H, sg, skin))
         # lashes: a dark line along the upper lid's edge
         pts = []
@@ -300,17 +300,19 @@ def features(skull_ob, centre, sex, fp, mats):
         n = 12
         for k in range(n):
             t = k / (n - 1.0)
-            x = ex + sg * (-0.09 + 0.26 * t) * H
-            z = centre.z + (0.085 + 0.045 * math.sin(t ** 0.9 * math.pi) - 0.01 * t) * H
-            pos, nrm = surf.on(Vector((centre.x + x, face, z)), 0.005 * H)
+            x = ex + sg * (-0.08 + 0.24 * t) * H
+            z = centre.z + (0.085 + 0.032 * math.sin(t ** 0.9 * math.pi) - 0.012 * t) * H
+            pos, nrm = surf.on(Vector((centre.x + x, face, z)), 0.002 * H)
             pts.append(pos)
-        rad = [0.011 * H * fp("brow") * (1.0 - 0.45 * (k / (n - 1.0)) ** 2) for k in range(n)]
+        rad = [0.0075 * H * fp("brow") * (1.0 - 0.45 * (k / (n - 1.0)) ** 2) for k in range(n)]
         out.append(_ob("Brow_%s" % side, pk._tube_bm(pts, rad, segments=6), hair))
     # the nose: a patch on the face from between the eyes to under the tip. The ridge rises
     # from the root to the tip and narrows at the middle; the tip is a bulb; the wings flare
     nl, nw = fp("nose"), fp("noseWidth")
-    ridge = [(0.1, 0.0), (0.06, 0.016), (0.02, 0.036), (-0.04, 0.058), (-0.1, 0.082), (-0.15, 0.105), (-0.185, 0.118), (-0.21, 0.085), (-0.235, 0.03), (-0.25, 0.0)]
-    width = [(0.1, 0.055), (0.03, 0.042), (-0.06, 0.04), (-0.13, 0.05), (-0.185, 0.064), (-0.22, 0.06), (-0.25, 0.05)]
+    # from the root between the eyes (nasion, just above the eye line) to the base under the
+    # tip (subnasale, 0.2 down): a nose 0.23 long and 0.15 wide, as on an adult
+    ridge = [(0.06, 0.0), (0.03, 0.012), (-0.01, 0.03), (-0.06, 0.055), (-0.1, 0.078), (-0.14, 0.1), (-0.165, 0.11), (-0.19, 0.08), (-0.212, 0.03), (-0.23, 0.0)]
+    width = [(0.06, 0.042), (0.0, 0.034), (-0.06, 0.034), (-0.12, 0.042), (-0.165, 0.052), (-0.2, 0.05), (-0.23, 0.04)]
 
     def nose_h(x, z):
         u = z / (H * nl)
@@ -320,22 +322,22 @@ def features(skull_ob, centre, sex, fp, mats):
         h = p * _bump(xw / w, 1.3)
         # the wings, either side of the tip, a little behind it
         for sg in (1, -1):
-            dx, dz = (xw - sg * 0.072) / 0.045, (u + 0.18) / 0.05
-            h = max(h, 0.075 * H * _bump(math.sqrt(dx * dx + dz * dz), 1.6))
+            dx, dz = (xw - sg * 0.056) / 0.036, (u + 0.165) / 0.045
+            h = max(h, 0.072 * H * _bump(math.sqrt(dx * dx + dz * dz), 1.6))
         # the nostrils' shadow under the wings
         for sg in (1, -1):
-            dx, dz = (xw - sg * 0.045) / 0.028, (u + 0.215) / 0.025
+            dx, dz = (xw - sg * 0.036) / 0.024, (u + 0.2) / 0.022
             h -= 0.01 * H * _bump(math.sqrt(dx * dx + dz * dz), 1.5)
         return max(0.0, h)
 
-    xs = [(-0.14 + 0.28 * i / 27.0) * H * nw for i in range(28)]
-    zs = [(-0.255 + 0.36 * j / 35.0) * H * nl for j in range(36)]
+    xs = [(-0.11 + 0.22 * i / 25.0) * H * nw for i in range(26)]
+    zs = [(-0.235 + 0.3 * j / 33.0) * H * nl for j in range(34)]
     out.append(_patch("Nose", surf, xs, zs, Vector((centre.x, face, centre.z)), nose_h, [skin]))
     # the mouth: a patch with two lip mounds either side of the mouth's line, the upper with a
     # cupid's bow, both tapering into the corners, the corners set a little into the cheeks
     lf = fp("lips") * (1.12 if fem else 1.0)
-    half = 0.125 * H
-    zm0 = -0.262 * H
+    half = 0.115 * H        # a mouth 0.23 wide, its line a third of the way from the nose to the chin
+    zm0 = -0.305 * H
 
     def zline(x):
         return zm0 - 0.012 * H * (x / half) ** 2
@@ -369,23 +371,24 @@ def features(skull_ob, centre, sex, fp, mats):
             return 1
         return 0
 
-    xs = [(-0.17 + 0.34 * i / 33.0) * H for i in range(34)]
-    zs = [(-0.335 + 0.135 * j / 21.0) * H for j in range(22)]
+    xs = [(-0.16 + 0.32 * i / 33.0) * H for i in range(34)]
+    zs = [(-0.375 + 0.135 * j / 21.0) * H for j in range(22)]
     out.append(_patch("Mouth", surf, xs, zs, Vector((centre.x, face, centre.z)), mouth_h, [skin, lips_mat], mouth_mat))
     # the ears: a helix round the back from the top, a concha, a lobe; flat against the side
     es = fp("ears")
     for sg in (1, -1):
         side = "l" if sg > 0 else "r"
-        ec = Vector((centre.x + sg * 0.355 * H, centre.y + 0.04 * H, centre.z - 0.03 * H))
+        # the ear runs from the brow's level to the nose's base (0.26 tall), behind the jaw
+        ec = Vector((centre.x + sg * 0.325 * H, centre.y + 0.05 * H, centre.z - 0.03 * H))
         pts = []
         n = 12
         for k in range(n):
             t = k / (n - 1.0)
             a = math.pi * (0.95 - 0.95 * t)   # from the top-front over the back down to the lobe
-            pts.append(ec + Vector((sg * 0.02 * H * math.sin(a), 0.07 * H * es * math.cos(a), 0.1 * H * es * math.sin(a))))
-        out.append(_ob("Ear_%s" % side, pk._tube_bm(pts, [0.015 * H * es] * n, segments=6), skin))
-        out.append(_ellipsoid("Concha_%s" % side, ec, 0.012 * H, 0.05 * H * es, 0.07 * H * es, skin))
-        out.append(_ellipsoid("Earlobe_%s" % side, ec + Vector((0, -0.01 * H, -0.09 * H * es)), 0.016 * H, 0.03 * H * es, 0.028 * H * es, skin))
+            pts.append(ec + Vector((sg * 0.02 * H * math.sin(a), 0.085 * H * es * math.cos(a), 0.12 * H * es * math.sin(a))))
+        out.append(_ob("Ear_%s" % side, pk._tube_bm(pts, [0.016 * H * es] * n, segments=6), skin))
+        out.append(_ellipsoid("Concha_%s" % side, ec, 0.012 * H, 0.062 * H * es, 0.09 * H * es, skin))
+        out.append(_ellipsoid("Earlobe_%s" % side, ec + Vector((0, -0.01 * H, -0.11 * H * es)), 0.016 * H, 0.034 * H * es, 0.03 * H * es, skin))
     return out
 
 

@@ -63,6 +63,7 @@ PROPORTIONS = {
     "torso_width": 0.86,          # shoulders and hips narrower
     "arm_girth": 0.8,             # arms thinner across
     "hang": 0.5,                  # where the fingertips hang: 0 = hip joint, 1 = knee
+    "elbow": 0.556,               # the elbow's place from the shoulder to the wrist (an adult's upper arm is the longer bone)
     "height": 2.4,                # the finished body, crown of the bare head, in model units
 }
 
@@ -331,6 +332,18 @@ def reshape(r, P=PROPORTIONS):
         chain = ["upperarm." + s, "lowerarm." + s, "elbowIK." + s]
         tip = ["wrist." + s, "hand." + s, "handslot." + s, "handIK." + s]
         r.lengthen_chain(chain, tip, shoulder, wrist, k_arm)
+        if P.get("elbow"):
+            # the elbow slid along the straight arm: the bones keep their directions
+            sh, wr, el = shoulder.x, r.bone("wrist." + s).x, r.bone("lowerarm." + s).x
+            te, e = (el - sh) / (wr - sh), P["elbow"]
+
+            def arm_x(x, sh=sh, wr=wr, te=te, e=e):
+                t = (x - sh) / (wr - sh)
+                if t <= 0.0 or t >= 1.0:
+                    return x
+                t2 = t * e / te if t < te else e + (t - te) * (1.0 - e) / (1.0 - te)
+                return sh + t2 * (wr - sh)
+            r.deform(chain + tip, lambda p: Vector((arm_x(p.x), p.y, p.z)))
         r.scale(r.arms(s), (0, shoulder.y, shoulder.z), (1, P["arm_girth"], P["arm_girth"]))
         for b in chain + tip:
             r.key_factors[b] = k_arm

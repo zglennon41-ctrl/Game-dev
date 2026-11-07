@@ -95,6 +95,16 @@ def girth(build, part):
     return table[build][part]
 
 
+# The garments are cut on these rings; the anatomy (v2) stands this much wider than the v1
+# lofts did, so the rings take the same girth (width, depth) by region.
+FIT = {"trunk": (1.36, 1.5), "shoulders": (1.22, 1.3), "neck": (1.3, 1.3), "arm": (1.1, 1.1), "leg": (1.6, 1.55), "ankle": (1.15, 1.15)}
+
+
+def _fit(rings, region):
+    kx, ky = FIT[region]
+    return [(r[0], r[1] * kx, r[2] * ky) + tuple(r[3:]) for r in rings]
+
+
 def trunk_rings(sex, build):
     g = lambda part: girth(build, part)  # noqa: E731
     fem = sex == "f"
@@ -112,6 +122,16 @@ def trunk_rings(sex, build):
         (1.99, (0.055 if fem else 0.065) * g("neck"), (0.06 if fem else 0.068) * g("neck"), 0.01),
         (2.05, (0.05 if fem else 0.06) * g("neck"), (0.056 if fem else 0.064) * g("neck"), 0.01),
     ]
+    if Body.ANATOMY:
+        # the garments on the anatomy's own measured rings, a margin out, the neck from v1
+        out = []
+        for z, hw, hd, yo in rings:
+            if z <= 1.93:
+                rx, ry, yc = an._ring_at(z, sex, build)
+                out.append((z, rx + 0.016, ry + 0.016, yc))
+            else:
+                out.append((z, hw * FIT["neck"][0], hd * FIT["neck"][1], yo))
+        return out
     return rings
 
 
@@ -135,7 +155,7 @@ def arm_rings(sex, build):
     fem = sex == "f"
     s = 0.9 if fem else 1.0
     # x, half-depth y, half-height z
-    return [
+    rings = [
         (0.135, 0.075 * s * k, 0.08 * s * k),
         (0.21, 0.08 * s * k, 0.085 * s * k),
         (0.36, 0.065 * s * k, 0.07 * s * k),
@@ -144,6 +164,16 @@ def arm_rings(sex, build):
         (0.82, 0.046 * s * k, 0.05 * s * k),
         (0.925, 0.038 * s, 0.042 * s),
     ]
+    if Body.ANATOMY:
+        # the elbow sits further out on the anatomy's rig (people_kit, "elbow")
+        sh, old_el, new_el, wr = 0.151, 0.518, 0.575, 0.913
+
+        def ax(x):
+            if x <= sh or x >= wr:
+                return x
+            return sh + (x - sh) * (new_el - sh) / (old_el - sh) if x <= old_el else new_el + (x - old_el) * (wr - new_el) / (wr - old_el)
+        return [(ax(r[0]),) + tuple(r[1:]) for r in _fit(rings, "arm")]
+    return rings
 
 
 def hand_rings(sex):
@@ -162,7 +192,7 @@ def leg_rings(sex, build):
     fem = sex == "f"
     s = 0.95 if fem else 1.0
     # z, half-width x, half-depth y
-    return [
+    rings = [
         (1.09, 0.095 * s * k, 0.105 * s * k),
         (0.95, 0.09 * s * k, 0.098 * s * k),
         (0.75, 0.075 * s * k, 0.08 * s * k),
@@ -171,6 +201,9 @@ def leg_rings(sex, build):
         (0.25, 0.048 * s * k, 0.055 * s * k),
         (0.14, 0.042 * s, 0.048 * s),
     ]
+    if Body.ANATOMY:
+        return _fit(rings[:6], "leg") + _fit(rings[6:], "ankle")
+    return rings
 
 
 def foot_rings(sex):
@@ -499,7 +532,8 @@ class Body:
         mats = [self.mats[n] for n in names]
         slot = {n: i for i, n in enumerate(names)}
         k = self.k
-        ob = an.grow("Body", an.graph(sex, "fit"), subdiv=2, smooth=1)
+        ob = an.grow("Body", an.graph(sex, "fit"), subdiv=2, smooth=2)
+        an.reloft_trunk(ob, sex, "fit")
         if k != 1.0:
             for v in ob.data.vertices:
                 v.co = v.co * k
