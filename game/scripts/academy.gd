@@ -223,8 +223,13 @@ func place_spec(id: String) -> Dictionary:
 		return Zones.area_place(id, int(progress.get("seed", 0)) + int(progress.get("day", 1)) * 7)
 	return {}
 
+## Automated checks print what the Academy does (--debug).
+var debug := OS.get_cmdline_user_args().has("--debug")
+
 func go(place_id: String, quiet := false, from := "") -> void:
 	var spec: Dictionary = place_spec(place_id)
+	if debug:
+		print("GO %s from %s (lesson %s step %d)" % [place_id, from, _lesson.get("id", ""), _step])
 	progress["place"] = place_id
 	# The shade stays at its hearth.
 	if _shade_node:
@@ -1026,7 +1031,7 @@ func auto_move() -> Vector2:
 					for p in _people:
 						if p.get("id", "") == who.get("id", "-"):
 							goal = p["pos"]
-			elif gt == "reach":
+			elif gt == "reach" and progress["place"] != String(st["goal"]["place"]):
 				goal = _door_toward(String(st["goal"]["place"]))
 		if goal == Vector2.INF:
 			return Vector2.ZERO
@@ -1294,6 +1299,8 @@ func _next_step() -> void:
 		_finish_lesson()
 		return
 	var s: Dictionary = steps[_step]
+	if debug:
+		print("STEP %s %d/%d %s goal=%s place=%s" % [_lesson.get("id", ""), _step + 1, steps.size(), s.get("title", ""), s["goal"]["type"], s.get("place", "-")])
 	_count = 0
 	_note = ""
 	var setup: Dictionary = s.get("setup", {})
@@ -2237,10 +2244,14 @@ func _hunt_begin(beast: String, scale: float) -> void:
 	world.reset_feedback()
 	hud.configure(fight, hero["name"])
 	hud.target.visible = true
+	if debug:
+		print("HUNT %s x%.2f at %s" % [beast, scale, str(fight.p_pos)])
 	title_card("LOOSE IN THE YARD", "the wards are up", Style.EMBER)
 
 func _finish_trouble() -> void:
 	var lesson := _lesson
+	if debug:
+		print("TROUBLE done %s" % lesson.get("id", ""))
 	var c: Dictionary = lesson["poster"]
 	if not progress.has("troubles_done"):
 		progress["troubles_done"] = []
