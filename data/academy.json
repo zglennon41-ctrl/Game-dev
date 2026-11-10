@@ -1,5 +1,5 @@
 {
-  "comment": "The Academy at Alexandria: a solo, offline act every character plays before the server. Places, Instructors, the cohort's name pools and temperaments, and the lessons. Every line is the owner's to rewrite. In lines: {name} is the player's character; {my_name}, {my_shape}, {my_blood}, {my_city} are the speaker's own; {your_shape}, {your_blood} the player's.",
+  "comment": "The Academy at Alexandria: a solo, offline act every character plays before the server. Places, Instructors, the cohort's name pools and temperaments, and the lessons. Every line is the owner's to rewrite. In lines: {name} is the player's character; {my_name}, {my_shape}, {my_blood}, {my_city} are the speaker's own; {your_shape}, {your_blood} the player's. A place's style says how the Academy kit builds it (tools/blender/academy_kit.py, docs/home-base.md): kind is court (under the dusk sky) or hall (indoors); floor is the kit's tile; sides gives each of n, s, e, w its wall bays in order (they repeat) and its door piece; a door may name its own piece; features stand a piece at a place along a side (the great hearth); corner is the piece on the four corners; trusses the roof timbers of a hall; lawns are rectangles of grass; pools are the Library's coloured light on the paving (x, z, size, colour); track lays the line from x. furniture is the place's fittings: piece, at (x, z), rot in degrees, solid (a radius people walk round) or solids (several, each dx, dz, radius).",
   "term": {
     "cohort": "the Hundred-and-Fourth Cohort",
     "season": "the Thaw",
@@ -71,7 +71,8 @@
             -5
           ],
           "label": "the Instructors' Tower",
-          "locked": "The Instructors' Tower. Students go up when they are sent for."
+          "locked": "The Instructors' Tower. Students go up when they are sent for.",
+          "piece": "tower_door"
         }
       ],
       "spots": [
@@ -139,7 +140,224 @@
           -8
         ],
         "label": "the board"
-      }
+      },
+      "style": {
+        "kind": "court",
+        "floor": "floor_flags",
+        "ambient": 0.5,
+        "corner": "corner_turret",
+        "lawns": [
+          [
+            -12,
+            -7,
+            -3,
+            -2.5
+          ],
+          [
+            3,
+            -7,
+            12,
+            -2.5
+          ],
+          [
+            -12,
+            2.5,
+            -3,
+            7
+          ],
+          [
+            3,
+            2.5,
+            12,
+            7
+          ]
+        ],
+        "sides": {
+          "n": {
+            "bays": [
+              "library_bay"
+            ],
+            "door": "library_portal"
+          },
+          "s": {
+            "bays": [
+              "range_window",
+              "range_plain",
+              "range_dim",
+              "range_window"
+            ],
+            "door": "gatehouse"
+          },
+          "w": {
+            "bays": [
+              "cloister_bay"
+            ],
+            "door": "range_portal"
+          },
+          "e": {
+            "bays": [
+              "range_window",
+              "range_dim",
+              "range_plain"
+            ],
+            "door": "range_door"
+          }
+        },
+        "pools": [
+          [
+            -10,
+            -8.4,
+            3.0,
+            "#7fd0ff"
+          ],
+          [
+            -6,
+            -8.4,
+            3.0,
+            "#b98cff"
+          ],
+          [
+            6,
+            -8.4,
+            3.0,
+            "#ffb060"
+          ],
+          [
+            10,
+            -8.4,
+            3.0,
+            "#8fffa8"
+          ]
+        ],
+        "lamps": 0.9
+      },
+      "furniture": [
+        {
+          "piece": "brazier_great",
+          "at": [
+            0,
+            0
+          ],
+          "solid": 1.3
+        },
+        {
+          "piece": "tree_court",
+          "at": [
+            -9.5,
+            -4.6
+          ],
+          "solid": 1.25
+        },
+        {
+          "piece": "tree_court",
+          "at": [
+            7.6,
+            4.6
+          ],
+          "rot": 140,
+          "solid": 1.25
+        },
+        {
+          "piece": "lamp_post",
+          "at": [
+            -12.8,
+            -9.0
+          ],
+          "solid": 0.3
+        },
+        {
+          "piece": "lamp_post",
+          "at": [
+            12.8,
+            9.2
+          ],
+          "solid": 0.3
+        },
+        {
+          "piece": "lamp_post",
+          "at": [
+            -12.8,
+            9.2
+          ],
+          "solid": 0.3
+        },
+        {
+          "piece": "lamp_post",
+          "at": [
+            12.6,
+            -9.3
+          ],
+          "solid": 0.3
+        },
+        {
+          "piece": "lamp_post",
+          "at": [
+            -7.0,
+            -2.2
+          ],
+          "solid": 0.3
+        },
+        {
+          "piece": "lamp_post",
+          "at": [
+            7.0,
+            2.2
+          ],
+          "solid": 0.3
+        },
+        {
+          "piece": "bench",
+          "at": [
+            -7.5,
+            -9.6
+          ],
+          "solid": 0.9
+        },
+        {
+          "piece": "bench",
+          "at": [
+            4.5,
+            -9.6
+          ],
+          "solid": 0.9
+        },
+        {
+          "piece": "bench",
+          "at": [
+            -7.5,
+            9.6
+          ],
+          "rot": 180,
+          "solid": 0.9
+        },
+        {
+          "piece": "bench",
+          "at": [
+            7.5,
+            9.6
+          ],
+          "rot": 180,
+          "solid": 0.9
+        },
+        {
+          "piece": "ward_stone",
+          "at": [
+            -2.7,
+            8.8
+          ],
+          "rot": 180,
+          "solid": 0.5
+        },
+        {
+          "piece": "ward_stone",
+          "at": [
+            2.7,
+            8.8
+          ],
+          "rot": 180,
+          "solid": 0.5
+        }
+      ]
     },
     "yard": {
       "name": "The Yard",
@@ -268,6 +486,137 @@
           ],
           "discipline": "blade"
         }
+      ],
+      "style": {
+        "kind": "court",
+        "floor": "floor_yard",
+        "ambient": 0.5,
+        "corner": "curtain_corner",
+        "sides": {
+          "n": {
+            "bays": [
+              "curtain_lamp",
+              "stand_bay",
+              "stand_bay",
+              "stand_bay",
+              "stand_bay",
+              "curtain_lamp"
+            ]
+          },
+          "s": {
+            "bays": [
+              "curtain_wall",
+              "curtain_lamp",
+              "curtain_wall",
+              "curtain_wall",
+              "curtain_lamp",
+              "curtain_wall"
+            ]
+          },
+          "e": {
+            "bays": [
+              "curtain_wall",
+              "armoury_bay",
+              "armoury_bay",
+              "curtain_wall"
+            ]
+          },
+          "w": {
+            "bays": [
+              "curtain_lamp"
+            ],
+            "door": "curtain_portal"
+          }
+        }
+      },
+      "furniture": [
+        {
+          "piece": "ward_stone",
+          "at": [
+            -9.5,
+            -5.8
+          ],
+          "solid": 0.5
+        },
+        {
+          "piece": "ward_stone",
+          "at": [
+            9.5,
+            5.8
+          ],
+          "rot": 180,
+          "solid": 0.5
+        },
+        {
+          "piece": "ward_stone",
+          "at": [
+            -9.5,
+            5.8
+          ],
+          "rot": 180,
+          "solid": 0.5
+        },
+        {
+          "piece": "training_dummy",
+          "at": [
+            5.2,
+            5.8
+          ],
+          "rot": 180,
+          "solid": 0.45
+        },
+        {
+          "piece": "training_dummy",
+          "at": [
+            7.4,
+            5.7
+          ],
+          "rot": 200,
+          "solid": 0.45
+        },
+        {
+          "piece": "training_post",
+          "at": [
+            2.4,
+            5.9
+          ],
+          "solid": 0.4
+        },
+        {
+          "piece": "training_post",
+          "at": [
+            -0.4,
+            5.9
+          ],
+          "rot": 30,
+          "solid": 0.4
+        },
+        {
+          "piece": "weapon_rack",
+          "at": [
+            -5.6,
+            6.0
+          ],
+          "rot": 180,
+          "solid": 0.9
+        },
+        {
+          "piece": "barrel",
+          "at": [
+            -8.0,
+            6.0
+          ],
+          "solid": 0.45
+        },
+        {
+          "piece": "barrel",
+          "at": [
+            -7.2,
+            6.2
+          ],
+          "rot": 40,
+          "scale": 0.85
+        }
       ]
     },
     "dorm": {
@@ -300,7 +649,276 @@
         "label": "your bunk"
       },
       "spots": [],
-      "instructors": []
+      "instructors": [],
+      "style": {
+        "kind": "hall",
+        "floor": "floor_boards",
+        "ambient": 0.28,
+        "corner": "hall_corner",
+        "door": "hall_door",
+        "sides": {
+          "n": {
+            "bays": [
+              "hall_window",
+              "hall_sconce",
+              "hall_window",
+              "hall_sconce"
+            ]
+          },
+          "s": {
+            "bays": [
+              "hall_sconce",
+              "hall_window",
+              "hall_sconce",
+              "hall_window"
+            ]
+          },
+          "e": {
+            "bays": [
+              "hall_window",
+              "hall_banner",
+              "hall_window"
+            ]
+          },
+          "w": {
+            "bays": [
+              "hall_wall"
+            ]
+          }
+        },
+        "trusses": {
+          "piece": "truss_12",
+          "across": "z",
+          "every": 4
+        },
+        "lamps": 0.7
+      },
+      "furniture": [
+        {
+          "piece": "bunk",
+          "at": [
+            -2.0,
+            -3.4
+          ],
+          "rot": 180,
+          "solids": [
+            [
+              0,
+              -0.55,
+              0.65
+            ],
+            [
+              0,
+              0.55,
+              0.65
+            ]
+          ]
+        },
+        {
+          "piece": "bunk",
+          "at": [
+            1.0,
+            -3.4
+          ],
+          "rot": 180,
+          "solids": [
+            [
+              0,
+              -0.55,
+              0.65
+            ],
+            [
+              0,
+              0.55,
+              0.65
+            ]
+          ]
+        },
+        {
+          "piece": "bunk",
+          "at": [
+            4.0,
+            -3.4
+          ],
+          "rot": 180,
+          "solids": [
+            [
+              0,
+              -0.55,
+              0.65
+            ],
+            [
+              0,
+              0.55,
+              0.65
+            ]
+          ]
+        },
+        {
+          "piece": "chest",
+          "at": [
+            -3.5,
+            -4.85
+          ],
+          "rot": 0
+        },
+        {
+          "piece": "chest",
+          "at": [
+            -0.5,
+            -4.85
+          ],
+          "rot": 0
+        },
+        {
+          "piece": "chest",
+          "at": [
+            2.5,
+            -4.85
+          ],
+          "rot": 0
+        },
+        {
+          "piece": "chest",
+          "at": [
+            5.5,
+            -4.85
+          ],
+          "rot": 0
+        },
+        {
+          "piece": "bunk",
+          "at": [
+            -2.0,
+            3.4
+          ],
+          "rot": 0,
+          "solids": [
+            [
+              0,
+              -0.55,
+              0.65
+            ],
+            [
+              0,
+              0.55,
+              0.65
+            ]
+          ]
+        },
+        {
+          "piece": "bunk",
+          "at": [
+            1.0,
+            3.4
+          ],
+          "rot": 0,
+          "solids": [
+            [
+              0,
+              -0.55,
+              0.65
+            ],
+            [
+              0,
+              0.55,
+              0.65
+            ]
+          ]
+        },
+        {
+          "piece": "bunk",
+          "at": [
+            4.0,
+            3.4
+          ],
+          "rot": 0,
+          "solids": [
+            [
+              0,
+              -0.55,
+              0.65
+            ],
+            [
+              0,
+              0.55,
+              0.65
+            ]
+          ]
+        },
+        {
+          "piece": "chest",
+          "at": [
+            -3.5,
+            4.85
+          ],
+          "rot": 180
+        },
+        {
+          "piece": "chest",
+          "at": [
+            -0.5,
+            4.85
+          ],
+          "rot": 180
+        },
+        {
+          "piece": "chest",
+          "at": [
+            2.5,
+            4.85
+          ],
+          "rot": 180
+        },
+        {
+          "piece": "chest",
+          "at": [
+            5.5,
+            4.85
+          ],
+          "rot": 180
+        },
+        {
+          "piece": "stove",
+          "at": [
+            6.5,
+            0.0
+          ],
+          "rot": 90,
+          "solid": 0.75
+        },
+        {
+          "piece": "rug",
+          "at": [
+            0.5,
+            0.0
+          ]
+        },
+        {
+          "piece": "desk",
+          "at": [
+            -5.5,
+            -4.1
+          ],
+          "solid": 0.8
+        },
+        {
+          "piece": "desk",
+          "at": [
+            -5.5,
+            4.1
+          ],
+          "rot": 180,
+          "solid": 0.8
+        },
+        {
+          "piece": "chandelier",
+          "at": [
+            0.5,
+            0.0
+          ]
+        }
+      ]
     },
     "hearth": {
       "name": "The Hearth Hall",
@@ -391,6 +1009,165 @@
           ],
           "after": "discipline"
         }
+      ],
+      "style": {
+        "kind": "hall",
+        "floor": "floor_hall",
+        "ambient": 0.3,
+        "corner": "hall_corner",
+        "door": "hall_portal",
+        "sides": {
+          "n": {
+            "bays": [
+              "hall_banner",
+              "hall_window",
+              "hall_window",
+              "hall_banner"
+            ],
+            "features": [
+              {
+                "piece": "hall_hearth",
+                "at": 0
+              }
+            ]
+          },
+          "s": {
+            "bays": [
+              "hall_banner",
+              "hall_sconce",
+              "hall_sconce",
+              "hall_banner"
+            ]
+          },
+          "e": {
+            "bays": [
+              "hall_banner",
+              "hall_window",
+              "hall_sconce",
+              "hall_window",
+              "hall_banner"
+            ]
+          },
+          "w": {
+            "bays": [
+              "hall_banner",
+              "hall_window",
+              "hall_sconce",
+              "hall_window",
+              "hall_banner"
+            ]
+          }
+        },
+        "trusses": {
+          "piece": "truss_20",
+          "across": "x",
+          "every": 4
+        },
+        "lamps": 0.85
+      },
+      "furniture": [
+        {
+          "piece": "table_long",
+          "at": [
+            -8.0,
+            2.5
+          ],
+          "rot": 90,
+          "solids": [
+            [
+              0,
+              -1.6,
+              0.75
+            ],
+            [
+              0,
+              0,
+              0.75
+            ],
+            [
+              0,
+              1.6,
+              0.75
+            ]
+          ]
+        },
+        {
+          "piece": "table_long",
+          "at": [
+            8.0,
+            2.5
+          ],
+          "rot": 90,
+          "solids": [
+            [
+              0,
+              -1.6,
+              0.75
+            ],
+            [
+              0,
+              0,
+              0.75
+            ],
+            [
+              0,
+              1.6,
+              0.75
+            ]
+          ]
+        },
+        {
+          "piece": "bench_long",
+          "at": [
+            -9.0,
+            2.5
+          ],
+          "rot": 90
+        },
+        {
+          "piece": "bench_long",
+          "at": [
+            9.0,
+            2.5
+          ],
+          "rot": 90
+        },
+        {
+          "piece": "chandelier",
+          "at": [
+            -5.0,
+            4.0
+          ]
+        },
+        {
+          "piece": "chandelier",
+          "at": [
+            5.0,
+            4.0
+          ]
+        },
+        {
+          "piece": "chandelier",
+          "at": [
+            -5.0,
+            -4.0
+          ]
+        },
+        {
+          "piece": "chandelier",
+          "at": [
+            5.0,
+            -4.0
+          ]
+        },
+        {
+          "piece": "rug",
+          "at": [
+            0.0,
+            6.2
+          ],
+          "scale": 1.3
+        }
       ]
     },
     "gate": {
@@ -474,6 +1251,109 @@
             3,
             0
           ]
+        }
+      ],
+      "style": {
+        "kind": "court",
+        "floor": "floor_platform",
+        "ambient": 0.48,
+        "corner": "curtain_corner",
+        "track": {
+          "from": -9.0
+        },
+        "sides": {
+          "n": {
+            "bays": [
+              "station_wall",
+              "station_bench",
+              "station_clock",
+              "station_wall",
+              "station_bench",
+              "station_wall",
+              "station_wall"
+            ]
+          },
+          "s": {
+            "bays": [
+              "station_bench",
+              "station_wall",
+              "station_wall",
+              "station_bench",
+              "station_wall",
+              "station_clock",
+              "station_wall"
+            ]
+          },
+          "w": {
+            "bays": [
+              "station_wall"
+            ],
+            "door": "station_portal"
+          },
+          "e": {
+            "bays": [
+              "station_wall"
+            ],
+            "features": [
+              {
+                "piece": "line_arch",
+                "at": 0
+              }
+            ]
+          }
+        }
+      },
+      "furniture": [
+        {
+          "piece": "signal_lamp",
+          "at": [
+            11.3,
+            -2.9
+          ],
+          "rot": 90,
+          "solid": 0.4
+        },
+        {
+          "piece": "luggage",
+          "at": [
+            -10.2,
+            -4.9
+          ],
+          "rot": 30,
+          "solid": 0.8
+        },
+        {
+          "piece": "luggage",
+          "at": [
+            9.6,
+            5.3
+          ],
+          "rot": 200,
+          "solid": 0.8
+        },
+        {
+          "piece": "lamp_post",
+          "at": [
+            -3.0,
+            5.9
+          ],
+          "solid": 0.3
+        },
+        {
+          "piece": "lamp_post",
+          "at": [
+            3.5,
+            -5.9
+          ],
+          "solid": 0.3
+        },
+        {
+          "piece": "barrel",
+          "at": [
+            -11.0,
+            5.4
+          ],
+          "solid": 0.45
         }
       ]
     }
