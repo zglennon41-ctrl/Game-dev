@@ -282,6 +282,15 @@ the turning and the bowl do across every base. In the game, `godot --path . --
 --gate --reading=<base>` opens the first refinement as if the term had been played like
 that base.
 
+**The whole tree as one page**, every form with its words and its picture from the game:
+`bash tools/genius-tree-page.sh` writes `build/genius-tree/genius-tree.html` (about twenty
+minutes without a graphics card; name bases after it to take only their pictures again).
+It stands each tree up with `godot --path . -- --sheet=<base> --shots=DIR`, every form
+alone in a cell and brought up to fill it (the settled form least, the finishes most), and
+takes one life beside its partner at true size with `-- --lineage=<base>`;
+`tools/genius-tree-page.py` cuts those into the page. `python3 tools/genius-tree-page.py
+--out DIR` alone writes the page with words only.
+
 `habit` is shown on the page and is not yet acted out in the world: `Genius.habit()`
 returns the form's, for the body's idle and the hall to use.
 

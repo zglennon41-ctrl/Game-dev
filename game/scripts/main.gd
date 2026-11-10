@@ -201,6 +201,9 @@ func _ready() -> void:
 	if _args.has("lineage"):
 		_lineage(str(_args["lineage"]))
 		return
+	if _args.has("sheet"):
+		_sheet(str(_args["sheet"]))
+		return
 	if _args.has("gallery"):
 		# The genius tree, assembled: a check of the bodies.
 		#   --gallery=wolf        one base's whole tree: the settled form, its three paths, the
@@ -551,6 +554,135 @@ func _play_like(g: Genius, leans: Dictionary, n: int) -> void:
 				"pattern":
 					if g.tally.get("intention") is Dictionary:
 						g.tally["intention"]["fires" if key == "fires" else "sworn"] = 100 if key == "fires" else true
+
+## --sheet=<base> (or a hybrid, wolf+hawk) with --shots=DIR: every form of one tree as the game
+## draws it, each alone in its own cell of a grid of eight by four, at the size of its age, on
+## a plain ground and seen flat (no perspective), so that a tool can cut the picture into
+## portraits. It writes sheet.json beside the picture: the ids of the forms, in order of cell.
+## tools/genius-tree-page.py makes the page of the whole tree from these.
+func _sheet(what: String) -> void:
+	mode = "gallery"
+	hud.hide_screen()
+	hud.play_ui.visible = false
+	world.show_wolf = false
+	world.genius_visible = false
+	world._player.visible = false
+	var tree := Data.tree_of(what)
+	if tree.is_empty():
+		push_error("no such base: " + what)
+		get_tree().quit(1)
+		return
+	const COLS := 8
+	const ROWS := 4
+	const HIGH := 300.0       # far above the room, where nothing else is
+	const FLOOR := 0.16       # how far up its cell a form's ground is
+	world._env.fog_enabled = false
+	world._env.background_color = Color(0.009, 0.007, 0.0055)
+	world._env.glow_bloom = 0.0
+	var key := DirectionalLight3D.new()
+	key.rotation_degrees = Vector3(-32, 28, 0)
+	key.light_color = Color(1.0, 0.93, 0.82)
+	key.light_energy = 0.3
+	world.add_child(key)
+	var ground := StandardMaterial3D.new()
+	ground.albedo_color = Color(0.2, 0.17, 0.14)
+	ground.roughness = 1.0
+	# one partner's genius all the way down: the colour of the Shape this base comes to most, and
+	# one coat, so that what differs between two cells is the form and nothing else
+	var col: Color = World.SHAPE_COLORS["anchor"]
+	var called: Dictionary = Data.base(what.get_slice("+", 0)).get("calls", {}).get("shape", {})
+	var most := 0.0
+	for sh in called:
+		if float(called[sh]) > most and World.SHAPE_COLORS.has(sh):
+			most = float(called[sh])
+			col = World.SHAPE_COLORS[sh]
+	var look := GeniusLook.born(4711 + what.hash() % 97)
+	var ids: Array = []
+	var bodies: Array = []
+	for i in tree.size():
+		var f: Dictionary = tree[i]
+		ids.append(f["id"])
+		var info := { "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": f["features"], "instar": int(f["level"]), "look": look }
+		var b := world.make_form(info, col)
+		world.add_child(b)
+		b.rotation.y = 0.6
+		bodies.append(b)
+	var vp := get_viewport().get_visible_rect().size
+	var shape := (vp.y / ROWS) / (vp.x / COLS)
+	var pitch := deg_to_rad(10.0)
+	var discs: Array = []
+	# stand them in cells of this width, with or without the ground under each
+	var place := func(cell_w: float, grounded: bool) -> void:
+		var cell_h := cell_w * shape
+		for d in discs:
+			d.queue_free()
+		discs.clear()
+		for i in bodies.size():
+			var b: Node3D = bodies[i]
+			var at := Vector3((i % COLS - (COLS - 1) / 2.0) * cell_w, HIGH - (i / COLS) * cell_h, 0)
+			b.position = at + Vector3(0, (0.35 if (b as GeniusBody).hover else 0.0) * b.scale.y, 0)
+			if grounded:
+				var disc := MeshInstance3D.new()
+				var dm := CylinderMesh.new()
+				dm.top_radius = cell_w * 0.4
+				dm.bottom_radius = cell_w * 0.4
+				dm.height = cell_w * 0.015
+				dm.radial_segments = 48
+				disc.mesh = dm
+				disc.material_override = ground
+				disc.position = at - Vector3(0, dm.height / 2.0, 0)
+				world.add_child(disc)
+				discs.append(disc)
+		var mid := Vector3(0, HIGH - (ROWS - 1) / 2.0 * cell_h + cell_h * (0.5 - FLOOR), 0)
+		world.camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+		world.camera.size = ROWS * cell_h * cos(pitch)
+		world.camera.far = 400.0
+		world.cine = true
+		world.cine_pos = mid + Vector3(0, 60.0 * sin(pitch), 60.0 * cos(pitch))
+		world.cine_look = mid
+		world._cam_pos = world.cine_pos
+		world._cam_look = world.cine_look
+	# First with no ground, to measure each where it is drawn (a body's own bounds are not to
+	# be trusted: skins, wings and lights all report their own). Then each is brought up to fill
+	# its cell, the settled form least and the finishes most, so that a pocket astrolabe is
+	# seen as near as a drake and the young still look young. True sizes are --lineage's.
+	var cell := float(_args.get("cell", "5.0"))
+	place.call(cell, false)
+	await get_tree().create_timer(1.0).timeout
+	await RenderingServer.frame_post_draw
+	var img := get_viewport().get_texture().get_image()
+	img.resize(COLS * 100, ROWS * 100, Image.INTERPOLATE_BILINEAR)
+	var back := img.get_pixel(1, 1)
+	var wide: Array = []      # of each, from the middle of its cell, and how tall, in hundredths of a cell
+	var tall: Array = []
+	for i in bodies.size():
+		wide.append(1.0)
+		tall.append(1.0)
+	for y in img.get_height():
+		for x in img.get_width():
+			var n := (y / 100) * COLS + x / 100
+			if n >= bodies.size():
+				continue
+			var c := img.get_pixel(x, y)
+			if absf(c.r - back.r) + absf(c.g - back.g) + absf(c.b - back.b) < 0.12:
+				continue
+			var up := (1.0 - FLOOR) * 100.0 - float(y % 100)
+			if up < 0.0:
+				continue      # what hangs below its ground is not counted
+			wide[n] = maxf(wide[n], absf(float(x % 100) + 0.5 - 50.0) + 1.0)
+			tall[n] = maxf(tall[n], up + 1.0)
+	const FILL := [0.56, 0.68, 0.78, 0.9]
+	for i in bodies.size():
+		var fill: float = FILL[clampi(int(tree[i]["level"]) - 1, 0, 3)]
+		(bodies[i] as Node3D).scale *= fill * minf(46.0 / float(wide[i]), (1.0 - FLOOR - 0.05) * 100.0 / float(tall[i]))
+	place.call(cell, true)
+	if _args.has("shots"):
+		await get_tree().create_timer(1.2).timeout
+		await _shot("sheet")
+		var out := FileAccess.open("%s/sheet.json" % _args["shots"], FileAccess.WRITE)
+		out.store_string(JSON.stringify({ "base": what, "cols": COLS, "rows": ROWS, "cell": cell, "forms": ids }))
+		out.close()
+		get_tree().quit()
 
 ## --lineage: how a genius's progress shows (docs/genius-progression.md), on the creator's
 ## platform. --lineage=life (or a list of form ids) stands one life in a row, a form for each

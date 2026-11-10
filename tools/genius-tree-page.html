@@ -1,0 +1,157 @@
+<title>WILDLINE Genius Tree</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,600;1,400&family=Alegreya+Sans:wght@400;500;700&family=Cinzel:wght@500;700&display=swap">
+<style>
+/* Layout: a sticky rail of the bases by class; below it each base is a sheet, its three paths side by side, each path a column that runs down through its prongs to their finishes. Every form has its portrait from the game at its left. */
+:root {
+  --ink: #0d0b0a; --plate: #17130f; --plate-hi: #211a13; --rule: #3a2f20;
+  --fg: #f2e8d6; --dim: #a99c8a; --faint: #766b5d;
+  --brass: #c79a4f; --brass-hi: #ffd175; --ember: #e07a4a; --shot: #070605;
+  --display: "Cinzel", "Trajan Pro", Georgia, serif;
+  --body: "Alegreya", Georgia, "Times New Roman", serif;
+  --ui: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --ink: #f4ede0; --plate: #fbf6ec; --plate-hi: #efe5d2; --rule: #cdbb9c;
+  --fg: #2a2118; --dim: #6a5c49; --faint: #94866f;
+  --brass: #8a6220; --brass-hi: #6e4a0e; --ember: #a8481c; color-scheme: light } }
+:root[data-theme="light"] {
+  --ink: #f4ede0; --plate: #fbf6ec; --plate-hi: #efe5d2; --rule: #cdbb9c;
+  --fg: #2a2118; --dim: #6a5c49; --faint: #94866f;
+  --brass: #8a6220; --brass-hi: #6e4a0e; --ember: #a8481c; color-scheme: light }
+* { box-sizing: border-box }
+body { background: var(--ink); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.45; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ink) }
+.wrap { max-width: 1500px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top { padding-block: 28px 14px }
+.top h1 { font-family: var(--display); font-weight: 700; font-size: clamp(28px, 5vw, 46px); letter-spacing: .04em; margin: 0; text-wrap: balance }
+.top p { max-width: 68ch; color: var(--dim); margin: 10px 0 0 }
+.levels { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 14px; font-family: var(--ui); font-size: 14px; color: var(--dim) }
+.levels b { color: var(--brass-hi); font-weight: 700 }
+.rail { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--ink); border-block: 1px solid var(--rule); }
+.rail .wrap { padding-block: 8px; display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center }
+.navgroup { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: baseline }
+.navlabel { font-family: var(--ui); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint) }
+.rail a { font-family: var(--ui); font-size: 14px; color: var(--fg); text-decoration: none; padding: 2px 8px; border: 1px solid var(--rule); border-radius: 3px }
+.rail a:hover, .rail a:focus-visible { border-color: var(--brass-hi); color: var(--brass-hi); outline: none }
+.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding-block: 14px 4px; font-family: var(--ui) }
+.tools input { flex: 1 1 240px; min-width: 0; max-width: 420px; font: inherit; font-size: 15px; padding: 7px 10px; background: var(--plate); color: var(--fg); border: 1px solid var(--rule); border-radius: 3px }
+.tools input:focus-visible, .tools button:focus-visible { outline: 2px solid var(--brass-hi); outline-offset: 1px }
+.tools button { font: inherit; font-size: 14px; padding: 7px 12px; background: var(--plate-hi); color: var(--fg); border: 1px solid var(--rule); border-radius: 3px; cursor: pointer }
+.tools span { font-size: 14px; color: var(--dim) }
+.base { padding-block: 34px 10px; scroll-margin-top: 110px }
+.bhead .eyebrow { font-family: var(--ui); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); margin: 0 }
+.bhead h2 { font-family: var(--display); font-weight: 700; font-size: clamp(26px, 4vw, 38px); letter-spacing: .05em; margin: 2px 0 6px; color: var(--brass-hi) }
+.soul { font-style: italic; font-size: 19px; max-width: 70ch; margin: 0 0 14px }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px 28px; border-top: 1px solid var(--rule); padding-top: 12px }
+.facts > div { min-width: 0 }
+.facts h3 { font-family: var(--ui); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin: 0 0 4px; font-weight: 700 }
+.facts p { margin: 0 0 4px }
+.sub { color: var(--dim); font-size: 15px }
+.settled { display: flex; gap: 12px; align-items: flex-start }
+.settled .pic { width: 96px }
+.txt { min-width: 0; flex: 1 }
+/* a portrait: one cell of the base's sheet from the game, eight across and four down */
+.pic { flex: none; display: block; width: 84px; aspect-ratio: 8 / 9; padding: 0; border: 1px solid var(--rule); border-radius: 3px; background-color: var(--shot); background-repeat: no-repeat; background-size: 800% 400%; background-position: calc(var(--c) / 7 * 100%) calc(var(--r) / 3 * 100%); cursor: zoom-in }
+.pic:hover, .pic:focus-visible { border-color: var(--brass-hi); outline: none }
+__SPRITES__
+.life { margin: 18px 0 0 }
+.life img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 3px; background: var(--shot) }
+.life figcaption { font-family: var(--ui); font-size: 14px; color: var(--dim); margin-top: 6px; max-width: 90ch }
+.life + .life { margin-top: 26px }
+.paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-top: 20px; align-items: start }
+.path { min-width: 0; background: var(--plate); border: 1px solid var(--rule); border-top: 3px solid var(--brass); padding: 14px 14px 6px; display: flex; flex-direction: column; gap: 10px }
+.form { display: flex; gap: 12px; align-items: flex-start }
+.l2 > .pic { width: 112px }
+.fname { margin: 0; font-weight: 600 }
+.l2 .fname { font-family: var(--display); font-size: 21px; letter-spacing: .04em; color: var(--brass-hi) }
+.l3 .fname { font-family: var(--body); font-size: 19px }
+.l4 .fname { font-family: var(--body); font-size: 17px }
+.of { margin: 2px 0 0; font-style: italic }
+.comes { margin: 2px 0 0; font-family: var(--ui); font-size: 13.5px; color: var(--dim) }
+.prong { border-top: 1px solid var(--rule); padding-top: 10px; display: flex; flex-direction: column; gap: 8px }
+.finishes { display: grid; gap: 10px; padding-left: 14px; border-left: 2px solid var(--rule); margin-bottom: 6px }
+.l4 .of { font-size: 16px }
+.more { margin-top: 4px }
+.more summary { cursor: pointer; font-family: var(--ui); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); list-style-position: inside }
+.more summary:hover, .more summary:focus-visible { color: var(--brass-hi); outline: none }
+.more p { margin: 6px 0; color: var(--fg) }
+.more dl { margin: 0 0 4px; display: grid; grid-template-columns: max-content 1fr; gap: 2px 10px; font-size: 15.5px }
+.more dt { font-family: var(--ui); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--brass); padding-top: 3px }
+.more dd { margin: 0; color: var(--dim) }
+.form.miss { opacity: .22 }
+.form.hit .fname { text-decoration: underline; text-decoration-color: var(--ember); text-underline-offset: 3px }
+dialog.look { border: 1px solid var(--brass); border-radius: 4px; background: var(--plate); color: var(--fg); padding: 14px; max-width: min(92vw, 460px); width: 100% }
+dialog.look::backdrop { background: rgba(0, 0, 0, .72) }
+dialog.look .pic { width: 100%; cursor: zoom-out; background-image: var(--sheet) }
+dialog.look p { font-family: var(--display); font-size: 20px; letter-spacing: .04em; color: var(--brass-hi); margin: 10px 0 0; text-align: center }
+footer { color: var(--faint); font-family: var(--ui); font-size: 13px; padding-block: 30px 40px }
+@media (max-width: 760px) {
+  body { font-size: 16px }
+  .rail .wrap { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 14px }
+  .rail .wrap::-webkit-scrollbar { display: none }
+  .navgroup { flex-wrap: nowrap; flex: none }
+  .rail a, .navlabel { white-space: nowrap }
+  .base { scroll-margin-top: 60px }
+  .pic { width: 72px }
+  .l2 > .pic { width: 92px }
+}
+</style>
+<div class="wrap top">
+  <h1>The Genius Tree</h1>
+  <p>A genius is its partner's soul, standing where it can be seen. Every one is on one of these trees. Each path is a trait in a person, and no two paths are earned by the same play. __SEEN__</p>
+  <div class="levels"><span><b>The spark</b> before the rite</span><span><b>Settled</b> at the rite</span><span><b>A path</b> of three, at the Gate</span><span><b>A prong</b> of three</span><span><b>A finish</b> of two</span><span>then it grows great, and to its apex</span></div>
+</div>
+<nav class="rail" aria-label="Bases"><div class="wrap">__NAV__</div></nav>
+<div class="wrap">
+  <div class="tools"><input id="find" type="search" placeholder="Find a form, a trait, a word" aria-label="Find a form"><button id="openall" type="button">Open every detail</button><span id="count">__TOTAL__ forms on __NBASE__ bases</span></div>
+__BODY__
+  <footer>Every name, sentence, sign and habit here is a draft from data/genius-bases. Hybrids join two of these bases and are composed from them by rule; any two can be joined.</footer>
+</div>
+<dialog class="look" id="look"><button type="button" class="pic" id="lookpic" aria-label="Close"></button><p id="lookname"></p></dialog>
+<script>
+(function () {
+  var find = document.getElementById('find'), count = document.getElementById('count'), btn = document.getElementById('openall');
+  var forms = Array.prototype.slice.call(document.querySelectorAll('.form'));
+  var rest = count.textContent, open = false;
+  find.addEventListener('input', function () {
+    var q = find.value.trim().toLowerCase(), n = 0;
+    forms.forEach(function (f) {
+      var hit = q !== '' && f.getAttribute('data-s').indexOf(q) >= 0;
+      f.classList.toggle('hit', hit);
+      f.classList.toggle('miss', q !== '' && !hit);
+      if (hit) n++;
+    });
+    count.textContent = q === '' ? rest : n + (n === 1 ? ' form matches' : ' forms match');
+  });
+  btn.addEventListener('click', function () {
+    open = !open;
+    Array.prototype.forEach.call(document.querySelectorAll('details.more'), function (d) { d.open = open; });
+    btn.textContent = open ? 'Close every detail' : 'Open every detail';
+  });
+  // a base's sheet of portraits is fetched when the base comes near the window
+  var bases = Array.prototype.slice.call(document.querySelectorAll('.base'));
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('seen'); io.unobserve(en.target); } });
+    }, { rootMargin: '900px 0px' });
+    bases.forEach(function (b) { io.observe(b); });
+  } else {
+    bases.forEach(function (b) { b.classList.add('seen'); });
+  }
+  // tap a portrait to look closer
+  var look = document.getElementById('look'), lookpic = document.getElementById('lookpic'), lookname = document.getElementById('lookname');
+  document.addEventListener('click', function (ev) {
+    var p = ev.target.closest ? ev.target.closest('.pic') : null;
+    if (!p) { if (ev.target === look) look.close(); return; }
+    if (p === lookpic) { look.close(); return; }
+    if (!look.showModal) return;
+    lookpic.style.setProperty('--c', p.style.getPropertyValue('--c'));
+    lookpic.style.setProperty('--r', p.style.getPropertyValue('--r'));
+    look.style.setProperty('--sheet', getComputedStyle(p).backgroundImage);
+    lookname.textContent = p.getAttribute('data-n');
+    look.showModal();
+  });
+})();
+</script>
