@@ -4,6 +4,7 @@
  "class": "creature",
  "expression": "aspect",
  "silhouette": "aspect-flame",
+ "soul": "The soul of one who gives off more than they keep, and has never worked out how to burn low.",
  "spark": "The mote is a point of orange that brightens when you breathe out. Cup your hands round it and they are warm.",
  "nature": {
   "shape": {
@@ -48,21 +49,383 @@
   "id": "ember-spark",
   "name": "Spark",
   "text": "A coal's worth of fire with nothing under it, hanging at your shoulder. It goes where your attention goes, and has scorched the page you were reading.",
+  "sign": "A coal's worth of fire with nothing under it, at your shoulder. It brightens when you breathe out.",
+  "habit": "It drifts to whatever you are looking at and scorches it slightly.",
   "features": [
    "ember"
   ]
  },
  "paths": [
   {
-   "id": "ember-open-flame",
-   "name": "Open Flame",
-   "text": "It learned from you that fire wants to go somewhere.",
+   "id": "ember-kept-fire",
+   "name": "Kept Fire",
+   "of": "one who warms a whole room and lets nobody close enough to be burned",
+   "text": "It learned from you that a fire is best at a certain distance: near enough to warm, too far to burn. It keeps that distance exactly.",
+   "sign": "A steady flame the height of a hand, always the same two paces off. It moves back when you move in.",
+   "habit": "It settles in the middle of any group and keeps the same distance from each.",
    "leans": {
+    "range": {
+     "mid": 1.0
+    },
+    "company": {
+     "party": 0.7
+    },
     "orders": {
-     "hunt": 1.0
+     "hold": 0.5
+    }
+   },
+   "features": [
+    "glow"
+   ],
+   "prongs": [
+    {
+     "id": "ember-camp-fire",
+     "name": "Camp-fire",
+     "of": "one people gather round without deciding to",
+     "text": "The party sits round it and it sits with the party. It is counted among the three now.",
+     "sign": "A ring of scorched stones travels with it and sets itself down wherever it stops.",
+     "habit": "It burns up a little when a third person joins, and down when one leaves.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      }
+     },
+     "features": [
+      "ring"
+     ],
+     "finishes": [
+      {
+       "id": "ember-cohort-fire",
+       "name": "Cohort Fire",
+       "of": "one who holds a little of each friend",
+       "text": "Twelve of you lit it together the first cold night. It burns a little for each, and dips when one is hurt.",
+       "sign": "Twelve small tongues of flame stand in a crown, each a slightly different colour.",
+       "habit": "One tongue dips now and then. It turns to face the dormitory that classmate sleeps in.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        }
+       },
+       "features": [
+        "crown"
+       ]
+      },
+      {
+       "id": "ember-travellers-fire",
+       "name": "Traveller's Fire",
+       "of": "one who is carried between strangers so that they are not strangers",
+       "text": "It goes in a pot between you and the passenger. Nobody who was warm at it has been lost on the road.",
+       "sign": "It rides in a pierced iron pot on a chain, and throws a lattice of light on whoever walks beside it.",
+       "habit": "It burns toward the guest, whoever the guest is.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ember-circle-flame",
+     "name": "Circle-flame",
+     "of": "one who decides where the dark stops",
+     "text": "It keeps the dark at the edge of a circle and you inside the circle.",
+     "sign": "The light it throws ends in a clean edge, like a line drawn on the ground. Two bright points in it watch the edge.",
+     "habit": "It widens its circle by a pace when someone is late home.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      }
+     },
+     "features": [
+      "far-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "ember-the-fire-that-stayed",
+       "name": "The Fire That Stayed",
+       "of": "one who was still there in the morning, every time",
+       "text": "It has burned through every night you were afraid it would not. The posts along your line have started to copy it.",
+       "sign": "A low old flame, more gold than orange, with the look of something that has seen many dawns.",
+       "habit": "It burns lowest in the hour before light, and has never gone out in it.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "orders": {
+         "hold": 0.5
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      },
+      {
+       "id": "ember-window-ember",
+       "name": "Window-ember",
+       "of": "one who keeps a light in the window for those not coming back",
+       "text": "It burns in the hall's window for those not coming back. They come anyway, to look at it.",
+       "sign": "A single ember behind glass, with a blue heart. Frost on the pane does not form near it.",
+       "habit": "It sits on the sill facing out, all night, from the lamp hour on.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ember-tempering-flame",
+     "name": "Tempering Flame",
+     "of": "one who is made harder by what should have put them out",
+     "text": "Each time you are hurt it burns a little hotter in you. You are harder to hurt than you were.",
+     "sign": "A dark skin like fire-scale has formed over it, and the flame shows red at the cracks.",
+     "habit": "It sits in the forge coals while they are worked, and comes out brighter.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      }
+     },
+     "features": [
+      "iron-hide"
+     ],
+     "finishes": [
+      {
+       "id": "ember-twice-lit",
+       "name": "Twice-lit",
+       "of": "one who went out once and came back changed",
+       "text": "It went out once, when you went down. It came back when you did, and has not been the same colour since.",
+       "sign": "Its flame is a colour it was not before, and two thin wings of it stand up at the back.",
+       "habit": "It gutters once, deliberately, each night, and catches again.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        }
+       },
+       "features": [
+        "wings"
+       ]
+      },
+      {
+       "id": "ember-slow-coal",
+       "name": "Slow Coal",
+       "of": "one whose patience is hot to the touch",
+       "text": "It sits in your guard arm. What strikes your guard finds the guard is hot.",
+       "sign": "A coal banked behind plates of its own clinker. Heat comes off the plates in a slow shimmer.",
+       "habit": "It sits in the crook of your guard arm and warms the joint before practice.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        }
+       },
+       "features": [
+        "plated"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ember-rushlight",
+   "name": "Rushlight",
+   "of": "one who keeps a small light going where there is no reason to",
+   "text": "It learned from you to go on where there is no reason to. It is a small light, and it has been carried into worse places than it was made for.",
+   "sign": "A thin upright flame no bigger than a thumbnail. It does not lean in a draught.",
+   "habit": "It burns at the same height all night, whether or not anyone is in the room.",
+   "leans": {
+    "ground": {
+     "quiet": 1.0
+    },
+    "quests": {
+     "deep-run": 0.7
     },
     "shape": {
-     "turn": 0.6
+     "read": 0.5
+    }
+   },
+   "features": [
+    "watching-eye"
+   ],
+   "prongs": [
+    {
+     "id": "ember-cold-flame",
+     "name": "Cold Flame",
+     "of": "one who can go on without any warmth coming back",
+     "text": "In the Quiet it burns blue and gives no heat, and it is the one flame the Quiet cannot put out.",
+     "sign": "It burns blue and gives no heat. You can pass a hand through it and feel nothing.",
+     "habit": "It stands in the coldest corner of the room, does not warm it, and does not leave.",
+     "leans": {
+      "ground": {
+       "quiet": 1.0
+      }
+     },
+     "features": [
+      "quiet-place"
+     ],
+     "finishes": [
+      {
+       "id": "ember-mast-fire",
+       "name": "Mast-fire",
+       "of": "one who stands at the front, where the dark water is",
+       "text": "It stands on the prow over black water, and the river-things keep their distance from it.",
+       "sign": "A blue-white flame that sits on the highest point of anything: a prow, a pole, a raised hand.",
+       "habit": "It climbs to the top of whatever is tallest in the room and stands there.",
+       "leans": {
+        "ground": {
+         "water": 1.0
+        }
+       },
+       "features": [
+        "current"
+       ]
+      },
+      {
+       "id": "ember-deep-ember",
+       "name": "Deep Ember",
+       "of": "one who always knows which way is out",
+       "text": "Carried into the heart of a zone, it leans toward the way out. When it stands straight, run.",
+       "sign": "A red ember with two pale points in it. It leans, slightly, always the same way.",
+       "habit": "It leans toward the door of any room it is in.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        }
+       },
+       "features": [
+        "far-eyes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ember-study-flame",
+     "name": "Study-flame",
+     "of": "one who reads by their own light, late",
+     "text": "Hold the thing to it and the old marks show. It has read more of the Archive's secrets than the archivists.",
+     "sign": "It burns small and white over a page and has never singed one. Old ink shows up under it.",
+     "habit": "It hangs over whatever you were last reading and waits for you to come back.",
+     "leans": {
+      "quests": {
+       "salvage": 1.0
+      }
+     },
+     "features": [
+      "pages"
+     ],
+     "finishes": [
+      {
+       "id": "ember-palimpsest-fire",
+       "name": "Palimpsest Fire",
+       "of": "one who sees what was there before it was written over",
+       "text": "It shows what was written under what was written. Some of it was about people like you.",
+       "sign": "A ring of faint figures turns round it like a dial, in a hand nobody now uses.",
+       "habit": "It passes slowly along old walls, and stops where there was once a door.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        },
+        "ground": {
+         "ruin": 0.4
+        }
+       },
+       "features": [
+        "dial"
+       ]
+      },
+      {
+       "id": "ember-seal-wax-flame",
+       "name": "Seal-wax Flame",
+       "of": "one who can tell when they are being lied to",
+       "text": "It seals what you send and opens what you receive, and burns a different colour when a house is lying.",
+       "sign": "It burns red as wax, with a drip that never falls. It goes green when someone in the room lies.",
+       "habit": "It hovers over the post as it is sorted, and darkens at one letter.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        }
+       },
+       "features": [
+        "ledger"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ember-signal-flame",
+     "name": "Signal-flame",
+     "of": "one who keeps talking to those too far away to answer",
+     "text": "It speaks across distance in flashes to those you are bound to, and they have learned to read it.",
+     "sign": "When it is alone it flashes long and short, with pauses left for a reply.",
+     "habit": "It signals from the window toward the line each night, and waits.",
+     "leans": {
+      "shape": {
+       "bind": 1.0
+      }
+     },
+     "features": [
+      "voice"
+     ],
+     "finishes": [
+      {
+       "id": "ember-oath-fire",
+       "name": "Oath-fire",
+       "of": "one whose word you can put your hand in",
+       "text": "You swore with your hand in it. It did not burn you. It will, the day a Term is broken.",
+       "sign": "A flame with a chain of darker fire coiled in it. It is cool to those who have kept faith.",
+       "habit": "It burns over your hand when you rest it on the table, and does not hurt.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      },
+      {
+       "id": "ember-running-fire",
+       "name": "Running Fire",
+       "of": "one who passes it on, and it is larger when it arrives",
+       "text": "It runs down the chain of your Pattern from beat to beat, and each beat lands hotter than the last.",
+       "sign": "It does not stay in one place but runs in a ring from point to point, brighter each lap.",
+       "habit": "It lights every candle in the room in turn, and goes round again.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ember-wildfire",
+   "name": "Wildfire",
+   "of": "one who spends themselves all at once and is surprised to be tired",
+   "text": "It learned from you to spend the whole of itself at once. It is always surprised, afterward, to find that it is tired.",
+   "sign": "It burns ragged and too tall, streaming smoke, and is already leaning toward the next thing.",
+   "habit": "It burns down to almost nothing by evening, and is back at full height by breakfast.",
+   "leans": {
+    "pattern": {
+     "fires": 1.0
+    },
+    "ground": {
+     "wild": 0.7
+    },
+    "orders": {
+     "hunt": 0.5
     }
    },
    "features": [
@@ -72,7 +435,10 @@
     {
      "id": "ember-lash-of-flame",
      "name": "Lash of Flame",
+     "of": "one who throws themselves into whatever is nearest",
      "text": "It wraps your weapon and goes where the edge goes. What you cut stays lit.",
+     "sign": "A long tongue of flame that wraps whatever you hold, and leaves a bright edge on it.",
+     "habit": "It winds itself round the fire-irons, the bedpost, your wrist.",
      "leans": {
       "range": {
        "close": 1.0
@@ -85,7 +451,10 @@
       {
        "id": "ember-white-ember",
        "name": "White Ember",
+       "of": "one who burns hottest when closest",
        "text": "Close in, it burns without colour. Armour is a thing it has opinions about.",
+       "sign": "At arm's length it is orange. Against your skin it is white, with no colour at all at the centre.",
+       "habit": "It presses itself against cold iron until the iron ticks.",
        "leans": {
         "range": {
          "close": 1.0
@@ -101,7 +470,10 @@
       {
        "id": "ember-kiln-breath",
        "name": "Kiln-breath",
+       "of": "one whose heat goes into the work and stays there",
        "text": "It lives in what you build. Your conjured edges come out of the air already tempered.",
+       "sign": "It lives in a small cage of turning wheels it built for itself, and breathes through the gaps.",
+       "habit": "It breathes on what you have just made, and the piece rings when it cools.",
        "leans": {
         "shape": {
          "make": 1.0
@@ -116,7 +488,10 @@
     {
      "id": "ember-on-the-shot",
      "name": "Ember on the Shot",
+     "of": "one who is gone as soon as they are pointed",
      "text": "It rides your shot and opens when it lands.",
+     "sign": "Two short wings of flame, swept back, and a way of quivering on the hand before it goes.",
+     "habit": "It darts to the far end of the corridor and back for no reason at all.",
      "leans": {
       "range": {
        "far": 1.0
@@ -129,7 +504,10 @@
       {
        "id": "ember-comet",
        "name": "Ember Comet",
+       "of": "one who arrives all at once and leaves a mark",
        "text": "A long tail across the dark and a hole where it stops. You only have to point.",
+       "sign": "A hot white head and a long tail. A ring of light spreads wherever it stops.",
+       "habit": "It draws one long line across the dark ceiling before it will settle.",
        "leans": {
         "shape": {
          "cast": 1.0
@@ -142,7 +520,10 @@
       {
        "id": "ember-hill-fire",
        "name": "Hill-fire",
+       "of": "one who burns where it can be seen from the road",
        "text": "It burns on the height above a dark post, so the next car knows where the line still is.",
+       "sign": "A beacon flame, tall and plain, in an iron basket. It can be seen from the next post.",
+       "habit": "It answers any light it sees on the horizon with one flare, and waits for the answer.",
        "leans": {
         "ground": {
          "line": 1.0
@@ -160,7 +541,10 @@
     {
      "id": "ember-grass-fire",
      "name": "Grass-fire",
+     "of": "one whose enthusiasm gets away from them",
      "text": "Set down in the green it runs with the wind. Call it back before it forgets whose it is.",
+     "sign": "A low wide flame that runs along the ground in a line and puts down runners.",
+     "habit": "It creeps out along the floorboards toward the door when you are not watching, and comes back when called.",
      "leans": {
       "ground": {
        "wild": 1.0
@@ -173,7 +557,10 @@
       {
        "id": "ember-burn-off",
        "name": "Burn-off",
+       "of": "one who clears the ground so that the thing has to be faced",
        "text": "It burns the cover the pack hides in, upwind, and waits with you where they will come out.",
+       "sign": "A wide mouth of flame, low to the ground, with black stubble behind it.",
+       "habit": "It eats the dead leaves out of the gutters in autumn, neatly.",
        "leans": {
         "quests": {
          "hunt": 1.0
@@ -186,7 +573,10 @@
       {
        "id": "ember-fire-whirl",
        "name": "Fire-whirl",
+       "of": "one who has met something that makes them more than they can manage",
        "text": "Fire and wind found each other over open ground. It walks on one foot and nothing stands near it.",
+       "sign": "A turning column of flame on one foot, with the air standing clear and still round it.",
+       "habit": "It spins slowly in the middle of the yard on windy days and will not come in.",
        "leans": {
         "ground": {
          "wild": 1.0
@@ -199,294 +589,6 @@
         "standing-air"
        ],
        "silhouette": "aspect-whirl"
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "ember-kept-fire",
-   "name": "Kept Fire",
-   "text": "It learned from you that the fire somebody tends outlasts the one that is merely large.",
-   "leans": {
-    "orders": {
-     "hold": 1.0
-    },
-    "company": {
-     "party": 0.6
-    }
-   },
-   "features": [
-    "glow"
-   ],
-   "prongs": [
-    {
-     "id": "ember-camp-fire",
-     "name": "Camp-fire",
-     "text": "The party sits round it and it sits with the party. It is counted among the three now.",
-     "leans": {
-      "company": {
-       "party": 1.0
-      }
-     },
-     "features": [
-      "ring"
-     ],
-     "finishes": [
-      {
-       "id": "ember-cohort-fire",
-       "name": "Cohort Fire",
-       "text": "Twelve of you lit it together the first cold night. It burns a little for each, and dips when one is hurt.",
-       "leans": {
-        "bonds": {
-         "classmate": 1.0
-        }
-       },
-       "features": [
-        "crown"
-       ]
-      },
-      {
-       "id": "ember-travellers-fire",
-       "name": "Traveller's Fire",
-       "text": "It goes in a pot between you and the passenger. Nobody who was warm at it has been lost on the road.",
-       "leans": {
-        "quests": {
-         "escort": 1.0
-        }
-       },
-       "features": [
-        "lantern"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "ember-circle-flame",
-     "name": "Circle-flame",
-     "text": "It keeps the dark at the edge of a circle and you inside the circle.",
-     "leans": {
-      "ground": {
-       "night": 1.0
-      }
-     },
-     "features": [
-      "far-eyes"
-     ],
-     "finishes": [
-      {
-       "id": "ember-the-fire-that-stayed",
-       "name": "The Fire That Stayed",
-       "text": "It has burned through every night you were afraid it would not. The posts along your line have started to copy it.",
-       "leans": {
-        "ground": {
-         "night": 1.0
-        },
-        "orders": {
-         "hold": 0.5
-        }
-       },
-       "features": [
-        "old-eyes"
-       ]
-      },
-      {
-       "id": "ember-window-ember",
-       "name": "Window-ember",
-       "text": "It burns in the hall's window for those not coming back. They come anyway, to look at it.",
-       "leans": {
-        "bonds": {
-         "shade": 1.0
-        }
-       },
-       "features": [
-        "cold-core"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "ember-tempering-flame",
-     "name": "Tempering Flame",
-     "text": "Each time you are hurt it burns a little hotter in you. You are harder to hurt than you were.",
-     "leans": {
-      "fights": {
-       "hurts": 1.0
-      }
-     },
-     "features": [
-      "iron-hide"
-     ],
-     "finishes": [
-      {
-       "id": "ember-twice-lit",
-       "name": "Twice-lit",
-       "text": "It went out once, when you went down. It came back when you did, and has not been the same colour since.",
-       "leans": {
-        "fights": {
-         "hurts": 1.0
-        }
-       },
-       "features": [
-        "wings"
-       ]
-      },
-      {
-       "id": "ember-slow-coal",
-       "name": "Slow Coal",
-       "text": "It sits in your guard arm. What strikes your guard finds the guard is hot.",
-       "leans": {
-        "fights": {
-         "blocks": 1.0
-        }
-       },
-       "features": [
-        "plated"
-       ]
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "ember-seeing-flame",
-   "name": "Seeing Flame",
-   "text": "It learned from you that most of what fire is for is seeing by.",
-   "leans": {
-    "shape": {
-     "read": 1.0
-    },
-    "orders": {
-     "free": 0.5
-    }
-   },
-   "features": [
-    "watching-eye"
-   ],
-   "prongs": [
-    {
-     "id": "ember-study-flame",
-     "name": "Study-flame",
-     "text": "Hold the thing to it and the old marks show. It has read more of the Archive's secrets than the archivists.",
-     "leans": {
-      "quests": {
-       "salvage": 1.0
-      }
-     },
-     "features": [
-      "pages"
-     ],
-     "finishes": [
-      {
-       "id": "ember-palimpsest-fire",
-       "name": "Palimpsest Fire",
-       "text": "It shows what was written under what was written. Some of it was about people like you.",
-       "leans": {
-        "quests": {
-         "salvage": 1.0
-        },
-        "ground": {
-         "ruin": 0.4
-        }
-       },
-       "features": [
-        "dial"
-       ]
-      },
-      {
-       "id": "ember-seal-wax-flame",
-       "name": "Seal-wax Flame",
-       "text": "It seals what you send and opens what you receive, and burns a different colour when a house is lying.",
-       "leans": {
-        "quests": {
-         "writ": 1.0
-        }
-       },
-       "features": [
-        "ledger"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "ember-signal-flame",
-     "name": "Signal-flame",
-     "text": "It speaks across distance in flashes to those you are bound to, and they have learned to read it.",
-     "leans": {
-      "shape": {
-       "bind": 1.0
-      }
-     },
-     "features": [
-      "voice"
-     ],
-     "finishes": [
-      {
-       "id": "ember-oath-fire",
-       "name": "Oath-fire",
-       "text": "You swore with your hand in it. It did not burn you. It will, the day a Term is broken.",
-       "leans": {
-        "pattern": {
-         "sworn": 1.0
-        }
-       },
-       "features": [
-        "chain"
-       ]
-      },
-      {
-       "id": "ember-running-fire",
-       "name": "Running Fire",
-       "text": "It runs down the chain of your Pattern from beat to beat, and each beat lands hotter than the last.",
-       "leans": {
-        "pattern": {
-         "fires": 1.0
-        }
-       },
-       "features": [
-        "ring"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "ember-cold-flame",
-     "name": "Cold Flame",
-     "text": "In the Quiet it burns blue and gives no heat, and it is the one flame the Quiet cannot put out.",
-     "leans": {
-      "ground": {
-       "quiet": 1.0
-      }
-     },
-     "features": [
-      "quiet-place"
-     ],
-     "finishes": [
-      {
-       "id": "ember-mast-fire",
-       "name": "Mast-fire",
-       "text": "It stands on the prow over black water, and the river-things keep their distance from it.",
-       "leans": {
-        "ground": {
-         "water": 1.0
-        }
-       },
-       "features": [
-        "current"
-       ]
-      },
-      {
-       "id": "ember-deep-ember",
-       "name": "Deep Ember",
-       "text": "Carried into the heart of a zone, it leans toward the way out. When it stands straight, run.",
-       "leans": {
-        "quests": {
-         "deep-run": 1.0
-        }
-       },
-       "features": [
-        "far-eyes"
-       ]
       }
      ]
     }

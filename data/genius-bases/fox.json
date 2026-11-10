@@ -4,6 +4,7 @@
  "class": "animal",
  "expression": "beast",
  "silhouette": "beast-fox",
+ "soul": "The soul of one who would rather be clever than strong, and rather be gone than either.",
  "spark": "The mote is never where you last saw it. It is behind the thing you are looking at.",
  "nature": {
   "fights": {
@@ -48,21 +49,29 @@
   "id": "fox-kit",
   "name": "Fox kit",
   "text": "Too much tail, and the conviction that everything in the dormitory is either food or a game.",
+  "sign": "More tail than fox. It looks at a thing sideways first, then pounces on something else.",
+  "habit": "It hides one of every pair of things you own, and watches you look.",
   "features": [
    "tail"
   ]
  },
  "paths": [
   {
-   "id": "fox-feinter",
-   "name": "Feinter",
-   "text": "It learned from you that the blow you make the foe waste is the cheapest one.",
+   "id": "fox-gone-away",
+   "name": "Gone-away",
+   "of": "one who is never where the consequences land",
+   "text": "It learned from you that the best place to be when a thing goes wrong is somewhere else. It is always already there.",
+   "sign": "Long whiskers that are always moving, and a way of standing with one foot already turned to go.",
+   "habit": "It sits nearest the door in every room, and nobody has seen it use the door.",
    "leans": {
     "fights": {
      "dodges": 1.0
     },
     "orders": {
-     "free": 0.6
+     "free": 0.7
+    },
+    "company": {
+     "alone": 0.4
     }
    },
    "features": [
@@ -72,7 +81,10 @@
     {
      "id": "fox-red-decoy",
      "name": "Red Decoy",
+     "of": "one who draws the trouble off their friends and enjoys it",
      "text": "It runs across the foe's eye at the moment your friends need it looking elsewhere.",
+     "sign": "A coat too red to miss, and it looks back over its shoulder as it runs.",
+     "habit": "It trots across any open space slowly, to see who looks.",
      "leans": {
       "company": {
        "party": 1.0
@@ -85,7 +97,10 @@
       {
        "id": "fox-brush-flag",
        "name": "Brush-flag",
+       "of": "one who is laughed at until the trick works",
        "text": "A white tail-tip going the wrong way. The pack follows it every time. Your cohort has stopped laughing.",
+       "sign": "The white tip of its tail carries a light of its own, and bobs.",
+       "habit": "It waves its tail at dogs from the far side of a fence.",
        "leans": {
         "company": {
          "party": 1.0
@@ -101,7 +116,10 @@
       {
        "id": "fox-hen-house-ghost",
        "name": "Hen-house Ghost",
+       "of": "one who is gone before the blame arrives",
        "text": "In and out before the dog lifts its head. Alone with you at night it is the same, and the dog is your problem.",
+       "sign": "It is a shade greyer than the dark it stands in. There is usually a feather somewhere on it.",
+       "habit": "It comes home at dawn by a different window each time.",
        "leans": {
         "company": {
          "alone": 1.0
@@ -119,7 +137,10 @@
     {
      "id": "fox-double-back",
      "name": "Double-back",
+     "of": "one who lets the other finish and then makes the point",
      "text": "It is behind the foe when the strike lands where it was. You parry; it punishes.",
+     "sign": "It shows its teeth in what is very nearly a smile, from behind you.",
+     "habit": "It follows people round a corner and is waiting at the next one.",
      "leans": {
       "fights": {
        "parries": 1.0
@@ -132,7 +153,10 @@
       {
        "id": "fox-turnabout",
        "name": "Turnabout",
+       "of": "one who gets the other to turn their back at the right moment",
        "text": "The foe turns to it, and your Pattern arrives in the back the foe just offered.",
+       "sign": "A thin ring of light spins round the tip of its tail when it is pleased with itself.",
+       "habit": "It chases its tail one way, stops, and catches it the other.",
        "leans": {
         "pattern": {
          "fires": 1.0
@@ -145,7 +169,10 @@
       {
        "id": "fox-hole-in-the-hedge",
        "name": "Hole-in-the-hedge",
+       "of": "one who always knows another way out",
        "text": "There is always a gap, and it is always already through it, looking back at you to hurry.",
+       "sign": "Its ears are large and turn separately. There are leaves in its coat from the far side of things.",
+       "habit": "It finds the gap in every fence on the first evening, and shows you on the second.",
        "leans": {
         "ground": {
          "wild": 1.0
@@ -158,45 +185,51 @@
      ]
     },
     {
-     "id": "fox-mask-wearer",
-     "name": "Mask-wearer",
-     "text": "It can wear a face the foe will follow. You taught it that a leash is mostly persuasion.",
+     "id": "fox-listening-fox",
+     "name": "Listening Fox",
+     "of": "one who hears it coming and leaves before the knock",
+     "text": "It hears the wind-up through the ground, head tilted, and is gone before you know why you should be.",
+     "sign": "Head tilted and one forepaw lifted, listening to the floor.",
+     "habit": "It presses one ear to the ground for a while, and then goes and sits somewhere else.",
      "leans": {
       "shape": {
-       "bind": 1.0
+       "read": 1.0
       }
      },
      "features": [
-      "mask"
+      "tunnel-ear"
      ],
      "finishes": [
       {
-       "id": "fox-of-two-faces",
-       "name": "Fox of Two Faces",
-       "text": "One face for you and one for everything else. Do not ask which this is.",
+       "id": "fox-at-the-crossroads",
+       "name": "Fox at the Crossroads",
+       "of": "one who waits to see which way everyone else goes",
+       "text": "It sits where two houses' interests meet and watches which way you turn. It will remember.",
+       "sign": "It sits exactly where two ways part. A pale eye-mark on its brow seems to follow you.",
+       "habit": "It sits in the middle of a corridor and makes people choose a side.",
        "leans": {
-        "shape": {
-         "bind": 1.0
-        },
-        "orders": {
-         "free": 0.5
+        "quests": {
+         "writ": 1.0
         }
        },
        "features": [
-        "second-face"
+        "watching-eye"
        ]
       },
       {
-       "id": "fox-contract-fox",
-       "name": "Contract Fox",
-       "text": "It was party to your oath and found the one thing the Terms did not forbid. It is saving it.",
+       "id": "fox-snow-silent-fox",
+       "name": "Snow-silent Fox",
+       "of": "one who leaves no trace of having been there",
+       "text": "It leaves no track in the Quiet, and neither do you while you walk in its.",
+       "sign": "It leaves no print, even in new snow. The air does not move when it passes.",
+       "habit": "It walks across a made bed and the blanket is not creased.",
        "leans": {
-        "pattern": {
-         "sworn": 1.0
+        "ground": {
+         "quiet": 1.0
         }
        },
        "features": [
-        "ledger"
+        "quiet-place"
        ]
       }
      ]
@@ -204,15 +237,19 @@
    ]
   },
   {
-   "id": "fox-mouser",
-   "name": "Mouser",
-   "text": "It learned from you to listen for the thing under the snow and go in nose first.",
+   "id": "fox-cache-fox",
+   "name": "Cache-fox",
+   "of": "one who cannot pass a thing left lying",
+   "text": "It learned from you that a thing left lying is a thing offered. It carries each one off and buries it, and knows where every one is.",
+   "sign": "There is always something in its mouth, held very gently. Its lips are worn pale from carrying.",
+   "habit": "It buries things under your bed and digs them up to check on them.",
    "leans": {
-    "orders": {
-     "hunt": 1.0
+    "quests": {
+     "salvage": 1.0
     },
-    "range": {
-     "close": 0.6
+    "ground": {
+     "night": 0.7,
+     "ruin": 0.5
     }
    },
    "features": [
@@ -220,9 +257,65 @@
    ],
    "prongs": [
     {
+     "id": "fox-night-raider",
+     "name": "Night-raider",
+     "of": "one who does their collecting after hours",
+     "text": "It hunts in the hours you keep. Its eyes give back the lamp from further off than they should.",
+     "sign": "Its eyes give back the lamp from further off than they should.",
+     "habit": "It makes its rounds of the yard when the last light goes out, the same way each night.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      }
+     },
+     "features": [
+      "dark-eyed"
+     ],
+     "finishes": [
+      {
+       "id": "fox-dock-fox",
+       "name": "Dock Fox",
+       "of": "one who lives on what the busy drop",
+       "text": "It works the yards and platforms after the last car, and brings you what the line dropped.",
+       "sign": "A small lamp swings at its neck, and its feet are black with platform soot.",
+       "habit": "It meets the last car and walks the length of it after everyone has left.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "quests": {
+         "salvage": 0.5
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      },
+      {
+       "id": "fox-graveyard-fox",
+       "name": "Graveyard Fox",
+       "of": "one who is at home where things have ended",
+       "text": "It dens in ruins and knows which floor will hold. It has been wrong once, and that was not its floor.",
+       "sign": "Old eyes in a young face. It tests each step with one paw before it trusts it.",
+       "habit": "It dens under the oldest thing in the yard.",
+       "leans": {
+        "ground": {
+         "ruin": 1.0
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      }
+     ]
+    },
+    {
      "id": "fox-den-digger",
      "name": "Den-digger",
+     "of": "one who goes in after what is hidden",
      "text": "It goes down the hole after what you hunt and comes out the other end driving it.",
+     "sign": "Its forepaws are broad and earth-stained, and its nose is usually dirty.",
+     "habit": "It digs at the corners of rooms, where the floor meets the wall.",
      "leans": {
       "quests": {
        "hunt": 1.0
@@ -235,7 +328,10 @@
       {
        "id": "fox-name-thief",
        "name": "Name-thief",
+       "of": "one who takes a keepsake from the mighty and is seen doing it",
        "text": "It has taken something from every named beast you felled, before you felled it. They noticed.",
+       "sign": "A chain of small stolen things hangs at its neck: a scale, a claw-tip, a tag.",
+       "habit": "It lays its takings out in a row at night and puts them away in a different order.",
        "leans": {
         "bonds": {
          "named": 1.0
@@ -248,7 +344,10 @@
       {
        "id": "fox-culvert-king",
        "name": "Culvert King",
+       "of": "one who knows every back way better than its owners",
        "text": "No den, tunnel or culvert on the line is closed to it. It knows them better than what lives there.",
+       "sign": "A coat that sheds water and mud alike, and shoulders narrower than they look.",
+       "habit": "It goes into any pipe it can fit its head in, and comes out somewhere you did not expect.",
        "leans": {
         "quests": {
          "hunt": 1.0
@@ -266,7 +365,10 @@
     {
      "id": "fox-snow-pouncer",
      "name": "Snow-pouncer",
+     "of": "one who knows where a thing is before it shows",
      "text": "It goes straight up and comes straight down on the place the foe will be standing.",
+     "sign": "Longer in the leg than a fox should be. It holds its head on one side over bare ground.",
+     "habit": "It leaps straight up and comes down nose first into blankets, snow, or your laundry.",
      "leans": {
       "range": {
        "mid": 1.0
@@ -279,7 +381,10 @@
       {
        "id": "fox-frost-fox",
        "name": "Frost Fox",
+       "of": "one who goes still and cold before they move",
        "text": "Your cold went into its coat. It lands, and the ground under the foe is ice.",
+       "sign": "White rime on its whiskers and tail. Its breath falls instead of rising.",
+       "habit": "It sits out in the frost until its coat is stiff, then comes in and stands on your feet.",
        "leans": {
         "shape": {
          "turn": 1.0
@@ -292,7 +397,10 @@
       {
        "id": "fox-cinder-brush",
        "name": "Cinder-brush",
+       "of": "one whose temper shows at the very tip",
        "text": "When you bleed its tail-tip lights. What it pounces on then stays lit.",
+       "sign": "The tip of its tail is a live coal. It holds it carefully away from the bedding.",
+       "habit": "It curls up with its tail over its nose, and the tip glows as it breathes.",
        "leans": {
         "fights": {
          "hurts": 1.0
@@ -303,61 +411,23 @@
        ]
       }
      ]
-    },
-    {
-     "id": "fox-night-raider",
-     "name": "Night-raider",
-     "text": "It hunts in the hours you keep. Its eyes give back the lamp from further off than they should.",
-     "leans": {
-      "ground": {
-       "night": 1.0
-      }
-     },
-     "features": [
-      "dark-eyed"
-     ],
-     "finishes": [
-      {
-       "id": "fox-dock-fox",
-       "name": "Dock Fox",
-       "text": "It works the yards and platforms after the last car, and brings you what the line dropped.",
-       "leans": {
-        "ground": {
-         "line": 1.0
-        },
-        "quests": {
-         "salvage": 0.5
-        }
-       },
-       "features": [
-        "lantern"
-       ]
-      },
-      {
-       "id": "fox-graveyard-fox",
-       "name": "Graveyard Fox",
-       "text": "It dens in ruins and knows which floor will hold. It has been wrong once, and that was not its floor.",
-       "leans": {
-        "ground": {
-         "ruin": 1.0
-        }
-       },
-       "features": [
-        "old-eyes"
-       ]
-      }
-     ]
     }
    ]
   },
   {
    "id": "fox-fire-tail",
    "name": "Fire-tail",
-   "text": "It learned from you that the field will hold a light if it is asked nicely.",
+   "of": "one who is a different person in every room",
+   "text": "It learned from you that people will follow a light if it is the one they hoped for. It carries a different one for each of them.",
+   "sign": "A light rides at the tip of its tail, and is not the same colour for any two people looking.",
+   "habit": "It greets everyone in a room separately, and each one believes they are the favourite.",
    "leans": {
     "shape": {
-     "turn": 1.0,
+     "bind": 1.0,
      "cast": 0.4
+    },
+    "pattern": {
+     "fires": 0.7
     }
    },
    "features": [
@@ -365,43 +435,54 @@
    ],
    "prongs": [
     {
-     "id": "fox-marsh-light-fox",
-     "name": "Marsh-light Fox",
-     "text": "It walks out over the water with its tail lit, and things follow it to where the footing ends.",
+     "id": "fox-mask-wearer",
+     "name": "Mask-wearer",
+     "of": "one who can be whoever the other hoped to see",
+     "text": "It can wear a face the foe will follow. You taught it that a leash is mostly persuasion.",
+     "sign": "A pale mask lies over its face that is not quite the shape of the face beneath.",
+     "habit": "It practises expressions in the washbasin.",
      "leans": {
-      "ground": {
-       "water": 1.0
+      "shape": {
+       "bind": 1.0
       }
      },
      "features": [
-      "webbed"
+      "mask"
      ],
      "finishes": [
       {
-       "id": "fox-ferry-fox",
-       "name": "Ferry-fox",
-       "text": "It leads the passenger across by the only stones that hold. It has a ferryman's contempt for swimmers.",
+       "id": "fox-of-two-faces",
+       "name": "Fox of Two Faces",
+       "of": "one who keeps one self for home and another for everyone else",
+       "text": "One face for you and one for everything else. Do not ask which this is.",
+       "sign": "Seen from the left and from the right it is not the same fox.",
+       "habit": "It sleeps with one face to you and one to the door.",
        "leans": {
-        "quests": {
-         "escort": 1.0
+        "shape": {
+         "bind": 1.0
+        },
+        "orders": {
+         "free": 0.5
         }
        },
        "features": [
-        "fins"
+        "second-face"
        ]
       },
       {
-       "id": "fox-fen-candle",
-       "name": "Fen Candle",
-       "text": "A small flame over black water that is never quite reachable. Others followed it. You it waits for.",
+       "id": "fox-contract-fox",
+       "name": "Contract Fox",
+       "of": "one who keeps their word, having read it very carefully first",
+       "text": "It was party to your oath and found the one thing the Terms did not forbid. It is saving it.",
+       "sign": "A small book hangs at its collar, with one page folded down.",
+       "habit": "It reads over your shoulder whenever you sign anything, and sometimes puts a paw on the page.",
        "leans": {
-        "ground": {
-         "water": 1.0,
-         "night": 0.5
+        "pattern": {
+         "sworn": 1.0
         }
        },
        "features": [
-        "ember"
+        "ledger"
        ]
       }
      ]
@@ -409,7 +490,10 @@
     {
      "id": "fox-split-tail",
      "name": "Split-tail",
+     "of": "one who cannot do a thing well without doing it again to be seen",
      "text": "Every time your Pattern went off cleanly its tail thought about dividing. It has now.",
+     "sign": "Two tails, and it carries them so that you will notice.",
+     "habit": "It grooms each tail separately and at length, in the best light in the room.",
      "leans": {
       "pattern": {
        "fires": 1.0
@@ -422,7 +506,10 @@
       {
        "id": "fox-of-many-tails",
        "name": "Fox of Many Tails",
+       "of": "one who has become more than anyone can keep count of",
        "text": "Count them when it is asleep. You will get a different number than your friends do.",
+       "sign": "More tails than can be counted, fanned behind it. They move like one thing and then do not.",
+       "habit": "It sleeps in a ring of its own tails and cannot be found in the middle.",
        "leans": {
         "pattern": {
          "fires": 1.0
@@ -438,7 +525,10 @@
       {
        "id": "fox-reynard-of-the-hall",
        "name": "Reynard of the Hall",
+       "of": "one who tells the old stories slightly wrong, for love",
        "text": "The shades taught it their stories and it tells them back wrong on purpose. They adore it.",
+       "sign": "It talks: a dry, quick voice, mostly asides. The old dead lean in to hear it.",
+       "habit": "It tells the hearth a story at the lamp hour and changes the ending every time.",
        "leans": {
         "bonds": {
          "shade": 1.0
@@ -451,42 +541,52 @@
      ]
     },
     {
-     "id": "fox-listening-fox",
-     "name": "Listening Fox",
-     "text": "It hears the wind-up through the ground, head tilted, and is gone before you know why you should be.",
+     "id": "fox-marsh-light-fox",
+     "name": "Marsh-light Fox",
+     "of": "one whom others follow further than is wise",
+     "text": "It walks out over the water with its tail lit, and things follow it to where the footing ends.",
+     "sign": "It walks on the water's skin with its tail lit. Its feet are webbed and leave rings.",
+     "habit": "It crosses every puddle by the middle.",
      "leans": {
-      "shape": {
-       "read": 1.0
+      "ground": {
+       "water": 1.0
       }
      },
      "features": [
-      "tunnel-ear"
+      "webbed"
      ],
      "finishes": [
       {
-       "id": "fox-at-the-crossroads",
-       "name": "Fox at the Crossroads",
-       "text": "It sits where two houses' interests meet and watches which way you turn. It will remember.",
+       "id": "fox-ferry-fox",
+       "name": "Ferry-fox",
+       "of": "one who knows the only safe way and makes you ask",
+       "text": "It leads the passenger across by the only stones that hold. It has a ferryman's contempt for swimmers.",
+       "sign": "A finned tail, a wet coat, and the look of someone who has been kept waiting.",
+       "habit": "It sits on the far bank until you call it, and then comes over by the stones.",
        "leans": {
         "quests": {
-         "writ": 1.0
+         "escort": 1.0
         }
        },
        "features": [
-        "watching-eye"
+        "fins"
        ]
       },
       {
-       "id": "fox-snow-silent-fox",
-       "name": "Snow-silent Fox",
-       "text": "It leaves no track in the Quiet, and neither do you while you walk in its.",
+       "id": "fox-fen-candle",
+       "name": "Fen Candle",
+       "of": "one who is out of reach for everyone but one person",
+       "text": "A small flame over black water that is never quite reachable. Others followed it. You it waits for.",
+       "sign": "A small steady flame at its tail-tip that is always a little further off than it looks.",
+       "habit": "It waits at the end of the path, just in sight, until you have caught up. Then it goes on.",
        "leans": {
         "ground": {
-         "quiet": 1.0
+         "water": 1.0,
+         "night": 0.5
         }
        },
        "features": [
-        "quiet-place"
+        "ember"
        ]
       }
      ]

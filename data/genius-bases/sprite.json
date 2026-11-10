@@ -4,6 +4,7 @@
  "class": "creature",
  "expression": "kith",
  "silhouette": "kith-fey",
+ "soul": "The soul of one who cannot keep an opinion to themselves, and is usually right about the small things.",
  "spark": "The mote hums, very faintly, the tune you had in your head. It gets the tune wrong on purpose.",
  "nature": {
   "orders": {
@@ -48,6 +49,8 @@
   "id": "sprite-little-lantern-sprite",
   "name": "Little lantern-sprite",
   "text": "A hand high, holding a light it will not put down, and talking the whole time: mostly to you, partly to the light.",
+  "sign": "A hand high, with a lantern it holds in both arms and will not put down. Its mouth is open.",
+  "habit": "It narrates what you are doing, a little ahead of your doing it.",
   "features": [
    "lantern",
    "voice"
@@ -57,13 +60,19 @@
   {
    "id": "sprite-hob",
    "name": "Hob",
+   "of": "one who fusses over everyone and is seldom thanked",
    "text": "It learned from you that somebody has to mind the house, even when the house is three people on a dark line.",
+   "sign": "Sleeves rolled, hands on hips, lantern hooked at its belt. It is looking at your bootlaces.",
+   "habit": "It tidies people: tucks in a scarf, turns down a collar, tuts.",
    "leans": {
-    "orders": {
-     "guard": 1.0
-    },
     "company": {
-     "party": 0.6
+     "party": 1.0
+    },
+    "fights": {
+     "hurts": 0.7
+    },
+    "orders": {
+     "guard": 0.5
     }
    },
    "features": [
@@ -73,7 +82,10 @@
     {
      "id": "sprite-shoulder-mender",
      "name": "Shoulder-mender",
+     "of": "one who scolds while they mend",
      "text": "It sits on your shoulder after the fight with a needle the size of an eyelash. It scolds while it works.",
+     "sign": "A needle the size of an eyelash and a brush behind one ear. It works with its tongue out.",
+     "habit": "It checks your seams and buttons each night and sews on the loose one, muttering.",
      "leans": {
       "fights": {
        "hurts": 1.0
@@ -86,7 +98,10 @@
       {
        "id": "sprite-wound-wright",
        "name": "Wound-wright",
+       "of": "one who remembers every hurt you took and watches for the next",
        "text": "It has closed every cut you took and remembers each. It has started closing them a moment early.",
+       "sign": "Its fingertips glow faintly, and it looks at your old scars before it looks at your face.",
+       "habit": "It counts your bruises at bedtime and compares the total with yesterday's.",
        "leans": {
         "fights": {
          "hurts": 1.0
@@ -99,7 +114,10 @@
       {
        "id": "sprite-thimble-knight",
        "name": "Thimble Knight",
+       "of": "one whose courage is far too large for them",
        "text": "It took a thimble for a helm and a needle for a lance, and stands on your guard arm daring the blow.",
+       "sign": "A thimble for a helm and a needle for a lance. It stands very straight on your guard arm.",
+       "habit": "It challenges moths.",
        "leans": {
         "fights": {
          "blocks": 1.0
@@ -114,7 +132,10 @@
     {
      "id": "sprite-hearth-hob",
      "name": "Hearth-hob",
+     "of": "one who knows who has not eaten and says so",
      "text": "It knows who in the cohort has not eaten and who has not slept, and tells you, loudly, in front of them.",
+     "sign": "It carries a live coal in a nutshell and warms its hands at it between remarks.",
+     "habit": "It goes round the table at supper and looks into every bowl.",
      "leans": {
       "bonds": {
        "classmate": 1.0
@@ -127,7 +148,10 @@
       {
        "id": "sprite-hob-of-the-hall",
        "name": "Hob of the Hall",
+       "of": "one who took on the house because nobody else was going to",
        "text": "It keeps the cohort's hearth. Nobody asked it to. The fire has not gone out since.",
+       "sign": "A lamplighter's pole taller than itself, and a little crown of bent wire it thinks nobody has noticed.",
+       "habit": "It banks the hearth last thing and is the first up to blow on it.",
        "leans": {
         "bonds": {
          "classmate": 1.0
@@ -144,7 +168,10 @@
       {
        "id": "sprite-collar-rider",
        "name": "Collar-rider",
+       "of": "one who tells the frightened it will be all right, and makes it so",
        "text": "It rides in the passenger's collar and tells them it will be all right. So far it has not lied.",
+       "sign": "It rides in a collar with only its head and lantern out. Its eyes are older than its voice.",
+       "habit": "It talks low and steadily to whoever in the room is most afraid.",
        "leans": {
         "quests": {
          "escort": 1.0
@@ -159,7 +186,10 @@
     {
      "id": "sprite-post-sprite",
      "name": "Post-sprite",
+     "of": "one who cannot bear a dirty lamp",
      "text": "It moves into the lamp of any post you hold and keeps the glass clean.",
+     "sign": "It sits inside a lamp glass with a rag, and a ring of clean light stands round the post.",
+     "habit": "It polishes any glass it can reach: lamps, windows, your spectacles while you wear them.",
      "leans": {
       "orders": {
        "hold": 1.0
@@ -175,7 +205,10 @@
       {
        "id": "sprite-thimble-of-oil",
        "name": "Thimble-of-oil",
+       "of": "one who has earned a small regular kindness and grown particular about it",
        "text": "The walkers leave it a thimble of oil at every post you have relit. It has grown particular about the oil.",
+       "sign": "It carries a thimble on a string and sniffs what is in it before it will drink.",
+       "habit": "It visits each lamp along the corridor at dusk and nods to it.",
        "leans": {
         "ground": {
          "line": 1.0
@@ -191,7 +224,10 @@
       {
        "id": "sprite-door-ward-hob",
        "name": "Door-ward Hob",
+       "of": "one who checks the latch twice",
        "text": "Where it hangs its light, the door is warded. It learned the knot from watching your hands.",
+       "sign": "A length of fine chain with a tiny lamp on the end, hung on whatever door you are behind.",
+       "habit": "It tries every door and window before bed, in the same order, and then once more.",
        "leans": {
         "shape": {
          "make": 1.0
@@ -209,15 +245,199 @@
    ]
   },
   {
-   "id": "sprite-pixy",
-   "name": "Pixy",
-   "text": "It learned from you that a foe's eyes can be led, and it had a light to lead them with.",
+   "id": "sprite-lore-sprite",
+   "name": "Lore-sprite",
+   "of": "one who has to know, and then has to tell you",
+   "text": "It learned from you that knowing is a kind of light too.",
+   "sign": "Its lantern is held up to whatever is nearest, and its nose is nearly touching it.",
+   "habit": "It reads the labels on everything, aloud.",
    "leans": {
-    "fights": {
-     "dodges": 1.0
+    "shape": {
+     "read": 1.0
+    },
+    "quests": {
+     "salvage": 0.7
     },
     "orders": {
-     "hunt": 0.5
+     "free": 0.4
+    }
+   },
+   "features": [
+    "old-eyes"
+   ],
+   "prongs": [
+    {
+     "id": "sprite-book-wisp",
+     "name": "Book-wisp",
+     "of": "one who reads the thing before it is clean",
+     "text": "It reads the thing you dig up before you have brushed it off, and tells you what the Archive will not.",
+     "sign": "Dust on its knees and a page stuck to one wing. It reads with its light held between its teeth.",
+     "habit": "It sleeps in whichever book you left open, and loses your place.",
+     "leans": {
+      "quests": {
+       "salvage": 1.0
+      }
+     },
+     "features": [
+      "pages"
+     ],
+     "finishes": [
+      {
+       "id": "sprite-stack-light",
+       "name": "Stack-light",
+       "of": "one the learned consult and do not credit",
+       "text": "The archivists pretend not to consult it. It lives in the stacks on the days you are not out.",
+       "sign": "It carries a little brass dial for finding shelves, and has ink on both feet.",
+       "habit": "It walks along the spines of a shelf, stops at one, and looks at you.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        }
+       },
+       "features": [
+        "dial"
+       ]
+      },
+      {
+       "id": "sprite-writ-riddler",
+       "name": "Writ-riddler",
+       "of": "one who hears what was said and what was meant",
+       "text": "It reads a writ and tells you what it says, what it means, and what the house hopes you will not notice.",
+       "sign": "A second small face on the back of its head reads the other side of the page.",
+       "habit": "It repeats what people have just said, slowly, until they hear it.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        }
+       },
+       "features": [
+        "second-face"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "sprite-grave-light",
+     "name": "Grave-light",
+     "of": "one who cannot leave the lonely in the dark",
+     "text": "It carries its lantern among the hall's dead so they can see each other. They are grateful, and talk.",
+     "sign": "Its lantern burns blue and cold, and it carries it low, at the height of someone seated.",
+     "habit": "It sets its lantern down beside empty chairs and waits a while.",
+     "leans": {
+      "bonds": {
+       "shade": 1.0
+      }
+     },
+     "features": [
+      "cold-core"
+     ],
+     "finishes": [
+      {
+       "id": "sprite-shade-lighter",
+       "name": "Shade-lighter",
+       "of": "one who goes out to bring the lost ones in",
+       "text": "Shades follow its light in from the dark line to the hearth. It has brought eleven home.",
+       "sign": "A lamplighter's pole with a soft light at the tip, held out behind it for someone to follow.",
+       "habit": "It walks to the gate at dusk, holds its light up to the dark line, and counts.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        }
+       },
+       "features": [
+        "glow"
+       ],
+       "silhouette": "kith-lamplighter"
+      },
+      {
+       "id": "sprite-quarrel-light",
+       "name": "Quarrel-light",
+       "of": "one who cannot hide what they think of somebody",
+       "text": "It burns a different colour near anything you have a quarrel with. Near the named ones it goes white.",
+       "sign": "Its light changes colour as people come in. An eye is painted on the glass, and it narrows.",
+       "habit": "It turns its lantern to face whoever it has not forgiven.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        }
+       },
+       "features": [
+        "watching-eye"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "sprite-weather-sprite",
+     "name": "Weather-sprite",
+     "of": "one who takes on the mood of the room",
+     "text": "It has learned your element and wears it: frost on its wings one week, cinders the next.",
+     "sign": "Frost on its wings this week. Last week it was soot. It sneezes small weather.",
+     "habit": "It sits on the sill and copies the sky: grey when it is grey, and so on.",
+     "leans": {
+      "shape": {
+       "turn": 1.0
+      }
+     },
+     "features": [
+      "rime"
+     ],
+     "finishes": [
+      {
+       "id": "sprite-storm-in-a-jar",
+       "name": "Storm-in-a-jar",
+       "of": "one who has bottled something up and is not sure it will hold",
+       "text": "It keeps your weather in its lantern and lets it out over the green when asked. Sometimes when not.",
+       "sign": "Its lantern is full of dark cloud with small lightning in it. It carries it at arm's length.",
+       "habit": "It shakes the lantern to see what the weather does, and is sorry.",
+       "leans": {
+        "shape": {
+         "turn": 1.0
+        },
+        "ground": {
+         "wild": 0.5
+        }
+       },
+       "features": [
+        "smoke"
+       ]
+      },
+      {
+       "id": "sprite-light-at-the-heart",
+       "name": "Light at the Heart",
+       "of": "one whose small light holds where larger ones fail",
+       "text": "At the heart of a zone its light is the only one that does not gutter. Varga walks beside it and does not say why.",
+       "sign": "The air stands still round its lantern, and the flame is the one thing that does not move.",
+       "habit": "It holds its lantern up at the darkest part of any stair and waits for you there.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        }
+       },
+       "features": [
+        "standing-air"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sprite-pixy",
+   "name": "Pixy",
+   "of": "one who will not be told, and leads the rest astray for the fun of it",
+   "text": "It learned from you that being told is only a suggestion. It goes where it likes, and other people's eyes go after it.",
+   "sign": "Quick wings and a grin. Its lantern is always held just behind its back.",
+   "habit": "It moves one thing in every room it passes through, a little, and watches from the lintel.",
+   "leans": {
+    "orders": {
+     "free": 1.0
+    },
+    "ground": {
+     "night": 0.7
+    },
+    "fights": {
+     "dodges": 0.5
     }
    },
    "features": [
@@ -227,7 +447,10 @@
     {
      "id": "sprite-stray-light-pixy",
      "name": "Stray-light Pixy",
+     "of": "one who likes to see where people will go if you let them",
      "text": "It hangs its lantern where the footing is worst and waits for the foe to walk to it.",
+     "sign": "Dark eyes that give back no light, and a lantern hung on a long crook, away from itself.",
+     "habit": "It hangs its lantern at the top of the wrong stair and listens.",
      "leans": {
       "ground": {
        "night": 1.0
@@ -240,7 +463,10 @@
       {
        "id": "sprite-marsh-jack",
        "name": "Marsh Jack",
+       "of": "one who has one trick and has never needed another",
        "text": "Its light stands over deep water looking like a lamp in a window. It has never needed a second trick.",
+       "sign": "Webbed feet, wet to the knee, and a light that looks exactly like a window with someone home.",
+       "habit": "It stands its lantern on the rain barrel and sits beside it, pleased.",
        "leans": {
         "ground": {
          "water": 1.0
@@ -253,7 +479,10 @@
       {
        "id": "sprite-shuttered-sprite",
        "name": "Shuttered Sprite",
+       "of": "one who can go dark or bright at will, and enjoys the bright part",
        "text": "It can shut its light. In that moment it is beside the foe, and then the light opens in the foe's face.",
+       "sign": "A tin shutter on its lantern and a mask to match. Both snap open at once.",
+       "habit": "It shuts its light, counts three, and opens it in somebody's face.",
        "leans": {
         "ground": {
          "night": 1.0
@@ -268,7 +497,10 @@
     {
      "id": "sprite-flare-sprite",
      "name": "Flare-sprite",
+     "of": "one who must be looked at when the moment comes",
      "text": "It flares on the first beat of your Pattern, and the foe spends the rest of the chain blinking.",
+     "sign": "A ring of afterglow hangs where it last flared. It is already somewhere else, waiting.",
+     "habit": "It flares whenever anyone in the room says its name, and sometimes when they nearly do.",
      "leans": {
       "pattern": {
        "fires": 1.0
@@ -281,7 +513,10 @@
       {
        "id": "sprite-star-burst",
        "name": "Star-burst",
+       "of": "one who would rather be a hundred small things than one sensible one",
        "text": "At the end of your chain it goes up like a rocket and comes down as a hundred small lights. All of them sting.",
+       "sign": "It is not one light any longer but a drift of them, and each has a little of its grin.",
+       "habit": "It scatters to every corner of the ceiling at bedtime and takes an hour to come together.",
        "leans": {
         "pattern": {
          "fires": 1.0
@@ -298,7 +533,10 @@
       {
        "id": "sprite-blind-mans-lamp",
        "name": "Blind-man's Lamp",
+       "of": "one whose timing is the whole joke",
        "text": "When you parry it shines in the foe's eye at the turn. The stagger lasts a breath longer.",
+       "sign": "It holds the lantern behind a cupped hand, with its eyes fixed on something far off, waiting.",
+       "habit": "It uncovers its light exactly as you turn to look at it.",
        "leans": {
         "fights": {
          "parries": 1.0
@@ -313,7 +551,10 @@
     {
      "id": "sprite-thorn-sprite",
      "name": "Thorn-sprite",
+     "of": "one who is too small to be so sure of themselves",
      "text": "It took up a thorn. It goes in at eye height, and it is very hard to hit.",
+     "sign": "It carries a thorn as long as itself, at the point, and flies at the height of your eye.",
+     "habit": "It fences with the candle flame and wins.",
      "leans": {
       "range": {
        "close": 1.0
@@ -326,7 +567,10 @@
       {
        "id": "sprite-wedge-leader",
        "name": "Wedge-leader",
+       "of": "one who talked the others into it",
        "text": "It has taught the cohort's small genii to fly in a wedge. It leads the wedge.",
+       "sign": "A crown of plaited grass, and a string of smaller genii behind it in a wedge.",
+       "habit": "It drills the dormitory's small genii along the curtain rail before breakfast.",
        "leans": {
         "company": {
          "party": 1.0
@@ -339,7 +583,10 @@
       {
        "id": "sprite-thorn-knight",
        "name": "Thorn-knight",
+       "of": "one who behaves as if an army were behind them",
        "text": "It goes out with you alone and fights as if there were an army behind it. There is not. It has not noticed.",
+       "sign": "Beetle-shell plates on its chest and shoulders, polished, and a thorn carried at the salute.",
+       "habit": "It salutes nobody in particular before every meal.",
        "leans": {
         "company": {
          "alone": 1.0
@@ -347,151 +594,6 @@
        },
        "features": [
         "plated"
-       ]
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "sprite-lore-sprite",
-   "name": "Lore-sprite",
-   "text": "It learned from you that knowing is a kind of light too.",
-   "leans": {
-    "shape": {
-     "read": 1.0
-    },
-    "orders": {
-     "free": 0.5
-    }
-   },
-   "features": [
-    "old-eyes"
-   ],
-   "prongs": [
-    {
-     "id": "sprite-book-wisp",
-     "name": "Book-wisp",
-     "text": "It reads the thing you dig up before you have brushed it off, and tells you what the Archive will not.",
-     "leans": {
-      "quests": {
-       "salvage": 1.0
-      }
-     },
-     "features": [
-      "pages"
-     ],
-     "finishes": [
-      {
-       "id": "sprite-stack-light",
-       "name": "Stack-light",
-       "text": "The archivists pretend not to consult it. It lives in the stacks on the days you are not out.",
-       "leans": {
-        "quests": {
-         "salvage": 1.0
-        }
-       },
-       "features": [
-        "dial"
-       ]
-      },
-      {
-       "id": "sprite-writ-riddler",
-       "name": "Writ-riddler",
-       "text": "It reads a writ and tells you what it says, what it means, and what the house hopes you will not notice.",
-       "leans": {
-        "quests": {
-         "writ": 1.0
-        }
-       },
-       "features": [
-        "second-face"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "sprite-grave-light",
-     "name": "Grave-light",
-     "text": "It carries its lantern among the hall's dead so they can see each other. They are grateful, and talk.",
-     "leans": {
-      "bonds": {
-       "shade": 1.0
-      }
-     },
-     "features": [
-      "cold-core"
-     ],
-     "finishes": [
-      {
-       "id": "sprite-shade-lighter",
-       "name": "Shade-lighter",
-       "text": "Shades follow its light in from the dark line to the hearth. It has brought eleven home.",
-       "leans": {
-        "bonds": {
-         "shade": 1.0
-        }
-       },
-       "features": [
-        "glow"
-       ],
-       "silhouette": "kith-lamplighter"
-      },
-      {
-       "id": "sprite-quarrel-light",
-       "name": "Quarrel-light",
-       "text": "It burns a different colour near anything you have a quarrel with. Near the named ones it goes white.",
-       "leans": {
-        "bonds": {
-         "named": 1.0
-        }
-       },
-       "features": [
-        "watching-eye"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "sprite-weather-sprite",
-     "name": "Weather-sprite",
-     "text": "It has learned your element and wears it: frost on its wings one week, cinders the next.",
-     "leans": {
-      "shape": {
-       "turn": 1.0
-      }
-     },
-     "features": [
-      "rime"
-     ],
-     "finishes": [
-      {
-       "id": "sprite-storm-in-a-jar",
-       "name": "Storm-in-a-jar",
-       "text": "It keeps your weather in its lantern and lets it out over the green when asked. Sometimes when not.",
-       "leans": {
-        "shape": {
-         "turn": 1.0
-        },
-        "ground": {
-         "wild": 0.5
-        }
-       },
-       "features": [
-        "smoke"
-       ]
-      },
-      {
-       "id": "sprite-light-at-the-heart",
-       "name": "Light at the Heart",
-       "text": "At the heart of a zone its light is the only one that does not gutter. Varga walks beside it and does not say why.",
-       "leans": {
-        "quests": {
-         "deep-run": 1.0
-        }
-       },
-       "features": [
-        "standing-air"
        ]
       }
      ]
