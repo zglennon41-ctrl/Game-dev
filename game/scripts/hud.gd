@@ -76,6 +76,7 @@ const SLOTS := [
 	["tech3", "3", "", ""],
 	["stance", "F", "Stance", "2/s"],
 	["pattern", "R", "Pattern", ""],
+	["genius", "G", "Genius", ""],
 ]
 
 const VEIL := """
@@ -392,6 +393,8 @@ func configure(f: Fight, hero_name: String) -> void:
 		if have:
 			(slots[sid]["name"] as Label).text = f.extra_techs[i]["name"]
 			(slots[sid]["cost"] as Label).text = "%d Will" % int(f.extra_techs[i]["will"])
+	# The genius's key: what it does is its type's (an order, the hand, its use).
+	(slots["genius"]["panel"] as PanelContainer).visible = f.genius != null
 	for s in slots.values():
 		if (s["panel"] as PanelContainer).visible:
 			visible_n += 1
@@ -566,14 +569,39 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 		_g_label.text = gn.form_name() if gn.name == "" or gn.name == gn.form_name() else "%s  ·  %s" % [gn.name, gn.form_name()]
 		g_bar.max_value = f.g_will_max
 		g_bar.value = f.g_will
-		# its order (on Free, what it chose and why), and the move it is making
+		# what it is doing, by its type: a companion's role and order (on Free, what it chose
+		# and why), a weapon in the hand or at the shoulder, an item ready or coming round; and
+		# the move it is making
+		var key: Dictionary = f.genius_key()
 		var ord := gn.order.to_upper()
 		if gn.order == "free":
 			ord = "FREE: %s%s" % [f.g_order.to_upper(), ("  (%s)" % f.g_free_why) if f.g_free_why != "" else ""]
-		if f.now < f.g_move_until and f.g_move_now != "":
+		match f.g_type:
+			"weapon":
+				ord = "IN YOUR HAND" if f.g_in_hand else ("AT YOUR SHOULDER" if key["ready"] else "RESTING  %ds" % ceili(float(key["left"])))
+			"defense", "ritual":
+				ord = String(f.g_item.get("wornAs", "")).to_upper()
+				if key["active"]:
+					ord += "   ·   %s" % String(f.g_item["use"]["name"]).to_upper()
+				elif not key["ready"]:
+					ord += "   ·   %ds" % ceili(float(key["left"])) if float(key["left"]) > 0.0 else "   ·   SPENT"
+			_:
+				if not f.g_role.is_empty():
+					ord = "%s   ·   %s" % [String(f.g_role["name"]).to_upper(), ord]
+		if f.now < f.g_move_until and f.g_move_now != "" and not key["active"]:
 			ord += "   ·   %s" % f.g_move_now
 		_g_order.text = "FALLEN" if gn.fallen else "%s   [G]" % ord
 		_g_order.add_theme_color_override("font_color", Style.EMBER if gn.fallen else GOLD)
+		# its key on the ability bar
+		(slots["genius"]["name"] as Label).text = String(key["label"])
+		var cost := ""
+		match f.g_type:
+			"weapon": cost = "%d a blow, its Will" % roundi(float(f.g_weapon.get("willPerBlow", 0.0))) if f.g_in_hand else "its Will %d" % roundi(f.g_will)
+			"defense", "ritual": cost = "%d of its Will" % roundi(float(f.g_item["use"].get("will", 0.0)))
+			_: cost = String(f.g_role.get("name", " "))
+		(slots["genius"]["cost"] as Label).text = cost
+		var total := maxf(0.01, float(f.g_item.get("use", {}).get("wait", 1.0)) * f.g_twait) if f.g_type in ["defense", "ritual"] else maxf(0.01, float(key["left"]))
+		_set_slot("genius", float(key["left"]) / total if float(key["left"]) > 0.0 else 0.0, key["ready"] and not gn.fallen, key["active"], Color(0, 0, 0, 0), float(key["left"]))
 	will_text.text = "Will %d" % roundi(f.p_will)
 	var low := f.p_hp <= hp_max * 0.3 and f.p_state != "down"
 	(hp_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color = RED.lerp(Color(1, 0.42, 0.3), (0.5 + 0.5 * sin(_play_time * 8.0)) * 0.5) if low else RED
@@ -628,16 +656,19 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 		_set_slot("tech%d" % (i + 1), left / float(et["cooldown"]), f.p_will >= float(et["will"]) and not f.p_fainted, f.p_state == "technique" and f.p_technique == et["id"], Color(0, 0, 0, 0), left)
 	_set_slot("dodge", 0.0, f.p_will >= float(Data.room["dodge"]["will"]), f.p_state == "dodge")
 	_set_slot("block", 0.0, not f.p_fainted, f.p_block_held)
+	# the weapon in the hand may have changed (a weapon genius taken up or let go)
+	(slots["attack"]["name"] as Label).text = ("Draw" if f.style.has("draw") else "Shot") if f.ranged else "Strike"
 	if f.ranged and f.p_ammo_max > 0:
 		_set_slot("attack", (1.0 - f.p_timer / maxf(0.01, f.p_reload_t)) if f.p_state == "reload" else 0.0, f.p_ammo > 0 or f.p_state == "reload", f.p_state == "attack", Color(0, 0, 0, 0), 0.0)
 		(slots["attack"]["cost"] as Label).text = ("reloading  (X)" if f.p_state == "reload" else ("%d / %d%s" % [f.p_ammo, f.p_ammo_max, "" if f.p_ammo > 0 else "  ·  X"]))
 		(slots["attack"]["cost"] as Label).add_theme_color_override("font_color", Style.EMBER if f.p_ammo == 0 and f.p_state != "reload" else BLUE.lightened(0.2))
 	elif f.ranged and f.style.has("draw"):
-		var charge := clampf(f.p_draw / float(f.style["draw"]["seconds"]), 0.0, 1.0) if f.p_state == "draw" else 0.0
+		var charge := clampf(f.p_draw / f.draw_seconds(), 0.0, 1.0) if f.p_state == "draw" else 0.0
 		_set_slot("attack", 0.0, true, f.p_state in ["attack", "draw"], Color(GOLD, charge) if charge > 0.0 else Color(0, 0, 0, 0), 0.0)
 		(slots["attack"]["cost"] as Label).text = ("drawn %d%%" % int(charge * 100)) if f.p_state == "draw" else "hold to draw"
 	else:
 		_set_slot("attack", 0.0, true, f.p_state == "attack")
+		(slots["attack"]["cost"] as Label).text = "its Will for rounds" if f.g_in_hand and f.ranged else " "
 	var ready := f.pattern_ready()
 	_set_slot("pattern", 0.0 if ready or f.p_state == "pattern" else 1.0, ready, f.p_state == "pattern", Color(GOLD, 0.5 + 0.5 * sin(Time.get_ticks_msec() / 110.0)) if ready else Color(0, 0, 0, 0))
 	var pname: String = f.pattern["name"]
@@ -653,7 +684,7 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	else:
 		pattern_banner.text = ""
 
-const SLOT_ACTION := { "attack": "attack", "block": "block-down", "dodge": "dodge", "technique": "technique", "stance": "stance", "pattern": "pattern", "tech1": "tech1", "tech2": "tech2", "tech3": "tech3" }
+const SLOT_ACTION := { "attack": "attack", "block": "block-down", "dodge": "dodge", "technique": "technique", "stance": "stance", "pattern": "pattern", "tech1": "tech1", "tech2": "tech2", "tech3": "tech3", "genius": "order" }
 var _fight_allowed: Array = []
 
 func _set_slot(id: String, cooldown: float, usable: bool, active: bool, glow := Color(0, 0, 0, 0), seconds := 0.0) -> void:

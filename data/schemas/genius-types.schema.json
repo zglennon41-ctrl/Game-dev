@@ -535,6 +535,7 @@
    "required": [
     "inHand",
     "take",
+    "rest",
     "with",
     "great",
     "bases"
@@ -543,6 +544,10 @@
    "properties": {
     "$comment": {
      "type": "string"
+    },
+    "rest": {
+     "type": "number",
+     "exclusiveMinimum": 0
     },
     "inHand": {
      "type": "object",
@@ -704,6 +709,17 @@
          "length": {
           "type": "number",
           "exclusiveMinimum": 0
+         },
+         "grip": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+         },
+         "flip": {
+          "type": "boolean"
+         },
+         "upright": {
+          "type": "boolean"
          }
         }
        },

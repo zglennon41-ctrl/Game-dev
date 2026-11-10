@@ -591,7 +591,7 @@ func _update_genius(dt: float) -> void:
 		return
 	# held in the hand it gets none of its Will back: it rests at the shoulder
 	if now >= g_regen_from and not g_in_hand:
-		g_will = minf(g_will_max, g_will + float(Data.genius()["will"]["regenPerSecond"]) * dt)
+		g_will = minf(g_will_max, g_will + float(Data.genius()["will"]["regenPerSecond"]) * _rest_k() * dt)
 	var F: Dictionary = Data.genius()["fight"]
 	# a weapon or an item takes no orders: it is with its partner, and does what its type does
 	if g_type != "companion":
@@ -939,6 +939,10 @@ func _genius_type_setup() -> void:
 				if (g_role.get("favours", []) as Array).has(m["id"]) and m.has("wait"):
 					m["wait"] = float(m["wait"]) * sooner
 
+## How much faster a weapon genius's Will comes back at the shoulder (weapon.rest).
+func _rest_k() -> float:
+	return float(_types().get("weapon", {}).get("rest", 1.0)) if g_type == "weapon" else 1.0
+
 ## One of its role's numbers (will, damage, interval, speed, guardCost, guardCooldown): 1 for a
 ## genius with no role.
 func _role_n(key: String) -> float:
@@ -971,7 +975,7 @@ func genius_key() -> Dictionary:
 		"weapon":
 			var need := g_will_max * float(_types()["weapon"]["take"]["retake"])
 			var ok := g_in_hand or (not genius.fallen and not p_disarmed and g_will >= need)
-			var per := float(Data.genius()["will"]["regenPerSecond"])
+			var per := float(Data.genius()["will"]["regenPerSecond"]) * _rest_k()
 			return { "does": "take", "label": "Let it go" if g_in_hand else "Take in hand", "ready": ok, "left": 0.0 if ok else maxf(0.0, (need - g_will) / maxf(0.01, per)), "active": g_in_hand }
 		"defense", "ritual":
 			var use: Dictionary = g_item.get("use", {})
@@ -1362,9 +1366,11 @@ func _use_catch(use: Dictionary) -> void:
 ## The coat pulls its partner out: an instant step, untouchable, out of anything.
 func _use_slip(use: Dictionary) -> void:
 	_use_spent(use, p_pos)
+	# with no direction held it goes round the foe, to its partner's left: out of the strike,
+	# and no farther from the answer (straight back would be an invitation to pounce)
 	var dir := p_dodge_dir
 	if dir.length() < 0.1:
-		dir = (p_pos - w_pos) if w_state not in ["down", "absent"] else -Vector2.from_angle(p_facing)
+		dir = (w_pos - p_pos).orthogonal() if w_state not in ["down", "absent"] else -Vector2.from_angle(p_facing)
 	if dir.length() < 0.01:
 		dir = Vector2.LEFT
 	p_slip = { "dir": dir.normalized(), "distance": float(use.get("distance", 1.0)), "iframes": float(use.get("iframes", 0.4)) }
@@ -2515,6 +2521,9 @@ func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
 	w_hp = maxf(w_floor, w_hp - dmg)
 	stats["hits"] += 1
 	stats["damage_dealt"] += dmg
+	if g_in_hand and p_state == "attack":
+		stats["hand_hits"] = int(stats.get("hand_hits", 0)) + 1
+		stats["hand_damage"] = float(stats.get("hand_damage", 0.0)) + dmg
 	p_combo_count += 1
 	stats["longest_combo"] = maxi(stats["longest_combo"], p_combo_count)
 	_emit({ "type": "hit", "damage": dmg, "pattern": from_pattern, "heavy": heavy, "staggered": w_state == "stagger", "combo": p_combo, "crit": crit, "dist": dist(), "technique": p_state == "technique", "hand": g_in_hand and p_state == "attack", "stand": _stands() })
@@ -2633,6 +2642,9 @@ func _choose_attack() -> void:
 func _update_wolf(dt: float) -> void:
 	w_timer += dt
 	var b := beast
+	# a Bulwark's hold has ended (or it has fallen): the foe is after its partner again
+	if w_target == HELD and not _held():
+		w_target = -1
 	match w_state:
 		"absent":
 			return

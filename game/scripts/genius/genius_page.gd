@@ -9,6 +9,7 @@ signal closed
 signal look_changed(g: Genius)
 
 var look_saved := false
+var hero: Dictionary = {}      # whose genius it is, if the page was told (it says how much they need what it does)
 var _root := Control.new()
 var _g: Genius
 var _color := Color.WHITE
@@ -104,6 +105,7 @@ func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 	_p(v, "[i]%s[/i]" % String(g.form().get("text", "")), Style.DIM)
 	if g.is_born():
 		_soul_section(v, g)
+		_does_section(v, g)
 		_tree_section(v, g)
 	if g.is_born() and not g.look.is_empty():
 		_look_section(v, g)
@@ -118,12 +120,13 @@ func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 		_p(v, "%s: %s, and at least %d days old. %s" % [r["name"], status, int(r["minDay"]), "It may be read now." if g.reading_due(tier) == n else ""])
 	else:
 		_p(v, "It is at its Apex.")
-	# Orders.
-	_section(v, "ORDERS")
-	for o in Data.genius()["orders"]:
-		var have := int(o["fromInstar"]) <= maxi(1, g.instar)
-		var mark := "  [color=#ffd175](now)[/color]" if o["id"] == g.order else ""
-		_p(v, "[b]%s[/b]%s  %s" % [o["name"], mark, o["text"]] if have else "[color=#736a60]%s: from the %s.[/color]" % [o["name"], GeniusResonance.instar_rule(int(o["fromInstar"]))["name"]])
+	# Only a companion takes orders: a weapon is taken in hand and an item used (above).
+	if String(GeniusTypes.of(g)["type"]) == "companion":
+		_section(v, "ORDERS")
+		for o in Data.genius()["orders"]:
+			var have := int(o["fromInstar"]) <= maxi(1, g.instar)
+			var mark := "  [color=#ffd175](now)[/color]" if o["id"] == g.order else ""
+			_p(v, "[b]%s[/b]%s  %s" % [o["name"], mark, o["text"]] if have else "[color=#736a60]%s: from the %s.[/color]" % [o["name"], GeniusResonance.instar_rule(int(o["fromInstar"]))["name"]])
 	# Parts.
 	_section(v, "WHAT IT IS MADE OF")
 	var by := g.features_by_slot()
@@ -227,6 +230,21 @@ func _look_section(v: Control, g: Genius) -> void:
 
 ## The soul outside the body: whose soul it is, what the form it is now is the picture of, and
 ## the detail a partner comes to know it by (its sign, its habit).
+## What it does beside its partner, by its type (docs/genius-types.md): a weapon taken in
+## hand, an item used, a companion in a role.
+func _does_section(v: Control, g: Genius) -> void:
+	var said: Dictionary = GeniusTypes.says(g, hero)
+	if (said["lines"] as Array).is_empty():
+		return
+	_section(v, "WHAT IT DOES BESIDE YOU  ·  %s" % String(said["title"]))
+	for ln in said["lines"]:
+		var line := String(ln)
+		# the name of a thing, before its colon, in brass like the page's other labels
+		var cut := line.find(": ")
+		if cut > 0 and cut < 34:
+			line = "[color=#a8803f]%s[/color]   %s" % [line.substr(0, cut).to_upper(), line.substr(cut + 2)]
+		_p(v, line)
+
 func _soul_section(v: Control, g: Genius) -> void:
 	var lines: Array = []
 	if g.soul() != "":

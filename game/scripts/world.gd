@@ -1534,6 +1534,62 @@ func feedback(f: Fight, events: Array) -> void:
 				_ring_wave(_v3(f.p_pos), _g_tint, 1.6)
 				floater(P, "GUARDED", _g_tint.lightened(0.3), 52, 1.0)
 				genius_react("parry")
+			"genius-take":
+				# a weapon genius changes hands
+				if e["in"]:
+					floater(P + Vector3(0, 0.3, 0), "IN HAND" + ("  ·  THE CUT" if e.get("cut", false) else ""), _g_tint.lightened(0.35), 46, 0.9)
+					burst(P, _g_tint.lightened(0.3), 14, 3.0)
+				else:
+					floater(P + Vector3(0, 0.3, 0), "IT IS SPENT" if e.get("spent", false) else "LET GO", _g_tint.lightened(0.2) if not e.get("spent", false) else Color(0.8, 0.75, 0.7), 42, 0.9)
+				genius_react("cue")
+			"genius-use":
+				var ua := _v3(e.get("at", f.p_pos), 1.7)
+				floater(ua, String(e["name"]).to_upper() + ("  ·  ON AIR" if e.get("miss", false) else ""), _g_tint.lightened(0.35) if not e.get("miss", false) else C_DIM, 44, 1.1)
+				if String(e.get("effect", "")) == "set" and not e.get("miss", false):
+					_ring_wave(_v3(f.p_pos), _g_tint, 1.4)
+				genius_react("stance")
+			"genius-took":
+				var who := int(e.get("ally", -1))
+				var ta: Vector3 = P if who < 0 or who >= f.allies.size() else _v3(f.allies[who]["pos"], 1.2)
+				impact(ta, _g_tint, 1.2)
+				_ring_wave(Vector3(ta.x, 0.0, ta.z), _g_tint, 1.8)
+				floater(ta + Vector3(0, 0.5, 0), "IT TAKES THE BLOW", _g_tint.lightened(0.3), 48, 1.0)
+				genius_react("parry")
+			"genius-door":
+				_ring_wave(_v3(e["at"]), _g_tint, float(e["radius"]))
+			"genius-caught":
+				var ca := _v3(e["at"], 1.0)
+				impact(ca, _g_tint, 1.4)
+				burst(ca, _g_tint.lightened(0.3), 16, 3.5)
+				floater(ca + Vector3(0, 0.8, 0), "CAUGHT", _g_tint.lightened(0.35), 52, 1.0)
+			"genius-lamp":
+				_ring_wave(_v3(e["at"]), Color(1.0, 0.9, 0.6), float(e["radius"]))
+			"genius-sight":
+				_ring_wave(_v3(f.w_pos), _g_tint.lightened(0.3), 1.6)
+				floater(W + Vector3(0, 1.0, 0), "SIGHTED", _g_tint.lightened(0.35), 46, 1.2)
+			"genius-toll":
+				_ring_wave(_v3(e["at"]), _g_tint.lightened(0.2), float(e["radius"]))
+				floater(P + Vector3(0, 0.5, 0), "IT TOLLS" if not e.get("auto", false) else "IT TOLLS OF ITSELF", _g_tint.lightened(0.35), 50, 1.1)
+				if int(e.get("broke", 0)) > 0:
+					flash_screen(_g_tint, 0.12)
+			"genius-took-back":
+				floater(P + Vector3(0, 0.2, 0), "+%d" % roundi(float(e["amount"])), _g_tint.lightened(0.4), 46, 1.0)
+			"genius-caught-fall":
+				flash_screen(_g_tint, 0.4)
+				_ring_wave(_v3(f.p_pos), _g_tint, 2.4)
+				floater(P + Vector3(0, 0.6, 0), "IT CATCHES YOU", _g_tint.lightened(0.4), 60, 1.6)
+				genius_react("parry")
+			"genius-mend":
+				var mw := int(e.get("who", -1))
+				var ma: Vector3 = P if mw < 0 or mw >= f.allies.size() else _v3(f.allies[mw]["pos"], 1.6)
+				floater(ma + Vector3(0.3, 0.1, 0), "+%d" % roundi(float(e["amount"])), _g_tint.lightened(0.45), 40, 0.9)
+			"genius-held-blow":
+				impact(_v3(e["at"], 0.9), _g_tint, 1.2)
+				floater(_v3(e["at"], 1.7), "IT HOLDS", _g_tint.lightened(0.3), 46, 1.0)
+			"genius-sig":
+				floater(W + Vector3(-0.3, 0.9, 0), String(e["name"]).to_upper(), _g_tint.lightened(0.4), 42, 1.0)
+			"genius-not-ready":
+				floater(P, "your genius is not ready", C_DIM, 36)
 			"genius-fall":
 				genius_down = true
 				floater(P + Vector3(0, 0.4, 0), "YOUR GENIUS FALLS", Color(0.8, 0.75, 0.7), 56, 1.6)
@@ -3842,6 +3898,8 @@ func _genius_move_shown(f: Fight, e: Dictionary, P: Vector3, W: Vector3) -> void
 			burst(at + Vector3(0, 0.4, 0), hi, 6, 2.0)
 
 var _g_hold_ring: MeshInstance3D = null
+var _g_door_ring: MeshInstance3D = null
+var _g_door_r := 0.0
 var _g_zone_disc: MeshInstance3D = null
 var _g_lit_light: OmniLight3D = null
 
@@ -3867,7 +3925,9 @@ func _genius_ground(f: Fight) -> void:
 		if holding:
 			_g_hold_ring.position = _v3(f.g_hold_at, 0.07)
 			_g_hold_ring.scale = Vector3.ONE * (1.0 + 0.015 * sin(_clock * 2.0))
-	var zoned := up and not f.g_zone.is_empty()
+	# a lamp set down lights its circle the way a genius laid on the ground does its own
+	var lamped := up and not f.g_lamp.is_empty()
+	var zoned := (up and not f.g_zone.is_empty()) or lamped
 	if zoned and _g_zone_disc == null:
 		_g_zone_disc = MeshInstance3D.new()
 		var pm := PlaneMesh.new()
@@ -3882,14 +3942,35 @@ func _genius_ground(f: Fight) -> void:
 	if _g_zone_disc:
 		_g_zone_disc.visible = zoned
 		if zoned:
-			var zr := minf(float(f.g_zone["radius"]), 14.0)
-			var zc: Color = { "burn": Color(1.0, 0.45, 0.15), "chill": Color(0.6, 0.85, 1.0), "dark": Color(0.35, 0.2, 0.55) }.get(String(f.g_zone["effect"]), _g_tint)
-			_g_zone_disc.position = _v3(f.g_zone["at"], 0.09)
+			var zone: Dictionary = f.g_lamp if lamped else f.g_zone
+			var zr := minf(float(zone["radius"]), 14.0)
+			var zc: Color = Color(1.0, 0.86, 0.55) if lamped else { "burn": Color(1.0, 0.45, 0.15), "chill": Color(0.6, 0.85, 1.0), "dark": Color(0.35, 0.2, 0.55) }.get(String(f.g_zone["effect"]), _g_tint)
+			_g_zone_disc.position = _v3(zone["at"], 0.09)
 			_g_zone_disc.scale = Vector3(zr, 1, zr)
 			var zm := _g_zone_disc.material_override as ShaderMaterial
 			zm.set_shader_parameter("tint", zc)
 			zm.set_shader_parameter("strength", 0.55 + 0.12 * sin(_clock * 5.0))
-	var lit := up and f.now < f.g_lit_until
+	# a shield standing as a door: a ring round the ground it covers
+	var doored := up and not f.g_door.is_empty()
+	if doored and (_g_door_ring == null or not is_equal_approx(_g_door_r, float(f.g_door["radius"]))):
+		if _g_door_ring:
+			_g_door_ring.queue_free()
+		_g_door_r = float(f.g_door["radius"])
+		_g_door_ring = MeshInstance3D.new()
+		var dm := TorusMesh.new()
+		dm.inner_radius = _g_door_r - 0.09
+		dm.outer_radius = _g_door_r
+		dm.rings = 64
+		dm.ring_segments = 6
+		_g_door_ring.mesh = dm
+		_g_door_ring.material_override = _mat(_g_tint.lightened(0.2), 1.8, true, 0.6)
+		_g_door_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(_g_door_ring)
+	if _g_door_ring:
+		_g_door_ring.visible = doored
+		if doored:
+			_g_door_ring.position = _v3(f.g_door["at"], 0.08)
+	var lit := (up and f.now < f.g_lit_until) or (lamped and f.p_pos.distance_to(f.g_lamp["at"]) <= float(f.g_lamp["radius"]))
 	if lit and _g_lit_light == null:
 		_g_lit_light = OmniLight3D.new()
 		_g_lit_light.light_color = Color(1.0, 0.9, 0.65)
@@ -3906,6 +3987,33 @@ func _update_form(f: Fight, dt: float) -> void:
 	_genius.visible = false
 	_g_trail.emitting = false
 	_genius_ground(f)
+	# A weapon genius in the hand is the weapon: it sits where the weapon put away sat, at the
+	# length a hand holds (data/genius-types.json, weapon.bases.*.held), and that one is not drawn.
+	if _sword:
+		_sword.visible = not f.g_in_hand
+	if f.g_in_hand and _sword and _g_form:
+		# length: how long it is in the hand, in metres. grip: how far along that length, from its
+		# foot, the hand takes it. flip: its foot is its point (a blade that floats point down).
+		var held: Dictionary = f.g_weapon.get("held", {})
+		var long := float(held.get("length", 1.0))
+		var k := long / maxf(0.2, _g_body.stands if _g_body else 1.0)
+		var slot := _sword.global_transform.basis.orthonormalized()
+		var hb := slot
+		var at := _sword.global_position - slot.y * long * float(held.get("grip", 0.0))
+		if held.get("upright", false):
+			# a thing held level (a gun): upright, turned the way its partner faces
+			hb = Basis(Vector3.UP, _yaw(f.p_facing))
+			at = _sword.global_position - Vector3.UP * long * float(held.get("grip", 0.0))
+		elif held.get("flip", false):
+			hb = slot * Basis(Vector3.RIGHT, PI)
+			at = _sword.global_position + slot.y * long * float(held.get("grip", 0.0))
+		_g_form.global_transform = Transform3D(hb * Basis.from_scale(Vector3.ONE * k), at)
+		_g_form_pos = _sword.global_position
+		if _g_body:
+			_g_body.move_at(0.0)
+		return
+	if not _g_form.scale.is_equal_approx(Vector3.ONE):
+		_g_form.scale = Vector3.ONE
 	var walker := _g_body != null and _g_body.walks()
 	var side := Vector2.from_angle(f.p_facing + (2.2 if walker else 1.9))
 	var want := _v3(f.p_pos + side * (1.1 if walker else 0.8), 0.0 if walker else 1.5 + 0.08 * sin(_clock * 2.4))

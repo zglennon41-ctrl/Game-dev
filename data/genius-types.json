@@ -100,14 +100,14 @@
     }
   },
   "weapon": {
-    "$comment": "A weapon genius (blade, gun, bow). In hand its partner fights with it: a weapon type of the twelve (data/combat-room.json, styles), its blows worth inHand at its age, each blow started costing it willPerBlow of its own Will; it gets no Will back while it is held. Emptied, it leaves the hand of itself and cannot be taken up again until it has `retake` of its Will. take.drawCut: the first blow after it is taken in hand, if it rested `rest` seconds first, starts in `startup` of its time (a bow draws in that much) and lands for `damage`. with: out of hand, every so many of its partner's blows it adds one (a multiple of the Hunt's damage, by Expression and Resonance, at its age's worth). A gun genius has no magazine: its rounds are its Will. great: the move only the great have (it stays what a worn relic's was). paths: the one signature property a path gives it, from these: damage (every blow in hand), parryWindow (the moment to parry while it is held), heavyOn (that cut of its combo throws the foe back and makes it flinch), afterParry { seconds, damage, free } (the next blow after a parry made with it), score { per, max } (each blow its partner takes is scored; the next blow that lands with it pays them all), firstFullDraw { damage, rest } (the first arrow from a full draw each time it is taken up, after that much rest), onWindup { weaken } (an arrow that lands while the foe winds up weakens that strike), fullDraw { slow, seconds } (an arrow from a full draw slows the foe's time), shot { ... } (laid over the type's shot), far { from, to, damage } (more the farther the foe), everyNth { n, damage } (every nth shot in a row), still { seconds, damage } (struck from a stand).",
+    "$comment": "A weapon genius (blade, gun, bow). In hand its partner fights with it: a weapon type of the twelve (data/combat-room.json, styles), its blows worth inHand at its age, each blow started costing it willPerBlow of its own Will; it gets no Will back while it is held, and at the shoulder its Will comes back `rest` times as fast as a companion's. Emptied, it leaves the hand of itself and cannot be taken up again until it has `retake` of its Will. take.drawCut: the first blow after it is taken in hand, if it rested `rest` seconds first, starts in `startup` of its time (a bow draws in that much) and lands for `damage`. with: out of hand, every so many of its partner's blows it adds one (a multiple of the Hunt's damage, by Expression and Resonance, at its age's worth). A gun genius has no magazine: its rounds are its Will. great: the move only the great have (it stays what a worn relic's was). held: how it sits in the hand: its length there in metres, grip (how far along that length from its foot the hand takes it), flip (its foot is its point) or upright (it is held level, a gun: upright, turned the way its partner faces). paths: the one signature property a path gives it, from these: damage (every blow in hand), parryWindow (the moment to parry while it is held), heavyOn (that cut of its combo throws the foe back and makes it flinch), afterParry { seconds, damage, free } (the next blow after a parry made with it), score { per, max } (each blow its partner takes is scored; the next blow that lands with it pays them all), firstFullDraw { damage, rest } (the first arrow from a full draw each time it is taken up, after that much rest), onWindup { weaken } (an arrow that lands while the foe winds up weakens that strike), fullDraw { slow, seconds } (an arrow from a full draw slows the foe's time), shot { ... } (laid over the type's shot), far { from, to, damage } (more the farther the foe), everyNth { n, damage } (every nth shot in a row), still { seconds, damage } (struck from a stand).",
     "inHand": {
-      "young": 0.9,
-      "half-grown": 1.05,
-      "grown": 1.2,
-      "prime": 1.3,
-      "great": 1.4,
-      "apex": 1.55
+      "young": 1.2,
+      "half-grown": 1.4,
+      "grown": 1.7,
+      "prime": 1.9,
+      "great": 2.1,
+      "apex": 2.4
     },
     "take": {
       "retake": 0.3,
@@ -118,10 +118,11 @@
         "rest": 2.5
       }
     },
+    "rest": 2.0,
     "with": {
       "name": "Strikes with you",
       "every": 3,
-      "damage": 1.1
+      "damage": 1.4
     },
     "great": {
       "name": "The second hand",
@@ -134,7 +135,9 @@
         "style": "blade",
         "willPerBlow": 2.5,
         "held": {
-          "length": 0.95
+          "length": 0.95,
+          "grip": 0.86,
+          "flip": true
         },
         "inHand": "A blade: three cuts, the third wide.",
         "paths": {
@@ -169,7 +172,8 @@
         "style": "bow",
         "willPerBlow": 4.0,
         "held": {
-          "length": 1.3
+          "length": 1.3,
+          "grip": 0.5
         },
         "inHand": "A bow: hold to draw, and a full draw hits three times as hard.",
         "paths": {
@@ -202,7 +206,9 @@
         "style": "pistol",
         "willPerBlow": 3.5,
         "held": {
-          "length": 0.5
+          "length": 0.34,
+          "grip": 0.55,
+          "upright": true
         },
         "inHand": "A gun with no magazine: its rounds are its Will, so it is never reloaded.",
         "paths": {
@@ -390,7 +396,7 @@
         "short": "Slip",
         "effect": "slip",
         "feeds": "free",
-        "text": "The coat pulls you out: an instant step, untouchable, out of a swing, a reload or a flinch. It costs you no Will.",
+        "text": "The coat pulls you out: an instant step the way you steer, or round the foe if you steer nowhere, untouchable, out of a swing, a reload or a flinch. It costs you no Will.",
         "wait": 8.0,
         "will": 8.0,
         "distance": 1.0,
@@ -501,7 +507,7 @@
         "text": "Each strike of a foe that you parry, block or dodge is a measure of it, up to five; every measure adds a little to your blows on that foe.",
         "feeds": "free",
         "measure": {
-          "per": 0.03,
+          "per": 0.04,
           "max": 5
         }
       },
@@ -510,11 +516,11 @@
         "short": "Take a sight",
         "effect": "sight",
         "feeds": "hunt",
-        "text": "The foe you are locked on to is sighted. For seven seconds your blows in its weak moment, when it is staggered or recovering from its own strike, land half again as hard.",
+        "text": "The foe you are locked on to is sighted. For seven seconds your blows in its weak moment, when it is staggered or recovering from its own strike, land more than half again as hard.",
         "wait": 14.0,
         "will": 8.0,
         "seconds": 7.0,
-        "damage": 1.5,
+        "damage": 1.6,
         "reach": 18.0,
         "grows": [
           "seconds"
@@ -549,7 +555,7 @@
           },
           "always": {
             "measure": {
-              "per": 0.03,
+              "per": 0.04,
               "max": 5,
               "keeps": true
             }
@@ -695,11 +701,11 @@
       "own": {
         "id": "worry",
         "name": "Worries it",
-        "text": "It worries the foe from where the foe is not looking: for two seconds its guard is down and every blow on it lands a sixth harder.",
-        "wait": 11.0,
+        "text": "It worries the foe from where the foe is not looking: for three seconds its guard is down and every blow on it lands nearly a third harder. Long enough for a slow weapon to arrive.",
+        "wait": 8.0,
         "will": 6.0,
-        "seconds": 2.0,
-        "exposed": 1.15,
+        "seconds": 3.0,
+        "exposed": 1.3,
         "reach": 2.6
       }
     },
@@ -722,11 +728,11 @@
       "own": {
         "id": "mend",
         "name": "Mends",
-        "text": "While you are hurt and nothing has struck you for a moment, it gives you health out of its own Will, a little every two seconds. With a party, it sees to whoever is worst hurt.",
+        "text": "While you are hurt and nothing has struck you for a moment, it gives you health out of its own Will, a little at a time, for as long as its Will lasts. With a party, it sees to whoever is worst hurt.",
         "below": 0.7,
-        "after": 2.5,
-        "every": 2.0,
-        "health": 5.0,
+        "after": 1.0,
+        "every": 1.5,
+        "health": 6.0,
         "will": 4.0,
         "reach": 5.0
       }
@@ -806,8 +812,8 @@
           "text": "It leads the foe a dance: it worries it between holds."
         },
         "stag-watch-hart": {
-          "shade": "keeper",
-          "text": "It walks at the back: it mends who is hurt."
+          "shade": "bulwark",
+          "text": "It walks at the back and stands between: it holds the foe longer."
         }
       }
     },
@@ -853,8 +859,8 @@
           "text": "It goes and gets it: it strikes hard into what it opened."
         },
         "imp-stickler": {
-          "shade": "lookout",
-          "text": "It has read the small print: it calls the strike."
+          "shade": "harrier",
+          "text": "It holds the foe to the letter: the guard is down longer."
         },
         "imp-surety": {
           "shade": "bulwark",
@@ -874,8 +880,8 @@
           "text": "It sits up with the hurt: it mends."
         },
         "lurker-the-unremarked": {
-          "shade": "harrier",
-          "text": "Eyes slide off it: it worries the foe unseen."
+          "shade": "lookout",
+          "text": "It sees from where it is not seen: the moment to parry is longer still."
         }
       }
     },

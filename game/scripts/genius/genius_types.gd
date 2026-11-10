@@ -255,17 +255,30 @@ static func key_line(base: String) -> String:
 	return "its orders"
 
 ## Should a bot press the genius's key now? One policy for every bot (the room's, the tests',
-## the balance tables'), so a table measures the rules and not a bot of its own.
-static func bot_wants_key(f: Fight) -> bool:
+## the balance tables'), so a table measures the rules and not a bot of its own. guarding: the
+## bot's own hand will turn the strike that is coming (a parry is worth more than a strike
+## that never comes, so an item that would prevent it is left alone).
+static func bot_wants_key(f: Fight, guarding := false) -> bool:
 	if f.genius == null or f.genius.fallen or f.p_state in ["down", "pattern"]:
 		return false
 	var foe_up := f.w_state not in ["down", "absent"]
 	match f.g_type:
 		"weapon":
+			var cost := float(f.g_weapon.get("willPerBlow", 2.5))
+			var mine: bool = String(Data.room["styles"].get(String(f.g_weapon.get("style", "")), {}).get("kind", "melee")) == "ranged"
+			var theirs: bool = f.main.get("ranged", f.ranged) if f.g_in_hand else f.ranged
+			var gap := f.dist() - float(f.beast["radius"])
+			if mine != theirs:
+				# two reaches: the weapon whose reach fits the distance is the one in the hand
+				var fits: bool = (gap >= 4.0) if mine else (gap <= 3.0)
+				var misfit: bool = (gap < 2.4) if mine else (gap > 5.0)
+				if f.g_in_hand:
+					return f.p_state in ["free", "draw"] and (misfit or f.g_will < cost)
+				return foe_up and fits and f.genius_key()["ready"] and f.g_will >= maxf(f.g_will_max * 0.5, cost * 3.0) and f.p_state == "free" and not f.p_block_held and f.w_state != "windup"
 			if f.g_in_hand:
 				# it is let go once it is nearly spent, to rest at the shoulder
-				return f.g_will < float(f.g_weapon.get("willPerBlow", 2.5)) * 2.0 and f.p_state == "free"
-			# taken up rested, for the opening: when the foe is open, or about to be
+				return f.g_will < cost * 2.0 and f.p_state == "free"
+			# one reach: it is taken up rested, and used until it is spent
 			return foe_up and f.genius_key()["ready"] and f.g_will >= f.g_will_max * 0.9 and f.p_state == "free" and not f.p_block_held
 		"defense", "ritual":
 			if not f.genius_key()["ready"]:
@@ -280,10 +293,10 @@ static func bot_wants_key(f: Fight) -> bool:
 					if (fo as Foe).duration - (fo as Foe).timer <= 0.3:
 						soon = true
 			match String(f.g_item.get("use", {}).get("effect", "")):
-				"set": return soon
-				"catch": return f.w_state == "windup" and f.w_timer >= 0.12 and f.dist() - float(f.beast["radius"]) <= float(f.g_item["use"].get("reach", 3.0))
-				"slip": return f.p_state == "flinch" or (soon and f.now > f.p_parry_until and not f._blocking())
+				"set": return soon and not guarding
+				"catch": return not guarding and f.w_state == "windup" and f.w_timer >= 0.12 and f.dist() - float(f.beast["radius"]) <= float(f.g_item["use"].get("reach", 3.0))
+				"slip": return f.p_state == "flinch" or (soon and not guarding and f.now > f.p_parry_until and not f._blocking())
 				"light": return foe_up and f.dist() <= 7.0
 				"sight": return foe_up and f.w_state in ["windup", "strike"]
-				"toll": return winding
+				"toll": return winding and not guarding
 	return false

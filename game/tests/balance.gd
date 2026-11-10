@@ -18,6 +18,18 @@ func _run() -> void:
 		_genii()
 		get_tree().quit()
 		return
+	for a in OS.get_cmdline_user_args():
+		# --one=form:instar:key:hand:weapon:health  one fight of the types tables, in full (for looking into a row)
+		if String(a).begins_with("--one="):
+			var q := String(a).trim_prefix("--one=").split(":")
+			var r := _type_run({ "form": q[0], "instar": int(q[1]), "key": q[2] == "1", "hand": q[3], "weapon": q[4], "health": float(q[5]) if q.size() > 5 else 1.0, "order": q[6] if q.size() > 6 else "guard" })
+			print(r)
+			get_tree().quit()
+			return
+	if Array(OS.get_cmdline_user_args()).any(func(a): return a == "--types" or String(a).begins_with("--types=")):
+		_types()
+		get_tree().quit()
+		return
 	print("\n== WEAPON TYPES: a skilled bot, 120 s against cut-wolves that return (seed 5) ==")
 	print("%-12s %-14s %6s %7s %7s %7s %6s" % ["type", "weapon", "felled", "dealt", "bitten", "lasted", "shots"])
 	var rows := []
@@ -291,6 +303,11 @@ func _genii() -> void:
 		var line := "%-22s" % String(row["label"])
 		for n in [1, 3, 6]:
 			var f: Dictionary = row["forms"][n]
+			# a weapon and an item make none of a companion's moves: they have a key (-- --types)
+			var of := GeniusTypes.of_form(f)
+			if of["written"] and String(of["type"]) != "companion":
+				line += "  %d %s: %s" % [n, f["name"], GeniusTypes.key_line(String(of["base"]))]
+				continue
 			var kind := String(Data.genius_bodies()["silhouettes"].get(f["silhouette"], {}).get("kind", "quadruped"))
 			var age: Dictionary = Data.genius()["fight"]["ages"][String(Genius.age_at(n)["id"])]
 			var mv: Array = Fight.genius_moves(kind, String(f["expression"]), f["features"], int(age.get("moves", 2))).map(func(m): return String(m["id"]) + (":" + String(m["effect"]) if m.has("effect") else ""))
@@ -303,10 +320,17 @@ func _genii() -> void:
 	print("%-22s %-6s %-6s %7s %6s %7s %7s %6s %6s %6s %7s" % none)
 	for row in rows:
 		for n in [1, 3, 6]:
+			var typed := GeniusTypes.of_form(row["forms"][n])
+			var keyed: bool = typed["written"] and String(typed["type"]) != "companion"
 			for order in ["guard", "hunt", "hold", "free"]:
 				if n < 2 and order in ["hold", "free"]:
 					continue
+				# a weapon or an item takes no orders: one row, its key used as a bot uses it
+				if keyed and order != "guard":
+					continue
 				var r := _genius_row(String(row["label"]), { "form": row["forms"][n]["id"], "instar": n, "order": order })
+				if keyed:
+					r[2] = "(key)"
 				print("%-22s %-6s %-6s %7s %6s %7s %7s %6s %6s %6s %7s" % r)
 
 func _genius_row(label: String, gspec: Dictionary) -> Array:
@@ -383,6 +407,11 @@ func _elite_run(beast_id: String, health: float, hand: String, shape: String, wi
 					f.input("block-down")
 				if f.p_block_held and not windup and f.w_state != "strike":
 					f.input("block-up")
+		# every hand but a new one uses its genius's key as a bot does (GeniusTypes.bot_wants_key)
+		if hand != "new" and gspec.get("key", true) and GeniusTypes.bot_wants_key(f, windup and (hand == "sure" or (hand == "steady" and guard_this))):
+			f.input("order")
+		if f.p_state == "draw" and f.p_draw >= f.draw_seconds():
+			f.input("attack-up")       # a bow genius in the hand: loose at the full draw
 		if f.pattern_ready():
 			f.input("pattern")
 		if f.p_state == "pattern" and not f.chain.is_empty():
@@ -438,3 +467,297 @@ func _cohort(temper: String) -> Array:
 		if f.p_state == "down":
 			break
 	return [temper, f.stats["wolves_down"], hits, int(f.stats["damage_dealt"]), techs, parries, retreats, downs]
+
+# ===================================================================== the three types of genius
+# npm run balance:game -- --types   (or --types=wolf for one base's rows)
+# What each type and each role is worth beside a hero, so that a number in
+# data/genius-types.json can be judged before it is played (docs/genius-types.md).
+
+const TYPE_SEEDS := 6
+const LONG := 2.0        # the Warden's health in the long fights of the first two tables, so a genius has time to tell
+
+## The partners the roles are measured beside: how each fights, and what each lacks.
+const PARTNERS := [
+	{ "id": "far", "weapon": "musket", "hand": "steady", "health": LONG, "says": "a musket, from seven metres: lacks a front" },
+	{ "id": "heavy", "weapon": "hammer", "hand": "steady", "health": LONG, "says": "a maul, slow and heavy: lacks the opening" },
+	{ "id": "turner", "weapon": "saber", "hand": "sure", "health": LONG, "says": "a saber, every bite parried: lacks the blow" },
+	{ "id": "brawler", "weapon": "short-blade", "hand": "learning", "health": 1.0, "says": "twin blades, strikes out of turn and blocks when it remembers, against the Warden at its own health: lacks staying" },
+]
+
+## The order a companion of a role is best given.
+const ROLE_ORDER := { "bulwark": "guard", "hunter": "hunt", "harrier": "hunt", "keeper": "guard", "lookout": "guard" }
+
+## One fight: a hero with a weapon and a hand, alone with one genius (or none) against a
+## beast. o: weapon, hand, form, instar, order, key (use the genius's key as a bot does),
+## beast, seed, seconds. A bot that knows the weapon in its hand, the genius's in its turn.
+func _type_run(o: Dictionary) -> Dictionary:
+	var h := Fight.default_hero()
+	h["stage"] = 3
+	h["projected"] = true
+	var w := Data.by_id(Data.weapons, String(o.get("weapon", "saber")))
+	h["weapon"] = w["id"]
+	h["city"] = w["city"]
+	var opts := { "seed": int(o.get("seed", 11)), "hero": h, "beast": String(o.get("beast", "green-warden")), "respawn": false, "arena": Vector2(22, 16) }
+	if float(o.get("health", 1.0)) != 1.0:
+		opts["beast_health"] = roundf(float(Data.beast(String(opts["beast"]))["health"]) * float(o["health"]))
+	if String(o.get("form", "")) != "":
+		var g := Genius.at_form(String(o["form"]), int(o.get("instar", 0)))
+		g.order = String(o.get("order", "guard"))
+		opts["genius"] = g
+		if g.order == "hold":
+			opts["post"] = Vector2.ZERO
+	var f := Fight.new(opts)
+	var hand := String(o.get("hand", "steady"))
+	var use_key: bool = o.get("key", true)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(o.get("seed", 11)) * 3 + 7
+	var guard_this := true
+	var rng_half := true
+	var was_windup := false
+	var felled := -1.0
+	var keys := 0
+	for i in int(float(o.get("seconds", 240.0)) / DT):
+		var to_w := f.w_pos - f.p_pos
+		var move := Vector2.ZERO
+		var windup := f.w_state == "windup" and f.w_target == -1
+		if windup and not was_windup:
+			guard_this = rng.randf() < 0.67
+			rng_half = rng.randf() < 0.5
+		was_windup = windup
+		match hand:
+			"sure":
+				if _bite_coming(f) and f.w_target == -1:
+					f.input("block-down")
+				if f.p_block_held and not windup:
+					f.input("block-up")
+			"steady":
+				if windup and guard_this and not f.p_block_held and f.w_timer > 0.25:
+					f.input("block-down")
+				if f.p_block_held and not windup and f.w_state != "strike":
+					f.input("block-up")
+			"learning":
+				if windup and rng_half and not f.p_block_held:
+					f.input("block-down")
+				if f.p_block_held and not windup and f.w_state != "strike":
+					f.input("block-up")
+		var guarding: bool = windup and (hand == "sure" or (hand == "steady" and guard_this))
+		if use_key and f.genius != null and f.g_type != "companion" and GeniusTypes.bot_wants_key(f, guarding):
+			f.input("order")
+			keys += 1
+		if f.pattern_ready():
+			f.input("pattern")
+		var foe_up := f.w_state not in ["down", "absent"]
+		if f.p_state == "pattern" and not f.chain.is_empty():
+			var c: float = f.chain["cues"][f.chain["next"]]
+			if absf(f.now - c) < DT / 2.0:
+				f.input("attack")
+		elif f.ranged:
+			# the weapon in the hand is a ranged one (the hero's own, or a bow or gun genius taken up)
+			if f.style.has("draw"):
+				if f.p_state == "free" and foe_up and not f.p_block_held and to_w.length() < float(f.combo[0]["range"]):
+					f.input("attack")
+				elif f.p_state == "draw" and f.p_draw >= f.draw_seconds():
+					f.input("attack-up")
+			elif f.p_ammo_max > 0 and f.p_ammo == 0 and f.p_state == "free":
+				f.input("reload")
+			elif foe_up and not f.p_block_held and (not windup or hand == "new") and f.p_state == "free" and to_w.length() < float(f.combo[0]["range"]):
+				f.input("attack")
+		elif to_w.length() < 2.6 and not f.p_block_held and foe_up:
+			var opening: bool = f.w_state in ["recover", "stagger", "flinch", "idle", "prowl"] and (f.w_state != "recover" or f.w_duration - f.w_timer > 0.45)
+			if opening or (f.beast.has("guard") and f.guard_open()) or hand == "new" or (hand == "learning" and guard_this and not windup):
+				if hand in ["sure", "steady"] and f.p_will > 40 and f.now >= float(f.p_cooldowns.get(f.tech["id"], 0.0)):
+					f.input("technique")
+				else:
+					f.input("attack")
+		# where the hero goes: a far-fighter keeps their distance, the rest close
+		var far_fighter: bool = f.ranged
+		if f.g_in_hand:
+			far_fighter = f.main.get("ranged", false) and f.ranged
+		if foe_up:
+			if far_fighter:
+				if to_w.length() > 8.5 and not windup:
+					move = to_w.normalized()
+				elif to_w.length() < 5.0 and f.p_state != "draw":
+					move = -to_w.normalized()
+			elif to_w.length() > 2.0 and (not windup or hand == "new"):
+				move = to_w.normalized()
+		f.update(DT, move)
+		for e in f.drain():
+			if e["type"] == "wolf-down" and felled < 0.0:
+				felled = f.now
+		if f.p_state == "down" or felled >= 0.0:
+			break
+	return { "felled": felled, "t": f.now, "hero": f.p_hp, "beast": 100.0 * f.w_hp / float(f.beast["health"]), "dealt": f.stats["damage_dealt"], "hurts": f.stats["hurts"], "parries": f.stats["parries"],
+		"g_damage": f.stats["g_damage"], "g_guards": f.stats["g_guards"], "g_will": f.stats["g_will_spent"], "g_moves": f.stats["g_moves"], "keys": keys, "g_own": int(f.stats.get("g_own", 0)), "mended": float(f.stats.get("g_mended", 0.0)), "hand": float(f.stats.get("hand_damage", 0.0)), "hits": f.stats["hits"], "hand_hits": int(f.stats.get("hand_hits", 0)), "patterns": f.stats["patterns"] }
+
+## The same fight over several seeds, as one row's numbers.
+func _type_row(o: Dictionary) -> Dictionary:
+	var wins: Array = []
+	var hero := 0.0
+	var lost_at := 0.0
+	var share := 0.0
+	var kept := 0.0
+	var hurts := 0.0
+	var keys := 0.0
+	var own := 0.0
+	for sd in TYPE_SEEDS:
+		var oo := o.duplicate()
+		oo["seed"] = 11 + sd * 17
+		var r := _type_run(oo)
+		if r["felled"] >= 0.0:
+			wins.append(r["felled"])
+			hero += float(r["hero"])
+		else:
+			lost_at += float(r["beast"])
+		share += float(r["g_damage"]) / maxf(1.0, float(r["dealt"]))
+		kept += float(r["g_guards"])
+		hurts += float(r["hurts"])
+		keys += float(r["keys"])
+		own += float(r["g_own"])
+	wins.sort()
+	var n := float(TYPE_SEEDS)
+	var losses := TYPE_SEEDS - wins.size()
+	var mid := float(wins[wins.size() / 2]) if not wins.is_empty() else 240.0
+	return { "won": wins.size(), "in": mid if not wins.is_empty() else -1.0, "hero": hero / maxf(1.0, wins.size()), "lost_at": lost_at / maxf(1.0, losses),
+		"share": 100.0 * share / n, "kept": kept / n, "hurts": hurts / n, "keys": keys / n, "own": own / n,
+		# one number to rank by: fights won first, then what was left of the hero, then how soon
+		"score": wins.size() * 1000.0 + hero / maxf(1.0, wins.size()) * 2.0 - mid - lost_at / maxf(1.0, losses) }
+
+func _cell(r: Dictionary) -> String:
+	if int(r["won"]) == 0:
+		return "0/%d at %.0f%%" % [TYPE_SEEDS, r["lost_at"]]
+	return "%d/%d %3.0fs hp%3.0f" % [r["won"], TYPE_SEEDS, r["in"], r["hero"]]
+
+## What a base is, in a few words, for a table.
+func _what(base: Dictionary) -> String:
+	var T := Data.genius_types()
+	var id := String(base["id"])
+	var type := GeniusTypes.type_of_class(String(base["class"]))
+	match type:
+		"weapon": return "weapon (%s)" % String(T["weapon"]["bases"].get(id, {}).get("style", "?"))
+		"defense", "ritual": return "%s (%s)" % ["defensive" if type == "defense" else "ritual", String(T["items"].get(id, {}).get("use", {}).get("effect", "?"))]
+	return String(T["companions"].get(id, {}).get("role", "companion"))
+
+func _types() -> void:
+	var only := ""
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--types="):
+			only = String(a).trim_prefix("--types=")
+	var T := Data.genius_types()
+	# --- 1. every base, at three ages
+	print("\n== THE THREE TYPES: every base down its first road, beside a steady saber hero alone against the Warden of the Cutting at %.1f times its health (%d fights of up to 240 s) ==" % [LONG, TYPE_SEEDS])
+	print("   a companion is on the order its role is best given; a weapon's and an item's key is used as a bot uses it, and in the last column never used.")
+	print("%-12s %-20s %-6s %-18s %6s %6s %6s %5s   %-18s" % ["base", "what it is", "instar", "felled, in, hero", "share", "kept", "hurts", "keys", "key never used"])
+	var none := _type_row({ "weapon": "saber", "hand": "steady", "health": LONG })
+	print("%-12s %-20s %-6s %-18s %6s %6s %6.1f" % ["(no genius)", "", "", _cell(none), "", "", none["hurts"]])
+	for b in Data.bases():
+		if only != "" and only != String(b["id"]):
+			continue
+		var road := Genius.road_of(String(b["id"]))
+		if road.size() < 4:
+			continue
+		var type := GeniusTypes.type_of_class(String(b["class"]))
+		var role := String(T["companions"].get(String(b["id"]), {}).get("role", ""))
+		for n in [1, 3, 6]:
+			var form: Dictionary = road[0] if n == 1 else (road[2] if n == 3 else road[3])
+			var o := { "weapon": "saber", "hand": "steady", "form": form["id"], "instar": n, "order": ROLE_ORDER.get(role, "guard"), "health": LONG }
+			var r := _type_row(o)
+			var never := ""
+			if type != "companion":
+				var o2 := o.duplicate()
+				o2["key"] = false
+				never = _cell(_type_row(o2))
+			print("%-12s %-20s %-6d %-18s %5.0f%% %6.1f %6.1f %5.1f   %-18s" % [b["id"], _what(b), n, _cell(r), r["share"], r["kept"], r["hurts"], r["keys"], never])
+	if only != "":
+		return
+	# --- 2. the roles, beside the partners they are meant to balance
+	print("\n== ROLES AND PARTNERS: a grown companion of each role (a path that keeps to its role), beside four partners, alone against the Warden at %.1f times its health but where a row says otherwise (%d fights each) ==" % [LONG, TYPE_SEEDS])
+	for p in PARTNERS:
+		print("   %-8s %s" % [p["id"], p["says"]])
+	var header := "%-22s" % "companion"
+	for p in PARTNERS:
+		header += " %-18s" % p["id"]
+	print(header)
+	var table := {}
+	var rows: Array = [{ "label": "(no genius)", "role": "" }]
+	for role in GeniusTypes.ROLES:
+		for b in Data.bases():
+			var c: Dictionary = T["companions"].get(String(b["id"]), {})
+			if String(c.get("role", "")) != role:
+				continue
+			var pure := ""
+			for pid in c["paths"]:
+				if String(c["paths"][pid]["shade"]) == role:
+					pure = pid
+			if pure == "":
+				continue
+			var kids := Data.children_of(pure)
+			rows.append({ "label": "%s (%s)" % [role, String(kids[0]["name"]) if not kids.is_empty() else pure], "role": role, "form": String(kids[0]["id"]) if not kids.is_empty() else pure })
+			break
+	for row in rows:
+		var line := "%-22s" % String(row["label"]).left(22)
+		table[row["role"]] = {}
+		for p in PARTNERS:
+			var o := { "weapon": p["weapon"], "hand": p["hand"], "health": p["health"] }
+			if row.has("form"):
+				o["form"] = row["form"]
+				o["instar"] = 3
+				o["order"] = ROLE_ORDER.get(String(row["role"]), "guard")
+			var r := _type_row(o)
+			table[row["role"]][p["id"]] = r
+			line += " %-18s" % _cell(r)
+		print(line)
+	for p in PARTNERS:
+		# who wins most often beside this partner; among those, who fells it soonest, and who leaves them safest
+		var most := 0
+		for role in GeniusTypes.ROLES:
+			if table.has(role):
+				most = maxi(most, int(table[role][p["id"]]["won"]))
+		var soonest := ""
+		var safest := ""
+		for role in GeniusTypes.ROLES:
+			if not table.has(role) or int(table[role][p["id"]]["won"]) < most:
+				continue
+			var r: Dictionary = table[role][p["id"]]
+			if soonest == "" or (most > 0 and float(r["in"]) < float(table[soonest][p["id"]]["in"])) or (most == 0 and float(r["lost_at"]) < float(table[soonest][p["id"]]["lost_at"])):
+				soonest = role
+			if safest == "" or float(r["hero"]) > float(table[safest][p["id"]]["hero"]):
+				safest = role
+		print("   beside the %s (won %d of %d at best): soonest with the %s, safest with the %s" % [p["id"], most, TYPE_SEEDS, soonest, safest])
+	# --- 3. a second reach: a weapon genius beside a partner whose own weapon has the other reach
+	print("\n== A SECOND REACH: a grown weapon genius beside a steady partner whose own weapon has the other reach, alone against the Warden at %.1f times its health (%d fights each) ==" % [LONG, TYPE_SEEDS])
+	print("%-12s %-22s %-20s %-20s %-20s" % ["genius", "partner's own weapon", "no genius", "its key never used", "its key used"])
+	for b in Data.bases():
+		if GeniusTypes.type_of_class(String(b["class"])) != "weapon":
+			continue
+		var w: Dictionary = T["weapon"]["bases"].get(String(b["id"]), {})
+		var mine_ranged: bool = String(Data.room["styles"].get(String(w.get("style", "")), {}).get("kind", "melee")) == "ranged"
+		var partner := "saber" if mine_ranged else "musket"
+		var road := Genius.road_of(String(b["id"]))
+		var o := { "weapon": partner, "hand": "steady", "health": LONG }
+		var alone := _cell(_type_row(o))
+		o["form"] = road[2]["id"]
+		o["instar"] = 3
+		var used := _cell(_type_row(o))
+		o["key"] = false
+		print("%-12s %-22s %-20s %-20s %-20s" % [b["id"], partner, alone, _cell(_type_row(o)), used])
+	# --- 4. a learner's First Form: is the Academy's own elite still fair with each type?
+	print("\n== A LEARNER'S FIRST FORM: each type young, beside three hands with a saber, alone against the Warden (%d fights each); the key used, and [never used] ==" % TYPE_SEEDS)
+	print("%-12s %-20s %-32s %-32s %-20s" % ["base", "what it is", "steady", "learning", "new (never uses it)"])
+	var l0 := "%-12s %-20s" % ["(no genius)", ""]
+	for hand in ["steady", "learning", "new"]:
+		l0 += " %-32s" % _cell(_type_row({ "weapon": "saber", "hand": hand }))
+	print(l0)
+	for b in Data.bases():
+		var type := GeniusTypes.type_of_class(String(b["class"]))
+		var role := String(T["companions"].get(String(b["id"]), {}).get("role", ""))
+		var line := "%-12s %-20s" % [b["id"], _what(b)]
+		for hand in ["steady", "learning", "new"]:
+			var o := { "weapon": "saber", "hand": hand, "form": b["settled"]["id"], "instar": 1, "order": ROLE_ORDER.get(role, "guard"), "key": hand != "new" }
+			var cell := _cell(_type_row(o))
+			if type != "companion" and hand != "new":
+				var o2 := o.duplicate()
+				o2["key"] = false
+				cell += " [%s]" % _cell(_type_row(o2))
+			line += " %-32s" % cell
+		print(line)
