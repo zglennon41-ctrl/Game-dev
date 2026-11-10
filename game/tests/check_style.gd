@@ -9,7 +9,7 @@
 ## and passes (a colour the game moves onto its ramp when the material is made).
 extends Node
 
-const FOLDERS := ["academy", "wild", "weapons", "beasts", "people", "kaykit_dungeon", "quaternius", "genius/bodies", "genius/parts", "genius/keepsakes", "genius/trappings"]
+const FOLDERS := ["academy", "wild", "weapons", "beasts", "people", "kaykit_dungeon", "quaternius", "genius/bodies", "genius/forms", "genius/parts", "genius/keepsakes", "genius/trappings"]
 ## A colour this far from every ramp of its class is not a shade of anything in the palette:
 ## the art is wrong, whatever the game does with it afterwards.
 const FAR := 0.16

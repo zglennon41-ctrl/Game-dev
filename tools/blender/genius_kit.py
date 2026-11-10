@@ -45,6 +45,7 @@ from mathutils import Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import genius_geo as g  # noqa: E402
+import style  # noqa: E402  (the game's one style: data/style.json, docs/style.md)
 from genius_geo import X, Y, Z, V  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -90,7 +91,7 @@ def mat(name, color=None, rough=None, metallic=None):
     if m:
         return m
     c, r, mt = PALETTE.get(name, ((0.3, 0.3, 0.3), 0.8, 0.0))
-    c = color or c
+    c = style.conform(name, tuple(color or c))[:3]      # on the ramps of what its name says it is (docs/style.md)
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     bsdf = m.node_tree.nodes.get("Principled BSDF")

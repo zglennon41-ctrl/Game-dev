@@ -191,6 +191,10 @@ static func conform_texture(tex: Texture2D) -> Texture2D:
 		if img.decompress() != OK:
 			return tex
 	img.convert(Image.FORMAT_RGBA8)
+	# a picture the engine has given mipmaps (it does, once it has seen it on a model) carries
+	# them in its data: only the picture itself is brought over, and its mipmaps made again
+	if img.has_mipmaps():
+		img.clear_mipmaps()
 	if maxi(img.get_width(), img.get_height()) > 256:
 		img.resize(mini(img.get_width(), 256), mini(img.get_height(), 256), Image.INTERPOLATE_BILINEAR)
 	var bytes := img.get_data()
