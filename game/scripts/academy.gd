@@ -1922,8 +1922,8 @@ func _take_post() -> void:
 	fight.p_lock = true
 	world.lock_on = true
 	world.show_wolf = true
-	world._ring_wave(world._v3(fight.p_pos), Color(0.6, 0.8, 1.0), 4.0)
-	title_card("THE POST IS YOURS", "hold it", Color(0.6, 0.8, 1.0))
+	world._ring_wave(world._v3(fight.p_pos), Style.fx("guard"), 4.0)
+	title_card("THE POST IS YOURS", "hold it", Style.fx("guard"))
 	sfx.play("stance", 1.2)
 	progress["record"]["posts_held"] = int(progress["record"].get("posts_held", 0)) + 1
 	if genius:
@@ -3074,7 +3074,7 @@ func _visit_shade() -> void:
 			genius.offer_graft({ "id": "shade:" + sd["id"], "feature": sd["graftFeature"], "source": "shade:" + sd["id"] })
 			genius.bonded("shade")
 			progress["record"]["shade_accepted"] = true
-			title_card("ACCEPTED", "the shade's graft waits for the Gate", Color(0.7, 0.8, 1.0))
+			title_card("ACCEPTED", "the shade's graft waits for the Gate", Style.fx("guard"))
 			sfx.play("done")
 		save())
 

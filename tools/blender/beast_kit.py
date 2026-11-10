@@ -26,6 +26,9 @@ import sys
 
 import bpy
 import bmesh
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import style  # noqa: E402  (the game's one style: data/style.json, docs/style.md)
 from mathutils import Matrix, Vector
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -484,6 +487,7 @@ class Rig:
     @staticmethod
     def _set_material(m, color, rough, metallic, emission, strength):
         bsdf = m.node_tree.nodes.get("Principled BSDF")
+        color = style.conform(m.name, color)      # on the ramps of what its name says it is
         bsdf.inputs["Base Color"].default_value = (color[0], color[1], color[2], 1)
         bsdf.inputs["Roughness"].default_value = rough
         bsdf.inputs["Metallic"].default_value = metallic

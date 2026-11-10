@@ -899,6 +899,10 @@ render_mode cull_back;
 uniform vec4 albedo : source_color = vec4(1.0);
 uniform sampler2D albedo_tex : source_color, filter_linear_mipmap;
 uniform bool use_tex = false;
+// the palette's ramps as a lookup (Style.ramp_lut): a painted texture that could not be
+// brought onto the ramps beforehand is brought onto them here
+uniform sampler2D ramp_lut : source_color, filter_linear, repeat_disable;
+uniform bool use_lut = false;
 uniform float bands = 3.0;
 uniform vec4 shadow_tint : source_color = vec4(0.5, 0.55, 0.78, 1.0);
 uniform vec4 emission : source_color = vec4(0.0);
@@ -929,9 +933,22 @@ float triplanar(vec3 p, vec3 n) {
 	float z = texture(detail_tex, p.xy * detail_scale).r;
 	return x * w.x + y * w.y + z * w.z;
 }
+vec3 on_ramps(vec3 lin) {
+	vec3 c = clamp(pow(max(lin, vec3(0.0)), vec3(1.0 / 2.2)), 0.0, 1.0);
+	float b = c.b * 15.0;
+	float b0 = floor(b);
+	float b1 = min(b0 + 1.0, 15.0);
+	vec2 at = vec2(0.5 + c.r * 15.0, (0.5 + c.g * 15.0) / 16.0);
+	vec3 lo = texture(ramp_lut, vec2((b0 * 16.0 + at.x) / 256.0, at.y)).rgb;
+	vec3 hi = texture(ramp_lut, vec2((b1 * 16.0 + at.x) / 256.0, at.y)).rgb;
+	return mix(lo, hi, b - b0);
+}
 void fragment() {
 	vec3 col = albedo.rgb;
-	if (use_tex) { col *= texture(albedo_tex, UV).rgb; }
+	if (use_tex) {
+		vec3 painted = texture(albedo_tex, UV).rgb;
+		col *= use_lut ? on_ramps(painted) : painted;
+	}
 	if (detail_strength > 0.0) {
 		float d = triplanar(world_pos, world_nrm);
 		col *= mix(1.0, d * 2.0, detail_strength);
@@ -1025,8 +1042,14 @@ func toonify(node: Node) -> void:
 			t.set_shader_parameter("use_tex", sm.albedo_texture != null)
 			if sm.albedo_texture:
 				# a painted texture is brought onto the ramps whole; what multiplies it is left
-				t.set_shader_parameter("albedo_tex", Style.conform_texture(sm.albedo_texture))
+				# (-- --style-lut leaves it to the shader everywhere, to look at that way of doing it)
+				var painted := sm.albedo_texture if OS.get_cmdline_user_args().has("--style-lut") else Style.conform_texture(sm.albedo_texture)
+				t.set_shader_parameter("albedo_tex", painted)
 				t.set_shader_parameter("albedo", sm.albedo_color)
+				if painted == sm.albedo_texture:
+					# it could not be read back here: the shader brings it over as it draws
+					t.set_shader_parameter("use_lut", true)
+					t.set_shader_parameter("ramp_lut", Style.ramp_lut())
 			else:
 				t.set_shader_parameter("albedo", Style.conform(sm.albedo_color, cls))
 			_surface_look(t, cls, mi)

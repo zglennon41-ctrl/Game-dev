@@ -50,6 +50,9 @@ If step 2 is not fun with one Shape and one zone, nothing added later fixes it.
   readable enemy telegraphs, and the camera before anything else. The beat is secondary:
   it lives only in the parry (timed against an enemy's wind-up) and in the Pattern's
   chain (owner's decision, 2026-11-05). Placeholder art is fine; placeholder feel is not.
+- **One style.** Everything the game draws and moves is held to `docs/style.md`; its numbers
+  are `data/style.json`. An asset off it is a bug: `npm run check:style` finds it. A new
+  material is named for what it is made of; a new colour comes from a ramp.
 - **Placeholder art is CC0.** Until the game has its own art direction, characters,
   creatures and environments come from CC0 libraries (KayKit, Quaternius), credited in
   `game/assets/CREDITS.md`. A genius form may still be a silhouette plus feature tags.
@@ -80,6 +83,7 @@ and JSON Schema for data. The rules a designer tunes live in `data/` and are sha
 - `npm run sim -- --life data/lives/mira.json` — run a scripted life through a year
 - `npm run validate` — schema-check every file in `data/`
 - `npm run balance:game` — play every weapon type, technique and temperament headlessly and print the tables
+- `npm run check:style` — fail on anything off the game's one style (`docs/style.md`, `data/style.json`)
 
 ## Layout
 

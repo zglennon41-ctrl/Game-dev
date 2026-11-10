@@ -157,6 +157,12 @@ func check_type() -> void:
 		for bad in [".ttf", ".otf", "SystemFont", "FontFile.new"]:
 			if src.contains(bad):
 				fail("%s reaches for a typeface of its own (%s): fonts come from Style.font()" % [path.get_file(), bad])
+		# nor keeps a copy of the interface's palette
+		var own := RegEx.new()
+		own.compile("(?m)^const (BG|PANEL|FG|DIM|GOLD|EDGE|OFF|RED|BRASS|INK) := Color\\(")
+		var hit := own.search(src)
+		if hit:
+			fail("%s keeps a palette of its own (%s...): the interface's colours are Style's" % [path.get_file(), hit.get_string().strip_edges()])
 
 func _scripts(path: String) -> Array:
 	var out: Array = []
@@ -244,7 +250,9 @@ func _check_material(folder: String, file: String, sm: StandardMaterial3D, made:
 	if sm.albedo_texture != null:
 		# a painted texture: the game's copy of it must be the one brought onto the ramps
 		var tex: Texture2D = t.get_shader_parameter("albedo_tex")
-		if tex == sm.albedo_texture or not (tex is ImageTexture):
+		if t.get_shader_parameter("use_lut") == true and t.get_shader_parameter("ramp_lut") != null:
+			pass      # brought over as it is drawn
+		elif tex == sm.albedo_texture or not (tex is ImageTexture):
 			fail("%s: its painted texture was not brought onto the ramps" % where)
 		else:
 			var img := (tex as ImageTexture).get_image()

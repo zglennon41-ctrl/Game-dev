@@ -213,6 +213,22 @@ static func conform_texture(tex: Texture2D) -> Texture2D:
 		_textures[path] = _textures[key]
 	return _textures[key]
 
+## The ramps as a lookup, for a shader: sixteen slices of sixteen by sixteen side by side,
+## each colour of the cube moved as conform() would move a painted texture's. Made once, and
+## only where a texture could not be brought over on the processor.
+static var _lut: ImageTexture
+static func ramp_lut() -> ImageTexture:
+	if _lut:
+		return _lut
+	var n := 16
+	var img := Image.create(n * n, n, false, Image.FORMAT_RGB8)
+	for b in n:
+		for g in n:
+			for r in n:
+				img.set_pixel(b * n + r, g, conform(Color(r / 15.0, g / 15.0, b / 15.0), "mixed"))
+	_lut = ImageTexture.create_from_image(img)
+	return _lut
+
 # --- Light ------------------------------------------------------------------------------
 
 ## One of the three lights (lamp, fire, moon, window): "cast" is what it throws on a surface,

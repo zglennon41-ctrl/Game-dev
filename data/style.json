@@ -93,7 +93,7 @@
     "fire": { "color": "#FF8A3D", "cast": "#FFA763", "energy": 1.0 },
     "moon": { "color": "#8C9EF2", "cast": "#B3BDE6", "energy": 1.0 },
     "window": { "color": "#FFB866", "energy": 1.0 },
-    "stain": { "cast": "#B9A6D9", "energy": 0.45, "darken": 0.3 },
+    "stain": { "cast": "#B9A6D9", "energy": 0.4, "darken": 0.38 },
     "kinds": {
       "hall": { "key": "lamp", "fill": "moon", "sky": "#040303", "ambient": "#A88A76", "ambientEnergy": 0.3, "fog": "#0D0907", "fogDensity": 0.016, "moon": 0.0 },
       "court": { "key": "moon", "fill": "lamp", "sky": "#06070B", "ambient": "#8F94A6", "ambientEnergy": 0.5, "fog": "#0C0D12", "fogDensity": 0.006, "moon": 0.4 },
