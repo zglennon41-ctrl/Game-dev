@@ -1262,6 +1262,7 @@ func impact(at: Vector3, color: Color, size := 0.7) -> void:
 	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	m.albedo_texture = fx_star()
 	m.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	m.billboard_keep_scale = true
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	m.no_depth_test = true
 	mi.material_override = m
@@ -1309,6 +1310,7 @@ func dust(at: Vector3, amount := 18) -> void:
 	var m := _mat(Style.fx("dust"), 0.0, true, Style.fx_n("puff", "alpha", 0.55))
 	m.albedo_texture = _soft_dot()
 	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	m.billboard_keep_scale = true
 	m.vertex_color_use_as_albedo = true
 	p.material_override = m
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -2128,11 +2130,12 @@ func _shader_mat(code: String) -> ShaderMaterial:
 	m.shader = _shaders[code]
 	return m
 
-## The ink line on the living (data/style.json, ink): by what carries it, people, beasts or
-## genii. Places carry none.
-func _ink(category: String) -> ShaderMaterial:
+## The ink line on the living (data/style.json, ink): by what carries it, "people", "beasts"
+## or "genii". Places carry none. (A width given as a number, as this once took, is not
+## heeded: the weight of the line is the style's.)
+func _ink(category = "people") -> ShaderMaterial:
 	var m := _shader_mat(INK)
-	m.set_shader_parameter("width", Style.ink_width(category))
+	m.set_shader_parameter("width", Style.ink_width(String(category) if category is String else "people"))
 	m.set_shader_parameter("screen", float(Style.data()["ink"].get("screen", 900)))
 	m.set_shader_parameter("ink", Style.ink_color())
 	return m
