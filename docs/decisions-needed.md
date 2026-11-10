@@ -304,3 +304,8 @@ played the arc); barks stay as floating text. Still to be played rather than dec
     the molt as the ready signal, the coat carried across forms, grafts in the donor's
     colour, Resonance as light and instar as body, the Reading as six beats, what each
     instar adds, and whether a First Form at 0.6 m is too small.
+75. **The genius as the signature** (owner's bar, 2026-11-10; mine to work down): the audit
+    and the four calls are in `docs/genius-signature.md`: whether keeping its kind is always
+    offered at a Reading; which kinds have an elder; the names of the great; and the order
+    of what to build next (it fights as what it is; the Reading as a ceremony; classmates'
+    genii in the yard; the lineage on its page; what shows between Readings; bodies).

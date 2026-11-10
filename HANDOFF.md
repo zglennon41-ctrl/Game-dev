@@ -435,6 +435,13 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   kind in name and in proportion; an Apex genius stands taller than its partner with a
   mantle of light; and each instar echoes on the partner's own body, in the genius's coat
   (`docs/genius-progression.md`, "Ages" and "The echo").
+- **The genius is the signature** (owner, 2026-11-10): "Everything should be logical. I
+  want the genius to be the signature mechanic of the series. It needs to be the best part.
+  Every aspect fully developed, a unique expression of character and play." The bar, the
+  audit of every aspect against it, and the order to work in are `docs/genius-signature.md`.
+  First consequence, built: a genius may always keep its kind at a Reading and grow (a pup
+  into a wolf; a hawk into a griffin, the elder of its kind), and its coat goes with it
+  into a new body.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.

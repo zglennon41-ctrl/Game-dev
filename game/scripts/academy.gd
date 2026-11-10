@@ -2126,6 +2126,36 @@ func show_reading(reading: Dictionary, then: Callable, heading := "The Reading: 
 		row.add_child(col_v)
 		if i == 0:
 			b.call_deferred("grab_focus")
+	# Its own kind, grown: beside what the Tally read, it may always stay what it is.
+	var own_kind: Dictionary = genius.kept_kind(int(reading.get("instar", 2))) if genius and genius.is_born() else {}
+	if not own_kind.is_empty():
+		var kn := int(reading.get("instar", 2))
+		var keep_v := VBoxContainer.new()
+		keep_v.add_theme_constant_override("separation", 8)
+		var kinfo := own_kind.duplicate()
+		kinfo["instar"] = kn
+		kinfo["name"] = Genius.form_name_at(String(own_kind["form"]), kn)
+		kinfo["look"] = genius.look
+		keep_v.add_child(GeniusCard.make(kinfo, col, "ITS OWN KIND", true))
+		var kwhy := RichTextLabel.new()
+		kwhy.bbcode_enabled = true
+		kwhy.fit_content = true
+		kwhy.scroll_active = false
+		kwhy.custom_minimum_size = Vector2(300, 0)
+		Style.rich(kwhy, 13, Style.DIM, "italic")
+		var kher: Array = own_kind.get("heritage", []).map(func(f): return Rite.feature_label(String(f)))
+		kwhy.text = "It stays what it is and grows: %s, %s.%s" % [String(kinfo["name"]).to_lower(), String(Genius.age_at(kn).get("word", "grown")), ("  Keeps %s." % ", ".join(kher)) if not kher.is_empty() else ""]
+		keep_v.add_child(kwhy)
+		var kb := Button.new()
+		kb.text = "Keep its kind"
+		Style.button(kb, false, 18)
+		kb.pressed.connect(func():
+			sfx.play("ui-take", 1.0, -6.0)
+			hide_reading()
+			then.call(Genius.KEEP))
+		keep_v.add_child(kb)
+		row.add_child(keep_v)
+		row.move_child(keep_v, 0)
 	var settle := Button.new()
 	settle.text = "Let it settle on the best fit"
 	Style.button(settle, false, 17)

@@ -10,6 +10,9 @@ the end.
 The aim in one line: *at any moment a player can look at their genius, without opening a
 page, and see what it is, how far along it is, and that it is theirs.*
 
+(The bar for the whole system, and the audit of every aspect against it, is
+`docs/genius-signature.md`.)
+
 ## The owner's direction (2026-11-10)
 
 > "I want the genius system to be incredibly deep but also logical: if the size is too

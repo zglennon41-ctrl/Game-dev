@@ -60,7 +60,7 @@ func _take(i: int) -> void:
 	var feats: Array = c["features"].map(func(f): return Rite.feature_label(String(f)))
 	ac.title_card(g.form_name().to_upper(), "SECOND FORM  ·  %s  ·  %s" % [String(c["expression"]).to_upper(), ", ".join(feats)], col)
 	ac.show_card(g.to_dict(), col, "SECOND FORM")
-	var key := "settled" if i < 0 else "chosen"
+	var key := "settled" if i == -1 else "chosen"
 	var line := String(cfg["lines"][key]).replace("{genius_name}", g.name).replace("{form}", g.form_name().to_lower()).replace("{was}", old_name.to_lower())
 	ac.say(cfg["instructor"], [line], func():
 		ac.hide_card()

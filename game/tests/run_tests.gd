@@ -65,6 +65,7 @@ func _run() -> void:
 	test_guard()
 	test_progression()
 	test_ages()
+	test_kind()
 	test_blood_marks()
 	test_life_features()
 	test_bots()
@@ -2170,3 +2171,78 @@ func test_ages() -> void:
 	var s6 := (ruff.get_child(0) as Node3D).scale.x if ruff and ruff.get_child_count() > 0 else 0.0
 	check(s6 > s3 and s3 > 0.0, "and it grows as the genius does (%.2f at the Third Form, %.2f at Apex)" % [s3, s6])
 	w.queue_free()
+
+## A genius may always keep its kind (owner, 2026-11-10: a pup grows into a wolf, and
+## everything should be logical): at a Reading it can grow into the next age of what it is,
+## or the elder of its kind; its heritage and its coat go with it.
+func test_kind() -> void:
+	var mk := func(form_id: String) -> Genius:
+		var g := Genius.new()
+		var f := Genius.form_of(form_id)
+		g.instar = 1
+		g.body = { "form": f["id"], "expression": f["expression"], "silhouette": f["silhouette"], "own": f["features"].duplicate(), "heritage": [], "seedMark": "far-eyes", "grafts": [], "adaptations": [{ "id": "set-feet", "lastFed": 0 }] }
+		g.look = GeniusLook.born(4711)
+		return g
+	var wolf: Genius = mk.call("field-wolf")
+	var k2 := wolf.kept_kind(2)
+	check(k2.get("form", "") == "field-wolf" and k2.get("kept", false) and Genius.form_name_at("field-wolf", 2) == "Yearling wolf", "a wolf pup may grow into a yearling wolf")
+	check((k2["heritage"] as Array).has("set-feet") and (k2["features"] as Array).has("far-eyes"), "what it had adapted goes with it as heritage, and the Seed-mark stays")
+	check(wolf.kept_kind(5).get("form", "") == "field-wolf" and Genius.form_name_at("field-wolf", 5) == "Great Field-wolf" and Genius.form_name_at("field-wolf", 6) == "Field-wolf of the Line", "a kind with no elder grows great as itself, and is named for it")
+	check(Genius.form_name_at("cairn-back", 5) == "Old Cairn-back" and Genius.form_name_at("closed-ledger", 6) == "The Ledger Closed", "a name that does not take the honour keeps its own")
+	var hawk: Genius = mk.call("hawk")
+	check(hawk.kept_kind(2).get("form", "") == "hawk" and hawk.kept_kind(3).get("form", "") == "griffin", "a hawk stays a hawk until it can be a griffin, the elder of its kind")
+	var g3 := hawk.kept_kind(3)
+	check((g3["heritage"] as Array).size() >= 1 and not (g3["own"] as Array).has("beak"), "the elder carries something of the younger form as heritage (%s)" % str(g3["heritage"]))
+	# every kind can come to Apex as itself, and an elder is of the same Expression
+	var stuck: Array = []
+	for f in Data.forms():
+		if int(f["instars"]["min"]) != 1:
+			continue
+		var g: Genius = mk.call(String(f["id"]))
+		var at := String(f["id"])
+		var ok := true
+		for n in range(2, 7):
+			var k := g.kept_kind(n)
+			if k.is_empty() or String(k["expression"]) != String(f["expression"]):
+				ok = false
+				break
+			g.body["form"] = k["form"]
+			g.body["own"] = k["own"]
+			g.body["heritage"] = k["heritage"]
+			g.body["silhouette"] = k["silhouette"]
+			g.instar = n
+			at = String(k["form"])
+		if not ok:
+			stuck.append(f["id"])
+	check(stuck.is_empty(), "every First Form can come to Apex as its own kind (%s)" % ", ".join(stuck))
+	# taking it: the Reading's three are untouched, and keeping is its own choice
+	var born := _born_genius()
+	born.look = GeniusLook.born(99)
+	born.day = 7
+	born.milestone("gate")
+	var was := String(born.body["form"])
+	var r := born.read(2)
+	var best := String(r["candidates"][0]["form"])
+	var c := born.take(Genius.KEEP)
+	check(c.get("kept", false) and born.instar == 2 and String(born.body["form"]) == String(born.kept_kind(2).get("form", was)) or String(born.body["form"]) == was, "keeping its kind at the Gate makes it the same kind, a year older (%s to %s)" % [was, born.body["form"]])
+	check(born.history[-1].get("kept", false) and not born.history[-1]["settled"], "and its history says it kept its kind")
+	var other := _born_genius()
+	other.day = 7
+	other.milestone("gate")
+	other.read(2)
+	other.take(-1)
+	check(String(other.body["form"]) == best and other.history[-1]["settled"] and not other.history[-1].get("kept", false), "settling still takes the best of the three the Tally read")
+	# the coat goes with it into a new body
+	var cg: Genius = mk.call("hawk")
+	cg.look["coat"] = 2
+	var worn := Color(String(GeniusLook.offered_coats(cg.look, "hawk", "beast-flier")[2]["main"]))
+	cg.pending_reading = { "instar": 2, "candidates": [{ "form": "harrier", "name": "Harrier", "expression": "beast", "silhouette": "beast-ground-hunter", "own": ["crest"], "heritage": [], "seedMark": "far-eyes", "features": ["crest"] }] }
+	cg.take(0)
+	var offered := GeniusLook.offered_coats(cg.look, "harrier", "beast-ground-hunter")
+	var got := Color(String(offered[int(cg.look["coat"])]["main"]))
+	var nearest := true
+	for o in offered:
+		var oc := Color(String(o["main"]))
+		if Vector3(oc.r - worn.r, oc.g - worn.g, oc.b - worn.b).length() + 0.0001 < Vector3(got.r - worn.r, got.g - worn.g, got.b - worn.b).length():
+			nearest = false
+	check(nearest, "in a new body it wears the coat nearest the one it wore")

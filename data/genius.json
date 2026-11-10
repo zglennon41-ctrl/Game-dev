@@ -118,7 +118,7 @@
       "strength": 1.0
     },
     "ages": {
-      "$comment": "A genius is a living thing with an age: each instar is one. The age shapes the body (data/genius-bodies.json, ages: the young have large heads and short legs, the great are deep in the chest) and may name it (data/forms.json, ages: a Field-wolf at the First Form is a wolf pup). word is how its page says it.",
+      "$comment": "A genius is a living thing with an age: each instar is one. The age shapes the body (data/genius-bodies.json, ages: the young have large heads and short legs, the great are deep in the chest) and may name it (data/forms.json, ages: a Field-wolf at the First Form is a wolf pup). word is how its page says it. name: what a form with no name of its own for that age is called ({name} is the form's).",
       "1": {
         "id": "young",
         "word": "young"
@@ -137,11 +137,13 @@
       },
       "5": {
         "id": "great",
-        "word": "great"
+        "word": "great",
+        "name": "Great {name}"
       },
       "6": {
         "id": "apex",
-        "word": "at its apex"
+        "word": "at its apex",
+        "name": "{name} of the Line"
       }
     },
     "presence": {
@@ -159,6 +161,10 @@
         "mantle": 9,
         "ground": 1.8
       }
+    },
+    "kind": {
+      "$comment": "A genius may always keep its kind (owner, 2026-11-10: a pup grows into a wolf). At every Reading after the first, beside the three forms the Tally reads, it may grow into the next age of what it already is: the same form, or the elder of its kind where the form names one (data/forms.json, growsInto). Settling on the best fit still means the best of the three.",
+      "offered": true
     }
   },
   "echo": {

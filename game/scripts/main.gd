@@ -616,6 +616,18 @@ func enter_academy() -> void:
 		if not forced.is_empty():
 			academy._begin_quest(forced)
 	fight = academy.fight
+	if _args.has("reading") and academy.genius and academy.genius.is_born():
+		# --reading (with --academy --gate): open the Gate's Reading at once, to look at it.
+		var rg: Genius = academy.genius
+		rg.milestone("gate")
+		rg.day = maxi(rg.day, 7)
+		academy.auto = false
+		academy.show_reading(rg.read(2), func(_i: int): pass)
+		if _args.has("shots"):
+			await get_tree().create_timer(2.0).timeout
+			await _shot("reading")
+			get_tree().quit()
+		return
 	if not _args.has("bot"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 

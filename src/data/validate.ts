@@ -32,6 +32,13 @@ export function validateData(dir = 'data'): Problem[] {
   for (const f of D('forms')) {
     for (const x of f.features) need('forms.json', features, x, `feature on ${f.id}`);
     if (f.instars.min > f.instars.max) problems.push({ file: 'forms.json', message: `${f.id}: instars.min > max` });
+    // The elder of its kind must be a form, of the same Expression, that it can grow into.
+    if (f.growsInto) {
+      const elder = D('forms').find((g: { id: string }) => g.id === f.growsInto);
+      if (!elder) problems.push({ file: 'forms.json', message: `${f.id}: growsInto "${f.growsInto}" is not a form` });
+      else if (elder.expression !== f.expression) problems.push({ file: 'forms.json', message: `${f.id}: its elder ${elder.id} is another Expression; a kind keeps its Expression` });
+      else if (elder.instars.max <= f.instars.max) problems.push({ file: 'forms.json', message: `${f.id}: its elder ${elder.id} does not outlast it` });
+    }
   }
   for (const s of D('seeds')) need('seeds.json', features, s.seedMark, `seed-mark of ${s.id}`);
   for (const a of D('adaptations')) need('adaptations.json', features, a.id, 'adaptation feature');

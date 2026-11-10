@@ -109,8 +109,53 @@ func form_name() -> String:
 static func form_name_at(form_id: String, at_instar: int) -> String:
 	for f in Data.forms():
 		if f["id"] == form_id:
-			return String(f.get("ages", {}).get(str(at_instar), f["name"]))
+			var nm := String(f["name"])
+			if f.get("ages", {}).has(str(at_instar)):
+				return String(f["ages"][str(at_instar)])
+			# the great and the apex of a kind are named for it, where the name allows
+			var pat := String(age_at(at_instar).get("name", ""))
+			if pat != "" and not (nm.begins_with("The ") or nm.begins_with("Old ")):
+				return pat.replace("{name}", nm)
+			return nm
 	return form_id.capitalize()
+
+static func form_of(form_id: String) -> Dictionary:
+	for f in Data.forms():
+		if f["id"] == form_id:
+			return f
+	return {}
+
+## Its own kind at instar n: what it becomes if it keeps its kind at the Reading and grows
+## (data/genius.json, progression.kind). The same form a year older, or the elder of its
+## kind once it has outgrown the form (data/forms.json, growsInto). It keeps its heritage,
+## and whatever it had adapted becomes heritage, as at any Reading.
+func kept_kind(n: int) -> Dictionary:
+	if not is_born() or not Data.genius().get("progression", {}).get("kind", {}).get("offered", false):
+		return {}
+	var cur := Genius.form_of(String(body.get("form", "")))
+	if cur.is_empty():
+		return {}
+	var f := cur
+	if n > int(cur["instars"]["max"]) and cur.has("growsInto"):
+		var elder := Genius.form_of(String(cur["growsInto"]))
+		if not elder.is_empty() and n >= int(elder["instars"]["min"]):
+			f = elder
+	var mark := String(body.get("seedMark", ""))
+	var own: Array = (f["features"] as Array).duplicate()
+	var heritage: Array = []
+	var carried: Array = body.get("heritage", []).duplicate()
+	if f["id"] != cur["id"]:
+		carried += body.get("own", [])
+	carried += body.get("adaptations", []).map(func(a): return a["id"])
+	for x in carried:
+		if x != mark and not own.has(x) and not heritage.has(x) and heritage.size() < int(Data.rules["genius"]["heritageMax"]):
+			heritage.append(x)
+	var feats: Array = []
+	for x in [mark] + own + heritage + body.get("grafts", []).map(func(gr): return gr["feature"]):
+		if x != "" and not feats.has(x):
+			feats.append(x)
+	return { "form": f["id"], "name": f["name"], "expression": f["expression"], "silhouette": f["silhouette"], "score": 0.0,
+		"own": own, "heritage": heritage, "seedMark": mark, "features": feats, "reasons": [], "kept": true }
 
 ## Its age: each instar is one (data/genius.json, progression.ages): { id, word }.
 func age() -> Dictionary:
@@ -340,22 +385,34 @@ func read(n: int, noise := 0.0, noise_seed := 0) -> Dictionary:
 	pending_reading["unlockedBy"] = GeniusResonance.unlock_reason(n, milestones, 0)
 	return pending_reading
 
-## Take candidate i of the pending Reading (or settle on the best, i = -1). Fixed adaptations
+const KEEP := -2    # take(KEEP): keep its kind and grow
+
+## Take candidate i of the pending Reading (or settle on the best, i = -1; or keep its kind,
+## i = KEEP). Fixed adaptations
 ## become heritage; pending grafts are taken while there are slots; the Tally starts again,
 ## keeping the Pattern as the intention.
 func take(i := -1) -> Dictionary:
 	var cands: Array = pending_reading.get("candidates", [])
 	if cands.is_empty():
 		return {}
-	var settled := i < 0
-	var c: Dictionary = cands[0 if settled else clampi(i, 0, cands.size() - 1)]
+	var settled := i == -1
 	var n := int(pending_reading["instar"])
+	var c: Dictionary = cands[0 if i < 0 else clampi(i, 0, cands.size() - 1)]
+	var kept := false
+	if i == KEEP:
+		var own_kind := kept_kind(n)
+		if not own_kind.is_empty():
+			c = own_kind
+			kept = true
+	var was_form := String(body.get("form", ""))
+	var was_sil := String(body.get("silhouette", ""))
 	var room := maxi(0, int(Data.rules["genius"]["graftSlots"]) - body.get("grafts", []).size())
 	var accepted: Array = pending_grafts.slice(0, room) if n >= 2 else []
 	pending_grafts = pending_grafts.slice(room) if n >= 2 else pending_grafts
 	body = GeniusReading.take(body, c, accepted)
 	instar = n
-	history.append({ "instar": n, "form": c["form"], "name": c["name"], "day": day, "by": pending_reading.get("unlockedBy", ""), "settled": settled })
+	history.append({ "instar": n, "form": c["form"], "name": c["name"], "day": day, "by": pending_reading.get("unlockedBy", ""), "settled": settled, "kept": kept })
+	_carry_coat(was_form, was_sil)
 	var intention: Variant = tally.get("intention")
 	tally = GeniusReading.empty_tally()
 	if intention is Dictionary:
@@ -369,6 +426,26 @@ func take(i := -1) -> Dictionary:
 		s["vestigial"] = not meets(sf.get("requires", []).filter(func(r): return r["kind"] == "expression"))
 	pending_reading = {}
 	return c
+
+## The coat goes with it into a new body: of the coats the new body offers it, the one nearest
+## in colour to the coat it wore.
+func _carry_coat(was_form: String, was_sil: String) -> void:
+	if look.is_empty() or was_sil == "" or was_sil == String(body.get("silhouette", "")):
+		return
+	var was := GeniusLook.offered_coats(look, was_form, was_sil)
+	var now := GeniusLook.offered_coats(look, String(body.get("form", "")), String(body.get("silhouette", "")))
+	if was.is_empty() or now.is_empty():
+		return
+	var worn := Color(String(was[clampi(int(look.get("coat", 0)), 0, was.size() - 1)].get("main", "#808080")))
+	var best := 0
+	var best_d := INF
+	for k in now.size():
+		var c := Color(String(now[k].get("main", "#808080")))
+		var d := Vector3(c.r - worn.r, c.g - worn.g, c.b - worn.b).length()
+		if d < best_d:
+			best_d = d
+			best = k
+	look["coat"] = best
 
 func milestone(id: String) -> void:
 	if not milestones.has(id):
