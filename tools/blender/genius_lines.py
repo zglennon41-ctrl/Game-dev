@@ -1006,6 +1006,35 @@ def build_baby():
     export_objects([ob], {}, os.path.join(OUT, "baby.glb"), ref=STAND)
 
 
+# --- the Wolf's gift: what a hybrid wears of it on another base's body ---------------------
+
+def fangs_gift():
+    """Fangs anyone can see: two long from above, two short from below."""
+    up = g.tongue([(0.03, 0.0, 0.008), (0.035, -0.012, -0.052), (0.027, 0.0, -0.125)], [0.032, 0.023, 0.002], thick=0.7, normal=(1, 0, 0))
+    low = g.tongue([(0.021, -0.022, -0.085), (0.023, -0.028, -0.05), (0.02, -0.022, -0.02)], [0.017, 0.013, 0.002], thick=0.7, normal=(1, 0, 0))
+    return [kit._part("fangs", [(g.merge(up, g.mirrored(up)), mat("bone")), (g.merge(low, g.mirrored(low)), mat("bone"))])]
+
+
+def ruff_gift():
+    """A wolf's ruff, round the throat of whatever wears it."""
+    geo, geo2 = None, None
+    n = 13
+    for i in range(n):
+        a = math.pi * (-0.15 + 1.3 * i / (n - 1))
+        d = Vector((math.cos(a), 0, math.sin(a)))
+        base = Vector((0.1 * d.x, 0.0, 0.09 + 0.1 * d.z))
+        L = 0.19 * (1.0 + 0.15 * math.sin(i * 2.3))
+        bl = g.blade(base, base + Vector((d.x * L * 0.6, L * 0.75, d.z * L * 0.6)), 0.085, normal=d, belly=0.32)
+        if i % 2:
+            geo2 = g.merge(geo2, bl)
+        else:
+            geo = g.merge(geo, bl)
+    return [kit._part("ruff", [(geo, mat("fur_ruff")), (geo2, mat("fur_light"))])]
+
+
+GIFTS = {"fangs": fangs_gift, "ruff": ruff_gift}
+
+
 def build_wolf(form_id, level, spec, base):
     r, sockets = wolf_form(form_id, level, spec)
     export(r, sockets, os.path.join(OUT, form_id + ".glb"))
@@ -1069,7 +1098,11 @@ _families()
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    if args and args[0] == "baby":
+    if args and args[0] == "gifts":       # the parts a hybrid wears of the bases built here
+        kit.PARTS.update(GIFTS)
+        for feature in GIFTS:
+            kit.build_part(feature)
+    elif args and args[0] == "baby":
         build_baby()
     elif not args or args[0] == "--all":
         build_baby()
