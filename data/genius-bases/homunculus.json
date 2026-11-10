@@ -1,0 +1,499 @@
+{
+ "id": "homunculus",
+ "name": "Homunculus",
+ "class": "creature",
+ "expression": "kith",
+ "silhouette": "kith-homunculus",
+ "spark": "The mote copies you. A beat late and a little wrong, it does what your hands just did.",
+ "nature": {
+  "shape": {
+   "make": 1.0
+  },
+  "orders": {
+   "hold": 0.5
+  },
+  "quests": {
+   "salvage": 0.5
+  },
+  "company": {
+   "alone": 0.3
+  }
+ },
+ "calls": {
+  "seed": {
+   "never-alive": 0.7,
+   "remembers": 0.5,
+   "i-can-hold": 0.3
+  },
+  "shape": {
+   "make": 0.8,
+   "read": 0.4,
+   "bind": 0.2
+  },
+  "blood": {
+   "forgeborn": 0.6,
+   "iron-blood": 0.5,
+   "ironblooded": 0.5,
+   "mound-kin": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Half-made",
+  "gift": [
+   "small-hands",
+   "brush"
+  ],
+  "text": "Somebody made it and did not finish. It has been finishing itself ever since, from watching."
+ },
+ "settled": {
+  "id": "homunculus-unfinished-homunculus",
+  "name": "Unfinished Homunculus",
+  "text": "Clay to the knees and unfinished above, with your thumbprint still in its forehead. It watches your hands as if they were the only book.",
+  "features": [
+   "small-hands"
+  ]
+ },
+ "paths": [
+  {
+   "id": "homunculus-clay-apprentice",
+   "name": "Clay Apprentice",
+   "text": "It learned from you by doing what you do, until it could do the next thing before you did.",
+   "leans": {
+    "shape": {
+     "make": 1.0
+    }
+   },
+   "features": [
+    "brush"
+   ],
+   "prongs": [
+    {
+     "id": "homunculus-fitter",
+     "name": "Fitter",
+     "text": "It keeps the car's fittings and the post's lamp. It has a spanner your size and uses it one-handed.",
+     "leans": {
+      "ground": {
+       "line": 1.0
+      },
+      "quests": {
+       "linework": 0.6
+      }
+     },
+     "features": [
+      "gears"
+     ],
+     "silhouette": "kith-fitter",
+     "finishes": [
+      {
+       "id": "homunculus-master-fitter",
+       "name": "Master Fitter",
+       "text": "No post it put right has gone dark again. The Compact has tried twice to hire it away from you.",
+       "leans": {
+        "quests": {
+         "linework": 1.0
+        }
+       },
+       "features": [
+        "brass-plate"
+       ],
+       "silhouette": "kith-fitter"
+      },
+      {
+       "id": "homunculus-plate-layer",
+       "name": "Plate-layer",
+       "text": "It walks the rails ahead of the car tapping each with a hammer, and stops the car at the one that rings wrong.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "orders": {
+         "hold": 0.4
+        }
+       },
+       "features": [
+        "set-feet"
+       ],
+       "silhouette": "kith-fitter"
+      }
+     ]
+    },
+    {
+     "id": "homunculus-copy-clerk",
+     "name": "Copy-clerk",
+     "text": "It keeps your notes, and has started keeping its own, in a hand much better than yours.",
+     "leans": {
+      "shape": {
+       "read": 1.0
+      }
+     },
+     "features": [
+      "pages"
+     ],
+     "silhouette": "kith-clerk",
+     "finishes": [
+      {
+       "id": "homunculus-examiners-clerk",
+       "name": "Examiner's Clerk",
+       "text": "It has read every writ and remembers every clause. Houses lower their voices when it is in the room.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        }
+       },
+       "features": [
+        "ledger"
+       ],
+       "silhouette": "kith-clerk"
+      },
+      {
+       "id": "homunculus-indexer",
+       "name": "Indexer",
+       "text": "It knows what the Archive holds and where, and what is missing, and it suspects who.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        }
+       },
+       "features": [
+        "dial"
+       ],
+       "silhouette": "kith-clerk"
+      }
+     ]
+    },
+    {
+     "id": "homunculus-ward-builder",
+     "name": "Ward-builder",
+     "text": "It raises your wards where you point and stays inside them, patching, while you go on.",
+     "leans": {
+      "orders": {
+       "hold": 1.0
+      }
+     },
+     "features": [
+      "ring"
+     ],
+     "finishes": [
+      {
+       "id": "homunculus-mason-of-the-post",
+       "name": "Mason of the Post",
+       "text": "It has built a wall at every post you held. Some of them are still there. One has a door.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "ground": {
+         "ruin": 0.4
+        }
+       },
+       "features": [
+        "wall-plate"
+       ]
+      },
+      {
+       "id": "homunculus-makers-maker",
+       "name": "Maker's Maker",
+       "text": "It has begun making small ones of its own. They carry its tools and look at it the way it looked at you.",
+       "leans": {
+        "shape": {
+         "make": 1.0
+        }
+       },
+       "features": [
+        "wheels"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "homunculus-clay-bearer",
+   "name": "Clay Bearer",
+   "text": "It learned from you that being made for a purpose is not the same as choosing one, and it chose yours.",
+   "leans": {
+    "orders": {
+     "guard": 1.0
+    },
+    "fights": {
+     "blocks": 0.5
+    }
+   },
+   "features": [
+    "broad-chest"
+   ],
+   "prongs": [
+    {
+     "id": "homunculus-clay-stand-in",
+     "name": "Clay Stand-in",
+     "text": "It steps into the blow because it can be mended and you cannot. It is right, and it is clay again by evening.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      }
+     },
+     "features": [
+      "stone-skin"
+     ],
+     "finishes": [
+      {
+       "id": "homunculus-thrice-mended",
+       "name": "Thrice-mended",
+       "text": "More patch than clay now. Every repair is your work, and it keeps each one where you can see it.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        }
+       },
+       "features": [
+        "iron-hide"
+       ]
+      },
+      {
+       "id": "homunculus-kiln-fired",
+       "name": "Kiln-fired",
+       "text": "Your fire went through it once by accident. It rang when it cooled, and nothing has cracked it since.",
+       "leans": {
+        "shape": {
+         "turn": 1.0
+        }
+       },
+       "features": [
+        "scorched"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "homunculus-pack-porter",
+     "name": "Pack-porter",
+     "text": "It carries what the party cannot. It has never asked what is in the packs.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      }
+     },
+     "features": [
+      "plated"
+     ],
+     "finishes": [
+      {
+       "id": "homunculus-litter-bearer",
+       "name": "Litter-bearer",
+       "text": "When the passenger cannot walk it carries them, at a pace that would not spill a cup.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        }
+       },
+       "features": [
+        "broad-guard"
+       ]
+      },
+      {
+       "id": "homunculus-cohorts-hand",
+       "name": "Cohort's Hand",
+       "text": "Every one of your classmates has been handed the right thing by it at the right moment, and not seen it arrive.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "homunculus-door-sitter",
+     "name": "Door-sitter",
+     "text": "It does not sleep. It sits against the dormitory door with a lamp and counts the hours aloud, very quietly.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      }
+     },
+     "features": [
+      "lantern"
+     ],
+     "finishes": [
+      {
+       "id": "homunculus-knocker-up",
+       "name": "Knocker-up",
+       "text": "It wakes the party before what is coming arrives. Nobody has worked out how it knows.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        }
+       },
+       "features": [
+        "tunnel-ear"
+       ]
+      },
+      {
+       "id": "homunculus-halls-caretaker",
+       "name": "Hall's Caretaker",
+       "text": "It sweeps the hearth where the shades sit and trims their lamp. They have told it how they were made.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "homunculus-likeness",
+   "name": "Likeness",
+   "text": "It learned from you so closely that it began to fight like you, and then to look like you.",
+   "leans": {
+    "orders": {
+     "hunt": 1.0
+    },
+    "range": {
+     "close": 0.5
+    }
+   },
+   "features": [
+    "short-blade"
+   ],
+   "prongs": [
+    {
+     "id": "homunculus-sparring-doll",
+     "name": "Sparring-doll",
+     "text": "It took every drill you did on the pell from the other side, and learned the answer to each.",
+     "leans": {
+      "fights": {
+       "parries": 1.0
+      }
+     },
+     "features": [
+      "mask"
+     ],
+     "finishes": [
+      {
+       "id": "homunculus-mirror-hand",
+       "name": "Mirror-hand",
+       "text": "It parries as you parry, a half-beat after, from the foe's other side. The foe has not found a third side.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        }
+       },
+       "features": [
+        "edge"
+       ]
+      },
+      {
+       "id": "homunculus-pell-breaker",
+       "name": "Pell-breaker",
+       "text": "It hits the way the training post taught it to be hit. It was listening the whole time.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        }
+       },
+       "features": [
+        "horn-brow"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "homunculus-clay-double",
+     "name": "Clay Double",
+     "text": "When your Pattern fires, it fires too, in clay. The second chain is slower and hits just as hard.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      }
+     },
+     "features": [
+      "ring"
+     ],
+     "finishes": [
+      {
+       "id": "homunculus-walking-likeness",
+       "name": "Walking Likeness",
+       "text": "At a distance your classmates cannot tell you apart. Nearer, it is the one not bleeding.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "company": {
+         "alone": 0.4
+        }
+       },
+       "features": [
+        "second-face"
+       ]
+      },
+      {
+       "id": "homunculus-sworn-likeness",
+       "name": "Sworn Likeness",
+       "text": "It took your oath beside you in its own voice. If you fall it will keep the Terms, and it has told you so.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        }
+       },
+       "features": [
+        "ledger"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "homunculus-clay-loader",
+     "name": "Clay Loader",
+     "text": "It hands you the next shot before you reach for it, and has started taking the odd one itself.",
+     "leans": {
+      "range": {
+       "far": 1.0
+      }
+     },
+     "features": [
+      "sight-glass"
+     ],
+     "finishes": [
+      {
+       "id": "homunculus-clay-sharpshooter",
+       "name": "Clay Sharpshooter",
+       "text": "It never breathes, so it never has to hold a breath. It has not missed since it learned which end to point.",
+       "leans": {
+        "shape": {
+         "cast": 1.0
+        }
+       },
+       "features": [
+        "barrel"
+       ]
+      },
+      {
+       "id": "homunculus-brush-beater",
+       "name": "Brush-beater",
+       "text": "It walks into the brush clapping two stones and drives what you hunt onto your line. It cannot be frightened off.",
+       "leans": {
+        "quests": {
+         "hunt": 1.0
+        },
+        "ground": {
+         "wild": 0.5
+        }
+       },
+       "features": [
+        "long-legs"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

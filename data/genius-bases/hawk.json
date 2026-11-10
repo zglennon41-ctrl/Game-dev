@@ -1,0 +1,531 @@
+{
+ "id": "hawk",
+ "name": "Hawk",
+ "class": "animal",
+ "expression": "beast",
+ "silhouette": "beast-flier",
+ "spark": "The mote rides high, above your head and a little ahead, and drops to your shoulder only when you stop.",
+ "nature": {
+  "range": {
+   "far": 1.0
+  },
+  "orders": {
+   "hunt": 0.7
+  },
+  "shape": {
+   "cast": 0.5,
+   "read": 0.4
+  }
+ },
+ "calls": {
+  "seed": {
+   "watches-from-above": 1.0,
+   "with-a-voice": 0.2
+  },
+  "shape": {
+   "cast": 0.6,
+   "read": 0.5,
+   "turn": 0.2
+  },
+  "blood": {
+   "aerie-born": 0.7,
+   "winged": 0.6,
+   "eyes-heat": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Winged",
+  "gift": [
+   "wings",
+   "talons"
+  ],
+  "text": "It sees the thing from above before it is a problem, and arrives on it from there."
+ },
+ "settled": {
+  "id": "hawk-fledgling-hawk",
+  "name": "Fledgling hawk",
+  "text": "Down still showing through the flight feathers. It falls off your shoulder twice a day and pretends it meant to.",
+  "features": [
+   "wings",
+   "beak"
+  ]
+ },
+ "paths": [
+  {
+   "id": "hawk-stooper",
+   "name": "Stooper",
+   "text": "It learned from you that the best blow is the one that arrives from somewhere else.",
+   "leans": {
+    "range": {
+     "far": 1.0
+    },
+    "orders": {
+     "hunt": 0.7
+    }
+   },
+   "features": [
+    "talons"
+   ],
+   "prongs": [
+    {
+     "id": "hawk-harrier",
+     "name": "Harrier",
+     "text": "You fight at arm's length, so it came down out of the air to fight at the height of your knee.",
+     "leans": {
+      "range": {
+       "close": 1.0
+      },
+      "fights": {
+       "dodges": 0.5
+      }
+     },
+     "features": [
+      "ground-claws",
+      "crest"
+     ],
+     "silhouette": "beast-ground-hunter",
+     "finishes": [
+      {
+       "id": "hawk-heel-hawk",
+       "name": "Heel-hawk",
+       "text": "It goes for the back of the leg while your party has the front. Nothing it has hamstrung has thanked it.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "bonds": {
+         "classmate": 0.5
+        }
+       },
+       "features": [
+        "long-legs"
+       ]
+      },
+      {
+       "id": "hawk-bramble-harrier",
+       "name": "Bramble-harrier",
+       "text": "You go out alone into the green, and it has learned to flush what hides there onto your blade.",
+       "leans": {
+        "company": {
+         "alone": 1.0
+        },
+        "ground": {
+         "wild": 0.8
+        }
+       },
+       "features": [
+        "tunnel-ear"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "hawk-fist-falcon",
+     "name": "Fist-falcon",
+     "text": "It leaves your fist on the first beat of your Pattern and is back on it before the last.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      }
+     },
+     "features": [
+      "talon-grip"
+     ],
+     "finishes": [
+      {
+       "id": "hawk-thunder-stoop",
+       "name": "Thunder-stoop",
+       "text": "It falls with the Pattern's last beat. The sound arrives after it does.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "shape": {
+         "cast": 0.6
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      },
+      {
+       "id": "hawk-jessed-falcon",
+       "name": "Jessed Falcon",
+       "text": "It wears the jesses of your oath by choice. It could slip them. It has not.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "hawk-high-circler",
+     "name": "High Circler",
+     "text": "It hangs where your shots land and marks them for you with its shadow.",
+     "leans": {
+      "shape": {
+       "cast": 1.0
+      },
+      "range": {
+       "far": 0.5
+      }
+     },
+     "features": [
+      "sleek-coat"
+     ],
+     "finishes": [
+      {
+       "id": "hawk-storm-kite",
+       "name": "Storm-kite",
+       "text": "It rides your weather in over the wild ground and comes down with it.",
+       "leans": {
+        "ground": {
+         "wild": 1.0
+        },
+        "shape": {
+         "turn": 0.6
+        }
+       },
+       "features": [
+        "smoke"
+       ]
+      },
+      {
+       "id": "hawk-line-falcon",
+       "name": "Line-falcon",
+       "text": "It flies the line ahead of the car, post to post. You know a lamp is out before the walker does.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "quests": {
+         "linework": 0.8
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hawk-mantler",
+   "name": "Mantler",
+   "text": "A hawk spreads its wings over what is its own. It learned from you what that is.",
+   "leans": {
+    "orders": {
+     "guard": 1.0
+    },
+    "fights": {
+     "blocks": 0.5
+    }
+   },
+   "features": [
+    "wing-cloak"
+   ],
+   "prongs": [
+    {
+     "id": "hawk-eyrie-holder",
+     "name": "Eyrie-holder",
+     "text": "Give it a high place and it will keep everything beneath.",
+     "leans": {
+      "orders": {
+       "hold": 1.0
+      },
+      "ground": {
+       "ruin": 0.5
+      }
+     },
+     "features": [
+      "set-feet"
+     ],
+     "finishes": [
+      {
+       "id": "hawk-post-eagle",
+       "name": "Post-eagle",
+       "text": "It sits the lamp-iron of every post you light, and the dark does not come under it.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "orders": {
+         "hold": 0.6
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      },
+      {
+       "id": "hawk-lord-of-the-broken-tower",
+       "name": "Lord of the Broken Tower",
+       "text": "It has chosen the tallest broken thing in every ruin you have walked. From there it owns the floor.",
+       "leans": {
+        "ground": {
+         "ruin": 1.0
+        }
+       },
+       "features": [
+        "stone-skin"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "hawk-wing-over",
+     "name": "Wing-over",
+     "text": "It puts a wing between you and what is coming, and counts the feathers afterward.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      }
+     },
+     "features": [
+      "plated"
+     ],
+     "finishes": [
+      {
+       "id": "hawk-broken-pinion",
+       "name": "Broken Pinion",
+       "text": "One wing never set straight. It flies anyway, lower, and nearer you.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "company": {
+         "alone": 0.4
+        }
+       },
+       "features": [
+        "scorched"
+       ]
+      },
+      {
+       "id": "hawk-iron-feather",
+       "name": "Iron-feather",
+       "text": "The feathers it lost for you grew back as something a blade turns on.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        },
+        "shape": {
+         "anchor": 0.6
+        }
+       },
+       "features": [
+        "iron-hide"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "hawk-flock-leader",
+     "name": "Flock-leader",
+     "text": "The party's genii take the air when it does and come down when it does.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      },
+      "bonds": {
+       "classmate": 0.7
+      }
+     },
+     "features": [
+      "voice"
+     ],
+     "finishes": [
+      {
+       "id": "hawk-passengers-hawk",
+       "name": "Passenger's Hawk",
+       "text": "It rides the shoulder of whoever you were set to bring home, and looks at you if they fall behind.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      },
+      {
+       "id": "hawk-cohort-eagle",
+       "name": "Cohort Eagle",
+       "text": "Every one of your cohort has had it land on their arm once. It has not forgotten which arm.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        },
+        "company": {
+         "party": 0.5
+        }
+       },
+       "features": [
+        "crown"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "hawk-keen-eye",
+   "name": "Keen-eye",
+   "text": "It learned from you that seeing first is worth more than striking first.",
+   "leans": {
+    "shape": {
+     "read": 1.0
+    },
+    "fights": {
+     "parries": 0.6
+    }
+   },
+   "features": [
+    "far-eyes"
+   ],
+   "prongs": [
+    {
+     "id": "hawk-dusk-hawk",
+     "name": "Dusk-hawk",
+     "text": "You work at night, so it has learned the hours a hawk should not know.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      }
+     },
+     "features": [
+      "dark-eyed"
+     ],
+     "finishes": [
+      {
+       "id": "hawk-owl-eyed-hawk",
+       "name": "Owl-eyed Hawk",
+       "text": "It turns its whole head to look, slowly. It sees the strike wind up in the dark before you hear it.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "ground": {
+         "night": 0.7
+        }
+       },
+       "features": [
+        "watching-eye"
+       ]
+      },
+      {
+       "id": "hawk-quiet-wing",
+       "name": "Quiet-wing",
+       "text": "It flies where the field goes still, and makes no more sound than the Quiet does.",
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        }
+       },
+       "features": [
+        "quiet-place"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "hawk-augurs-hawk",
+     "name": "Augur's Hawk",
+     "text": "It flies a pattern over the ground before you walk it. Left is a warning.",
+     "leans": {
+      "quests": {
+       "deep-run": 1.0
+      },
+      "shape": {
+       "read": 0.5
+      }
+     },
+     "features": [
+      "old-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "hawk-tiercel-of-the-deep-run",
+       "name": "Tiercel of the Deep Run",
+       "text": "It has been to the heart of every zone with you and came out counting the party.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      },
+      {
+       "id": "hawk-salvage-kite",
+       "name": "Salvage Kite",
+       "text": "It finds the thing in the rubble before the archivist has finished describing it.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        },
+        "ground": {
+         "ruin": 0.4
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "hawk-message-hawk",
+     "name": "Message-hawk",
+     "text": "It carries what you bind, a word or a writ or a name, to whoever must have it.",
+     "leans": {
+      "shape": {
+       "bind": 1.0
+      },
+      "quests": {
+       "writ": 0.6
+      }
+     },
+     "features": [
+      "ledger"
+     ],
+     "finishes": [
+      {
+       "id": "hawk-writ-falcon",
+       "name": "Writ-falcon",
+       "text": "It has delivered every writ you carried. It reads the seal before you do.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        }
+       },
+       "features": [
+        "brass-plate"
+       ]
+      },
+      {
+       "id": "hawk-shades-falcon",
+       "name": "Shade's Falcon",
+       "text": "The shades at the hearth send it out with words for the living. It comes back to you with the answers.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

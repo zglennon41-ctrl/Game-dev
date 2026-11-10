@@ -464,6 +464,14 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   refinement." A good mix of animals, monsters, magical creatures, items of power, weapons
   and armors. The specification is `docs/genius-tree.md`; a base is one file in
   `data/genius-bases/`; a home's lean is `data/genius-homes.json`.
+- **The soul outside the body** (owner, 2026-11-10): "Every path should feel unique. Genius
+  are the representation of the soul outside of the body. No level of detail will be enough
+  to capture that depth but I love and prefer the attention to detail." So a tree is not
+  combat roles with a creature's name on them: a base is a kind of soul, a path is a trait
+  in a person, no two paths in the game are earned by the same play, and every form carries
+  detail a player can come to know (what it is the picture of, a sign, a habit).
+  `docs/genius-tree.md`, "The soul outside the body"; `tools/genius-base-check.py` holds
+  the data to it.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.

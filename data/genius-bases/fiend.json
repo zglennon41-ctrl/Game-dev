@@ -1,0 +1,495 @@
+{
+ "id": "fiend",
+ "name": "Fiend",
+ "class": "monster",
+ "expression": "daemon",
+ "silhouette": "daemon-wick",
+ "spark": "The mote is warm to hold a hand near. It leans toward anything that will burn, and toward you when you are angry.",
+ "nature": {
+  "shape": {
+   "turn": 1.0
+  },
+  "fights": {
+   "hurts": 0.6
+  },
+  "pattern": {
+   "fires": 0.6
+  },
+  "range": {
+   "close": 0.4
+  }
+ },
+ "calls": {
+  "seed": {
+   "that-burns": 0.9,
+   "owes-me": 0.5
+  },
+  "shape": {
+   "turn": 0.7,
+   "bind": 0.3,
+   "anchor": 0.2
+  },
+  "blood": {
+   "demon-blooded": 0.6,
+   "never-cold": 0.6,
+   "forgeborn": 0.5,
+   "eyes-heat": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Wick-lit",
+  "gift": [
+   "ember",
+   "horns"
+  ],
+  "text": "It burns because it is angry, and it is angry on your behalf."
+ },
+ "settled": {
+  "id": "fiend-wick-fiend",
+  "name": "Wick-fiend",
+  "text": "A flame the size of a candle's with two horns and a temper. It has set fire to your bedding once and is not sorry.",
+  "features": [
+   "ember"
+  ]
+ },
+ "paths": [
+  {
+   "id": "fiend-coal-carrier",
+   "name": "Coal-carrier",
+   "text": "It learned from you that fire is for carrying to somebody.",
+   "leans": {
+    "shape": {
+     "turn": 1.0
+    },
+    "orders": {
+     "hunt": 0.6
+    }
+   },
+   "features": [
+    "scorched"
+   ],
+   "prongs": [
+    {
+     "id": "fiend-blade-rider",
+     "name": "Blade-rider",
+     "text": "It rides your blade to the foe and stays on the foe when the blade comes back.",
+     "leans": {
+      "range": {
+       "close": 1.0
+      }
+     },
+     "features": [
+      "short-blade"
+     ],
+     "finishes": [
+      {
+       "id": "fiend-slag-fiend",
+       "name": "Slag-fiend",
+       "text": "Metal runs where it grips. What it has hold of is not armoured any more.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "shape": {
+         "make": 0.4
+        }
+       },
+       "features": [
+        "iron-hide"
+       ]
+      },
+      {
+       "id": "fiend-pyre-dancer",
+       "name": "Pyre-dancer",
+       "text": "It is never where the blow lands, and everywhere it has just been is alight.",
+       "leans": {
+        "fights": {
+         "dodges": 1.0
+        }
+       },
+       "features": [
+        "long-legs"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fiend-slung-coal",
+     "name": "Slung Coal",
+     "text": "It goes out on your shot like a coal in a sling.",
+     "leans": {
+      "range": {
+       "far": 1.0
+      },
+      "shape": {
+       "cast": 0.5
+      }
+     },
+     "features": [
+      "talons"
+     ],
+     "finishes": [
+      {
+       "id": "fiend-falling-coal",
+       "name": "Falling Coal",
+       "text": "Thrown high, it comes down white. The ground keeps the mark all season.",
+       "leans": {
+        "shape": {
+         "cast": 1.0
+        }
+       },
+       "features": [
+        "wings"
+       ]
+      },
+      {
+       "id": "fiend-on-the-hill",
+       "name": "Fiend on the Hill",
+       "text": "It burns on the hill above a dark post so the car can find you. Things that hate the light find it first.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fiend-flare-up",
+     "name": "Flare-up",
+     "text": "When you are struck it doubles in size, and it does not come back down until something has paid.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      }
+     },
+     "features": [
+      "maw"
+     ],
+     "finishes": [
+      {
+       "id": "fiend-vendetta",
+       "name": "Vendetta",
+       "text": "It keeps a coal lit for each named beast that marked you. It blows on them at night.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      },
+      {
+       "id": "fiend-brush-burner",
+       "name": "Brush-burner",
+       "text": "Hurt you in the green and it gets into the undergrowth. After that it is not one fiend.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "ground": {
+         "wild": 0.6
+        }
+       },
+       "features": [
+        "smoke"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fiend-grate-fiend",
+   "name": "Grate-fiend",
+   "text": "It learned from you that a fire kept is worth more than a fire thrown.",
+   "leans": {
+    "orders": {
+     "guard": 1.0
+    },
+    "company": {
+     "party": 0.5
+    }
+   },
+   "features": [
+    "glow"
+   ],
+   "prongs": [
+    {
+     "id": "fiend-stove-devil",
+     "name": "Stove-devil",
+     "text": "The cohort built it a stove so it would stop sleeping in the coal scuttle. It heats the whole dormitory out of spite.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      }
+     },
+     "features": [
+      "broad-chest"
+     ],
+     "silhouette": "engine-stove",
+     "finishes": [
+      {
+       "id": "fiend-three-legged-stove",
+       "name": "Three-legged Stove",
+       "text": "It walks on three iron legs and the party eats hot. Nobody who shared its fire has been left on the line.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        }
+       },
+       "features": [
+        "gears"
+       ],
+       "silhouette": "engine-stove"
+      },
+      {
+       "id": "fiend-watchfire-fiend",
+       "name": "Watchfire Fiend",
+       "text": "Set it down at the post and it burns there till morning. What it lights, it guards.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        }
+       },
+       "features": [
+        "lantern"
+       ],
+       "silhouette": "engine-stove"
+      }
+     ]
+    },
+    {
+     "id": "fiend-cauteriser",
+     "name": "Cauteriser",
+     "text": "It closes your wounds the only way it knows. It works. You will not thank it at the time.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      }
+     },
+     "features": [
+      "small-hands"
+     ],
+     "finishes": [
+      {
+       "id": "fiend-scar-smith",
+       "name": "Scar-smith",
+       "text": "Every wound of yours it sealed is a line of bright metal now. It is proud of the work.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        }
+       },
+       "features": [
+        "brass-plate"
+       ]
+      },
+      {
+       "id": "fiend-ward-flame",
+       "name": "Ward-flame",
+       "text": "It burns along the edge of your wards, and nothing has yet wished to cross it twice.",
+       "leans": {
+        "shape": {
+         "make": 1.0
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fiend-bedside-fiend",
+     "name": "Bedside Fiend",
+     "text": "It burns low beside your bed, and brighter when something outside is thinking about the window.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      }
+     },
+     "features": [
+      "lantern-jaw"
+     ],
+     "finishes": [
+      {
+       "id": "fiend-wake-candle",
+       "name": "Wake-candle",
+       "text": "It burns at the hearth for the hall's dead. They come to it as moths would, if moths had names.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      },
+      {
+       "id": "fiend-thaw-fiend",
+       "name": "Thaw-fiend",
+       "text": "Ice goes out ahead of it and the river lets you through. It hates the water and does it anyway.",
+       "leans": {
+        "ground": {
+         "water": 1.0
+        }
+       },
+       "features": [
+        "current"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fiend-bargain-fiend",
+   "name": "Bargain-fiend",
+   "text": "It learned from you that fire will do anything for a price, and so will most things.",
+   "leans": {
+    "shape": {
+     "bind": 1.0
+    },
+    "pattern": {
+     "sworn": 0.6
+    }
+   },
+   "features": [
+    "ledger"
+   ],
+   "prongs": [
+    {
+     "id": "fiend-oath-scorch",
+     "name": "Oath-scorch",
+     "text": "Your Terms are burned into the air where you swore them. It tends the letters.",
+     "leans": {
+      "pattern": {
+       "sworn": 1.0
+      }
+     },
+     "features": [
+      "crown"
+     ],
+     "finishes": [
+      {
+       "id": "fiend-mark-of-the-sworn",
+       "name": "Mark of the Sworn",
+       "text": "It has marked you, by agreement. While the Terms hold, the mark is cool. You know what happens otherwise.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      },
+      {
+       "id": "fiend-toll-fire",
+       "name": "Toll-fire",
+       "text": "Each firing of your Pattern costs you, and it burns the cost for light. The chain shows brighter each time.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fiend-bottle-fiend",
+     "name": "Bottle-fiend",
+     "text": "It moved into a thing you dug out of a ruin, and comes out when the thing is rubbed, grumbling.",
+     "leans": {
+      "quests": {
+       "salvage": 1.0
+      }
+     },
+     "features": [
+      "sheath"
+     ],
+     "finishes": [
+      {
+       "id": "fiend-of-the-stopped-bottle",
+       "name": "Fiend of the Stopped Bottle",
+       "text": "The Archive wants the bottle back. It has explained to the Archive, at length, that it is not in.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        },
+        "ground": {
+         "ruin": 0.5
+        }
+       },
+       "features": [
+        "brass-plate"
+       ]
+      },
+      {
+       "id": "fiend-seal-burner",
+       "name": "Seal-burner",
+       "text": "It melts the wax on every writ you carry and reseals it better. It has read them all.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        }
+       },
+       "features": [
+        "small-hands"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fiend-smoke-reader",
+     "name": "Smoke-reader",
+     "text": "It reads what is coming in its own smoke, and leans the way you should go.",
+     "leans": {
+      "shape": {
+       "read": 1.0
+      }
+     },
+     "features": [
+      "smoke"
+     ],
+     "finishes": [
+      {
+       "id": "fiend-ash-reader",
+       "name": "Ash-reader",
+       "text": "It sifts the ash at the mouth of the deep places and tells you who went in and did not come out.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      },
+      {
+       "id": "fiend-last-red-coal",
+       "name": "Last Red Coal",
+       "text": "In the Quiet it goes down to one red point and holds it. That point is the only warm thing for a mile.",
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        }
+       },
+       "features": [
+        "quiet-place"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,502 @@
+{
+ "id": "sprite",
+ "name": "Sprite",
+ "class": "creature",
+ "expression": "kith",
+ "silhouette": "kith-fey",
+ "spark": "The mote hums, very faintly, the tune you had in your head. It gets the tune wrong on purpose.",
+ "nature": {
+  "orders": {
+   "free": 0.8
+  },
+  "company": {
+   "party": 0.7
+  },
+  "bonds": {
+   "classmate": 0.6
+  },
+  "shape": {
+   "read": 0.4
+  }
+ },
+ "calls": {
+  "seed": {
+   "with-a-voice": 0.8,
+   "watches-from-above": 0.3,
+   "remembers": 0.3
+  },
+  "shape": {
+   "read": 0.5,
+   "bind": 0.4,
+   "make": 0.4
+  },
+  "blood": {
+   "lamplighters": 0.7,
+   "greenwood": 0.5,
+   "hearth-hears": 0.5
+  }
+ },
+ "hybrid": {
+  "adj": "Fey",
+  "gift": [
+   "glow",
+   "small-hands"
+  ],
+  "text": "It is small, it carries a light, and it has an opinion about everything you do."
+ },
+ "settled": {
+  "id": "sprite-little-lantern-sprite",
+  "name": "Little lantern-sprite",
+  "text": "A hand high, holding a light it will not put down, and talking the whole time: mostly to you, partly to the light.",
+  "features": [
+   "lantern",
+   "voice"
+  ]
+ },
+ "paths": [
+  {
+   "id": "sprite-hob",
+   "name": "Hob",
+   "text": "It learned from you that somebody has to mind the house, even when the house is three people on a dark line.",
+   "leans": {
+    "orders": {
+     "guard": 1.0
+    },
+    "company": {
+     "party": 0.6
+    }
+   },
+   "features": [
+    "small-hands"
+   ],
+   "prongs": [
+    {
+     "id": "sprite-shoulder-mender",
+     "name": "Shoulder-mender",
+     "text": "It sits on your shoulder after the fight with a needle the size of an eyelash. It scolds while it works.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      }
+     },
+     "features": [
+      "brush"
+     ],
+     "finishes": [
+      {
+       "id": "sprite-wound-wright",
+       "name": "Wound-wright",
+       "text": "It has closed every cut you took and remembers each. It has started closing them a moment early.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      },
+      {
+       "id": "sprite-thimble-knight",
+       "name": "Thimble Knight",
+       "text": "It took a thimble for a helm and a needle for a lance, and stands on your guard arm daring the blow.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        }
+       },
+       "features": [
+        "short-blade"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "sprite-hearth-hob",
+     "name": "Hearth-hob",
+     "text": "It knows who in the cohort has not eaten and who has not slept, and tells you, loudly, in front of them.",
+     "leans": {
+      "bonds": {
+       "classmate": 1.0
+      }
+     },
+     "features": [
+      "ember"
+     ],
+     "finishes": [
+      {
+       "id": "sprite-hob-of-the-hall",
+       "name": "Hob of the Hall",
+       "text": "It keeps the cohort's hearth. Nobody asked it to. The fire has not gone out since.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        },
+        "company": {
+         "party": 0.4
+        }
+       },
+       "features": [
+        "crown"
+       ],
+       "silhouette": "kith-lamplighter"
+      },
+      {
+       "id": "sprite-collar-rider",
+       "name": "Collar-rider",
+       "text": "It rides in the passenger's collar and tells them it will be all right. So far it has not lied.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "sprite-post-sprite",
+     "name": "Post-sprite",
+     "text": "It moves into the lamp of any post you hold and keeps the glass clean.",
+     "leans": {
+      "orders": {
+       "hold": 1.0
+      },
+      "ground": {
+       "line": 0.6
+      }
+     },
+     "features": [
+      "ring"
+     ],
+     "finishes": [
+      {
+       "id": "sprite-thimble-of-oil",
+       "name": "Thimble-of-oil",
+       "text": "The walkers leave it a thimble of oil at every post you have relit. It has grown particular about the oil.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "quests": {
+         "linework": 0.6
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      },
+      {
+       "id": "sprite-door-ward-hob",
+       "name": "Door-ward Hob",
+       "text": "Where it hangs its light, the door is warded. It learned the knot from watching your hands.",
+       "leans": {
+        "shape": {
+         "make": 1.0
+        },
+        "orders": {
+         "hold": 0.5
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sprite-pixy",
+   "name": "Pixy",
+   "text": "It learned from you that a foe's eyes can be led, and it had a light to lead them with.",
+   "leans": {
+    "fights": {
+     "dodges": 1.0
+    },
+    "orders": {
+     "hunt": 0.5
+    }
+   },
+   "features": [
+    "wings"
+   ],
+   "prongs": [
+    {
+     "id": "sprite-stray-light-pixy",
+     "name": "Stray-light Pixy",
+     "text": "It hangs its lantern where the footing is worst and waits for the foe to walk to it.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      }
+     },
+     "features": [
+      "dark-eyed"
+     ],
+     "finishes": [
+      {
+       "id": "sprite-marsh-jack",
+       "name": "Marsh Jack",
+       "text": "Its light stands over deep water looking like a lamp in a window. It has never needed a second trick.",
+       "leans": {
+        "ground": {
+         "water": 1.0
+        }
+       },
+       "features": [
+        "webbed"
+       ]
+      },
+      {
+       "id": "sprite-shuttered-sprite",
+       "name": "Shuttered Sprite",
+       "text": "It can shut its light. In that moment it is beside the foe, and then the light opens in the foe's face.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        }
+       },
+       "features": [
+        "mask"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "sprite-flare-sprite",
+     "name": "Flare-sprite",
+     "text": "It flares on the first beat of your Pattern, and the foe spends the rest of the chain blinking.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      }
+     },
+     "features": [
+      "ring"
+     ],
+     "finishes": [
+      {
+       "id": "sprite-star-burst",
+       "name": "Star-burst",
+       "text": "At the end of your chain it goes up like a rocket and comes down as a hundred small lights. All of them sting.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "shape": {
+         "cast": 0.5
+        }
+       },
+       "features": [
+        "ember"
+       ],
+       "silhouette": "aspect-wisps"
+      },
+      {
+       "id": "sprite-blind-mans-lamp",
+       "name": "Blind-man's Lamp",
+       "text": "When you parry it shines in the foe's eye at the turn. The stagger lasts a breath longer.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        }
+       },
+       "features": [
+        "far-eyes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "sprite-thorn-sprite",
+     "name": "Thorn-sprite",
+     "text": "It took up a thorn. It goes in at eye height, and it is very hard to hit.",
+     "leans": {
+      "range": {
+       "close": 1.0
+      }
+     },
+     "features": [
+      "short-blade"
+     ],
+     "finishes": [
+      {
+       "id": "sprite-wedge-leader",
+       "name": "Wedge-leader",
+       "text": "It has taught the cohort's small genii to fly in a wedge. It leads the wedge.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        }
+       },
+       "features": [
+        "crown"
+       ]
+      },
+      {
+       "id": "sprite-thorn-knight",
+       "name": "Thorn-knight",
+       "text": "It goes out with you alone and fights as if there were an army behind it. There is not. It has not noticed.",
+       "leans": {
+        "company": {
+         "alone": 1.0
+        }
+       },
+       "features": [
+        "plated"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sprite-lore-sprite",
+   "name": "Lore-sprite",
+   "text": "It learned from you that knowing is a kind of light too.",
+   "leans": {
+    "shape": {
+     "read": 1.0
+    },
+    "orders": {
+     "free": 0.5
+    }
+   },
+   "features": [
+    "old-eyes"
+   ],
+   "prongs": [
+    {
+     "id": "sprite-book-wisp",
+     "name": "Book-wisp",
+     "text": "It reads the thing you dig up before you have brushed it off, and tells you what the Archive will not.",
+     "leans": {
+      "quests": {
+       "salvage": 1.0
+      }
+     },
+     "features": [
+      "pages"
+     ],
+     "finishes": [
+      {
+       "id": "sprite-stack-light",
+       "name": "Stack-light",
+       "text": "The archivists pretend not to consult it. It lives in the stacks on the days you are not out.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        }
+       },
+       "features": [
+        "dial"
+       ]
+      },
+      {
+       "id": "sprite-writ-riddler",
+       "name": "Writ-riddler",
+       "text": "It reads a writ and tells you what it says, what it means, and what the house hopes you will not notice.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        }
+       },
+       "features": [
+        "second-face"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "sprite-grave-light",
+     "name": "Grave-light",
+     "text": "It carries its lantern among the hall's dead so they can see each other. They are grateful, and talk.",
+     "leans": {
+      "bonds": {
+       "shade": 1.0
+      }
+     },
+     "features": [
+      "cold-core"
+     ],
+     "finishes": [
+      {
+       "id": "sprite-shade-lighter",
+       "name": "Shade-lighter",
+       "text": "Shades follow its light in from the dark line to the hearth. It has brought eleven home.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        }
+       },
+       "features": [
+        "glow"
+       ],
+       "silhouette": "kith-lamplighter"
+      },
+      {
+       "id": "sprite-quarrel-light",
+       "name": "Quarrel-light",
+       "text": "It burns a different colour near anything you have a quarrel with. Near the named ones it goes white.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        }
+       },
+       "features": [
+        "watching-eye"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "sprite-weather-sprite",
+     "name": "Weather-sprite",
+     "text": "It has learned your element and wears it: frost on its wings one week, cinders the next.",
+     "leans": {
+      "shape": {
+       "turn": 1.0
+      }
+     },
+     "features": [
+      "rime"
+     ],
+     "finishes": [
+      {
+       "id": "sprite-storm-in-a-jar",
+       "name": "Storm-in-a-jar",
+       "text": "It keeps your weather in its lantern and lets it out over the green when asked. Sometimes when not.",
+       "leans": {
+        "shape": {
+         "turn": 1.0
+        },
+        "ground": {
+         "wild": 0.5
+        }
+       },
+       "features": [
+        "smoke"
+       ]
+      },
+      {
+       "id": "sprite-light-at-the-heart",
+       "name": "Light at the Heart",
+       "text": "At the heart of a zone its light is the only one that does not gutter. Varga walks beside it and does not say why.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        }
+       },
+       "features": [
+        "standing-air"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

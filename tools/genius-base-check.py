@@ -25,6 +25,8 @@ LEANS = {
     "quests": {"linework", "salvage", "hunt", "escort", "writ", "deep-run"},
 }
 CALLS = {"seed", "shape", "blood"}
+SIGNATURES = {}    # a path's two heaviest leans -> the path that has them
+FIRSTS = {}        # a path's heaviest lean -> the paths that lean on it first
 
 
 def check(path, known_features, seeds, bloods, bodies, all_ids, all_names):
@@ -39,6 +41,8 @@ def check(path, known_features, seeds, bloods, bodies, all_ids, all_names):
             say("no %s" % k)
     if problems:
         return problems, 0
+    if not (20 <= len(b.get("soul", "")) <= 200):
+        say("no soul: one sentence saying whose soul settles as this")
     if b["class"] not in CLASSES:
         say("class %s is not one of %s" % (b["class"], sorted(CLASSES)))
     if b["expression"] not in EXPRESSIONS:
@@ -77,6 +81,12 @@ def check(path, known_features, seeds, bloods, bodies, all_ids, all_names):
         all_names[nd["name"]] = nd["id"]
         if not (20 <= len(nd["text"]) <= 200):
             say("%s: its text is %d characters; one or two plain sentences" % (nd["id"], len(nd["text"])))
+        # the soul outside the body: what it is the picture of, and detail a player can come to know
+        for k, lo, hi in (("sign", 20, 170), ("habit", 20, 170)) + ((("of", 8, 90),) if level >= 2 else ()):
+            if k not in nd:
+                say("%s has no %s" % (nd["id"], k))
+            elif not (lo <= len(nd[k]) <= hi):
+                say("%s: its %s is %d characters (%d to %d)" % (nd["id"], k, len(nd[k]), lo, hi))
         if not (1 <= len(nd["features"]) <= 3):
             say("%s adds %d features; one to three" % (nd["id"], len(nd["features"])))
         for f in nd["features"]:
@@ -110,6 +120,24 @@ def check(path, known_features, seeds, bloods, bodies, all_ids, all_names):
     count = 1
     if len(b["paths"]) != 3:
         say("%d paths; three" % len(b["paths"]))
+    # every path is unique in play: its signature is the two things it leans on most
+    first_lines = []
+    for p in b["paths"]:
+        flat = sorted(((float(w), "%s.%s" % (line, k)) for line, keys in p.get("leans", {}).items() for k, w in keys.items()), key=lambda t: -t[0])
+        if len(flat) < 2:
+            say("%s leans on fewer than two things: a path's signature is its two heaviest leans" % p.get("id"))
+            continue
+        sig = tuple(sorted(x[1] for x in flat[:2]))
+        first = flat[0][1]
+        if sig in SIGNATURES:
+            say("%s is earned by the same play as %s (%s and %s): every path in the game is unique" % (p.get("id"), SIGNATURES[sig], sig[0], sig[1]))
+        SIGNATURES[sig] = p.get("id")
+        FIRSTS.setdefault(first, []).append(p.get("id"))
+        if len(FIRSTS[first]) > 3:
+            say("%s leans first on %s, as %s already do: no more than three paths in the game may" % (p.get("id"), first, ", ".join(FIRSTS[first][:-1])))
+        first_lines.append(first.split(".")[0])
+    if len(set(first_lines)) < len(first_lines):
+        say("two of its paths lean first on the same line of the Tally (%s): three paths, three different lines" % ", ".join(first_lines))
     for p in b["paths"]:
         node(p, 2)
         count += 1

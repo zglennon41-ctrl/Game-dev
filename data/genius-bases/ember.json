@@ -1,0 +1,496 @@
+{
+ "id": "ember",
+ "name": "Ember",
+ "class": "creature",
+ "expression": "aspect",
+ "silhouette": "aspect-flame",
+ "spark": "The mote is a point of orange that brightens when you breathe out. Cup your hands round it and they are warm.",
+ "nature": {
+  "shape": {
+   "turn": 1.0
+  },
+  "pattern": {
+   "fires": 0.6
+  },
+  "range": {
+   "mid": 0.5
+  },
+  "ground": {
+   "night": 0.3
+  }
+ },
+ "calls": {
+  "seed": {
+   "that-burns": 1.0,
+   "never-alive": 0.4
+  },
+  "shape": {
+   "turn": 0.8,
+   "cast": 0.4,
+   "make": 0.2
+  },
+  "blood": {
+   "never-cold": 0.7,
+   "eyes-heat": 0.5,
+   "forgeborn": 0.5,
+   "hearth-hears": 0.4
+  }
+ },
+ "hybrid": {
+  "adj": "Kindled",
+  "gift": [
+   "ember",
+   "glow"
+  ],
+  "text": "It is your field as fire, with nothing under it: it goes where your attention goes."
+ },
+ "settled": {
+  "id": "ember-spark",
+  "name": "Spark",
+  "text": "A coal's worth of fire with nothing under it, hanging at your shoulder. It goes where your attention goes, and has scorched the page you were reading.",
+  "features": [
+   "ember"
+  ]
+ },
+ "paths": [
+  {
+   "id": "ember-open-flame",
+   "name": "Open Flame",
+   "text": "It learned from you that fire wants to go somewhere.",
+   "leans": {
+    "orders": {
+     "hunt": 1.0
+    },
+    "shape": {
+     "turn": 0.6
+    }
+   },
+   "features": [
+    "smoke"
+   ],
+   "prongs": [
+    {
+     "id": "ember-lash-of-flame",
+     "name": "Lash of Flame",
+     "text": "It wraps your weapon and goes where the edge goes. What you cut stays lit.",
+     "leans": {
+      "range": {
+       "close": 1.0
+      }
+     },
+     "features": [
+      "edge"
+     ],
+     "finishes": [
+      {
+       "id": "ember-white-ember",
+       "name": "White Ember",
+       "text": "Close in, it burns without colour. Armour is a thing it has opinions about.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "fights": {
+         "hurts": 0.4
+        }
+       },
+       "features": [
+        "scorched"
+       ]
+      },
+      {
+       "id": "ember-kiln-breath",
+       "name": "Kiln-breath",
+       "text": "It lives in what you build. Your conjured edges come out of the air already tempered.",
+       "leans": {
+        "shape": {
+         "make": 1.0
+        }
+       },
+       "features": [
+        "gears"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ember-on-the-shot",
+     "name": "Ember on the Shot",
+     "text": "It rides your shot and opens when it lands.",
+     "leans": {
+      "range": {
+       "far": 1.0
+      }
+     },
+     "features": [
+      "wings"
+     ],
+     "finishes": [
+      {
+       "id": "ember-comet",
+       "name": "Ember Comet",
+       "text": "A long tail across the dark and a hole where it stops. You only have to point.",
+       "leans": {
+        "shape": {
+         "cast": 1.0
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      },
+      {
+       "id": "ember-hill-fire",
+       "name": "Hill-fire",
+       "text": "It burns on the height above a dark post, so the next car knows where the line still is.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "quests": {
+         "linework": 0.5
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ember-grass-fire",
+     "name": "Grass-fire",
+     "text": "Set down in the green it runs with the wind. Call it back before it forgets whose it is.",
+     "leans": {
+      "ground": {
+       "wild": 1.0
+      }
+     },
+     "features": [
+      "roots"
+     ],
+     "finishes": [
+      {
+       "id": "ember-burn-off",
+       "name": "Burn-off",
+       "text": "It burns the cover the pack hides in, upwind, and waits with you where they will come out.",
+       "leans": {
+        "quests": {
+         "hunt": 1.0
+        }
+       },
+       "features": [
+        "maw"
+       ]
+      },
+      {
+       "id": "ember-fire-whirl",
+       "name": "Fire-whirl",
+       "text": "Fire and wind found each other over open ground. It walks on one foot and nothing stands near it.",
+       "leans": {
+        "ground": {
+         "wild": 1.0
+        },
+        "shape": {
+         "turn": 0.5
+        }
+       },
+       "features": [
+        "standing-air"
+       ],
+       "silhouette": "aspect-whirl"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ember-kept-fire",
+   "name": "Kept Fire",
+   "text": "It learned from you that the fire somebody tends outlasts the one that is merely large.",
+   "leans": {
+    "orders": {
+     "hold": 1.0
+    },
+    "company": {
+     "party": 0.6
+    }
+   },
+   "features": [
+    "glow"
+   ],
+   "prongs": [
+    {
+     "id": "ember-camp-fire",
+     "name": "Camp-fire",
+     "text": "The party sits round it and it sits with the party. It is counted among the three now.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      }
+     },
+     "features": [
+      "ring"
+     ],
+     "finishes": [
+      {
+       "id": "ember-cohort-fire",
+       "name": "Cohort Fire",
+       "text": "Twelve of you lit it together the first cold night. It burns a little for each, and dips when one is hurt.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        }
+       },
+       "features": [
+        "crown"
+       ]
+      },
+      {
+       "id": "ember-travellers-fire",
+       "name": "Traveller's Fire",
+       "text": "It goes in a pot between you and the passenger. Nobody who was warm at it has been lost on the road.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ember-circle-flame",
+     "name": "Circle-flame",
+     "text": "It keeps the dark at the edge of a circle and you inside the circle.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      }
+     },
+     "features": [
+      "far-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "ember-the-fire-that-stayed",
+       "name": "The Fire That Stayed",
+       "text": "It has burned through every night you were afraid it would not. The posts along your line have started to copy it.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "orders": {
+         "hold": 0.5
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      },
+      {
+       "id": "ember-window-ember",
+       "name": "Window-ember",
+       "text": "It burns in the hall's window for those not coming back. They come anyway, to look at it.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ember-tempering-flame",
+     "name": "Tempering Flame",
+     "text": "Each time you are hurt it burns a little hotter in you. You are harder to hurt than you were.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      }
+     },
+     "features": [
+      "iron-hide"
+     ],
+     "finishes": [
+      {
+       "id": "ember-twice-lit",
+       "name": "Twice-lit",
+       "text": "It went out once, when you went down. It came back when you did, and has not been the same colour since.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        }
+       },
+       "features": [
+        "wings"
+       ]
+      },
+      {
+       "id": "ember-slow-coal",
+       "name": "Slow Coal",
+       "text": "It sits in your guard arm. What strikes your guard finds the guard is hot.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        }
+       },
+       "features": [
+        "plated"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ember-seeing-flame",
+   "name": "Seeing Flame",
+   "text": "It learned from you that most of what fire is for is seeing by.",
+   "leans": {
+    "shape": {
+     "read": 1.0
+    },
+    "orders": {
+     "free": 0.5
+    }
+   },
+   "features": [
+    "watching-eye"
+   ],
+   "prongs": [
+    {
+     "id": "ember-study-flame",
+     "name": "Study-flame",
+     "text": "Hold the thing to it and the old marks show. It has read more of the Archive's secrets than the archivists.",
+     "leans": {
+      "quests": {
+       "salvage": 1.0
+      }
+     },
+     "features": [
+      "pages"
+     ],
+     "finishes": [
+      {
+       "id": "ember-palimpsest-fire",
+       "name": "Palimpsest Fire",
+       "text": "It shows what was written under what was written. Some of it was about people like you.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        },
+        "ground": {
+         "ruin": 0.4
+        }
+       },
+       "features": [
+        "dial"
+       ]
+      },
+      {
+       "id": "ember-seal-wax-flame",
+       "name": "Seal-wax Flame",
+       "text": "It seals what you send and opens what you receive, and burns a different colour when a house is lying.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        }
+       },
+       "features": [
+        "ledger"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ember-signal-flame",
+     "name": "Signal-flame",
+     "text": "It speaks across distance in flashes to those you are bound to, and they have learned to read it.",
+     "leans": {
+      "shape": {
+       "bind": 1.0
+      }
+     },
+     "features": [
+      "voice"
+     ],
+     "finishes": [
+      {
+       "id": "ember-oath-fire",
+       "name": "Oath-fire",
+       "text": "You swore with your hand in it. It did not burn you. It will, the day a Term is broken.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      },
+      {
+       "id": "ember-running-fire",
+       "name": "Running Fire",
+       "text": "It runs down the chain of your Pattern from beat to beat, and each beat lands hotter than the last.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "ember-cold-flame",
+     "name": "Cold Flame",
+     "text": "In the Quiet it burns blue and gives no heat, and it is the one flame the Quiet cannot put out.",
+     "leans": {
+      "ground": {
+       "quiet": 1.0
+      }
+     },
+     "features": [
+      "quiet-place"
+     ],
+     "finishes": [
+      {
+       "id": "ember-mast-fire",
+       "name": "Mast-fire",
+       "text": "It stands on the prow over black water, and the river-things keep their distance from it.",
+       "leans": {
+        "ground": {
+         "water": 1.0
+        }
+       },
+       "features": [
+        "current"
+       ]
+      },
+      {
+       "id": "ember-deep-ember",
+       "name": "Deep Ember",
+       "text": "Carried into the heart of a zone, it leans toward the way out. When it stands straight, run.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        }
+       },
+       "features": [
+        "far-eyes"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

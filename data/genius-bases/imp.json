@@ -1,0 +1,502 @@
+{
+ "id": "imp",
+ "name": "Imp",
+ "class": "monster",
+ "expression": "daemon",
+ "silhouette": "daemon-small",
+ "spark": "The mote keeps a count. If you go to bed owing anyone anything, it is brighter, and nearer your face.",
+ "nature": {
+  "shape": {
+   "bind": 1.0
+  },
+  "pattern": {
+   "sworn": 0.8
+  },
+  "quests": {
+   "writ": 0.6
+  },
+  "orders": {
+   "free": 0.4
+  }
+ },
+ "calls": {
+  "seed": {
+   "owes-me": 1.0,
+   "with-a-voice": 0.3
+  },
+  "shape": {
+   "bind": 0.7,
+   "make": 0.3,
+   "read": 0.2
+  },
+  "blood": {
+   "demon-blooded": 0.8,
+   "nightfolk": 0.3,
+   "forgeborn": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Horned",
+  "gift": [
+   "horns",
+   "tail"
+  ],
+  "text": "It keeps accounts, and it believes everything can be collected on in the end."
+ },
+ "settled": {
+  "id": "imp-impling",
+  "name": "Impling",
+  "text": "Knee-high, with a book it cannot yet read and a firm belief that you owe it for something.",
+  "features": [
+   "horns",
+   "ledger"
+  ]
+ },
+ "paths": [
+  {
+   "id": "imp-debt-collector",
+   "name": "Debt-collector",
+   "text": "It learned from you that a debt is no use until somebody goes and gets it.",
+   "leans": {
+    "orders": {
+     "hunt": 1.0
+    },
+    "shape": {
+     "bind": 0.5
+    }
+   },
+   "features": [
+    "chain"
+   ],
+   "prongs": [
+    {
+     "id": "imp-dunner",
+     "name": "Dunner",
+     "text": "It walks up to the foe and presents the bill. The foe hits it. That goes on the bill.",
+     "leans": {
+      "range": {
+       "close": 1.0
+      }
+     },
+     "features": [
+      "maw"
+     ],
+     "finishes": [
+      {
+       "id": "imp-knee-breaker",
+       "name": "Knee-breaker",
+       "text": "It is small, and it knows where the joint is. It learned that from watching what happened to you.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "fights": {
+         "hurts": 0.5
+        }
+       },
+       "features": [
+        "ground-claws"
+       ]
+      },
+      {
+       "id": "imp-reckoner-of-arrears",
+       "name": "Reckoner of Arrears",
+       "text": "It keeps a page for every named beast that got away. The interest is ruinous.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        }
+       },
+       "features": [
+        "ledger-closed"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imp-process-server",
+     "name": "Process-server",
+     "text": "It delivers. Houses have tried locking the door, and found it already inside holding the paper.",
+     "leans": {
+      "quests": {
+       "writ": 1.0
+      }
+     },
+     "features": [
+      "brass-plate"
+     ],
+     "finishes": [
+      {
+       "id": "imp-seal-breaker",
+       "name": "Seal-breaker",
+       "text": "No writ you carried stayed sealed from it. It has never told you what the ones you gave away said.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        }
+       },
+       "features": [
+        "watching-eye"
+       ]
+      },
+      {
+       "id": "imp-appraiser-to-the-archive",
+       "name": "Appraiser to the Archive",
+       "text": "It appraises the thing before you have dug it out, and is offended on the Archive's behalf by what you were paid.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        }
+       },
+       "features": [
+        "small-hands"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imp-gate-toll-imp",
+     "name": "Gate-toll Imp",
+     "text": "Your Pattern has a price. It stands at the gate with its hand out, and takes a little from the foe as well.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      }
+     },
+     "features": [
+      "crown"
+     ],
+     "finishes": [
+      {
+       "id": "imp-usurer",
+       "name": "Usurer",
+       "text": "Every chain you fire, it lends the foe a blow at interest. Collection is prompt.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      },
+      {
+       "id": "imp-bondsman",
+       "name": "Bondsman",
+       "text": "It stood surety for your oath. If you break a Term it pays, and then it comes to see you.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        }
+       },
+       "features": [
+        "iron-hide"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "imp-shoulder-imp",
+   "name": "Shoulder-imp",
+   "text": "It learned from you that a small thing in the right place is worth a large one elsewhere.",
+   "leans": {
+    "orders": {
+     "guard": 1.0
+    },
+    "company": {
+     "party": 0.4
+    }
+   },
+   "features": [
+    "small-hands"
+   ],
+   "prongs": [
+    {
+     "id": "imp-hearth-imp",
+     "name": "Hearth-imp",
+     "text": "It runs errands for the whole cohort and keeps a tally of who said thank you.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      },
+      "bonds": {
+       "classmate": 0.6
+      }
+     },
+     "features": [
+      "glow"
+     ],
+     "finishes": [
+      {
+       "id": "imp-cohorts-devil",
+       "name": "Cohort's Devil",
+       "text": "Twelve classmates, and it has something on each of them. It uses it only to make them duck in time.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        }
+       },
+       "features": [
+        "voice"
+       ]
+      },
+      {
+       "id": "imp-kettle-watcher",
+       "name": "Kettle-watcher",
+       "text": "Told to mind the post, it minds the post, and has opinions about how you left it.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "ground": {
+         "line": 0.5
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imp-whipping-imp",
+     "name": "Whipping-imp",
+     "text": "By the old bargain the blow meant for you falls on it. It complains without pause and never once steps aside.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      }
+     },
+     "features": [
+      "plated"
+     ],
+     "finishes": [
+      {
+       "id": "imp-proxy-of-record",
+       "name": "Proxy of Record",
+       "text": "It takes your wounds onto its own ledger. You will find them there, itemised.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "company": {
+         "alone": 0.4
+        }
+       },
+       "features": [
+        "scorched"
+       ]
+      },
+      {
+       "id": "imp-indemnity",
+       "name": "Indemnity",
+       "text": "A clause in small type says the first blow of each fight is void. It wrote the clause.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        }
+       },
+       "features": [
+        "wall-plate"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "imp-night-clerk",
+     "name": "Night-clerk",
+     "text": "It keeps your accounts while you sleep, and wakes you if the dark outside the window owes you anything.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      }
+     },
+     "features": [
+      "dark-eyed"
+     ],
+     "finishes": [
+      {
+       "id": "imp-lights-out-imp",
+       "name": "Lights-out Imp",
+       "text": "It snuffs the foe's eyes first. In the dark it is exactly as large as it says it is.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        }
+       },
+       "features": [
+        "shadow-cloak"
+       ]
+      },
+      {
+       "id": "imp-quiet-clerk",
+       "name": "Quiet Clerk",
+       "text": "In the Quiet nothing can be owed. It sits very still beside you with the book shut and waits for it to end.",
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        }
+       },
+       "features": [
+        "quiet-place"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "imp-pleader",
+   "name": "Pleader",
+   "text": "It learned from you that most things can be talked into a worse position.",
+   "leans": {
+    "shape": {
+     "bind": 1.0
+    },
+    "orders": {
+     "free": 0.5
+    }
+   },
+   "features": [
+    "voice"
+   ],
+   "prongs": [
+    {
+     "id": "imp-contract-daemon",
+     "name": "Contract Daemon",
+     "text": "It grew into its book. It is taller than you now, and reads your Terms aloud when you hesitate.",
+     "leans": {
+      "pattern": {
+       "sworn": 1.0
+      }
+     },
+     "features": [
+      "horn-brow"
+     ],
+     "silhouette": "daemon-tall",
+     "finishes": [
+      {
+       "id": "imp-the-ledger-closed",
+       "name": "The Ledger Closed",
+       "text": "The book is shut and it does not open it any more. Everything in it has been settled, or will be.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        }
+       },
+       "features": [
+        "ledger-closed",
+        "crown"
+       ],
+       "silhouette": "daemon-tall"
+      },
+      {
+       "id": "imp-witness-for-the-dead",
+       "name": "Witness for the Dead",
+       "text": "The shades swear by it. A word given in front of it still binds after the one who gave it is gone.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        }
+       },
+       "features": [
+        "old-eyes"
+       ],
+       "silhouette": "daemon-tall"
+      }
+     ]
+    },
+    {
+     "id": "imp-marginal",
+     "name": "Marginal",
+     "text": "It moved into the margins of what you study and corrects them. It is usually right, which is worse.",
+     "leans": {
+      "shape": {
+       "read": 1.0
+      }
+     },
+     "features": [
+      "pages"
+     ],
+     "silhouette": "daemon-marginal",
+     "finishes": [
+      {
+       "id": "imp-glossator",
+       "name": "Glossator",
+       "text": "It has annotated the heart of every zone you entered. The notes say what will try to kill you, in order.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        },
+        "shape": {
+         "read": 0.5
+        }
+       },
+       "features": [
+        "far-eyes"
+       ],
+       "silhouette": "daemon-marginal"
+      },
+      {
+       "id": "imp-errata",
+       "name": "Errata",
+       "text": "It marks the foe's mistakes as they are made. Watch where it points and put your guard there.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        }
+       },
+       "features": [
+        "watching-eye"
+       ],
+       "silhouette": "daemon-marginal"
+      }
+     ]
+    },
+    {
+     "id": "imp-tinker-devil",
+     "name": "Tinker-devil",
+     "text": "It improves your constructs when you are not looking. Some of the improvements are for you.",
+     "leans": {
+      "shape": {
+       "make": 1.0
+      }
+     },
+     "features": [
+      "gears"
+     ],
+     "finishes": [
+      {
+       "id": "imp-clockmakers-devil",
+       "name": "Clockmaker's Devil",
+       "text": "Every ward you raise has one more gear in it than you put there. It ticks. It holds.",
+       "leans": {
+        "shape": {
+         "make": 1.0
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      },
+      {
+       "id": "imp-furnace-imp",
+       "name": "Furnace-imp",
+       "text": "It lives in your fire now and feeds it things it will not name. The flame burns a colour you did not choose.",
+       "leans": {
+        "shape": {
+         "turn": 1.0
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

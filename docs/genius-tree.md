@@ -15,6 +15,33 @@ This replaces the lattice of forms (`data/forms.json`) and the kinds of the thir
 It is the specification; the rules in `docs/systems-10-genius-shades.md` that it changes
 are listed at the end.
 
+> "Every path should feel unique. Genius are the representation of the soul outside of the
+> body. No level of detail will be enough to capture that depth but I love and prefer the
+> attention to detail." (owner, 2026-11-10)
+
+## The soul outside the body
+
+A genius is its partner's soul, standing where it can be seen. So a tree is not a set of
+combat roles with a creature's name on them. Each base is a kind of soul; each path is a
+trait in a person, shown as what this creature becomes when its partner lives that way; and
+no two paths in the whole game are the same trait or are earned by the same play.
+
+What that asks of the data, and the checker holds it to:
+
+- **A base says whose soul it is** (`soul`: one sentence).
+- **Every form from the first refinement on says what in its partner it is the picture of**
+  (`of`: a phrase, a trait and not a role: "one who cannot leave a thing unfinished", not
+  "a defender").
+- **Every form has detail a player can see and come to know**: `sign` (what a stranger
+  would notice about it: something on its body or in how it carries itself) and `habit`
+  (what it does when nothing is happening). These are shown on its page and are what an
+  artist and an animator build from.
+- **Every path is unique in play.** A path's signature is the two things it leans on most.
+  No two paths in the game share a signature; no more than three in the game lean first on
+  the same thing; and the three paths of one base lean first on three different lines of
+  the Tally. The common triad (one that strikes, one that guards, one that thinks) is
+  exactly what this rules out.
+
 ## The shape
 
 Every genius is on one tree. A tree has five levels and thirty-one forms after the spark.
@@ -59,12 +86,13 @@ pattern; `python3 tools/genius-base-check.py` checks every file against this pag
 |---|---|
 | `id`, `name`, `class`, `expression` | `class` is animal, monster, creature, item, weapon or armor. `expression` is how it fights and is drawn (beast, kith, engine, relic, daemon, aspect). |
 | `silhouette` | Its body (`game/assets/genius/bodies/<silhouette>.glb`). Any form in the tree may name its own `silhouette` where a better body exists; otherwise it wears the base's, shaped by its age and its features. |
+| `soul` | One sentence: whose soul settles as this. |
 | `spark` | One sentence: how the mote behaves before the rite when this is what it will settle as. |
 | `nature` | What the base stands for, as leans on the Tally (below). Used to tell when play has turned toward another base. |
 | `calls` | What the first Reading reads to offer this base: weights by `seed`, `shape` and `blood`. |
 | `hybrid` | `adj` (how it names a hybrid it is the second half of: "Fanged"), `gift` (the one or two features it lends that hybrid's body), `text`. |
-| `settled` | The level 1 form: `id`, `name`, `text`, `features`. |
-| `paths` | Three. Each has `id`, `name`, `text`, `leans`, `features`, and three `prongs`; each prong the same and two `finishes`. |
+| `settled` | The level 1 form: `id`, `name`, `text`, `sign`, `habit`, `features`. |
+| `paths` | Three. Each has `id`, `name`, `of`, `text`, `sign`, `habit`, `leans`, `features`, and three `prongs`; each prong the same and two `finishes`. |
 | `newFeatures` | Features this base needs that `data/features.json` does not have: `id`, `slot`, `label`. |
 
 Rules for a form:
