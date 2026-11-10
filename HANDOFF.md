@@ -397,6 +397,14 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   bodies are replaced by MakeHuman's CC0 human on the game's bones, each home's people
   shaped by data (`data/bodies.json`, `form`); `docs/bodies-plan.md`, "The human base".
   The ancestry mix and details of each home are a first draft for the owner to rewrite.
+  Then (2026-11-10): "review the forms of genii and weapons and improve them across the
+  board; also improve the home base design and scale." Done as three passes: the weapons
+  redrawn for the human hand and the hands closed round a grip (`docs/weapons.md`); the
+  First Forms and seven Second Forms redesigned (`docs/genius-forms.md`); the Academy
+  rebuilt as its own architecture at human scale, laid out from data (`docs/home-base.md`).
+  Design calls made on the way and left for the owner: the harrier, the stooping kith and
+  the chord as drawn; the Academy's layout; whether the small kith should keep realistic
+  faces.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.
