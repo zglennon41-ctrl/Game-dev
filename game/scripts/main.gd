@@ -247,6 +247,10 @@ func _ready() -> void:
 				"place": "hearth", "record": { "parries": 6, "blocks": 4, "hurts": 2, "dodges": 1, "talks": 3 } }
 		hero = h
 		enter_academy()
+		if _args.has("tour"):
+			# A review of the grounds: every place from above and from where a student stands.
+			_tour()
+			return
 		if _args.has("quit"):
 			get_tree().create_timer(float(_args.get("seconds", "90")), true, false, true).timeout.connect(func():
 				print("ACADEMY: place %s, done %s, met %d, rested after %s, record %s" % [academy.progress["place"], str(academy.progress["done"]), academy.progress["met"].size(), str(academy.progress.get("rested_after", "")), str(academy.progress["record"])])
@@ -420,6 +424,32 @@ func _academy_gate() -> void:
 		if _args.has("quit"):
 			get_tree().create_timer(1.0, true, false, true).timeout.connect(get_tree().quit)
 
+## --tour (with --academy --gate --shots=DIR): walk the camera through every place of the
+## Academy and save two pictures of each, for reviewing the architecture and its scale.
+func _tour() -> void:
+	await get_tree().create_timer(1.0).timeout
+	var only := str(_args.get("tour", ""))
+	for id in Data.academy["places"]:
+		if only != "" and only != "true" and not only.split(",").has(id):
+			continue
+		academy.go(id, true)
+		var a: Vector2 = world.arena
+		var views := {
+			"wide": [Vector3(a.x * 0.42, maxf(a.x, a.y) * 0.5, a.y * 0.95), Vector3(0, 1.5, -a.y * 0.08)],
+			"eye": [Vector3(-a.x * 0.3, 1.9, a.y * 0.42), Vector3(a.x * 0.12, 2.0, -a.y * 0.3)],
+			"cross": [Vector3(a.x * 0.44, 2.6, -a.y * 0.1), Vector3(-a.x * 0.3, 1.6, a.y * 0.05)],
+		}
+		for v in views:
+			world.cine = true
+			world.cine_speed = 60.0
+			world.cine_pos = views[v][0]
+			world.cine_look = views[v][1]
+			await get_tree().create_timer(0.9).timeout
+			hud.screen.visible = false
+			_shot("tour-%s-%s" % [id, v])
+			await get_tree().create_timer(0.3).timeout
+	get_tree().quit()
+
 ## The Academy: walk the grounds, meet the cohort, take the lessons.
 func enter_academy() -> void:
 	if hero.is_empty():
@@ -491,7 +521,7 @@ func _academy_frame(delta: float, real_dt: float) -> void:
 	world.draw(fight, real_dt, cam, move)
 	if academy.in_lesson():
 		hud.update_play(fight, "", academy.place_label(), true)
-	if _args.has("shots") and _clock_shots(real_dt):
+	if _args.has("shots") and not _args.has("tour") and _clock_shots(real_dt):
 		_shot("academy-" + String(academy.progress["place"]))
 
 ## Automated checks in a lesson: keep near the genius, face it, and parry each bite.
