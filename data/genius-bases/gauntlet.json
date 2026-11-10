@@ -1,0 +1,652 @@
+{
+ "id": "gauntlet",
+ "name": "Gauntlet",
+ "class": "armor",
+ "expression": "relic",
+ "silhouette": "relic-gauntlet",
+ "soul": "The soul of someone who thinks with their hands, and cannot see a thing broken without reaching for it.",
+ "spark": "The mote settles in your palm whenever your hand is open, and closes your fingers for you.",
+ "nature": {
+  "shape": {
+   "make": 0.8
+  },
+  "range": {
+   "close": 0.6
+  },
+  "quests": {
+   "salvage": 0.4
+  }
+ },
+ "calls": {
+  "seed": {
+   "i-can-hold": 0.9,
+   "never-alive": 0.2,
+   "owes-me": 0.2
+  },
+  "shape": {
+   "make": 0.7,
+   "bind": 0.5,
+   "anchor": 0.3
+  },
+  "blood": {
+   "forgeborn": 0.7,
+   "iron-blood": 0.4,
+   "mound-kin": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Gloved",
+  "gift": [
+   "small-hands",
+   "talon-grip"
+  ],
+  "text": "It would rather do the thing than watch it done."
+ },
+ "settled": {
+  "id": "gauntlet-worn-glove",
+  "name": "Worn Glove",
+  "text": "One work glove, gone soft at the palm. It closes on whatever you were about to drop.",
+  "sign": "One work glove, soft at the palm, its fingers a little curled as if round a handle.",
+  "habit": "It picks things up and turns them over. It puts most of them back.",
+  "features": [
+   "small-hands",
+   "grip"
+  ],
+  "silhouette": "relic-glove"
+ },
+ "paths": [
+  {
+   "id": "gauntlet-maker",
+   "name": "Maker's Hand",
+   "of": "one who cannot leave a thing unfixed",
+   "text": "It learned from you that most problems are a thing that wants fixing or a thing that wants taking apart.",
+   "sign": "A jeweller's glass on a stalk at the wrist, and oil in every crease.",
+   "habit": "It tightens things as it passes: hinges, buckles, the lid of the jam.",
+   "leans": {
+    "shape": {
+     "make": 1.0
+    },
+    "quests": {
+     "salvage": 0.7
+    }
+   },
+   "features": [
+    "sight-glass"
+   ],
+   "prongs": [
+    {
+     "id": "gauntlet-fitter",
+     "name": "Fitter's Glove",
+     "of": "one who finds the bolt that everyone else missed",
+     "text": "It has learned the line's bolts by feel and tightens the one you missed.",
+     "sign": "Small gears turn at the knuckles when it flexes.",
+     "habit": "It runs a finger along any rail or pipe, feeling for the loose place.",
+     "leans": {
+      "quests": {
+       "linework": 1.0
+      },
+      "ground": {
+       "line": 0.6
+      }
+     },
+     "features": [
+      "gears"
+     ],
+     "finishes": [
+      {
+       "id": "gauntlet-linemans-hand",
+       "name": "Lineman's Hand",
+       "of": "one who feels a fault from two posts away",
+       "text": "It can feel a fault in the line from the rail, two posts off. It taps the place and waits for you to catch up.",
+       "sign": "A faint pulse in the palm, in time with the line when the line is near.",
+       "habit": "It lies flat on the ground, palm down, listening.",
+       "leans": {
+        "quests": {
+         "linework": 1.0
+        },
+        "shape": {
+         "make": 0.4
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      },
+      {
+       "id": "gauntlet-switch-hand",
+       "name": "Switch-hand",
+       "of": "one who clears the way before anyone arrives to need it",
+       "text": "It throws the points before the handcar reaches them. Passengers think the line was simply clear.",
+       "sign": "Small wheels at the heel of the hand, and a grip shaped to a lever.",
+       "habit": "It opens doors before you reach them and has them shut again behind you.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "quests": {
+         "escort": 0.5
+        }
+       },
+       "features": [
+        "wheels"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "gauntlet-salvor",
+     "name": "Salvor's Glove",
+     "of": "one who can tell treasure from weight",
+     "text": "It knows what is worth carrying out of a ruin and will not close on what is not.",
+     "sign": "Fingertips worn through, and something older than leather showing under.",
+     "habit": "It sorts your pockets while you sleep. It is right about what you did not need.",
+     "leans": {
+      "quests": {
+       "salvage": 1.0
+      },
+      "ground": {
+       "ruin": 0.6
+      }
+     },
+     "features": [
+      "talon-grip"
+     ],
+     "finishes": [
+      {
+       "id": "gauntlet-careful-hand",
+       "name": "The Careful Hand",
+       "of": "one who has never broken anything they were trusted with",
+       "text": "It has lifted glass a thousand years old out of rubble and not chipped it. It expects the same of you.",
+       "sign": "It moves slowly near anything fragile, and nothing near it has ever fallen.",
+       "habit": "It carries eggs for the kitchen, one at a time, because it likes to.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        },
+        "ground": {
+         "quiet": 0.4
+        }
+       },
+       "features": [
+        "old-eyes"
+       ],
+       "silhouette": "relic-glove"
+      },
+      {
+       "id": "gauntlet-door-opener",
+       "name": "Door-opener",
+       "of": "one who must know what is behind it, and knocks first",
+       "text": "Deep under, it finds the catch on doors nobody has opened since the old world. It always knocks first.",
+       "sign": "A small lamp on the knuckle of the first finger.",
+       "habit": "It knocks on walls and listens. It knocks on doors that are already open.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        },
+        "ground": {
+         "ruin": 0.6
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "gauntlet-warding-hand",
+     "name": "Warding Hand",
+     "of": "one who builds so that it will still be standing after them",
+     "text": "It lays your wards for you, flat-palmed, the way a mason sets a stone.",
+     "sign": "A ring of light round the wrist that brightens when it presses down.",
+     "habit": "It pats things it has made, twice, the way a mason pats a set stone.",
+     "leans": {
+      "shape": {
+       "anchor": 1.0,
+       "make": 0.6
+      }
+     },
+     "features": [
+      "ring"
+     ],
+     "finishes": [
+      {
+       "id": "gauntlet-masons-fist",
+       "name": "Mason's Fist",
+       "of": "one whose work does not move, and who does not either",
+       "text": "It has gone to stone to the wrist. What it sets down stays set down, and so do you.",
+       "sign": "Stone to the wrist, grey and seamed.",
+       "habit": "It rests on the table like a paperweight, and holds down whatever needs it.",
+       "leans": {
+        "shape": {
+         "anchor": 1.0
+        },
+        "fights": {
+         "blocks": 0.5
+        }
+       },
+       "features": [
+        "stone-skin"
+       ]
+      },
+      {
+       "id": "gauntlet-sixth-finger",
+       "name": "The Sixth Finger",
+       "of": "one who makes what nobody showed them how to make",
+       "text": "It has grown a finger you do not have and makes with it what you could not. Left alone, it has been improving your gear.",
+       "sign": "A finger you do not have, between the first and the thumb, tipped like a brush.",
+       "habit": "It improves your gear at night. You find out when something works that never did.",
+       "leans": {
+        "shape": {
+         "make": 1.0
+        },
+        "orders": {
+         "free": 0.6
+        }
+       },
+       "features": [
+        "brush"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gauntlet-fist",
+   "name": "Fighting Fist",
+   "of": "one who settles it now, in person",
+   "text": "It learned from you that the shortest argument is the one made at arm's length.",
+   "sign": "Plates across the back of the hand, and it rides closed.",
+   "habit": "It opens and closes, slowly, when someone is being unreasonable.",
+   "leans": {
+    "fights": {
+     "hurts": 1.0
+    },
+    "orders": {
+     "hunt": 0.7
+    }
+   },
+   "features": [
+    "plated"
+   ],
+   "prongs": [
+    {
+     "id": "gauntlet-knuckle-duster",
+     "name": "Knuckle-duster",
+     "of": "one who has decided that being hit is the price of hitting",
+     "text": "You trade blows, so it has put brass over the knuckles and stopped asking you to duck.",
+     "sign": "A bar of brass across the knuckles, dented in four places.",
+     "habit": "It knocks on wood as it passes: doorframes, tables, the heads of statues.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      },
+      "fights": {
+       "hurts": 0.6
+      }
+     },
+     "features": [
+      "brass-plate"
+     ],
+     "finishes": [
+      {
+       "id": "gauntlet-hammer-hand",
+       "name": "Hammer-hand",
+       "of": "one who brings it all down on the last beat",
+       "text": "It closes on the last beat of your chain and comes down like a smith's hammer. The anvil is whoever is nearest.",
+       "sign": "The fist glows at the heel like iron just out of the fire.",
+       "habit": "It taps out your Pattern on the table, and the last tap makes the cups jump.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "shape": {
+         "cast": 0.3
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      },
+      {
+       "id": "gauntlet-bare-knuckle",
+       "name": "Bare Knuckle",
+       "of": "one who took the armour off to feel what they were doing",
+       "text": "It shed its brass to feel what it hits. It hits harder now, which neither of you can explain.",
+       "sign": "No brass, no plate. Split knuckles that have healed pale.",
+       "habit": "It runs its fingers over rough things: bark, brick, a three-day beard.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "fights": {
+         "hurts": 0.6
+        }
+       },
+       "features": [
+        "scorched"
+       ],
+       "silhouette": "relic-glove"
+      }
+     ]
+    },
+    {
+     "id": "gauntlet-catching-hand",
+     "name": "Catching Hand",
+     "of": "one who would rather stop a fight than win it",
+     "text": "It would rather catch a blow than throw one, and has got good at where blows go.",
+     "sign": "A broad open palm, held out flat.",
+     "habit": "It catches things you drop before you know you have dropped them.",
+     "leans": {
+      "fights": {
+       "parries": 1.0,
+       "blocks": 0.5
+      }
+     },
+     "features": [
+      "broad-guard"
+     ],
+     "finishes": [
+      {
+       "id": "gauntlet-blade-catcher",
+       "name": "Blade-catcher",
+       "of": "one who takes hold of the sharp end of the problem",
+       "text": "On the beat it closes on the edge itself and holds. The other party is always surprised, and then disarmed.",
+       "sign": "Fine scars across the palm, all in one direction.",
+       "habit": "It plucks flies out of the air and lets them go outside.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "shape": {
+         "read": 0.4
+        }
+       },
+       "features": [
+        "talon-grip"
+       ]
+      },
+      {
+       "id": "gauntlet-iron-palm",
+       "name": "Iron Palm",
+       "of": "one who says stop, once, with the flat of the hand",
+       "text": "Held out flat it stops what runs into it. It has stopped a boar. The boar was more hurt than the palm.",
+       "sign": "The palm has gone to dark iron, and is cool on the hottest day.",
+       "habit": "It holds doors shut against the wind, flat, without seeming to try.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        },
+        "shape": {
+         "anchor": 0.5
+        }
+       },
+       "features": [
+        "iron-hide"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "gauntlet-grappler",
+     "name": "Grappler",
+     "of": "one who, having taken hold of a thing, sees it through",
+     "text": "It takes hold and keeps hold. What you do with the time is up to you.",
+     "sign": "A length of chain from the wrist, wrapped twice round the forearm.",
+     "habit": "It holds on to your sleeve in crowds.",
+     "leans": {
+      "shape": {
+       "bind": 1.0
+      },
+      "quests": {
+       "hunt": 0.6
+      }
+     },
+     "features": [
+      "chain"
+     ],
+     "finishes": [
+      {
+       "id": "gauntlet-long-hold",
+       "name": "The Long Hold",
+       "of": "one who can keep hold until help comes",
+       "text": "It has held a beast down from dusk until the rescue team came, and let go only when asked twice.",
+       "sign": "Roots of light from each fingertip when it grips.",
+       "habit": "It holds whatever you gave it last until you take it back. It has held a cup for two days.",
+       "leans": {
+        "shape": {
+         "bind": 1.0
+        },
+        "orders": {
+         "hold": 0.4
+        }
+       },
+       "features": [
+        "roots"
+       ]
+      },
+      {
+       "id": "gauntlet-scruff-hand",
+       "name": "Scruff-hand",
+       "of": "one who is firm in the way a mother is",
+       "text": "It takes a named beast by the scruff, the way its mother did. For a moment the beast remembers being small.",
+       "sign": "Blunt curved nails, and a grip shaped to the back of a neck.",
+       "habit": "It picks up cats, correctly. They let it.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "quests": {
+         "hunt": 0.6
+        }
+       },
+       "features": [
+        "talons"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gauntlet-open",
+   "name": "Open Hand",
+   "of": "one who reaches for whoever is falling",
+   "text": "It learned from you that a hand is mostly for other people.",
+   "sign": "It rides open, palm up, a little ahead of you.",
+   "habit": "It straightens your friends' collars. It has started on strangers.",
+   "leans": {
+    "bonds": {
+     "classmate": 1.0
+    },
+    "quests": {
+     "escort": 0.7
+    }
+   },
+   "features": [
+    "glow"
+   ],
+   "prongs": [
+    {
+     "id": "gauntlet-helping-hand",
+     "name": "Helping Hand",
+     "of": "one who sees the stumble coming",
+     "text": "It is under a classmate's elbow before they know they have slipped.",
+     "sign": "An eye in the back of the hand, half-lidded, watching feet.",
+     "habit": "It hovers near whoever is carrying too much.",
+     "leans": {
+      "bonds": {
+       "classmate": 1.0
+      },
+      "company": {
+       "party": 0.5
+      }
+     },
+     "features": [
+      "watching-eye"
+     ],
+     "finishes": [
+      {
+       "id": "gauntlet-hand-up",
+       "name": "The Hand Up",
+       "of": "one who has got everyone they know back on their feet at least once",
+       "text": "It has pulled every one of your cohort off the ground at least once. They get up faster for it, and stand nearer to you.",
+       "sign": "The palm is worn smooth by other people's hands.",
+       "habit": "It offers itself to anyone sitting on the ground, whether or not they meant to be there.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        },
+        "quests": {
+         "escort": 0.3
+        }
+       },
+       "features": [
+        "long-legs"
+       ]
+      },
+      {
+       "id": "gauntlet-steadying-hand",
+       "name": "Steadying Hand",
+       "of": "one whose hand on a shoulder is enough",
+       "text": "It rests on the shoulder of whoever is about to break, and they do not. It has done this for you more than for anyone.",
+       "sign": "It is warm. You can feel it from a pace away.",
+       "habit": "It rests on the shoulder of whoever has gone quiet, and says nothing.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "orders": {
+         "guard": 0.5
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "gauntlet-signing-hand",
+     "name": "Signing Hand",
+     "of": "one who notices everything and has a sign for each thing",
+     "text": "It has worked out a sign for everything it notices and uses them all, whether or not you are looking.",
+     "sign": "Its fingers are never still. Someone who knew how could read them.",
+     "habit": "It comments on the room in small signs, to itself. Some of them are rude.",
+     "leans": {
+      "shape": {
+       "read": 1.0
+      },
+      "orders": {
+       "free": 0.5
+      }
+     },
+     "features": [
+      "far-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "gauntlet-fingerpost",
+       "name": "Fingerpost",
+       "of": "one who cannot help telling you what you have missed",
+       "text": "It points at the thing you ought to be looking at, from as far off as it likes. It has never been wrong and never been polite.",
+       "sign": "One finger is longer than the rest, and it is always pointing.",
+       "habit": "It points at the weather, at the time, at the door. It is tiresome and right.",
+       "leans": {
+        "shape": {
+         "read": 1.0
+        },
+        "range": {
+         "far": 0.5
+        }
+       },
+       "features": [
+        "sight-glass"
+       ]
+      },
+      {
+       "id": "gauntlet-beckoner",
+       "name": "The Beckoner",
+       "of": "one who goes ahead alone and comes back to fetch you",
+       "text": "Sent off alone in the dark it comes back and crooks a finger. What it wants you to see is always worth the walk.",
+       "sign": "A dark glove with a pale palm, so that you can see it turn in the dark.",
+       "habit": "At dusk it goes to the end of the lane and crooks a finger at nothing, practising.",
+       "leans": {
+        "orders": {
+         "free": 1.0
+        },
+        "ground": {
+         "night": 0.6
+        }
+       },
+       "features": [
+        "dark-eyed"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "gauntlet-pledged-hand",
+     "name": "Pledged Hand",
+     "of": "one whose handshake is the contract",
+     "text": "It was on yours when you swore, and it has kept its grip on the promise since.",
+     "sign": "A band of light round the fourth finger.",
+     "habit": "It rests over your heart when you say anything you mean.",
+     "leans": {
+      "pattern": {
+       "sworn": 1.0
+      },
+      "bonds": {
+       "shade": 0.7
+      }
+     },
+     "features": [
+      "ring"
+     ],
+     "finishes": [
+      {
+       "id": "gauntlet-handfast",
+       "name": "Handfast",
+       "of": "one who keeps hold of a promise longest",
+       "text": "It clasps and the oath holds, yours and anyone's who took it with you. It does not let go first.",
+       "sign": "A fine chain from its wrist that ends in an open cuff, for someone else.",
+       "habit": "It takes the hand of anyone who offers one, and waits for them to let go.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        },
+        "company": {
+         "party": 0.4
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      },
+      {
+       "id": "gauntlet-shades-glove",
+       "name": "Shade's Glove",
+       "of": "one still holding a hand that is not there any more",
+       "text": "Some evenings by the hearth it fills out, as if another hand were in it. That hand shows yours an older grip.",
+       "sign": "Some evenings it fills out, as if another hand were in it.",
+       "habit": "By the hearth it lies palm up, and its fingers close, gently, on nothing.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        },
+        "ground": {
+         "quiet": 0.5
+        }
+       },
+       "features": [
+        "old-eyes"
+       ],
+       "silhouette": "relic-glove"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,660 @@
+{
+ "id": "gun",
+ "name": "Gun",
+ "class": "weapon",
+ "expression": "engine",
+ "silhouette": "engine-weapon",
+ "soul": "The soul of someone who thinks a long time, speaks once, and does not explain.",
+ "spark": "The mote keeps at arm's length, always in line with your eye and one other thing.",
+ "nature": {
+  "range": {
+   "far": 0.9
+  },
+  "shape": {
+   "cast": 0.6
+  },
+  "company": {
+   "alone": 0.3
+  }
+ },
+ "calls": {
+  "seed": {
+   "never-alive": 0.6,
+   "i-can-hold": 0.4,
+   "watches-from-above": 0.3
+  },
+  "shape": {
+   "cast": 0.8,
+   "make": 0.3,
+   "read": 0.3
+  },
+  "blood": {
+   "eyes-heat": 0.7,
+   "forgeborn": 0.4,
+   "long-stride": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Sighted",
+  "gift": [
+   "gears",
+   "sight-glass"
+  ],
+  "text": "It decides once, from a long way off."
+ },
+ "settled": {
+  "id": "gun-pocket-piece",
+  "name": "Pocket-piece",
+  "text": "A one-shot pistol small enough to lose in a coat. It thinks about its one shot all day and would rather not be hurried.",
+  "sign": "A pistol the size of a hand, with one barrel and one very steady lens.",
+  "habit": "It turns to keep the door in view. It has not yet found a room it trusts.",
+  "features": [
+   "barrel",
+   "sight-glass"
+  ]
+ },
+ "paths": [
+  {
+   "id": "gun-long-gun",
+   "name": "Long Gun",
+   "of": "one who can wait longer than whatever they are waiting for",
+   "text": "It learned from you that distance is the only armour worth the weight.",
+   "sign": "A barrel twice the length it needs, held level without a tremor.",
+   "habit": "It settles on a far thing and stays on it. An hour later it is still on it.",
+   "leans": {
+    "ground": {
+     "wild": 1.0
+    },
+    "range": {
+     "far": 0.7
+    }
+   },
+   "features": [
+    "far-eyes"
+   ],
+   "prongs": [
+    {
+     "id": "gun-stalking-rifle",
+     "name": "Stalking Rifle",
+     "of": "one who can be uncomfortable for a long time without minding",
+     "text": "It will lie in the wet all day for one clear line, and thinks less of you when you fidget.",
+     "sign": "Mud to the breech, and long thin legs folded under it.",
+     "habit": "It goes still when you fidget, pointedly, to show you how.",
+     "leans": {
+      "quests": {
+       "hunt": 1.0
+      },
+      "ground": {
+       "wild": 0.6
+      }
+     },
+     "features": [
+      "long-legged"
+     ],
+     "finishes": [
+      {
+       "id": "gun-one-round",
+       "name": "One Round",
+       "of": "one who has never needed to say it twice",
+       "text": "It carries a single round with a name scratched on it. So far it has only ever needed the one.",
+       "sign": "A single round carried in the open, with a name scratched on the case.",
+       "habit": "It takes the round out, looks at it, and puts it back.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "quests": {
+         "hunt": 0.6
+        }
+       },
+       "features": [
+        "ledger"
+       ]
+      },
+      {
+       "id": "gun-hide-gun",
+       "name": "Hide-gun",
+       "of": "one who becomes the place they are waiting in",
+       "text": "It has taken the colour of the ground it lies on. You have put your hand on it by mistake.",
+       "sign": "It is the colour of whatever is behind it. You find it by the lens.",
+       "habit": "It lies down in long grass, and you spend a while looking for it.",
+       "leans": {
+        "ground": {
+         "wild": 1.0
+        },
+        "fights": {
+         "dodges": 0.5
+        }
+       },
+       "features": [
+        "shadow-cloak"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "gun-overwatch",
+     "name": "Overwatch",
+     "of": "one who keeps everyone in view and says nothing about it",
+     "text": "It finds the high place and keeps the whole party in one eye.",
+     "sign": "One wide unblinking lens, set high.",
+     "habit": "It climbs onto whatever is tallest and faces the way your friends went.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      },
+      "orders": {
+       "free": 0.6
+      }
+     },
+     "features": [
+      "watching-eye"
+     ],
+     "finishes": [
+      {
+       "id": "gun-covering-fire",
+       "name": "Covering Fire",
+       "of": "one whose friends walk easier and do not know why",
+       "text": "A classmate steps out, and the thing that would have met them is already sitting down.",
+       "sign": "Its works tick over quietly whenever a classmate is in the open.",
+       "habit": "It tracks each friend across the yard in turn, and eases when they are indoors.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "bonds": {
+         "classmate": 0.6
+        }
+       },
+       "features": [
+        "gears"
+       ]
+      },
+      {
+       "id": "gun-high-window",
+       "name": "The High Window",
+       "of": "one who finds the place that commands the rest",
+       "text": "Left to itself in a ruin it finds the one window that commands the rest, and is in it before you have asked.",
+       "sign": "Thin vanes it uses only to get up to a ledge.",
+       "habit": "In any building it is at the top window before you have taken your coat off.",
+       "leans": {
+        "orders": {
+         "free": 1.0
+        },
+        "ground": {
+         "ruin": 0.5
+        }
+       },
+       "features": [
+        "wings"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "gun-night-glass",
+     "name": "Night-glass",
+     "of": "one who needs less light than other people to be sure",
+     "text": "It has learned to see by what little there is, and to wait for the breath out.",
+     "sign": "A lens gone dark as a pupil in poor light.",
+     "habit": "It stays awake after the lamp is out. You can hear it adjusting.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      },
+      "shape": {
+       "read": 0.6
+      }
+     },
+     "features": [
+      "dark-eyed"
+     ],
+     "finishes": [
+      {
+       "id": "gun-dark-lens",
+       "name": "Dark-lens",
+       "of": "one who does not fear the dark, having looked at it properly",
+       "text": "Its glass drinks the night and shows it to you grey and plain. Nothing has crossed it unseen.",
+       "sign": "Look over its shoulder and its glass shows you the night, grey and plain.",
+       "habit": "It sweeps the dark outside the window, slowly, the same arc each time.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "orders": {
+         "guard": 0.4
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      },
+      {
+       "id": "gun-cold-reader",
+       "name": "Cold Reader",
+       "of": "one who studies a person before saying a word to them",
+       "text": "It watches how a thing breathes for as long as that takes. Then it fires between.",
+       "sign": "A breath of frost at the muzzle. It does not hurry for anybody.",
+       "habit": "It matches its small ticking to your breathing, then to someone else's.",
+       "leans": {
+        "shape": {
+         "read": 1.0
+        },
+        "range": {
+         "far": 0.5
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gun-repeater",
+   "name": "Repeater",
+   "of": "one who tries again at once, and differently",
+   "text": "It learned from you that the second shot is the one that counts.",
+   "sign": "A wheel of chambers that it turns with a thumb of brass, idly, all day.",
+   "habit": "It takes itself apart on the table and puts itself back a little changed.",
+   "leans": {
+    "range": {
+     "mid": 1.0
+    },
+    "fights": {
+     "dodges": 0.7
+    }
+   },
+   "features": [
+    "gears"
+   ],
+   "prongs": [
+    {
+     "id": "gun-fanning-gun",
+     "name": "Fanning Gun",
+     "of": "one who thinks in runs, not in single words",
+     "text": "It has stopped aiming each shot and started aiming the whole string of them.",
+     "sign": "A hammer worn smooth and bright.",
+     "habit": "It clicks through its chambers in rhythm when it is thinking.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      },
+      "range": {
+       "close": 0.5
+      }
+     },
+     "features": [
+      "pulse"
+     ],
+     "finishes": [
+      {
+       "id": "gun-six-beat",
+       "name": "Six-beat",
+       "of": "one who works in time with another and makes it sound like one",
+       "text": "It fires on your chain's beats and reloads in the rests. The two of you sound like one instrument.",
+       "sign": "Six bright rings round the barrel, one for each beat.",
+       "habit": "It taps out your Pattern on the table and leaves the rests in.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "range": {
+         "mid": 0.4
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      },
+      {
+       "id": "gun-belly-gun",
+       "name": "Belly-gun",
+       "of": "one who has their say after being hit, from very close",
+       "text": "It has learned to speak at conversational distance, after you have already been hit.",
+       "sign": "A short ugly barrel and a wide mouth.",
+       "habit": "It sits against your ribs, warm, and you forget it is there.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "fights": {
+         "hurts": 0.6
+        }
+       },
+       "features": [
+        "maw"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "gun-skirmisher",
+     "name": "Skirmisher",
+     "of": "one who cannot think standing still",
+     "text": "It shoots on the move because you are always on the move.",
+     "sign": "Long legs, always in the middle of a stride.",
+     "habit": "It paces. Round the fire, round the table, round you.",
+     "leans": {
+      "fights": {
+       "dodges": 1.0
+      },
+      "ground": {
+       "line": 0.5
+      }
+     },
+     "features": [
+      "long-legs"
+     ],
+     "finishes": [
+      {
+       "id": "gun-running-gun",
+       "name": "Running Gun",
+       "of": "one who is surest when nowhere in particular",
+       "text": "It fires at the top of your step, when you are nowhere in particular. Its aim is better than when you stand.",
+       "sign": "It carries itself level however the ground goes.",
+       "habit": "It will not sit. It rests by walking more slowly.",
+       "leans": {
+        "fights": {
+         "dodges": 1.0
+        },
+        "range": {
+         "mid": 0.4
+        }
+       },
+       "features": [
+        "long-legged"
+       ]
+      },
+      {
+       "id": "gun-car-gun",
+       "name": "Car-gun",
+       "of": "one who looks both ways for somebody else",
+       "text": "It rides the tender with one eye forward and one back, and the passenger between.",
+       "sign": "Small wheels, and two lenses facing opposite ways.",
+       "habit": "It rides on anything that moves: a cart, a barrow, the mess trolley.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "ground": {
+         "line": 0.6
+        }
+       },
+       "features": [
+        "wheels"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "gun-smoke-pole",
+     "name": "Smoke-pole",
+     "of": "one who uses whatever is to hand",
+     "text": "It has begun loading with whatever your field gives it instead of powder.",
+     "sign": "A patched barrel, each patch a different metal.",
+     "habit": "It picks things up and tries them in its breech: gravel, a nail, a peach stone.",
+     "leans": {
+      "shape": {
+       "turn": 1.0,
+       "make": 0.8
+      }
+     },
+     "features": [
+      "smoke"
+     ],
+     "finishes": [
+      {
+       "id": "gun-hot-barrel",
+       "name": "Hot Barrel",
+       "of": "one who, once started, is never quite cool again",
+       "text": "Your element is the charge. It has not needed powder in a season and the barrel never quite cools.",
+       "sign": "The barrel glows dull at the muzzle and ticks as it tries to cool.",
+       "habit": "It keeps your tea warm if you stand the cup against it.",
+       "leans": {
+        "shape": {
+         "turn": 1.0
+        },
+        "pattern": {
+         "fires": 0.4
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      },
+      {
+       "id": "gun-tinkers-piece",
+       "name": "Tinker's Piece",
+       "of": "one who has changed everything about themselves but their mind",
+       "text": "It has rebuilt itself so often that nothing of the pocket-piece is left but the opinion.",
+       "sign": "Not one part matches another. Small hands of brass do the fitting.",
+       "habit": "It mends things that were not broken, and they are usually the better for it.",
+       "leans": {
+        "shape": {
+         "make": 1.0
+        },
+        "quests": {
+         "salvage": 0.5
+        }
+       },
+       "features": [
+        "small-hands"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "gun-standing",
+   "name": "Standing Gun",
+   "of": "one who says a thing once and stands behind it",
+   "text": "It learned from you that a gun with its feet set does not have to be asked twice.",
+   "sign": "It has grown legs and a spine, and stands like something on duty.",
+   "habit": "It takes up a post wherever you stop, and faces outward.",
+   "leans": {
+    "orders": {
+     "hold": 1.0
+    },
+    "pattern": {
+     "sworn": 0.7
+    }
+   },
+   "features": [
+    "set-feet"
+   ],
+   "silhouette": "engine-sentinel",
+   "prongs": [
+    {
+     "id": "gun-post-gun",
+     "name": "Post-gun",
+     "of": "one who turns their back on the fire to watch the dark",
+     "text": "It walks to the post, turns its back on the flame and faces the dark.",
+     "sign": "A lamp bracket on its shoulder, and it stands with the light behind it.",
+     "habit": "It walks the edge of any lit place and stops where the light gives out.",
+     "leans": {
+      "ground": {
+       "line": 1.0
+      },
+      "quests": {
+       "linework": 0.7
+      }
+     },
+     "features": [
+      "lantern"
+     ],
+     "silhouette": "engine-sentinel",
+     "finishes": [
+      {
+       "id": "gun-lamp-gun",
+       "name": "Lamp-gun",
+       "of": "one who stays until the thing is done, however long",
+       "text": "It stands at a dark post until the flame takes. Nothing has yet reached the flame past it.",
+       "sign": "A steady glow at its back, like a post-flame seen through cloth.",
+       "habit": "It stands by anything unfinished: a fire being laid, a letter half written.",
+       "leans": {
+        "quests": {
+         "linework": 1.0
+        },
+        "orders": {
+         "hold": 0.6
+        }
+       },
+       "features": [
+        "glow"
+       ],
+       "silhouette": "engine-sentinel"
+      },
+      {
+       "id": "gun-gate-piece",
+       "name": "Gate-piece",
+       "of": "one who reads you the rule before anything else",
+       "text": "It stands at a door with a writ nailed to its plate, and reads the writ to callers.",
+       "sign": "A plate on its chest with a writ nailed to it.",
+       "habit": "It reads its writ aloud at dawn, to nobody, to keep in practice.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        },
+        "ground": {
+         "line": 0.5
+        }
+       },
+       "features": [
+        "ledger"
+       ],
+       "silhouette": "engine-sentinel"
+      }
+     ]
+    },
+    {
+     "id": "gun-shield-gun",
+     "name": "Shield-gun",
+     "of": "one who takes it on the chin and has not changed their mind",
+     "text": "It has grown a plate to fire round and has stopped minding what hits the plate.",
+     "sign": "A plate grown across its front, with one slot for the barrel.",
+     "habit": "It turns its plate to wind, rain and arguments alike.",
+     "leans": {
+      "fights": {
+       "blocks": 1.0
+      },
+      "shape": {
+       "anchor": 0.6
+      }
+     },
+     "features": [
+      "shield-face"
+     ],
+     "silhouette": "engine-sentinel",
+     "finishes": [
+      {
+       "id": "gun-mantlet",
+       "name": "Mantlet",
+       "of": "one who would rather you stood behind them",
+       "text": "There is room behind its plate for you. It prefers that you use it.",
+       "sign": "A plate taller than you, with a worn place where a shoulder leans.",
+       "habit": "It moves to put itself between you and any open window.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        },
+        "orders": {
+         "guard": 0.5
+        }
+       },
+       "features": [
+        "tower-shield"
+       ],
+       "silhouette": "engine-sentinel"
+      },
+      {
+       "id": "gun-emplacement",
+       "name": "Emplacement",
+       "of": "one around whom other people arrange themselves",
+       "text": "Once it has chosen its ground the party fights round it, the way a town grows round a well.",
+       "sign": "It has dug itself in. There are small walls round its feet.",
+       "habit": "It chooses its ground at every stop, and you find the camp has formed round it.",
+       "leans": {
+        "shape": {
+         "anchor": 1.0
+        },
+        "company": {
+         "party": 0.5
+        }
+       },
+       "features": [
+        "bastion"
+       ],
+       "silhouette": "engine-sentinel"
+      }
+     ]
+    },
+    {
+     "id": "gun-warning-shot",
+     "name": "Warning Shot",
+     "of": "one who tells you plainly where the line is, once",
+     "text": "It has found that most things will stop if it is clear enough about what happens next.",
+     "sign": "It clears its throat. There is no other way to describe the sound.",
+     "habit": "It raises its barrel a finger's width when anyone steps too near you, and holds it there.",
+     "leans": {
+      "shape": {
+       "bind": 1.0
+      },
+      "bonds": {
+       "shade": 0.5
+      }
+     },
+     "features": [
+      "voice"
+     ],
+     "silhouette": "engine-sentinel",
+     "finishes": [
+      {
+       "id": "gun-law",
+       "name": "The Law",
+       "of": "one whose look is enough",
+       "text": "Levelled, it does not need to fire. The foe hesitates, and that was the shot.",
+       "sign": "A ring of small points above its sight, like a badge worn high.",
+       "habit": "It looks at people until they sit down.",
+       "leans": {
+        "shape": {
+         "bind": 1.0
+        },
+        "pattern": {
+         "sworn": 0.6
+        }
+       },
+       "features": [
+        "crown"
+       ],
+       "silhouette": "engine-sentinel"
+      },
+      {
+       "id": "gun-dead-mans-gun",
+       "name": "Dead Man's Gun",
+       "of": "one who learned a thing from the dead and keeps it for the day",
+       "text": "A shade taught it one trick. It will show it once in a fight, and not to you beforehand.",
+       "sign": "One chamber is always closed. It was not always.",
+       "habit": "By the hearth it holds still while something you cannot see adjusts its aim.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        },
+        "ground": {
+         "night": 0.4
+        }
+       },
+       "features": [
+        "old-eyes"
+       ],
+       "silhouette": "engine-sentinel"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

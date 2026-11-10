@@ -1,0 +1,649 @@
+{
+ "id": "bell",
+ "name": "Bell",
+ "class": "item",
+ "expression": "engine",
+ "silhouette": "engine-buoy",
+ "soul": "The soul of someone who cannot keep a thing to themselves. They call out, and they are heard across a room.",
+ "spark": "The mote hums. Put a cup over it and the cup rings.",
+ "nature": {
+  "company": {
+   "party": 0.8
+  },
+  "shape": {
+   "bind": 0.6
+  },
+  "orders": {
+   "hold": 0.5
+  }
+ },
+ "calls": {
+  "seed": {
+   "with-a-voice": 0.7,
+   "stands-between": 0.3,
+   "remembers": 0.2
+  },
+  "shape": {
+   "bind": 0.6,
+   "anchor": 0.4,
+   "read": 0.2
+  },
+  "blood": {
+   "beast-voice": 0.7,
+   "hearth-hears": 0.6,
+   "tidewater": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Belled",
+  "gift": [
+   "voice",
+   "bell"
+  ],
+  "text": "You hear it coming, and so does everyone who should."
+ },
+ "settled": {
+  "id": "bell-hand",
+  "name": "Hand-bell",
+  "text": "A small brass bell with a tongue it cannot keep still. It rings when you are late, when you are early, and when it is pleased.",
+  "sign": "A small brass bell whose tongue trembles just before anyone speaks.",
+  "habit": "It rings once, softly, when you come back into a room, whoever else is there.",
+  "features": [
+   "bell",
+   "voice"
+  ]
+ },
+ "paths": [
+  {
+   "id": "bell-rally",
+   "name": "Rally-bell",
+   "of": "one who is only whole in company",
+   "text": "It learned from you that a table is not laid until everyone is at it.",
+   "sign": "It swings toward whichever of your friends is furthest off.",
+   "habit": "It rings people in to meals. It rings again, louder, for whoever is late.",
+   "leans": {
+    "company": {
+     "party": 1.0
+    },
+    "bonds": {
+     "classmate": 0.7
+    }
+   },
+   "features": [
+    "ring"
+   ],
+   "prongs": [
+    {
+     "id": "bell-muster-bell",
+     "name": "Muster-bell",
+     "of": "one who cannot start until everyone is here",
+     "text": "It rings the party together before a door and apart again after, and has opinions about stragglers.",
+     "sign": "A broad foot that it plants in doorways.",
+     "habit": "It counts the party at every threshold with small taps on its own rim.",
+     "leans": {
+      "quests": {
+       "escort": 1.0
+      },
+      "company": {
+       "party": 0.8
+      }
+     },
+     "features": [
+      "set-feet"
+     ],
+     "finishes": [
+      {
+       "id": "bell-convoy-bell",
+       "name": "Convoy-bell",
+       "of": "one who talks the whole way so that nobody feels the miles",
+       "text": "It rings from the tender the whole way out. The passenger sleeps through it; nothing else does.",
+       "sign": "A lamp hung under its lip that swings as it rings.",
+       "habit": "It keeps up a soft steady ring on any long walk, and only stops to listen.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "ground": {
+         "line": 0.5
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      },
+      {
+       "id": "bell-roll-call",
+       "name": "Roll-call",
+       "of": "one who will not go on a head short",
+       "text": "One stroke for each of you at every door. It will not stop at the wrong number.",
+       "sign": "A strip of names pressed into its waist, and a mark by each.",
+       "habit": "At dusk it rings each name it knows, and waits after each for an answer.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "bonds": {
+         "classmate": 0.6
+        }
+       },
+       "features": [
+        "ledger"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "bell-mess-bell",
+     "name": "Mess-bell",
+     "of": "one in whose company people put their burdens down",
+     "text": "It is the sound of sitting down afterwards. People are a little mended just hearing it.",
+     "sign": "A warm dull gold, with a dent where a ladle has struck it for years.",
+     "habit": "It hums over anyone who is hurting, low, until they are breathing with it.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      },
+      "bonds": {
+       "shade": 0.5
+      }
+     },
+     "features": [
+      "glow"
+     ],
+     "finishes": [
+      {
+       "id": "bell-mending-peal",
+       "name": "Mending-peal",
+       "of": "one whose voice gets people back on their feet",
+       "text": "It rings low when someone is hurt, and they stand up into the sound.",
+       "sign": "A low ring you feel in the breastbone before you hear it.",
+       "habit": "It rings under its breath near anything broken: a cup, a wrist, a mood.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "company": {
+         "party": 0.5
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      },
+      {
+       "id": "bell-hearth-bell",
+       "name": "Hearth-bell",
+       "of": "one who says the names of the dead aloud",
+       "text": "Hung by the hearth, it is rung for the dead by name. The shades come when it does.",
+       "sign": "It hangs itself from any hook near a fire, and will not ring for trifles there.",
+       "habit": "It rings once at nightfall for someone. It does not say who, and it is not always the same.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        },
+        "orders": {
+         "hold": 0.5
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "bell-change-ringer",
+     "name": "Change-ringer",
+     "of": "one who needs others to keep time with",
+     "text": "It has learned your chain as a peal, and rings each beat with you.",
+     "sign": "A set of small wheels inside that turn it through its changes.",
+     "habit": "It practises against any rhythm going, and will not stop in the middle of a run.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0,
+       "sworn": 0.4
+      }
+     },
+     "features": [
+      "gears"
+     ],
+     "finishes": [
+      {
+       "id": "bell-peal-of-eight",
+       "name": "Peal of Eight",
+       "of": "one who makes a thing longer and better by joining in",
+       "text": "It rings your Pattern through with you, beat for beat, and the chain runs a beat longer for the company.",
+       "sign": "Eight small bells have grown along its yoke, smallest to largest.",
+       "habit": "It rings down the eight and back up, and is restless until someone claps the time.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "shape": {
+         "bind": 0.4
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      },
+      {
+       "id": "bell-tenor",
+       "name": "The Tenor",
+       "of": "one who speaks seldom, low, and last",
+       "text": "One deep note, struck once, each time the oath is kept. You have come to need the sound.",
+       "sign": "It has grown heavy and dark, with a rim as thick as a wrist.",
+       "habit": "It keeps silent for days. When it does sound, people in other rooms look up.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        },
+        "bonds": {
+         "classmate": 0.3
+        }
+       },
+       "features": [
+        "crown"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bell-hour",
+   "name": "Hour-bell",
+   "of": "one whom others set their day by",
+   "text": "It learned from you that people can bear a great deal if they know what time it is.",
+   "sign": "It hangs dead level and rings on the hour, whatever hours you keep.",
+   "habit": "It rings you awake at the same moment every day, including the days you asked it not to.",
+   "leans": {
+    "shape": {
+     "anchor": 1.0
+    },
+    "ground": {
+     "night": 0.7
+    }
+   },
+   "features": [
+    "dial"
+   ],
+   "prongs": [
+    {
+     "id": "bell-watch-bell",
+     "name": "Watch-bell",
+     "of": "one who stays awake so that the night has a witness",
+     "text": "It rings the hours through the night so the dark knows somebody is counting.",
+     "sign": "A dark bronze that shows no shine at night.",
+     "habit": "It rings the quarters through the night, quieter each time until dawn.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      },
+      "orders": {
+       "hold": 0.7
+      }
+     },
+     "features": [
+      "dark-eyed"
+     ],
+     "finishes": [
+      {
+       "id": "bell-curfew",
+       "name": "Curfew",
+       "of": "one who can send everyone home with a word",
+       "text": "When it tolls, things that hunt by dark remember somewhere else they have to be.",
+       "sign": "One long note with a falling end, like a door closing slowly.",
+       "habit": "At dusk it rings once and looks at anything still out of doors.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "shape": {
+         "bind": 0.4
+        }
+       },
+       "features": [
+        "shadow-cloak"
+       ]
+      },
+      {
+       "id": "bell-post-bell",
+       "name": "Post-bell",
+       "of": "one who reports exactly what came, and no more",
+       "text": "It hangs itself at the post you are holding and rings once for each thing that comes into the light.",
+       "sign": "It hangs from a post's bracket as if the bracket had been made for it.",
+       "habit": "It rings once for each thing that enters the light: a moth, a fox, you.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "ground": {
+         "line": 0.6
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "bell-tell-bell",
+     "name": "Tell-bell",
+     "of": "one who hears the change in a voice before the words",
+     "text": "It has learned what a strike sounds like before it is a strike.",
+     "sign": "A wide flared lip, turned like an ear.",
+     "habit": "It shivers, without sounding, a moment before any loud noise.",
+     "leans": {
+      "fights": {
+       "parries": 1.0
+      },
+      "shape": {
+       "read": 0.6
+      }
+     },
+     "features": [
+      "tunnel-ear"
+     ],
+     "finishes": [
+      {
+       "id": "bell-strike-note",
+       "name": "Strike-note",
+       "of": "one who gives the cue and is never late with it",
+       "text": "It sounds a breath before the blow lands. Parry on the note and you will not be late.",
+       "sign": "A clean high note with no ring after it.",
+       "habit": "It sounds a single note when you are about to drop something. You catch it.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "range": {
+         "close": 0.4
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      },
+      {
+       "id": "bell-sounding-bell",
+       "name": "Sounding-bell",
+       "of": "one who asks a question and listens to how the answer comes back",
+       "text": "Its echo comes back wrong off anything that is hiding. It rings, listens, and tells you where.",
+       "sign": "It rings, then tilts, then waits. The waiting is most of it.",
+       "habit": "It rings into wells, cupboards and empty rooms, and considers the echo.",
+       "leans": {
+        "shape": {
+         "read": 1.0
+        },
+        "quests": {
+         "hunt": 0.5
+        }
+       },
+       "features": [
+        "far-eyes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "bell-fog-bell",
+     "name": "Fog-bell",
+     "of": "one who keeps on calling when they cannot see who hears",
+     "text": "It rings so you can find it and so that other things think they have found you.",
+     "sign": "Green at the rim, and beaded with wet in any weather.",
+     "habit": "On still mornings it rings slowly, at intervals, toward the nearest water.",
+     "leans": {
+      "ground": {
+       "water": 1.0
+      },
+      "fights": {
+       "dodges": 0.6
+      }
+     },
+     "features": [
+      "mist"
+     ],
+     "finishes": [
+      {
+       "id": "bell-channel-bell",
+       "name": "Channel-bell",
+       "of": "one who has stood in one hard place for years, saying the same true thing",
+       "text": "It rides a float in the bad water and rings the safe line. River towns have asked to keep it.",
+       "sign": "It rides a float, tilting with a swell that is not there.",
+       "habit": "It rings a little on every seventh breath, like a buoy in a slow sea.",
+       "leans": {
+        "ground": {
+         "water": 1.0
+        },
+        "quests": {
+         "linework": 0.4
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      },
+      {
+       "id": "bell-lost-bell",
+       "name": "Lost-bell",
+       "of": "one whose voice seems to come from somewhere they are not",
+       "text": "It rings from where you are not, and that is where the blow goes.",
+       "sign": "You hear it from the wrong side. Every time.",
+       "habit": "It rings from behind you, and then is in front of you, looking innocent.",
+       "leans": {
+        "fights": {
+         "dodges": 1.0
+        },
+        "ground": {
+         "wild": 0.5
+        }
+       },
+       "features": [
+        "standing-air"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bell-alarm",
+   "name": "Alarm-bell",
+   "of": "one who says the hard thing aloud and will not take it back",
+   "text": "It learned from you that some things have to be said once, loudly, and stood by.",
+   "sign": "A hard bright note that people flinch from and then obey.",
+   "habit": "It rings at lies. Small ones too. It has made supper difficult.",
+   "leans": {
+    "pattern": {
+     "sworn": 1.0
+    },
+    "shape": {
+     "cast": 0.7
+    }
+   },
+   "features": [
+    "maw"
+   ],
+   "prongs": [
+    {
+     "id": "bell-stun-bell",
+     "name": "Stun-bell",
+     "of": "one who says it to your face, from very near",
+     "text": "It goes in close and rings itself against the foe's skull.",
+     "sign": "A thick-waisted bell, dented outward from the inside.",
+     "habit": "It bumps against you when it wants attention, and rings on contact.",
+     "leans": {
+      "range": {
+       "close": 1.0
+      },
+      "fights": {
+       "blocks": 0.6
+      }
+     },
+     "features": [
+      "broad-chest"
+     ],
+     "finishes": [
+      {
+       "id": "bell-anvil-bell",
+       "name": "Anvil-bell",
+       "of": "one who is only made louder by being struck",
+       "text": "Strike it and the blow rings back up the arm that struck. It has been hit a great deal and enjoys it.",
+       "sign": "Hammer marks all over it. It shows them off.",
+       "habit": "It leans into anything that knocks it and hums afterwards, pleased.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        },
+        "shape": {
+         "anchor": 0.6
+        }
+       },
+       "features": [
+        "iron-hide"
+       ]
+      },
+      {
+       "id": "bell-skull-ringer",
+       "name": "Skull-ringer",
+       "of": "one whose single remark ends the conversation",
+       "text": "One stroke at arm's length. The foe stands very still afterwards, working out which way is up.",
+       "sign": "A short heavy clapper, and a brow of bronze above the lip.",
+       "habit": "It taps its clapper once against its own rim, thinking, like a knuckle on a table.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "orders": {
+         "hunt": 0.5
+        }
+       },
+       "features": [
+        "horn-brow"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "bell-carrying-bell",
+     "name": "Carrying-bell",
+     "of": "one whose anger travels well",
+     "text": "It has found the note that goes a long way and arrives still angry.",
+     "sign": "A long narrow waist and a mouth pointed at the horizon.",
+     "habit": "It rings across valleys to hear what comes back, and is put out if nothing does.",
+     "leans": {
+      "range": {
+       "far": 1.0
+      },
+      "shape": {
+       "cast": 0.6
+      }
+     },
+     "features": [
+      "far-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "bell-far-caller",
+       "name": "Far-caller",
+       "of": "one who can be heard by the person they mean, a long way off",
+       "text": "It grew a throat and a flare of brass and became a horn. What it calls at, across a valley, turns to look.",
+       "sign": "It has grown a throat and a flare of brass. It is a horn now and knows it.",
+       "habit": "From any height at evening it sounds one long call. Something far off always answers.",
+       "leans": {
+        "range": {
+         "far": 1.0
+        },
+        "company": {
+         "party": 0.4
+        }
+       },
+       "features": [
+        "crest"
+       ],
+       "silhouette": "relic-horn"
+      },
+      {
+       "id": "bell-thunder-bell",
+       "name": "Thunder-bell",
+       "of": "one whose mood changes the weather in the room",
+       "text": "Your element is in the bronze. When it rings there is weather.",
+       "sign": "The bronze has gone storm-coloured, and the air round it is close.",
+       "habit": "It hums before rain. Your hair lifts a little when it does.",
+       "leans": {
+        "shape": {
+         "turn": 1.0,
+         "cast": 0.5
+        }
+       },
+       "features": [
+        "smoke"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "bell-binding-bell",
+     "name": "Binding-bell",
+     "of": "one who knows what to call a thing so that it stops",
+     "text": "A thing that hears its own toll does not move easily. It has learned whose toll is whose.",
+     "sign": "A ring of small links round its crown, each one stamped.",
+     "habit": "It tries out names under its breath, one after another, on anything it does not know.",
+     "leans": {
+      "quests": {
+       "hunt": 1.0
+      },
+      "bonds": {
+       "named": 0.7
+      }
+     },
+     "features": [
+      "chain"
+     ],
+     "finishes": [
+      {
+       "id": "bell-name-bell",
+       "name": "Name-bell",
+       "of": "one who learns the one thing each enemy cannot bear to hear",
+       "text": "It has found the one note each named beast cannot bear, and keeps them all. It rings the right one first.",
+       "sign": "A row of different small tongues inside it, and it chooses among them.",
+       "habit": "It rings each of its notes in turn, softly, checking that none has been forgotten.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "shape": {
+         "bind": 0.5
+        }
+       },
+       "features": [
+        "ledger"
+       ]
+      },
+      {
+       "id": "bell-passing-bell",
+       "name": "Passing-bell",
+       "of": "one who tells you plainly that it is over",
+       "text": "It rings once for what you are hunting. It is not a warning.",
+       "sign": "One cold note, struck once. It does not repeat itself.",
+       "habit": "It rings once when something nearby ends: a moth, a fire, a day.",
+       "leans": {
+        "quests": {
+         "hunt": 1.0
+        },
+        "company": {
+         "alone": 0.5
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

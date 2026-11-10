@@ -1,0 +1,661 @@
+{
+ "id": "blade",
+ "name": "Blade",
+ "class": "weapon",
+ "expression": "relic",
+ "silhouette": "relic-blade",
+ "soul": "The soul of someone who decides. They would rather cut the knot than pick at it, and they live with where the cut fell.",
+ "spark": "The mote has a bright edge and a dull one. It turns the bright one toward whatever startles you.",
+ "nature": {
+  "range": {
+   "close": 0.9
+  },
+  "fights": {
+   "parries": 0.6
+  },
+  "company": {
+   "alone": 0.4
+  }
+ },
+ "calls": {
+  "seed": {
+   "i-can-hold": 0.8,
+   "stands-between": 0.2,
+   "owes-me": 0.2
+  },
+  "shape": {
+   "anchor": 0.5,
+   "read": 0.4,
+   "cast": 0.3
+  },
+  "blood": {
+   "iron-blood": 0.7,
+   "ironblooded": 0.5,
+   "second-heart": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Edged",
+  "gift": [
+   "short-blade",
+   "edge"
+  ],
+  "text": "It finds the place to cut and does not see why anyone would do anything else."
+ },
+ "newFeatures": [
+  {
+   "id": "notches",
+   "slot": "surface",
+   "label": "a notch for every blow given back"
+  }
+ ],
+ "settled": {
+  "id": "blade-kept-knife",
+  "name": "Kept Knife",
+  "text": "The knife you had before any of this. It has an eye now, and opinions about how you hold it.",
+  "sign": "An ordinary knife with one eye near the hilt. The eye follows hands.",
+  "habit": "It turns its edge away when you reach for it. Only when it is you.",
+  "features": [
+   "short-blade",
+   "watching-eye"
+  ],
+  "silhouette": "relic-knife"
+ },
+ "paths": [
+  {
+   "id": "blade-duelling",
+   "name": "Duelling Blade",
+   "of": "one who needs an equal to find out what they are",
+   "text": "It learned from you that the other blade is a conversation, and that it is rude not to answer.",
+   "sign": "It hangs point-down and perfectly still, and tilts toward anyone armed.",
+   "habit": "It salutes other blades. Kitchen knives included.",
+   "leans": {
+    "range": {
+     "close": 1.0
+    },
+    "fights": {
+     "parries": 0.7
+    }
+   },
+   "features": [
+    "edge"
+   ],
+   "prongs": [
+    {
+     "id": "blade-parrying",
+     "name": "Parrying Blade",
+     "of": "one who listens before answering",
+     "text": "It moves to the guard a little before your wrist does. You have decided to call that practice.",
+     "sign": "A wide guard it has grown like a pair of shoulders.",
+     "habit": "It mirrors your hand when you gesture, and finishes a little before you do.",
+     "leans": {
+      "fights": {
+       "parries": 1.0
+      },
+      "shape": {
+       "read": 0.6
+      }
+     },
+     "features": [
+      "broad-guard"
+     ],
+     "finishes": [
+      {
+       "id": "blade-answer",
+       "name": "The Answer",
+       "of": "one who always has the reply ready",
+       "text": "It is in the way before you move it. You have stopped asking how.",
+       "sign": "A faint pulse along the flat, in time with whoever is facing it.",
+       "habit": "It moves to cover you when anyone in the room raises their voice.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "range": {
+         "close": 0.4
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      },
+      {
+       "id": "blade-reading-edge",
+       "name": "Reading Edge",
+       "of": "one who sees where an argument is weak",
+       "text": "It shows you the opening as a line of light along its flat. It has not been wrong about an opening yet.",
+       "sign": "A line of light that runs up its flat and stops where it is looking.",
+       "habit": "It points, very slightly, at the flaw in things: a cracked cup, a loose stair.",
+       "leans": {
+        "shape": {
+         "read": 1.0
+        },
+        "fights": {
+         "parries": 0.4
+        }
+       },
+       "features": [
+        "sight-glass"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "blade-first-blood",
+     "name": "First-blood Blade",
+     "of": "one who wants it settled on the first exchange",
+     "text": "It likes a fight to be over on the first exchange, and has learned which exchange that is.",
+     "sign": "A narrow point that is always the nearest part of it to anyone.",
+     "habit": "It leans forward out of its hang when a stranger comes in.",
+     "leans": {
+      "range": {
+       "close": 1.0
+      },
+      "orders": {
+       "hunt": 0.6
+      }
+     },
+     "features": [
+      "fangs"
+     ],
+     "finishes": [
+      {
+       "id": "blade-quick-mercy",
+       "name": "Quick Mercy",
+       "of": "one who is particular that nothing suffers",
+       "text": "What you hunt with it does not suffer. It is particular about that, and about nothing else.",
+       "sign": "Clean. Always clean, though you have never seen it wiped.",
+       "habit": "It will not stay in a room where something is being teased.",
+       "leans": {
+        "orders": {
+         "hunt": 1.0
+        },
+        "quests": {
+         "hunt": 0.6
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      },
+      {
+       "id": "blade-lunge",
+       "name": "The Lunge",
+       "of": "one who commits before the doubt arrives",
+       "text": "It goes in while you are still stepping aside. Somehow you arrive together.",
+       "sign": "It hangs at a slant, as if already halfway there.",
+       "habit": "It reaches the door before you do. It is always a little ahead of your decision.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "fights": {
+         "dodges": 0.6
+        }
+       },
+       "features": [
+        "long-legs"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "blade-wooden-sword",
+     "name": "Wooden Sword",
+     "of": "one who would rather make a friend better than beat them",
+     "text": "For the yard it turns itself to oak, and stops a finger short of your classmates every time.",
+     "sign": "Oak, with the grain showing, and a blunt edge it keeps blunt.",
+     "habit": "It taps your classmates on the shoulder, flat, to correct their stance.",
+     "leans": {
+      "bonds": {
+       "classmate": 1.0
+      },
+      "company": {
+       "party": 0.5
+      }
+     },
+     "features": [
+      "grip"
+     ],
+     "silhouette": "relic-woodsword",
+     "finishes": [
+      {
+       "id": "blade-masters-stick",
+       "name": "Master's Stick",
+       "of": "one who has taught everyone they know something",
+       "text": "It has beaten every classmate you have, gently, and each of them is better for it. It stays wood out of preference.",
+       "sign": "Worn pale where a hundred practice blows have landed, with a knot like an old eye.",
+       "habit": "It demonstrates. Slowly, twice, and then it looks at you.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        },
+        "company": {
+         "party": 0.6
+        }
+       },
+       "features": [
+        "old-eyes"
+       ],
+       "silhouette": "relic-woodsword"
+      },
+      {
+       "id": "blade-bare-steel",
+       "name": "Bare Steel",
+       "of": "one for whom practice ended on a particular day",
+       "text": "The day you swore, it put the wood away. It has not been a practice blade since.",
+       "sign": "Bright steel with one strip of oak left along the back, kept.",
+       "habit": "It lies with its edge outward now. It did not use to.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        },
+        "company": {
+         "alone": 0.4
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "blade-cleaver",
+   "name": "Cleaver",
+   "of": "one who would rather end it badly than leave it open",
+   "text": "It learned from you that a guard is time not spent cutting.",
+   "sign": "Heavy toward the point, and it hangs point-down because of it.",
+   "habit": "It cuts things that were going to need cutting anyway: string, bread, the knot you were picking at.",
+   "leans": {
+    "pattern": {
+     "fires": 1.0
+    },
+    "fights": {
+     "hurts": 0.7
+    }
+   },
+   "features": [
+    "maw"
+   ],
+   "prongs": [
+    {
+     "id": "blade-chain-blade",
+     "name": "Chain-blade",
+     "of": "one who saves the weight for the last word",
+     "text": "It counts your Pattern's beats and puts its weight on the last one.",
+     "sign": "Links along its spine that clink once for each beat.",
+     "habit": "It counts under its breath, and sways on the last number.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      },
+      "shape": {
+       "turn": 0.5
+      }
+     },
+     "features": [
+      "chain"
+     ],
+     "finishes": [
+      {
+       "id": "blade-last-beat",
+       "name": "Last Beat",
+       "of": "one who finishes what the others started",
+       "text": "It saves itself for the end of your chain. The end of your chain is where things stop.",
+       "sign": "It goes dull between fights, and bright all at once.",
+       "habit": "It waits until everyone has spoken. Then it moves.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "range": {
+         "close": 0.4
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      },
+      {
+       "id": "blade-tempered-edge",
+       "name": "Tempered Edge",
+       "of": "one whose temper has been made into something useful",
+       "text": "Your element lives in the steel now. It comes out of the scabbard already hot, or already cold.",
+       "sign": "Heat or frost on the steel, never the same from the scabbard twice.",
+       "habit": "It warms your hands in winter and cools the water in summer, and wants no thanks.",
+       "leans": {
+        "shape": {
+         "turn": 1.0
+        },
+        "pattern": {
+         "fires": 0.4
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "blade-notched",
+     "name": "Notched Blade",
+     "of": "one who trusts only what has been through it",
+     "text": "It has been used hard and badly and has come to like it.",
+     "sign": "A ragged edge it will not let anyone dress.",
+     "habit": "It runs its notches along a stone. Not to remove them. To count.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      },
+      "ground": {
+       "wild": 0.5
+      }
+     },
+     "features": [
+      "notches"
+     ],
+     "finishes": [
+      {
+       "id": "blade-old-notch",
+       "name": "Old Notch",
+       "of": "one who keeps every hurt and has paid each one back",
+       "text": "A notch for every blow you took and gave back. It will not let the smith grind them out.",
+       "sign": "More notch than edge now, and each notch is bright.",
+       "habit": "It rests against your worst scar while you sleep.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "pattern": {
+         "fires": 0.3
+        }
+       },
+       "features": [
+        "scorched"
+       ]
+      },
+      {
+       "id": "blade-brush-hook",
+       "name": "Brush-hook",
+       "of": "one who makes a road where there was none",
+       "text": "It has cut more bramble than beast and grown a hooked back for it. The wild opens where it goes.",
+       "sign": "A hooked back, stained green to the hilt.",
+       "habit": "It trims what overhangs a path as you walk it, without breaking stride.",
+       "leans": {
+        "ground": {
+         "wild": 1.0
+        },
+        "quests": {
+         "salvage": 0.5
+        }
+       },
+       "features": [
+        "talons"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "blade-broad-blade",
+     "name": "Broad Blade",
+     "of": "one who ends an argument by not moving",
+     "text": "It has grown a hand's breadth wider and a good deal less clever, and stands where you put it.",
+     "sign": "A hand's breadth wider than a sword should be, and flat as a board.",
+     "habit": "It stands itself in the ground beside you when you stop, upright, like a post.",
+     "leans": {
+      "fights": {
+       "blocks": 1.0
+      },
+      "shape": {
+       "anchor": 0.6
+      }
+     },
+     "features": [
+      "broad-chest"
+     ],
+     "finishes": [
+      {
+       "id": "blade-wall-of-one",
+       "name": "Wall of One",
+       "of": "one who needs nobody's help to stay put",
+       "text": "Planted point-down in front of you it does not fall over and does not let much past.",
+       "sign": "Its point is worn round from being planted.",
+       "habit": "It finds the middle of any room and stands there.",
+       "leans": {
+        "shape": {
+         "anchor": 1.0
+        },
+        "fights": {
+         "blocks": 0.5
+        }
+       },
+       "features": [
+        "wall-plate"
+       ]
+      },
+      {
+       "id": "blade-bar",
+       "name": "The Bar",
+       "of": "one who shuts the door, and that is the end of it",
+       "text": "Held across a doorway, it is the door.",
+       "sign": "It hangs crosswise, never upright.",
+       "habit": "At night it lays itself across the threshold.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "fights": {
+         "blocks": 0.6
+        }
+       },
+       "features": [
+        "door"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "blade-scored",
+   "name": "Scored Blade",
+   "of": "one who keeps score, of debts and of wrongs alike",
+   "text": "It learned from you that nothing is ever quite over, and it keeps the score cut into its own flat.",
+   "sign": "Fine marks cut along the flat in two columns. You know which column is which.",
+   "habit": "It turns to face the door when a certain kind of person comes through it.",
+   "leans": {
+    "bonds": {
+     "named": 1.0
+    },
+    "quests": {
+     "hunt": 0.7
+    }
+   },
+   "features": [
+    "ledger"
+   ],
+   "prongs": [
+    {
+     "id": "blade-pack-cutter",
+     "name": "Pack-cutter",
+     "of": "one who picks out the weak point in a crowd",
+     "text": "It has learned the order to take a pack in: the one that looks away first.",
+     "sign": "A curved belly to the edge, like something made for one job.",
+     "habit": "It watches a flock of anything and picks one. It does not say which.",
+     "leans": {
+      "quests": {
+       "hunt": 1.0
+      },
+      "bonds": {
+       "named": 0.6
+      }
+     },
+     "features": [
+      "fangs"
+     ],
+     "finishes": [
+      {
+       "id": "blade-name-taker",
+       "name": "Name-taker",
+       "of": "one who reads the list aloud",
+       "text": "Each named beast it felled is scratched below the guard. It reads the list aloud to the next, in a voice like a whetstone.",
+       "sign": "The names run from the guard to halfway up the flat, cut small to leave room.",
+       "habit": "On quiet nights it recites. You have learned the list without meaning to.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "quests": {
+         "hunt": 0.5
+        }
+       },
+       "features": [
+        "voice"
+       ]
+      },
+      {
+       "id": "blade-skinning-knife",
+       "name": "Skinning Knife",
+       "of": "one who needs very little, and all of it sharp",
+       "text": "Small again, by choice, and curved. Alone on a long hunt it is the only tool you need.",
+       "sign": "Small again and curved, with the old eye still in it.",
+       "habit": "It sees to its own edge on your boot heel while you walk.",
+       "leans": {
+        "quests": {
+         "hunt": 1.0
+        },
+        "company": {
+         "alone": 0.6
+        }
+       },
+       "features": [
+        "grip"
+       ],
+       "silhouette": "relic-knife"
+      }
+     ]
+    },
+    {
+     "id": "blade-beholden",
+     "name": "Beholden Blade",
+     "of": "one who remembers who stood beside them",
+     "text": "It keeps the other column too. It watches the person beside you, and trusts you to watch yourself.",
+     "sign": "It hangs on the side of whoever walked in with you.",
+     "habit": "It follows your friends to the door and waits until they are out of sight.",
+     "leans": {
+      "quests": {
+       "escort": 1.0
+      },
+      "company": {
+       "party": 0.6
+      }
+     },
+     "features": [
+      "far-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "blade-seconds-sword",
+       "name": "Second's Sword",
+       "of": "one who pays a kindness back with interest",
+       "text": "It guards the back of whoever stands next to you. Your classmates have noticed and stand next to you.",
+       "sign": "A soft light along the back edge, the side that faces friends.",
+       "habit": "It stands behind whichever classmate is being argued with.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "bonds": {
+         "classmate": 0.6
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      },
+      {
+       "id": "blade-road-knife",
+       "name": "Road-knife",
+       "of": "one who sees a charge all the way home",
+       "text": "It rides at your belt with the catch off the whole way out, and has never needed telling when.",
+       "sign": "A plain sheath, worn at the mouth, with the catch always off.",
+       "habit": "It rides at your belt facing backward on the way out, and forward on the way home.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "ground": {
+         "line": 0.5
+        }
+       },
+       "features": [
+        "sheath"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "blade-grave-blade",
+     "name": "Grave-blade",
+     "of": "one who carries the quarrels of the dead",
+     "text": "It is easy in old places and at night, and you have not asked it why.",
+     "sign": "It takes no shine in old places. Elsewhere it is an ordinary grey.",
+     "habit": "It hums, barely, near graves and old doorways. It will not tell you the tune.",
+     "leans": {
+      "bonds": {
+       "shade": 1.0
+      },
+      "ground": {
+       "night": 0.8
+      }
+     },
+     "features": [
+      "dark-eyed"
+     ],
+     "finishes": [
+      {
+       "id": "blade-heirloom",
+       "name": "Heirloom",
+       "of": "one who is somebody's unfinished business",
+       "text": "A shade has held it. It cuts a little the way they did, and you are the better for it.",
+       "sign": "A grip worn to the shape of a hand that is not yours.",
+       "habit": "It shifts in your hand to an older hold when you are not thinking.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        },
+        "ground": {
+         "quiet": 0.3
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      },
+      {
+       "id": "blade-night-edge",
+       "name": "Night-edge",
+       "of": "one who settles accounts after dark",
+       "text": "It takes no light at all. In the ruins after dark the first anyone knows of it is the second thing it does.",
+       "sign": "Edge-on it cannot be seen at all. Flat-on, barely.",
+       "habit": "It leaves its hook at night. It is back by morning, and it is not your business.",
+       "leans": {
+        "ground": {
+         "night": 1.0,
+         "ruin": 0.6
+        }
+       },
+       "features": [
+        "shadow-cloak"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

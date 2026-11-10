@@ -1,0 +1,655 @@
+{
+ "id": "astrolabe",
+ "name": "Astrolabe",
+ "class": "item",
+ "expression": "engine",
+ "silhouette": "engine-astrolabe",
+ "soul": "The soul of someone who has to know where they stand before they take a step, and finds the world less frightening once it is measured.",
+ "spark": "The mote does not drift. It moves in small exact arcs, stops, and moves again, as if taking sights.",
+ "nature": {
+  "shape": {
+   "read": 0.9
+  },
+  "range": {
+   "far": 0.5
+  },
+  "fights": {
+   "parries": 0.5
+  }
+ },
+ "calls": {
+  "seed": {
+   "watches-from-above": 0.6,
+   "never-alive": 0.4,
+   "remembers": 0.2
+  },
+  "shape": {
+   "read": 0.7,
+   "cast": 0.4,
+   "make": 0.3
+  },
+  "blood": {
+   "reads-currents": 0.8,
+   "aerie-born": 0.3,
+   "demigod": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Star-read",
+  "gift": [
+   "far-eyes",
+   "gears"
+  ],
+  "text": "It has already worked out where this is going."
+ },
+ "settled": {
+  "id": "astrolabe-pocket",
+  "name": "Pocket astrolabe",
+  "text": "A brass disc the size of a palm that turns to face things. So far it has measured you, the bowl and the ceiling, and written all three down.",
+  "sign": "A brass disc that turns to face whoever spoke last, a beat late.",
+  "habit": "It measures things: the bowl, your boot, the distance to the door. It keeps the numbers somewhere.",
+  "features": [
+   "dial",
+   "sight-glass"
+  ]
+ },
+ "paths": [
+  {
+   "id": "astrolabe-sighting",
+   "name": "Sighting-glass",
+   "of": "one who would rather be right from far off than brave up close",
+   "text": "It learned from you that knowing where a thing will be is the same as hitting it.",
+   "sign": "One arm ends in a lens, and it holds that arm out toward the furthest thing in view.",
+   "habit": "It picks a point on the horizon and stays fixed on it while you talk.",
+   "leans": {
+    "range": {
+     "far": 1.0
+    },
+    "shape": {
+     "cast": 0.7
+    }
+   },
+   "features": [
+    "far-eyes"
+   ],
+   "prongs": [
+    {
+     "id": "astrolabe-rangefinder",
+     "name": "Rangefinder",
+     "of": "one who cannot bear to guess",
+     "text": "It calls the distance before you ask, and is hurt if you check.",
+     "sign": "A scale along its rim that it runs a pointer down, clicking.",
+     "habit": "It calls distances to things nobody asked about: the gatepost, that crow, the kettle.",
+     "leans": {
+      "quests": {
+       "hunt": 1.0
+      },
+      "range": {
+       "far": 0.8
+      }
+     },
+     "features": [
+      "gears"
+     ],
+     "finishes": [
+      {
+       "id": "astrolabe-dead-reckoner",
+       "name": "Dead Reckoner",
+       "of": "one who works out where a thing must be and goes there to wait",
+       "text": "From one footprint it plots a named beast's whole road, and marks where the road ends.",
+       "sign": "A second, smaller dial that turns backward.",
+       "habit": "It studies footprints, any footprints, and then looks up along the way they went.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "quests": {
+         "hunt": 0.6
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      },
+      {
+       "id": "astrolabe-long-sight",
+       "name": "Long Sight",
+       "of": "one who is content alone with a long view",
+       "text": "Alone on a ridge with it you can see tomorrow's weather and the thing you came for. It prefers the quiet.",
+       "sign": "It has grown thin vanes of brass, and on a ridge it rides the air.",
+       "habit": "It faces the weather that is coming, a full day before it comes.",
+       "leans": {
+        "range": {
+         "far": 1.0
+        },
+        "company": {
+         "alone": 0.6
+        }
+       },
+       "features": [
+        "wings"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "astrolabe-leading-glass",
+     "name": "Leading-glass",
+     "of": "one who aims at where things are going, not where they are",
+     "text": "It shows you the place a moving thing has not reached yet.",
+     "sign": "Its pointer rests a hand's breadth ahead of whatever it is tracking.",
+     "habit": "It watches birds and swings to where each one will be. It is pleased when they arrive.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      },
+      "ground": {
+       "wild": 0.6
+      }
+     },
+     "features": [
+      "ring"
+     ],
+     "finishes": [
+      {
+       "id": "astrolabe-chain-plotter",
+       "name": "Chain-plotter",
+       "of": "one who has the whole plan before the first move",
+       "text": "It draws your Pattern's beats in the air a breath before you need them. You have stopped counting.",
+       "sign": "Faint lines hang in the air round it for a moment after it turns.",
+       "habit": "It draws your Pattern over and over, small, in the dust, and corrects a stroke.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "shape": {
+         "cast": 0.4
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      },
+      {
+       "id": "astrolabe-windage",
+       "name": "Windage",
+       "of": "one who allows for everything",
+       "text": "It reads the wild's own air and lays your shot through it. It mutters the corrections.",
+       "sign": "A small vane on top that never stops moving.",
+       "habit": "It mutters. If you listen, it is corrections: a little left, a little more.",
+       "leans": {
+        "shape": {
+         "cast": 1.0
+        },
+        "ground": {
+         "wild": 0.6
+        }
+       },
+       "features": [
+        "standing-air"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "astrolabe-spotter",
+     "name": "Spotter",
+     "of": "one who sees the whole of it and tells the rest",
+     "text": "It goes up on leaves of brass to look, and comes down with the party's whole fight in its head.",
+     "sign": "Leaves of brass that open like a fan when it wants height.",
+     "habit": "It goes up to look at nothing in particular and comes down knowing where everyone is.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      },
+      "orders": {
+       "free": 0.6
+      }
+     },
+     "features": [
+      "wings"
+     ],
+     "silhouette": "engine-flier",
+     "finishes": [
+      {
+       "id": "astrolabe-partys-eye",
+       "name": "Party's Eye",
+       "of": "one who gives the credit away",
+       "text": "It calls each classmate's target to them by name. They hit more than they used to and credit themselves.",
+       "sign": "It turns to each of your friends in order, the same order every time.",
+       "habit": "It says your classmates' names quietly to itself, like a roll.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "bonds": {
+         "classmate": 0.6
+        }
+       },
+       "features": [
+        "voice"
+       ],
+       "silhouette": "engine-flier"
+      },
+      {
+       "id": "astrolabe-two-posts-on",
+       "name": "Two Posts On",
+       "of": "one who is always looking further down the road than anyone asked",
+       "text": "It hangs above the line at lamp height and knows what is on the rail before the rail does.",
+       "sign": "It hangs at lamp height with a small light of its own, facing down the line.",
+       "habit": "It drifts ahead until your attention, like a tether, pulls it back.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "orders": {
+         "free": 0.6
+        }
+       },
+       "features": [
+        "lantern"
+       ],
+       "silhouette": "engine-flier"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "astrolabe-orrery",
+   "name": "Orrery",
+   "of": "one who believes everything comes round again, and waits for it",
+   "text": "It learned from you that every strike is a body in an orbit, and orbits can be worked out.",
+   "sign": "Rings inside rings, turning at different speeds, never touching.",
+   "habit": "It sets its rings to match whatever is moving in the room and lets them run.",
+   "leans": {
+    "fights": {
+     "parries": 1.0
+    },
+    "pattern": {
+     "fires": 0.7
+    }
+   },
+   "features": [
+    "ring"
+   ],
+   "prongs": [
+    {
+     "id": "astrolabe-tell-reader",
+     "name": "Tell-reader",
+     "of": "one who watches what people do, not what they say",
+     "text": "It watches the foe's weight, not its teeth, and ticks once when the weight shifts.",
+     "sign": "A single needle that points at people's feet.",
+     "habit": "It ticks once when someone in the room is about to stand up.",
+     "leans": {
+      "fights": {
+       "parries": 1.0
+      },
+      "range": {
+       "close": 0.6
+      }
+     },
+     "features": [
+      "watching-eye"
+     ],
+     "finishes": [
+      {
+       "id": "astrolabe-half-beat",
+       "name": "The Half-beat",
+       "of": "one who is early, always, and enjoys it",
+       "text": "It shows you the strike half a beat early. It is smug about this and has earned it.",
+       "sign": "It ticks a half-beat ahead of any clock in the room.",
+       "habit": "It has finished turning before you have finished asking.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "pattern": {
+         "fires": 0.3
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      },
+      {
+       "id": "astrolabe-slow-circle",
+       "name": "The Slow Circle",
+       "of": "one who makes the other person come to them",
+       "text": "At arm's length, alone, it turns round the two of you and the foe is always in the slow part of the circle.",
+       "sign": "It orbits you at arm's length, and slows on the far side.",
+       "habit": "It circles anything left on a table, once, at a walking pace.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "company": {
+         "alone": 0.5
+        }
+       },
+       "features": [
+        "gears"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "astrolabe-guard-dial",
+     "name": "Guard-dial",
+     "of": "one who has divided the day so that nothing is forgotten",
+     "text": "It has divided the space round you into hours and stands in the one the blow will come from.",
+     "sign": "Twelve marks round its rim, and it stands on one of them.",
+     "habit": "It moves one mark round on the hour. You could tell the time by where it stands.",
+     "leans": {
+      "orders": {
+       "guard": 1.0
+      },
+      "fights": {
+       "blocks": 0.6
+      }
+     },
+     "features": [
+      "broad-guard"
+     ],
+     "finishes": [
+      {
+       "id": "astrolabe-armillary",
+       "name": "Armillary",
+       "of": "one who lets nothing in until it has passed three rings",
+       "text": "Rings within rings, turning round you. A blow has to find the gap, and the gap moves.",
+       "sign": "A cage of turning hoops with you, somehow, in the middle.",
+       "habit": "It closes its rings to a ball to sleep and opens them one at a time on waking.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        },
+        "shape": {
+         "anchor": 0.6
+        }
+       },
+       "features": [
+        "shell"
+       ]
+      },
+      {
+       "id": "astrolabe-sentry-sphere",
+       "name": "Sentry-sphere",
+       "of": "one who wakes a minute before they are needed",
+       "text": "It keeps the night watches to the minute and wakes you one minute before you are needed.",
+       "sign": "One dark face on the sphere, and it is always the one turned outward.",
+       "habit": "It chimes the watches very quietly, for itself.",
+       "leans": {
+        "orders": {
+         "guard": 1.0
+        },
+        "ground": {
+         "night": 0.5
+        }
+       },
+       "features": [
+        "dark-eyed"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "astrolabe-tide-table",
+     "name": "Tide-table",
+     "of": "one who knows the right hour and will not go a minute sooner",
+     "text": "It knows when the water will be where, and has started applying the method to everything else.",
+     "sign": "A wavy line engraved round its edge that is never in the same place twice.",
+     "habit": "It watches water come and go, any water, even a basin being emptied.",
+     "leans": {
+      "ground": {
+       "water": 1.0
+      },
+      "fights": {
+       "dodges": 0.6
+      }
+     },
+     "features": [
+      "current"
+     ],
+     "finishes": [
+      {
+       "id": "astrolabe-eclipse",
+       "name": "Eclipse",
+       "of": "one who can stand exactly in the way of being seen",
+       "text": "For the length of one step it stands exactly between you and being seen.",
+       "sign": "Now and then, for a moment, it has no shine at all.",
+       "habit": "It slides between you and whoever is looking at you, and out again.",
+       "leans": {
+        "fights": {
+         "dodges": 1.0
+        },
+        "ground": {
+         "night": 0.4
+        }
+       },
+       "features": [
+        "shadow-cloak"
+       ]
+      },
+      {
+       "id": "astrolabe-tide-clock",
+       "name": "Tide-clock",
+       "of": "one who would sooner wait an hour than arrive a minute after",
+       "text": "It brings passengers over the bad water in the one quarter-hour it can be crossed. It has not been late.",
+       "sign": "One hand that points at high water and one that points at you.",
+       "habit": "It taps when it is time to leave. It starts tapping early.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "ground": {
+         "water": 0.6
+        }
+       },
+       "features": [
+        "fins"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "astrolabe-almanac",
+   "name": "Almanac",
+   "of": "one who writes it down because someone must",
+   "text": "It learned from you that most of the work is knowing what day it is.",
+   "sign": "Thin plates of brass that turn like pages, each one scratched full.",
+   "habit": "At the end of the day it adds a line. You have never seen it miss one.",
+   "leans": {
+    "quests": {
+     "linework": 1.0
+    },
+    "ground": {
+     "line": 0.7
+    }
+   },
+   "features": [
+    "pages"
+   ],
+   "prongs": [
+    {
+     "id": "astrolabe-line-almanac",
+     "name": "Line-almanac",
+     "of": "one who knows a road by heart and still checks it",
+     "text": "It has the whole line by heart: every post, every grade, every lamp that burns short.",
+     "sign": "A long folded strip of plates, with the line's posts marked as notches.",
+     "habit": "It runs a pointer down its notches at each post and stops on the right one.",
+     "leans": {
+      "ground": {
+       "line": 1.0
+      },
+      "quests": {
+       "linework": 0.7
+      }
+     },
+     "features": [
+      "ledger"
+     ],
+     "finishes": [
+      {
+       "id": "astrolabe-timetable",
+       "name": "Timetable",
+       "of": "one whose forecasts people have stopped arguing with",
+       "text": "It knows when each post will fail, to the hour. The Compact has stopped asking how and started asking when.",
+       "sign": "A column of small hands, one for each post, all moving.",
+       "habit": "It looks at lamps the way a doctor looks at a cough.",
+       "leans": {
+        "quests": {
+         "linework": 1.0
+        },
+        "orders": {
+         "hold": 0.4
+        }
+       },
+       "features": [
+        "gears"
+       ]
+      },
+      {
+       "id": "astrolabe-surveyors-disc",
+       "name": "Surveyor's Disc",
+       "of": "one who cannot rest while something is out of true",
+       "text": "It sights a line and what you build along it stands true. It cannot look at a crooked wall.",
+       "sign": "Three flat feet and a bubble of light that finds level.",
+       "habit": "It straightens things: pictures, cutlery, your collar if it can reach.",
+       "leans": {
+        "shape": {
+         "make": 1.0
+        },
+        "ground": {
+         "line": 0.6
+        }
+       },
+       "features": [
+        "set-feet"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "astrolabe-star-ledger",
+     "name": "Star-ledger",
+     "of": "one who puts a date on every promise",
+     "text": "It dates everything. A promise with a date on it is harder to forget.",
+     "sign": "A closed case with a clasp, and a small window showing today.",
+     "habit": "It clicks its date over at midnight and looks to see whether you noticed.",
+     "leans": {
+      "quests": {
+       "writ": 1.0
+      },
+      "pattern": {
+       "sworn": 0.7
+      }
+     },
+     "features": [
+      "ledger-closed"
+     ],
+     "finishes": [
+      {
+       "id": "astrolabe-notarys-sphere",
+       "name": "Notary's Sphere",
+       "of": "one whose witness is taken without question",
+       "text": "It witnesses a writ by turning once. Houses accept the turn; they have seen what it does to forgeries.",
+       "sign": "A band of seals round its middle, pressed in, none of them its own.",
+       "habit": "It turns once, slowly, whenever two people shake hands near it.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        },
+        "shape": {
+         "bind": 0.4
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      },
+      {
+       "id": "astrolabe-fixed-star",
+       "name": "Fixed Star",
+       "of": "one who has a single point they steer by",
+       "text": "It holds one point of the sky still: the one you swore under. You can always find it, which is the idea.",
+       "sign": "One bright point on its dial that does not move when the rest turns.",
+       "habit": "At night it turns until that point is overhead, and then keeps very still.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        },
+        "ground": {
+         "night": 0.4
+        }
+       },
+       "features": [
+        "crown"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "astrolabe-memory-dial",
+     "name": "Memory-dial",
+     "of": "one who looks at a place and sees what it was",
+     "text": "It can be set to a night that is over. Old places look different through it.",
+     "sign": "A dial with no numbers, only worn places where numbers were.",
+     "habit": "It turns itself back a little when you pass somewhere old, and looks.",
+     "leans": {
+      "bonds": {
+       "shade": 1.0
+      },
+      "ground": {
+       "ruin": 0.7
+      }
+     },
+     "features": [
+      "old-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "astrolabe-old-sky",
+       "name": "Old Sky",
+       "of": "one who keeps the dead company without needing to speak",
+       "text": "It shows the heavens as the dead saw them. Shades come and stand under it and say nothing.",
+       "sign": "Stars on its plate in the wrong places. They were right once.",
+       "habit": "It lies face up by the hearth of an evening, showing a sky nobody living has seen.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        },
+        "ground": {
+         "quiet": 0.4
+        }
+       },
+       "features": [
+        "quiet-place"
+       ]
+      },
+      {
+       "id": "astrolabe-deep-chart",
+       "name": "Deep Chart",
+       "of": "one who marks honestly the place where they turned back",
+       "text": "It has mapped the heart of every zone you came back from. The blank parts are where you turned round.",
+       "sign": "A plate crowded with fine lines, and here and there a deliberate blank.",
+       "habit": "It goes over its blanks with the pointer, not touching, like a tongue at a missing tooth.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        },
+        "ground": {
+         "ruin": 0.6
+        }
+       },
+       "features": [
+        "tunnel-ear"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

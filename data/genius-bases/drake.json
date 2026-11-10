@@ -1,0 +1,650 @@
+{
+ "id": "drake",
+ "name": "Drake",
+ "class": "monster",
+ "expression": "beast",
+ "silhouette": "beast-drake",
+ "soul": "The soul of someone who keeps: things, grudges, promises, people. Nothing ever given to them has been thrown away.",
+ "spark": "The mote is warm in the hand, and it will not be parted from the first thing you ever gave it.",
+ "nature": {
+  "orders": {
+   "hold": 0.8
+  },
+  "ground": {
+   "wild": 0.7
+  },
+  "shape": {
+   "turn": 0.6
+  }
+ },
+ "calls": {
+  "seed": {
+   "that-burns": 0.6,
+   "owes-me": 0.3,
+   "stands-between": 0.3
+  },
+  "shape": {
+   "turn": 0.6,
+   "anchor": 0.4,
+   "bind": 0.2
+  },
+  "blood": {
+   "dragon-blooded": 0.9,
+   "forgeborn": 0.4,
+   "never-cold": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Scaled",
+  "gift": [
+   "horns",
+   "tail"
+  ],
+  "text": "It keeps what it has, and it counts you among what it has."
+ },
+ "settled": {
+  "id": "drake-hatchling",
+  "name": "Drake hatchling",
+  "text": "Still damp from a shell nobody found. It sleeps on your pack, because your pack is the most valuable thing it has ever seen.",
+  "sign": "A ridge it has not grown into yet, and one eye always on your pack.",
+  "habit": "It lays small things in a row by your bedroll: a button, a bolt, a tooth. It knows if one has moved.",
+  "features": [
+   "horns",
+   "tail"
+  ]
+ },
+ "paths": [
+  {
+   "id": "drake-hoard",
+   "name": "Hoard-drake",
+   "of": "one who cannot throw anything away",
+   "text": "It learned from you that a thing is yours once you can lie down on it.",
+   "sign": "Its belly plates are scuffed flat and bright, like the brass of a door everyone touches.",
+   "habit": "It lies on whatever you set down last and pretends to be asleep.",
+   "leans": {
+    "quests": {
+     "salvage": 1.0
+    },
+    "orders": {
+     "hold": 0.7
+    }
+   },
+   "features": [
+    "plated"
+   ],
+   "prongs": [
+    {
+     "id": "drake-post-coiler",
+     "name": "Post-coiler",
+     "of": "one who adopts a place and then cannot leave it be",
+     "text": "It winds itself round a post's foot and will not be moved until the flame takes.",
+     "sign": "It carries its tail in a loop, ready to go round something.",
+     "habit": "It circles a spot three times before settling, and a fourth if anyone is watching.",
+     "leans": {
+      "ground": {
+       "line": 1.0
+      },
+      "quests": {
+       "linework": 0.7
+      }
+     },
+     "features": [
+      "lantern"
+     ],
+     "finishes": [
+      {
+       "id": "drake-lamp-hoarder",
+       "name": "Lamp-hoarder",
+       "of": "one who takes every dark lamp as a personal loss",
+       "text": "It counts the line's lamps as its own. A dark one is a theft, and it takes thefts personally.",
+       "sign": "A dull blue shine under its throat, the colour of a post-flame.",
+       "habit": "It counts lamps under its breath wherever there are lamps, and starts again if interrupted.",
+       "leans": {
+        "quests": {
+         "linework": 1.0
+        },
+        "ground": {
+         "line": 0.6
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      },
+      {
+       "id": "drake-gate-wyrm",
+       "name": "Gate-wyrm",
+       "of": "one who decides who is let in",
+       "text": "It lies across the road with one eye open and decides who passes. Your passengers pass.",
+       "sign": "One eye never fully closes. The lid on that side has gone thick as a shutter.",
+       "habit": "It lies across any doorway you stop in, so that people have to ask.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "bonds": {
+         "classmate": 0.5
+        }
+       },
+       "features": [
+        "broad-chest"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "drake-ruin-sleeper",
+     "name": "Ruin-sleeper",
+     "of": "one who believes old things deserve a keeper",
+     "text": "It goes down into old places with you and has to be argued off whatever it finds there.",
+     "sign": "Dust in the creases of its hide that no washing shifts.",
+     "habit": "It noses under rubble and stays there with its eyes shut, listening to whatever is underneath.",
+     "leans": {
+      "ground": {
+       "ruin": 1.0
+      },
+      "quests": {
+       "salvage": 0.8
+      }
+     },
+     "features": [
+      "dark-eyed"
+     ],
+     "finishes": [
+      {
+       "id": "drake-vault-drake",
+       "name": "Vault-drake",
+       "of": "one who can be trusted with what matters to other people",
+       "text": "What the Archive sends you for is safest under its belly. It gives things back slowly, and only to you.",
+       "sign": "It walks low and wide, like something carrying eggs.",
+       "habit": "It checks what it is guarding with its chin, piece by piece, without looking down.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        },
+        "company": {
+         "alone": 0.5
+        }
+       },
+       "features": [
+        "shell"
+       ]
+      },
+      {
+       "id": "drake-old-coin",
+       "name": "Old Coin",
+       "of": "one who has become what they kept",
+       "text": "It has slept on something so long it has taken its colour. Nobody has asked what, or what became of it.",
+       "sign": "Its scales have gone the green-gold of old brass, and ring faintly when it moves.",
+       "habit": "It sleeps so still that dust settles on it. It does not shake the dust off.",
+       "leans": {
+        "ground": {
+         "ruin": 1.0,
+         "night": 0.5
+        }
+       },
+       "features": [
+        "brass-plate"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "drake-debt-drake",
+     "name": "Debt-drake",
+     "of": "one who remembers exactly what is owed, both ways",
+     "text": "A promise is a thing that can be kept, so it keeps them, in a heap, and knows the count.",
+     "sign": "A row of small nicks down one horn. It adds to them itself.",
+     "habit": "It taps a claw while it thinks, a different count each time. The counts come out right.",
+     "leans": {
+      "pattern": {
+       "sworn": 1.0
+      },
+      "quests": {
+       "writ": 0.7
+      }
+     },
+     "features": [
+      "ledger"
+     ],
+     "finishes": [
+      {
+       "id": "drake-ledger-wyrm",
+       "name": "Ledger-wyrm",
+       "of": "one who cannot let a wrong sum stand",
+       "text": "Every writ you ever carried is under its tongue. The houses' clerks check their sums when it yawns.",
+       "sign": "Its tongue is stained black to the root, like a clerk's finger.",
+       "habit": "It reads over the shoulder of anyone writing figures, and sighs through its nose at errors.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        },
+        "shape": {
+         "bind": 0.4
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      },
+      {
+       "id": "drake-sworn-drake",
+       "name": "Sworn Drake",
+       "of": "one who guards their own word like gold",
+       "text": "It counts your oath among its gold and guards it the same way. It would be worse than you if you broke it.",
+       "sign": "A pale band round the base of one horn, worn like a ring.",
+       "habit": "It curls round nothing you can see and will not be coaxed off it.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        },
+        "orders": {
+         "hold": 0.4
+        }
+       },
+       "features": [
+        "crown"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "drake-fire",
+   "name": "Fire-drake",
+   "of": "a temper kept banked, and let out all at once",
+   "text": "It learned from you to keep the fire in until it is wanted, and then not to stint.",
+   "sign": "A shimmer of heat over its nostrils whenever it is being patient.",
+   "habit": "It swallows its own smoke. You can hear it going down.",
+   "leans": {
+    "shape": {
+     "turn": 1.0
+    },
+    "fights": {
+     "hurts": 0.7
+    }
+   },
+   "features": [
+    "ember"
+   ],
+   "prongs": [
+    {
+     "id": "drake-kiln-throat",
+     "name": "Kiln-throat",
+     "of": "one who gets close enough to be hurt for the sake of being heard",
+     "text": "It breathes from close enough to be bitten for it, and thinks the trade is fair.",
+     "sign": "The scales round its mouth are cracked and glazed like the lip of a kiln.",
+     "habit": "It breathes on stones until they tick, then lies on them.",
+     "leans": {
+      "range": {
+       "close": 1.0
+      },
+      "fights": {
+       "hurts": 0.6
+      }
+     },
+     "features": [
+      "maw"
+     ],
+     "finishes": [
+      {
+       "id": "drake-slag-jaw",
+       "name": "Slag-jaw",
+       "of": "one whose anger grows with every blow taken",
+       "text": "Each blow you take stokes it. By the third it is dripping something that used to be the floor.",
+       "sign": "Something bright drips from the corner of its jaw and hisses where it lands.",
+       "habit": "It grinds its teeth in its sleep. There are scorch marks wherever it has slept.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "range": {
+         "close": 0.5
+        }
+       },
+       "features": [
+        "scorched"
+       ]
+      },
+      {
+       "id": "drake-forge-drake",
+       "name": "Forge-drake",
+       "of": "one who has found a use for their temper",
+       "text": "It breathes on what you build and the thing holds. The smith has asked, twice, to borrow it.",
+       "sign": "Its breath comes out narrow and blue, the way a smith wants it.",
+       "habit": "It warms your tools before you pick them up, handle end toward you.",
+       "leans": {
+        "shape": {
+         "make": 1.0
+        },
+        "orders": {
+         "hold": 0.4
+        }
+       },
+       "features": [
+        "iron-hide"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "drake-far-spitter",
+     "name": "Far-spitter",
+     "of": "one who would rather say it from across the room",
+     "text": "It learned your range and then learned to spit past it.",
+     "sign": "A long throat, held straight, and a way of sighting along it.",
+     "habit": "It spits small sparks at flies. It does not often miss, and sulks when it does.",
+     "leans": {
+      "range": {
+       "far": 1.0
+      },
+      "shape": {
+       "cast": 0.6
+      }
+     },
+     "features": [
+      "far-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "drake-signal-fire",
+       "name": "Signal-fire",
+       "of": "one who wants to be seen from a long way off",
+       "text": "Its flame can be seen from the next post. The line's walkers set their watches by it.",
+       "sign": "A steady flame at the back of its open mouth, visible from the next ridge.",
+       "habit": "At dusk it climbs the highest thing nearby and yawns, lit, at the horizon.",
+       "leans": {
+        "range": {
+         "far": 1.0
+        },
+        "ground": {
+         "line": 0.5
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      },
+      {
+       "id": "drake-cinder-rain",
+       "name": "Cinder-rain",
+       "of": "one whose moods fall on everyone nearby",
+       "text": "It breathes upward and lets the weather do the rest. The party has learned to stand where it stands.",
+       "sign": "Ash in a fine grey collar round its neck.",
+       "habit": "It breathes straight up to watch the sparks come down, and steps aside at the last moment.",
+       "leans": {
+        "shape": {
+         "cast": 1.0
+        },
+        "company": {
+         "party": 0.5
+        }
+       },
+       "features": [
+        "mist"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "drake-smoke-drake",
+     "name": "Smoke-drake",
+     "of": "one who goes quiet when angry, which is worse",
+     "text": "It banks its fire and breathes out the dark. What cannot see you cannot bite you.",
+     "sign": "No flame at all. A thread of dark smoke from each nostril, constant.",
+     "habit": "It fills a room slowly, from the floor up, and watches who notices.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      },
+      "fights": {
+       "dodges": 0.6
+      }
+     },
+     "features": [
+      "smoke"
+     ],
+     "finishes": [
+      {
+       "id": "drake-chimney-wyrm",
+       "name": "Chimney-wyrm",
+       "of": "one who hides the people they love inside their bad temper",
+       "text": "It coils round you both and smokes like a bad flue. You cough, and are not found.",
+       "sign": "Soot-black along the spine, as if it had been up a flue.",
+       "habit": "It coils round your feet and smokes gently. Visitors do not stay long.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "orders": {
+         "guard": 0.5
+        }
+       },
+       "features": [
+        "shadow-cloak"
+       ]
+      },
+      {
+       "id": "drake-ash-walker",
+       "name": "Ash-walker",
+       "of": "one who has burned through anger and come out the far side",
+       "text": "It leaves a drake of ash standing where it was. The ash takes the blow and falls down.",
+       "sign": "Grey all over, and it leaves pale footprints.",
+       "habit": "It sheds a fine ash when it stretches, and looks back at the shape it left.",
+       "leans": {
+        "fights": {
+         "dodges": 1.0
+        },
+        "ground": {
+         "wild": 0.5
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "drake-sky",
+   "name": "Sky-drake",
+   "of": "one who needs to be above it all, and alone there",
+   "text": "It learned from you that most troubles look smaller from higher up, and went to look.",
+   "sign": "Its wings are never quite folded. It stands like something about to leave.",
+   "habit": "It finds the highest place in any room and looks down from it at everyone, you included.",
+   "leans": {
+    "company": {
+     "alone": 1.0
+    },
+    "ground": {
+     "wild": 0.7
+    }
+   },
+   "features": [
+    "wings"
+   ],
+   "prongs": [
+    {
+     "id": "drake-thermal-rider",
+     "name": "Thermal-rider",
+     "of": "one who comes back only when they choose to",
+     "text": "It goes up on the warm air above the wild and comes down only for you.",
+     "sign": "Wind-burn along the leading edge of each wing.",
+     "habit": "It holds its wings open to any warm draught, eyes shut, and loses track of time.",
+     "leans": {
+      "ground": {
+       "wild": 1.0
+      },
+      "company": {
+       "alone": 0.6
+      }
+     },
+     "features": [
+      "long-legs"
+     ],
+     "finishes": [
+      {
+       "id": "drake-ridge-king",
+       "name": "Ridge-king",
+       "of": "one who is easy only on ground they have claimed",
+       "text": "The high ground knows it. Things that den there move out when its shadow has gone over twice.",
+       "sign": "It stands with its chest out and its head higher than yours, whatever the footing.",
+       "habit": "It walks the edge of any high place twice a day. Nobody asked it to.",
+       "leans": {
+        "company": {
+         "alone": 1.0
+        },
+        "ground": {
+         "wild": 0.7
+        }
+       },
+       "features": [
+        "horn-brow"
+       ]
+      },
+      {
+       "id": "drake-weather-drake",
+       "name": "Weather-drake",
+       "of": "one who goes to look at the storm instead of sheltering",
+       "text": "It flies the river fog and comes back wet and certain of where the bad water is.",
+       "sign": "It comes back wet. Its ridge has gone finned and ragged.",
+       "habit": "It faces into the wind with its mouth open, tasting what is coming.",
+       "leans": {
+        "ground": {
+         "water": 1.0
+        },
+        "quests": {
+         "deep-run": 0.6
+        }
+       },
+       "features": [
+        "fins"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "drake-stooping",
+     "name": "Stooping Drake",
+     "of": "one who settles a thing in a single stroke, from above",
+     "text": "It has learned the one long fall onto a thing's back, and how to walk away from it.",
+     "sign": "Talons out of proportion to the rest of it, and kept very clean.",
+     "habit": "It drops small stones from a height onto a chosen mark. It is rarely far off.",
+     "leans": {
+      "quests": {
+       "hunt": 1.0
+      },
+      "bonds": {
+       "named": 0.6
+      }
+     },
+     "features": [
+      "talons"
+     ],
+     "finishes": [
+      {
+       "id": "drake-trophy-drake",
+       "name": "Trophy-drake",
+       "of": "one who keeps proof",
+       "text": "It keeps one tooth of every named beast you felled, and shows them to the next one.",
+       "sign": "A string of teeth, not its own, worn where a collar would be.",
+       "habit": "It lays the teeth out in order of size and puts them back on in order of when.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "quests": {
+         "hunt": 0.5
+        }
+       },
+       "features": [
+        "fangs"
+       ]
+      },
+      {
+       "id": "drake-wing-shadow",
+       "name": "Wing-shadow",
+       "of": "one whose arrival is the whole argument",
+       "text": "What it hunts sees the shadow first. For most things that is the whole of the fight.",
+       "sign": "It flies with the sun behind it, always. You see the shadow before the drake.",
+       "habit": "It glides low over anything that looks too comfortable, once, and does not look back.",
+       "leans": {
+        "orders": {
+         "hunt": 1.0
+        },
+        "quests": {
+         "hunt": 0.6
+        }
+       },
+       "features": [
+        "dark-eyed"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "drake-herald-drake",
+     "name": "Herald-drake",
+     "of": "one who thinks they see further than the rest, and says so",
+     "text": "It flies where the party can see it, and has begun to have views on where the party should go.",
+     "sign": "It carries its head well forward, and has started speaking before it lands.",
+     "habit": "It flies ahead to the next rise and waits there, looking pointedly back.",
+     "leans": {
+      "orders": {
+       "free": 1.0
+      },
+      "bonds": {
+       "classmate": 0.6
+      }
+     },
+     "features": [
+      "voice"
+     ],
+     "finishes": [
+      {
+       "id": "drake-banner-wyrm",
+       "name": "Banner-wyrm",
+       "of": "one whom others look up to, and who has decided to deserve it",
+       "text": "It hangs in the air above your party like a flag. They fight better under it and have stopped pretending otherwise.",
+       "sign": "A crest that lifts and spreads when the party is watching.",
+       "habit": "It hangs in the air above wherever your friends are sitting, like something run up a pole.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "bonds": {
+         "classmate": 0.7
+        }
+       },
+       "features": [
+        "crest"
+       ]
+      },
+      {
+       "id": "drake-grey-counsel",
+       "name": "Grey Counsel",
+       "of": "one who has grown old enough to tell you no",
+       "text": "It is old enough now to disagree with you, and it is right more often than is comfortable.",
+       "sign": "Grey at the muzzle. It looks at you a moment longer than is polite before it obeys.",
+       "habit": "It watches you make a decision and makes a small sound when it is the wrong one.",
+       "leans": {
+        "shape": {
+         "read": 1.0
+        },
+        "orders": {
+         "free": 0.7
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
