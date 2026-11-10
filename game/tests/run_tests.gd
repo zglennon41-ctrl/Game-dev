@@ -66,6 +66,7 @@ func _run() -> void:
 	test_progression()
 	test_ages()
 	test_kind()
+	test_genius_fight()
 	test_blood_marks()
 	test_life_features()
 	test_bots()
@@ -2246,3 +2247,275 @@ func test_kind() -> void:
 		if Vector3(oc.r - worn.r, oc.g - worn.g, oc.b - worn.b).length() + 0.0001 < Vector3(got.r - worn.r, got.g - worn.g, got.b - worn.b).length():
 			nearest = false
 	check(nearest, "in a new body it wears the coat nearest the one it wore")
+
+
+## The genius fights as what it is (docs/genius-combat.md; data/genius.json, fight): its moves
+## from its kind and features, what it can do yet from its age, where it stands from its
+## order, and on Free what it chooses from how its partner fights.
+func _fighting_genius(form_id: String, instar: int, order: String) -> Genius:
+	var f := Genius.form_of(form_id)
+	var g := Genius.new()
+	g.instar = instar
+	g.body = { "form": f["id"], "expression": f["expression"], "silhouette": f["silhouette"], "own": (f["features"] as Array).duplicate(), "heritage": [], "seedMark": "", "grafts": [], "adaptations": [] }
+	g.order = order
+	return g
+
+func _genius_fight(form_id: String, instar: int, order: String, beast := "cut-wolf", extra: Dictionary = {}) -> Fight:
+	var opts := { "hero": Fight.default_hero(), "beast": beast, "seed": 3, "respawn": false, "genius": _fighting_genius(form_id, instar, order) }
+	for k in extra:
+		opts[k] = extra[k]
+	var f := Fight.new(opts)
+	f.w_state = "prowl"
+	f.w_pos = f.p_pos + Vector2(2.0, 0.0)
+	f.p_lock = true
+	return f
+
+func test_genius_fight() -> void:
+	var F: Dictionary = Data.genius()["fight"]
+	var ids := func(ms: Array) -> Array: return ms.map(func(m): return String(m["id"]))
+	# --- moves by kind and feature, never by form
+	check(ids.call(Fight.genius_moves("quadruped", "beast", ["long-legs", "fangs", "ruff"], 2)) == ["hamstring"], "a runner hamstrings")
+	check(ids.call(Fight.genius_moves("flier", "beast", ["wings", "talons", "beak"], 2)) == ["stoop"], "a flier stoops")
+	check(ids.call(Fight.genius_moves("quadruped", "beast", ["shell", "stone-skin"], 2)) == ["hamstring", "brace"], "a shelled beast braces as well")
+	check(ids.call(Fight.genius_moves("object", "relic", ["edge", "sheath"], 2)) == ["with"], "a relic strikes with its partner")
+	check(ids.call(Fight.genius_moves("humanoid", "daemon", ["chain", "horns"], 2)) == ["call", "debt"], "a daemon calls, and marks a debt")
+	check(ids.call(Fight.genius_moves("quadruped", "beast", ["wings", "lantern"], 3)) == ["hamstring", "stoop", "light"], "a body no form has yet (a winged runner with a lantern) has moves by what it is made of")
+	var lay_of := func(feats: Array) -> String: return String(Fight.genius_moves("aspect", "aspect", feats, 1)[0].get("effect", ""))
+	check(lay_of.call(["ember"]) == "burn" and lay_of.call(["shadow-cloak"]) == "dark" and lay_of.call(["rime"]) == "chill" and lay_of.call(["ring"]) == "burn", "an Aspect lays itself down as what it is: an ember burns, a shadow darkens, rime chills")
+	var bare: Array = []
+	var named_by_form: Array = []
+	var form_ids: Array = Data.forms().map(func(f): return f["id"])
+	for f in Data.forms():
+		var kind := String(Data.genius_bodies()["silhouettes"][f["silhouette"]]["kind"])
+		if Fight.genius_moves(kind, String(f["expression"]), f["features"], 2).is_empty():
+			bare.append(f["id"])
+	for table in ["byKind", "byExpression", "byFeature", "moves"]:
+		for k in F[table]:
+			if form_ids.has(k) and not Data.features().map(func(x): return x["id"]).has(k):
+				named_by_form.append(k)
+	check(bare.is_empty(), "every form in the lattice has a move, grown (%s)" % ", ".join(bare))
+	check(named_by_form.is_empty(), "no move is keyed by a form's name (%s)" % ", ".join(named_by_form))
+	var unknown: Array = []
+	for table in ["byKind", "byExpression", "byFeature"]:
+		for k in F[table]:
+			for id in F[table][k]:
+				if not F["moves"].has(id):
+					unknown.append(id)
+	check(unknown.is_empty(), "every move a rule names exists")
+	# --- its age
+	check(Fight.genius_moves("quadruped", "beast", ["long-legs"], int(F["ages"]["young"]["moves"])).is_empty() and F["ages"]["young"].has("nip"), "a young one has no moves yet: it nips")
+	var ages_up := true
+	var last := -1
+	for a in ["young", "half-grown", "grown", "prime", "great", "apex"]:
+		ages_up = ages_up and int(F["ages"][a]["moves"]) >= last
+		last = int(F["ages"][a]["moves"])
+	check(ages_up, "it has more of its moves as it grows")
+	var pup := _genius_fight("field-wolf", 1, "hunt")
+	var flinched := false
+	var pup_dmg := 0.0
+	for i in 600:
+		pup.w_pos = pup.p_pos + Vector2(2.0, 0.0)
+		if pup.w_state not in ["prowl", "flinch"]:
+			pup.w_state = "prowl"
+		pup._update_genius(1.0 / 60.0)
+		pup.now += 1.0 / 60.0
+		for e in pup.drain():
+			if e["type"] == "genius-move" and e["move"] == "nip":
+				flinched = true
+			if e["type"] == "genius-hunt":
+				pup_dmg = maxf(pup_dmg, float(e["damage"]))
+	var grown := _genius_fight("field-wolf", 3, "hunt")
+	var grown_dmg := 0.0
+	var slowed := false
+	var hamstrung := false
+	for i in 600:
+		grown.w_pos = grown.p_pos + Vector2(2.0, 0.0)
+		if grown.w_state != "prowl":
+			grown.w_state = "prowl"
+		grown._update_genius(1.0 / 60.0)
+		slowed = slowed or grown.now < grown.w_slow_until
+		for e in grown.drain():
+			if e["type"] == "genius-hunt" and e["move"] == "strike":
+				grown_dmg = maxf(grown_dmg, float(e["damage"]))
+			if e["type"] == "genius-move" and e["move"] == "hamstring":
+				hamstrung = true
+		grown.now += 1.0 / 60.0
+	check(flinched and pup_dmg > 0.0, "a pup's nips make the foe flinch now and then (%d a nip)" % int(pup_dmg))
+	check(grown_dmg > pup_dmg * 2.0, "a grown wolf's bite does damage (%d to the pup's %d)" % [int(grown_dmg), int(pup_dmg)])
+	check(hamstrung and slowed and grown.g_pos.distance_to(grown.w_pos) < 3.0, "on Hunt the wolf is at the foe, and its hamstring slows it")
+	check(Fight.genius_great("quadruped", "beast").get("effect", "") == "stagger" and _genius_fight("field-wolf", 3, "hunt").g_great.is_empty() and not _genius_fight("field-wolf", 6, "hunt").g_great.is_empty(), "only the great have the great move")
+	# --- the great move changes the fight
+	var apex := _genius_fight("field-wolf", 6, "hunt", "green-warden")
+	apex.g_great_at = 0.0
+	apex._update_genius(0.016)
+	check(apex.w_state == "stagger" and apex.guard_open() and apex.stats["g_great"] == 1, "an Apex wolf pulls the Warden down: its guard is open")
+	var wall := _genius_fight("walking-lantern", 6, "guard")
+	wall.g_great_at = 0.0
+	wall._update_genius(0.016)
+	check(wall.g_ward_blows >= 2, "an Apex lantern raises the wall: the next blows are turned (%d)" % wall.g_ward_blows)
+	var hp0 := wall.p_hp
+	wall._resolve_bite_from(wall.beast["attacks"][0], wall.w_pos, -1)
+	check(is_equal_approx(wall.p_hp, hp0), "and a blow behind the wall does not land")
+	# --- its damage is guarded like any blow out of turn
+	var w1 := _genius_fight("field-wolf", 3, "hunt", "green-warden")
+	var before := w1.w_hp
+	w1._genius_hits(100.0, "strike")
+	var shut := before - w1.w_hp
+	w1.w_state = "recover"
+	before = w1.w_hp
+	w1._genius_hits(100.0, "strike")
+	check(shut < 60.0 and before - w1.w_hp >= 99.0, "an elite's guard holds against its genius too, and its openings are open to it (%d, then %d)" % [int(shut), int(before - w1.w_hp)])
+	# --- stoop: one heavy blow, then it climbs
+	var hawk := _genius_fight("hawk", 3, "hunt")
+	hawk._genius_move(hawk._genius_has("stoop"))
+	var struck: float = hawk.stats["g_damage"]
+	hawk._genius_hunts(hawk._order("hunt")["hunt"], hawk.g_pos)
+	check(struck > 0.0 and hawk.now < hawk.g_climb_until and is_equal_approx(hawk.stats["g_damage"], struck), "a hawk stoops, and cannot strike again until it has climbed")
+	# --- brace
+	var soft := _genius_fight("field-wolf", 3, "guard")
+	var hard := _genius_fight("tortoise", 3, "guard")
+	soft.g_pos = soft.p_pos
+	hard.g_pos = hard.p_pos
+	soft._genius_guards(20.0)
+	hard._genius_guards(20.0)
+	check(hard.g_will_max - hard.g_will < soft.g_will_max - soft.g_will and hard.g_guard_ready_at < soft.g_guard_ready_at, "a shelled one guards for less of its Will, and is ready sooner")
+	hard.g_will = 3.0
+	hard.g_guard_ready_at = 0.0
+	hard._genius_guards(60.0)
+	check(not hard.genius.fallen and hard.g_will >= 1.0, "braced, a blow it guards does not fell it")
+	soft.g_pos = soft.p_pos + Vector2(9.0, 0.0)
+	soft.g_guard_ready_at = 0.0
+	check(not soft._genius_guards(10.0), "it cannot guard a partner it is not beside")
+	# --- call
+	var kith := _genius_fight("lantern-sprite", 3, "guard")
+	kith.g_pos = kith.p_pos
+	kith.w_state = "windup"
+	kith.w_target = -1
+	kith._update_genius(0.016)
+	var kw := kith.g_will
+	var kh := kith.p_hp
+	check(kith.now < kith.g_called_until, "a kith calls the strike wound up at its partner")
+	kith._resolve_bite_from(kith.beast["attacks"][0], kith.w_pos, -1)
+	check(is_equal_approx(kith.p_hp, kh) and kith.g_will < kw and kith.g_called_until < kith.now, "the blow lands on it, out of its Will, and its partner is untouched")
+	# --- with
+	var blade := _genius_fight("living-blade", 3, "guard")
+	var added := 0
+	for i in 6:
+		blade._genius_after_hit(10.0, false)
+	for e in blade.drain():
+		if e["type"] == "genius-hunt" and e["move"] == "with":
+			added += 1
+	check(added == 2, "a relic adds a blow of its own to every third of its partner's (%d in six)" % added)
+	blade._update_genius(0.016)
+	check(blade.g_pos.is_equal_approx(blade.p_pos), "and is never apart from them")
+	# --- debt
+	var imp := _genius_fight("ledger-imp", 3, "hunt")
+	imp._genius_move(imp._genius_has("debt"))
+	check(imp.now < imp.g_debt_until, "a daemon writes the foe a debt")
+	var wh := imp.w_hp
+	imp._resolve_bite_from(imp.beast["attacks"][0], imp.w_pos, -1)
+	check(imp.w_hp < wh and imp.g_debt_until < imp.now, "the foe strikes its partner, and pays")
+	# --- lay
+	var ember := _genius_fight("ember", 3, "hunt")
+	ember._genius_move(ember._genius_has("lay"))
+	var eh := ember.w_hp
+	for i in 90:
+		ember.now += 1.0 / 60.0
+		ember._genius_zone()
+	check(ember.g_zone["effect"] == "burn" and ember.w_hp < eh, "an ember laid on the ground burns what stands there")
+	var dark := _genius_fight("shadow", 3, "hunt")
+	dark._genius_move(dark._genius_has("lay"))
+	var full := float(dark.beast["attacks"][0]["damage"])
+	check(dark._genius_on_struck(full, dark.w_pos, -1) < full and is_equal_approx(dark._genius_on_struck(full, dark.w_pos + Vector2(20, 0), -1), full), "a shadow laid down weakens the blows struck from inside it, and no others")
+	# --- light
+	var lamp := _genius_fight("walking-lantern", 3, "guard")
+	lamp.p_state = "free"
+	lamp.input("block-down")
+	var plain_window := lamp.p_parry_until - lamp.now
+	lamp.input("block-up")
+	lamp._genius_move(lamp._genius_has("light"))
+	lamp.input("block-down")
+	check(lamp.p_parry_until - lamp.now > plain_window * 1.2, "on ground its genius has lit, the moment to parry is longer")
+	# --- orders
+	var g1 := _fighting_genius("field-wolf", 1, "guard")
+	var seen1 := [g1.order]
+	for i in 3:
+		g1.order = g1.next_order()
+		seen1.append(g1.order)
+	var g3 := _fighting_genius("field-wolf", 3, "guard")
+	var seen3 := [g3.order]
+	for i in 4:
+		g3.order = g3.next_order()
+		seen3.append(g3.order)
+	check(seen1 == ["guard", "hunt", "guard", "hunt"] and seen3 == ["guard", "hunt", "hold", "free", "guard"], "a First Form guards and hunts; from the Second it can hold and go free (%s)" % str(seen3))
+	# --- hold
+	var hold := _genius_fight("iron-hound", 3, "hold")
+	hold.g_hold_at = hold.p_pos
+	hold.w_pos = hold.p_pos + Vector2(2.5, 0)
+	var held_hits := 0
+	for i in 400:
+		hold.w_pos = hold.p_pos + Vector2(2.5, 0)
+		hold.w_state = "prowl"
+		hold._update_genius(1.0 / 60.0)
+		hold.now += 1.0 / 60.0
+		for e in hold.drain():
+			if e["type"] == "genius-hold":
+				held_hits += 1
+	check(held_hits >= 2 and hold.g_pos.distance_to(hold.g_hold_at) < 0.2 and hold.w_slow < 1.0, "on Hold it stands on its ground, and what comes onto it is struck and slowed (%d blows)" % held_hits)
+	hold.g_guard_ready_at = 0.0
+	check(hold._genius_guards(10.0), "its partner is guarded while they stand on that ground")
+	hold.p_pos = hold.g_hold_at + Vector2(12.0, 0)
+	hold.g_guard_ready_at = 0.0
+	check(not hold._genius_guards(10.0) and hold.g_pos.distance_to(hold.g_hold_at) < 0.2, "and not when they leave it: it does not follow")
+	var far := _genius_fight("iron-hound", 3, "hold")
+	far.w_pos = far.p_pos + Vector2(11.0, 0)
+	var none := 0
+	for i in 300:
+		far.w_pos = far.p_pos + Vector2(11.0, 0)
+		far.w_state = "prowl"
+		far._update_genius(1.0 / 60.0)
+		far.now += 1.0 / 60.0
+		for e in far.drain():
+			if e["type"] in ["genius-hold", "genius-hunt"]:
+				none += 1
+	check(none == 0, "a foe that keeps off its ground it leaves alone")
+	var posted := _genius_fight("iron-hound", 3, "hold", "cut-wolf", { "post": Vector2(4, -3) })
+	posted._update_genius(0.016)
+	check(posted.g_hold_at.is_equal_approx(Vector2(4, -3)), "where the fight has a post, that is the ground it holds")
+	# --- free: it judges by how its partner fights
+	var parrier := _genius_fight("field-wolf", 3, "free")
+	parrier.genius.lifetime["fights.parries"] = 40.0
+	parrier.genius.lifetime["fights.hurts"] = 4.0
+	parrier._update_genius(0.016)
+	var brawler := _genius_fight("field-wolf", 3, "free")
+	brawler.genius.lifetime["fights.hurts"] = 40.0
+	brawler.genius.lifetime["fights.parries"] = 2.0
+	brawler.g_order = "hunt"
+	brawler._update_genius(0.016)
+	check(parrier.g_order == "hunt" and parrier.g_free_why == String(Data.genius()["orders"][3]["free"]["why"]["parryShare"]), "raised by a partner who parries, on Free it hunts, and says why (%s: %s)" % [parrier.g_order, parrier.g_free_why])
+	check(brawler.g_order == "guard" and brawler.g_free_why == String(Data.genius()["orders"][3]["free"]["why"]["hurtShare"]), "raised by one who takes the blows, it guards (%s: %s)" % [brawler.g_order, brawler.g_free_why])
+	var keeper := _genius_fight("field-wolf", 3, "free", "cut-wolf", { "post": Vector2(1, 1) })
+	keeper._update_genius(0.016)
+	check(keeper.g_order == "hold" and keeper.g_hold_at.is_equal_approx(Vector2(1, 1)), "and where there is a post to keep, it keeps it")
+	var again := _genius_fight("field-wolf", 3, "free")
+	again.genius.lifetime["fights.parries"] = 40.0
+	again.genius.lifetime["fights.hurts"] = 4.0
+	again._update_genius(0.016)
+	check(again.g_order == parrier.g_order and again.g_free_why == parrier.g_free_why, "the same partner, the same judgment: Free is not chance")
+	var said := false
+	for e in parrier.drain():
+		said = said or (e["type"] == "free" and e["order"] == "hunt")
+	check(said, "it says what it chose when it chooses")
+	# --- the Tally learns how its partner meets a blow
+	var learn := _genius_fight("field-wolf", 3, "guard")
+	learn._record([{ "type": "parry" }, { "type": "parry" }, { "type": "hurt" }, { "type": "block" }])
+	check(float(learn.genius.lifetime.get("fights.parries", 0.0)) == 2.0 and float(learn.genius.lifetime.get("fights.hurts", 0.0)) == 1.0 and float(learn.genius.lifetime.get("fights.blocks", 0.0)) == 1.0, "it counts the blows its partner parries, blocks and takes")
+	# --- a fight with a genius is the same fight twice
+	var runs: Array = []
+	for k in 2:
+		var d := _genius_fight("field-wolf", 6, "free", "green-warden")
+		for i in 900:
+			d.update(1.0 / 60.0, Vector2.ZERO)
+			d.drain()
+		runs.append("%.3f %.3f %.3f %s" % [d.w_hp, d.g_will, d.p_hp, str(d.g_pos)])
+	check(runs[0] == runs[1], "seeded, a fight with a genius plays out the same")

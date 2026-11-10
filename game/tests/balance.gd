@@ -14,6 +14,10 @@ func _run() -> void:
 		_elites()
 		get_tree().quit()
 		return
+	if OS.get_cmdline_user_args().has("--genii"):
+		_genii()
+		get_tree().quit()
+		return
 	print("\n== WEAPON TYPES: a skilled bot, 120 s against cut-wolves that return (seed 5) ==")
 	print("%-12s %-14s %6s %7s %7s %7s %6s" % ["type", "weapon", "felled", "dealt", "bitten", "lasted", "shots"])
 	var rows := []
@@ -251,17 +255,87 @@ func _elite_row(label: String, beast_id: String, health: float, hand: String, sh
 		("%.0f s" % wins[wins.size() / 2]) if not wins.is_empty() else "-", ("%.0f" % mean.call(left)) if not wins.is_empty() else "-",
 		("%.0f%%" % mean.call(lost_at)) if not lost_at.is_empty() else "-", "%.1f" % (hurts / float(ELITE_SEEDS))]
 
+## A genius of a given form at a given instar, on a given order, with nothing else to it: for
+## the table below.
+func _genius_of(form_id: String, instar: int, order: String) -> Genius:
+	var f := Genius.form_of(form_id)
+	var g := Genius.new()
+	g.instar = instar
+	g.body = { "form": f["id"], "expression": f["expression"], "silhouette": f["silhouette"], "own": (f["features"] as Array).duplicate(), "heritage": [], "seedMark": "", "grafts": [], "adaptations": [] }
+	g.order = order
+	return g
+
+const GENII := [["field-wolf", "beast, runner"], ["hawk", "beast, flier"], ["tortoise", "beast, shelled"], ["lantern-sprite", "kith"], ["iron-hound", "engine, hound"],
+	["walking-lantern", "engine, lantern"], ["living-blade", "relic"], ["ledger-imp", "daemon"], ["ember", "aspect, flame"], ["shadow", "aspect, shadow"]]
+const GENII_SEEDS := 4
+
+## The genii in a fight (npm run balance:game -- --genii): each kind of genius at three ages on
+## each order, beside the same steady hero, alone, against the Green's Warden. What it has,
+## its share of the damage, the blows it kept off its partner, the Will it spent, its falls,
+## how long the fight took and what was left of the hero. The first row is the hero alone.
+func _genii() -> void:
+	print("\n== GENII: what each kind has, by age (its moves; * the move only the great have) ==")
+	for gk in GENII:
+		var f := Genius.form_of(String(gk[0]))
+		var kind := String(Data.genius_bodies()["silhouettes"][f["silhouette"]]["kind"])
+		var line := "%-18s" % String(gk[1])
+		for n in [1, 3, 6]:
+			var age: Dictionary = Data.genius()["fight"]["ages"][String(Genius.age_at(n)["id"])]
+			var mv: Array = Fight.genius_moves(kind, String(f["expression"]), f["features"], int(age.get("moves", 2))).map(func(m): return String(m["id"]) + (":" + String(m["effect"]) if m.has("effect") else ""))
+			var gr := Fight.genius_great(kind, String(f["expression"])) if float(age.get("great", 0.0)) > 0.0 else {}
+			line += "  %d: %s%s" % [n, ", ".join(mv) if not mv.is_empty() else "a nip" if n == 1 else "-", ("  *" + String(gr.get("name", ""))) if not gr.is_empty() else ""]
+		print(line)
+	print("\n== GENII IN A FIGHT: a steady hero alone with one genius against the Warden of the Cutting, %d fights of up to 240 s each ==" % GENII_SEEDS)
+	print("%-18s %-6s %-6s %7s %6s %7s %7s %6s %6s %6s %7s" % ["genius", "instar", "order", "felled", "in", "share", "kept off", "Will", "moves", "falls", "hero"])
+	var none := _genius_row("(no genius)", { "none": true })
+	print("%-18s %-6s %-6s %7s %6s %7s %7s %6s %6s %6s %7s" % none)
+	for gk in GENII:
+		for n in [1, 3, 6]:
+			for order in ["guard", "hunt", "hold", "free"]:
+				if n < 2 and order in ["hold", "free"]:
+					continue
+				var row := _genius_row(String(gk[1]), { "form": gk[0], "instar": n, "order": order })
+				print("%-18s %-6s %-6s %7s %6s %7s %7s %6s %6s %6s %7s" % row)
+
+func _genius_row(label: String, gspec: Dictionary) -> Array:
+	var wins: Array = []
+	var share := 0.0
+	var kept := 0.0
+	var will := 0.0
+	var moves := 0.0
+	var falls := 0.0
+	var hero := 0.0
+	for sd in GENII_SEEDS:
+		var r := _elite_run("green-warden", 1.0, "steady", "anchor", false, 11 + sd * 17, 240.0, gspec)
+		if r["felled"] >= 0.0:
+			wins.append(r["felled"])
+		share += float(r["g_damage"]) / maxf(1.0, float(r["dealt"]))
+		kept += float(r["g_guards"])
+		will += float(r["g_will"])
+		moves += float(r["g_moves"])
+		falls += float(r["g_falls"])
+		hero += float(r["hero"])
+	wins.sort()
+	var n := float(GENII_SEEDS)
+	return [label, str(gspec.get("instar", "-")), String(gspec.get("order", "-")), "%d/%d" % [wins.size(), GENII_SEEDS], ("%.0f s" % wins[wins.size() / 2]) if not wins.is_empty() else "-",
+		"%.0f%%" % (100.0 * share / n), "%.1f" % (kept / n), "%.0f" % (will / n), "%.1f" % (moves / n), "%.1f" % (falls / n), "%.0f" % (hero / n)]
+
 ## One beast, alone in its lair, against a hero of a given Shape and hand at Stage 3, with or
 ## without two classmates. Returns the row: when it fell, and how the fight ended.
-func _elite_run(beast_id: String, health: float, hand: String, shape: String, with_party: bool, seed_value := 11, seconds := 240.0) -> Dictionary:
+func _elite_run(beast_id: String, health: float, hand: String, shape: String, with_party: bool, seed_value := 11, seconds := 240.0, gspec: Dictionary = {}) -> Dictionary:
 	var h := Fight.default_hero()
 	h["stage"] = 3
 	h["projected"] = true
 	h["shape"] = shape
 	var cohort := Academy.make_cohort(42, h)
 	var opts := { "seed": seed_value, "hero": h, "beast": beast_id, "respawn": false, "arena": Vector2(20, 14), "allies": [cohort[0], cohort[1]] if with_party else [] }
-	var ff := Rite.first_form(h, shape, 11)
-	opts["genius"] = Rite.birth(h, ff["reading"], ff["name"])
+	if gspec.is_empty():
+		var ff := Rite.first_form(h, shape, 11)
+		opts["genius"] = Rite.birth(h, ff["reading"], ff["name"])
+	elif gspec.has("form"):
+		opts["genius"] = _genius_of(String(gspec["form"]), int(gspec["instar"]), String(gspec["order"]))
+		if String(gspec["order"]) == "hold":
+			opts["post"] = Vector2.ZERO   # a post in the middle of the ground, for it to keep
 	if health != 1.0:
 		opts["beast_health"] = roundf(float(Data.beast(beast_id)["health"]) * health)
 	var f := Fight.new(opts)
@@ -318,7 +392,8 @@ func _elite_run(beast_id: String, health: float, hand: String, shape: String, wi
 				felled = f.now
 		if f.p_state == "down" or felled >= 0.0:
 			break
-	return { "t": f.now, "dealt": f.stats["damage_dealt"], "felled": felled, "hero": f.p_hp, "beast": 100.0 * f.w_hp / float(f.beast["health"]), "hurts": f.stats["hurts"], "parries": f.stats["parries"], "blocks": f.stats["blocks"] }
+	return { "g_damage": f.stats["g_damage"], "g_guards": f.stats["g_guards"], "g_will": f.stats["g_will_spent"], "g_falls": f.stats["g_falls"], "g_moves": f.stats["g_moves"], "g_great": f.stats["g_great"],
+		"t": f.now, "dealt": f.stats["damage_dealt"], "felled": felled, "hero": f.p_hp, "beast": 100.0 * f.w_hp / float(f.beast["health"]), "hurts": f.stats["hurts"], "parries": f.stats["parries"], "blocks": f.stats["blocks"] }
 
 func _cohort(temper: String) -> Array:
 	var h := Fight.default_hero()

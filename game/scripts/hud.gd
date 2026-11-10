@@ -566,7 +566,13 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 		_g_label.text = gn.form_name() if gn.name == "" or gn.name == gn.form_name() else "%s  ·  %s" % [gn.name, gn.form_name()]
 		g_bar.max_value = f.g_will_max
 		g_bar.value = f.g_will
-		_g_order.text = "FALLEN" if gn.fallen else "%s   [G]" % gn.order.to_upper()
+		# its order (on Free, what it chose and why), and the move it is making
+		var ord := gn.order.to_upper()
+		if gn.order == "free":
+			ord = "FREE: %s%s" % [f.g_order.to_upper(), ("  (%s)" % f.g_free_why) if f.g_free_why != "" else ""]
+		if f.now < f.g_move_until and f.g_move_now != "":
+			ord += "   ·   %s" % f.g_move_now
+		_g_order.text = "FALLEN" if gn.fallen else "%s   [G]" % ord
 		_g_order.add_theme_color_override("font_color", Style.EMBER if gn.fallen else GOLD)
 	will_text.text = "Will %d" % roundi(f.p_will)
 	var low := f.p_hp <= hp_max * 0.3 and f.p_state != "down"
