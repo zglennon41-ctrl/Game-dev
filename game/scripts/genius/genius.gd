@@ -79,6 +79,32 @@ func _onto_the_tree() -> void:
 	history.append({ "instar": instar, "form": settled["id"], "name": settled["name"], "day": day, "by": "the tree", "settled": true, "resettled": was })
 	pending_reading = {}
 
+## A genius standing at a form of the tree with nothing else to it: no partner, no life. For
+## the tables, the pictures and the tests. at_instar 0: the instar its level is reached at.
+static func at_form(form_id: String, at_instar := 0, mark := "") -> Genius:
+	var g := Genius.new()
+	var f := Data.form(form_id)
+	if f.is_empty():
+		return g
+	g.instar = at_instar if at_instar > 0 else int(f["level"])
+	g.body = { "form": f["id"], "base": f["base"], "expression": f["expression"], "silhouette": f["silhouette"], "coatOf": f["coatOf"],
+		"own": (f["features"] as Array).duplicate(), "heritage": [], "seedMark": mark, "grafts": [], "adaptations": [] }
+	return g
+
+## One road down a base's tree: its settled form, then the first path, prong and finish (or
+## the nth of each: which = [path, prong, finish]).
+static func road_of(base_id: String, which: Array = [0, 0, 0]) -> Array:
+	var b := Data.base(base_id)
+	if b.is_empty():
+		return []
+	var out: Array = [Data.form(String(b["settled"]["id"]))]
+	for k in which:
+		var kids := Data.children_of(String(out.back()["id"]))
+		if kids.is_empty():
+			break
+		out.append(kids[clampi(int(k), 0, kids.size() - 1)])
+	return out
+
 ## The base nearest a body: the one that wears it, or one of its Expression, or the first.
 static func nearest_base(silhouette: String, expression: String) -> Dictionary:
 	var same: Dictionary = {}
@@ -170,6 +196,24 @@ func form() -> Dictionary:
 ## What it is: its base's name, or its hybrid's ("Wolf", "Edged Wolf").
 func kind() -> String:
 	return String(form().get("kind", ""))
+
+## Whose soul it is: what its base says of the one it settles for (a hybrid's is its first
+## base's; docs/genius-tree.md, "The soul outside the body").
+func soul() -> String:
+	return String(Data.base(String(body.get("base", "")).split("+")[0]).get("soul", ""))
+
+## What in its partner the form it is now is the picture of ("" while it is only settled).
+func picture_of() -> String:
+	return String(form().get("of", ""))
+
+## What a stranger would notice about it.
+func sign_now() -> String:
+	return String(form().get("sign", ""))
+
+## What it does when nothing is happening. Nothing in the world acts this out yet: this is
+## the hook for whatever comes to (the body's idle, the hall, the page already says it).
+func habit() -> String:
+	return String(form().get("habit", ""))
 
 ## How far along its tree it is: 1 settled, 2 a path, 3 a prong, 4 a finish.
 func level() -> int:

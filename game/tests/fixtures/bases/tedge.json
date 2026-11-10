@@ -4,6 +4,7 @@
  "class": "weapon",
  "expression": "relic",
  "silhouette": "relic-knife",
+ "soul": "The soul of no one: a test edge, kept for the engine's tests only.",
  "spark": "A test mote, kept for the engine's tests only.",
  "nature": {
   "range": {
@@ -38,7 +39,9 @@
  "settled": {
   "id": "tedge-small",
   "name": "Small test edge",
-  "text": "The small of a test base, kept for the engine's tests only.",
+  "text": "A test settled form of the test edge, kept for the engine's tests only.",
+  "sign": "A stranger would notice the mark of Small test edge on it.",
+  "habit": "When nothing is happening, Small test edge counts to itself.",
   "features": [
    "edge",
    "grip"
@@ -48,13 +51,16 @@
   {
    "id": "tedge-a",
    "name": "Test Edge Path A",
+   "of": "one who is like Test Edge Path A",
    "text": "A test path of the test edge, kept for the engine's tests only.",
+   "sign": "A stranger would notice the mark of Test Edge Path A on it.",
+   "habit": "When nothing is happening, Test Edge Path A counts to itself.",
    "leans": {
-    "shape": {
-     "read": 1.0
+    "range": {
+     "close": 1.0
     },
-    "quests": {
-     "hunt": 0.5
+    "fights": {
+     "parries": 0.6
     }
    },
    "features": [
@@ -64,7 +70,10 @@
     {
      "id": "tedge-a1",
      "name": "Test Edge Prong A1",
+     "of": "one who is like Test Edge Prong A1",
      "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Edge Prong A1 on it.",
+     "habit": "When nothing is happening, Test Edge Prong A1 counts to itself.",
      "leans": {
       "shape": {
        "cast": 1.0
@@ -80,7 +89,10 @@
       {
        "id": "tedge-a1x",
        "name": "Test Edge Finish A1X",
+       "of": "one who is like Test Edge Finish A1X",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish A1X on it.",
+       "habit": "When nothing is happening, Test Edge Finish A1X counts to itself.",
        "leans": {
         "range": {
          "close": 1.0
@@ -96,7 +108,10 @@
       {
        "id": "tedge-a1y",
        "name": "Test Edge Finish A1Y",
+       "of": "one who is like Test Edge Finish A1Y",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish A1Y on it.",
+       "habit": "When nothing is happening, Test Edge Finish A1Y counts to itself.",
        "leans": {
         "fights": {
          "parries": 1.0
@@ -114,7 +129,10 @@
     {
      "id": "tedge-a2",
      "name": "Test Edge Prong A2",
+     "of": "one who is like Test Edge Prong A2",
      "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Edge Prong A2 on it.",
+     "habit": "When nothing is happening, Test Edge Prong A2 counts to itself.",
      "leans": {
       "fights": {
        "dodges": 1.0
@@ -130,7 +148,10 @@
       {
        "id": "tedge-a2x",
        "name": "Test Edge Finish A2X",
+       "of": "one who is like Test Edge Finish A2X",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish A2X on it.",
+       "habit": "When nothing is happening, Test Edge Finish A2X counts to itself.",
        "leans": {
         "pattern": {
          "fires": 1.0
@@ -146,7 +167,10 @@
       {
        "id": "tedge-a2y",
        "name": "Test Edge Finish A2Y",
+       "of": "one who is like Test Edge Finish A2Y",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish A2Y on it.",
+       "habit": "When nothing is happening, Test Edge Finish A2Y counts to itself.",
        "leans": {
         "orders": {
          "hunt": 1.0
@@ -164,7 +188,10 @@
     {
      "id": "tedge-a3",
      "name": "Test Edge Prong A3",
+     "of": "one who is like Test Edge Prong A3",
      "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Edge Prong A3 on it.",
+     "habit": "When nothing is happening, Test Edge Prong A3 counts to itself.",
      "leans": {
       "bonds": {
        "named": 1.0
@@ -180,7 +207,10 @@
       {
        "id": "tedge-a3x",
        "name": "Test Edge Finish A3X",
+       "of": "one who is like Test Edge Finish A3X",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish A3X on it.",
+       "habit": "When nothing is happening, Test Edge Finish A3X counts to itself.",
        "leans": {
         "quests": {
          "hunt": 1.0
@@ -196,7 +226,10 @@
       {
        "id": "tedge-a3y",
        "name": "Test Edge Finish A3Y",
+       "of": "one who is like Test Edge Finish A3Y",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish A3Y on it.",
+       "habit": "When nothing is happening, Test Edge Finish A3Y counts to itself.",
        "leans": {
         "company": {
          "alone": 1.0
@@ -216,13 +249,16 @@
   {
    "id": "tedge-b",
    "name": "Test Edge Path B",
+   "of": "one who is like Test Edge Path B",
    "text": "A test path of the test edge, kept for the engine's tests only.",
+   "sign": "A stranger would notice the mark of Test Edge Path B on it.",
+   "habit": "When nothing is happening, Test Edge Path B counts to itself.",
    "leans": {
-    "quests": {
-     "hunt": 1.0
+    "shape": {
+     "cast": 1.0
     },
-    "range": {
-     "close": 0.5
+    "pattern": {
+     "fires": 0.6
     }
    },
    "features": [
@@ -232,26 +268,36 @@
     {
      "id": "tedge-b1",
      "name": "Test Edge Prong B1",
+     "of": "one who is like Test Edge Prong B1",
      "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Edge Prong B1 on it.",
+     "habit": "When nothing is happening, Test Edge Prong B1 counts to itself.",
      "leans": {
-      "range": {
-       "mid": 1.0
+      "ground": {
+       "ruin": 1.0
+      },
+      "pattern": {
+       "sworn": 0.5
       }
      },
      "features": [
       "edge"
      ],
+     "silhouette": "relic-blade",
      "finishes": [
       {
        "id": "tedge-b1x",
        "name": "Test Edge Finish B1X",
+       "of": "one who is like Test Edge Finish B1X",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish B1X on it.",
+       "habit": "When nothing is happening, Test Edge Finish B1X counts to itself.",
        "leans": {
-        "pattern": {
-         "sworn": 1.0
+        "shape": {
+         "read": 1.0
         },
-        "bonds": {
-         "named": 0.5
+        "quests": {
+         "hunt": 0.5
         }
        },
        "features": [
@@ -261,13 +307,16 @@
       {
        "id": "tedge-b1y",
        "name": "Test Edge Finish B1Y",
+       "of": "one who is like Test Edge Finish B1Y",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish B1Y on it.",
+       "habit": "When nothing is happening, Test Edge Finish B1Y counts to itself.",
        "leans": {
-        "ground": {
-         "ruin": 1.0
-        },
         "pattern": {
-         "sworn": 0.5
+         "sworn": 1.0
+        },
+        "bonds": {
+         "named": 0.5
         }
        },
        "features": [
@@ -279,13 +328,16 @@
     {
      "id": "tedge-b2",
      "name": "Test Edge Prong B2",
+     "of": "one who is like Test Edge Prong B2",
      "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Edge Prong B2 on it.",
+     "habit": "When nothing is happening, Test Edge Prong B2 counts to itself.",
      "leans": {
-      "shape": {
-       "cast": 1.0
-      },
       "fights": {
-       "dodges": 0.5
+       "parries": 1.0
+      },
+      "pattern": {
+       "fires": 0.5
       }
      },
      "features": [
@@ -295,13 +347,13 @@
       {
        "id": "tedge-b2x",
        "name": "Test Edge Finish B2X",
+       "of": "one who is like Test Edge Finish B2X",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish B2X on it.",
+       "habit": "When nothing is happening, Test Edge Finish B2X counts to itself.",
        "leans": {
         "range": {
-         "close": 1.0
-        },
-        "fights": {
-         "parries": 0.5
+         "mid": 1.0
         }
        },
        "features": [
@@ -311,13 +363,16 @@
       {
        "id": "tedge-b2y",
        "name": "Test Edge Finish B2Y",
+       "of": "one who is like Test Edge Finish B2Y",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish B2Y on it.",
+       "habit": "When nothing is happening, Test Edge Finish B2Y counts to itself.",
        "leans": {
-        "fights": {
-         "parries": 1.0
+        "range": {
+         "close": 1.0
         },
-        "pattern": {
-         "fires": 0.5
+        "fights": {
+         "parries": 0.5
         }
        },
        "features": [
@@ -329,13 +384,16 @@
     {
      "id": "tedge-b3",
      "name": "Test Edge Prong B3",
+     "of": "one who is like Test Edge Prong B3",
      "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Edge Prong B3 on it.",
+     "habit": "When nothing is happening, Test Edge Prong B3 counts to itself.",
      "leans": {
-      "fights": {
-       "dodges": 1.0
+      "orders": {
+       "hunt": 1.0
       },
-      "ground": {
-       "ruin": 0.5
+      "shape": {
+       "read": 0.5
       }
      },
      "features": [
@@ -345,13 +403,16 @@
       {
        "id": "tedge-b3x",
        "name": "Test Edge Finish B3X",
+       "of": "one who is like Test Edge Finish B3X",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish B3X on it.",
+       "habit": "When nothing is happening, Test Edge Finish B3X counts to itself.",
        "leans": {
-        "pattern": {
-         "fires": 1.0
+        "shape": {
+         "cast": 1.0
         },
-        "company": {
-         "alone": 0.5
+        "fights": {
+         "dodges": 0.5
         }
        },
        "features": [
@@ -361,13 +422,16 @@
       {
        "id": "tedge-b3y",
        "name": "Test Edge Finish B3Y",
+       "of": "one who is like Test Edge Finish B3Y",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish B3Y on it.",
+       "habit": "When nothing is happening, Test Edge Finish B3Y counts to itself.",
        "leans": {
-        "orders": {
-         "hunt": 1.0
+        "pattern": {
+         "fires": 1.0
         },
-        "shape": {
-         "read": 0.5
+        "company": {
+         "alone": 0.5
         }
        },
        "features": [
@@ -381,13 +445,16 @@
   {
    "id": "tedge-c",
    "name": "Test Edge Path C",
+   "of": "one who is like Test Edge Path C",
    "text": "A test path of the test edge, kept for the engine's tests only.",
+   "sign": "A stranger would notice the mark of Test Edge Path C on it.",
+   "habit": "When nothing is happening, Test Edge Path C counts to itself.",
    "leans": {
-    "pattern": {
-     "fires": 1.0
-    },
     "company": {
-     "alone": 0.5
+     "alone": 1.0
+    },
+    "quests": {
+     "hunt": 0.6
     }
    },
    "features": [
@@ -397,13 +464,16 @@
     {
      "id": "tedge-c1",
      "name": "Test Edge Prong C1",
+     "of": "one who is like Test Edge Prong C1",
      "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Edge Prong C1 on it.",
+     "habit": "When nothing is happening, Test Edge Prong C1 counts to itself.",
      "leans": {
-      "shape": {
-       "read": 1.0
+      "company": {
+       "alone": 1.0
       },
-      "quests": {
-       "hunt": 0.5
+      "shape": {
+       "cast": 0.5
       }
      },
      "features": [
@@ -413,13 +483,16 @@
       {
        "id": "tedge-c1x",
        "name": "Test Edge Finish C1X",
+       "of": "one who is like Test Edge Finish C1X",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish C1X on it.",
+       "habit": "When nothing is happening, Test Edge Finish C1X counts to itself.",
        "leans": {
-        "company": {
-         "alone": 1.0
+        "fights": {
+         "dodges": 1.0
         },
-        "shape": {
-         "cast": 0.5
+        "ground": {
+         "ruin": 0.5
         }
        },
        "features": [
@@ -429,13 +502,16 @@
       {
        "id": "tedge-c1y",
        "name": "Test Edge Finish C1Y",
+       "of": "one who is like Test Edge Finish C1Y",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish C1Y on it.",
+       "habit": "When nothing is happening, Test Edge Finish C1Y counts to itself.",
        "leans": {
-        "bonds": {
-         "named": 1.0
+        "quests": {
+         "hunt": 1.0
         },
-        "orders": {
-         "hunt": 0.5
+        "range": {
+         "close": 0.5
         }
        },
        "features": [
@@ -447,10 +523,16 @@
     {
      "id": "tedge-c2",
      "name": "Test Edge Prong C2",
+     "of": "one who is like Test Edge Prong C2",
      "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Edge Prong C2 on it.",
+     "habit": "When nothing is happening, Test Edge Prong C2 counts to itself.",
      "leans": {
-      "range": {
-       "mid": 1.0
+      "pattern": {
+       "sworn": 1.0
+      },
+      "bonds": {
+       "named": 0.5
       }
      },
      "features": [
@@ -460,13 +542,16 @@
       {
        "id": "tedge-c2x",
        "name": "Test Edge Finish C2X",
+       "of": "one who is like Test Edge Finish C2X",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish C2X on it.",
+       "habit": "When nothing is happening, Test Edge Finish C2X counts to itself.",
        "leans": {
-        "pattern": {
-         "sworn": 1.0
-        },
         "bonds": {
-         "named": 0.5
+         "named": 1.0
+        },
+        "orders": {
+         "hunt": 0.5
         }
        },
        "features": [
@@ -476,13 +561,16 @@
       {
        "id": "tedge-c2y",
        "name": "Test Edge Finish C2Y",
+       "of": "one who is like Test Edge Finish C2Y",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish C2Y on it.",
+       "habit": "When nothing is happening, Test Edge Finish C2Y counts to itself.",
        "leans": {
-        "ground": {
-         "ruin": 1.0
+        "shape": {
+         "read": 1.0
         },
-        "pattern": {
-         "sworn": 0.5
+        "quests": {
+         "hunt": 0.5
         }
        },
        "features": [
@@ -494,13 +582,16 @@
     {
      "id": "tedge-c3",
      "name": "Test Edge Prong C3",
+     "of": "one who is like Test Edge Prong C3",
      "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Edge Prong C3 on it.",
+     "habit": "When nothing is happening, Test Edge Prong C3 counts to itself.",
      "leans": {
-      "shape": {
-       "cast": 1.0
+      "range": {
+       "close": 1.0
       },
       "fights": {
-       "dodges": 0.5
+       "parries": 0.5
       }
      },
      "features": [
@@ -510,13 +601,16 @@
       {
        "id": "tedge-c3x",
        "name": "Test Edge Finish C3X",
+       "of": "one who is like Test Edge Finish C3X",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish C3X on it.",
+       "habit": "When nothing is happening, Test Edge Finish C3X counts to itself.",
        "leans": {
-        "range": {
-         "close": 1.0
+        "ground": {
+         "ruin": 1.0
         },
-        "fights": {
-         "parries": 0.5
+        "pattern": {
+         "sworn": 0.5
         }
        },
        "features": [
@@ -526,13 +620,13 @@
       {
        "id": "tedge-c3y",
        "name": "Test Edge Finish C3Y",
+       "of": "one who is like Test Edge Finish C3Y",
        "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Edge Finish C3Y on it.",
+       "habit": "When nothing is happening, Test Edge Finish C3Y counts to itself.",
        "leans": {
-        "fights": {
-         "parries": 1.0
-        },
-        "pattern": {
-         "fires": 0.5
+        "range": {
+         "mid": 1.0
         }
        },
        "features": [

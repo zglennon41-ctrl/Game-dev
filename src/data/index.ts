@@ -146,7 +146,7 @@ export function hybridForms(first: string, second: string): Form[] {
   if (!hybridCache.has(key)) {
     const a = baseOf(first);
     const b = baseOf(second);
-    hybridCache.set(key, a && b && a.id !== b.id ? compose(a, b, data.hybrids) : []);
+    hybridCache.set(key, a && b && a.id !== b.id ? compose(a, b, data.hybrids, Object.fromEntries(data.features.map((f) => [f.id, f.label]))) : []);
   }
   return hybridCache.get(key)!;
 }

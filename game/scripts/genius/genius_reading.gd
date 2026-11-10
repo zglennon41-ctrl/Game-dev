@@ -137,7 +137,7 @@ static func _candidate(f: Dictionary, score: float, reasons: Array, mark: String
 	for x in [mark] + f["features"] + heritage + grafts:
 		if x != "" and not feats.has(x):
 			feats.append(x)
-	return { "form": f["id"], "base": f["base"], "kind": f["kind"], "name": f["name"], "text": f["text"], "expression": f["expression"],
+	return { "form": f["id"], "base": f["base"], "kind": f["kind"], "name": f["name"], "text": f["text"], "of": f.get("of", ""), "sign": f.get("sign", ""), "habit": f.get("habit", ""), "expression": f["expression"],
 		"silhouette": f["silhouette"], "coatOf": f["coatOf"], "level": int(f["level"]), "score": _round(score),
 		"own": (f["features"] as Array).duplicate(), "heritage": heritage.duplicate(), "seedMark": mark, "features": feats,
 		"reasons": reasons.map(func(r): return { "line": r["line"], "key": r["key"], "share": _round(r["share"]), "contribution": _round(r["contribution"]) }) }
@@ -189,7 +189,8 @@ static func _offer(forms: Array, lines: Dictionary, cfg: Dictionary, mark: Strin
 	for i in forms.size():
 		var s := fit(forms[i].get("leans", {}), lines, cfg)
 		scored.append({ "f": forms[i], "i": i, "score": s["score"], "reasons": s["reasons"] })
-	scored.sort_custom(func(a, b): return a["score"] > b["score"] or (a["score"] == b["score"] and a["i"] < b["i"]))
+	# of equal fits, the one written first
+	scored.sort_custom(func(a, b): return _round(a["score"]) > _round(b["score"]) or (_round(a["score"]) == _round(b["score"]) and a["i"] < b["i"]))
 	return scored.map(func(x): return _candidate(x["f"], x["score"], x["reasons"], mark, heritage, grafts))
 
 ## Read for instar n. The rite (no genius yet: current is {}) offers three bases. A refinement
@@ -249,12 +250,13 @@ static func take(current: Dictionary, c: Dictionary, accepted_grafts: Array = []
 		"grafts": current.get("grafts", []).duplicate(true) + accepted_grafts, "adaptations": [] }
 
 ## A line and key of the Tally in plain words ("fighting close"; data/reading.json, words).
-static func words(line: String, key: String) -> String:
+## rite: the line is one the first Reading read (the Seed, the blood, the Shape, the home).
+static func words(line: String, key: String, rite := false) -> String:
 	var w: Dictionary = Data.rules_reading().get("words", {})
 	if line == "home":
 		return "%s (%s)" % [String(w.get("rite", {}).get("home", "home")), key.capitalize()]
-	if w.get("rite", {}).has(line):
-		return String(w["rite"][line])
+	if rite or line in ["seed", "blood"]:
+		return String(w.get("rite", {}).get(line, line))
 	return String(w.get(line, {}).get(key, "%s %s" % [line, key]))
 
 ## What play leads to a form, in plain words: its strongest leans first.
@@ -267,8 +269,8 @@ static func lean_words(leans: Dictionary, most := 3) -> String:
 	return ", ".join(all.slice(0, most).map(func(x): return words(x["line"], x["key"])))
 
 ## The lines that spoke for a candidate, in plain words.
-static func reason_words(reasons: Array) -> String:
-	return ", ".join(reasons.map(func(r): return words(String(r["line"]), String(r["key"]))))
+static func reason_words(reasons: Array, rite := false) -> String:
+	return ", ".join(reasons.map(func(r): return words(String(r["line"]), String(r["key"]), rite)))
 
 static func _round(x: float) -> float:
 	return roundf(x * 1000.0) / 1000.0

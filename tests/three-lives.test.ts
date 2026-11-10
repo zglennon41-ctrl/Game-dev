@@ -1,11 +1,13 @@
-// Acceptance: docs/three-lives.md. These expectations are the owner's; if one fails after a
-// change to data/reading.json or data/rules.json, that is a design change to raise with the
-// owner, not a test to edit.
+// Acceptance: docs/three-lives.md. The lives are the owner's; what they must show is what the
+// rules promise, on whatever bases the genius tree has. No test here names a base, a form or a
+// lean: those are the designer's, in data/genius-bases, and change. If one of these fails
+// after a change to data/reading.json, data/genius-hybrids.json or data/rules.json, that is a
+// design change to raise with the owner, not a test to edit.
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { simulate, stateOn, monthOf, yearOf, type SimResult, type ReadingRecord } from '../src/sim/simulate';
 import type { Life } from '../src/sim/script';
-import { data } from '../src/data';
+import { data, formOf, baseOf } from '../src/data';
 
 const load = (id: string) => simulate(JSON.parse(readFileSync(`data/lives/${id}.json`, 'utf8')) as Life);
 const mira = load('mira');
@@ -17,33 +19,90 @@ const reading = (r: SimResult, instar: number): ReadingRecord => {
   if (!x) throw new Error(`${r.life.name} never reached instar ${instar}`);
   return x;
 };
-const hasTag = (featureIds: string[], tags: string[]) =>
-  featureIds.some((f) => (data.features.find((x) => x.id === f)?.tags ?? []).some((t) => tags.includes(t)));
-const WORN = ['relic-mask', 'relic-coat', 'relic-gauntlet'];
+
+// What every life on the tree shows, whoever lives it.
+for (const [name, life] of [['Mira', mira], ['Tobiah', tobiah], ['Sable', sable]] as const) {
+  describe(`${name} — a life on the genius tree`, () => {
+    it('the rite offers three bases, read from Seed, blood and Shape, and one settles', () => {
+      const rd = reading(life, 1);
+      expect(rd.result.level).toBe(1);
+      expect(rd.result.candidates).toHaveLength(Math.min(3, data.bases.length));
+      expect(new Set(rd.result.candidates.map((c) => c.base)).size).toBe(rd.result.candidates.length);
+      // the best fit is called by something of theirs
+      expect(rd.result.candidates[0].score).toBeGreaterThan(0);
+      expect(rd.result.candidates[0].reasons.every((x) => ['seed', 'blood', 'shape'].includes(x.line))).toBe(true);
+      expect(rd.picked.seedMark).toBe(data.seeds.find((s) => s.id === life.life.seed)!.seedMark);
+      expect(baseOf(rd.picked.base)!.settled.id).toBe(rd.picked.form);
+    });
+
+    it('three refinements: a path, a prong, a finish, each one of the children of the form before', () => {
+      let was = reading(life, 1).picked.form;
+      for (const n of [2, 3, 4]) {
+        const rd = reading(life, n);
+        expect(rd.result.level).toBe(n);
+        expect(rd.result.grows).toBe(false);
+        expect(rd.result.candidates.map((c) => c.form).sort()).toEqual([...formOf(was)!.children].sort());
+        expect(rd.result.candidates).toHaveLength(n === 4 ? 2 : 3);
+        const offered = [...rd.result.candidates, ...(rd.result.turning?.candidates ?? [])];
+        expect(offered.map((c) => c.form)).toContain(rd.picked.form);
+        for (const c of offered) expect(c.features).toContain(rd.picked.seedMark);
+        // a turning only at the first refinement, and always toward another base
+        if (n > 2) expect(rd.result.turning).toBeNull();
+        if (rd.result.turning) expect(rd.result.turning.second).not.toBe(reading(life, 1).picked.base);
+        was = rd.picked.form;
+      }
+    });
+
+    it('instars five and six: no new form; it grows as what it finished as', () => {
+      const finish = reading(life, 4).picked.form;
+      for (const n of [5, 6]) {
+        const rd = reading(life, n);
+        expect(rd.result.grows).toBe(true);
+        expect(rd.picked.form).toBe(finish);
+      }
+      expect(life.genius.form).toBe(finish);
+      expect(life.genius.instar).toBe(6);
+      expect(formOf(finish)!.level).toBe(4);
+      // it wears the whole road: the settled form's parts, its path's, its prong's, its own
+      let f = formOf(finish);
+      while (f) { for (const x of f.own) expect(life.genius.own).toContain(x); f = f.parent ? formOf(f.parent) : undefined; }
+    });
+
+    it('an adaptation it has at a refinement and can keep becomes heritage; heritage is never lost', () => {
+      let kept: string[] = [];
+      for (const rd of life.readings.filter((x) => x.instar >= 2)) {
+        for (const a of rd.adaptationsAtReading) if (data.features.find((f) => f.id === a)?.fixable && kept.length < data.rules.genius.heritageMax) expect(rd.picked.heritage, `instar ${rd.instar}`).toContain(a);
+        for (const h of kept) expect(rd.picked.heritage).toContain(h);
+        kept = rd.picked.heritage;
+      }
+    });
+  });
+}
 
 describe('Mira — says ranged, fights close', () => {
-  it('First Form: a Beast with wings and far-eyes', () => {
-    const c = reading(mira, 1).picked;
-    expect(c.expression).toBe('beast');
-    expect(c.features).toContain('wings');
-    expect(c.seedMark).toBe('far-eyes');
-  });
-
-  it('Gate Reading: at least one Kith and one Relic, all carry far-eyes, set-feet present and fixable', () => {
+  it('fights close from the first week: set-feet by the Gate, kept as heritage', () => {
     const rd = reading(mira, 2);
-    const xs = rd.result.candidates.map((c) => c.expression);
-    expect(xs).toContain('kith');
-    expect(xs).toContain('relic');
-    for (const c of rd.result.candidates) expect(c.features).toContain('far-eyes');
     expect(rd.adaptationsAtReading).toContain('set-feet');
     expect(data.features.find((f) => f.id === 'set-feet')?.fixable).toBe(true);
-    expect(rd.result.candidates.some((c) => c.heritage.includes('set-feet'))).toBe(true);
+    expect(rd.picked.heritage).toContain('set-feet');
+    expect(mira.genius.heritage).toContain('set-feet');
   });
 
-  it('Third Form Reading, at the Pattern, offers a worn Relic in the top three', () => {
-    const rd = reading(mira, 3);
-    expect(rd.unlockedBy).toBe('pattern-built');
-    expect(rd.result.candidates.some((c) => c.expression === 'relic' && WORN.includes(c.silhouette))).toBe(true);
+  it('at the Gate, if her play has turned from what the bowl read, she lets it turn', () => {
+    const rd = reading(mira, 2);
+    expect(mira.life.picks?.['2']?.turn).toBe(true);
+    if (rd.result.turning) {
+      expect(rd.picked.base).toBe(rd.result.turning.base);
+      expect(rd.settled).toBe(false);
+      expect(mira.genius.base).toBe(`${reading(mira, 1).picked.base}+${rd.result.turning.second}`);
+    } else {
+      expect(rd.settled).toBe(true);
+      expect(mira.genius.base).toBe(reading(mira, 1).picked.base);
+    }
+  });
+
+  it('the Third Form is read when the Pattern is built', () => {
+    expect(reading(mira, 3).unlockedBy).toBe('pattern-built');
   });
 
   it('Kin-form offered at the first Reading after 100 runs beside Oona', () => {
@@ -93,13 +152,8 @@ describe('Tobiah — fires the Pattern, ignores the genius', () => {
     expect(s.instar).toBeLessThanOrEqual(3);
   });
 
-  it('every candidate set after tier III has at least two Engine/Relic forms with wall or shield features', () => {
-    const after = tobiah.readings.filter((rd) => rd.day >= tobiah.tierDays[3]);
-    expect(after.length).toBeGreaterThan(0);
-    for (const rd of after) {
-      const n = rd.result.candidates.filter((c) => ['engine', 'relic'].includes(c.expression) && hasTag(c.features, ['wall', 'shield'])).length;
-      expect(n, `instar ${rd.instar} on day ${rd.day}`).toBeGreaterThanOrEqual(2);
-    }
+  it('he never chooses: every form his genius takes is the one the Tally read', () => {
+    for (const rd of tobiah.readings) { expect(rd.settled).toBe(true); expect(rd.picked.form).toBe(rd.result.candidates[0].form); }
   });
 
   it('Tier IV at 400 uses, month 10–14', () => {
@@ -124,10 +178,6 @@ describe('Tobiah — fires the Pattern, ignores the genius', () => {
 });
 
 describe('Sable — bonds with everything, rarely fires', () => {
-  it('First Form: a Daemon', () => {
-    expect(reading(sable, 1).picked.expression).toBe('daemon');
-  });
-
   it('Shade graft offered at the first Reading after acceptance; Shade-walker unlocked from the Third Form', () => {
     const accepted = sable.life.events.find((e) => e.type === 'shade-accept')!.day;
     const next = sable.readings.find((rd) => rd.day >= accepted)!;

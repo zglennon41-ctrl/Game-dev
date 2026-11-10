@@ -145,19 +145,23 @@ describe('marks', () => {
 });
 
 describe('reading', () => {
-  it('offers three candidates, every one with the Seed-mark, deterministically', () => {
+  // The Readings on the genius tree have a file of their own (tests/tree.test.ts). Here: what
+  // every Reading has been since the first.
+  it('the rite offers three, every one with the Seed-mark, deterministically', () => {
     const t = emptyTally();
     const r1 = read({ instar: 1, tally: t, origin: { seed: 'watches-from-above', blood: 'long-stride', shape: 'cast' }, current: null });
     const r2 = read({ instar: 1, tally: t, origin: { seed: 'watches-from-above', blood: 'long-stride', shape: 'cast' }, current: null });
-    expect(r1.candidates).toHaveLength(3);
+    expect(r1.candidates).toHaveLength(Math.min(3, data.bases.length));
     expect(r1).toEqual(r2);
     for (const c of r1.candidates) expect(c.features).toContain('far-eyes');
   });
-  it('never offers the current form', () => {
+  it('never offers the form it is: a refinement offers what that form may become', () => {
     const t = emptyTally();
     t.range.close = 50;
-    const current = { form: 'stooping-kith', expression: 'kith' as const, own: ['wing-cloak', 'short-blade', 'beak'], heritage: [], seedMark: 'far-eyes', grafts: [], adaptations: [] };
+    const f = data.forms.find((x) => x.level === 2)!;
+    const current = { form: f.id, base: f.base, expression: f.expression, own: f.features, heritage: [], seedMark: 'far-eyes', grafts: [], adaptations: [] };
     const r = read({ instar: 3, tally: t, origin: { seed: 'watches-from-above', blood: 'long-stride', shape: 'cast' }, current });
-    expect(r.candidates.map((c) => c.form)).not.toContain('stooping-kith');
+    expect(r.candidates.map((c) => c.form)).not.toContain(f.id);
+    expect(r.candidates.map((c) => c.form)).toEqual(expect.arrayContaining(f.children));
   });
 });

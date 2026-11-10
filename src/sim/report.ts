@@ -1,5 +1,5 @@
 // Plain-language report of a simulated life, for the owner.
-import { data, byId, formOf } from '../data';
+import { data, byId, formOf, baseOf } from '../data';
 import { dateLabel, roman, stateOn, type SimResult } from './simulate';
 
 const label = (id: string) => data.features.find((f) => f.id === id)?.label ?? id;
@@ -12,21 +12,39 @@ export function report(r: SimResult, opts: { log?: boolean } = {}): string {
   p(`${byId(data.bloods, L.blood).name} (${byId(data.bloods, L.blood).tier}) · Seed: "${byId(data.seeds, L.seed).text}" · Shape: ${L.shape} · ${L.city} / ${L.discipline}`);
   p();
   p('THE GENIUS, READING BY READING');
+  const LEVELS = ['', 'settles as a base', 'takes a path', 'takes a prong', 'takes its finish'];
   for (const rd of r.readings) {
-    p(`  ${dateLabel(rd.day)} — ${rd.instar === 1 ? 'the rite' : `instar ${rd.instar}, unlocked by ${rd.unlockedBy}`}`);
-    rd.result.candidates.forEach((c, i) => {
-      const mark = c.form === rd.picked.form ? (rd.settled ? '→ settled' : '→ picked ') : '         ';
-      const why = c.reasons.map((x) => `${x.line}:${x.key}`).join(', ');
-      p(`    ${mark} ${i + 1}. ${c.name} [${c.expression}] score ${c.score}`);
-      p(`              carries: ${c.heritage.length ? c.heritage.map(label).join('; ') : '—'}  · seed-mark: ${label(c.seedMark)}`);
-      p(`              read from: ${why}`);
-    });
+    const res = rd.result;
+    if (res.grows) {
+      p(`  ${dateLabel(rd.day)} — instar ${rd.instar}, unlocked by ${rd.unlockedBy}: it grows, the same form an age on (${rd.picked.name})`);
+    } else {
+      p(`  ${dateLabel(rd.day)} — ${rd.instar === 1 ? 'the rite' : `instar ${rd.instar}, unlocked by ${rd.unlockedBy}`}: it ${LEVELS[res.level] ?? 'is read'}`);
+      const line = (c: typeof rd.picked, i: number) => {
+        const mark = c.form === rd.picked.form ? (rd.settled ? '→ settled' : '→ picked ') : '         ';
+        const why = c.reasons.map((x) => `${x.line}:${x.key}${['seed', 'blood', 'shape', 'home', 'pattern', 'bonds'].includes(x.line) ? '' : ` ${Math.round(x.share * 100)}%`}`).join(', ');
+        p(`    ${mark} ${i + 1}. ${c.name} (${formOf(c.form)?.kind ?? c.base}) [${c.expression}] fit ${c.score}`);
+        if (formOf(c.form)?.of) p(`              the picture of: ${formOf(c.form)!.of}`);
+        p(`              read from: ${why || 'nothing in the Tally'}`);
+      };
+      res.candidates.forEach(line);
+      if (res.turning) {
+        p(`    the play has turned toward the ${byId(data.bases, res.turning.second).name} (it fits ${res.turning.other}; its own nature ${res.turning.own}): ${res.turning.name} is offered`);
+        res.turning.candidates.forEach(line);
+      }
+      if (rd.picked.heritage.length) p(`    it keeps: ${rd.picked.heritage.map(label).join('; ')}`);
+    }
     if (rd.graftsOffered.length) p(`    grafts offered: ${rd.graftsOffered.map((g) => `${label(g.feature)} (${g.source})`).join('; ')}${rd.graftsAccepted.length ? ' — accepted' : ' — declined'}`);
     if (rd.adaptationsAtReading.length) p(`    adaptations at the Reading: ${rd.adaptationsAtReading.join(', ')}${rd.fixed.length ? `; fixed as heritage: ${rd.fixed.join(', ')}` : ''}`);
   }
   p();
   const g = r.genius;
   p(`  Now: ${formOf(g.form)?.name ?? g.form} (${formOf(g.form)?.kind ?? g.base}) [${g.expression}], instar ${g.instar}${g.focus ? `, Focus ${g.focus}` : ''}`);
+  const now = formOf(g.form);
+  const whose = baseOf(g.base.split('+')[0])?.soul;
+  if (whose) p(`  Whose soul: ${whose}`);
+  if (now?.of) p(`  The picture of: ${now.of}`);
+  if (now?.sign) p(`  Its sign: ${now.sign}`);
+  if (now?.habit) p(`  Its habit: ${now.habit}`);
   p(`  Wears: ${[g.seedMark, ...g.own, ...g.heritage, ...g.grafts.map((x) => x.feature)].map(label).join('; ')}`);
   p(`  Secondary forms: ${g.secondary.length ? g.secondary.map((s) => `${s.id}${s.vestigial ? ' (vestigial)' : ''} from ${dateLabel(s.day)}`).join('; ') : 'none'}`);
   p(`  Shadows: ${g.shadows.length ? g.shadows.map((s) => `${s.pattern} (${s.uses} witnessed)`).join('; ') : 'none'}`);

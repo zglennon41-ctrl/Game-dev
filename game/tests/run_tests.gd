@@ -16,7 +16,23 @@ func check(cond: bool, what: String) -> void:
 func _ready() -> void:
 	call_deferred("_run")
 
+## The genius tree in the tests (docs/genius-tree.md). The game's bases are the designer's and
+## change; a test must not depend on what they say. So three small bases of the tests' own
+## (written by tools/genius-test-bases.py) stand beside them for the whole run, a test of the
+## rules names only those, and a test of the game's bases holds for whatever is there.
+const TEST_BASES := "res://game/tests/fixtures/bases"
+
+func _all_bases() -> void:
+	Data.use_bases(Data.load_bases() + Data.load_bases(TEST_BASES))
+
+func _only_test_bases() -> void:
+	Data.use_bases(Data.load_bases(TEST_BASES))
+
+func _game_base_ids() -> Array:
+	return Data.load_bases().map(func(b): return String(b["id"]))
+
 func _run() -> void:
+	_all_bases()
 	test_breaks_and_chord()
 	test_combo()
 	test_parry()
@@ -36,7 +52,8 @@ func _run() -> void:
 	test_genius_fights()
 	test_genius_assembly()
 	test_genius_art()
-	test_genius_lattice()
+	test_genius_tree()
+	test_genius_hybrids()
 	test_genius_looks()
 	test_genius_looks_on_the_body()
 	test_sparring()
@@ -65,9 +82,10 @@ func _run() -> void:
 	test_guard()
 	test_progression()
 	test_ages()
-	test_kind()
+	test_refinement_and_turning()
+	test_old_saves()
 	test_homes_hand()
-	test_home_kinds()
+	test_homes_lean()
 	test_genius_fight()
 	test_blood_marks()
 	test_life_features()
@@ -499,16 +517,19 @@ func test_rite() -> void:
 		if Rite.read_shape(h, { "parries": 40 }, 2000 + s)["shape"] == "read": reader += 1
 		if Rite.read_shape(h, {}, 2000 + s)["shape"] == "read": plain += 1
 	check(reader > plain, "parrying through the Academy leans the bowl toward Read (%d against %d)" % [reader, plain])
-	# The First Form is a first-instar form, with the Seed's mark.
+	# What it settles as is the first form of a base, with the Seed's mark, out of three offered.
 	var f := Rite.first_form(h, a["shape"], 7)
-	var form: Dictionary = Data.forms().filter(func(x): return x["id"] == f["form"])[0]
-	check(int(form["instars"]["min"]) == 1, "the First Form is a form a first instar can take (%s)" % f["form"])
-	check(f["features"].size() >= form["features"].size(), "the First Form carries its features")
+	var form := Data.form(String(f["form"]))
+	check(int(form["level"]) == 1 and String(form["parent"]) == "" and String(Data.base(String(form["base"]))["settled"]["id"]) == String(f["form"]), "the rite settles it as a base's first form (%s)" % f["form"])
+	check(f["features"].size() >= form["features"].size() and (f["features"] as Array).has(f["seedMark"]), "what settles carries its own parts and the Seed-mark")
+	var offered: Array = f["reading"]["candidates"].map(func(c): return c["base"])
+	check(offered.size() == 3 and offered[0] != offered[1] and offered[1] != offered[2] and offered[0] != offered[2], "the bowl offers three different bases (%s)" % ", ".join(offered))
+	check(str(Rite.first_form(h, a["shape"], 7)["reading"]) == str(f["reading"]), "the same hero and the same bowl: the same three")
 	var forms := {}
 	for s in 60:
 		var hh := Creation.generate([0, 1, s % 6, s % 4, 1, 2, 0, s % 3, 2, 0], "", s + 1)
 		forms[Rite.first_form(hh, hh["shape"], s)["form"]] = true
-	check(forms.size() >= 4, "different lives take different First Forms (%d kinds)" % forms.size())
+	check(forms.size() >= mini(4, Data.bases().size()), "different lives settle as different bases (%d kinds)" % forms.size())
 	# A surprise Shape keeps a Pattern that works with the new kit.
 	for s in Creation.SHAPES:
 		var hh := h.duplicate(true)
@@ -535,78 +556,165 @@ func test_spark() -> void:
 		names[Creation.name_for("columbia", s + 1)] = true
 	check(names.size() >= 20, "a spark names people many ways (%d names in 40)" % names.size())
 
-## The game's Reading and Resonance give the tools' answers (fixtures written by
-## tools/genius-fixtures.ts from src/rules).
+## The game's tree, hybrids, Readings and Resonance give the tools' answers (fixtures written by
+## tools/genius-fixtures.ts from src/, on the tests' own three bases).
 func test_genius_parity() -> void:
 	var fx: Dictionary = JSON.parse_string(FileAccess.open("res://game/tests/fixtures/readings.json", FileAccess.READ).get_as_text())
+	var homes: Dictionary = Data._homes
+	_only_test_bases()
+	Data._homes = fx["homes"]
+	check(str(Data.bases().map(func(b): return b["id"])) == str(fx["bases"]), "the tests' bases are the ones the tools wrote the answers from")
+	for bid in fx["trees"]:
+		var why := _forms_differ(Data.tree_of(String(bid)), fx["trees"][bid])
+		check(why == "", "the tree of %s is the tools' tree, form for form%s" % [bid, " (%s)" % why if why != "" else ""])
+	for pair in fx["hybrids"]:
+		var ab := String(pair).split("+")
+		var why := _forms_differ(Data.hybrid_forms(ab[0], ab[1]), fx["hybrids"][pair])
+		check(why == "", "the hybrid %s is composed as the tools compose it%s" % [pair, " (%s)" % why if why != "" else ""])
 	for r in fx["readings"]:
 		var cur: Dictionary = r["current"] if r["current"] is Dictionary else {}
-		var got := GeniusReading.read(int(r["instar"]), r["tally"] if r["tally"]["intention"] != null else _no_null(r["tally"]), r["origin"], cur)
-		var want: Array = r["result"]["candidates"]
-		var ok: bool = got["candidates"].size() == want.size() and got["crossingAllowed"] == r["result"]["crossingAllowed"]
-		for i in mini(want.size(), got["candidates"].size()):
-			var a: Dictionary = got["candidates"][i]
-			var b: Dictionary = want[i]
-			ok = ok and a["form"] == b["form"] and absf(float(a["score"]) - float(b["score"])) < 0.002 and str(a["heritage"]) == str(b["heritage"]) and str(a["features"]) == str(b["features"])
-		check(ok, "the Reading matches the tools: %s (%s)" % [r["name"], ", ".join(got["candidates"].map(func(c): return c["form"]))])
+		var got := GeniusReading.read(int(r["instar"]), r["tally"], r["origin"], cur)
+		var want: Dictionary = r["result"]
+		var ok: bool = got["grows"] == want["grows"] and int(got["level"]) == int(want["level"]) and _same_candidates(got["candidates"], want["candidates"])
+		if want["turning"] == null:
+			ok = ok and (got["turning"] as Dictionary).is_empty()
+		else:
+			var gt: Dictionary = got["turning"]
+			var wt: Dictionary = want["turning"]
+			ok = ok and not gt.is_empty() and gt["second"] == wt["second"] and gt["base"] == wt["base"] and gt["name"] == wt["name"] \
+				and absf(float(gt["own"]) - float(wt["own"])) < 0.0011 and absf(float(gt["other"]) - float(wt["other"])) < 0.0011 \
+				and _same_reasons(gt["reasons"], wt["reasons"]) and _same_candidates(gt["candidates"], wt["candidates"])
+		check(ok, "the Reading matches the tools: %s (%s%s)" % [r["name"], ", ".join(got["candidates"].map(func(c): return c["form"])), "; turning toward %s" % got["turning"]["second"] if not (got["turning"] as Dictionary).is_empty() else ""])
+	# a whole life, taking the best fit each time
+	var hunting: Dictionary = {}
+	for r in fx["readings"]:
+		if String(r["name"]).contains("hunted the wild"):
+			hunting = r["tally"]
+	var g: Dictionary = {}
+	var life: Array = []
+	for n in range(1, 7):
+		var rd := GeniusReading.read(n, GeniusReading.empty_tally() if n == 1 else hunting, { "seed": "stands-between", "blood": "ridgefolk", "shape": "anchor" }, g)
+		g = GeniusReading.take(g, rd["candidates"][0])
+		life.append(g["form"])
+	check(str(life) == str(fx["life"]), "a whole life on the tree is the tools' life (%s)" % " > ".join(life))
+	Data._homes = homes
+	_all_bases()
 	for x in fx["resonance"]:
 		var res := GeniusResonance.resonance(int(x["instar"]), int(x["tier"]))
 		check(res == int(x["resonance"]) and GeniusResonance.paying_tier(res, int(x["tier"])) == int(x["paying"]) and GeniusResonance.verses(GeniusResonance.paying_tier(res, int(x["tier"]))) == int(x["verses"]) and GeniusResonance.shadow_cap(res) == int(x["shadowCap"]) and is_equal_approx(GeniusResonance.genius_will(res), float(x["will"])), "Resonance matches the tools at instar %d, tier %d" % [int(x["instar"]), int(x["tier"])])
 	for x in fx["tiers"]:
 		check(GeniusResonance.tier_for({ "uses": x["uses"], "built": true }) == int(x["tier"]), "Intention tier at %d uses" % int(x["uses"]))
 
-func _no_null(t: Dictionary) -> Dictionary:
-	var d := t.duplicate(true)
-	d["intention"] = null
-	return d
+func _same_reasons(a: Array, b: Array) -> bool:
+	if a.size() != b.size():
+		return false
+	for i in a.size():
+		if a[i]["line"] != b[i]["line"] or a[i]["key"] != b[i]["key"] or absf(float(a[i]["share"]) - float(b[i]["share"])) > 0.0011 or absf(float(a[i]["contribution"]) - float(b[i]["contribution"])) > 0.0011:
+			return false
+	return true
 
-## A genius's life, start to finish of what exists: born, learns, adapts, reads, inherits.
+func _same_candidates(a: Array, b: Array) -> bool:
+	if a.size() != b.size():
+		return false
+	for i in a.size():
+		var x: Dictionary = a[i]
+		var y: Dictionary = b[i]
+		if x["form"] != y["form"] or x["base"] != y["base"] or x["name"] != y["name"] or int(x["level"]) != int(y["level"]) or x["silhouette"] != y["silhouette"] or x["seedMark"] != y["seedMark"]:
+			return false
+		if absf(float(x["score"]) - float(y["score"])) > 0.0011 or str(x["own"]) != str(y["own"]) or str(x["heritage"]) != str(y["heritage"]) or str(x["features"]) != str(y["features"]) or not _same_reasons(x["reasons"], y["reasons"]):
+			return false
+	return true
+
+## "" if two lists of forms are the same, form for form; or the first difference.
+func _forms_differ(a: Array, b: Array) -> String:
+	if a.size() != b.size():
+		return "%d forms against %d" % [a.size(), b.size()]
+	for i in a.size():
+		var x: Dictionary = a[i]
+		var y: Dictionary = b[i]
+		for k in ["id", "name", "text", "of", "sign", "habit", "base", "kind", "parent", "expression", "class", "silhouette", "coatOf"]:
+			if String(x[k]) != String(y[k]):
+				return "%s: %s is '%s', the tools say '%s'" % [x["id"], k, x[k], y[k]]
+		if int(x["level"]) != int(y["level"]) or str(x["own"]) != str(y["own"]) or str(x["features"]) != str(y["features"]) or str(x["children"]) != str(y["children"]):
+			return "%s: its level, parts or children" % x["id"]
+		if int(x["instars"]["min"]) != int(y["instars"]["min"]) or int(x["instars"]["max"]) != int(y["instars"]["max"]):
+			return "%s: its instars" % x["id"]
+		var xl: Dictionary = x["leans"]
+		var yl: Dictionary = y["leans"]
+		if str(xl.keys()) != str(yl.keys()):
+			return "%s: the lines it leans on (%s against %s)" % [x["id"], str(xl.keys()), str(yl.keys())]
+		for line in xl:
+			if str(xl[line].keys()) != str(yl[line].keys()):
+				return "%s: what it leans on in %s" % [x["id"], line]
+			for key in xl[line]:
+				if absf(float(xl[line][key]) - float(yl[line][key])) > 0.0000001:
+					return "%s: %s.%s is %s, the tools say %s" % [x["id"], line, key, str(xl[line][key]), str(yl[line][key])]
+	return ""
+
+## A genius's life on its tree, start to finish: it settles, learns, adapts, is refined three
+## times, and grows twice as what it finished as.
 func test_genius_life() -> void:
+	_only_test_bases()
 	var h := Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
-	h["seed"] = "watches-from-above"
-	h["blood"] = "aerie-born"
-	h["shape"] = "cast"
+	h["seed"] = "stands-between"
+	h["blood"] = "ridgefolk"
+	h["shape"] = "anchor"
+	var mark := GeniusReading.seed_mark("stands-between")
 	var g := Genius.for_hero(h)
 	check(not g.is_born(), "a genius before the rite has no body")
-	g.read(1)
+	var r1 := g.read(1)
+	check(r1["candidates"].size() == 3 and int(r1["level"]) == 1, "the bowl offers three bases")
 	var c := g.take()
 	g.milestone("rite")
-	check(g.is_born() and g.instar == 1 and c["form"] == "hawk", "the rite gives a First Form (%s)" % c["form"])
-	check(g.features().has("far-eyes"), "the Seed-mark is on it")
+	check(g.is_born() and g.instar == 1 and c["form"] == "trun-small" and g.body["base"] == "trun" and g.level() == 1 and g.kind() == "Test Runner", "the rite settles it as the base its Seed, blood and Shape call (%s)" % c["form"])
+	check(g.features().has(mark), "the Seed-mark is on it")
+	check(g.soul() != "" and g.sign_now().contains("Small test runner") and g.habit().contains("counts to itself") and g.picture_of() == "", "it says whose soul it is, and has a sign and a habit; a settled form is not yet the picture of anything")
 	check(is_equal_approx(g.will_max(), 40.0) and g.orders_available().size() == 2, "a First Form has 40 Will and two orders")
 	# Saved and loaded, it is the same genius.
 	var g2 := Genius.from_dict(g.to_dict())
 	check(str(g2.to_dict()) == str(g.to_dict()), "a genius survives saving")
-	# Play: close fighting with Guard and Hold.
+	# Play: hunting in the wild with a party, a little guarding, a posting taken.
 	for i in 30: g.hit_at(1.5)
 	for i in 6: g.hit_at(5.0)
-	for i in 14: g.used_family("cast.reach")
-	for i in 6: g.used_family("anchor.wall")
-	for i in 12: g.gave_order("hold")
-	for i in 9: g.gave_order("guard")
-	for i in 6: g.fought_beside("anchor")
-	for i in 4: g.fought_beside("read")
-	for i in 8: g.ran("tunnel")
-	for i in 3: g.ran("ruin")
+	for i in 14: g.used_family("anchor.wall")
+	for i in 22: g.gave_order("hunt")
+	for i in 4: g.gave_order("guard")
+	for i in 9: g.ran("wild", false, 2)
+	for i in 2: g.ran("ruin", true, 0)
+	for i in 6: g.met_blow("blocks")
+	for i in 3: g.met_blow("dodges")
+	g.took_work("hunt")
+	g.fought_beside("read")
 	g.studied("marshal", 10)
+	var cn: Dictionary = g.tally["counters"]
+	check(float(cn.get("runs.party", 0)) == 9.0 and float(cn.get("runs.alone", 0)) == 2.0 and float(cn.get("fights.blocks", 0)) == 6.0 and float(cn.get("fights.dodges", 0)) == 3.0 and float(cn.get("runs.quest.hunt", 0)) == 1.0, "the Tally counts who they went out with, how blows were met and the work taken")
+	check(float(g.tally["ground"].get("night", 0)) == 2.0 and float(g.tally["ground"].get("quiet", 0)) == 1.0, "and a run by night, and a day somewhere quiet")
+	var pl := GeniusReading.play_lines(g.tally)
+	check(is_equal_approx(float(pl["shares"]["orders"]["hunt"]), 22.0 / 26.0) and is_equal_approx(float(pl["shares"]["company"]["party"]), 9.0 / 11.0) and is_equal_approx(float(pl["shares"]["shape"]["anchor"]), 1.0) and is_equal_approx(float(pl["emphasis"]["fights"]), 9.0 / 20.0), "the Tally is read as shares of each line, and a line with little on it counts for less")
 	check(g.reading_due() == 0, "no Second Form before the Gate")
 	g.milestone("gate")
 	check(g.reading_due() == 0, "nor before its seventh day")
 	g.day = 7
-	check(g.reading_due() == 2, "the Gate and a week: the Second Form may be read")
+	check(g.reading_due() == 2, "the Gate and a week: the first refinement may be read")
 	var rd := g.read(2)
-	check(rd["candidates"].size() == 3, "a Reading offers three")
 	var forms: Array = rd["candidates"].map(func(x): return x["form"])
-	check(forms.has("talon-relic") and forms.has("stooping-kith"), "the Guide's hawk that fights close is offered a Talon Relic and a Stooping Kith (%s)" % str(forms))
+	check(forms.size() == 3 and forms[0] == "trun-a" and forms.has("trun-b") and forms.has("trun-c") and int(rd["level"]) == 2, "the first refinement offers the three paths of its own base, the one its partner played first (%s)" % str(forms))
+	check((rd["turning"] as Dictionary).is_empty(), "play that is its own nature does not turn it")
+	check((rd["candidates"][0]["reasons"] as Array).map(func(x): return "%s.%s" % [x["line"], x["key"]]) == ["orders.hunt", "ground.wild"], "and says which lines of the Tally spoke for it")
 	for cand in rd["candidates"]:
-		check(cand["features"].has("far-eyes") and cand["heritage"].size() >= 1, "%s carries the Seed-mark and heritage" % cand["form"])
+		check(cand["features"].has(mark) and cand["of"] != "", "%s carries the Seed-mark and says what it is the picture of" % cand["form"])
 	g.take(1)
-	check(g.instar == 2 and g.history.size() == 2 and float(g.tally["range"].get("close", 0.0)) == 0.0, "taking a form starts a new Tally, and history remembers")
+	check(g.instar == 2 and g.level() == 2 and g.history.size() == 2 and not g.history[-1]["settled"] and float(g.tally["range"].get("close", 0.0)) == 0.0, "taking a path starts a new Tally, and history remembers it was chosen")
+	check(g.road().map(func(f): return f["id"]) == ["trun-small", String(g.body["form"])] and g.picture_of().begins_with("one who is like"), "it knows the road it took, and what it is now the picture of")
 	check(is_equal_approx(g.will_max(), 50.0) and g.orders_available().size() == 4, "a Second Form has 50 Will and four orders")
-	# Adaptations come from play and fade unfed.
+	# Adaptations come from play; kept fed until a Reading they become part of it; unfed they fade.
 	for i in 50: g.hit_at(1.0)
 	var ch := g.update_adaptations()
 	check(ch.size() == 1 and ch[0]["id"] == "set-feet" and g.features().has("set-feet"), "fifty close fights grow set feet")
+	var kept := Genius.from_dict(JSON.parse_string(JSON.stringify(g.to_dict())))
+	kept.read(3)
+	kept.take()
+	check(kept.level() == 3 and (kept.body["heritage"] as Array).has("set-feet") and (kept.body["adaptations"] as Array).is_empty() and kept.features().has("set-feet"), "kept until the next refinement, it becomes part of it")
 	g.day += 100
 	ch = g.update_adaptations()
 	check(ch.size() == 1 and ch[0]["change"] == "faded" and not g.features().has("set-feet"), "unfed for a season, it fades")
@@ -623,27 +731,77 @@ func test_genius_life() -> void:
 	check(g.secondary_ready().is_empty(), "no secondary forms before the Third")
 	g.milestone("pattern-built")
 	g.day = 40
-	check(g.reading_due() == 3, "a built Pattern and thirty days: the Third Form")
-	g.read(3)
+	check(g.reading_due() == 3, "a built Pattern and thirty days: the second refinement")
+	var rd3 := g.read(3)
+	check(rd3["candidates"].size() == 3 and rd3["candidates"].all(func(x): return Data.form(String(x["form"]))["parent"] == g.body["form"]), "the second refinement offers the three prongs of its path")
 	g.take()
-	check(g.features().has("lantern"), "the graft is on the Third Form")
+	check(g.features().has("lantern") and g.level() == 3, "the graft is on the Third Form")
 	for i in 60: g.gave_order("hunt")
 	var ready: Array = g.secondary_ready().map(func(s): return s["id"])
 	check(ready.has("arms") == (g.body["expression"] in ["relic", "engine"]), "Arms needs a Relic or Engine and fifty Hunts (%s, %s)" % [g.body["expression"], str(ready)])
 	var hb := g.features_by_slot()
 	check(hb.size() >= 2, "features sort into slots (%s)" % str(hb.keys()))
+	# The last refinement: two finishes. Then nothing new: it grows.
+	var rd4 := g.read(4)
+	check(rd4["candidates"].size() == 2 and int(rd4["level"]) == 4, "the last refinement offers the two finishes of its prong")
+	g.take()
+	var fin := String(g.body["form"])
+	var fin_name := String(Data.form(fin)["name"])
+	check(g.level() == 4 and g.next_forms().is_empty() and g.road().size() == 4 and g.form_name() == fin_name, "it has finished its tree (%s)" % fin_name)
+	var whole := true
+	for f in g.road():
+		for x in f["own"]:
+			whole = whole and (g.body["own"] as Array).has(x)
+	check(whole, "a finish wears the whole road: what every form on it added")
+	for i in 50: g.hit_at(1.0)
+	g.update_adaptations()
+	var rd5 := g.read(5)
+	check(rd5["grows"] and rd5["candidates"].size() == 1 and rd5["candidates"][0]["form"] == fin, "at the fifth instar nothing new is offered")
+	g.take()
+	check(g.instar == 5 and g.body["form"] == fin and g.history[-1].get("grew", false) and g.form_name() == "Great " + fin_name and (g.body["heritage"] as Array).has("set-feet"), "it grows great as what it is, named for it, and keeps what it kept fed (%s)" % g.form_name())
+	g.read(6)
+	g.take()
+	check(g.instar == 6 and g.body["form"] == fin and g.form_name() == fin_name + " of the Line" and is_equal_approx(g.will_max(), 90.0), "and comes to its apex (%s)" % g.form_name())
 	g.fall(); g.fall(); g.develop_secondary("night"); g.fall()
 	check(g.secondary.is_empty() and g.fallen, "three falls in a season cost the newest secondary form")
+	_all_bases()
 
+## A genius settled as the tests' runner, for whatever needs one.
 func _born_genius() -> Genius:
 	var h := Fight.default_hero()
 	h["seed"] = "stands-between"
 	h["blood"] = "ridgefolk"
 	var g := Genius.for_hero(h)
-	g.read(1)
+	g.pending_reading = { "instar": 1, "level": 1, "candidates": [GeniusReading._candidate(Data.form("trun-small"), 0.0, [], GeniusReading.seed_mark("stands-between"), [], [])], "turning": {}, "grows": false, "unlockedBy": "rite" }
 	g.take()
 	g.milestone("rite")
 	return g
+
+## A genius standing at a form of the tree, with a Seed-mark and an origin.
+func _genius_at(form_id: String, at_instar := 0) -> Genius:
+	var g := Genius.at_form(form_id, at_instar, GeniusReading.seed_mark("stands-between"))
+	g.origin = { "seed": "stands-between", "blood": "ridgefolk", "shape": "anchor", "city": "", "home": "" }
+	g.look = GeniusLook.born(4711)
+	return g
+
+## Count play into a genius's Tally in the proportions of some leans.
+func _play_like(g: Genius, leans: Dictionary, n := 40) -> void:
+	for line in leans:
+		for key in leans[line]:
+			var k := maxi(1, roundi(n * float(leans[line][key])))
+			match String(line):
+				"range": g.count("range", String(key), k)
+				"orders": g.count("orders", String(key), k)
+				"shape": g.count("families", "%s.x" % key, k)
+				"fights": g.counter("fights." + String(key), k)
+				"company": g.counter("runs." + String(key), k)
+				"ground": g.count("ground", String(key), k)
+				"quests": g.counter("runs.quest." + String(key), k)
+				"bonds": g.bonded(String(key))
+				"pattern":
+					if not (g.tally.get("intention") is Dictionary):
+						g.tally["intention"] = { "form": "x.y", "terms": [], "fires": 0, "sworn": false }
+					g.tally["intention"]["fires" if key == "fires" else "sworn"] = 1000 if key == "fires" else true
 
 ## The genius in a fight: Guard, Hunt, falling, getting up, orders, and what it learns.
 func test_genius_fights() -> void:
@@ -699,7 +857,7 @@ func test_genius_fights() -> void:
 	evs = run_for(n, 0.5)
 	check(not types(evs).has("genius-guard") and n.genius == null, "no genius, no guard")
 
-## Every form in the lattice assembles, with a part for every feature it has a socket for.
+## Every form of every tree assembles, with a part for every feature it has a socket for.
 func test_genius_assembly() -> void:
 	var bad: Array = []
 	for f in Data.forms():
@@ -709,14 +867,15 @@ func test_genius_assembly() -> void:
 		if meshes == 0 or b.sockets.is_empty():
 			bad.append(f["id"])
 		b.free()
-	check(bad.is_empty(), "every form in the lattice assembles (%d forms; failed: %s)" % [Data.forms().size(), str(bad)])
+	check(bad.is_empty(), "every form of every tree assembles (%d forms; failed: %s)" % [Data.forms().size(), str(bad)])
 
 ## Art files follow the art bible: named for a silhouette, feature or form; sockets on bodies;
 ## within budget; cards in portrait 3:4.
 func test_genius_art() -> void:
+	# every body the game knows (data/genius-bodies.json), whether a tree wears it yet or not
 	var sils := {}
-	for f in Data.forms():
-		sils[f["silhouette"]] = true
+	for sil in Data.genius_bodies()["silhouettes"]:
+		sils[sil] = true
 	var feats := {}
 	for f in Data.features():
 		feats[f["id"]] = true
@@ -724,6 +883,7 @@ func test_genius_art() -> void:
 	for f in Data.forms():
 		forms[f["id"]] = true
 	var n := 0
+	var named := 0
 	for pair in [["bodies", sils, 8000], ["parts", feats, 1500]]:
 		var dir := "res://game/assets/genius/%s/" % pair[0]
 		for file in DirAccess.get_files_at(dir):
@@ -754,48 +914,227 @@ func test_genius_art() -> void:
 		if not file.ends_with(".png"):
 			continue
 		n += 1
-		check(forms.has(file.get_basename()), "cards/%s is named for a form" % file)
+		# a card is drawn for the form it is named for; those painted for the lattice before the
+		# tree are kept (game/assets is not thrown away) until a form of the tree takes their name
+		named += 1 if forms.has(file.get_basename()) else 0
 		var tex: Texture2D = load("res://game/assets/genius/cards/" + file)
 		check(absf(float(tex.get_width()) / tex.get_height() - 0.75) < 0.01, "cards/%s is a 3:4 portrait" % file)
-	check(n > 0, "there is genius art to check (%d files)" % n)
+	check(n > 0, "there is genius art to check (%d files; %d cards are named for a form of the tree)" % [n, named])
 
-## The lattice the bowl reads from: every Expression has ways in at the rite (the Relic too),
-## and no First Form is out of reach of every Seed, blood and Shape.
-func test_genius_lattice() -> void:
-	var firsts := {}
-	for f in Data.forms():
-		if int(f["instars"]["min"]) == 1:
-			firsts[f["expression"]] = int(firsts.get(f["expression"], 0)) + 1
-	for e in ["beast", "kith", "engine", "relic", "daemon", "aspect"]:
-		check(int(firsts.get(e, 0)) >= 3, "the %s has at least three First Forms (%d)" % [e, int(firsts.get(e, 0))])
-	var seen := {}
+## The tree every genius is on (docs/genius-tree.md), for whatever bases there are: thirty-one
+## forms a base; a form wears its road; every lean is one the Tally answers; the rite offers
+## three bases; a refinement offers the children of the form it is; a finished form grows.
+func test_genius_tree() -> void:
+	var lines := { "range": ["close", "mid", "far"], "orders": GeniusReading.ORDERS, "shape": GeniusReading.SHAPES, "fights": GeniusReading.FIGHTS, "company": ["alone", "party"],
+		"ground": ["line", "wild", "water", "ruin", "night", "quiet"], "pattern": ["fires", "sworn"], "bonds": ["classmate", "shade", "named"], "quests": GeniusReading.QUESTS }
+	check(lines.keys() == GeniusReading.PLAY_LINES, "the Readings read the nine lines of the specification")
+	var ids := {}
+	check(Data.bases().size() >= 3, "there are bases to settle as (%d)" % Data.bases().size())
+	for b in Data.bases():
+		var tree := Data.tree_of(String(b["id"]))
+		var by_level := [0, 0, 0, 0, 0]
+		var ok: bool = tree.size() == 31 and tree[0]["id"] == b["settled"]["id"]
+		var why := ""
+		for f in tree:
+			by_level[int(f["level"])] += 1
+			if ids.has(f["id"]):
+				why = "%s is used twice" % f["id"]
+			ids[f["id"]] = true
+			if Data.form(String(f["id"])) != f or f["base"] != b["id"] or f["kind"] != b["name"]:
+				why = "%s is not asked for by its id" % f["id"]
+			if (f["children"] as Array).size() != [0, 3, 3, 2, 0][int(f["level"])]:
+				why = "%s has %d children" % [f["id"], (f["children"] as Array).size()]
+			var parent := Data.form(String(f["parent"])) if String(f["parent"]) != "" else {}
+			for x in parent.get("features", []) + f["own"]:
+				if not (f["features"] as Array).has(x):
+					why = "%s does not wear %s" % [f["id"], x]
+			for line in f["leans"]:
+				for key in f["leans"][line]:
+					if not (lines.get(line, []) as Array).has(key):
+						why = "%s leans on %s.%s, which the Tally does not count" % [f["id"], line, key]
+			if int(f["level"]) >= 2 and (f["leans"] as Dictionary).is_empty():
+				why = "%s leans on nothing" % f["id"]
+		check(ok and by_level == [0, 1, 3, 9, 18] and why == "", "%s is a tree of thirty-one forms: one settled, three paths, nine prongs, eighteen finishes%s" % [b["name"], " (%s)" % why if why != "" else ""])
+	# The Tally answers every line and key a form may lean on.
+	var full := Genius.new()
+	for line in lines:
+		var ask := {}
+		for key in lines[line]:
+			ask[key] = 1.0
+		_play_like(full, { line: ask }, 5)
+	var pl := GeniusReading.play_lines(full.tally)
+	var deaf: Array = []
+	for line in lines:
+		for key in lines[line]:
+			if float(pl["shares"].get(line, {}).get(key, 0.0)) <= 0.0:
+				deaf.append("%s.%s" % [line, key])
+	check(deaf.is_empty(), "the Tally answers every line and key of the tree (unanswered: %s)" % ", ".join(deaf))
+	# The rite: three bases to everyone, each with the Seed-mark, the same every time.
+	var odd: Array = []
 	var trios := {}
 	for sd in Data.seeds():
 		for sh in Creation.SHAPES:
-			for b in [""] + Data.bloods.map(func(x): return x["id"]):
-				var r := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": sd["id"], "blood": b, "shape": sh }, {})
-				var ids: Array = r["candidates"].map(func(c): return c["form"])
-				trios[",".join(ids)] = true
+			for b in ["", "ridgefolk", "long-stride"]:
+				var origin := { "seed": sd["id"], "blood": b, "shape": sh }
+				var r := GeniusReading.read(1, GeniusReading.empty_tally(), origin, {})
+				var offered: Array = r["candidates"].map(func(c): return c["base"])
+				trios[",".join(offered)] = true
+				if offered.size() != 3 or offered[0] == offered[1] or offered[1] == offered[2] or offered[0] == offered[2] or str(GeniusReading.read(1, GeniusReading.empty_tally(), origin, {})) != str(r):
+					odd.append("%s %s %s" % [sd["id"], sh, b])
 				for c in r["candidates"]:
-					seen[c["form"]] = true
-					check(c["features"].has(sd["seedMark"]), "every offer carries the Seed-mark (%s on %s)" % [sd["seedMark"], c["form"]]) if b == "" and sh == "anchor" else null
-	# a home's kinds are offered to the people of that home (data/forms.json, home)
-	for h in Data.bodies:
-		for sd in Data.seeds():
-			for sh in Creation.SHAPES:
-				for c in GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": sd["id"], "blood": "", "shape": sh, "home": h }, {})["candidates"]:
-					seen[c["form"]] = true
-	var unreachable: Array = Data.forms().filter(func(f): return int(f["instars"]["min"]) == 1 and not seen.has(f["id"])).map(func(f): return f["id"])
-	check(unreachable.is_empty(), "every First Form is offered to somebody (never offered: %s)" % str(unreachable))
-	check(trios.size() >= 60, "the bowl's three vary by Seed, blood and Shape (%d different offers)" % trios.size())
-	var relic := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": "i-can-hold", "blood": "", "shape": "cast" }, {})
-	check(relic["candidates"][0]["expression"] == "relic", "something to hold is a Relic from the first day (%s)" % relic["candidates"][0]["form"])
+					if not (c["features"] as Array).has(sd["seedMark"]) or int(c["level"]) != 1 or String(Data.base(String(c["base"]))["settled"]["id"]) != String(c["form"]):
+						odd.append("%s on %s" % [sd["seedMark"], c["form"]])
+	check(odd.is_empty(), "the bowl offers three different bases to every Seed, blood and Shape, each settled form carrying the Seed-mark (%s)" % ", ".join(odd.slice(0, 4)))
+	check(trios.size() >= mini(12, Data.bases().size()), "the bowl's three vary by Seed, blood and Shape (%d different offers)" % trios.size())
+	# A refinement offers the children of the form it is, best fit first, and nothing else.
+	var strays: Array = []
+	for f in Data.forms():
+		var g := _genius_at(String(f["id"]))
+		_play_like(g, { "range": { "close": 0.8, "far": 0.2 }, "orders": { "hunt": 0.7, "guard": 0.3 }, "fights": { "parries": 0.5 }, "ground": { "wild": 0.4 } })
+		var r := g.read(int(f["level"]) + 1)
+		var got: Array = r["candidates"].map(func(c): return c["form"])
+		if int(f["level"]) == 4:
+			if not r["grows"] or got != [f["id"]]:
+				strays.append("%s does not grow as itself" % f["id"])
+			continue
+		var want: Array = (f["children"] as Array).duplicate()
+		got.sort()
+		want.sort()
+		if r["grows"] or got != want or (int(f["level"]) != 1 and not (r["turning"] as Dictionary).is_empty()):
+			strays.append(String(f["id"]))
+		for i in range(1, r["candidates"].size()):
+			if float(r["candidates"][i - 1]["score"]) < float(r["candidates"][i]["score"]):
+				strays.append("%s: not best first" % f["id"])
+	check(strays.is_empty(), "at every form of every tree a refinement offers its children and nothing else; a finish grows (%s)" % ", ".join(strays.slice(0, 4)))
+	# Play made of what a form leans on speaks for that form.
+	var mute: Array = []
+	for f in Data.forms():
+		if int(f["level"]) < 2:
+			continue
+		var g := _genius_at(String(f["parent"]))
+		_play_like(g, f["leans"], 60)
+		for c in g.read(int(f["level"]))["candidates"]:
+			if c["form"] == f["id"] and (float(c["score"]) <= 0.0 or (c["reasons"] as Array).is_empty()):
+				mute.append(String(f["id"]))
+	check(mute.is_empty(), "play made of what a form leans on speaks for it (%s)" % ", ".join(mute.slice(0, 4)))
+	# On the tests' own bases: all of one path's play is read as that path.
+	var wrong: Array = []
+	for bid in ["tedge", "tlamp", "trun"]:
+		for p in Data.base(bid)["paths"]:
+			var g := _genius_at(String(Data.base(bid)["settled"]["id"]))
+			_play_like(g, p["leans"], 60)
+			if g.read(2)["candidates"][0]["form"] != p["id"]:
+				wrong.append(String(p["id"]))
+	check(wrong.is_empty(), "play that is all one path's is read as that path (%s)" % ", ".join(wrong))
+	# A form that names a body of its own is worn by the forms below it too.
+	check(Data.form("tedge-b")["silhouette"] == "relic-knife" and Data.form("tedge-b1")["silhouette"] == "relic-blade" and Data.form("tedge-b1x")["silhouette"] == "relic-blade" and Data.form("tedge-b2x")["silhouette"] == "relic-knife", "a prong's own body is its finishes' body too")
 	# Every Seed-mark has something to show on an art body: a part of its own.
 	for sd in Data.seeds():
 		check(ResourceLoader.exists(GeniusBody.PART_DIR % String(sd["seedMark"])), "the Seed-mark %s has a part to show" % sd["seedMark"])
-	# Every form a student can reach in the Academy (the rite, the Gate) has an art body.
-	var bare: Array = Data.forms().filter(func(f): return int(f["instars"]["min"]) <= 2 and not ResourceLoader.exists(GeniusBody.BODY_DIR % String(f["silhouette"]))).map(func(f): return f["id"])
+	# Every form a student can reach in the Academy (the rite, the Gate) has an art body, unless
+	# its base says that body is still to be built.
+	var bare: Array = []
+	for f in Data.forms():
+		var to_build: Array = Data.base(String(f["base"])).get("toBuild", [])
+		if int(f["level"]) <= 2 and not ResourceLoader.exists(GeniusBody.BODY_DIR % String(f["silhouette"])) and not to_build.has(f["silhouette"]):
+			bare.append(String(f["id"]))
 	check(bare.is_empty(), "every form the Academy can give has a body of its own (placeholders: %s)" % str(bare))
+	# What the tree is said in: every line and key has plain words.
+	var wordless: Array = []
+	for line in lines:
+		for key in lines[line]:
+			if GeniusReading.words(line, key) == "%s %s" % [line, key]:
+				wordless.append("%s.%s" % [line, key])
+	check(wordless.is_empty() and GeniusReading.lean_words({ "range": { "close": 1.0 }, "fights": { "parries": 0.5 } }) == "fighting close, parrying", "every line of the Tally is said in plain words (%s)" % ", ".join(wordless))
+
+## Hybrids (docs/genius-tree.md): any two bases make one by rule, with a tree of its own; the
+## rule itself is tested on the tests' own bases, and its shape on every pair there is.
+func test_genius_hybrids() -> void:
+	var rule: Dictionary = Data.genius_hybrids()["rule"]
+	var bad: Array = []
+	var pairs := 0
+	for a in Data.bases():
+		for b in Data.bases():
+			if a["id"] == b["id"]:
+				if not Data.hybrid_forms(a["id"], b["id"]).is_empty():
+					bad.append("%s with itself" % a["id"])
+				continue
+			pairs += 1
+			var pair := "%s+%s" % [a["id"], b["id"]]
+			var forms := Data.hybrid_forms(a["id"], b["id"])
+			var by_level := [0, 0, 0, 0, 0]
+			var sigs := {}
+			var why := ""
+			for f in forms:
+				by_level[int(f["level"])] += 1
+				if not String(f["id"]).begins_with(pair + ":") or Data.form(String(f["id"])) != f or f["base"] != pair:
+					why = "%s is not asked for by its id" % f["id"]
+				if f["expression"] != a["expression"] or f["coatOf"] != b["silhouette"]:
+					why = "%s is not the first's body in the second's coat" % f["id"]
+				for x in (b["hybrid"]["gift"] as Array) + (a["settled"]["features"] as Array):
+					if not (f["features"] as Array).has(x):
+						why = "%s does not wear %s" % [f["id"], x]
+				if int(f["level"]) == 2:
+					sigs["|".join(GeniusTree.signature(f["leans"])["sig"])] = true
+					if f["parent"] != a["settled"]["id"]:
+						why = "%s does not come of the first's settled form" % f["id"]
+					var carried: Array = (f["children"] as Array).filter(func(cid): return String(cid).begins_with("%s:%s-" % [pair, b["id"]]))
+					if carried.size() != 1:
+						why = "%s carries %d of the second's prongs" % [f["id"], carried.size()]
+			if forms.size() != 30 or by_level != [0, 0, 3, 9, 18] or sigs.size() != 3 or why != "":
+				bad.append("%s%s" % [pair, " (%s)" % why if why != "" else " (%d forms, %d plays)" % [forms.size(), sigs.size()]])
+	check(bad.is_empty(), "every ordered pair of bases makes a hybrid: thirty forms, three paths each earned by its own play, the first's body with the second's gift and coat (%d pairs; wrong: %s)" % [pairs, ", ".join(bad.slice(0, 4))])
+	# The rule, on the tests' own: the runner turned toward the edge.
+	var a := Data.base("trun")
+	var b := Data.base("tedge")
+	var forms := Data.hybrid_forms("trun", "tedge")
+	var paths: Array = forms.filter(func(f): return int(f["level"]) == 2)
+	check(paths.map(func(f): return f["name"]) == ["Edged Test Runner Path A", "Edged Test Runner Path B", "Edged Test Runner Path C"] and paths[0]["kind"] == "Edged Test Runner" and GeniusTree.hybrid_name(a, b, Data.genius_hybrids()) == "Edged Test Runner", "a hybrid is named for the second's word and the first's name, and so are its paths")
+	check(str(paths[0]["leans"]) == str(GeniusTree.bend(a["paths"][0]["leans"], b["nature"], float(rule["bend"]))) and is_equal_approx(float(paths[0]["leans"]["orders"]["hunt"]), 0.5) and is_equal_approx(float(paths[0]["leans"]["range"]["close"]), 0.5), "a hybrid's path leans half its own way and half the second's nature")
+	check(paths[0]["of"] == "one who is like Test Runner Path A, turned toward the test edge's way" and paths[0]["sign"] == String(a["paths"][0]["sign"]) + " It wears an edge, the test edge's." and paths[0]["habit"] == a["paths"][0]["habit"], "it says what it is the picture of, wears the second's gift as its sign, and keeps the first's habit")
+	var carried_ok := true
+	for i in 3:
+		var P: Dictionary = a["paths"][i]
+		var drop := 0
+		var drop_s := INF
+		for j in 3:
+			var s := GeniusTree.alike(P["prongs"][j]["leans"], b["nature"])
+			if s <= drop_s:
+				drop_s = s
+				drop = j
+		var prongs: Array = (paths[i]["children"] as Array).map(func(cid): return Data.form(String(cid)))
+		for j in 3:
+			if j != drop:
+				carried_ok = carried_ok and prongs[j]["id"] == "trun+tedge:" + String(P["prongs"][j]["id"]) and prongs[j]["name"] == P["prongs"][j]["name"]
+			else:
+				var from := Data.form(String(prongs[j]["id"]).split(":")[1])
+				carried_ok = carried_ok and String(prongs[j]["id"]).begins_with("trun+tedge:tedge-") and String(prongs[j]["name"]) == "Running " + String(from["name"]) and prongs[j]["of"] == from["of"] \
+					and prongs[j]["habit"] == P["prongs"][drop]["habit"] and prongs[j]["silhouette"] == a["silhouette"] and prongs[j]["sign"] == "It wears an edge, the test edge's."
+	check(carried_ok, "in each path the prong furthest from the second's nature gives way to one of the second's, carried across with its finishes and named for the first")
+	var back := Data.hybrid_forms("tedge", "trun")
+	check(back[0]["kind"] == "Running Test Edge" and back[0]["expression"] == "relic" and back[0]["coatOf"] == "beast-runner" and back[0]["id"] != forms[0]["id"], "the other way round is another genius")
+	# two paths are never earned by the same play: one that would be bends less far
+	var heavy: Dictionary = b.duplicate(true)
+	heavy["id"] = "theavy"
+	heavy["nature"] = { "range": { "close": 1.0 }, "fights": { "parries": 1.0 } }
+	var light: Dictionary = a.duplicate(true)
+	var faint := [{ "orders": { "hunt": 0.4 }, "ground": { "wild": 0.3 } }, { "orders": { "guard": 0.4 }, "ground": { "ruin": 0.3 } }, { "bonds": { "named": 0.4 }, "ground": { "night": 0.3 } }]
+	for i in 3:
+		light["paths"][i]["leans"] = faint[i]
+	var sigs: Array = GeniusTree.compose(light, heavy, Data.genius_hybrids()).filter(func(f): return int(f["level"]) == 2).map(func(f): return "|".join(GeniusTree.signature(f["leans"])["sig"]))
+	check(sigs[0] == "fights.parries|range.close" and sigs[1] != sigs[0] and sigs[2] != sigs[0] and sigs[1] != sigs[2], "where the second's nature would swallow two paths, the later bends less far and keeps a play of its own (%s)" % "; ".join(sigs))
+	# a pair written by hand says its own words
+	var hy := { "rule": rule, "pairs": { "trun+tedge": { "name": "Knife-Runner", "nodes": { "trun-a": { "name": "Knife-Courser", "of": "one who closes the distance", "habit": "It whets itself." } } } } }
+	var written := GeniusTree.compose(a, b, hy)
+	check(written[0]["name"] == "Knife-Courser" and written[0]["kind"] == "Knife-Runner" and written[0]["of"] == "one who closes the distance" and written[0]["habit"] == "It whets itself." and String(written[0]["sign"]).begins_with(String(a["paths"][0]["sign"])) and String(written[0]["sign"]).ends_with("the test edge's."), "a pair written by hand says its own words, and the rule's where it says none")
+	check(GeniusTree.signature({ "range": { "close": 0.5 }, "orders": { "hunt": 1.0, "guard": 0.5 } }) == { "first": "orders.hunt", "sig": ["orders.hunt", "range.close"] }, "a signature is the two heaviest leans; of equal ones the first written")
+	# its look: a hybrid wears a coat of its second's palette on its first's body
+	var looks: Dictionary = Data.genius_looks()
+	check(GeniusLook.palette("trun+tedge:trun-a", "beast-runner") == looks["palettes"][GeniusLook.body("relic-knife")["coats"]] and GeniusLook.palette("trun-a", "beast-runner") == looks["palettes"][GeniusLook.body("beast-runner")["coats"]], "a hybrid's coat is from its second's palette; a base's form wears its own")
+	var hb := GeniusBody.build({ "form": "trun+tedge:trun-a", "silhouette": "beast-runner", "expression": "beast", "features": forms[0]["features"], "instar": 2, "look": GeniusLook.born(31) }, Color.ORANGE, 2)
+	add_child(hb)
+	check(hb.uses_art and hb.painted > 0, "and it is painted in it")
+	hb.queue_free()
 
 ## One genius is not another of its form: what it is born with comes from who its partner is,
 ## the same every time; the partner chooses its coat, its markings and its keepsake.
@@ -810,33 +1149,33 @@ func test_genius_looks() -> void:
 	h3["seed"] = "owes-me" if h["seed"] != "owes-me" else "remembers"
 	check(GeniusLook.identity(h2) != id and GeniusLook.identity(h3) != id, "another Pattern or another Seed is another number")
 	var look := GeniusLook.born(id)
-	var a := GeniusLook.resolve(look, "field-wolf", "beast-runner", 1)
-	var b := GeniusLook.resolve(look.duplicate(true), "field-wolf", "beast-runner", 1)
-	check(str(a) == str(b) and not a["coat"].is_empty(), "the same look is the same wolf (%s)" % GeniusLook.describe(look, "field-wolf", "beast-runner"))
+	var a := GeniusLook.resolve(look, "trun-small", "beast-runner", 1)
+	var b := GeniusLook.resolve(look.duplicate(true), "trun-small", "beast-runner", 1)
+	check(str(a) == str(b) and not a["coat"].is_empty(), "the same look is the same wolf (%s)" % GeniusLook.describe(look, "trun-small", "beast-runner"))
 	# Forty wolves, from forty partners: no one look takes them all.
 	var kinds := {}
 	var coats := {}
 	for i in 40:
 		var l := GeniusLook.born(GeniusLook.roll(i, "wolf") * 4000000.0 as int)
-		var r := GeniusLook.resolve(l, "field-wolf", "beast-runner", 1)
+		var r := GeniusLook.resolve(l, "trun-small", "beast-runner", 1)
 		kinds["%s|%s|%d|%s" % [r["coat"]["id"], str(r["marks"]), roundi(float(r["proportions"]["build"]) * 3.0), r["eyes"]["id"]]] = true
 		coats[r["coat"]["id"]] = true
 	check(kinds.size() >= 30 and coats.size() >= 5, "forty wolves are born many ways (%d looks, %d coats)" % [kinds.size(), coats.size()])
 	# What the partner chooses: one of a few coats, each marking, a keepsake and its colour.
-	var offered := GeniusLook.offered_coats(look, "field-wolf", "beast-runner")
+	var offered := GeniusLook.offered_coats(look, "trun-small", "beast-runner")
 	check(offered.size() == int(Data.genius_looks()["born"]["coatsOffered"]) and offered[0]["id"] == a["coat"]["id"], "it has a few coats of its own, the born one first")
 	var chosen := look.duplicate(true)
 	chosen["coat"] = 1
-	var c := GeniusLook.resolve(chosen, "field-wolf", "beast-runner", 1)
+	var c := GeniusLook.resolve(chosen, "trun-small", "beast-runner", 1)
 	check(c["coat"]["id"] == offered[1]["id"] and c["colors"]["fur_dark"] != a["colors"]["fur_dark"], "choosing another coat changes its colours")
 	var was: bool = a["marks"]["socks"]
 	chosen["marks"] = { "socks": not was }
-	c = GeniusLook.resolve(chosen, "field-wolf", "beast-runner", 1)
+	c = GeniusLook.resolve(chosen, "trun-small", "beast-runner", 1)
 	check(c["marks"]["socks"] == (not was) and c["colors"]["mark_socks"] == Color(String(c["coat"]["mark"] if not was else c["coat"]["main"])), "a marking shows in its own colour, or hides in the coat's")
 	chosen["keepsake"] = "ribbon"
 	chosen["keepsakeColor"] = "indigo"
-	c = GeniusLook.resolve(chosen, "field-wolf", "beast-runner", 1)
-	check(c["keepsake"]["id"] == "ribbon" and c["keepsake_color"]["id"] == "indigo" and GeniusLook.describe(chosen, "field-wolf", "beast-runner").contains("ribbon"), "a keepsake and its colour are kept (%s)" % GeniusLook.describe(chosen, "field-wolf", "beast-runner"))
+	c = GeniusLook.resolve(chosen, "trun-small", "beast-runner", 1)
+	check(c["keepsake"]["id"] == "ribbon" and c["keepsake_color"]["id"] == "indigo" and GeniusLook.describe(chosen, "trun-small", "beast-runner").contains("ribbon"), "a keepsake and its colour are kept (%s)" % GeniusLook.describe(chosen, "trun-small", "beast-runner"))
 	# The look goes with the genius: born at the rite, saved, kept through a new form.
 	var hero := Creation.generate([1, 0, 2, 1, 0, 2, 1, 0, 2, 1], "", 5)
 	hero["name"] = "Ost"
@@ -848,7 +1187,7 @@ func test_genius_looks() -> void:
 	g.save_to(hero)
 	var again := Genius.for_hero(JSON.parse_string(JSON.stringify(hero)))
 	check(again.look["keepsake"] == "bell" and int(again.look["seed"]) == int(g.look["seed"]), "the look survives saving")
-	check(str(GeniusLook.resolve(again.look, "ram", "beast-grazer")["proportions"]) == str(GeniusLook.resolve(g.look, "field-wolf", "beast-runner")["proportions"]), "its build is its own in every form")
+	check(str(GeniusLook.resolve(again.look, "", "beast-grazer")["proportions"]) == str(GeniusLook.resolve(g.look, "trun-small", "beast-runner")["proportions"]), "its build is its own in every form")
 	var old := { "seed": hero["seed"], "blood": hero["blood"], "shape": hero["shape"], "pattern": hero["pattern"], "name": "Ost", "spark": hero.get("spark", 0), "genius": g.to_dict() }
 	old["genius"].erase("look")
 	check(int(Genius.for_hero(old).look["seed"]) == GeniusLook.identity(old), "a genius from before looks is given the one it would have been born with")
@@ -857,7 +1196,7 @@ func test_genius_looks() -> void:
 ## The look on the body: the coat and markings painted, the build on the blend shapes, the
 ## keepsake hung; and the art carries everything the data says it does.
 func test_genius_looks_on_the_body() -> void:
-	var info := { "form": "field-wolf", "silhouette": "beast-runner", "expression": "beast", "features": ["far-eyes", "long-legs", "fangs", "ruff"], "instar": 1 }
+	var info := { "form": "trun-small", "silhouette": "beast-runner", "expression": "beast", "features": ["far-eyes", "long-legs", "fangs", "ruff"], "instar": 1 }
 	var plain := GeniusBody.build(info, Color.ORANGE, 1)
 	check(plain.painted == 0 and plain.keepsake == "", "a genius with no look keeps the colours it was made in")
 	var look := GeniusLook.born(424242)
@@ -866,7 +1205,7 @@ func test_genius_looks_on_the_body() -> void:
 	var with := info.duplicate(true)
 	with["look"] = look
 	var body := GeniusBody.build(with, Color.ORANGE, 1)
-	var res := GeniusLook.resolve(look, "field-wolf", "beast-runner", 1)
+	var res := GeniusLook.resolve(look, "trun-small", "beast-runner", 1)
 	var got := {}
 	for m in body.find_children("*", "MeshInstance3D", true, false):
 		var mi := m as MeshInstance3D
@@ -888,7 +1227,7 @@ func test_genius_looks_on_the_body() -> void:
 	body.free()
 	older.free()
 	# A flame has no neck: a collar is not offered, a ribbon is.
-	var ember := { "form": "ember", "silhouette": "aspect-flame", "expression": "aspect", "features": ["ember", "glow", "smoke"], "instar": 1, "look": { "seed": 7, "coat": 0, "marks": {}, "keepsake": "collar", "keepsakeColor": "" } }
+	var ember := { "form": "", "silhouette": "aspect-flame", "expression": "aspect", "features": ["ember", "glow", "smoke"], "instar": 1, "look": { "seed": 7, "coat": 0, "marks": {}, "keepsake": "collar", "keepsakeColor": "" } }
 	var eb := GeniusBody.build(ember, Color.ORANGE, 1)
 	var can: Array = GeniusLook.keepsakes_for(eb.sockets.keys()).map(func(k): return k["id"])
 	check(eb.keepsake == "" and not can.has("collar") and can.has("ribbon"), "a body with no neck wears no collar (it can wear: %s)" % str(can))
@@ -1090,17 +1429,16 @@ func test_project_and_gate() -> void:
 	check(g3.p_field_open, "a Stage 3 field is open from the start")
 	var h2 := Fight.new({ "hero": Fight.default_hero(), "passive": true })
 	check(not h2.p_field_open and h2.staged(h2.tech) == h2.tech, "a Stage 2 field stays inside the skin")
-	# The Gate's Reading offers three, each with the Seed-mark and heritage, and the write-up reads the record.
-	var hero := Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
-	hero["seed"] = "watches-from-above"
-	var gn := Genius.for_hero(hero)
-	gn.read(1); gn.take(); gn.milestone("rite")
+	# The Gate's Reading offers the three paths of what it settled as, each with the Seed-mark, and the write-up reads the record.
+	var gn := _born_genius()
 	for i in 30: gn.hit_at(1.5)
 	for i in 12: gn.gave_order("hold")
 	gn.milestone("gate")
 	gn.day = 7
 	var rd := gn.read(2)
-	check(rd["candidates"].size() == 3 and rd["candidates"].all(func(c): return c["features"].has("far-eyes") and c["heritage"].size() >= 1), "the Gate offers three Second Forms, each marked and carrying heritage")
+	var mark := String(gn.body["seedMark"])
+	var settled := String(gn.body["form"])
+	check(rd["candidates"].size() == 3 and int(rd["level"]) == 2 and rd["candidates"].all(func(c): return c["features"].has(mark) and Data.form(String(c["form"]))["parent"] == settled), "the Gate offers the three paths of what it settled as, each carrying the Seed-mark")
 	var c := gn.take(1)
 	check(gn.instar == 2 and gn.body["form"] == c["form"] and gn.history.size() == 2, "taking one makes it the Second Form")
 	var gate: Dictionary = Data.academy["gate"]
@@ -2105,7 +2443,7 @@ func test_progression() -> void:
 	var fresh := GeniusBody.build(g.to_dict(), Color.ORANGE, 1)
 	add_child(fresh)
 	check(is_equal_approx(fresh.stands, float(sizes["1"])) and is_zero_approx(fresh.molt), "new from the rite, it stands at the First Form's size and shows no seams")
-	var plain := GeniusBody.build({ "form": "field-wolf", "silhouette": "beast-runner", "expression": "beast", "features": [], "instar": 2 }, Color.ORANGE, 2)
+	var plain := GeniusBody.build({ "form": "trun-small", "silhouette": "beast-runner", "expression": "beast", "features": [], "instar": 2 }, Color.ORANGE, 2)
 	add_child(plain)
 	check(is_equal_approx(plain.stands, float(sizes["2"])) and is_zero_approx(plain.molt), "a body shown without a life (a card, a candidate) stands at its instar's size")
 	due.queue_free()
@@ -2116,8 +2454,9 @@ func test_progression() -> void:
 ## grows into one; the last stage is an impressive ally; its growth shows in its design and
 ## echoes on its partner). Names, proportions, size, presence, and the echo, by instar.
 func test_ages() -> void:
-	check(Genius.form_name_at("field-wolf", 1) == "Wolf pup" and Genius.form_name_at("field-wolf", 2) == "Yearling wolf" and Genius.form_name_at("field-wolf", 3) == "Field-wolf", "a Field-wolf is a pup, then a yearling, then a wolf")
-	check(Genius.form_name_at("griffin", 3) == "Griffin", "a form with no young keeps its name")
+	check(Genius.form_name_at("trun-small", 1) == "Small test runner" and Genius.form_name_at("trun-a", 2) == "Test Runner Path A" and Genius.form_name_at("trun-a1", 3) == "Test Runner Prong A1", "the young of a base has its own name, and so has every form it grows into")
+	check(Genius.form_name_at("trun-a1x", 4) == "Test Runner Finish A1X" and Genius.form_name_at("trun-a1x", 5) == "Great Test Runner Finish A1X" and Genius.form_name_at("trun-a1x", 6) == "Test Runner Finish A1X of the Line", "a finished form is named for its age when it grows great, and at its apex")
+	check(Genius.form_name_at("trun-a", 5) == "Test Runner Path A", "a form that has not finished keeps its plain name")
 	var ages := {}
 	for i in range(1, 7):
 		ages[String(Genius.age_at(i)["id"])] = true
@@ -2128,7 +2467,7 @@ func test_ages() -> void:
 		rising = rising and float(sizes[str(i + 1)]) > float(sizes[str(i)])
 	check(rising and float(sizes["6"]) > 1.8 and float(sizes["1"]) <= 0.7, "it grows at every instar, from the young of its kind to taller than its partner (%.1f to %.1f m)" % [float(sizes["1"]), float(sizes["6"])])
 	var wolf := func(instar: int) -> GeniusBody:
-		var b := GeniusBody.build({ "form": "field-wolf", "silhouette": "beast-runner", "expression": "beast", "features": ["fangs"], "instar": instar }, Color.ORANGE, instar)
+		var b := GeniusBody.build({ "form": "trun-small", "silhouette": "beast-runner", "expression": "beast", "features": ["fangs"], "instar": instar }, Color.ORANGE, instar)
 		add_child(b)
 		return b
 	var pup: GeniusBody = wolf.call(1)
@@ -2154,7 +2493,7 @@ func test_ages() -> void:
 	add_child(w)
 	var hero := Fight.default_hero()
 	hero["body"] = "cahokia-f"
-	var g := { "instar": 1, "expression": "beast", "form": "field-wolf", "silhouette": "beast-runner", "look": GeniusLook.born(4711) }
+	var g := { "instar": 1, "expression": "beast", "form": "trun-small", "silhouette": "beast-runner", "look": GeniusLook.born(4711) }
 	hero["genius"] = g
 	check(w.features_of(hero) == ["cloak-genius"], "the First Form's echo is its coat in the cloak (%s)" % str(w.features_of(hero)))
 	g["instar"] = 3
@@ -2181,80 +2520,129 @@ func test_ages() -> void:
 	check(s6 > s3 and s3 > 0.0, "and it grows as the genius does (%.2f at the Third Form, %.2f at Apex)" % [s3, s6])
 	w.queue_free()
 
-## A genius may always keep its kind (owner, 2026-11-10: a pup grows into a wolf, and
-## everything should be logical): at a Reading it can grow into the next age of what it is,
-## or the elder of its kind; its heritage and its coat go with it.
-func test_kind() -> void:
-	var mk := func(form_id: String) -> Genius:
-		var g := Genius.new()
-		var f := Genius.form_of(form_id)
-		g.instar = 1
-		g.body = { "form": f["id"], "expression": f["expression"], "silhouette": f["silhouette"], "own": f["features"].duplicate(), "heritage": [], "seedMark": "far-eyes", "grafts": [], "adaptations": [{ "id": "set-feet", "lastFed": 0 }] }
-		g.look = GeniusLook.born(4711)
-		return g
-	var wolf: Genius = mk.call("field-wolf")
-	var k2 := wolf.kept_kind(2)
-	check(k2.get("form", "") == "field-wolf" and k2.get("kept", false) and Genius.form_name_at("field-wolf", 2) == "Yearling wolf", "a wolf pup may grow into a yearling wolf")
-	check((k2["heritage"] as Array).has("set-feet") and (k2["features"] as Array).has("far-eyes"), "what it had adapted goes with it as heritage, and the Seed-mark stays")
-	check(wolf.kept_kind(5).get("form", "") == "field-wolf" and Genius.form_name_at("field-wolf", 5) == "Great Field-wolf" and Genius.form_name_at("field-wolf", 6) == "Field-wolf of the Line", "a kind with no elder grows great as itself, and is named for it")
-	check(Genius.form_name_at("cairn-back", 5) == "Old Cairn-back" and Genius.form_name_at("closed-ledger", 6) == "The Ledger Closed", "a name that does not take the honour keeps its own")
-	var hawk: Genius = mk.call("hawk")
-	check(hawk.kept_kind(2).get("form", "") == "hawk" and hawk.kept_kind(3).get("form", "") == "griffin", "a hawk stays a hawk until it can be a griffin, the elder of its kind")
-	var g3 := hawk.kept_kind(3)
-	check((g3["heritage"] as Array).size() >= 1 and not (g3["own"] as Array).has("beak"), "the elder carries something of the younger form as heritage (%s)" % str(g3["heritage"]))
-	# every kind can come to Apex as itself, and an elder is of the same Expression
-	var stuck: Array = []
-	for f in Data.forms():
-		if int(f["instars"]["min"]) != 1:
-			continue
-		var g: Genius = mk.call(String(f["id"]))
-		var at := String(f["id"])
-		var ok := true
-		for n in range(2, 7):
-			var k := g.kept_kind(n)
-			if k.is_empty() or String(k["expression"]) != String(f["expression"]):
-				ok = false
-				break
-			g.body["form"] = k["form"]
-			g.body["own"] = k["own"]
-			g.body["heritage"] = k["heritage"]
-			g.body["silhouette"] = k["silhouette"]
-			g.instar = n
-			at = String(k["form"])
-		if not ok:
-			stuck.append(f["id"])
-	check(stuck.is_empty(), "every First Form can come to Apex as its own kind (%s)" % ", ".join(stuck))
-	# taking it: the Reading's three are untouched, and keeping is its own choice
-	var born := _born_genius()
-	born.look = GeniusLook.born(99)
-	born.day = 7
-	born.milestone("gate")
-	var was := String(born.body["form"])
-	var r := born.read(2)
-	var best := String(r["candidates"][0]["form"])
-	var c := born.take(Genius.KEEP)
-	check(c.get("kept", false) and born.instar == 2 and String(born.body["form"]) == String(born.kept_kind(2).get("form", was)) or String(born.body["form"]) == was, "keeping its kind at the Gate makes it the same kind, a year older (%s to %s)" % [was, born.body["form"]])
-	check(born.history[-1].get("kept", false) and not born.history[-1]["settled"], "and its history says it kept its kind")
-	var other := _born_genius()
-	other.day = 7
-	other.milestone("gate")
-	other.read(2)
-	other.take(-1)
-	check(String(other.body["form"]) == best and other.history[-1]["settled"] and not other.history[-1].get("kept", false), "settling still takes the best of the three the Tally read")
-	# the coat goes with it into a new body
-	var cg: Genius = mk.call("hawk")
-	cg.look["coat"] = 2
-	var worn := Color(String(GeniusLook.offered_coats(cg.look, "hawk", "beast-flier")[2]["main"]))
-	cg.pending_reading = { "instar": 2, "candidates": [{ "form": "harrier", "name": "Harrier", "expression": "beast", "silhouette": "beast-ground-hunter", "own": ["crest"], "heritage": [], "seedMark": "far-eyes", "features": ["crest"] }] }
-	cg.take(0)
-	var offered := GeniusLook.offered_coats(cg.look, "harrier", "beast-ground-hunter")
-	var got := Color(String(offered[int(cg.look["coat"])]["main"]))
+## A genius always keeps its kind (docs/genius-tree.md): a refinement offers nothing outside
+## its own tree. What the play decides is which of its kind it becomes; and once, at the first
+## refinement, whether it turns into a hybrid. The turning is offered, never forced.
+func test_refinement_and_turning() -> void:
+	_only_test_bases()
+	var rule: Dictionary = Data.genius_hybrids()["rule"]
+	# played as its own nature, nothing turns
+	var own := _genius_at("trun-small", 1)
+	_play_like(own, Data.base("trun")["nature"])
+	var r0 := own.read(2)
+	check((r0["turning"] as Dictionary).is_empty() and r0["candidates"].all(func(c): return c["base"] == "trun"), "played as what it is, it is offered its own three paths and no turning")
+	# since it settled its partner has fought like an edge: close, parrying, casting
+	var g := _genius_at("trun-small", 1)
+	g.look["coat"] = 2
+	_play_like(g, Data.base("tedge")["nature"])
+	var worn := Color(String(GeniusLook.offered_coats(g.look, "trun-small", "beast-runner")[2]["main"]))
+	var r := g.read(2)
+	var t: Dictionary = r["turning"]
+	check(not t.is_empty() and t["second"] == "tedge" and t["base"] == "trun+tedge" and t["name"] == "Edged Test Runner", "play that is another base's is seen: a turning toward it is offered (%s)" % t.get("name", "none"))
+	check(float(t["other"]) >= float(rule["min"]) and float(t["other"]) >= float(t["own"]) * (1.0 + float(rule["margin"])), "because that nature fits the play better than its own by the margin (%.2f against %.2f)" % [float(t.get("other", 0)), float(t.get("own", 0))])
+	check(GeniusReading.reason_words(t["reasons"]) == "fighting close, parrying, Cast techniques", "and the Reading says why, in plain words (%s)" % GeniusReading.reason_words(t.get("reasons", [])))
+	check(r["candidates"].size() == 3 and r["candidates"].all(func(c): return c["base"] == "trun") and (t["candidates"] as Array).size() == 3 and (t["candidates"] as Array).all(func(c): return c["base"] == "trun+tedge"), "it is offered beside its own three paths, never in place of them")
+	# refusing it: its own path
+	var refused := Genius.from_dict(JSON.parse_string(JSON.stringify(g.to_dict())))
+	refused.pending_reading = r.duplicate(true)
+	refused.take(0)
+	check(refused.body["base"] == "trun" and refused.kind() == "Test Runner" and not refused.history[-1].has("turned"), "its partner may refuse: it takes a path of its own")
+	var settled := Genius.from_dict(JSON.parse_string(JSON.stringify(g.to_dict())))
+	settled.pending_reading = r.duplicate(true)
+	settled.take(-1)
+	check(settled.body["form"] == r["candidates"][0]["form"] and settled.history[-1]["settled"], "letting it settle never turns it: it takes the best of its own")
+	# taking it
+	var c := g.take(Genius.TURN)
+	check(c["form"] == t["candidates"][0]["form"] and g.body["base"] == "trun+tedge" and g.kind() == "Edged Test Runner" and g.level() == 2 and g.instar == 2, "taking the turning makes it the hybrid, on the hybrid's best path")
+	check(g.features().has("edge") and g.features().has(Data.base("trun")["settled"]["features"][0]) and g.body["silhouette"] == "beast-runner" and g.body["coatOf"] == "relic-knife", "it is one genius: the runner's body, wearing the edge's gift, in a coat of the edge's")
+	check(g.history[-1].get("turned", "") == "tedge" and not g.history[-1]["settled"] and g.road().map(func(f): return f["id"]) == ["trun-small", String(c["form"])], "its history says it turned, and its road begins where it settled")
+	check(g.soul() == String(Data.base("trun")["soul"]) and g.picture_of().ends_with("turned toward the test edge's way") and g.sign_now().ends_with("It wears an edge, the test edge's."), "it is still its first base's soul, and says what it has turned toward")
+	var offered := GeniusLook.offered_coats(g.look, String(g.body["form"]), "beast-runner")
+	var got := Color(String(offered[int(g.look["coat"])]["main"]))
 	var nearest := true
 	for o in offered:
 		var oc := Color(String(o["main"]))
 		if Vector3(oc.r - worn.r, oc.g - worn.g, oc.b - worn.b).length() + 0.0001 < Vector3(got.r - worn.r, got.g - worn.g, got.b - worn.b).length():
 			nearest = false
-	check(nearest, "in a new body it wears the coat nearest the one it wore")
+	check(nearest, "in its new coat it wears the one nearest the coat it wore")
+	# from there it is on the hybrid's tree, and does not turn again
+	_play_like(g, Data.base("tlamp")["nature"])
+	var r3 := g.read(3)
+	var kids: Array = (Data.form(String(g.body["form"]))["children"] as Array).duplicate()
+	var got3: Array = r3["candidates"].map(func(x): return x["form"])
+	kids.sort()
+	got3.sort()
+	check(got3 == kids and (r3["turning"] as Dictionary).is_empty(), "a hybrid is refined down its own tree, and nothing turns twice")
+	g.take()
+	g.read(4)
+	g.take()
+	check(g.level() == 4 and g.next_forms().is_empty() and g.body["base"] == "trun+tedge" and g.read(5)["grows"], "it finishes as a hybrid and grows as one")
+	# no turning below the least fit, however far ahead; none where the margin is not met
+	var faint := _genius_at("trun-small", 1)
+	faint.count("range", "close", 3)
+	check((faint.read(2)["turning"] as Dictionary).is_empty(), "a little play is not a turning")
+	var half := _genius_at("trun-small", 1)
+	_play_like(half, Data.base("tedge")["nature"])
+	_play_like(half, Data.base("trun")["nature"])
+	var rh := half.read(2)
+	check((rh["turning"] as Dictionary).is_empty(), "play that is as much its own as another's does not turn it")
+	# asking for a turning where none is offered takes its own best
+	var none := _genius_at("trun-small", 1)
+	_play_like(none, Data.base("trun")["nature"])
+	none.read(2)
+	check(none.take(Genius.TURN)["base"] == "trun", "with no turning offered there is nothing to turn into")
+	# the page shows its tree: where it is, what comes next, and what play leads to each
+	var page := GeniusPage.new()
+	add_child(page)
+	var pg := _genius_at("trun-a", 2)
+	_play_like(pg, { "orders": { "hunt": 1.0 }, "fights": { "blocks": 0.5 } })
+	page.open(pg, Color.ORANGE)
+	var text := "\n".join(page.find_children("*", "RichTextLabel", true, false).map(func(x): return (x as RichTextLabel).text))
+	var heads := page.find_children("*", "Label", true, false).map(func(x): return (x as Label).text)
+	check(heads.any(func(x): return String(x).begins_with("ITS TREE")) and heads.has("YOUR SOUL, OUTSIDE YOU"), "the genius's page has its tree and its soul")
+	var all_named := true
+	for f in Data.tree_of("trun"):
+		all_named = all_named and (int(f["level"]) == 1 or text.contains(String(f["name"])))
+	check(all_named and text.contains("(it is this)") and text.contains("(next: the Tally speaks for it"), "the tree names every form of its base, where it is, and what it may become next")
+	check(text.contains("comes of sending it to Hunt") and text.contains("one who is like Test Runner Path B") and text.contains("WHOSE SOUL") and text.contains("ITS HABIT") and text.contains("ITS SIGN") and text.contains("THE PICTURE OF"), "each form says what play leads to it and what it is the picture of; the page says whose soul it is, its sign and its habit")
+	page.queue_free()
+	_all_bases()
+
+## A genius saved before the tree is a form no tree has (docs/genius-tree.md). It settles again
+## as the base nearest the body it wore, keeping its name, its look, its Seed-mark and its age.
+func test_old_saves() -> void:
+	_only_test_bases()
+	var old := { "name": "Brack", "instar": 3, "day": 55, "order": "hunt", "look": { "seed": 4711, "coat": 1, "marks": {}, "keepsake": "bell", "keepsakeColor": "" },
+		"body": { "form": "field-wolf", "expression": "beast", "silhouette": "beast-runner", "own": ["long-legs", "fangs", "ruff"], "heritage": ["set-feet", "beak"], "seedMark": "far-eyes",
+			"grafts": [{ "id": "shade:x", "feature": "lantern", "source": "shade:x" }], "adaptations": [] },
+		"history": [{ "instar": 1, "form": "field-wolf", "name": "Wolf pup", "day": 0, "by": "rite", "settled": true }], "milestones": ["rite", "gate", "pattern-built"] }
+	var g := Genius.from_dict(old.duplicate(true))
+	check(g.body["form"] == "trun-small" and g.body["base"] == "trun" and g.level() == 1, "a genius from before the tree settles again as the base that wears its old body (%s)" % g.body["form"])
+	check(g.name == "Brack" and g.look["coat"] == 1 and g.look["keepsake"] == "bell" and int(g.look["seed"]) == 4711 and g.body["seedMark"] == "far-eyes" and g.instar == 3 and g.day == 55, "it keeps its name, its look, its Seed-mark and its instars: they are its age")
+	check((g.body["heritage"] as Array) == ["set-feet"] and g.features().has("lantern") and not g.features().has("beak"), "what it had adapted and its grafts stay; the parts of forms that are gone do not")
+	check(g.history.size() == 2 and g.history[-1].get("resettled", "") == "field-wolf" and g.history[-1]["form"] == "trun-small", "and its history says so")
+	var r := g.read(4)
+	check(not r["grows"] and r["candidates"].size() == 3 and int(r["level"]) == 2, "at its next Reading it is offered the paths of its base, late as it is")
+	var again := Genius.from_dict(g.to_dict())
+	check(again.body["form"] == "trun-small" and again.history.size() == 2, "it settles again once only")
+	var lamp: Dictionary = old.duplicate(true)
+	lamp["body"]["silhouette"] = "engine-sentinel"
+	lamp["body"]["expression"] = "engine"
+	check(Genius.from_dict(lamp).body["base"] == "tlamp", "a body no base wears settles as a base of its Expression")
+	var odd: Dictionary = old.duplicate(true)
+	odd["body"]["silhouette"] = "aspect-fog"
+	odd["body"]["expression"] = "aspect"
+	check(Genius.from_dict(odd).body["base"] == String(Data.bases()[0]["id"]), "and where there is none of its Expression, as the first base")
+	# a save from before the genius system, with its form at the top
+	var older := Genius.from_dict({ "form": "hawk", "expression": "beast", "silhouette": "beast-flier", "features": ["wings", "talons"], "seedMark": "far-eyes" })
+	check(older.is_born() and older.body["base"] == "trun" and older.instar == 1 and older.body["seedMark"] == "far-eyes", "the oldest saves come onto the tree too")
+	# a genius on the tree is left as it is
+	var here := _genius_at("tedge-b1", 3)
+	var same := Genius.from_dict(here.to_dict())
+	check(same.body["form"] == "tedge-b1" and same.history.is_empty(), "a genius that is on the tree is not touched")
+	var hy := _genius_at("trun+tedge:trun-a", 2)
+	check(Genius.from_dict(hy.to_dict()).body["form"] == "trun+tedge:trun-a", "nor is a hybrid")
+	_all_bases()
 
 ## The home's hand, and the cohort's genii (owner, 2026-11-10: full variety, logically sound,
 ## capturing the diversity of humanity): a genius wears what its partner's home puts on its
@@ -2266,7 +2654,7 @@ func test_homes_hand() -> void:
 		if String(t.get("name", "")) == "" or String(t.get("text", "")) == "" or not ResourceLoader.exists(GeniusBody.TRAP_DIR % home):
 			missing.append(home)
 	check(Data.bodies.size() == 13 and missing.is_empty(), "each of the thirteen homes has a piece it puts on its genii (%s)" % ", ".join(missing))
-	var wolf := { "form": "field-wolf", "silhouette": "beast-runner", "expression": "beast", "features": ["fangs"], "instar": 3, "look": GeniusLook.born(7), "home": "edo" }
+	var wolf := { "form": "trun-small", "silhouette": "beast-runner", "expression": "beast", "features": ["fangs"], "instar": 3, "look": GeniusLook.born(7), "home": "edo" }
 	var b := GeniusBody.build(wolf, Color.ORANGE, 3)
 	add_child(b)
 	check(b.trapping == "edo" and b.find_child("Trapping", true, false) != null and b.find_child("TrappingBand", true, false) != null, "a wolf raised in Edo wears Edo's cord, on a band at its neck")
@@ -2288,7 +2676,7 @@ func test_homes_hand() -> void:
 	var b4 := GeniusBody.build(kept, Color.ORANGE, 3)
 	add_child(b4)
 	check(b4.keepsake == "collar" and b4.trapping == "edo", "a keepsake and the home's piece are both worn, each in its own place")
-	var none := GeniusBody.build({ "form": "field-wolf", "silhouette": "beast-runner", "expression": "beast", "features": [], "instar": 1 }, Color.ORANGE, 1)
+	var none := GeniusBody.build({ "form": "trun-small", "silhouette": "beast-runner", "expression": "beast", "features": [], "instar": 1 }, Color.ORANGE, 1)
 	add_child(none)
 	check(none.trapping == "", "a genius with no partner's home wears nothing of one")
 	for x in [b, b2, b3, b4, none]:
@@ -2308,11 +2696,23 @@ func test_homes_hand() -> void:
 	var whole := true
 	for c in a.cohort:
 		var g := a.classmate_genius(c)
-		whole = whole and not g.is_empty() and Genius.form_of(String(g["form"])).size() > 0 and String(g["home"]) == String(c["city"]) and int(g["instar"]) == 1 and not (g["look"] as Dictionary).is_empty()
+		whole = whole and not g.is_empty() and int(Genius.form_of(String(g["form"])).get("level", 0)) == 1 and String(g["home"]) == String(c["city"]) and int(g["instar"]) == 1 and not (g["look"] as Dictionary).is_empty()
 		kinds[g.get("form", "")] = true
 		expressions[g.get("expression", "")] = true
-	check(whole, "after it, each of the twelve has one, a First Form of a real kind, with a look of its own and its partner's home")
-	check(kinds.size() >= 6 and expressions.size() >= 3, "and the cohort's genii are of many kinds (%d kinds, %d Expressions)" % [kinds.size(), expressions.size()])
+	check(whole, "after it, each of the twelve has one, settled as a base of the tree, with a look of its own and its partner's home")
+	check(kinds.size() >= mini(4, Data.bases().size()), "and the cohort's genii are of several kinds (%d kinds, %d Expressions)" % [kinds.size(), expressions.size()])
+	# after the Gate each classmate's genius has taken a path of its own tree
+	var first_forms := {}
+	for c in a.cohort:
+		first_forms[c["id"]] = String(a.classmate_genius(c)["form"])
+	a.genius = _genius_at("trun-a", 2)
+	var on_paths := true
+	for c in a.cohort:
+		var g2 := a.classmate_genius(c)
+		var pf := Data.form(String(g2["form"]))
+		on_paths = on_paths and int(g2["instar"]) == 2 and int(pf["level"]) == 2 and String(pf["parent"]) == String(first_forms[c["id"]]) and (g2["features"] as Array).has(g2["seedMark"]) and str(g2) == str(a.classmate_genius(c))
+	check(on_paths, "after the Gate each has taken a path of its own base, the same every time it is asked")
+	a.genius = null
 	check(str(a.classmate_genius(a.cohort[3])) == str(a.classmate_genius(a.cohort[3])), "a classmate's genius is the same every time it is asked for")
 	var seeds := {}
 	for t in Data.academy["cohort"]["temperaments"]:
@@ -2327,101 +2727,101 @@ func test_homes_hand() -> void:
 	a.free()
 	w.queue_free()
 
-## The kinds of the thirteen homes (data/forms.json, home; docs/genius-forms.md): two First
-## Forms for each home, across all six Expressions, each with a body and coats of its own; a
-## home leans the bowl's second and third offers toward its kinds and never owns the bowl;
-## after the rite a home's kinds are kept, not read.
-func test_home_kinds() -> void:
-	var homes: Array = Data.bodies.keys()
-	var firsts := {}
-	var exprs := {}
-	var bad: Array = []
-	for f in Data.forms():
-		var h := String(f.get("home", ""))
-		if h == "":
-			continue
-		if not homes.has(h):
-			bad.append("%s: no home %s" % [f["id"], h])
-		if int(f["instars"]["min"]) == 1:
-			firsts[h] = firsts.get(h, []) + [f["id"]]
-			exprs[String(f["expression"])] = exprs.get(String(f["expression"]), 0) + 1
-		if not ResourceLoader.exists(GeniusBody.BODY_DIR % String(f["silhouette"])):
-			bad.append("%s: no body" % f["id"])
-		if not Data.genius_looks()["bodies"].has(String(f["silhouette"])):
-			bad.append("%s: no coats" % f["id"])
-		if not ResourceLoader.exists("res://game/assets/genius/cards/%s.png" % String(f["id"])):
-			bad.append("%s: no card" % f["id"])
-	check(bad.is_empty(), "every kind of a home has a home, a body, coats and a card (%s)" % "; ".join(bad))
-	var two := homes.filter(func(h): return (firsts.get(h, []) as Array).size() == 2)
-	check(two.size() == 13 and homes.size() == 13, "each of the thirteen homes has two First Forms of its own (%d of %d)" % [two.size(), homes.size()])
-	check(exprs.size() == 6 and int(exprs.get("beast", 0)) <= 14, "the homes' kinds are of all six Expressions (%s)" % str(exprs))
-	# the bowl: the best fit is the field's; one of the other two may be the home's
-	var cfg: Dictionary = Data.rules_reading()["home"]
-	var seeds: Array = Data.seeds().map(func(sd): return sd["id"])
-	var bowls := 0
-	var with_home := 0
-	var same_first := true
-	var never_more := true
-	var strangers := 0
+## A home has no forms of its own (docs/genius-tree.md, Regions): it raises the chance of some
+## bases at the rite. It never makes one certain, never forbids one, and never moves the
+## bowl's best fit.
+func test_homes_lean() -> void:
+	var homes: Dictionary = Data.genius_homes()
+	var strangers: Array = []
+	var flat: Array = []
 	for h in homes:
-		for sd in seeds:
-			for shp in ["anchor", "turn", "cast", "read", "bind", "make"]:
-				var here := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": sd, "blood": "", "shape": shp, "home": h }, {})
-				var nowhere := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": sd, "blood": "", "shape": shp }, {})
-				var own := 0
-				for c in here["candidates"]:
-					var fh := String(Genius.form_of(String(c["form"])).get("home", ""))
-					if fh == h:
-						own += 1
-					elif fh != "" and not (cfg["open"] as Array).has(fh):
-						strangers += 1
+		if String(h).begins_with("$"):
+			continue
+		if not Data.bodies.has(h):
+			strangers.append(h)
+		for b in homes[h]:
+			if float(homes[h][b]) <= 1.0:
+				flat.append("%s: %s" % [h, b])
+	check(strangers.is_empty() and flat.is_empty(), "every lean is a home's, and raises a base (not homes: %s; not raised: %s)" % [", ".join(strangers), ", ".join(flat)])
+	# on whatever bases there are: the best fit is the field's own
+	var bowls := 0
+	var leaned := 0
+	var moved: Array = []
+	for h in Data.bodies:
+		for sd in Data.seeds():
+			for shp in ["anchor", "cast", "read"]:
+				var here := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": sd["id"], "blood": "", "shape": shp, "home": h }, {})
+				var nowhere := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": sd["id"], "blood": "", "shape": shp }, {})
 				bowls += 1
-				with_home += 1 if own > 0 else 0
-				never_more = never_more and own <= int(cfg["most"])
-				# with no home at all, every home's kind counts as another's: the best fit may differ only by a home kind's own merit
-				var first_form := Genius.form_of(String(here["candidates"][0]["form"]))
-				if String(first_form.get("home", "")) == "":
-					same_first = same_first and String(here["candidates"][0]["form"]) == String(nowhere["candidates"][0]["form"])
-	check(with_home * 100 / bowls >= 60 and with_home < bowls, "a home's kind is usually among the bowl's three, not always (%d of %d)" % [with_home, bowls])
-	check(never_more, "never more of the three than the rule allows are of home")
-	check(same_first, "the bowl's best fit is read from Seed, blood and Shape: the home does not move it")
-	check(strangers * 20 < bowls, "another home's kind is rarely offered (%d times in %d bowls)" % [strangers, bowls])
-	var col := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": "watches-from-above", "blood": "long-stride", "shape": "cast", "home": "columbia" }, {})
-	var mine: Array = col["candidates"].filter(func(c): return String(Genius.form_of(String(c["form"])).get("home", "")) == "columbia")
-	check(String(col["candidates"][0]["form"]) == "hawk" and mine.size() == 1, "a Cast of Columbia who wants something that watches from above is still offered the hawk first, and one kind of Columbia (%s)" % ", ".join(col["candidates"].map(func(c): return c["form"])))
-	check(mine.size() == 1 and (mine[0]["reasons"] as Array).any(func(r): return r["line"] == "home" and r["key"] == "columbia"), "and the offer says it is for the home's sake")
-	# after the rite a home's kinds are not read: they are kept
-	var g := _born_genius()
-	g.origin["home"] = "columbia"
-	g.day = 7
-	g.milestone("gate")
-	var later := g.read(2)
-	check(not later["candidates"].any(func(c): return String(Genius.form_of(String(c["form"])).get("home", "")) != ""), "the Gate's Reading offers no home's kind")
-	var cat := Genius.new()
-	var cf := Genius.form_of("carp")
-	cat.instar = 2
-	cat.body = { "form": "carp", "expression": cf["expression"], "silhouette": cf["silhouette"], "own": cf["features"].duplicate(), "heritage": [], "seedMark": "far-eyes", "grafts": [], "adaptations": [] }
-	check(cat.kept_kind(3).get("form", "") == "gate-carp" and Genius.form_name_at("carp", 1) == "Carp fry", "a carp fry grows into a carp, and a carp that keeps its kind into a gate-carp")
-	# a body of a home's kind is its age and wears its coat
-	var foal := GeniusBody.build({ "form": "steppe-horse", "silhouette": "beast-horse", "expression": "beast", "features": ["long-legs", "mane", "tail"], "instar": 1, "look": GeniusLook.born(77) }, Color.ORANGE, 1)
-	add_child(foal)
-	check(foal.uses_art and foal.age == "young" and foal.painted > 0, "a steppe foal is young, and wears a coat of its own")
-	foal.queue_free()
+				if here["candidates"][0]["form"] != nowhere["candidates"][0]["form"] or float(here["candidates"][0]["score"]) != float(nowhere["candidates"][0]["score"]):
+					moved.append("%s %s %s" % [h, sd["id"], shp])
+				for i in range(1, here["candidates"].size()):
+					var c: Dictionary = here["candidates"][i]
+					if (c["reasons"] as Array).any(func(r): return r["line"] == "home"):
+						leaned += 1
+						if String(c["reasons"][-1]["key"]) != String(h) or float(homes.get(h, {}).get(c["base"], 1.0)) <= 1.0:
+							moved.append("%s says %s is for the home's sake" % [h, c["base"]])
+	check(moved.is_empty(), "the bowl's best fit is read from Seed, blood and Shape: no home moves it (%s)" % ", ".join(moved.slice(0, 4)))
+	var some := false
+	for h in homes:
+		if not String(h).begins_with("$"):
+			for b in homes[h]:
+				some = some or not Data.base(String(b)).is_empty()
+	check(leaned > 0 or not some, "a home's lean shows in the offers beside it, and the offer says so (%d of %d bowls)" % [leaned, bowls])
+	# the rule, on the tests' own bases
+	_only_test_bases()
+	Data._homes = { "columbia": { "tlamp": 1.8 } }
+	var o := { "seed": "i-can-hold", "blood": "", "shape": "read" }
+	var at_home := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": "i-can-hold", "blood": "", "shape": "read", "home": "columbia" }, {})
+	var away := GeniusReading.read(1, GeniusReading.empty_tally(), o, {})
+	check(at_home["candidates"].map(func(c): return c["base"]) == ["tedge", "tlamp", "trun"] and str(at_home["candidates"][0]) == str(away["candidates"][0]), "the best fit is the same at home and away")
+	check(float(at_home["candidates"][1]["score"]) == float(away["candidates"][1]["score"]) and at_home["candidates"][1]["reasons"][-1]["line"] == "home" and at_home["candidates"][1]["reasons"][-1]["key"] == "columbia", "a base offered for the home's sake keeps the Reading's own score, and says so")
+	var w := { "seed": "watches-from-above", "blood": "", "shape": "read", "home": "columbia" }
+	check(GeniusReading.read(1, GeniusReading.empty_tally(), w, {})["candidates"].map(func(c): return c["base"]) == ["trun", "tlamp", "tedge"], "with no lean on it the third fit is offered third")
+	Data._homes = { "columbia": { "tedge": 5.0 } }
+	check(GeniusReading.read(1, GeniusReading.empty_tally(), w, {})["candidates"].map(func(c): return c["base"]) == ["trun", "tedge", "tlamp"], "a lean can bring a base up the bowl, but not to the top of it")
+	# with the bowl's own chance, a leaned base is likelier and never certain
+	Data._homes = { "columbia": { "tedge": 1.8 } }
+	var second_home := 0
+	var second_away := 0
+	for k in 200:
+		var wh := GeniusReading.read(1, GeniusReading.empty_tally(), w, {}, 0.6, 1000 + k)
+		var wa := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": "watches-from-above", "blood": "", "shape": "read" }, {}, 0.6, 1000 + k)
+		second_home += 1 if wh["candidates"][1]["base"] == "tedge" or wh["candidates"][0]["base"] == "tedge" else 0
+		second_away += 1 if wa["candidates"][1]["base"] == "tedge" or wa["candidates"][0]["base"] == "tedge" else 0
+	check(second_home > second_away and second_home < 200 and second_away > 0, "at home the leaned base is among the first two more often, and neither always nor never (%d against %d of 200)" % [second_home, second_away])
+	Data._homes = homes
+	_all_bases()
 
 
 ## The genius fights as what it is (docs/genius-combat.md; data/genius.json, fight): its moves
 ## from its kind and features, what it can do yet from its age, where it stands from its
 ## order, and on Free what it chooses from how its partner fights.
-func _fighting_genius(form_id: String, instar: int, order: String) -> Genius:
-	var f := Genius.form_of(form_id)
+## The bodies these fights are fought with: a kind of body, an Expression and parts. A fight
+## asks nothing else of a genius, so the tests do not depend on which forms the tree has.
+const BODIES := {
+	"runner": ["beast-runner", "beast", ["long-legs", "fangs", "ruff"]],
+	"flier": ["beast-flier", "beast", ["wings", "talons", "beak"]],
+	"shelled": ["beast-shell", "beast", ["shell", "stone-skin", "old-eyes"]],
+	"lantern": ["engine-lantern", "engine", ["lantern", "roots", "cold-core"]],
+	"sprite": ["kith-fey", "kith", ["lantern", "voice", "small-hands"]],
+	"blade": ["relic-blade", "relic", ["edge", "grip", "sheath"]],
+	"imp": ["daemon-small", "daemon", ["horns", "ledger", "tail"]],
+	"ember": ["aspect-flame", "aspect", ["ember", "glow", "smoke"]],
+	"shadow": ["aspect-shadow", "aspect", ["shadow-cloak", "glow", "smoke"]],
+	"hound": ["engine-quadruped", "engine", ["broad-chest", "iron-hide", "lantern"]],
+}
+
+func _fighting_genius(body_id: String, instar: int, order: String) -> Genius:
+	var b: Array = BODIES[body_id]
 	var g := Genius.new()
 	g.instar = instar
-	g.body = { "form": f["id"], "expression": f["expression"], "silhouette": f["silhouette"], "own": (f["features"] as Array).duplicate(), "heritage": [], "seedMark": "", "grafts": [], "adaptations": [] }
+	g.body = { "form": "", "base": "", "expression": b[1], "silhouette": b[0], "coatOf": b[0], "own": (b[2] as Array).duplicate(), "heritage": [], "seedMark": "", "grafts": [], "adaptations": [] }
 	g.order = order
 	return g
 
-func _genius_fight(form_id: String, instar: int, order: String, beast := "cut-wolf", extra: Dictionary = {}) -> Fight:
-	var opts := { "hero": Fight.default_hero(), "beast": beast, "seed": 3, "respawn": false, "genius": _fighting_genius(form_id, instar, order) }
+func _genius_fight(body_id: String, instar: int, order: String, beast := "cut-wolf", extra: Dictionary = {}) -> Fight:
+	var opts := { "hero": Fight.default_hero(), "beast": beast, "seed": 3, "respawn": false, "genius": _fighting_genius(body_id, instar, order) }
 	for k in extra:
 		opts[k] = extra[k]
 	var f := Fight.new(opts)
@@ -2453,7 +2853,7 @@ func test_genius_fight() -> void:
 		for k in F[table]:
 			if form_ids.has(k) and not Data.features().map(func(x): return x["id"]).has(k):
 				named_by_form.append(k)
-	check(bare.is_empty(), "every form in the lattice has a move, grown (%s)" % ", ".join(bare))
+	check(bare.is_empty(), "every form of every tree has a move, grown (%s)" % ", ".join(bare))
 	check(named_by_form.is_empty(), "no move is keyed by a form's name (%s)" % ", ".join(named_by_form))
 	var unknown: Array = []
 	for table in ["byKind", "byExpression", "byFeature"]:
@@ -2470,7 +2870,7 @@ func test_genius_fight() -> void:
 		ages_up = ages_up and int(F["ages"][a]["moves"]) >= last
 		last = int(F["ages"][a]["moves"])
 	check(ages_up, "it has more of its moves as it grows")
-	var pup := _genius_fight("field-wolf", 1, "hunt")
+	var pup := _genius_fight("runner", 1, "hunt")
 	var flinched := false
 	var pup_dmg := 0.0
 	for i in 600:
@@ -2484,7 +2884,7 @@ func test_genius_fight() -> void:
 				flinched = true
 			if e["type"] == "genius-hunt":
 				pup_dmg = maxf(pup_dmg, float(e["damage"]))
-	var grown := _genius_fight("field-wolf", 3, "hunt")
+	var grown := _genius_fight("runner", 3, "hunt")
 	var grown_dmg := 0.0
 	var slowed := false
 	var hamstrung := false
@@ -2503,13 +2903,13 @@ func test_genius_fight() -> void:
 	check(flinched and pup_dmg > 0.0, "a pup's nips make the foe flinch now and then (%d a nip)" % int(pup_dmg))
 	check(grown_dmg > pup_dmg * 2.0, "a grown wolf's bite does damage (%d to the pup's %d)" % [int(grown_dmg), int(pup_dmg)])
 	check(hamstrung and slowed and grown.g_pos.distance_to(grown.w_pos) < 3.0, "on Hunt the wolf is at the foe, and its hamstring slows it")
-	check(Fight.genius_great("quadruped", "beast").get("effect", "") == "stagger" and _genius_fight("field-wolf", 3, "hunt").g_great.is_empty() and not _genius_fight("field-wolf", 6, "hunt").g_great.is_empty(), "only the great have the great move")
+	check(Fight.genius_great("quadruped", "beast").get("effect", "") == "stagger" and _genius_fight("runner", 3, "hunt").g_great.is_empty() and not _genius_fight("runner", 6, "hunt").g_great.is_empty(), "only the great have the great move")
 	# --- the great move changes the fight
-	var apex := _genius_fight("field-wolf", 6, "hunt", "green-warden")
+	var apex := _genius_fight("runner", 6, "hunt", "green-warden")
 	apex.g_great_at = 0.0
 	apex._update_genius(0.016)
 	check(apex.w_state == "stagger" and apex.guard_open() and apex.stats["g_great"] == 1, "an Apex wolf pulls the Warden down: its guard is open")
-	var wall := _genius_fight("walking-lantern", 6, "guard")
+	var wall := _genius_fight("lantern", 6, "guard")
 	wall.g_great_at = 0.0
 	wall._update_genius(0.016)
 	check(wall.g_ward_blows >= 2, "an Apex lantern raises the wall: the next blows are turned (%d)" % wall.g_ward_blows)
@@ -2517,7 +2917,7 @@ func test_genius_fight() -> void:
 	wall._resolve_bite_from(wall.beast["attacks"][0], wall.w_pos, -1)
 	check(is_equal_approx(wall.p_hp, hp0), "and a blow behind the wall does not land")
 	# --- its damage is guarded like any blow out of turn
-	var w1 := _genius_fight("field-wolf", 3, "hunt", "green-warden")
+	var w1 := _genius_fight("runner", 3, "hunt", "green-warden")
 	var before := w1.w_hp
 	w1._genius_hits(100.0, "strike")
 	var shut := before - w1.w_hp
@@ -2526,14 +2926,14 @@ func test_genius_fight() -> void:
 	w1._genius_hits(100.0, "strike")
 	check(shut < 60.0 and before - w1.w_hp >= 99.0, "an elite's guard holds against its genius too, and its openings are open to it (%d, then %d)" % [int(shut), int(before - w1.w_hp)])
 	# --- stoop: one heavy blow, then it climbs
-	var hawk := _genius_fight("hawk", 3, "hunt")
+	var hawk := _genius_fight("flier", 3, "hunt")
 	hawk._genius_move(hawk._genius_has("stoop"))
 	var struck: float = hawk.stats["g_damage"]
 	hawk._genius_hunts(hawk._order("hunt")["hunt"], hawk.g_pos)
 	check(struck > 0.0 and hawk.now < hawk.g_climb_until and is_equal_approx(hawk.stats["g_damage"], struck), "a hawk stoops, and cannot strike again until it has climbed")
 	# --- brace
-	var soft := _genius_fight("field-wolf", 3, "guard")
-	var hard := _genius_fight("tortoise", 3, "guard")
+	var soft := _genius_fight("runner", 3, "guard")
+	var hard := _genius_fight("shelled", 3, "guard")
 	soft.g_pos = soft.p_pos
 	hard.g_pos = hard.p_pos
 	soft._genius_guards(20.0)
@@ -2547,7 +2947,7 @@ func test_genius_fight() -> void:
 	soft.g_guard_ready_at = 0.0
 	check(not soft._genius_guards(10.0), "it cannot guard a partner it is not beside")
 	# --- call
-	var kith := _genius_fight("lantern-sprite", 3, "guard")
+	var kith := _genius_fight("sprite", 3, "guard")
 	kith.g_pos = kith.p_pos
 	kith.w_state = "windup"
 	kith.w_target = -1
@@ -2558,7 +2958,7 @@ func test_genius_fight() -> void:
 	kith._resolve_bite_from(kith.beast["attacks"][0], kith.w_pos, -1)
 	check(is_equal_approx(kith.p_hp, kh) and kith.g_will < kw and kith.g_called_until < kith.now, "the blow lands on it, out of its Will, and its partner is untouched")
 	# --- with
-	var blade := _genius_fight("living-blade", 3, "guard")
+	var blade := _genius_fight("blade", 3, "guard")
 	var added := 0
 	for i in 6:
 		blade._genius_after_hit(10.0, false)
@@ -2569,7 +2969,7 @@ func test_genius_fight() -> void:
 	blade._update_genius(0.016)
 	check(blade.g_pos.is_equal_approx(blade.p_pos), "and is never apart from them")
 	# --- debt
-	var imp := _genius_fight("ledger-imp", 3, "hunt")
+	var imp := _genius_fight("imp", 3, "hunt")
 	imp._genius_move(imp._genius_has("debt"))
 	check(imp.now < imp.g_debt_until, "a daemon writes the foe a debt")
 	var wh := imp.w_hp
@@ -2588,7 +2988,7 @@ func test_genius_fight() -> void:
 	var full := float(dark.beast["attacks"][0]["damage"])
 	check(dark._genius_on_struck(full, dark.w_pos, -1) < full and is_equal_approx(dark._genius_on_struck(full, dark.w_pos + Vector2(20, 0), -1), full), "a shadow laid down weakens the blows struck from inside it, and no others")
 	# --- light
-	var lamp := _genius_fight("walking-lantern", 3, "guard")
+	var lamp := _genius_fight("lantern", 3, "guard")
 	lamp.p_state = "free"
 	lamp.input("block-down")
 	var plain_window := lamp.p_parry_until - lamp.now
@@ -2597,19 +2997,19 @@ func test_genius_fight() -> void:
 	lamp.input("block-down")
 	check(lamp.p_parry_until - lamp.now > plain_window * 1.2, "on ground its genius has lit, the moment to parry is longer")
 	# --- orders
-	var g1 := _fighting_genius("field-wolf", 1, "guard")
+	var g1 := _fighting_genius("runner", 1, "guard")
 	var seen1 := [g1.order]
 	for i in 3:
 		g1.order = g1.next_order()
 		seen1.append(g1.order)
-	var g3 := _fighting_genius("field-wolf", 3, "guard")
+	var g3 := _fighting_genius("runner", 3, "guard")
 	var seen3 := [g3.order]
 	for i in 4:
 		g3.order = g3.next_order()
 		seen3.append(g3.order)
 	check(seen1 == ["guard", "hunt", "guard", "hunt"] and seen3 == ["guard", "hunt", "hold", "free", "guard"], "a First Form guards and hunts; from the Second it can hold and go free (%s)" % str(seen3))
 	# --- hold
-	var hold := _genius_fight("iron-hound", 3, "hold")
+	var hold := _genius_fight("hound", 3, "hold")
 	hold.g_hold_at = hold.p_pos
 	hold.w_pos = hold.p_pos + Vector2(2.5, 0)
 	var held_hits := 0
@@ -2627,7 +3027,7 @@ func test_genius_fight() -> void:
 	hold.p_pos = hold.g_hold_at + Vector2(12.0, 0)
 	hold.g_guard_ready_at = 0.0
 	check(not hold._genius_guards(10.0) and hold.g_pos.distance_to(hold.g_hold_at) < 0.2, "and not when they leave it: it does not follow")
-	var far := _genius_fight("iron-hound", 3, "hold")
+	var far := _genius_fight("hound", 3, "hold")
 	far.w_pos = far.p_pos + Vector2(11.0, 0)
 	var none := 0
 	for i in 300:
@@ -2639,25 +3039,25 @@ func test_genius_fight() -> void:
 			if e["type"] in ["genius-hold", "genius-hunt"]:
 				none += 1
 	check(none == 0, "a foe that keeps off its ground it leaves alone")
-	var posted := _genius_fight("iron-hound", 3, "hold", "cut-wolf", { "post": Vector2(4, -3) })
+	var posted := _genius_fight("hound", 3, "hold", "cut-wolf", { "post": Vector2(4, -3) })
 	posted._update_genius(0.016)
 	check(posted.g_hold_at.is_equal_approx(Vector2(4, -3)), "where the fight has a post, that is the ground it holds")
 	# --- free: it judges by how its partner fights
-	var parrier := _genius_fight("field-wolf", 3, "free")
+	var parrier := _genius_fight("runner", 3, "free")
 	parrier.genius.lifetime["fights.parries"] = 40.0
 	parrier.genius.lifetime["fights.hurts"] = 4.0
 	parrier._update_genius(0.016)
-	var brawler := _genius_fight("field-wolf", 3, "free")
+	var brawler := _genius_fight("runner", 3, "free")
 	brawler.genius.lifetime["fights.hurts"] = 40.0
 	brawler.genius.lifetime["fights.parries"] = 2.0
 	brawler.g_order = "hunt"
 	brawler._update_genius(0.016)
 	check(parrier.g_order == "hunt" and parrier.g_free_why == String(Data.genius()["orders"][3]["free"]["why"]["parryShare"]), "raised by a partner who parries, on Free it hunts, and says why (%s: %s)" % [parrier.g_order, parrier.g_free_why])
 	check(brawler.g_order == "guard" and brawler.g_free_why == String(Data.genius()["orders"][3]["free"]["why"]["hurtShare"]), "raised by one who takes the blows, it guards (%s: %s)" % [brawler.g_order, brawler.g_free_why])
-	var keeper := _genius_fight("field-wolf", 3, "free", "cut-wolf", { "post": Vector2(1, 1) })
+	var keeper := _genius_fight("runner", 3, "free", "cut-wolf", { "post": Vector2(1, 1) })
 	keeper._update_genius(0.016)
 	check(keeper.g_order == "hold" and keeper.g_hold_at.is_equal_approx(Vector2(1, 1)), "and where there is a post to keep, it keeps it")
-	var again := _genius_fight("field-wolf", 3, "free")
+	var again := _genius_fight("runner", 3, "free")
 	again.genius.lifetime["fights.parries"] = 40.0
 	again.genius.lifetime["fights.hurts"] = 4.0
 	again._update_genius(0.016)
@@ -2667,13 +3067,13 @@ func test_genius_fight() -> void:
 		said = said or (e["type"] == "free" and e["order"] == "hunt")
 	check(said, "it says what it chose when it chooses")
 	# --- the Tally learns how its partner meets a blow
-	var learn := _genius_fight("field-wolf", 3, "guard")
-	learn._record([{ "type": "parry" }, { "type": "parry" }, { "type": "hurt" }, { "type": "block" }])
-	check(float(learn.genius.lifetime.get("fights.parries", 0.0)) == 2.0 and float(learn.genius.lifetime.get("fights.hurts", 0.0)) == 1.0 and float(learn.genius.lifetime.get("fights.blocks", 0.0)) == 1.0, "it counts the blows its partner parries, blocks and takes")
+	var learn := _genius_fight("runner", 3, "guard")
+	learn._record([{ "type": "parry" }, { "type": "parry" }, { "type": "hurt" }, { "type": "block" }, { "type": "evade", "how": "dodged" }, { "type": "evade", "how": "dodged" }, { "type": "evade", "how": "dodged" }])
+	check(float(learn.genius.lifetime.get("fights.parries", 0.0)) == 2.0 and float(learn.genius.lifetime.get("fights.hurts", 0.0)) == 1.0 and float(learn.genius.lifetime.get("fights.blocks", 0.0)) == 1.0 and float(learn.genius.tally["counters"].get("fights.dodges", 0.0)) == 3.0, "it counts the blows its partner parries, blocks, takes and dodges")
 	# --- a fight with a genius is the same fight twice
 	var runs: Array = []
 	for k in 2:
-		var d := _genius_fight("field-wolf", 6, "free", "green-warden")
+		var d := _genius_fight("runner", 6, "free", "green-warden")
 		for i in 900:
 			d.update(1.0 / 60.0, Vector2.ZERO)
 			d.drain()

@@ -2,7 +2,8 @@ extends Node
 ## A genius in a fight, to look at (docs/genius-combat.md): a steady hand plays the hero against
 ## the Warden with one genius on one order, and the frame after a given event is saved.
 ##   xvfb-run -a godot --path . res://game/tests/genius_shots.tscn -- FORM INSTAR ORDER EVENT OUT.png
-## e.g. field-wolf 3 hunt genius-move /tmp/hunt.png   (EVENT: genius-move, genius-great, genius-hold, free, genius-guard)
+## FORM is a form of the tree by its id (a base's, or a hybrid's: wolf+hawk:wolf-courser); with
+## none, the first prong of the first base.   (EVENT: genius-move, genius-great, genius-hold, free, genius-guard)
 
 func _ready() -> void:
 	_run.call_deferred()
@@ -11,15 +12,12 @@ func _run() -> void:
 	var root := get_tree().root
 	await get_tree().process_frame
 	var args := OS.get_cmdline_user_args()
-	var form_id: String = args[0] if args.size() > 0 else "field-wolf"
+	var form_id: String = args[0] if args.size() > 0 else String(Genius.road_of(String(Data.bases()[0]["id"]))[2]["id"])
 	var instar: int = int(args[1]) if args.size() > 1 else 3
 	var order: String = args[2] if args.size() > 2 else "hunt"
 	var want: String = args[3] if args.size() > 3 else "genius-move"
 	var out: String = args[4] if args.size() > 4 else "user://genius-%s-%d-%s.png" % [form_id, instar, order]
-	var f0 := Genius.form_of(form_id)
-	var g := Genius.new()
-	g.instar = instar
-	g.body = { "form": f0["id"], "expression": f0["expression"], "silhouette": f0["silhouette"], "own": (f0["features"] as Array).duplicate(), "heritage": [], "seedMark": "", "grafts": [], "adaptations": [] }
+	var g := Genius.at_form(form_id, instar)
 	g.look = GeniusLook.born(4711)
 	g.order = order
 	g.name = ""

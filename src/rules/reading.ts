@@ -220,7 +220,7 @@ export function read(input: ReadingInput): ReadingResult {
   const lines = playLines(input.tally, cfg);
   const offer = (forms: Form[]) => forms
     .map((f, i) => ({ f, i, ...fit(f.leans, lines, cfg) }))
-    .sort((a, b) => b.score - a.score || a.i - b.i)
+    .sort((a, b) => round(b.score) - round(a.score) || a.i - b.i)   // of equal fits, the one written first
     .map((x) => candidate(x.f, x.score, x.reasons, seedMark, heritage, grafts));
   const candidates = offer(kids);
   let turning: Turning | null = null;

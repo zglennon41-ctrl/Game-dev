@@ -2107,7 +2107,7 @@ func show_reading(reading: Dictionary, then: Callable, heading := "", subheading
 		var why := ""
 		var reasons: Array = c.get("reasons", [])
 		if rite:
-			why = "Called by %s." % GeniusReading.reason_words(reasons) if not reasons.is_empty() else "The bowl's own chance."
+			why = "Called by %s." % GeniusReading.reason_words(reasons, true) if not reasons.is_empty() else "The bowl's own chance."
 		else:
 			why = "Because of %s." % _reason_shares(reasons) if not reasons.is_empty() else "Nothing in the Tally speaks for it yet."
 			why += "  It comes of %s." % GeniusReading.lean_words(Data.form(String(c["form"])).get("leans", {}))
@@ -2125,8 +2125,9 @@ func show_reading(reading: Dictionary, then: Callable, heading := "", subheading
 		var tc: Dictionary = turning["candidates"][0]
 		var second := Data.base(String(turning["second"]))
 		var gift: Array = second["hybrid"]["gift"].map(func(f): return Rite.feature_label(String(f)))
-		var twhy := "Since it settled you have fought like %s: %s. It may turn, and be %s: its own body with %s, in %s's coat." % [
-			_a(String(second["name"])), GeniusReading.reason_words(turning.get("reasons", [])), _a(String(turning["name"])), " and ".join(gift), _a(String(second["name"]))]
+		var twhy := "Since it settled you have fought like %s: %s. It may turn, and be %s: its own body with %s, in %s's coat. Of the hybrid's paths (%s) the Tally speaks best for this one." % [
+			_a(String(second["name"])), GeniusReading.reason_words(turning.get("reasons", [])), _a(String(turning["name"])), " and ".join(gift), _a(String(second["name"])),
+			", ".join((turning["candidates"] as Array).map(func(x): return String(x["name"])))]
 		_reading_card(row, tc, n, look, col, "THE TURNING  ·  %s" % String(turning["name"]).to_upper(), twhy, "Let it turn", false, func():
 			hide_reading()
 			then.call(Genius.TURN))

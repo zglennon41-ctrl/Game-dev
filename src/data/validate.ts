@@ -2,6 +2,7 @@
 import Ajv from 'ajv';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, basename } from 'node:path';
+import { signature, compose, type Base, type Hybrids } from './tree';
 
 export interface Problem { file: string; message: string }
 
@@ -16,7 +17,14 @@ export const TREE_ROSTER = ['wolf', 'hawk', 'stag', 'tortoise', 'fox', 'imp', 'l
 
 const read = (f: string) => JSON.parse(readFileSync(f, 'utf8'));
 
-export function validateData(dir = 'data'): Problem[] {
+/** What a base file must say of the soul (docs/genius-tree.md, "The soul outside the body"). */
+const SOUL_FIELDS = ['soul', 'sign', 'habit', 'of'];
+
+/**
+ * Check every file in data/. opts.basesDir: check the bases of another folder in place of
+ * data/genius-bases (the tests keep small bases of their own).
+ */
+export function validateData(dir = 'data', opts: { basesDir?: string } = {}): Problem[] {
   const problems: Problem[] = [];
   const ajv = new Ajv({ allErrors: true, strict: false });
   const files = readdirSync(dir).filter((f) => f.endsWith('.json'));
@@ -32,11 +40,24 @@ export function validateData(dir = 'data'): Problem[] {
     if (!lifeCheck(read(join(dir, 'lives', f)))) for (const e of lifeCheck.errors ?? []) problems.push({ file: `lives/${f}`, message: `${e.instancePath || '/'} ${e.message}` });
   }
   const baseCheck = ajv.compile(read(join(dir, 'schemas', 'genius-base.schema.json')));
-  const baseFiles = existsSync(join(dir, 'genius-bases')) ? readdirSync(join(dir, 'genius-bases')).filter((f) => f.endsWith('.json')).sort() : [];
-  for (const f of baseFiles) {
-    if (!baseCheck(read(join(dir, 'genius-bases', f)))) for (const e of baseCheck.errors ?? []) problems.push({ file: `genius-bases/${f}`, message: `${e.instancePath || '/'} ${e.message}` });
-  }
+  const basesDir = opts.basesDir ?? join(dir, 'genius-bases');
+  const baseFiles = existsSync(basesDir) ? readdirSync(basesDir).filter((f) => f.endsWith('.json')).sort() : [];
   if (problems.length) return problems;
+  // A base that only lacks what it must say of the soul is still a tree: its other rules are
+  // checked too. One that is not the shape of a base is left out of the checks between files.
+  const broken = new Set<string>();
+  for (const f of baseFiles) {
+    if (baseCheck(read(join(basesDir, f)))) continue;
+    const lacking: Record<string, number> = {};
+    for (const e of baseCheck.errors ?? []) {
+      const missing = e.keyword === 'required' ? (e.params as { missingProperty?: string }).missingProperty ?? '' : '';
+      if (SOUL_FIELDS.includes(missing)) { lacking[missing] = (lacking[missing] ?? 0) + 1; continue; }
+      problems.push({ file: `genius-bases/${f}`, message: `${e.instancePath || '/'} ${e.message}` });
+      broken.add(f);
+    }
+    // said once a base, not once a form
+    if (Object.keys(lacking).length) problems.push({ file: `genius-bases/${f}`, message: `it does not yet say all it must of the soul (docs/genius-tree.md): ${SOUL_FIELDS.filter((k) => lacking[k]).map((k) => (k === 'soul' ? 'no soul' : `${lacking[k]} forms without ${k}`)).join(', ')}` });
+  }
 
   // References between files.
   const D = (n: string) => read(join(dir, `${n}.json`));
@@ -44,7 +65,7 @@ export function validateData(dir = 'data'): Problem[] {
   const features = ids('features');
   const need = (file: string, set: Set<string>, id: string, what: string) => { if (!set.has(id)) problems.push({ file, message: `unknown ${what}: ${id}` }); };
   // The genius tree (docs/genius-tree.md): every base is a tree of thirty-one forms.
-  const bases: any[] = baseFiles.map((f) => ({ file: `genius-bases/${f}`, ...read(join(dir, 'genius-bases', f)) }));
+  const bases: any[] = baseFiles.filter((f) => !broken.has(f)).map((f) => ({ file: `genius-bases/${f}`, ...read(join(basesDir, f)) }));
   for (const b of bases) for (const nf of b.newFeatures ?? []) features.add(nf.id);
   const seedIds = ids('seeds');
   const bloodIds = ids('bloods');
@@ -53,6 +74,8 @@ export function validateData(dir = 'data'): Problem[] {
   const hasBody = (sil: string) => !existsSync(bodyDir) || existsSync(join(bodyDir, `${sil}.glb`));
   const formIds = new Set<string>();
   const formNames = new Map<string, string>();
+  const signatures = new Map<string, string>();   // a path's two heaviest leans -> the path that has them
+  const firsts = new Map<string, string[]>();     // a path's heaviest lean -> the paths that lean on it first
   for (const b of bases) {
     const say = (message: string) => problems.push({ file: b.file, message });
     if (b.file !== `genius-bases/${b.id}.json`) say('the file is not named for its id');
@@ -77,6 +100,28 @@ export function validateData(dir = 'data'): Problem[] {
       for (const c of n.prongs ?? n.finishes ?? []) node(c, level + 1);
     };
     node({ ...b.settled, prongs: b.paths }, 1);
+    // Every path is unique in play: its signature is the two things it leans on most.
+    const firstLines: string[] = [];
+    for (const p of b.paths) {
+      const { first, sig } = signature(p.leans ?? {});
+      if (sig.length < 2) { say(`${p.id} leans on fewer than two things: a path's signature is its two heaviest leans`); continue; }
+      const key = sig.join(' and ');
+      if (signatures.has(key)) say(`${p.id} is earned by the same play as ${signatures.get(key)} (${key}): every path in the game is unique`);
+      signatures.set(key, p.id);
+      const same = firsts.get(first) ?? [];
+      firsts.set(first, [...same, p.id]);
+      if (same.length >= 3) say(`${p.id} leans first on ${first}, as ${same.join(', ')} already do: no more than three paths in the game may`);
+      firstLines.push(first.split('.')[0]);
+    }
+    if (new Set(firstLines).size < firstLines.length) say(`two of its paths lean first on the same line of the Tally (${firstLines.join(', ')}): three paths, three different lines`);
+  }
+  // A hybrid's three paths are each earned by their own play too, whichever two bases make it.
+  const hybridRule = D('genius-hybrids') as Hybrids;
+  for (const a of bases) for (const b of bases) {
+    if (a.id === b.id) continue;
+    const paths = compose(a as Base, b as Base, hybridRule).filter((f) => f.level === 2);
+    const sigs = paths.map((f) => signature(f.leans).sig.join(' and '));
+    if (new Set(sigs).size < sigs.length) problems.push({ file: 'genius-hybrids.json', message: `${a.id}+${b.id}: two of its paths are earned by the same play (${sigs.join('; ')}); write the pair by hand or change the rule` });
   }
   // A home's lean names a home and bases; a pair written by hand names two bases.
   const baseIds = new Set<string>(bases.map((b) => b.id));
@@ -87,7 +132,10 @@ export function validateData(dir = 'data'): Problem[] {
     // a base still to be written is not a mistake while the tree is being filled; a name that is no base's of the roster is
     for (const k of Object.keys(leans)) if (!baseIds.has(k) && !TREE_ROSTER.includes(k)) problems.push({ file: 'genius-homes.json', message: `${home}: ${k} is not a base` });
   }
-  for (const pair of Object.keys(D('genius-hybrids').pairs)) for (const k of pair.split('+')) if (!baseIds.has(k)) problems.push({ file: 'genius-hybrids.json', message: `${pair}: ${k} is not a base` });
+  for (const [pair, written] of Object.entries<{ nodes?: Record<string, unknown> }>(D('genius-hybrids').pairs)) {
+    for (const k of pair.split('+')) if (!baseIds.has(k)) problems.push({ file: 'genius-hybrids.json', message: `${pair}: ${k} is not a base` });
+    for (const id of Object.keys(written.nodes ?? {})) if (!formIds.has(id) || !pair.split('+').includes(id.split('-')[0])) problems.push({ file: 'genius-hybrids.json', message: `${pair}: ${id} is not a form of either base` });
+  }
   for (const s of D('seeds')) need('seeds.json', features, s.seedMark, `seed-mark of ${s.id}`);
   for (const a of D('adaptations')) need('adaptations.json', features, a.id, 'adaptation feature');
   for (const s of D('shades')) need('shades.json', features, s.graftFeature, `graft of ${s.id}`);
@@ -116,12 +164,17 @@ export function validateData(dir = 'data'): Problem[] {
   for (const b of D('bloods')) for (const m of b.marks ?? []) need('bloods.json', peopleFeatures, m, `mark of ${b.id}`);
   const disciplines = ids('disciplines');
   for (const a of D('archetypes')) need('archetypes.json', disciplines, a.discipline, `discipline of ${a.id}`);
-  const forms = bases.flatMap((b) => { const out: Array<{ id: string; silhouette: string }> = []; const walk = (n: any) => { out.push({ id: n.id, silhouette: n.silhouette ?? b.silhouette }); for (const c of n.prongs ?? n.finishes ?? []) walk(c); }; walk({ ...b.settled, prongs: b.paths }); return out; });
+  const forms = bases.flatMap((b) => { const out: Array<{ id: string; silhouette: string }> = []; const walk = (n: any, worn: string) => { const sil = n.silhouette ?? worn; out.push({ id: n.id, silhouette: sil }); for (const c of n.prongs ?? n.finishes ?? []) walk(c, sil); }; walk({ ...b.settled, prongs: b.paths }, b.silhouette); return out; });
   // Every silhouette in the lattice can be assembled, and every slot has sockets.
   const bodies = D('genius-bodies');
   for (const f of forms) if (!bodies.silhouettes[f.silhouette] && hasBody(f.silhouette)) problems.push({ file: 'genius-bodies.json', message: `no body for silhouette ${f.silhouette} (form ${f.id})` });
   const looked = D('genius-looks').bodies;
-  for (const b of bases) if (hasBody(b.silhouette) && existsSync(bodyDir) && !looked[b.silhouette]) problems.push({ file: 'genius-looks.json', message: `no coats for ${b.silhouette}, the body of the base ${b.id}` });
+  const coated = new Set<string>();
+  for (const f of forms) {
+    if (coated.has(f.silhouette) || !hasBody(f.silhouette) || !existsSync(bodyDir)) continue;
+    coated.add(f.silhouette);
+    if (!looked[f.silhouette]) problems.push({ file: 'genius-looks.json', message: `no coats for the body ${f.silhouette} (worn by ${f.id})` });
+  }
   for (const ft of D('features')) if (ft.slot !== 'surface' && !bodies.slotSockets[ft.slot]) problems.push({ file: 'genius-bodies.json', message: `no sockets for slot ${ft.slot}` });
   for (const [sil, sp] of Object.entries(bodies.silhouettes as Record<string, { kind: string }>)) if (!bodies.kinds[sp.kind]) problems.push({ file: 'genius-bodies.json', message: `${sil}: unknown kind ${sp.kind}` });
   // What a genius may look like: every body named is a silhouette, has a palette that exists,

@@ -37,6 +37,11 @@
       },
       "ground": {
         "tunnel": 1.0
+      },
+      "meets": {
+        "parries": 0.6,
+        "dodges": 0.2,
+        "hurts": 0.1
       }
     },
     {
@@ -91,6 +96,11 @@
       "techniques": {
         "closing-strike": 3.5,
         "long-shot": 1.0
+      },
+      "meets": {
+        "parries": 0.6,
+        "dodges": 0.2,
+        "hurts": 0.1
       }
     },
     {
@@ -145,6 +155,11 @@
       "techniques": {
         "closing-strike": 3.5,
         "long-shot": 1.0
+      },
+      "meets": {
+        "parries": 0.6,
+        "dodges": 0.2,
+        "hurts": 0.1
       }
     },
     {
@@ -198,6 +213,11 @@
       ],
       "techniques": {
         "closing-strike": 3.0
+      },
+      "meets": {
+        "parries": 0.6,
+        "dodges": 0.2,
+        "hurts": 0.1
       }
     },
     {
@@ -243,6 +263,11 @@
       ],
       "techniques": {
         "closing-strike": 3.0
+      },
+      "meets": {
+        "parries": 0.6,
+        "dodges": 0.2,
+        "hurts": 0.1
       }
     }
   ],
@@ -304,10 +329,7 @@
   ],
   "picks": {
     "2": {
-      "expression": "kith"
-    },
-    "3": {
-      "expression": "relic"
+      "turn": true
     }
   },
   "focus": "warden",

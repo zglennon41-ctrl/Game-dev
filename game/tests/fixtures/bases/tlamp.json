@@ -4,6 +4,7 @@
  "class": "item",
  "expression": "engine",
  "silhouette": "engine-lantern",
+ "soul": "The soul of no one: a test lamp, kept for the engine's tests only.",
  "spark": "A test mote, kept for the engine's tests only.",
  "nature": {
   "orders": {
@@ -39,7 +40,9 @@
  "settled": {
   "id": "tlamp-small",
   "name": "Small test lamp",
-  "text": "The small of a test base, kept for the engine's tests only.",
+  "text": "A test settled form of the test lamp, kept for the engine's tests only.",
+  "sign": "A stranger would notice the mark of Small test lamp on it.",
+  "habit": "When nothing is happening, Small test lamp counts to itself.",
   "features": [
    "lantern",
    "glow"
@@ -49,13 +52,16 @@
   {
    "id": "tlamp-a",
    "name": "Test Lamp Path A",
+   "of": "one who is like Test Lamp Path A",
    "text": "A test path of the test lamp, kept for the engine's tests only.",
+   "sign": "A stranger would notice the mark of Test Lamp Path A on it.",
+   "habit": "When nothing is happening, Test Lamp Path A counts to itself.",
    "leans": {
-    "fights": {
-     "blocks": 1.0
+    "orders": {
+     "hold": 1.0
     },
-    "company": {
-     "party": 0.5
+    "ground": {
+     "night": 0.6
     }
    },
    "features": [
@@ -65,7 +71,10 @@
     {
      "id": "tlamp-a1",
      "name": "Test Lamp Prong A1",
+     "of": "one who is like Test Lamp Prong A1",
      "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Lamp Prong A1 on it.",
+     "habit": "When nothing is happening, Test Lamp Prong A1 counts to itself.",
      "leans": {
       "shape": {
        "read": 1.0
@@ -81,7 +90,10 @@
       {
        "id": "tlamp-a1x",
        "name": "Test Lamp Finish A1X",
+       "of": "one who is like Test Lamp Finish A1X",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish A1X on it.",
+       "habit": "When nothing is happening, Test Lamp Finish A1X counts to itself.",
        "leans": {
         "orders": {
          "hold": 1.0
@@ -97,7 +109,10 @@
       {
        "id": "tlamp-a1y",
        "name": "Test Lamp Finish A1Y",
+       "of": "one who is like Test Lamp Finish A1Y",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish A1Y on it.",
+       "habit": "When nothing is happening, Test Lamp Finish A1Y counts to itself.",
        "leans": {
         "ground": {
          "night": 1.0,
@@ -113,7 +128,10 @@
     {
      "id": "tlamp-a2",
      "name": "Test Lamp Prong A2",
+     "of": "one who is like Test Lamp Prong A2",
      "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Lamp Prong A2 on it.",
+     "habit": "When nothing is happening, Test Lamp Prong A2 counts to itself.",
      "leans": {
       "quests": {
        "linework": 1.0,
@@ -127,7 +145,10 @@
       {
        "id": "tlamp-a2x",
        "name": "Test Lamp Finish A2X",
+       "of": "one who is like Test Lamp Finish A2X",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish A2X on it.",
+       "habit": "When nothing is happening, Test Lamp Finish A2X counts to itself.",
        "leans": {
         "ground": {
          "line": 1.0
@@ -143,7 +164,10 @@
       {
        "id": "tlamp-a2y",
        "name": "Test Lamp Finish A2Y",
+       "of": "one who is like Test Lamp Finish A2Y",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish A2Y on it.",
+       "habit": "When nothing is happening, Test Lamp Finish A2Y counts to itself.",
        "leans": {
         "orders": {
          "guard": 1.0
@@ -161,7 +185,10 @@
     {
      "id": "tlamp-a3",
      "name": "Test Lamp Prong A3",
+     "of": "one who is like Test Lamp Prong A3",
      "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Lamp Prong A3 on it.",
+     "habit": "When nothing is happening, Test Lamp Prong A3 counts to itself.",
      "leans": {
       "shape": {
        "make": 1.0
@@ -177,7 +204,10 @@
       {
        "id": "tlamp-a3x",
        "name": "Test Lamp Finish A3X",
+       "of": "one who is like Test Lamp Finish A3X",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish A3X on it.",
+       "habit": "When nothing is happening, Test Lamp Finish A3X counts to itself.",
        "leans": {
         "company": {
          "party": 1.0
@@ -193,7 +223,10 @@
       {
        "id": "tlamp-a3y",
        "name": "Test Lamp Finish A3Y",
+       "of": "one who is like Test Lamp Finish A3Y",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish A3Y on it.",
+       "habit": "When nothing is happening, Test Lamp Finish A3Y counts to itself.",
        "leans": {
         "bonds": {
          "shade": 1.0
@@ -213,13 +246,16 @@
   {
    "id": "tlamp-b",
    "name": "Test Lamp Path B",
+   "of": "one who is like Test Lamp Path B",
    "text": "A test path of the test lamp, kept for the engine's tests only.",
+   "sign": "A stranger would notice the mark of Test Lamp Path B on it.",
+   "habit": "When nothing is happening, Test Lamp Path B counts to itself.",
    "leans": {
-    "company": {
-     "party": 1.0
+    "shape": {
+     "read": 1.0
     },
-    "orders": {
-     "hold": 0.5
+    "bonds": {
+     "shade": 0.6
     }
    },
    "features": [
@@ -229,10 +265,16 @@
     {
      "id": "tlamp-b1",
      "name": "Test Lamp Prong B1",
+     "of": "one who is like Test Lamp Prong B1",
      "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Lamp Prong B1 on it.",
+     "habit": "When nothing is happening, Test Lamp Prong B1 counts to itself.",
      "leans": {
-      "range": {
-       "far": 1.0
+      "quests": {
+       "escort": 1.0
+      },
+      "ground": {
+       "quiet": 0.5
       }
      },
      "features": [
@@ -242,13 +284,16 @@
       {
        "id": "tlamp-b1x",
        "name": "Test Lamp Finish B1X",
+       "of": "one who is like Test Lamp Finish B1X",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish B1X on it.",
+       "habit": "When nothing is happening, Test Lamp Finish B1X counts to itself.",
        "leans": {
-        "ground": {
-         "quiet": 1.0
+        "fights": {
+         "blocks": 1.0
         },
-        "shape": {
-         "make": 0.5
+        "company": {
+         "party": 0.5
         }
        },
        "features": [
@@ -258,13 +303,16 @@
       {
        "id": "tlamp-b1y",
        "name": "Test Lamp Finish B1Y",
+       "of": "one who is like Test Lamp Finish B1Y",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish B1Y on it.",
+       "habit": "When nothing is happening, Test Lamp Finish B1Y counts to itself.",
        "leans": {
-        "quests": {
-         "escort": 1.0
-        },
         "ground": {
-         "quiet": 0.5
+         "quiet": 1.0
+        },
+        "shape": {
+         "make": 0.5
         }
        },
        "features": [
@@ -276,13 +324,14 @@
     {
      "id": "tlamp-b2",
      "name": "Test Lamp Prong B2",
+     "of": "one who is like Test Lamp Prong B2",
      "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Lamp Prong B2 on it.",
+     "habit": "When nothing is happening, Test Lamp Prong B2 counts to itself.",
      "leans": {
-      "shape": {
-       "read": 1.0
-      },
-      "quests": {
-       "linework": 0.5
+      "ground": {
+       "night": 1.0,
+       "line": 0.5
       }
      },
      "features": [
@@ -292,13 +341,13 @@
       {
        "id": "tlamp-b2x",
        "name": "Test Lamp Finish B2X",
+       "of": "one who is like Test Lamp Finish B2X",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish B2X on it.",
+       "habit": "When nothing is happening, Test Lamp Finish B2X counts to itself.",
        "leans": {
-        "orders": {
-         "hold": 1.0
-        },
-        "ground": {
-         "night": 0.5
+        "range": {
+         "far": 1.0
         }
        },
        "features": [
@@ -308,11 +357,16 @@
       {
        "id": "tlamp-b2y",
        "name": "Test Lamp Finish B2Y",
+       "of": "one who is like Test Lamp Finish B2Y",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish B2Y on it.",
+       "habit": "When nothing is happening, Test Lamp Finish B2Y counts to itself.",
        "leans": {
+        "orders": {
+         "hold": 1.0
+        },
         "ground": {
-         "night": 1.0,
-         "line": 0.5
+         "night": 0.5
         }
        },
        "features": [
@@ -324,11 +378,16 @@
     {
      "id": "tlamp-b3",
      "name": "Test Lamp Prong B3",
+     "of": "one who is like Test Lamp Prong B3",
      "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Lamp Prong B3 on it.",
+     "habit": "When nothing is happening, Test Lamp Prong B3 counts to itself.",
      "leans": {
-      "quests": {
-       "linework": 1.0,
-       "escort": 0.5
+      "orders": {
+       "guard": 1.0
+      },
+      "fights": {
+       "blocks": 0.5
       }
      },
      "features": [
@@ -338,13 +397,16 @@
       {
        "id": "tlamp-b3x",
        "name": "Test Lamp Finish B3X",
+       "of": "one who is like Test Lamp Finish B3X",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish B3X on it.",
+       "habit": "When nothing is happening, Test Lamp Finish B3X counts to itself.",
        "leans": {
-        "ground": {
-         "line": 1.0
+        "shape": {
+         "read": 1.0
         },
-        "bonds": {
-         "shade": 0.5
+        "quests": {
+         "linework": 0.5
         }
        },
        "features": [
@@ -354,13 +416,16 @@
       {
        "id": "tlamp-b3y",
        "name": "Test Lamp Finish B3Y",
+       "of": "one who is like Test Lamp Finish B3Y",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish B3Y on it.",
+       "habit": "When nothing is happening, Test Lamp Finish B3Y counts to itself.",
        "leans": {
-        "orders": {
-         "guard": 1.0
+        "ground": {
+         "line": 1.0
         },
-        "fights": {
-         "blocks": 0.5
+        "bonds": {
+         "shade": 0.5
         }
        },
        "features": [
@@ -374,13 +439,16 @@
   {
    "id": "tlamp-c",
    "name": "Test Lamp Path C",
+   "of": "one who is like Test Lamp Path C",
    "text": "A test path of the test lamp, kept for the engine's tests only.",
+   "sign": "A stranger would notice the mark of Test Lamp Path C on it.",
+   "habit": "When nothing is happening, Test Lamp Path C counts to itself.",
    "leans": {
     "ground": {
      "line": 1.0
     },
-    "bonds": {
-     "shade": 0.5
+    "quests": {
+     "linework": 0.6
     }
    },
    "features": [
@@ -390,13 +458,16 @@
     {
      "id": "tlamp-c1",
      "name": "Test Lamp Prong C1",
+     "of": "one who is like Test Lamp Prong C1",
      "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Lamp Prong C1 on it.",
+     "habit": "When nothing is happening, Test Lamp Prong C1 counts to itself.",
      "leans": {
-      "fights": {
-       "blocks": 1.0
+      "bonds": {
+       "shade": 1.0
       },
-      "company": {
-       "party": 0.5
+      "shape": {
+       "read": 0.5
       }
      },
      "features": [
@@ -406,13 +477,14 @@
       {
        "id": "tlamp-c1x",
        "name": "Test Lamp Finish C1X",
+       "of": "one who is like Test Lamp Finish C1X",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish C1X on it.",
+       "habit": "When nothing is happening, Test Lamp Finish C1X counts to itself.",
        "leans": {
-        "bonds": {
-         "shade": 1.0
-        },
-        "shape": {
-         "read": 0.5
+        "quests": {
+         "linework": 1.0,
+         "escort": 0.5
         }
        },
        "features": [
@@ -422,13 +494,16 @@
       {
        "id": "tlamp-c1y",
        "name": "Test Lamp Finish C1Y",
+       "of": "one who is like Test Lamp Finish C1Y",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish C1Y on it.",
+       "habit": "When nothing is happening, Test Lamp Finish C1Y counts to itself.",
        "leans": {
-        "shape": {
-         "make": 1.0
+        "company": {
+         "party": 1.0
         },
         "orders": {
-         "guard": 0.5
+         "hold": 0.5
         }
        },
        "features": [
@@ -440,10 +515,16 @@
     {
      "id": "tlamp-c2",
      "name": "Test Lamp Prong C2",
+     "of": "one who is like Test Lamp Prong C2",
      "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Lamp Prong C2 on it.",
+     "habit": "When nothing is happening, Test Lamp Prong C2 counts to itself.",
      "leans": {
-      "range": {
-       "far": 1.0
+      "ground": {
+       "quiet": 1.0
+      },
+      "shape": {
+       "make": 0.5
       }
      },
      "features": [
@@ -453,13 +534,16 @@
       {
        "id": "tlamp-c2x",
        "name": "Test Lamp Finish C2X",
+       "of": "one who is like Test Lamp Finish C2X",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish C2X on it.",
+       "habit": "When nothing is happening, Test Lamp Finish C2X counts to itself.",
        "leans": {
-        "ground": {
-         "quiet": 1.0
-        },
         "shape": {
-         "make": 0.5
+         "make": 1.0
+        },
+        "orders": {
+         "guard": 0.5
         }
        },
        "features": [
@@ -469,13 +553,16 @@
       {
        "id": "tlamp-c2y",
        "name": "Test Lamp Finish C2Y",
+       "of": "one who is like Test Lamp Finish C2Y",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish C2Y on it.",
+       "habit": "When nothing is happening, Test Lamp Finish C2Y counts to itself.",
        "leans": {
-        "quests": {
-         "escort": 1.0
+        "fights": {
+         "blocks": 1.0
         },
-        "ground": {
-         "quiet": 0.5
+        "company": {
+         "party": 0.5
         }
        },
        "features": [
@@ -487,13 +574,16 @@
     {
      "id": "tlamp-c3",
      "name": "Test Lamp Prong C3",
+     "of": "one who is like Test Lamp Prong C3",
      "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Lamp Prong C3 on it.",
+     "habit": "When nothing is happening, Test Lamp Prong C3 counts to itself.",
      "leans": {
-      "shape": {
-       "read": 1.0
+      "orders": {
+       "hold": 1.0
       },
-      "quests": {
-       "linework": 0.5
+      "ground": {
+       "night": 0.5
       }
      },
      "features": [
@@ -503,13 +593,16 @@
       {
        "id": "tlamp-c3x",
        "name": "Test Lamp Finish C3X",
+       "of": "one who is like Test Lamp Finish C3X",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish C3X on it.",
+       "habit": "When nothing is happening, Test Lamp Finish C3X counts to itself.",
        "leans": {
-        "orders": {
-         "hold": 1.0
+        "quests": {
+         "escort": 1.0
         },
         "ground": {
-         "night": 0.5
+         "quiet": 0.5
         }
        },
        "features": [
@@ -519,11 +612,13 @@
       {
        "id": "tlamp-c3y",
        "name": "Test Lamp Finish C3Y",
+       "of": "one who is like Test Lamp Finish C3Y",
        "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Lamp Finish C3Y on it.",
+       "habit": "When nothing is happening, Test Lamp Finish C3Y counts to itself.",
        "leans": {
-        "ground": {
-         "night": 1.0,
-         "line": 0.5
+        "range": {
+         "far": 1.0
         }
        },
        "features": [

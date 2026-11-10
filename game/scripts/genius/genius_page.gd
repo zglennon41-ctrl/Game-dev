@@ -103,6 +103,7 @@ func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 		g.kind(), String(g.body.get("expression", "")).capitalize(), g.form_name(), String(g.age().get("word", "grown")), g.resonance(tier), int(g.will_max(tier)), g.shadow_cap(tier), "" if g.shadow_cap(tier) == 1 else "s", g.day])
 	_p(v, "[i]%s[/i]" % String(g.form().get("text", "")), Style.DIM)
 	if g.is_born():
+		_soul_section(v, g)
 		_tree_section(v, g)
 	if g.is_born() and not g.look.is_empty():
 		_look_section(v, g)
@@ -224,6 +225,27 @@ func _look_section(v: Control, g: Genius) -> void:
 		for c in Data.genius_looks()["keepsakeColors"]:
 			_choice(crow, String(c["name"]).capitalize(), now == String(c["id"]), func(): _set_look("keepsakeColor", String(c["id"])), Color(String(c["color"])))
 
+## The soul outside the body: whose soul it is, what the form it is now is the picture of, and
+## the detail a partner comes to know it by (its sign, its habit).
+func _soul_section(v: Control, g: Genius) -> void:
+	var lines: Array = []
+	if g.soul() != "":
+		lines.append("[color=#a8803f]WHOSE SOUL[/color]   %s" % g.soul())
+	var pair := String(g.body.get("base", "")).split("+")
+	if pair.size() == 2 and String(Data.base(pair[1]).get("soul", "")) != "":
+		lines.append("[color=#a8803f]AND TURNED TOWARD[/color]   %s" % String(Data.base(pair[1])["soul"]))
+	if g.picture_of() != "":
+		lines.append("[color=#a8803f]THE PICTURE OF[/color]   %s" % g.picture_of())
+	if g.sign_now() != "":
+		lines.append("[color=#a8803f]ITS SIGN[/color]   %s" % g.sign_now())
+	if g.habit() != "":
+		lines.append("[color=#a8803f]ITS HABIT[/color]   %s" % g.habit())
+	if lines.is_empty():
+		return
+	_section(v, "YOUR SOUL, OUTSIDE YOU")
+	for l in lines:
+		_p(v, String(l))
+
 ## Its tree (docs/genius-tree.md): every form of its base (or of its hybrid), the road it has
 ## taken, where it is, what it may become next and how well the Tally speaks for each now, and
 ## what play leads to every form it has not reached.
@@ -292,8 +314,10 @@ func _tree_form(col: Control, f: Dictionary, depth: int, here: String, road: Arr
 	Style.rich(r, [17, 15, 14][depth], Style.DIM, "body")
 	var indent := ["", "    ", "        "][depth] as String
 	var mark := ["", "> ", "- "][depth] as String
-	r.text = "%s[color=%s]%s%s%s[/color]%s\n%s[i]%s[/i]" % [indent, name_col, mark, "[b]%s[/b]" % f["name"] if depth == 0 else String(f["name"]), "", tag,
-		indent + ("" if depth == 0 else "  "), GeniusReading.lean_words(f.get("leans", {}))]
+	var pad := indent + ("" if depth == 0 else "  ")
+	var pic := String(f.get("of", ""))
+	r.text = "%s[color=%s]%s%s[/color]%s%s\n%s[i]comes of %s[/i]" % [indent, name_col, mark, "[b]%s[/b]" % f["name"] if depth == 0 else String(f["name"]), tag,
+		("\n%s[color=#d9cfc0]%s[/color]" % [pad, pic]) if pic != "" else "", pad, GeniusReading.lean_words(f.get("leans", {}))]
 	r.tooltip_text = String(f.get("text", ""))
 	col.add_child(r)
 

@@ -19,7 +19,9 @@
         "bend",
         "kind",
         "path",
-        "carried"
+        "carried",
+        "of",
+        "sign"
       ],
       "additionalProperties": false,
       "properties": {
@@ -43,6 +45,12 @@
           "type": "string"
         },
         "carried": {
+          "type": "string"
+        },
+        "of": {
+          "type": "string"
+        },
+        "sign": {
           "type": "string"
         }
       }
@@ -72,6 +80,15 @@
                   "type": "string"
                 },
                 "text": {
+                  "type": "string"
+                },
+                "of": {
+                  "type": "string"
+                },
+                "sign": {
+                  "type": "string"
+                },
+                "habit": {
                   "type": "string"
                 }
               }

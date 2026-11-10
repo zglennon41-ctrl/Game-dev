@@ -65,6 +65,16 @@ func _build(info: Dictionary, color: Color, title: String) -> void:
 	n.text = String(info.get("name", "")) if String(info.get("name", "")) != "" else _form_name(form)
 	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(n)
+	# what in its partner it is the picture of, under its name
+	var pic := String(info.get("of", Data.form(form).get("of", "")))
+	if pic != "":
+		var ofl := Label.new()
+		Style.label(ofl, 15, Style.FG, "italic")
+		ofl.text = pic
+		ofl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		ofl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		ofl.custom_minimum_size = Vector2(W - 28, 0)
+		v.add_child(ofl)
 	var sub := Label.new()
 	Style.label(sub, 15, Style.DIM, "italic")
 	var instar := int(info.get("instar", 1))

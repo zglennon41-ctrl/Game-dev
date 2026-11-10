@@ -14,7 +14,7 @@ func _run() -> void:
 		_elites()
 		get_tree().quit()
 		return
-	if OS.get_cmdline_user_args().has("--genii"):
+	if Array(OS.get_cmdline_user_args()).any(func(a): return a == "--genii" or String(a).begins_with("--genii=")):
 		_genii()
 		get_tree().quit()
 		return
@@ -255,47 +255,59 @@ func _elite_row(label: String, beast_id: String, health: float, hand: String, sh
 		("%.0f s" % wins[wins.size() / 2]) if not wins.is_empty() else "-", ("%.0f" % mean.call(left)) if not wins.is_empty() else "-",
 		("%.0f%%" % mean.call(lost_at)) if not lost_at.is_empty() else "-", "%.1f" % (hurts / float(ELITE_SEEDS))]
 
-## A genius of a given form at a given instar, on a given order, with nothing else to it: for
-## the table below.
+## A genius standing at a form of the tree at a given instar, on a given order, with nothing
+## else to it: for the table below.
 func _genius_of(form_id: String, instar: int, order: String) -> Genius:
-	var f := Genius.form_of(form_id)
-	var g := Genius.new()
-	g.instar = instar
-	g.body = { "form": f["id"], "expression": f["expression"], "silhouette": f["silhouette"], "own": (f["features"] as Array).duplicate(), "heritage": [], "seedMark": "", "grafts": [], "adaptations": [] }
+	var g := Genius.at_form(form_id, instar)
 	g.order = order
 	return g
 
-const GENII := [["field-wolf", "beast, runner"], ["hawk", "beast, flier"], ["tortoise", "beast, shelled"], ["lantern-sprite", "kith"], ["iron-hound", "engine, hound"],
-	["walking-lantern", "engine, lantern"], ["living-blade", "relic"], ["ledger-imp", "daemon"], ["ember", "aspect, flame"], ["shadow", "aspect, shadow"]]
 const GENII_SEEDS := 4
 
-## The genii in a fight (npm run balance:game -- --genii): each kind of genius at three ages on
-## each order, beside the same steady hero, alone, against the Green's Warden. What it has,
+## The rows of the table: for every base of the tree (or the one named: -- --genii=wolf), one
+## road down it: its settled form young, its first prong grown, its first finish at its apex.
+func _genii_rows(only := "") -> Array:
+	var rows: Array = []
+	for b in Data.bases():
+		if only != "" and only != String(b["id"]):
+			continue
+		var road := Genius.road_of(String(b["id"]))
+		if road.size() == 4:
+			rows.append({ "label": "%s (%s)" % [b["name"], b["expression"]], "forms": { 1: road[0], 3: road[2], 6: road[3] } })
+	return rows
+
+## The genii in a fight (npm run balance:game -- --genii): each base of the tree at three ages
+## on each order, beside the same steady hero, alone, against the Green's Warden. What it has,
 ## its share of the damage, the blows it kept off its partner, the Will it spent, its falls,
 ## how long the fight took and what was left of the hero. The first row is the hero alone.
 func _genii() -> void:
-	print("\n== GENII: what each kind has, by age (its moves; * the move only the great have) ==")
-	for gk in GENII:
-		var f := Genius.form_of(String(gk[0]))
-		var kind := String(Data.genius_bodies()["silhouettes"][f["silhouette"]]["kind"])
-		var line := "%-18s" % String(gk[1])
+	var only := ""
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--genii="):
+			only = String(a).trim_prefix("--genii=")
+	var rows := _genii_rows(only)
+	print("\n== GENII: what each base has, by age, down its first road (its moves; * the move only the great have) ==")
+	for row in rows:
+		var line := "%-22s" % String(row["label"])
 		for n in [1, 3, 6]:
+			var f: Dictionary = row["forms"][n]
+			var kind := String(Data.genius_bodies()["silhouettes"].get(f["silhouette"], {}).get("kind", "quadruped"))
 			var age: Dictionary = Data.genius()["fight"]["ages"][String(Genius.age_at(n)["id"])]
 			var mv: Array = Fight.genius_moves(kind, String(f["expression"]), f["features"], int(age.get("moves", 2))).map(func(m): return String(m["id"]) + (":" + String(m["effect"]) if m.has("effect") else ""))
 			var gr := Fight.genius_great(kind, String(f["expression"])) if float(age.get("great", 0.0)) > 0.0 else {}
-			line += "  %d: %s%s" % [n, ", ".join(mv) if not mv.is_empty() else "a nip" if n == 1 else "-", ("  *" + String(gr.get("name", ""))) if not gr.is_empty() else ""]
+			line += "  %d %s: %s%s" % [n, f["name"], ", ".join(mv) if not mv.is_empty() else "a nip" if n == 1 else "-", ("  *" + String(gr.get("name", ""))) if not gr.is_empty() else ""]
 		print(line)
 	print("\n== GENII IN A FIGHT: a steady hero alone with one genius against the Warden of the Cutting, %d fights of up to 240 s each ==" % GENII_SEEDS)
-	print("%-18s %-6s %-6s %7s %6s %7s %7s %6s %6s %6s %7s" % ["genius", "instar", "order", "felled", "in", "share", "kept off", "Will", "moves", "falls", "hero"])
+	print("%-22s %-6s %-6s %7s %6s %7s %7s %6s %6s %6s %7s" % ["genius", "instar", "order", "felled", "in", "share", "kept off", "Will", "moves", "falls", "hero"])
 	var none := _genius_row("(no genius)", { "none": true })
-	print("%-18s %-6s %-6s %7s %6s %7s %7s %6s %6s %6s %7s" % none)
-	for gk in GENII:
+	print("%-22s %-6s %-6s %7s %6s %7s %7s %6s %6s %6s %7s" % none)
+	for row in rows:
 		for n in [1, 3, 6]:
 			for order in ["guard", "hunt", "hold", "free"]:
 				if n < 2 and order in ["hold", "free"]:
 					continue
-				var row := _genius_row(String(gk[1]), { "form": gk[0], "instar": n, "order": order })
-				print("%-18s %-6s %-6s %7s %6s %7s %7s %6s %6s %6s %7s" % row)
+				var r := _genius_row(String(row["label"]), { "form": row["forms"][n]["id"], "instar": n, "order": order })
+				print("%-22s %-6s %-6s %7s %6s %7s %7s %6s %6s %6s %7s" % r)
 
 func _genius_row(label: String, gspec: Dictionary) -> Array:
 	var wins: Array = []

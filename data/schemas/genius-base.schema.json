@@ -8,6 +8,7 @@
     "class",
     "expression",
     "silhouette",
+    "soul",
     "spark",
     "nature",
     "calls",
@@ -47,7 +48,10 @@
       "required": [
         "id",
         "name",
+        "of",
         "text",
+        "sign",
+        "habit",
         "features",
         "leans"
       ],
@@ -79,6 +83,21 @@
         },
         "leans": {
           "$ref": "#/definitions/leans"
+        },
+        "sign": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 170
+        },
+        "habit": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 170
+        },
+        "of": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 90
         }
       }
     },
@@ -87,7 +106,10 @@
       "required": [
         "id",
         "name",
+        "of",
         "text",
+        "sign",
+        "habit",
         "features",
         "leans",
         "finishes"
@@ -128,6 +150,21 @@
           },
           "minItems": 2,
           "maxItems": 2
+        },
+        "sign": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 170
+        },
+        "habit": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 170
+        },
+        "of": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 90
         }
       }
     },
@@ -136,7 +173,10 @@
       "required": [
         "id",
         "name",
+        "of",
         "text",
+        "sign",
+        "habit",
         "features",
         "leans",
         "prongs"
@@ -177,6 +217,21 @@
           },
           "minItems": 3,
           "maxItems": 3
+        },
+        "sign": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 170
+        },
+        "habit": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 170
+        },
+        "of": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 90
         }
       }
     }
@@ -283,6 +338,8 @@
         "id",
         "name",
         "text",
+        "sign",
+        "habit",
         "features"
       ],
       "additionalProperties": false,
@@ -313,6 +370,16 @@
         },
         "leans": {
           "$ref": "#/definitions/leans"
+        },
+        "sign": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 170
+        },
+        "habit": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 170
         }
       }
     },
@@ -345,6 +412,11 @@
           }
         }
       }
+    },
+    "soul": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 200
     }
   }
 }

@@ -139,7 +139,10 @@ func hybrid_forms(first: String, second: String) -> Array:
 	if not _hybrid_cache.has(key):
 		var a := base(first)
 		var b := base(second)
-		_hybrid_cache[key] = GeniusTree.compose(a, b, _hybrids) if not a.is_empty() and not b.is_empty() and first != second else []
+		var labels := {}
+		for f in _features:
+			labels[f["id"]] = f.get("label", f["id"])
+		_hybrid_cache[key] = GeniusTree.compose(a, b, _hybrids, labels) if not a.is_empty() and not b.is_empty() and first != second else []
 	return _hybrid_cache[key]
 
 ## A form by its id: a form of a base, or of a hybrid (first+second:form). {} if there is none.

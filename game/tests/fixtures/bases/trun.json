@@ -1,0 +1,641 @@
+{
+ "id": "trun",
+ "name": "Test Runner",
+ "class": "animal",
+ "expression": "beast",
+ "silhouette": "beast-runner",
+ "soul": "The soul of no one: a test runner, kept for the engine's tests only.",
+ "spark": "A test mote, kept for the engine's tests only.",
+ "nature": {
+  "orders": {
+   "hunt": 1.0
+  },
+  "ground": {
+   "wild": 0.7
+  },
+  "company": {
+   "party": 0.5
+  }
+ },
+ "calls": {
+  "seed": {
+   "stands-between": 1.0,
+   "watches-from-above": 0.5
+  },
+  "shape": {
+   "anchor": 0.6,
+   "turn": 0.4
+  },
+  "blood": {
+   "ridgefolk": 0.5
+  }
+ },
+ "hybrid": {
+  "adj": "Running",
+  "gift": [
+   "long-legs"
+  ],
+  "text": "It is a test of the test runner."
+ },
+ "settled": {
+  "id": "trun-small",
+  "name": "Small test runner",
+  "text": "A test settled form of the test runner, kept for the engine's tests only.",
+  "sign": "A stranger would notice the mark of Small test runner on it.",
+  "habit": "When nothing is happening, Small test runner counts to itself.",
+  "features": [
+   "long-legs",
+   "fangs"
+  ]
+ },
+ "paths": [
+  {
+   "id": "trun-a",
+   "name": "Test Runner Path A",
+   "of": "one who is like Test Runner Path A",
+   "text": "A test path of the test runner, kept for the engine's tests only.",
+   "sign": "A stranger would notice the mark of Test Runner Path A on it.",
+   "habit": "When nothing is happening, Test Runner Path A counts to itself.",
+   "leans": {
+    "orders": {
+     "hunt": 1.0
+    },
+    "ground": {
+     "wild": 0.6
+    }
+   },
+   "features": [
+    "tail"
+   ],
+   "prongs": [
+    {
+     "id": "trun-a1",
+     "name": "Test Runner Prong A1",
+     "of": "one who is like Test Runner Prong A1",
+     "text": "A test prong of the test runner, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Runner Prong A1 on it.",
+     "habit": "When nothing is happening, Test Runner Prong A1 counts to itself.",
+     "leans": {
+      "fights": {
+       "blocks": 1.0
+      },
+      "bonds": {
+       "classmate": 0.5
+      }
+     },
+     "features": [
+      "ruff"
+     ],
+     "finishes": [
+      {
+       "id": "trun-a1x",
+       "name": "Test Runner Finish A1X",
+       "of": "one who is like Test Runner Finish A1X",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish A1X on it.",
+       "habit": "When nothing is happening, Test Runner Finish A1X counts to itself.",
+       "leans": {
+        "orders": {
+         "hunt": 1.0
+        },
+        "ground": {
+         "wild": 0.5
+        }
+       },
+       "features": [
+        "long-legs"
+       ]
+      },
+      {
+       "id": "trun-a1y",
+       "name": "Test Runner Finish A1Y",
+       "of": "one who is like Test Runner Finish A1Y",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish A1Y on it.",
+       "habit": "When nothing is happening, Test Runner Finish A1Y counts to itself.",
+       "leans": {
+        "ground": {
+         "wild": 1.0
+        },
+        "orders": {
+         "guard": 0.5
+        }
+       },
+       "features": [
+        "fangs"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "trun-a2",
+     "name": "Test Runner Prong A2",
+     "of": "one who is like Test Runner Prong A2",
+     "text": "A test prong of the test runner, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Runner Prong A2 on it.",
+     "habit": "When nothing is happening, Test Runner Prong A2 counts to itself.",
+     "leans": {
+      "bonds": {
+       "classmate": 1.0
+      },
+      "quests": {
+       "salvage": 0.5
+      }
+     },
+     "features": [
+      "ground-claws"
+     ],
+     "finishes": [
+      {
+       "id": "trun-a2x",
+       "name": "Test Runner Finish A2X",
+       "of": "one who is like Test Runner Finish A2X",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish A2X on it.",
+       "habit": "When nothing is happening, Test Runner Finish A2X counts to itself.",
+       "leans": {
+        "orders": {
+         "guard": 1.0
+        },
+        "quests": {
+         "escort": 0.5
+        }
+       },
+       "features": [
+        "tail"
+       ]
+      },
+      {
+       "id": "trun-a2y",
+       "name": "Test Runner Finish A2Y",
+       "of": "one who is like Test Runner Finish A2Y",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish A2Y on it.",
+       "habit": "When nothing is happening, Test Runner Finish A2Y counts to itself.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "fights": {
+         "hurts": 0.5
+        }
+       },
+       "features": [
+        "broad-chest"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "trun-a3",
+     "name": "Test Runner Prong A3",
+     "of": "one who is like Test Runner Prong A3",
+     "text": "A test prong of the test runner, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Runner Prong A3 on it.",
+     "habit": "When nothing is happening, Test Runner Prong A3 counts to itself.",
+     "leans": {
+      "ground": {
+       "water": 1.0
+      },
+      "company": {
+       "party": 0.5
+      }
+     },
+     "features": [
+      "ruff"
+     ],
+     "finishes": [
+      {
+       "id": "trun-a3x",
+       "name": "Test Runner Finish A3X",
+       "of": "one who is like Test Runner Finish A3X",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish A3X on it.",
+       "habit": "When nothing is happening, Test Runner Finish A3X counts to itself.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "orders": {
+         "hunt": 0.5
+        }
+       },
+       "features": [
+        "long-legs"
+       ]
+      },
+      {
+       "id": "trun-a3y",
+       "name": "Test Runner Finish A3Y",
+       "of": "one who is like Test Runner Finish A3Y",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish A3Y on it.",
+       "habit": "When nothing is happening, Test Runner Finish A3Y counts to itself.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "fights": {
+         "blocks": 0.5
+        }
+       },
+       "features": [
+        "fangs"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "trun-b",
+   "name": "Test Runner Path B",
+   "of": "one who is like Test Runner Path B",
+   "text": "A test path of the test runner, kept for the engine's tests only.",
+   "sign": "A stranger would notice the mark of Test Runner Path B on it.",
+   "habit": "When nothing is happening, Test Runner Path B counts to itself.",
+   "leans": {
+    "fights": {
+     "blocks": 1.0
+    },
+    "orders": {
+     "guard": 0.6
+    }
+   },
+   "features": [
+    "fangs"
+   ],
+   "prongs": [
+    {
+     "id": "trun-b1",
+     "name": "Test Runner Prong B1",
+     "of": "one who is like Test Runner Prong B1",
+     "text": "A test prong of the test runner, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Runner Prong B1 on it.",
+     "habit": "When nothing is happening, Test Runner Prong B1 counts to itself.",
+     "leans": {
+      "quests": {
+       "salvage": 1.0
+      },
+      "shape": {
+       "anchor": 0.5
+      }
+     },
+     "features": [
+      "long-legs"
+     ],
+     "finishes": [
+      {
+       "id": "trun-b1x",
+       "name": "Test Runner Finish B1X",
+       "of": "one who is like Test Runner Finish B1X",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish B1X on it.",
+       "habit": "When nothing is happening, Test Runner Finish B1X counts to itself.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "range": {
+         "close": 0.5
+        }
+       },
+       "features": [
+        "broad-chest"
+       ]
+      },
+      {
+       "id": "trun-b1y",
+       "name": "Test Runner Finish B1Y",
+       "of": "one who is like Test Runner Finish B1Y",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish B1Y on it.",
+       "habit": "When nothing is happening, Test Runner Finish B1Y counts to itself.",
+       "leans": {
+        "shape": {
+         "anchor": 1.0
+        },
+        "ground": {
+         "water": 0.5
+        }
+       },
+       "features": [
+        "ground-claws"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "trun-b2",
+     "name": "Test Runner Prong B2",
+     "of": "one who is like Test Runner Prong B2",
+     "text": "A test prong of the test runner, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Runner Prong B2 on it.",
+     "habit": "When nothing is happening, Test Runner Prong B2 counts to itself.",
+     "leans": {
+      "ground": {
+       "wild": 1.0
+      },
+      "orders": {
+       "guard": 0.5
+      }
+     },
+     "features": [
+      "tail"
+     ],
+     "finishes": [
+      {
+       "id": "trun-b2x",
+       "name": "Test Runner Finish B2X",
+       "of": "one who is like Test Runner Finish B2X",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish B2X on it.",
+       "habit": "When nothing is happening, Test Runner Finish B2X counts to itself.",
+       "leans": {
+        "orders": {
+         "free": 1.0
+        }
+       },
+       "features": [
+        "fangs"
+       ]
+      },
+      {
+       "id": "trun-b2y",
+       "name": "Test Runner Finish B2Y",
+       "of": "one who is like Test Runner Finish B2Y",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish B2Y on it.",
+       "habit": "When nothing is happening, Test Runner Finish B2Y counts to itself.",
+       "leans": {
+        "orders": {
+         "hunt": 1.0
+        },
+        "ground": {
+         "wild": 0.5
+        }
+       },
+       "features": [
+        "ruff"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "trun-b3",
+     "name": "Test Runner Prong B3",
+     "of": "one who is like Test Runner Prong B3",
+     "text": "A test prong of the test runner, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Runner Prong B3 on it.",
+     "habit": "When nothing is happening, Test Runner Prong B3 counts to itself.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      },
+      "fights": {
+       "hurts": 0.5
+      }
+     },
+     "features": [
+      "long-legs"
+     ],
+     "finishes": [
+      {
+       "id": "trun-b3x",
+       "name": "Test Runner Finish B3X",
+       "of": "one who is like Test Runner Finish B3X",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish B3X on it.",
+       "habit": "When nothing is happening, Test Runner Finish B3X counts to itself.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        },
+        "bonds": {
+         "classmate": 0.5
+        }
+       },
+       "features": [
+        "broad-chest"
+       ]
+      },
+      {
+       "id": "trun-b3y",
+       "name": "Test Runner Finish B3Y",
+       "of": "one who is like Test Runner Finish B3Y",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish B3Y on it.",
+       "habit": "When nothing is happening, Test Runner Finish B3Y counts to itself.",
+       "leans": {
+        "orders": {
+         "guard": 1.0
+        },
+        "quests": {
+         "escort": 0.5
+        }
+       },
+       "features": [
+        "ground-claws"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "trun-c",
+   "name": "Test Runner Path C",
+   "of": "one who is like Test Runner Path C",
+   "text": "A test path of the test runner, kept for the engine's tests only.",
+   "sign": "A stranger would notice the mark of Test Runner Path C on it.",
+   "habit": "When nothing is happening, Test Runner Path C counts to itself.",
+   "leans": {
+    "bonds": {
+     "classmate": 1.0
+    },
+    "company": {
+     "party": 0.6
+    }
+   },
+   "features": [
+    "ground-claws"
+   ],
+   "prongs": [
+    {
+     "id": "trun-c1",
+     "name": "Test Runner Prong C1",
+     "of": "one who is like Test Runner Prong C1",
+     "text": "A test prong of the test runner, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Runner Prong C1 on it.",
+     "habit": "When nothing is happening, Test Runner Prong C1 counts to itself.",
+     "leans": {
+      "quests": {
+       "escort": 1.0
+      },
+      "fights": {
+       "blocks": 0.5
+      }
+     },
+     "features": [
+      "broad-chest"
+     ],
+     "finishes": [
+      {
+       "id": "trun-c1x",
+       "name": "Test Runner Finish C1X",
+       "of": "one who is like Test Runner Finish C1X",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish C1X on it.",
+       "habit": "When nothing is happening, Test Runner Finish C1X counts to itself.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        },
+        "quests": {
+         "salvage": 0.5
+        }
+       },
+       "features": [
+        "ruff"
+       ]
+      },
+      {
+       "id": "trun-c1y",
+       "name": "Test Runner Finish C1Y",
+       "of": "one who is like Test Runner Finish C1Y",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish C1Y on it.",
+       "habit": "When nothing is happening, Test Runner Finish C1Y counts to itself.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "orders": {
+         "hunt": 0.5
+        }
+       },
+       "features": [
+        "tail"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "trun-c2",
+     "name": "Test Runner Prong C2",
+     "of": "one who is like Test Runner Prong C2",
+     "text": "A test prong of the test runner, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Runner Prong C2 on it.",
+     "habit": "When nothing is happening, Test Runner Prong C2 counts to itself.",
+     "leans": {
+      "shape": {
+       "anchor": 1.0
+      },
+      "ground": {
+       "water": 0.5
+      }
+     },
+     "features": [
+      "fangs"
+     ],
+     "finishes": [
+      {
+       "id": "trun-c2x",
+       "name": "Test Runner Finish C2X",
+       "of": "one who is like Test Runner Finish C2X",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish C2X on it.",
+       "habit": "When nothing is happening, Test Runner Finish C2X counts to itself.",
+       "leans": {
+        "ground": {
+         "water": 1.0
+        },
+        "company": {
+         "party": 0.5
+        }
+       },
+       "features": [
+        "ground-claws"
+       ]
+      },
+      {
+       "id": "trun-c2y",
+       "name": "Test Runner Finish C2Y",
+       "of": "one who is like Test Runner Finish C2Y",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish C2Y on it.",
+       "habit": "When nothing is happening, Test Runner Finish C2Y counts to itself.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "range": {
+         "close": 0.5
+        }
+       },
+       "features": [
+        "long-legs"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "trun-c3",
+     "name": "Test Runner Prong C3",
+     "of": "one who is like Test Runner Prong C3",
+     "text": "A test prong of the test runner, kept for the engine's tests only.",
+     "sign": "A stranger would notice the mark of Test Runner Prong C3 on it.",
+     "habit": "When nothing is happening, Test Runner Prong C3 counts to itself.",
+     "leans": {
+      "orders": {
+       "hunt": 1.0
+      },
+      "ground": {
+       "wild": 0.5
+      }
+     },
+     "features": [
+      "broad-chest"
+     ],
+     "finishes": [
+      {
+       "id": "trun-c3x",
+       "name": "Test Runner Finish C3X",
+       "of": "one who is like Test Runner Finish C3X",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish C3X on it.",
+       "habit": "When nothing is happening, Test Runner Finish C3X counts to itself.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        },
+        "shape": {
+         "anchor": 0.5
+        }
+       },
+       "features": [
+        "ruff"
+       ]
+      },
+      {
+       "id": "trun-c3y",
+       "name": "Test Runner Finish C3Y",
+       "of": "one who is like Test Runner Finish C3Y",
+       "text": "A test finish of the test runner, kept for the engine's tests only.",
+       "sign": "A stranger would notice the mark of Test Runner Finish C3Y on it.",
+       "habit": "When nothing is happening, Test Runner Finish C3Y counts to itself.",
+       "leans": {
+        "orders": {
+         "free": 1.0
+        }
+       },
+       "features": [
+        "tail"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
