@@ -731,6 +731,12 @@ func test_genius_art() -> void:
 			check(tris <= int(pair[2]), "%s/%s is within budget (%d of %d triangles)" % [pair[0], file, tris, int(pair[2])])
 			if pair[0] == "bodies":
 				var socks := scene.find_children("socket_*", "", true, false).map(func(x): return String(x.name))
+				# a rigged body carries its sockets as bones of its skeleton
+				for sk in scene.find_children("*", "Skeleton3D", true, false):
+					for bi in (sk as Skeleton3D).get_bone_count():
+						var bn := (sk as Skeleton3D).get_bone_name(bi)
+						if bn.begins_with("socket_") and not socks.has(bn):
+							socks.append(bn)
 				check(socks.has("socket_body") and socks.size() >= 4, "bodies/%s carries its sockets (%s)" % [file, ", ".join(socks)])
 			scene.free()
 	for file in DirAccess.get_files_at("res://game/assets/genius/cards/"):

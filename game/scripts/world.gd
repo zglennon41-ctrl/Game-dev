@@ -3221,6 +3221,10 @@ void fragment() {
 ## placeholders if not).
 func make_form(info: Dictionary, color: Color) -> Node3D:
 	var gb := GeniusBody.build(info, color, int(info.get("instar", 1)))
+	# An art body takes the cel bands like everything else that lives (the placeholders keep
+	# their shadow shader: toonify only turns standard materials).
+	if gb.uses_art:
+		toonify(gb)
 	for m in gb.find_children("*", "MeshInstance3D", true, false):
 		var mi := m as MeshInstance3D
 		if mi.material_overlay:
