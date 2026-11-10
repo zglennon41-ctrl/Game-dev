@@ -4,8 +4,18 @@ class_name GeniusPage
 extends CanvasLayer
 
 signal closed
+## The partner chose a coat, a marking or a keepsake. Whoever keeps the genius saves it and
+## sets look_saved; if nobody does, the page saves it to the stored character itself.
+signal look_changed(g: Genius)
 
+var look_saved := false
 var _root := Control.new()
+var _g: Genius
+var _color := Color.WHITE
+var _tier := 0
+var _marks_n := 0
+var _scroll: ScrollContainer
+var _card: GeniusCard
 
 const MILESTONE_WORDS := {
 	"rite": "the rite", "gate": "passing the Field Examination, at the Gate", "pattern-built": "building your own Pattern",
@@ -26,6 +36,10 @@ func _ready() -> void:
 func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 	for c in _root.get_children():
 		c.queue_free()
+	_g = g
+	_color = color
+	_tier = tier
+	_marks_n = marks
 	visible = true
 	var veil := ColorRect.new()
 	veil.color = Color(0.02, 0.016, 0.016, 0.8)
@@ -65,7 +79,9 @@ func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 	var card := GeniusCard.make(info, color, "")
 	card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(card)
+	_card = card
 	var scroll := ScrollContainer.new()
+	_scroll = scroll
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -85,6 +101,8 @@ func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 		_p(v, "Your record: %d Marks." % marks, Style.DIM)
 	_p(v, "A %s, %s. Resonance %d: it fights with %d Will and can carry %d shadow%s. Day %d since the rite." % [
 		String(g.body.get("expression", "")).capitalize(), g.form_name(), g.resonance(tier), int(g.will_max(tier)), g.shadow_cap(tier), "" if g.shadow_cap(tier) == 1 else "s", g.day])
+	if g.is_born() and not g.look.is_empty():
+		_look_section(v, g)
 	# The next Reading.
 	_section(v, "THE NEXT READING")
 	var n := g.instar + 1
@@ -158,6 +176,84 @@ func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 	foot.add_child(close)
 	close.call_deferred("grab_focus")
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+## How this one looks, and what its partner may choose: one of its own few coats, which of its
+## body's markings show, and a keepsake to wear.
+func _look_section(v: Control, g: Genius) -> void:
+	var form := String(g.body.get("form", ""))
+	var sil := String(g.body.get("silhouette", ""))
+	var res := GeniusLook.resolve(g.look, form, sil, g.instar)
+	_section(v, "HOW IT LOOKS")
+	_p(v, GeniusLook.describe(g.look, form, sil) + "  [color=#9e958a]No other %s is quite like it. Its build and its light it was born with; the coat, the markings and the keepsake are yours to choose.[/color]" % g.form_name().to_lower())
+	var offered: Array = res["offered"]
+	if not offered.is_empty():
+		var row := _choice_row(v, "Coat")
+		for i in offered.size():
+			_choice(row, String(offered[i]["name"]).capitalize() + ("  (born)" if i == 0 else ""), clampi(int(g.look.get("coat", 0)), 0, offered.size() - 1) == i, func(): _set_look("coat", i), Color(String(offered[i]["main"])))
+	var shown: Dictionary = res["marks"]
+	if not shown.is_empty():
+		var row := _choice_row(v, "Markings")
+		var names: Dictionary = GeniusLook.body(sil)["marks"]
+		for r in shown:
+			_choice(row, String(names[r]["name"]).capitalize(), bool(shown[r]), func():
+				var m: Dictionary = g.look.get("marks", {}).duplicate()
+				m[r] = not bool(shown[r])
+				_set_look("marks", m))
+	var can: Array = GeniusLook.keepsakes_for(_card.body.sockets.keys()) if _card and _card.body else Data.genius_looks()["keepsakes"]
+	var krow := _choice_row(v, "Keepsake")
+	var worn := String(g.look.get("keepsake", ""))
+	_choice(krow, "None", worn == "", func(): _set_look("keepsake", ""))
+	for k in can:
+		_choice(krow, String(k["name"]).capitalize(), worn == String(k["id"]), func(): _set_look("keepsake", String(k["id"])))
+	if worn != "":
+		var crow := _choice_row(v, "Its colour")
+		var now := String(GeniusLook.keepsake_color(String(g.look.get("keepsakeColor", "")))["id"])
+		for c in Data.genius_looks()["keepsakeColors"]:
+			_choice(crow, String(c["name"]).capitalize(), now == String(c["id"]), func(): _set_look("keepsakeColor", String(c["id"])), Color(String(c["color"])))
+
+func _choice_row(v: Control, label: String) -> HFlowContainer:
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 8)
+	row.add_theme_constant_override("v_separation", 6)
+	var l := Label.new()
+	Style.label(l, 14, Style.BRASS, "title_light")
+	l.text = label.to_upper()
+	l.custom_minimum_size = Vector2(120, 34)
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	row.add_child(l)
+	v.add_child(row)
+	return row
+
+func _choice(row: Control, text: String, chosen: bool, then: Callable, swatch: Variant = null) -> void:
+	var b := Button.new()
+	b.text = text
+	Style.button(b, chosen, 15)
+	b.custom_minimum_size = Vector2(0, 34)
+	if swatch is Color:
+		# a chip of the colour itself beside its name
+		var img := Image.create(14, 14, false, Image.FORMAT_RGBA8)
+		img.fill(swatch)
+		b.icon = ImageTexture.create_from_image(img)
+	b.pressed.connect(then)
+	row.add_child(b)
+
+## A choice made: the genius keeps it, whoever holds the genius saves it, and the page is drawn
+## again with the genius as it now looks.
+func _set_look(key: String, value: Variant) -> void:
+	if _g == null:
+		return
+	_g.look[key] = value
+	look_saved = false
+	look_changed.emit(_g)
+	if not look_saved:
+		var h: Dictionary = Settings.hero()
+		var saved: Dictionary = h.get("genius", {})
+		if not saved.is_empty() and String(saved.get("name", "")) == _g.name and String(saved.get("form", "")) == String(_g.body.get("form", "")):
+			_g.save_to(h)
+			Settings.save_hero(h)
+	var at := _scroll.scroll_vertical if _scroll else 0
+	open(_g, _color, _tier, _marks_n)
+	_scroll.set_deferred("scroll_vertical", at)
 
 func hide_page() -> void:
 	visible = false

@@ -1,5 +1,5 @@
 {
-  "$comment": "How a genius is assembled: its body (one per silhouette) and parts (one per feature) on named sockets. When the art exists, the body is game/assets/genius/bodies/<silhouette>.glb with empties named socket_<name>, and each part is game/assets/genius/parts/<feature>.glb; the game uses them and ignores the placeholders below. Placeholder bodies are built from a kind: quadruped and humanoid kinds borrow a rigged model, so they walk; the rest are shapes. Socket positions are in metres on the placeholder before it is scaled to the genius's height; 'bone' sockets ride the rig. featureSockets names the sockets some features use instead of their slot's (a beak and fangs at the mouth, small hands at the wrists, a brush in the grip, a tail at the tail's root); a body without those sockets falls back to the slot's. A part hung on a right-hand socket (a name ending in _r, fr or br) is mirrored: parts of a pair are made for the left. artSize is how tall a silhouette's art body stands against its instar's size (default 1): an art body carries its own proportions, so scale applies only to the placeholder. carries lists features a silhouette's art body already wears in its own design (the stag its antlers), so no part is hung for them.",
+  "$comment": "How a genius is assembled: its body (one per silhouette) and parts (one per feature) on named sockets. When the art exists, the body is game/assets/genius/bodies/<silhouette>.glb with empties named socket_<name>, and each part is game/assets/genius/parts/<feature>.glb; the game uses them and ignores the placeholders below. Placeholder bodies are built from a kind: quadruped and humanoid kinds borrow a rigged model, so they walk; the rest are shapes. Socket positions are in metres on the placeholder before it is scaled to the genius's height; 'bone' sockets ride the rig. featureSockets names the sockets some features use instead of their slot's (a beak and fangs at the mouth, small hands at the wrists, a brush in the grip, a tail at the tail's root); a body without those sockets falls back to the slot's. A part hung on a right-hand socket (a name ending in _r, fr or br) is mirrored: parts of a pair are made for the left. artSize is how tall a silhouette's art body stands against its instar's size (default 1): an art body carries its own proportions, so scale applies only to the placeholder. carries lists features a silhouette's art body already wears in its own design (the stag its antlers), so no part is hung for them. A surface feature hangs nothing unless it has a part and is named in featureSockets (the Seed-marks a grip and a ledger: a handle on its back, a book at its chest). How one genius differs from another of its form (coat, markings, build, keepsake) is in genius-looks.json.",
   "slotSockets": {
     "head": ["socket_head"], "eyes": ["socket_eyes"], "wings": ["socket_back"], "body": ["socket_body"],
     "arms": ["socket_arm_r", "socket_arm_l"], "limbs": ["socket_limb_fl", "socket_limb_fr", "socket_limb_bl", "socket_limb_br"],
@@ -8,7 +8,8 @@
   "featureSockets": {
     "beak": ["socket_mouth"], "fangs": ["socket_mouth"], "lantern-jaw": ["socket_mouth"], "maw": ["socket_mouth"],
     "small-hands": ["socket_hand_l", "socket_hand_r"], "brush": ["socket_grip"], "tail": ["socket_tail"], "short-blade": ["socket_grip"],
-    "chain": ["socket_hand_l"]
+    "chain": ["socket_hand_l"],
+    "grip": ["socket_back"], "ledger": ["socket_body"], "broad-guard": ["socket_arm_l", "socket_arm_r"], "shell": ["socket_back"]
   },
   "kinds": {
     "quadruped": { "model": "res://game/assets/quaternius/Wolf.glb", "anim": { "idle": "AnimalArmature|Idle", "walk": "AnimalArmature|Walk", "run": "AnimalArmature|Gallop" },
@@ -50,24 +51,37 @@
     "kith-child": { "kind": "humanoid", "scale": [0.9, 0.95, 0.9] },
     "kith-elder": { "kind": "humanoid", "scale": [0.95, 1.1, 0.95] },
     "kith-small-warrior": { "kind": "humanoid", "scale": [1, 1, 1], "artSize": 0.95, "carries": ["wing-cloak"] },
-    "daemon-small": { "kind": "humanoid", "scale": [0.9, 0.85, 0.9], "artSize": 0.9 },
-    "daemon-tall": { "kind": "humanoid", "scale": [0.85, 1.35, 0.85], "artSize": 1.3 },
+    "daemon-small": { "kind": "humanoid", "scale": [0.9, 0.85, 0.9], "artSize": 0.9, "carries": ["ledger"] },
+    "daemon-tall": { "kind": "humanoid", "scale": [0.85, 1.35, 0.85], "artSize": 1.3, "carries": ["ledger"] },
     "daemon-shadow": { "kind": "humanoid", "scale": [1.0, 1.15, 1.0], "hover": true, "artSize": 1.15 },
-    "engine-sentinel": { "kind": "humanoid", "scale": [1.3, 1.1, 1.3] },
+    "engine-sentinel": { "kind": "humanoid", "scale": [1.3, 1.1, 1.3], "artSize": 1.15, "carries": ["shield-face"] },
     "engine-lantern": { "kind": "construct", "build": "lantern" },
     "engine-fortress": { "kind": "construct", "build": "fortress" },
-    "engine-weapon": { "kind": "object", "build": "gun", "hover": true },
+    "engine-weapon": { "kind": "object", "build": "gun", "hover": true, "artSize": 0.9, "carries": ["barrel", "gears", "sight-glass"] },
     "daemon-wall": { "kind": "construct", "build": "wall" },
-    "relic-blade": { "kind": "object", "build": "blade", "hover": true },
-    "relic-shield": { "kind": "object", "build": "shield", "hover": true },
-    "relic-gauntlet": { "kind": "object", "build": "gauntlet", "hover": true },
-    "relic-coat": { "kind": "object", "build": "coat", "hover": true },
+    "relic-blade": { "kind": "object", "build": "blade", "hover": true, "artSize": 1.1, "carries": ["edge", "grip", "short-blade"] },
+    "relic-shield": { "kind": "object", "build": "shield", "hover": true, "carries": ["tower-shield", "broad-chest", "fangs", "bastion", "grip"] },
+    "relic-gauntlet": { "kind": "object", "build": "gauntlet", "hover": true, "artSize": 0.9, "carries": ["talon-grip", "grip", "small-hands"] },
+    "relic-coat": { "kind": "object", "build": "coat", "hover": true, "artSize": 1.1, "carries": ["grip"] },
     "relic-mask": { "kind": "object", "build": "mask", "hover": true },
     "relic-gate": { "kind": "construct", "build": "gate" },
     "aspect-flame": { "kind": "aspect", "build": "flame", "hover": true },
     "aspect-shadow": { "kind": "aspect", "build": "shadow", "hover": true },
     "aspect-chord": { "kind": "aspect", "build": "chord", "hover": true, "carries": ["ring"] },
-    "aspect-weather": { "kind": "aspect", "build": "weather", "hover": true }
+    "aspect-weather": { "kind": "aspect", "build": "weather", "hover": true },
+    "beast-corvid": { "kind": "flier", "build": "bird", "artSize": 0.9, "carries": ["beak"] },
+    "beast-shell": { "kind": "quadruped", "scale": [1.2, 0.7, 1.1], "artSize": 0.62, "carries": ["shell"] },
+    "kith-fledgling": { "kind": "humanoid", "scale": [0.85, 0.85, 0.85], "artSize": 0.85, "carries": ["wing-cloak"] },
+    "kith-lamplighter": { "kind": "humanoid", "scale": [0.9, 1.05, 0.9], "artSize": 1.0, "carries": ["lantern"] },
+    "engine-flier": { "kind": "flier", "build": "bird", "artSize": 0.75, "carries": ["wings", "beak", "gears", "sight-glass"] },
+    "engine-stove": { "kind": "construct", "build": "lantern", "artSize": 0.95, "carries": ["ember", "broad-chest"] },
+    "daemon-wick": { "kind": "humanoid", "scale": [0.9, 0.8, 0.9], "artSize": 0.85, "carries": ["ember", "horns", "tail"] },
+    "daemon-whisper": { "kind": "humanoid", "scale": [0.8, 0.8, 0.8], "hover": true, "artSize": 0.8, "carries": ["second-face"] },
+    "aspect-frost": { "kind": "aspect", "build": "flame", "hover": true, "carries": ["cold-core"] },
+    "aspect-wisps": { "kind": "aspect", "build": "flame", "hover": true, "carries": ["ember", "lantern"] },
+    "relic-buckle": { "kind": "object", "build": "shield", "hover": true, "artSize": 0.8, "carries": ["watching-eye", "grip"] },
+    "relic-knife": { "kind": "object", "build": "blade", "hover": true, "artSize": 0.85, "carries": ["short-blade", "watching-eye", "grip", "edge"] },
+    "relic-glove": { "kind": "object", "build": "gauntlet", "hover": true, "artSize": 0.8, "carries": ["small-hands", "grip", "talon-grip"] }
   },
   "surfaces": {
     "$comment": "Surface features are not parts: they change the body's skin. tint: the body's own colour; rim: how strongly the field shows at the edges; bands: stripes or plates (0 none).",

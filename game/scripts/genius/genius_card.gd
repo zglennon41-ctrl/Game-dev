@@ -1,6 +1,8 @@
 ## A genius's card: a painted portrait in a brass frame, its name, its form, and its parts.
 ## The portrait is game/assets/genius/cards/<form>.png when that art exists; until then the card
-## shows the genius itself, turning slowly in its own light.
+## shows the genius itself, turning slowly in its own light. A genius with a look of its own
+## (its coat, its markings, its keepsake) is always shown as itself: the painted card is the
+## form's, and no two of a form are alike.
 class_name GeniusCard
 extends PanelContainer
 
@@ -10,8 +12,10 @@ const ART_FULL := 400.0
 var W := 380.0      # a compact card (three on a screen) is narrower and shorter
 var ART_H := 400.0
 
+var body: GeniusBody = null   # the genius in the portrait, when the portrait is the genius itself
 var _vp: SubViewport
 var _pivot: Node3D
+var _color := Color.WHITE
 var _t := 0.0
 
 ## info: a genius's to_dict() (or the Reading's candidate with a name), color: the Shape's.
@@ -46,7 +50,8 @@ func _build(info: Dictionary, color: Color, title: String) -> void:
 	art.add_theme_stylebox_override("panel", inner)
 	v.add_child(art)
 	var form: String = info.get("form", "")
-	if ResourceLoader.exists(CARD_DIR % form):
+	_color = color
+	if ResourceLoader.exists(CARD_DIR % form) and (info.get("look", {}) as Dictionary).is_empty():
 		var tr := TextureRect.new()
 		tr.texture = load(CARD_DIR % form)
 		tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -106,8 +111,8 @@ func _portrait(info: Dictionary, color: Color) -> Control:
 	env.background_mode = Environment.BG_COLOR
 	env.background_color = Color(0.03, 0.025, 0.03)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.5, 0.45, 0.45)
-	env.ambient_light_energy = 0.3
+	env.ambient_light_color = Color(0.62, 0.58, 0.56)
+	env.ambient_light_energy = 0.55
 	env.glow_enabled = true
 	env.glow_intensity = 0.8
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
@@ -116,19 +121,16 @@ func _portrait(info: Dictionary, color: Color) -> Control:
 	_vp.add_child(we)
 	_pivot = Node3D.new()
 	_vp.add_child(_pivot)
-	var gi := info.duplicate()
-	gi["instar"] = 1
-	var body := GeniusBody.build(gi, color, 1)
-	_pivot.add_child(body)
+	_stand(info)
 	var key := DirectionalLight3D.new()
 	key.rotation_degrees = Vector3(-30, 30, 0)
-	key.light_color = Color(1.0, 0.75, 0.5)
-	key.light_energy = 0.9
+	key.light_color = Color(1.0, 0.9, 0.78)
+	key.light_energy = 1.35
 	_vp.add_child(key)
 	var rim := OmniLight3D.new()
 	rim.position = Vector3(0, 0.6, -1.0)
 	rim.light_color = color
-	rim.light_energy = 3.0
+	rim.light_energy = 1.6
 	rim.omni_range = 3.0
 	_vp.add_child(rim)
 	var cam := Camera3D.new()
@@ -137,6 +139,23 @@ func _portrait(info: Dictionary, color: Color) -> Control:
 	_vp.add_child(cam)
 	cam.look_at_from_position(cam.position, Vector3(0, 0.3, 0), Vector3.UP)
 	return holder
+
+## Put the genius in the portrait (again, when its look has changed).
+func _stand(info: Dictionary) -> void:
+	if _pivot == null:
+		return
+	if body:
+		_pivot.remove_child(body)
+		body.queue_free()
+	var gi := info.duplicate()
+	gi["instar"] = 1
+	body = GeniusBody.build(gi, _color, 1)
+	# a portrait is to see it by: its own colours first, the Shape's along the edge
+	body.set_rim(0.3)
+	_pivot.add_child(body)
+
+func restyle(info: Dictionary) -> void:
+	_stand(info)
 
 func _process(dt: float) -> void:
 	_t += dt

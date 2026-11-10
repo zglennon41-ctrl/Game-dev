@@ -78,6 +78,22 @@ export function validateData(dir = 'data'): Problem[] {
   for (const f of forms) if (!bodies.silhouettes[f.silhouette]) problems.push({ file: 'genius-bodies.json', message: `no body for silhouette ${f.silhouette} (form ${f.id})` });
   for (const ft of D('features')) if (ft.slot !== 'surface' && !bodies.slotSockets[ft.slot]) problems.push({ file: 'genius-bodies.json', message: `no sockets for slot ${ft.slot}` });
   for (const [sil, sp] of Object.entries(bodies.silhouettes as Record<string, { kind: string }>)) if (!bodies.kinds[sp.kind]) problems.push({ file: 'genius-bodies.json', message: `${sil}: unknown kind ${sp.kind}` });
+  // What a genius may look like: every body named is a silhouette, has a palette that exists,
+  // and every form's own palette exists; a keepsake's colours and an eye's ids are unique.
+  const looks = D('genius-looks');
+  for (const [sil, b] of Object.entries(looks.bodies as Record<string, { coats: string }>)) {
+    if (!bodies.silhouettes[sil]) problems.push({ file: 'genius-looks.json', message: `bodies.${sil} is not a silhouette in genius-bodies.json` });
+    if (!looks.palettes[b.coats]) problems.push({ file: 'genius-looks.json', message: `bodies.${sil}: no palette "${b.coats}"` });
+  }
+  const formIds = new Set<string>(forms.map((f: { id: string }) => f.id));
+  for (const [fid, f] of Object.entries(looks.forms as Record<string, { coats: string }>)) {
+    need('genius-looks.json', formIds, fid, 'form with its own coats');
+    if (!looks.palettes[f.coats]) problems.push({ file: 'genius-looks.json', message: `forms.${fid}: no palette "${f.coats}"` });
+  }
+  for (const [pid, coats] of Object.entries(looks.palettes as Record<string, Array<{ id: string }>>)) {
+    if (new Set(coats.map((c) => c.id)).size !== coats.length) problems.push({ file: 'genius-looks.json', message: `palettes.${pid}: two coats share an id` });
+    if (coats.length < looks.born.coatsOffered) problems.push({ file: 'genius-looks.json', message: `palettes.${pid}: fewer coats than are offered (${looks.born.coatsOffered})` });
+  }
   // Zones: their beasts exist, their doors lead somewhere, their libraries are not empty; the
   // Academy's lessons travel to places that exist, of the Academy or of a zone.
   const beasts = ids('beasts');
