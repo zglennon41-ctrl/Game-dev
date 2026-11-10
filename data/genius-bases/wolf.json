@@ -20,18 +20,20 @@
  },
  "calls": {
   "seed": {
-   "stands-between": 0.6,
-   "remembers": 0.2
+   "stands-between": 1.0,
+   "remembers": 0.6,
+   "owes-me": 0.2
   },
   "shape": {
-   "anchor": 0.5,
+   "anchor": 0.6,
    "cast": 0.4,
-   "bind": 0.3
+   "bind": 0.4
   },
   "blood": {
-   "fused": 0.6,
-   "long-stride": 0.4,
-   "greenwood": 0.3
+   "fused": 0.8,
+   "long-stride": 0.5,
+   "greenwood": 0.4,
+   "ridgefolk": 0.3
   }
  },
  "hybrid": {

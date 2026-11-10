@@ -325,3 +325,14 @@ played the arc); barks stay as floating text. Still to be played rather than dec
 78. **The home's hand and the cohort's genii** (mine, 2026-11-10; `docs/genius-signature.md`):
     the thirteen pieces the homes put on their genii, and which Seed each temperament gives
     a classmate.
+79. **The genius tree** (owner's structure, 2026-11-10; mine to fill; `docs/genius-tree.md`):
+    the twenty-two bases and their classes; every form's name, sentence, `of`, sign, habit
+    and leans (about seven hundred, all drafts); each home's leans
+    (`data/genius-homes.json`); that instars five and six are ages of the finished form;
+    how easily a genius turns into a hybrid (now: another base's nature must fit the play at
+    least 0.45 and half again better than its own) and that the turning is offered as one
+    card and never forced; the rule's words for a hybrid and the three written by hand
+    (Edged Wolf, Winged Shield, Lantern Fox); how often each base is offered at the rite
+    (`npx tsx tools/genius-offers.ts`: now between 7 and 21 bowls in a hundred); how much
+    play fills a line of the Tally (twenty blows, ten runs, six postings, a hundred Pattern
+    fires, which a week at the Academy does not reach).

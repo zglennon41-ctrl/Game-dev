@@ -7,18 +7,15 @@
  "soul": "The soul of one who softens whatever they touch, and is hard to find when an answer is wanted.",
  "spark": "The mote has no edge. Some mornings it is a point of light, and some mornings the whole room is slightly harder to see across.",
  "nature": {
-  "fights": {
-   "dodges": 0.8
-  },
   "ground": {
-   "water": 0.8,
-   "night": 0.5
-  },
-  "company": {
-   "alone": 0.5
+   "water": 1.0,
+   "quiet": 0.6
   },
   "orders": {
-   "free": 0.5
+   "hold": 0.6
+  },
+  "shape": {
+   "turn": 0.5
   }
  },
  "calls": {

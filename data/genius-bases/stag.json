@@ -22,19 +22,20 @@
  },
  "calls": {
   "seed": {
-   "stands-between": 0.4,
-   "remembers": 0.4,
-   "watches-from-above": 0.2
+   "remembers": 0.7,
+   "stands-between": 0.6,
+   "watches-from-above": 0.4
   },
   "shape": {
-   "anchor": 0.4,
-   "turn": 0.4,
-   "read": 0.3
+   "anchor": 0.5,
+   "turn": 0.5,
+   "read": 0.4
   },
   "blood": {
-   "greenwood": 0.7,
-   "ridgefolk": 0.3,
-   "mound-kin": 0.3
+   "greenwood": 1.0,
+   "ridgefolk": 0.5,
+   "mound-kin": 0.5,
+   "long-stride": 0.3
   }
  },
  "hybrid": {
