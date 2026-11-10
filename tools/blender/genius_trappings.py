@@ -3,8 +3,8 @@
 drawn from the home's own dress (data/bodies.json, dress), so a genius says where its partner
 is from as well as what it is.
 
-    python tools/blender/genius_homes.py            # every home's piece, and the band
-    python tools/blender/genius_homes.py edo tiber  # some
+    python tools/blender/genius_trappings.py            # every home's piece, and the band
+    python tools/blender/genius_trappings.py edo tiber  # some
 
 Each is game/assets/genius/trappings/<home>.glb, hanging down from its origin and facing the
 front (-Y here), about the size of the charm. Materials are named home_main, home_second and
@@ -255,7 +255,7 @@ def build(which=None):
         bpy.context.view_layer.objects.active.name = home
         path = os.path.join(OUT, home + ".glb")
         bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_yup=True, export_animations=False, export_materials="EXPORT")
-        print("[genius_homes] wrote", os.path.relpath(path, ROOT), "%d KB" % max(1, os.path.getsize(path) // 1024))
+        print("[genius_trappings] wrote", os.path.relpath(path, ROOT), "%d KB" % max(1, os.path.getsize(path) // 1024))
 
 
 if __name__ == "__main__":

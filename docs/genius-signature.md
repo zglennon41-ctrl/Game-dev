@@ -35,7 +35,7 @@ Where a character grew up shows on their genius twice.
   homes".)
 - **What the home puts on it** (built). Each home dresses the genii raised there with one
   small piece from its own dress, in its own colours (`data/bodies.json`, `dress.trapping`;
-  `tools/blender/genius_homes.py`): the Academy's brass tag, a marshal's star, a river sash,
+  `tools/blender/genius_trappings.py`): the Academy's brass tag, a marshal's star, a river sash,
   a docker's scarf, a works lens, a bronze disc, a growers' collar, a jewel on blue cloth,
   a string of saffron beads, a jade ring, a tuft of fur on an ochre band, a satchel for one
   page, a knotted cord. It hangs at the collar or the throat beside any keepsake, and the
