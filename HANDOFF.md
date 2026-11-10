@@ -476,6 +476,34 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   detail a player can come to know (what it is the picture of, a sign, a habit).
   `docs/genius-tree.md`, "The soul outside the body"; `tools/genius-base-check.py` holds
   the data to it.
+- **A line is an evolution** (owner, 2026-11-10, on seeing the whole tree): "I want these
+  to be distinct like Pokémon evolutions or digivolutions. Right now it just looks very
+  clunky. Baby, three starters, three paths from each starter and hybrid lines, three
+  advancements from there, final advancement." So every form on a line is a different
+  creature to look at, not its base wearing one more part: its build, its great parts, its
+  coat and its light change at every stage, and something of the stage before is always
+  carried into the next. The stages, in the player's words: **Baby** (everyone's, before
+  the rite), **Starter** (three offered at the rite; the tree's settled form), **Path**
+  (three from each starter, and the hybrid lines), **Advancement** (three from each path),
+  **Final** (from each advancement), and then it grows great and to its apex. The reading
+  taken, and the calls it leaves, are in `docs/genius-evolutions.md`.
+- **Three types of genius** (owner, 2026-11-10): "I also want to create distinct types of
+  genius: weapon genius should be their own weapon usable on a switch with their main
+  weapon, defensive and ritual items should have functions in combat, companion genius
+  should fulfill different roles that balance out the player. The distinctness of their
+  genius will be the pride of each player." A base's class says what a genius *does*
+  beside its partner, not only what it looks like: a **weapon** (blade, gun, bow) is taken
+  in hand; a **defensive item** (shield, gauntlet, coat) and a **ritual item** (lantern,
+  astrolabe, bell) are worn or carried and used; a **companion** (the animals, monsters and
+  magical creatures) fights at its partner's side in a role that supplies what its partner
+  lacks. This does not undo "the soul outside the body": a path is still a trait in a
+  person, and its job in a fight follows from that trait. `docs/genius-types.md`.
+- **One style** (owner, 2026-11-10): "Generally improve and conform the design of the
+  game. I want a universal style for every aspect of the game: lineages, attire, weapons,
+  genii, settings, animations. I want this game to have a uniform style that fits the theme
+  and tone of the game." The style is the art bible's lamplight gothic, held as data and
+  applied to everything the game draws and moves; an asset that is off it is a bug.
+  `docs/style.md`.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.
