@@ -2089,7 +2089,10 @@ func show_reading(reading: Dictionary, then: Callable, heading := "", subheading
 	var kind := genius.kind() if genius and genius.is_born() else ""
 	var title := Label.new()
 	Style.label(title, 30, Style.FG, "title")
-	title.text = heading if heading != "" else String(["", "The bowl offers three", "The first refinement: its path", "The second refinement: its prong", "The last refinement: its finish"][clampi(level, 1, 4)])
+	# in the player's words for the stages of its line (data/genius.json, stages)
+	var stages: Dictionary = Data.genius().get("stages", {})
+	var stage := func(l: int, key := "name") -> String: return String(stages.get(str(l), {}).get(key, "form"))
+	title.text = heading if heading != "" else String(["", "The bowl offers three %s" % stage.call(1, "plural"), "The first refinement: its %s" % stage.call(2), "The second refinement: its %s" % stage.call(3), "The last refinement: its %s" % stage.call(4)][clampi(level, 1, 4)])
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(title)
 	var sub := Label.new()

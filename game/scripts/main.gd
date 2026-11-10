@@ -726,7 +726,7 @@ func _lineage(what: String) -> void:
 	while not Data.children_of(String(road.back())).is_empty():
 		road.append(Data.children_of(String(road.back()))[0]["id"])
 	var stand: Array = []      # [info, label]
-	var names := ["First Form", "Second Form", "Third Form", "Fourth Form", "Fifth Form", "Apex"]
+	var names := ["Starter", "Path", "Advancement", "Final", "Great", "Apex"]
 	var homes_row: Array = []
 	if what.begins_with("homes"):
 		# --lineage=homes:0 (or :1): a grown genius of one kind beside a partner from each home,

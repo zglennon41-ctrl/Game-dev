@@ -45,6 +45,7 @@ render_mode blend_add, unshaded, cull_back, depth_draw_never;
 uniform vec4 glow : source_color = vec4(1.0, 0.7, 0.3, 1.0);
 uniform float strength = 1.0;
 uniform float molt = 0.0;      // 0 to 1: the molt lines, as a Reading nears
+uniform float flood = 0.0;     // 0 to 1: the whole body gone to light, as it changes form
 uniform float molt_scale = 1.0;
 varying vec3 lp;
 void vertex() { lp = VERTEX * length(MODEL_MATRIX[0].xyz); }   // the body's own space, in metres
@@ -63,6 +64,8 @@ void fragment() {
 		float breathe = 0.75 + 0.25 * sin(TIME * 2.2 + lp.y * 5.0);
 		col += mix(glow.rgb, vec3(1.0), 0.3) * seams(lp * molt_scale) * molt * breathe * 3.2;
 	}
+	// going from one form to the next it is a shape of light, and nothing else
+	col += mix(glow.rgb, vec3(1.0), 0.6) * flood * (1.2 + 0.5 * flood);
 	ALBEDO = col;
 }
 """
@@ -564,6 +567,11 @@ func set_strength(k: float) -> void:
 
 ## How strongly the Shape colour lies along its edges (1 in the world; a portrait that must
 ## show its coat turns it down).
+## The whole body gone to light (0 to 1): what it is while it changes from one form to the next.
+func set_flood(k: float) -> void:
+	for r in _rims:
+		(r as ShaderMaterial).set_shader_parameter("flood", k)
+
 func set_rim(k: float) -> void:
 	for r in _rims:
 		(r as ShaderMaterial).set_shader_parameter("strength", k)

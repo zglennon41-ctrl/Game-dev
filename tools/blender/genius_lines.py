@@ -49,11 +49,11 @@ BASES = os.path.join(ROOT, "data", "genius-bases")
 
 # what the forms are made of that the kit's palette did not have: muted, a value apart
 PALETTE.update({
-    "fur_pale": ((0.6, 0.56, 0.48), 0.9, 0.0), "fur_mask": ((0.03, 0.028, 0.03), 0.9, 0.0), "fur_grey": ((0.4, 0.39, 0.38), 0.9, 0.0),
+    "fur_pale": ((0.6, 0.56, 0.48), 0.9, 0.0), "fur_mask": ((0.03, 0.028, 0.03), 0.9, 0.0), "fur_grey": ((0.27, 0.265, 0.26), 0.9, 0.0),
     "maw": ((0.13, 0.025, 0.025), 0.6, 0.0), "tongue": ((0.42, 0.12, 0.11), 0.5, 0.0),
     "slate": ((0.19, 0.2, 0.23), 0.85, 0.0), "slate_light": ((0.37, 0.38, 0.41), 0.85, 0.0),
     "smoke": ((0.1, 0.095, 0.11), 1.0, 0.0), "scar": ((0.6, 0.48, 0.44), 0.6, 0.0), "iron_bristle": ((0.15, 0.15, 0.17), 0.4, 0.8),
-    "baby_skin": ((0.5, 0.47, 0.42), 0.8, 0.0), "baby_dark": ((0.15, 0.135, 0.125), 0.8, 0.0),
+    "baby_skin": ((0.2, 0.185, 0.18), 0.8, 0.0), "baby_dark": ((0.09, 0.082, 0.08), 0.8, 0.0), "baby_pale": ((0.56, 0.52, 0.46), 0.8, 0.0),
     "star": ((0.8, 0.78, 0.7), 0.4, 0.0), "wool_stripe": ((0.34, 0.12, 0.08), 0.95, 0.0), "cloth_watch": ((0.17, 0.2, 0.3), 0.95, 0.0),
 })
 
@@ -118,8 +118,23 @@ class Anat:
             rz = 0.31 * k
             self.neck[name] = (y, top - rz, 0.28 * k, rz)
 
+        # the line of its back and the breadth of its flank, as they are before anything is
+        # grown on it: a cloth is cut to the body, not to the mane under it
+        self._ys = [self.n3.y - 0.3 + 0.1 * i for i in range(int((self.tail[1].y + 0.5 - self.n3.y) / 0.1) + 2)]
+        self._tops = [r.top(y) for y in self._ys]
+        self._sides = [r.side(y, t - 0.42) for y, t in zip(self._ys, self._tops)]
+
+    def _at(self, table, y):
+        i = (y - self._ys[0]) / 0.1
+        i0 = max(0, min(len(table) - 2, int(i)))
+        t = max(0.0, min(1.0, i - i0))
+        return table[i0] * (1 - t) + table[i0 + 1] * t
+
     def top(self, y):
-        return self.r.top(y)
+        return self._at(self._tops, y)
+
+    def flank(self, y):
+        return self._at(self._sides, y)
 
 
 def _head(r):
@@ -513,9 +528,9 @@ def _cape(r, A, name, y0, y1, drop, material, steps=9, off=0.05, flare=0.1, hem=
     """A cloth over the back: round the top of the body to where the flank is widest, then
     hanging to its hem."""
     def section(y):
-        top = r.top(y)
+        top = A.top(y)
         zc = top - 0.42
-        w = r.side(y, zc) + off
+        w = A.flank(y) + off
         t = (y - y0) / max(1e-6, y1 - y0)
         pts = []
         for j in range(11):
@@ -754,6 +769,8 @@ def grow_carry(r, A, style, size):
     elif style == "cloak":           # a watch-cloak over the shoulders and back
         _cape(r, A, "cloak", A.n1.y, (A.t1.y if size < 1.2 else A.back.y + 0.1), 0.5 * size, mat("cloth_watch"))
         _add(r, "cloak_clasp", g.ico(Vector((0, A.chest_y - 0.02, A.sh.z + 0.42)), 0.08, sub=1, scale=(1, 0.5, 1)), "Torso3", mat("metal_brass"))
+    elif style == "shroud":          # a cloak of shadow, tattered at the hem
+        _cape(r, A, "shroud", A.n1.y, A.back.y + 0.2, 0.62 * size, mat("shade_edge"), hem=0.14, flare=0.14)
     elif style == "rug":             # a woven rug across its back
         _cape(r, A, "rug", A.t3.y + 0.12, A.t1.y + 0.3, 0.4 * size, mat("cloth_wool"), hem=0.0, flare=0.03)
         _cape(r, A, "rug_stripe", A.t3.y + 0.42, A.t1.y + 0.0, 0.34 * size, mat("wool_stripe"), steps=5, hem=0.0, flare=0.04, off=0.07)
@@ -975,10 +992,11 @@ def build_baby():
     R = STAND / 1.85
     c = Vector((0, 0, R * 0.95))
     items = [(g.ico(c, R, sub=2, scale=(1.0, 0.95, 0.9)), skin)]
-    items.append((g.ico(c + Vector((0, -R * 0.6, -R * 0.3)), R * 0.4, sub=1, scale=(1.0, 0.6, 0.9)), field("heart", 2.4)))
+    items.append((g.ico(c + Vector((0, -R * 0.58, -R * 0.34)), R * 0.46, sub=2, scale=(1.0, 0.62, 0.86)), field("heart", 2.2)))
     for sg in (1, -1):
-        items.append((g.ico(c + Vector((sg * R * 0.38, -R * 0.78, R * 0.22)), R * 0.2, sub=1, scale=(0.9, 0.55, 1.2)), field("eyes", 3.6)))
+        items.append((g.ico(c + Vector((sg * R * 0.36, -R * 0.74, R * 0.26)), R * 0.25, sub=2, scale=(0.95, 0.6, 1.15)), field("eyes", 3.8)))
         items.append((g.blade(c + Vector((sg * R * 0.42, 0.02, R * 0.66)), c + Vector((sg * R * 0.86, 0.12, R * 1.5)), R * 0.46, normal=Vector((0, -1, 0.2)), belly=0.42), skin))
+        items.append((g.blade(c + Vector((sg * R * 0.66, 0.04, R * 1.12)), c + Vector((sg * R * 0.9, 0.11, R * 1.56)), R * 0.26, normal=Vector((0, -1, 0.2)), belly=0.42), mat("baby_pale")))
         items.append((g.ico(Vector((sg * R * 0.36, -R * 0.3, R * 0.12)), R * 0.2, sub=1, scale=(1.0, 1.35, 0.7)), dark))
     t0 = c + Vector((0, R * 0.78, -R * 0.25))
     pts = [t0, t0 + Vector((0, R * 0.55, R * 0.05)), t0 + Vector((0, R * 0.9, R * 0.55)), t0 + Vector((0, R * 0.62, R * 1.12))]

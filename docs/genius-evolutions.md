@@ -81,7 +81,7 @@ On the wolf's rig (`tools/blender/genius_lines.py`):
 | `tail` | | `whip` `short` (its shape); `flag` `smoke` `lamp` `rings` `ember` |
 | `flags` | from the shoulders | `fur` `pale` `light` |
 | `armor` | | `brow` `chest` `chain` `harness` `scars` |
-| `carry` | what it has been given | `lamp` `book` `tags` `knots` `post` `cloak` `rug` `bell` |
+| `carry` | what it has been given | `lamp` `book` `tags` `knots` `post` `cloak` `shroud` `rug` `bell` |
 | `paws` | | `set` `grease` `shade` `frost` |
 | `aura` | | `windows` `motes` `cold` `crescent` |
 | `coat` | how its partner's coat is worn | a shift in `data/genius-looks.json`, `shifts`: `night` `ash` `frost` `ember` `slate` `iron` `hearth` `blood` `moon` |
