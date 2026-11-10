@@ -2,28 +2,384 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "academy",
   "type": "object",
-  "required": ["term", "arrival", "places", "instructors", "cohort", "lessons", "rest", "rite", "gate"],
+  "required": [
+    "term",
+    "arrival",
+    "places",
+    "instructors",
+    "cohort",
+    "lessons",
+    "rest",
+    "rite",
+    "gate"
+  ],
   "properties": {
     "places": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["name", "size", "floor", "spawn", "doors", "spots", "instructors"],
+        "required": [
+          "name",
+          "size",
+          "floor",
+          "spawn",
+          "doors",
+          "spots",
+          "instructors"
+        ],
         "properties": {
-          "size": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
-          "doors": { "type": "array", "items": { "type": "object", "required": ["to", "at", "label"] } }
+          "size": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "doors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "to",
+                "at",
+                "label"
+              ]
+            }
+          },
+          "style": {
+            "type": "object",
+            "required": [
+              "kind",
+              "floor",
+              "sides"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "enum": [
+                  "court",
+                  "hall"
+                ]
+              },
+              "floor": {
+                "type": "string"
+              },
+              "lawn": {
+                "type": "string"
+              },
+              "door": {
+                "type": "string"
+              },
+              "corner": {
+                "type": "string"
+              },
+              "ambient": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+              },
+              "bays": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "sides": {
+                "type": "object",
+                "properties": {
+                  "n": {
+                    "type": "object",
+                    "properties": {
+                      "bays": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "minItems": 1
+                      },
+                      "door": {
+                        "type": "string"
+                      },
+                      "features": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "piece",
+                            "at"
+                          ],
+                          "properties": {
+                            "piece": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "s": {
+                    "type": "object",
+                    "properties": {
+                      "bays": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "minItems": 1
+                      },
+                      "door": {
+                        "type": "string"
+                      },
+                      "features": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "piece",
+                            "at"
+                          ],
+                          "properties": {
+                            "piece": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "e": {
+                    "type": "object",
+                    "properties": {
+                      "bays": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "minItems": 1
+                      },
+                      "door": {
+                        "type": "string"
+                      },
+                      "features": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "piece",
+                            "at"
+                          ],
+                          "properties": {
+                            "piece": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "w": {
+                    "type": "object",
+                    "properties": {
+                      "bays": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        },
+                        "minItems": 1
+                      },
+                      "door": {
+                        "type": "string"
+                      },
+                      "features": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "piece",
+                            "at"
+                          ],
+                          "properties": {
+                            "piece": {
+                              "type": "string"
+                            },
+                            "at": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              },
+              "lawns": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 4,
+                  "maxItems": 4
+                }
+              },
+              "pools": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "minItems": 4,
+                  "maxItems": 4
+                }
+              },
+              "trusses": {
+                "type": "object",
+                "required": [
+                  "piece"
+                ],
+                "properties": {
+                  "piece": {
+                    "type": "string"
+                  },
+                  "across": {
+                    "enum": [
+                      "x",
+                      "z"
+                    ]
+                  },
+                  "every": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                }
+              },
+              "track": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "number"
+                  }
+                }
+              },
+              "lamps": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              }
+            }
+          },
+          "furniture": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "piece",
+                "at"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "piece": {
+                  "type": "string"
+                },
+                "at": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "rot": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                },
+                "scale": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "solid": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "solids": {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
-    "instructors": { "type": "array", "items": { "type": "object", "required": ["id", "name", "shape", "body", "lines"] } },
-    "cohort": { "type": "object", "required": ["first", "last", "temperaments"] },
+    "instructors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "shape",
+          "body",
+          "lines"
+        ]
+      }
+    },
+    "cohort": {
+      "type": "object",
+      "required": [
+        "first",
+        "last",
+        "temperaments"
+      ]
+    },
     "lessons": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "title", "place", "instructor", "intro", "steps", "outro"],
+        "required": [
+          "id",
+          "title",
+          "place",
+          "instructor",
+          "intro",
+          "steps",
+          "outro"
+        ],
         "properties": {
-          "steps": { "type": "array", "items": { "type": "object", "required": ["title", "text", "goal"] } }
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "title",
+                "text",
+                "goal"
+              ]
+            }
+          }
         }
       }
     }

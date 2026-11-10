@@ -151,6 +151,7 @@ func _build_environment() -> void:
 	env.adjustment_contrast = 1.08
 	env.adjustment_saturation = 1.1
 	_env = env
+	_ambient_default = env.ambient_light_source
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
@@ -1673,6 +1674,12 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 	for idx in _torches.size():
 		var l: OmniLight3D = _torches[idx]
 		l.light_energy = 1.4 + 0.25 * sin(_clock * 9.0 + idx * 1.7) + 0.15 * sin(_clock * 23.0 + idx)
+	# The Academy's lamps and fires, each about its own level; the rite dims them.
+	for idx in _lamps.size():
+		var lm: Dictionary = _lamps[idx]
+		var fl := 1.0 if lm["steady"] else 1.0 + 0.09 * sin(_clock * 8.0 + idx * 1.9) + 0.05 * sin(_clock * 21.0 + idx)
+		(lm["light"] as OmniLight3D).light_energy = float(lm["base"]) * fl * lerpf(1.0, 0.1, _torch_dim)
+	_update_cutaway()
 
 	# Floaters rise and fade (in real time, so they read during hit-stop).
 	for fl in _floaters.duplicate():
@@ -2169,6 +2176,11 @@ func set_place(id: String, spec: Dictionary = {}) -> void:
 	_sigils.clear()
 	_pillar = null
 	bowl_flame = null
+	_cut_walls.clear()
+	_lamps.clear()
+	_sky_dome = null
+	_ambient_lit = 0.0
+	_env.ambient_light_source = _ambient_default
 	if id == "cut":
 		_build_chamber()
 		_moonlight([[Vector3(-5.5, 0, -2.6), 1.3], [Vector3(3.2, 0, 3.4), 0.9], [Vector3(8.6, 0, -4.4), 1.1]])
@@ -2186,6 +2198,10 @@ func set_place(id: String, spec: Dictionary = {}) -> void:
 ## and the props that say what the place is for. Evening at the Thaw: a deep blue sky.
 func _build_academy_place(spec: Dictionary) -> void:
 	arena = Vector2(spec["size"][0], spec["size"][1])
+	# --kaykit (after --) builds the old dungeon-tile places, to compare.
+	if spec.has("style") and ResourceLoader.exists(ACADEMY_DIR % String(spec["style"].get("floor", "floor_flags"))) and not OS.get_cmdline_user_args().has("--kaykit"):
+		_build_kit_place(spec)
+		return
 	var hw := arena.x / 2.0 + 1.0
 	var hd := arena.y / 2.0 + 1.0
 	var floor_piece: String = spec["floor"]
@@ -2285,13 +2301,313 @@ func _build_academy_place(spec: Dictionary) -> void:
 	if spec.get("walls", "") != "fortress" or arena.x > 20.0:
 		_moonlight([[Vector3(arena.x * 0.18, 0, -arena.y * 0.12), 1.2], [Vector3(-arena.x * 0.25, 0, arena.y * 0.2), 0.9]])
 
+# --- The Academy's own architecture (tools/blender/academy_kit.py, docs/home-base.md) -----
+
+const ACADEMY_DIR := "res://game/assets/academy/%s.glb"
+## Pieces 8 wide; every other wall piece is 4.
+const WIDE_PIECES := ["range_portal", "library_portal", "gatehouse", "curtain_portal", "station_portal", "line_arch", "hall_portal", "hall_hearth"]
+## What a light the kit marks (an empty named light_<kind>) gives: colour, energy, range.
+const KIT_LIGHTS := {
+	"lamp": [Color(1.0, 0.68, 0.36), 0.95, 7.0], "fire": [Color(1.0, 0.56, 0.26), 2.0, 12.0],
+	"stain": [Color(0.72, 0.52, 1.0), 0.5, 6.5], "cool": [Color(0.5, 0.72, 1.0), 1.1, 8.0] }
+
+var _cut_walls: Array = []    # {upper, at, out, out2}: a wall's upper part hides on the camera's side
+var _lamps: Array = []        # {light, base, steady}: the kit's lights, flickering about their own level
+var _sky_dome: MeshInstance3D = null
+var _ambient_default := Environment.AMBIENT_SOURCE_COLOR
+var _stain_count := 0
+var _lamp_scale := 1.0     # a place's own level for its lamps (style.lamps)
+
+const SKY := """
+shader_type spatial;
+// The sky over the Academy at dusk: night above, the last of the day along the horizon,
+// stars, a moon. A dome drawn behind everything.
+render_mode unshaded, cull_disabled, depth_draw_never, fog_disabled, shadows_disabled;
+uniform vec3 moon_dir = vec3(0.35, 0.55, -0.75);
+varying vec3 dir;
+float hash(vec3 p) {
+	p = fract(p * 0.3183099 + 0.1);
+	p *= 17.0;
+	return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+}
+void vertex() { dir = normalize(VERTEX); }
+void fragment() {
+	vec3 d = normalize(dir);
+	float h = d.y;
+	vec3 top = vec3(0.02, 0.03, 0.085);
+	vec3 mid = vec3(0.06, 0.08, 0.2);
+	vec3 low = vec3(0.2, 0.14, 0.21);
+	vec3 ember = vec3(0.5, 0.24, 0.14);
+	vec3 col = mix(mid, top, smoothstep(0.12, 0.8, h));
+	col = mix(low, col, smoothstep(0.0, 0.3, h));
+	// the last light, in the west only
+	float west = smoothstep(0.2, 1.0, dot(normalize(vec3(d.x, 0.0, d.z) + vec3(0.0001)), normalize(vec3(-0.8, 0.0, 0.6))));
+	col = mix(col, ember, west * (1.0 - smoothstep(0.0, 0.16, h)) * 0.8);
+	// stars, thinning toward the horizon
+	vec3 gp = d * 170.0;
+	vec3 g = floor(gp);
+	float r = hash(g);
+	float star = step(0.992, r) * smoothstep(0.08, 0.4, h) * smoothstep(0.3, 0.05, length(fract(gp) - 0.5));
+	col += vec3(0.8, 0.85, 1.0) * star * (0.5 + 0.5 * sin(TIME * (1.0 + r * 3.0) + r * 40.0)) * 0.9;
+	// the moon and its halo
+	float m = dot(d, normalize(moon_dir));
+	col += vec3(0.75, 0.8, 0.95) * smoothstep(0.99965, 0.9998, m);
+	col += vec3(0.16, 0.2, 0.34) * pow(max(m, 0.0), 220.0);
+	if (h < 0.0) { col = mix(low * 0.35, vec3(0.008, 0.008, 0.012), smoothstep(0.0, -0.08, h)); }
+	ALBEDO = col;
+}
+"""
+
+## One piece of the kit, placed; null if the file is not there. The lights it marks are hung.
+func _kit_piece(name: String, pos: Vector3, rot_deg := 0.0, scale := Vector3.ONE) -> Node3D:
+	var path := ACADEMY_DIR % name
+	if not ResourceLoader.exists(path):
+		return null
+	var n: Node3D = load(path).instantiate()
+	n.position = pos
+	n.rotation_degrees.y = rot_deg
+	n.scale = scale
+	_place_root.add_child(n)
+	toonify(n)
+	if name.begins_with("floor_"):
+		# a floor takes shadows and casts none
+		for m in n.find_children("*", "MeshInstance3D", true, false):
+			(m as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for c in n.find_children("light_*", "", true, false):
+		var kind := String(c.name).get_slice("_", 1)
+		if not KIT_LIGHTS.has(kind):
+			continue
+		# coloured glass lights every other bay only, and no place more lights than it can draw
+		if kind == "stain":
+			_stain_count += 1
+			if _stain_count % 2 == 0 and not WIDE_PIECES.has(name):
+				continue
+		if _lamps.size() >= 26:
+			continue
+		var k: Array = KIT_LIGHTS[kind]
+		var light := OmniLight3D.new()
+		light.light_color = k[0]
+		light.light_energy = k[1]
+		light.omni_range = float(k[2]) * (1.6 if String(c.name).contains("tower") else (0.6 if String(c.name).contains("small") else 1.0))
+		light.omni_attenuation = 1.4
+		light.shadow_enabled = false
+		(c as Node3D).add_child(light)
+		_lamps.append({ "light": light, "base": float(k[1]) * _lamp_scale, "steady": kind in ["stain", "cool"] })
+	return n
+
+## A place built from the Academy's kit by its style (data/academy.json): a floor, four sides
+## of wall bays with a door piece at every door, corners, trusses indoors, and the furniture.
+func _build_kit_place(spec: Dictionary) -> void:
+	var style: Dictionary = spec["style"]
+	var hall: bool = String(style.get("kind", "court")) == "hall"
+	# the walls stand a tile's grid round the arena, at least a unit clear of where people walk
+	var W := ceilf((arena.x + 2.0) / 4.0) * 4.0
+	var D := ceilf((arena.y + 2.0) / 4.0) * 4.0
+	_stain_count = 0
+	_lamp_scale = float(style.get("lamps", 1.0))
+	# the floor
+	var boards: bool = String(style["floor"]) == "floor_boards"
+	var i := 0
+	var x := -W / 2.0 + 2.0
+	while x < W / 2.0:
+		var z := -D / 2.0 + 2.0
+		while z < D / 2.0:
+			_kit_piece(String(style["floor"]), Vector3(x, 0, z), (180.0 * (i % 2)) if boards else 90.0 * ((i * 7 + int(x)) % 4))
+			z += 4.0
+			i += 1
+		x += 4.0
+	for lawn in style.get("lawns", []):
+		_kit_rect(String(style.get("lawn", "floor_lawn")), float(lawn[0]), float(lawn[1]), float(lawn[2]), float(lawn[3]), 0.07)
+	# the four sides
+	var doors: Array = spec["doors"]
+	var sides: Dictionary = style.get("sides", {})
+	for side in ["n", "s", "w", "e"]:
+		var ss: Dictionary = sides.get(side, {})
+		var along_x: bool = side in ["n", "s"]
+		var length := W if along_x else D
+		var fixed := (-D / 2.0 if side == "n" else D / 2.0) if along_x else (-W / 2.0 if side == "w" else W / 2.0)
+		var rot: float = { "n": 0.0, "s": 180.0, "w": 90.0, "e": -90.0 }[side]
+		var out: Vector3 = { "n": Vector3(0, 0, -1), "s": Vector3(0, 0, 1), "w": Vector3(-1, 0, 0), "e": Vector3(1, 0, 0) }[side]
+		# what must stand at a given place along the side: a door piece at each door, and features
+		var feats: Array = []
+		for d in doors:
+			var dx := float(d["at"][0])
+			var dz := float(d["at"][1])
+			var on_side := absf(dz - signf(fixed) * arena.y / 2.0) < 0.6 if along_x else absf(dx - signf(fixed) * arena.x / 2.0) < 0.6
+			if on_side:
+				feats.append({ "piece": String(d.get("piece", ss.get("door", style.get("door", "range_door")))), "at": dx if along_x else dz })
+		for f in ss.get("features", []):
+			feats.append({ "piece": String(f["piece"]), "at": float(f["at"]) })
+		feats.sort_custom(func(a, b): return float(a["at"]) < float(b["at"]))
+		var bays: Array = ss.get("bays", style.get("bays", ["range_plain"]))
+		var cursor := -length / 2.0
+		var b := 0
+		for fi in feats.size() + 1:
+			var stop := length / 2.0
+			var fw := 0.0
+			var fat := 0.0
+			if fi < feats.size():
+				fw = 8.0 if WIDE_PIECES.has(feats[fi]["piece"]) else 4.0
+				fat = clampf(float(feats[fi]["at"]), cursor + fw / 2.0, length / 2.0 - fw / 2.0)
+				stop = fat - fw / 2.0
+			var gap := stop - cursor
+			if gap > 0.4:
+				var count := maxi(1, int(round(gap / 4.0)))
+				var bw := gap / count
+				for k in count:
+					var t := cursor + bw * (k + 0.5)
+					_kit_wall(String(bays[b % bays.size()]), t, fixed, along_x, rot, out, bw / 4.0)
+					b += 1
+			if fi < feats.size():
+				_kit_wall(String(feats[fi]["piece"]), fat, fixed, along_x, rot, out, 1.0)
+				cursor = fat + fw / 2.0
+	# the corners
+	var corner := String(style.get("corner", ""))
+	if corner != "":
+		for c in [[1, -1, 0.0], [-1, -1, 90.0], [-1, 1, 180.0], [1, 1, 270.0]]:
+			var cat := Vector3(c[0] * W / 2.0, 0, c[1] * D / 2.0)
+			var cn := _kit_piece(corner, cat, c[2])
+			if cn and cn.has_node("Upper"):
+				_cut_walls.append({ "upper": cn.get_node("Upper"), "at": cat, "out": Vector3(c[0], 0, 0), "out2": Vector3(0, 0, c[1]) })
+	# the roof's timbers, indoors
+	if style.has("trusses"):
+		var tr: Dictionary = style["trusses"]
+		var across_z: bool = String(tr.get("across", "z")) == "z"
+		var run := W if across_z else D
+		var t2 := -run / 2.0 + 2.0
+		while t2 < run / 2.0:
+			_kit_piece(String(tr["piece"]), Vector3(t2, 0, 0) if across_z else Vector3(0, 0, t2), 90.0 if across_z else 0.0)
+			t2 += float(tr.get("every", 4.0))
+	# the line, where the place has one: cinders between the platforms, the rails, the buffer
+	if style.has("track"):
+		var from := float(style["track"].get("from", -W / 2.0))
+		var tx := from + 2.0
+		while tx < W / 2.0 + 2.0:
+			_kit_piece("floor_ballast", Vector3(tx, 0.035, 0), 0.0, Vector3(1, 1, 0.82))
+			for sz in [-1, 1]:
+				_kit_piece("platform_edge", Vector3(tx, 0.06, sz * 1.9), 0.0 if sz > 0 else 180.0)
+			tx += 4.0
+		_rails(W / 2.0 + 1.0, from + 0.6)
+		_kit_piece("buffer_stop", Vector3(from + 0.4, 0, 0), 0.0)
+		obstacles.append(Vector3(from + 0.2, 0, 1.2))
+	# the furniture
+	for f in spec.get("furniture", []):
+		var at := Vector3(float(f["at"][0]), float(f.get("y", 0.0)), float(f["at"][1]))
+		var sc := float(f.get("scale", 1.0))
+		if _kit_piece(String(f["piece"]), at, float(f.get("rot", 0.0)), Vector3.ONE * sc) == null:
+			continue
+		if f.has("solid"):
+			obstacles.append(Vector3(at.x, at.z, float(f["solid"])))
+		for so in f.get("solids", []):
+			obstacles.append(Vector3(at.x + float(so[0]), at.z + float(so[1]), float(so[2])))
+	for d in doors:
+		_door_marker(Vector3(float(d["at"][0]), 0, float(d["at"][1])), String(d["label"]), d.has("locked") and not open_doors.has(d["to"]))
+	if spec.has("board"):
+		var ba := Vector3(float(spec["board"]["at"][0]), 0, float(spec["board"]["at"][1]))
+		_kit_piece("notice_board", ba, float(spec["board"].get("rot", 0.0)))
+		obstacles.append(Vector3(ba.x - 0.8, ba.z, 0.7))
+		obstacles.append(Vector3(ba.x + 0.8, ba.z, 0.7))
+		var l := Label3D.new()
+		l.text = "THE BOARD"
+		l.font = Style.font("title")
+		l.font_size = 26
+		l.pixel_size = 0.006
+		l.modulate = Color(1.0, 0.85, 0.6)
+		l.outline_size = 8
+		l.outline_modulate = Color(0, 0, 0, 0.8)
+		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		l.position = ba + Vector3(0, 4.1, 0)
+		_place_root.add_child(l)
+	match String(spec["name"]):
+		"The Yard": _furnish_yard(true)
+		"The Hearth Hall": _furnish_hearth(true)
+	# the light of the place
+	_ambient_lit = float(style.get("ambient", 0.3 if hall else 0.5))
+	_torch_dim = 0.0
+	if hall:
+		# indoors: no sky, the dark of a roof overhead, lamps and a fire
+		_env.background_color = Color(0.016, 0.012, 0.011)
+		_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		_env.ambient_light_color = Color(0.62, 0.5, 0.42)
+		_env.ambient_light_energy = _ambient_lit
+		_env.fog_light_color = Color(0.05, 0.035, 0.028)
+		_env.fog_density = 0.016
+		_moon.light_energy = 0.0
+	else:
+		_env.background_color = Color(0.02, 0.02, 0.035)
+		_env.ambient_light_energy = _ambient_lit
+		_env.fog_light_color = Color(0.05, 0.05, 0.085)
+		_env.fog_density = 0.006
+		_moon.light_energy = 0.5
+		_sky_dome = MeshInstance3D.new()
+		var sm := SphereMesh.new()
+		sm.radius = 260.0
+		sm.height = 520.0
+		sm.radial_segments = 24
+		sm.rings = 12
+		_sky_dome.mesh = sm
+		_sky_dome.material_override = _shader_mat(SKY)
+		_sky_dome.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_sky_dome.extra_cull_margin = 1000.0
+		_place_root.add_child(_sky_dome)
+		for pool in style.get("pools", []):
+			# the Library's glass on the paving: a pool of coloured light
+			var pm := MeshInstance3D.new()
+			var plane := PlaneMesh.new()
+			plane.size = Vector2(float(pool[2]), float(pool[2]) * 1.6)
+			pm.mesh = plane
+			var gm := _shader_mat(GLOW)
+			gm.set_shader_parameter("billboard", false)
+			gm.set_shader_parameter("tint", Color(String(pool[3])))
+			gm.set_shader_parameter("strength", 0.34)
+			gm.set_shader_parameter("falloff", 1.5)
+			pm.material_override = gm
+			pm.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			pm.position = Vector3(float(pool[0]), 0.14, float(pool[1]))
+			_place_root.add_child(pm)
+
+## A wall piece on a side, and its upper part entered for the cutaway.
+func _kit_wall(name: String, t: float, fixed: float, along_x: bool, rot: float, out: Vector3, stretch: float) -> void:
+	var at := Vector3(t, 0, fixed) if along_x else Vector3(fixed, 0, t)
+	var n := _kit_piece(name, at, rot, Vector3(stretch, 1, 1))
+	if n == null:
+		# the kit lacks the piece: KayKit's wall stands in
+		_piece("wall_arched" if name.contains("door") or name.contains("portal") else "wall", at, rot)
+		return
+	if n.has_node("Upper"):
+		_cut_walls.append({ "upper": n.get_node("Upper"), "at": at, "out": out, "out2": Vector3.ZERO })
+
+## A rectangle of the floor laid again in another tile (the lawns), a little proud of it.
+func _kit_rect(name: String, x0: float, z0: float, x1: float, z1: float, y: float) -> void:
+	var nx := maxi(1, int(round((x1 - x0) / 4.0)))
+	var nz := maxi(1, int(round((z1 - z0) / 4.0)))
+	var sx := (x1 - x0) / nx
+	var sz := (z1 - z0) / nz
+	for ix in nx:
+		for iz in nz:
+			_kit_piece(name, Vector3(x0 + sx * (ix + 0.5), y, z0 + sz * (iz + 0.5)), 0.0, Vector3(sx / 4.0, 1, sz / 4.0))
+
+## Tall walls never stand between the camera and the hero: a wall's upper part hides while the
+## camera is outside it (or pressed against it), leaving its plinth as the room's edge.
+func _update_cutaway() -> void:
+	if _cut_walls.is_empty():
+		return
+	var cp := camera.global_position
+	for w in _cut_walls:
+		var rel: Vector3 = cp - (w["at"] as Vector3)
+		var hide := rel.dot(w["out"]) > -1.4
+		if (w["out2"] as Vector3) != Vector3.ZERO:
+			hide = hide or rel.dot(w["out2"]) > -1.4
+		(w["upper"] as Node3D).visible = not hide
+
 ## The line itself: ties and two rails across the place.
-func _rails(hw: float) -> void:
+func _rails(hw: float, from := -INF) -> void:
 	var tie := _mat(Color(0.22, 0.15, 0.1))
 	var rail := _mat(Color(0.42, 0.4, 0.38))
 	rail.metallic = 0.85
 	rail.roughness = 0.3
-	var tx := -hw
+	var x0 := maxf(-hw, from)
+	var tx := x0
 	while tx < hw:
 		var bm := BoxMesh.new()
 		bm.size = Vector3(0.3, 0.12, 2.4)
@@ -2303,10 +2619,10 @@ func _rails(hw: float) -> void:
 		tx += 0.8
 	for rz in [-0.72, 0.72]:
 		var rm := BoxMesh.new()
-		rm.size = Vector3(hw * 2.0, 0.12, 0.1)
+		rm.size = Vector3(hw - x0, 0.12, 0.1)
 		var r := MeshInstance3D.new()
 		r.mesh = rm
-		r.position = Vector3(0, 0.2, rz)
+		r.position = Vector3((hw + x0) / 2.0, 0.2, rz)
 		r.material_override = rail
 		_place_root.add_child(r)
 
@@ -2598,15 +2914,16 @@ func _furnish_quad() -> void:
 	_piece("crates_stacked", Vector3(-13.0, 0, 9.0), 10.0, 0.6)
 	_piece("barrel_small_stack", Vector3(-13.0, 0, -9.0), 0.0, 0.7)
 
-func _furnish_yard() -> void:
-	# Pillars in the corners, clear of the ring and of the camera behind whoever is sparring.
-	for p in [Vector3(-9.5, 0, -5.8), Vector3(9.5, 0, -5.8), Vector3(9.5, 0, 5.8)]:
-		_piece("pillar", p, 0.0, 0.7)
-		obstacles.append(Vector3(p.x, p.z, 0.6))
-	_piece("crates_stacked", Vector3(9.0, 0, 5.0), 0.0, 0.6)
-	_piece("barrel_large", Vector3(7.0, 0, 5.4), 15.0, 0.6)
-	_piece("rubble_half", Vector3(-3.0, 0, 6.2), 180.0, 0.5)
-	_piece("banner_patternA_red", Vector3(0.0, 0.6, -7.55), 0.0)
+func _furnish_yard(kit := false) -> void:
+	if not kit:
+		# Pillars in the corners, clear of the ring and of the camera behind whoever is sparring.
+		for p in [Vector3(-9.5, 0, -5.8), Vector3(9.5, 0, -5.8), Vector3(9.5, 0, 5.8)]:
+			_piece("pillar", p, 0.0, 0.7)
+			obstacles.append(Vector3(p.x, p.z, 0.6))
+		_piece("crates_stacked", Vector3(9.0, 0, 5.0), 0.0, 0.6)
+		_piece("barrel_large", Vector3(7.0, 0, 5.4), 15.0, 0.6)
+		_piece("rubble_half", Vector3(-3.0, 0, 6.2), 180.0, 0.5)
+		_piece("banner_patternA_red", Vector3(0.0, 0.6, -7.55), 0.0)
 	# The ward ring: the circle the drills are fought in.
 	var ring := MeshInstance3D.new()
 	var tm := TorusMesh.new()
@@ -3070,26 +3387,27 @@ var _pillar: MeshInstance3D    # the column of light when the genius is made
 
 const BOWL := Vector3(0, 0, -1.2)
 
-func _furnish_hearth() -> void:
+func _furnish_hearth(kit := false) -> void:
 	# The bowl: a broad stone basin on a short column, with the fire in it.
-	_piece("column", BOWL, 0.0, 0.5)
-	var rim := MeshInstance3D.new()
-	var tm := TorusMesh.new()
-	tm.inner_radius = 0.7
-	tm.outer_radius = 1.0
-	rim.mesh = tm
-	rim.position = BOWL + Vector3(0, 1.05, 0)
-	rim.material_override = _mat(Color(0.35, 0.3, 0.27))
-	_place_root.add_child(rim)
-	var basin := MeshInstance3D.new()
-	var cm := CylinderMesh.new()
-	cm.top_radius = 0.85
-	cm.bottom_radius = 0.4
-	cm.height = 0.4
-	basin.mesh = cm
-	basin.position = BOWL + Vector3(0, 0.85, 0)
-	basin.material_override = _mat(Color(0.3, 0.26, 0.24))
-	_place_root.add_child(basin)
+	if not kit or _kit_piece("rite_bowl", BOWL) == null:
+		_piece("column", BOWL, 0.0, 0.5)
+		var rim := MeshInstance3D.new()
+		var tm := TorusMesh.new()
+		tm.inner_radius = 0.7
+		tm.outer_radius = 1.0
+		rim.mesh = tm
+		rim.position = BOWL + Vector3(0, 1.05, 0)
+		rim.material_override = _mat(Color(0.35, 0.3, 0.27))
+		_place_root.add_child(rim)
+		var basin := MeshInstance3D.new()
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.85
+		cm.bottom_radius = 0.4
+		cm.height = 0.4
+		basin.mesh = cm
+		basin.position = BOWL + Vector3(0, 0.85, 0)
+		basin.material_override = _mat(Color(0.3, 0.26, 0.24))
+		_place_root.add_child(basin)
 	obstacles.append(Vector3(BOWL.x, BOWL.z, 1.1))
 	bowl_flame = MeshInstance3D.new()
 	var sm := SphereMesh.new()
@@ -3118,6 +3436,8 @@ func _furnish_hearth() -> void:
 	ring.position = BOWL + Vector3(0, 0.12, 0)
 	ring.material_override = _mat(Color(1.0, 0.75, 0.4), 1.5, true, 0.5)
 	_place_root.add_child(ring)
+	if kit:
+		return
 	for b in [[-4.0, -9.4, 0.0], [4.0, -9.4, 0.0]]:
 		_piece("banner_patternA_red", Vector3(b[0], 0.6, b[1]), b[2])
 	for c in [Vector2(-6.5, -6.5), Vector2(6.5, -6.5)]:
@@ -3128,10 +3448,11 @@ func _furnish_hearth() -> void:
 func dim(k: float) -> void:
 	for t in _torches:
 		(t as OmniLight3D).light_energy = lerpf(1.5, 0.15, k)
-	_env.ambient_light_energy = lerpf(0.34, 0.08, k)
+	_env.ambient_light_energy = lerpf(_ambient_lit if _ambient_lit > 0.0 else 0.34, 0.08, k)
 	_torch_dim = k
 
 var _torch_dim := 0.0
+var _ambient_lit := 0.0     # the place's own ambient, for the rite to dim from and return to
 
 ## The bowl's fire: its colour and how high it burns.
 func flame(color: Color, size: float, energy := 4.0) -> void:

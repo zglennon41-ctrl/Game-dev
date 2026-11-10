@@ -446,6 +446,9 @@ func _tour() -> void:
 			world.cine_look = views[v][1]
 			await get_tree().create_timer(0.9).timeout
 			hud.screen.visible = false
+			if _args.has("debug"):
+				print("TOUR %s %s: %.1f frames a second, %d objects, %d primitives" % [id, v, Engine.get_frames_per_second(),
+					RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME), RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)])
 			_shot("tour-%s-%s" % [id, v])
 			await get_tree().create_timer(0.3).timeout
 	get_tree().quit()
