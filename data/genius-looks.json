@@ -322,8 +322,5 @@
     "daemon-vigil": { "coats": "shade", "roles": { "shade": "main", "shade_edge": "under" }, "marks": { "hem": { "name": "a pale hem", "on": "under" } } },
     "daemon-marginal": { "coats": "ink", "roles": { "ink": "main", "ink_edge": "under", "paper": "trim" }, "marks": { "cover": { "name": "a tooled cover", "on": "under" }, "drip": { "name": "a run of pale ink", "on": "main" } } }
   },
-  "forms": {
-    "storm-crow": { "coats": "corvid" },
-    "weir-otter": { "coats": "pelt" }
-  }
+  "forms": {}
 }

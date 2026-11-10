@@ -44,6 +44,10 @@ func _ready() -> void:
 		var kv := String(a).trim_prefix("--").split("=", true, 1)
 		_args[kv[0]] = kv[1] if kv.size() > 1 else true
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	if _args.has("bases"):
+		# --bases=res://game/tests/fixtures/bases: more bases beside the game's own, to look at
+		# the tree's screens with (a turning needs a second base).
+		Data.use_bases(Data.load_bases() + Data.load_bases(str(_args["bases"])))
 	_setup_input()
 	add_child(world)
 	add_child(hud)
@@ -159,6 +163,33 @@ func _ready() -> void:
 		return
 	if _args.has("page"):
 		var ph := Settings.hero()
+		if ph.is_empty() or not ph.has("genius") or _args.has("fresh"):
+			# no saved character: one made here, its genius settled, to look at the page with.
+			# --page=<form id> (a base's, or a hybrid's: wolf+hawk:wolf-courser) stands it at that form.
+			ph = Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0])
+			ph["name"] = "Test"
+			var pff := Rite.first_form(ph, ph["shape"], 11)
+			var pg := Rite.birth(ph, pff["reading"], pff["name"])
+			var want := Data.form(str(_args["page"]))
+			if not want.is_empty():
+				var steps: Array = []
+				var wf := want
+				while not wf.is_empty() and int(wf["level"]) >= 1:
+					steps.push_front(wf)
+					wf = Data.form(String(wf["parent"])) if String(wf["parent"]) != "" else {}
+				for st in steps:
+					pg.pending_reading = { "instar": int(st["level"]), "candidates": [GeniusReading._candidate(st, 0.0, [], String(pg.body.get("seedMark", "")), [], [])], "unlockedBy": "gate" }
+					pg.take(0)
+				pg.history = pg.history.slice(1) if not steps.is_empty() else pg.history
+			for i in 22: pg.hit_at(1.5)
+			for i in 9: pg.hit_at(6.0)
+			for i in 14: pg.gave_order("hunt")
+			for i in 6: pg.gave_order("guard")
+			for i in 8: pg.met_blow("parries")
+			for i in 5: pg.met_blow("dodges")
+			for i in 4: pg.ran("wild", false, 2)
+			pg.ran("ruin", true, 0)
+			pg.save_to(ph)
 		menu()
 		page.open(Genius.for_hero(ph), World.SHAPE_COLORS.get(ph.get("shape", "anchor"), Color.WHITE), 0, int(ph.get("academy", {}).get("record", {}).get("marks", 0)))
 		if _args.has("shots"):
@@ -170,7 +201,9 @@ func _ready() -> void:
 		_lineage(str(_args["lineage"]))
 		return
 	if _args.has("gallery"):
-		# Every form in the lattice, assembled, in rows: a check of the genius bodies.
+		# The genius tree, assembled: a check of the bodies. --gallery: every base, a row each
+		# (its settled form, then each path with its prongs and their finishes). --gallery=wolf:
+		# one base's tree, a row for each level. --gallery=wolf+hawk: a hybrid's.
 		mode = "gallery"
 		hud.hide_screen()
 		hud.play_ui.visible = false
@@ -178,25 +211,38 @@ func _ready() -> void:
 		world.genius_visible = false
 		world._player.visible = false
 		var only: String = str(_args.get("gallery", ""))
-		var forms: Array = Data.forms().filter(func(f): return only == "true" or only == "" or int(f["instars"]["min"]) <= int(only))
-		var cols := 7 if forms.size() <= 35 else (9 if forms.size() <= 60 else 13)
-		var rows := ceili(forms.size() / float(cols))
-		for i in forms.size():
-			var f: Dictionary = forms[i]
-			var col: Color = World.SHAPE_COLORS.values()[i % 6]
-			var info := { "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": f["features"], "instar": 3 }
-			var b := world.make_form(info, col)
-			world.add_child(b)
-			b.position = Vector3((i % cols - cols / 2.0 + 0.5) * 2.4, 0, (i / cols - (rows - 1) / 2.0) * 2.6)
-			b.rotation.y = 0.5
-			var l := Label3D.new()
-			l.text = String(f["name"]).to_upper() + "\n" + String(f["silhouette"])
-			l.font = Style.font("title")
-			l.font_size = 30
-			l.pixel_size = 0.005
-			l.position = b.position + Vector3(0, -0.15, 0.9)
-			l.rotation.x = -0.6
-			world.add_child(l)
+		var grid: Array = []      # rows of forms
+		if only != "" and only != "true" and not Data.tree_of(only).is_empty():
+			var tree := Data.tree_of(only)
+			for lv in [1, 2, 3, 4]:
+				grid.append(tree.filter(func(f): return int(f["level"]) == lv))
+		else:
+			for b in Data.bases():
+				grid.append(Data.tree_of(String(b["id"])))
+		var rows := grid.size()
+		var widest := 1
+		for r in grid:
+			widest = maxi(widest, (r as Array).size())
+		var step := 2.4 if widest <= 18 else 1.7
+		for ri in rows:
+			var line: Array = grid[ri]
+			for i in line.size():
+				var f: Dictionary = line[i]
+				var col: Color = World.SHAPE_COLORS.values()[ri % 6]
+				var info := { "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": f["features"], "instar": int(f["level"]), "look": GeniusLook.born(4711 + ri) }
+				var b := world.make_form(info, col)
+				world.add_child(b)
+				b.position = Vector3((i - line.size() / 2.0 + 0.5) * step, 0, (ri - (rows - 1) / 2.0) * 2.8)
+				b.rotation.y = 0.5
+				var l := Label3D.new()
+				l.text = String(f["name"]).to_upper()
+				l.font = Style.font("title")
+				l.font_size = 30 if step > 2.0 else 22
+				l.pixel_size = 0.005
+				l.position = b.position + Vector3(0, -0.15, 0.9)
+				l.rotation.x = -0.6
+				world.add_child(l)
+		rows = maxi(rows, ceili(widest * step / 6.0))
 		world.cine = true
 		# the camera stands back far enough for every row
 		world.cine_pos = Vector3(0, 2.4 + rows * 1.35, rows * 1.3 + 2.6)
@@ -469,6 +515,24 @@ func _academy_gate() -> void:
 		if _args.has("quit"):
 			get_tree().create_timer(1.0, true, false, true).timeout.connect(get_tree().quit)
 
+## For looking at a Reading: count play into a genius's Tally in the proportions of some leans.
+func _play_like(g: Genius, leans: Dictionary, n: int) -> void:
+	for line in leans:
+		for key in leans[line]:
+			var k := roundi(n * float(leans[line][key]))
+			match String(line):
+				"range": g.count("range", String(key), k)
+				"orders": g.count("orders", String(key), k)
+				"shape": g.count("families", "%s.%s" % [key, Data.kits[String(key)]["technique"]["family"]], k)
+				"fights": g.counter("fights." + String(key), k)
+				"company": g.counter("runs." + String(key), k)
+				"ground": g.count("ground", String(key), k)
+				"quests": g.counter("runs.quest." + String(key), k)
+				"bonds": g.bonded(String(key))
+				"pattern":
+					if g.tally.get("intention") is Dictionary:
+						g.tally["intention"]["fires" if key == "fires" else "sworn"] = 100 if key == "fires" else true
+
 ## --lineage: how a genius's progress shows (docs/genius-progression.md), on the creator's
 ## platform. --lineage=life (or a list of form ids) stands one life in a row, a form for each
 ## instar at that instar's size, the same coat, the Seed-mark and one part carried forward;
@@ -484,12 +548,12 @@ func _lineage(what: String) -> void:
 	world._player.visible = false
 	var col: Color = World.SHAPE_COLORS["anchor"]
 	var look := GeniusLook.born(4711)
-	var forms: Array = Data.forms()
 	var by_id := func(id: String) -> Dictionary:
-		for f in forms:
-			if f["id"] == id:
-				return f
-		return {}
+		return Data.form(id)
+	# a road down the first base's tree: settled, its first path, that path's first prong and finish
+	var road: Array = [Data.bases()[0]["settled"]["id"]]
+	while not Data.children_of(String(road.back())).is_empty():
+		road.append(Data.children_of(String(road.back()))[0]["id"])
 	var stand: Array = []      # [info, label]
 	var names := ["First Form", "Second Form", "Third Form", "Fourth Form", "Fifth Form", "Apex"]
 	var homes_row: Array = []
@@ -501,18 +565,26 @@ func _lineage(what: String) -> void:
 		homes_row = all_homes.slice(0, 7) if half == 0 else all_homes.slice(7)
 		if what.contains(":") and all_homes.has(what.get_slice(":", 1)):
 			homes_row = Array(what.get_slice(":", 1).split(","))      # --lineage=homes:edo, one home close
-		var hf: Dictionary = by_id.call("field-wolf")
+		var hf: Dictionary = by_id.call(String(road[mini(2, road.size() - 1)]))
 		for hid in homes_row:
 			stand.append([{ "form": hf["id"], "silhouette": hf["silhouette"], "expression": hf["expression"], "features": hf["features"], "instar": 3, "look": GeniusLook.born(4711 + String(hid).hash() % 977), "ready": 0.0, "home": hid },
 				"%s\n%s" % [String(hid).to_upper(), String(Data.bodies[hid]["dress"].get("trapping", {}).get("name", ""))]])
 	elif what == "molt":
-		var f: Dictionary = by_id.call("field-wolf")
+		var f: Dictionary = by_id.call(String(road[0]))
 		for st in [[0.0, "THE DAY OF THE RITE"], [0.5, "HALF THE DAYS LIVED\nit has grown"], [0.85, "NEAR\nthe seams show"], [1.0, "THE READING IS DUE\nit molts"]]:
 			stand.append([{ "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": f["features"], "instar": 1, "look": look, "ready": st[0] }, String(st[1])])
 	elif homes_row.is_empty():
-		# by default one kind through all its ages: a wolf, pup to Apex (the rules would read it into
-		# other forms on the way; this row is to see the ages)
-		var ids: Array = ["field-wolf", "field-wolf", "field-wolf", "field-wolf", "field-wolf", "field-wolf"] if what in ["true", "", "life"] else Array(what.split(","))
+		# by default one road down a tree and its two ages after: settled, path, prong, finish,
+		# great, apex. --lineage=<base> for that base's first road; or a list of form ids.
+		var ids: Array = Array(what.split(","))
+		if what in ["true", "", "life"] or not Data.base(what).is_empty():
+			if not Data.base(what).is_empty():
+				road = [Data.base(what)["settled"]["id"]]
+				while not Data.children_of(String(road.back())).is_empty():
+					road.append(Data.children_of(String(road.back()))[0]["id"])
+			ids = road.duplicate()
+			while ids.size() < 6:
+				ids.append(ids.back())
 		var carried: Array = []
 		for i in ids.size():
 			var f: Dictionary = by_id.call(String(ids[i]))
@@ -637,6 +709,11 @@ func enter_academy() -> void:
 		var rg: Genius = academy.genius
 		rg.milestone("gate")
 		rg.day = maxi(rg.day, 7)
+		# --reading=<base>: as if the term had been played like that base, so that it turns.
+		var like := Data.base(str(_args["reading"]))
+		if not like.is_empty():
+			rg.tally = GeniusReading.empty_tally()
+			_play_like(rg, like["nature"], 40)
 		academy.auto = false
 		academy.show_reading(rg.read(2), func(_i: int): pass)
 		if _args.has("shots"):

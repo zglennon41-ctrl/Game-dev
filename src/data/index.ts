@@ -10,11 +10,17 @@ import seedsJson from '../../data/seeds.json';
 import bloodsJson from '../../data/bloods.json';
 import featuresJson from '../../data/features.json';
 import adaptationsJson from '../../data/adaptations.json';
-import formsJson from '../../data/forms.json';
+import homesJson from '../../data/genius-homes.json';
+import hybridsJson from '../../data/genius-hybrids.json';
 import secondaryJson from '../../data/secondary-forms.json';
 import shadesJson from '../../data/shades.json';
 import rosterJson from '../../data/roster.json';
 import techniquesJson from '../../data/techniques.json';
+import { readFileSync, readdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { flatten, compose, type Base, type Form, type Hybrids } from './tree';
+
+export type { Base, Form, Hybrids, Leans, TreeNode } from './tree';
 
 export type ShapeId = 'anchor' | 'turn' | 'cast' | 'read' | 'bind' | 'make';
 export type Expression = 'beast' | 'kith' | 'engine' | 'relic' | 'daemon' | 'aspect';
@@ -32,15 +38,6 @@ export interface Seed { id: string; text: string; seedMark: string; leansToward:
 export interface Blood { id: string; tier: 'mark' | 'kindred' | 'bloodline'; name: string; gift: string; gap: string; house?: string; shapeLean?: Record<string, number>; graft?: string }
 export interface Feature { id: string; slot: string; label: string; bonus: Record<string, unknown>; fixable?: boolean; adaptation?: boolean; tags?: string[] }
 export interface Adaptation { id: string; metric: string; threshold: number }
-export interface Form {
-  id: string; name: string; expression: Expression; silhouette: string; features: string[]; instars: { min: number; max: number };
-  /** The home whose kind this is: offered more often to a character who grew up there, and only at the rite. */
-  home?: string;
-  /** What the form is called while it is young, by instar. */
-  ages?: Record<string, string>;
-  /** The elder of its kind. */
-  growsInto?: string;
-}
 export type Requirement =
   | { kind: 'rank'; archetypeDiscipline: string; rank: 'adept' | 'master' }
   | { kind: 'expression'; in: Expression[] }
@@ -53,17 +50,13 @@ export interface Shade { id: string; name: string; discipline: string; expressio
 export interface RosterMember { id: string; name: string; shape: ShapeId; genius: { form: string; expression: Expression; features: string[]; kinFeature: string } }
 export interface Technique { id: string; name: string; shape: ShapeId; family: string; beats: number; will: number; stage: number; placeholder?: boolean }
 
-export interface Lean { expression: Partial<Record<Expression, number>>; features: Record<string, number> }
 export interface ReadingConfig {
-  weights: Record<string, number>;
-  firstFormWeights: Record<string, number>;
-  emphasis: { reference: Record<string, number>; intentionBase: number; intentionFires: number };
-  diversity: { sameExpression: number };
-  crossing: { linesAway: number; stayBonus: number };
-  heritage: { sharedBonus: number; minScore: number };
-  /** How a character's home leans the bowl's second and third offers (data/reading.json, home). */
-  home: { bonus: number; floor: number; away: number; most: number; open: string[] };
-  leans: Record<string, Record<string, Lean>>;
+  /** The rite: the weight of each line of the character's own (Seed, blood, Shape), and what a second base of a class already offered counts for. */
+  rite: { weights: Record<string, number>; sameClass: number };
+  /** A refinement: the weight of each line of the Tally, the play a line needs to count in full, and the fires a Pattern needs. */
+  refine: { weights: Record<string, number>; reference: Record<string, number>; patternFires: number };
+  /** How a line of the Tally is said in plain words. */
+  words?: Record<string, Record<string, string> | string>;
 }
 
 export type Rules = typeof rulesJson;
@@ -80,7 +73,13 @@ export interface GameData {
   bloods: Blood[];
   features: Feature[];
   adaptations: Adaptation[];
+  /** The bases of the genius tree (data/genius-bases), by id. */
+  bases: Base[];
+  /** Every form of every base, each base's settled form first. Hybrids are asked for with formOf. */
   forms: Form[];
+  /** Each home's lean on the bases at the rite (data/genius-homes.json). */
+  homes: Record<string, Record<string, number>>;
+  hybrids: Hybrids;
   secondaryForms: SecondaryForm[];
   shades: Shade[];
   roster: RosterMember[];
@@ -97,9 +96,12 @@ export const data: GameData = {
   terms: termsJson as Term[],
   seeds: seedsJson as Seed[],
   bloods: bloodsJson as Blood[],
-  features: featuresJson as Feature[],
+  features: [],
   adaptations: adaptationsJson as Adaptation[],
-  forms: formsJson as Form[],
+  bases: [],
+  forms: [],
+  homes: Object.fromEntries(Object.entries(homesJson).filter(([k]) => !k.startsWith('$'))) as unknown as Record<string, Record<string, number>>,
+  hybrids: hybridsJson as unknown as Hybrids,
   secondaryForms: secondaryJson as SecondaryForm[],
   shades: shadesJson as Shade[],
   roster: rosterJson as RosterMember[],
@@ -110,4 +112,54 @@ export function byId<T extends { id: string }>(list: T[], id: string, what = 'it
   const found = list.find((x) => x.id === id);
   if (!found) throw new Error(`Unknown ${what}: ${id}`);
   return found;
+}
+
+const dataDir = fileURLToPath(new URL('../../data/', import.meta.url));
+
+/** Read every base in a folder (data/genius-bases by default), in the order of their ids. */
+export function loadBases(dir = dataDir + 'genius-bases'): Base[] {
+  return readdirSync(dir).filter((f) => f.endsWith('.json')).sort().map((f) => JSON.parse(readFileSync(`${dir}/${f}`, 'utf8')) as Base);
+}
+
+let formIndex = new Map<string, Form>();
+const hybridCache = new Map<string, Form[]>();
+
+/** Set the bases the rules run on (the game's own by default; a test may add its own). */
+export function useBases(bases: Base[]): void {
+  data.bases = [...bases].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  data.forms = data.bases.flatMap(flatten);
+  formIndex = new Map(data.forms.map((f) => [f.id, f]));
+  hybridCache.clear();
+  const extra = data.bases.flatMap((b) => b.newFeatures ?? []).map((f) => ({ bonus: {}, ...f })) as Feature[];
+  const known = new Set((featuresJson as Feature[]).map((f) => f.id));
+  data.features = [...(featuresJson as Feature[]), ...extra.filter((f) => !known.has(f.id))];
+}
+useBases(loadBases());
+
+export function baseOf(id: string): Base | undefined {
+  return data.bases.find((b) => b.id === id);
+}
+
+/** The thirty forms of the hybrid of two bases (docs/genius-tree.md, Hybrids). */
+export function hybridForms(first: string, second: string): Form[] {
+  const key = `${first}+${second}`;
+  if (!hybridCache.has(key)) {
+    const a = baseOf(first);
+    const b = baseOf(second);
+    hybridCache.set(key, a && b && a.id !== b.id ? compose(a, b, data.hybrids) : []);
+  }
+  return hybridCache.get(key)!;
+}
+
+/** A form by its id: a form of a base, or of a hybrid (first+second:form). */
+export function formOf(id: string): Form | undefined {
+  const pure = formIndex.get(id);
+  if (pure || !id.includes(':')) return pure;
+  const [first, second] = id.split(':')[0].split('+');
+  return hybridForms(first, second).find((f) => f.id === id);
+}
+
+/** The forms a form may become. */
+export function childrenOf(id: string): Form[] {
+  return (formOf(id)?.children ?? []).map((c) => formOf(c)!).filter(Boolean);
 }

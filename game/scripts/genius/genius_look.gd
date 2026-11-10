@@ -26,10 +26,13 @@ static func roll(seed_value: int, salt: String) -> float:
 static func body(silhouette: String) -> Dictionary:
 	return Data.genius_looks()["bodies"].get(silhouette, {})
 
-## The coats a form may wear: its own palette if it has one, or its body's.
+## The coats a form may wear: its own palette if it has one, or its body's. A hybrid wears its
+## first base's body in a coat of its second's (the form's coatOf; docs/genius-tree.md).
 static func palette(form: String, silhouette: String) -> Array:
 	var looks: Dictionary = Data.genius_looks()
-	var pid: String = looks["forms"].get(form, {}).get("coats", body(silhouette).get("coats", ""))
+	var coat_of := String(Data.form(form).get("coatOf", silhouette)) if form != "" else silhouette
+	var theirs: String = body(coat_of).get("coats", "")
+	var pid: String = looks["forms"].get(form, {}).get("coats", theirs if theirs != "" else body(silhouette).get("coats", ""))
 	return looks["palettes"].get(pid, [])
 
 ## The few coats that are this genius's own, the one it was born in first.

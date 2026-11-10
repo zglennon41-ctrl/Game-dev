@@ -1,180 +1,97 @@
 {
-  "$comment": "How the Reading scores the lattice. Every number here is a designer knob. A form's score = sum over Tally lines of weight x emphasis x sum over keys of (share of that key in the line) x (lean of that key toward the form's Expression + leans toward each of its features). Order of weight follows the Guide: intention, then range and families, then company and ground, then orders, then bonds, then blood.",
+ "$comment": "How the Readings score the genius tree (docs/genius-tree.md). Every number is a designer's knob. The rite scores each base by its calls: the weight of each line (Seed, blood, Shape) times what the base says of the character's own; a home's lean (data/genius-homes.json) multiplies it for the second and third offers, and each later offer counts for sameClass of its score for every base of the same class already offered, so the bowl shows three kinds of thing. A refinement scores each child of the form the genius is by its leans: for each line and key it leans on, the line's weight times its emphasis (how much play there has been on that line, against its reference) times the lean times the share of that key in the play, over the sum of its leans. The pattern line counts fires against patternFires; bonds and sworn are yes or no.",
+ "rite": {
   "weights": {
-    "intention": 1.0,
-    "range": 0.8,
-    "families": 0.8,
-    "company": 0.5,
-    "ground": 0.5,
-    "discipline": 0.45,
-    "orders": 0.4,
-    "bonds": 0.3,
-    "blood": 0.2,
-    "seed": 0.15,
-    "shape": 0.1
+   "seed": 1.0,
+   "blood": 1.0,
+   "shape": 0.6
   },
-  "firstFormWeights": { "seed": 1.0, "blood": 1.0, "shape": 0.6 },
-  "emphasis": {
-    "$comment": "How much evidence a line needs before it counts in full. A line with less activity than its reference counts in proportion. Intention counts half the moment a Pattern exists, the rest by fires.",
-    "reference": { "range": 20, "families": 20, "company": 10, "ground": 10, "discipline": 10, "orders": 20, "bonds": 1 },
-    "intentionBase": 0.5,
-    "intentionFires": 100
+  "sameClass": 0.8
+ },
+ "refine": {
+  "weights": {
+   "range": 1.0,
+   "orders": 1.0,
+   "shape": 1.0,
+   "fights": 1.0,
+   "company": 0.7,
+   "ground": 0.7,
+   "pattern": 1.0,
+   "bonds": 0.8,
+   "quests": 0.7
   },
-  "diversity": {
-    "$comment": "After the best fit is picked, each later pick's score is multiplied by this for each candidate of the same Expression already picked, so three bodies are offered, not three of one kind.",
-    "sameExpression": 0.8
+  "reference": {
+   "range": 20,
+   "orders": 20,
+   "shape": 20,
+   "fights": 20,
+   "company": 10,
+   "ground": 10,
+   "quests": 6
   },
-  "crossing": {
-    "$comment": "A Reading can cross Expressions when at least this many of the top three lines point away from the current kind; otherwise the current kind keeps a bonus.",
-    "linesAway": 2,
-    "stayBonus": 0.25
+  "patternFires": 100
+ },
+ "words": {
+  "$comment": "How the page and the Reading say a line of the Tally in plain words: what play leads to a form ('fighting close, parrying'). rite: what the first Reading read.",
+  "range": {
+   "close": "fighting close",
+   "mid": "fighting at the middle distance",
+   "far": "striking from far off"
   },
-  "heritage": {
-    "$comment": "Heritage is chosen from the old form's features and adaptations by how well each fits the Tally; a feature the candidate already shares scores this bonus.",
-    "sharedBonus": 0.5,
-    "minScore": 0.05
+  "orders": {
+   "guard": "keeping it on Guard",
+   "hunt": "sending it to Hunt",
+   "hold": "setting it to Hold",
+   "free": "letting it run Free"
   },
-  "home": {
-    "$comment": "Where a character grew up shapes what the field takes as a body (data/forms.json, home; docs/genius-forms.md). Only at the rite: a home's kinds are never among a later Reading's three (they are kept, by keeping its kind). The bowl's first offer, the best fit, is read from Seed, blood and Shape alone. For the other two, a kind of the character's own home counts for its score times (1 + bonus) plus floor; no more than `most` of the three are of their home. A kind of another home counts for `away` of its score everywhere, except the kinds of the homes named in `open` (Alexandria: everyone passes through).",
-    "bonus": 0.9,
-    "floor": 0.55,
-    "away": 0.5,
-    "most": 1,
-    "open": ["alexandria"]
+  "shape": {
+   "anchor": "Anchor techniques",
+   "turn": "Turn techniques",
+   "cast": "Cast techniques",
+   "read": "Read techniques",
+   "bind": "Bind techniques",
+   "make": "Make techniques"
   },
-  "leans": {
-    "seed": {
-      "watches-from-above": { "expression": { "beast": 0.6, "kith": 0.4 }, "features": { "wings": 0.6, "wing-cloak": 0.4, "beak": 0.3, "talons": 0.2 } },
-      "stands-between": { "expression": { "engine": 0.6, "beast": 0.4 }, "features": { "broad-chest": 0.5, "shield-face": 0.4, "iron-hide": 0.3 } },
-      "i-can-hold": { "expression": { "relic": 1.0 }, "features": { "grip": 0.4, "pulse": 0.2 } },
-      "never-alive": { "expression": { "engine": 0.6, "aspect": 0.4 }, "features": { "cold-core": 0.4, "rime": 0.3 } },
-      "with-a-voice": { "expression": { "kith": 0.5, "daemon": 0.5 }, "features": { "voice": 0.4 } },
-      "that-burns": { "expression": { "aspect": 0.6, "daemon": 0.4 }, "features": { "ember": 0.4 } },
-      "remembers": { "expression": { "kith": 0.8 }, "features": { "old-eyes": 0.4, "shell": 0.3 } },
-      "owes-me": { "expression": { "daemon": 1.0 }, "features": { "ledger": 0.4, "horns": 0.2 } }
-    },
-    "blood": {
-      "long-stride": { "expression": { "beast": 0.2 }, "features": { "long-legs": 0.3 } },
-      "ridgefolk": { "expression": { "engine": 0.3, "beast": 0.2 }, "features": { "stone-skin": 0.5, "iron-hide": 0.3 } },
-      "demon-blooded": { "expression": { "daemon": 0.7 }, "features": { "horns": 0.4, "second-face": 0.2 } },
-      "eyes-heat": { "expression": { "aspect": 0.3 }, "features": { "ember": 0.3, "watching-eye": 0.2 } },
-      "second-heart": { "expression": { "relic": 0.2, "beast": 0.2 }, "features": { "pulse": 0.4 } },
-      "beast-voice": { "expression": { "beast": 0.5 }, "features": { "voice": 0.3, "fangs": 0.2 } },
-      "reads-currents": { "expression": { "beast": 0.2 }, "features": { "fins": 0.4, "sleek-coat": 0.3 } },
-      "iron-blood": { "expression": { "engine": 0.3 }, "features": { "iron-hide": 0.3 } },
-      "never-cold": { "expression": { "aspect": 0.2 }, "features": { "ember": 0.3 } },
-      "hearth-hears": { "expression": { "kith": 0.3 }, "features": { "lantern": 0.3, "voice": 0.2 } },
-      "tidewater": { "expression": { "beast": 0.3 }, "features": { "fins": 0.4, "sleek-coat": 0.2 } },
-      "fogborn": { "expression": { "aspect": 0.4 }, "features": { "shadow-cloak": 0.4, "smoke": 0.2 } },
-      "mound-kin": { "expression": { "kith": 0.3 }, "features": { "small-hands": 0.3, "shell": 0.3, "old-eyes": 0.2 } },
-      "lamplighters": { "expression": { "engine": 0.2, "kith": 0.2 }, "features": { "lantern": 0.5 } },
-      "hollowfolk": { "expression": { "daemon": 0.2, "aspect": 0.2 }, "features": { "shadow-cloak": 0.3 } },
-      "riverborn": { "expression": { "beast": 0.3 }, "features": { "fins": 0.3, "small-hands": 0.3 } },
-      "ironblooded": { "expression": { "engine": 0.4 }, "features": { "iron-hide": 0.4, "gears": 0.2 } },
-      "greenwood": { "expression": { "beast": 0.4 }, "features": { "long-legs": 0.3, "fangs": 0.3, "ruff": 0.2 } },
-      "aerie-born": { "expression": { "beast": 0.3 }, "features": { "wings": 0.4, "talons": 0.3 } },
-      "nightfolk": { "expression": { "aspect": 0.3, "daemon": 0.2 }, "features": { "shadow-cloak": 0.4 } },
-      "forgeborn": { "expression": { "engine": 0.4 }, "features": { "ember": 0.3, "gears": 0.3 } },
-      "winged": { "expression": { "beast": 0.2, "kith": 0.2 }, "features": { "wings": 0.5, "wing-cloak": 0.4 } },
-      "dragon-blooded": { "expression": { "beast": 0.3, "daemon": 0.2 }, "features": { "horns": 0.3, "ember": 0.3 } },
-      "shapechanger": { "expression": { "beast": 0.3, "aspect": 0.2 }, "features": { "tail": 0.2, "fangs": 0.2 } },
-      "demigod": { "expression": { "aspect": 0.3, "kith": 0.2 }, "features": { "glow": 0.4 } },
-      "fused": { "expression": { "relic": 0.4, "engine": 0.2 }, "features": { "grip": 0.3, "pulse": 0.3 } }
-    },
-    "shape": {
-      "anchor": { "expression": { "beast": 0.3, "engine": 0.3 }, "features": { "broad-chest": 0.4, "shell": 0.3 } },
-      "turn": { "expression": { "aspect": 0.4 }, "features": { "ember": 0.2, "rime": 0.2 } },
-      "cast": { "expression": { "beast": 0.5 }, "features": { "wings": 0.2, "long-legs": 0.2 } },
-      "read": { "expression": { "kith": 0.3 }, "features": { "old-eyes": 0.2 } },
-      "bind": { "expression": { "daemon": 0.3, "kith": 0.3 }, "features": { "chain": 0.3 } },
-      "make": { "expression": { "engine": 0.5 }, "features": { "gears": 0.2 } }
-    },
-    "families": {
-      "cast.reach": { "expression": { "relic": 0.3, "beast": 0.2, "kith": 0.2 }, "features": { "short-blade": 0.3, "talon-grip": 0.3, "talons": 0.2 } },
-      "cast.shot": { "expression": { "beast": 0.3, "engine": 0.2 }, "features": { "barrel": 0.3, "sight-glass": 0.3 } },
-      "cast.speed": { "expression": { "beast": 0.4 }, "features": { "long-legs": 0.4 } },
-      "anchor.wall": { "expression": { "engine": 0.4, "relic": 0.4 }, "features": { "shield-face": 0.6, "tower-shield": 0.6, "bastion": 0.6, "wall-plate": 0.5 } },
-      "anchor.weight": { "expression": { "beast": 0.4, "engine": 0.2 }, "features": { "horn-brow": 0.3 } },
-      "anchor.endurance": { "expression": { "engine": 0.3, "beast": 0.2 }, "features": { "iron-hide": 0.3 } },
-      "bind.leash": { "expression": { "kith": 0.3, "daemon": 0.2 }, "features": { "chain": 0.4 } },
-      "bind.puppet": { "expression": { "kith": 0.4 }, "features": { "small-hands": 0.3 } },
-      "bind.contract": { "expression": { "daemon": 0.6, "kith": 0.2 }, "features": { "ledger": 0.4, "chain": 0.3 } },
-      "make.ward": { "expression": { "engine": 0.4 }, "features": { "wall-plate": 0.3 } },
-      "turn.element": { "expression": { "aspect": 0.5 }, "features": { "ember": 0.3 } },
-      "marshal.school": { "expression": { "relic": 0.3, "engine": 0.2 }, "features": { "barrel": 0.2 } },
-      "blade.school": { "expression": { "relic": 0.6 }, "features": { "edge": 0.5, "sheath": 0.3 } },
-      "examiner.school": { "expression": { "kith": 0.3, "daemon": 0.3 }, "features": { "brush": 0.3, "ledger": 0.3 } },
-      "aeronaut.school": { "expression": { "engine": 0.3, "beast": 0.2 }, "features": { "wings": 0.2 } }
-    },
-    "range": {
-      "close": { "expression": { "relic": 0.5, "kith": 0.3 }, "features": { "short-blade": 0.3, "edge": 0.3, "set-feet": 0.4, "talon-grip": 0.2, "mask": 0.2 } },
-      "mid": { "expression": { "beast": 0.3, "kith": 0.2 }, "features": {} },
-      "far": { "expression": { "beast": 0.4, "engine": 0.3 }, "features": { "far-eyes": 0.3, "sight-glass": 0.3, "barrel": 0.3 } }
-    },
-    "orders": {
-      "guard": { "expression": { "relic": 0.3, "engine": 0.3, "kith": 0.2 }, "features": { "shield-face": 0.3, "wing-cloak": 0.2, "broad-chest": 0.2, "set-feet": 0.2 } },
-      "hunt": { "expression": { "beast": 0.5 }, "features": { "talons": 0.3, "long-legs": 0.2, "fangs": 0.2 } },
-      "hold": { "expression": { "engine": 0.4 }, "features": { "lantern": 0.3, "roots": 0.3 } },
-      "free": { "expression": { "kith": 0.3, "aspect": 0.2 }, "features": {} },
-      "duet": { "expression": { "relic": 0.2, "kith": 0.2 }, "features": {} }
-    },
-    "company": {
-      "anchor": { "expression": { "relic": 0.2, "engine": 0.2 }, "features": { "horn-brow": 0.2, "set-feet": 0.2 } },
-      "turn": { "expression": { "aspect": 0.3 }, "features": { "scorched": 0.2 } },
-      "cast": { "expression": { "beast": 0.2 }, "features": { "far-eyes": 0.1 } },
-      "read": { "expression": { "kith": 0.3 }, "features": { "old-eyes": 0.2 } },
-      "bind": { "expression": { "kith": 0.2, "daemon": 0.1 }, "features": { "chain": 0.1 } },
-      "make": { "expression": { "engine": 0.4 }, "features": { "plated": 0.3, "gears": 0.2 } }
-    },
-    "ground": {
-      "tunnel": { "expression": { "engine": 0.2, "beast": 0.1 }, "features": { "tunnel-ear": 0.3, "lantern": 0.2 } },
-      "ruin": { "expression": { "engine": 0.3, "relic": 0.2 }, "features": { "gears": 0.2 } },
-      "water": { "expression": { "beast": 0.3 }, "features": { "webbed": 0.4, "fins": 0.3 } },
-      "sky": { "expression": { "beast": 0.3 }, "features": { "wings": 0.3 } },
-      "wild": { "expression": { "beast": 0.4 }, "features": {} },
-      "night": { "expression": { "aspect": 0.3, "daemon": 0.2 }, "features": { "dark-eyed": 0.3, "shadow-cloak": 0.2 } },
-      "quiet": { "expression": { "aspect": 0.6 }, "features": { "quiet-place": 0.5 } }
-    },
-    "discipline": {
-      "marshal": { "expression": { "relic": 0.4, "engine": 0.2 }, "features": { "mask": 0.3 } },
-      "blade": { "expression": { "relic": 0.6 }, "features": { "edge": 0.4, "sheath": 0.3 } },
-      "aeronaut": { "expression": { "engine": 0.3, "beast": 0.2 }, "features": { "wings": 0.2 } },
-      "examiner": { "expression": { "kith": 0.3, "daemon": 0.3 }, "features": { "ledger": 0.3, "brush": 0.2 } },
-      "rider": { "expression": { "beast": 0.5 }, "features": {} }
-    },
-    "intention": {
-      "family:anchor.wall": { "expression": { "engine": 0.5, "relic": 0.5 }, "features": { "shield-face": 0.7, "tower-shield": 0.7, "bastion": 0.7, "wall-plate": 0.5, "door": 0.5 } },
-      "family:cast.reach": { "expression": { "relic": 0.5, "kith": 0.2 }, "features": { "mask": 0.4, "talon-grip": 0.4, "edge": 0.2 } },
-      "family:bind.contract": { "expression": { "daemon": 0.8 }, "features": { "ledger": 0.5, "chain": 0.3 } },
-      "tag:guard": { "expression": { "engine": 0.3, "relic": 0.3 }, "features": { "shield-face": 0.3, "tower-shield": 0.2 } },
-      "tag:ally": { "expression": { "kith": 0.2, "engine": 0.2 }, "features": {} },
-      "tag:pain": { "expression": { "daemon": 0.3, "relic": 0.2 }, "features": { "iron-hide": 0.2 } },
-      "tag:sacrifice": { "expression": { "daemon": 0.3 }, "features": {} },
-      "tag:debt": { "expression": { "daemon": 0.6 }, "features": { "ledger": 0.4 } },
-      "tag:contract": { "expression": { "daemon": 0.5 }, "features": { "chain": 0.2 } },
-      "tag:voice": { "expression": { "kith": 0.3, "daemon": 0.3 }, "features": { "voice": 0.3, "maw": 0.2 } },
-      "tag:night": { "expression": { "aspect": 0.5 }, "features": { "shadow-cloak": 0.3 } },
-      "tag:sun": { "expression": { "aspect": 0.3 }, "features": { "glow": 0.3 } },
-      "tag:alone": { "expression": { "relic": 0.4 }, "features": {} },
-      "tag:held": { "expression": { "relic": 0.5 }, "features": { "mask": 0.3, "grip": 0.2 } },
-      "tag:tempo": { "expression": { "relic": 0.2, "beast": 0.1 }, "features": {} },
-      "tag:mercy": { "expression": { "kith": 0.2 }, "features": {} },
-      "tag:bond": { "expression": { "kith": 0.4 }, "features": {} },
-      "tag:blood": { "expression": { "daemon": 0.3 }, "features": { "second-face": 0.2 } },
-      "tag:quiet": { "expression": { "aspect": 0.6 }, "features": {} },
-      "tag:wild": { "expression": { "beast": 0.4 }, "features": {} },
-      "tag:tunnel": { "expression": { "engine": 0.3 }, "features": {} },
-      "tag:discipline": { "expression": { "engine": 0.2, "relic": 0.2 }, "features": {} },
-      "tag:vengeance": { "expression": { "daemon": 0.3 }, "features": {} },
-      "tag:silence": { "expression": { "aspect": 0.3 }, "features": {} },
-      "tag:death": { "expression": { "daemon": 0.5 }, "features": {} },
-      "tag:hall": { "expression": { "kith": 0.3 }, "features": {} },
-      "tag:stealth": { "expression": { "aspect": 0.3 }, "features": {} }
-    },
-    "bonds": {
-      "shade": { "expression": { "kith": 0.4, "daemon": 0.2 }, "features": { "lantern-jaw": 0.3 } },
-      "hearth": { "expression": { "kith": 0.3 }, "features": {} },
-      "kin": { "expression": { "kith": 0.2, "beast": 0.1 }, "features": {} }
-    }
+  "fights": {
+   "parries": "parrying",
+   "blocks": "blocking",
+   "hurts": "taking the blow",
+   "dodges": "dodging"
+  },
+  "company": {
+   "alone": "going out alone",
+   "party": "going out with a party"
+  },
+  "ground": {
+   "line": "working the line",
+   "wild": "running the wild",
+   "water": "running by water",
+   "ruin": "running the ruins",
+   "night": "going out by night",
+   "quiet": "days somewhere quiet"
+  },
+  "pattern": {
+   "fires": "firing your Pattern often",
+   "sworn": "a Pattern sworn at the hearth"
+  },
+  "bonds": {
+   "classmate": "standing by a classmate",
+   "shade": "speaking with a shade",
+   "named": "felling a named beast"
+  },
+  "quests": {
+   "linework": "linework",
+   "salvage": "salvage",
+   "hunt": "hunts",
+   "escort": "escorts",
+   "writ": "writs",
+   "deep-run": "deep runs"
+  },
+  "rite": {
+   "seed": "your Seed",
+   "blood": "your blood",
+   "shape": "your Shape",
+   "home": "where you grew up"
   }
+ }
 }

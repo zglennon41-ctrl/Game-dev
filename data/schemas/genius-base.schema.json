@@ -1,0 +1,350 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "genius-base",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "class",
+    "expression",
+    "silhouette",
+    "spark",
+    "nature",
+    "calls",
+    "hybrid",
+    "settled",
+    "paths"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "leans": {
+      "type": "object",
+      "propertyNames": {
+        "enum": [
+          "range",
+          "orders",
+          "shape",
+          "fights",
+          "company",
+          "ground",
+          "pattern",
+          "bonds",
+          "quests"
+        ]
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "minProperties": 1
+      }
+    },
+    "finish": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "text",
+        "features",
+        "leans"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2
+        },
+        "text": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 200
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 3
+        },
+        "silhouette": {
+          "type": "string"
+        },
+        "leans": {
+          "$ref": "#/definitions/leans"
+        }
+      }
+    },
+    "prong": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "text",
+        "features",
+        "leans",
+        "finishes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2
+        },
+        "text": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 200
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 3
+        },
+        "silhouette": {
+          "type": "string"
+        },
+        "leans": {
+          "$ref": "#/definitions/leans"
+        },
+        "finishes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/finish"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      }
+    },
+    "path": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "text",
+        "features",
+        "leans",
+        "prongs"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2
+        },
+        "text": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 200
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 3
+        },
+        "silhouette": {
+          "type": "string"
+        },
+        "leans": {
+          "$ref": "#/definitions/leans"
+        },
+        "prongs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/prong"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      }
+    }
+  },
+  "properties": {
+    "$comment": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "class": {
+      "enum": [
+        "animal",
+        "monster",
+        "creature",
+        "item",
+        "weapon",
+        "armor"
+      ]
+    },
+    "expression": {
+      "enum": [
+        "beast",
+        "kith",
+        "engine",
+        "relic",
+        "daemon",
+        "aspect"
+      ]
+    },
+    "silhouette": {
+      "type": "string"
+    },
+    "toBuild": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "spark": {
+      "type": "string",
+      "minLength": 10
+    },
+    "nature": {
+      "$ref": "#/definitions/leans"
+    },
+    "calls": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "seed": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "shape": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "blood": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "hybrid": {
+      "type": "object",
+      "required": [
+        "adj",
+        "gift",
+        "text"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "adj": {
+          "type": "string"
+        },
+        "gift": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 2
+        },
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    "settled": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "text",
+        "features"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2
+        },
+        "text": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 200
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "maxItems": 3
+        },
+        "silhouette": {
+          "type": "string"
+        },
+        "leans": {
+          "$ref": "#/definitions/leans"
+        }
+      }
+    },
+    "paths": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/path"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "newFeatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "slot",
+          "label"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slot": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

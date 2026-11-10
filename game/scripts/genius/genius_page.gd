@@ -23,8 +23,8 @@ const MILESTONE_WORDS := {
 	"master": "Master in any archetype", "tier:5": "the fifth Intention tier", "accord": "Accord: the Fifth Form and the fifth tier together",
 }
 const LINE_WORDS := {
-	"families": "Technique families", "range": "Where your hits land", "orders": "Orders it carried out", "company": "Who you fought beside",
-	"ground": "Where you ran", "discipline": "Your Discipline", "bonds": "Bonds",
+	"range": "Where your blows land", "orders": "The orders you give it", "shape": "Your techniques, by Shape", "fights": "How you meet a blow",
+	"company": "Who you go out with", "ground": "Where you go", "pattern": "Your Pattern", "bonds": "Who you are bound to", "quests": "The work you take",
 }
 
 func _ready() -> void:
@@ -99,8 +99,11 @@ func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 	foot.add_child(hint)
 	if marks > 0:
 		_p(v, "Your record: %d Marks." % marks, Style.DIM)
-	_p(v, "A %s, %s, %s. Resonance %d: it fights with %d Will and can carry %d shadow%s. Day %d since the rite." % [
-		String(g.body.get("expression", "")).capitalize(), g.form_name(), String(g.age().get("word", "grown")), g.resonance(tier), int(g.will_max(tier)), g.shadow_cap(tier), "" if g.shadow_cap(tier) == 1 else "s", g.day])
+	_p(v, "%s (%s): %s, %s. Resonance %d: it fights with %d Will and can carry %d shadow%s. Day %d since the rite." % [
+		g.kind(), String(g.body.get("expression", "")).capitalize(), g.form_name(), String(g.age().get("word", "grown")), g.resonance(tier), int(g.will_max(tier)), g.shadow_cap(tier), "" if g.shadow_cap(tier) == 1 else "s", g.day])
+	_p(v, "[i]%s[/i]" % String(g.form().get("text", "")), Style.DIM)
+	if g.is_born():
+		_tree_section(v, g)
 	if g.is_born() and not g.look.is_empty():
 		_look_section(v, g)
 	# The next Reading.
@@ -132,24 +135,26 @@ func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 		(", %d waiting for the next Reading" % g.pending_grafts.size()) if not g.pending_grafts.is_empty() else ""], Style.DIM)
 	# The Tally.
 	_section(v, "WHAT IT IS LEARNING (THE TALLY, SINCE ITS LAST READING)")
+	# The Tally as its tree reads it: the same lines its forms lean on, nothing hidden.
 	var any := false
-	for line in LINE_WORDS:
-		var d: Dictionary = g.tally.get(line, {})
-		if d.is_empty():
+	var play := GeniusReading.play_lines(g.tally)
+	for line in GeniusReading.PLAY_LINES:
+		var d: Dictionary = play["shares"].get(line, {})
+		var heard := float(play["emphasis"].get(line, 0.0))
+		if d.is_empty() or heard <= 0.0:
+			continue
+		var parts: Array = []
+		var keys: Array = d.keys().filter(func(k): return float(d[k]) > 0.0)
+		keys.sort_custom(func(a, b): return float(d[a]) > float(d[b]) or (float(d[a]) == float(d[b]) and String(a) < String(b)))
+		for k in keys:
+			parts.append(GeniusReading.words(line, String(k)) if line in ["pattern", "bonds"] else "%s %d%%" % [GeniusReading.words(line, String(k)), roundi(100.0 * float(d[k]))])
+		if parts.is_empty():
 			continue
 		any = true
-		var total := 0.0
-		for k in d:
-			total += float(d[k])
-		var parts: Array = []
-		var keys: Array = d.keys()
-		keys.sort_custom(func(a, b): return float(d[a]) > float(d[b]))
-		for k in keys:
-			parts.append("%s %d%%" % [String(k).replace(".", " · "), roundi(100.0 * float(d[k]) / maxf(total, 1.0))])
-		_p(v, "[color=#a8803f]%s[/color]   %s" % [LINE_WORDS[line], ",  ".join(parts)])
+		_p(v, "[color=#a8803f]%s[/color]   %s%s" % [LINE_WORDS[line], ",  ".join(parts), "   [color=#9e958a][i](little of it yet: it counts for %d%%)[/i][/color]" % roundi(heard * 100.0) if heard < 1.0 else ""])
 	var it: Variant = g.tally.get("intention")
 	if it is Dictionary:
-		_p(v, "[color=#a8803f]Your Pattern[/color]   %s, fired %d times" % [String(it["form"]).replace(".", " · "), int(it["fires"])])
+		_p(v, "[color=#a8803f]Your Pattern[/color]   %s, fired %d times%s" % [String(it["form"]).replace(".", " · "), int(it["fires"]), ", sworn" if it.get("sworn", false) else ""])
 		any = true
 	if not any:
 		_p(v, "Nothing yet. It learns from every fight, every order, every place you run.", Style.DIM)
@@ -167,7 +172,8 @@ func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 		_p(v, "%s (%s)" % [s["name"], String(s["form"]).replace(".", " · ")])
 	_section(v, "ITS LIFE")
 	for h in g.history:
-		_p(v, "Day %d: the %s, a %s%s." % [int(h["day"]), GeniusResonance.instar_rule(int(h["instar"]))["name"], h["name"], " (settled)" if h.get("settled", false) else " (chosen)"])
+		var how := " (it grew)" if h.get("grew", false) else (" (settled again, on the tree)" if h.has("resettled") else (" (it turned)" if h.has("turned") else (" (settled)" if h.get("settled", false) else " (chosen)")))
+		_p(v, "Day %d: the %s, %s%s." % [int(h["day"]), GeniusResonance.instar_rule(int(h["instar"]))["name"], h["name"], how])
 	var close := Button.new()
 	close.text = "Close   (J)"
 	Style.button(close, false, 17)
@@ -217,6 +223,79 @@ func _look_section(v: Control, g: Genius) -> void:
 		var now := String(GeniusLook.keepsake_color(String(g.look.get("keepsakeColor", "")))["id"])
 		for c in Data.genius_looks()["keepsakeColors"]:
 			_choice(crow, String(c["name"]).capitalize(), now == String(c["id"]), func(): _set_look("keepsakeColor", String(c["id"])), Color(String(c["color"])))
+
+## Its tree (docs/genius-tree.md): every form of its base (or of its hybrid), the road it has
+## taken, where it is, what it may become next and how well the Tally speaks for each now, and
+## what play leads to every form it has not reached.
+func _tree_section(v: Control, g: Genius) -> void:
+	var tree := Data.tree_of(String(g.body.get("base", "")))
+	if tree.is_empty():
+		return
+	var here := String(g.body.get("form", ""))
+	var road: Array = g.road().map(func(f): return String(f["id"]))
+	var next: Array = g.next_forms().map(func(f): return String(f["id"]))
+	var play := GeniusReading.play_lines(g.tally)
+	_section(v, "ITS TREE  ·  %s" % g.kind().to_upper())
+	var said := "It has finished its tree. From here it grows: great, and then to its apex." if next.is_empty() else \
+		"It is %s. At its next Reading it becomes one of %d forms, by how you have played since the last; each says below what play leads to it, and how well the Tally speaks for it now." % [String(Data.form(here).get("name", "")), next.size()]
+	_p(v, "[color=#ffd175]%s[/color]   %s" % ["  >  ".join(g.road().map(func(f): return String(f["name"]))), said])
+	# a turning is only ever offered at the first refinement
+	if g.level() == 1 and not String(g.body.get("base", "")).contains("+"):
+		var mine := Data.base(String(g.body.get("base", "")))
+		var own := float(GeniusReading.fit(mine["nature"], play)["score"])
+		var best := {}
+		var best_s := 0.0
+		for b in Data.bases():
+			var s := float(GeniusReading.fit(b["nature"], play)["score"])
+			if b["id"] != mine["id"] and (best.is_empty() or s > best_s):
+				best = b
+				best_s = s
+		if not best.is_empty():
+			var rule: Dictionary = Data.genius_hybrids()["rule"]
+			var turns := best_s >= float(rule["min"]) and best_s >= own * (1.0 + float(rule["margin"]))
+			_p(v, "If your play turns away from its nature before the first refinement, it may turn into a hybrid. Your play fits %s %d%%; the nearest other is %s, %d%%.%s" % [
+				Academy._a(String(mine["name"])), roundi(own * 100.0), Academy._a(String(best["name"])), roundi(best_s * 100.0),
+				"  [color=#ffd175]A turning would be offered: %s.[/color]" % GeniusTree.hybrid_name(mine, best, Data.genius_hybrids()) if turns else ""], Style.DIM)
+	var cols := HBoxContainer.new()
+	cols.add_theme_constant_override("separation", 18)
+	cols.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.add_child(cols)
+	for path in tree.filter(func(f): return int(f["level"]) == 2):
+		var col := VBoxContainer.new()
+		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		col.add_theme_constant_override("separation", 2)
+		cols.add_child(col)
+		_tree_form(col, path, 0, here, road, next, play)
+		for prong_id in path["children"]:
+			var prong := Data.form(String(prong_id))
+			_tree_form(col, prong, 1, here, road, next, play)
+			for fin_id in prong["children"]:
+				_tree_form(col, Data.form(String(fin_id)), 2, here, road, next, play)
+
+## One form of the tree: its name (gold on the road it took, bright where it may go next, dim
+## elsewhere) and the play that leads to it.
+func _tree_form(col: Control, f: Dictionary, depth: int, here: String, road: Array, next: Array, play: Dictionary) -> void:
+	var id := String(f["id"])
+	var name_col := "#ffd175" if road.has(id) else ("#f2e9dc" if next.has(id) else "#9e958a")
+	var tag := ""
+	if id == here:
+		tag = "  [color=#ffd175](it is this)[/color]"
+	elif road.has(id):
+		tag = "  [color=#a8803f](its road)[/color]"
+	elif next.has(id):
+		tag = "  [color=#f2e9dc](next: the Tally speaks for it %d%%)[/color]" % roundi(float(GeniusReading.fit(f.get("leans", {}), play)["score"]) * 100.0)
+	var r := RichTextLabel.new()
+	r.bbcode_enabled = true
+	r.fit_content = true
+	r.scroll_active = false
+	r.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	Style.rich(r, [17, 15, 14][depth], Style.DIM, "body")
+	var indent := ["", "    ", "        "][depth] as String
+	var mark := ["", "> ", "- "][depth] as String
+	r.text = "%s[color=%s]%s%s%s[/color]%s\n%s[i]%s[/i]" % [indent, name_col, mark, "[b]%s[/b]" % f["name"] if depth == 0 else String(f["name"]), "", tag,
+		indent + ("" if depth == 0 else "  "), GeniusReading.lean_words(f.get("leans", {}))]
+	r.tooltip_text = String(f.get("text", ""))
+	col.add_child(r)
 
 func _choice_row(v: Control, label: String) -> HFlowContainer:
 	var row := HFlowContainer.new()

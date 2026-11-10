@@ -1,5 +1,5 @@
 // Plain-language report of a simulated life, for the owner.
-import { data, byId } from '../data';
+import { data, byId, formOf } from '../data';
 import { dateLabel, roman, stateOn, type SimResult } from './simulate';
 
 const label = (id: string) => data.features.find((f) => f.id === id)?.label ?? id;
@@ -26,7 +26,7 @@ export function report(r: SimResult, opts: { log?: boolean } = {}): string {
   }
   p();
   const g = r.genius;
-  p(`  Now: ${byId(data.forms, g.form).name} [${g.expression}], instar ${g.instar}${g.focus ? `, Focus ${g.focus}` : ''}`);
+  p(`  Now: ${formOf(g.form)?.name ?? g.form} (${formOf(g.form)?.kind ?? g.base}) [${g.expression}], instar ${g.instar}${g.focus ? `, Focus ${g.focus}` : ''}`);
   p(`  Wears: ${[g.seedMark, ...g.own, ...g.heritage, ...g.grafts.map((x) => x.feature)].map(label).join('; ')}`);
   p(`  Secondary forms: ${g.secondary.length ? g.secondary.map((s) => `${s.id}${s.vestigial ? ' (vestigial)' : ''} from ${dateLabel(s.day)}`).join('; ') : 'none'}`);
   p(`  Shadows: ${g.shadows.length ? g.shadows.map((s) => `${s.pattern} (${s.uses} witnessed)`).join('; ') : 'none'}`);

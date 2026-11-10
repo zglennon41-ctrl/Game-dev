@@ -1,5 +1,5 @@
 // The headless simulator: runs a scripted life day by day through the rules.
-import { data, byId } from '../data';
+import { data, byId, formOf } from '../data';
 import { buildPattern, chainBeats, formShape, type BuiltPattern } from '../rules/terms';
 import { tierFor, resonance, payingTier, verses, shadowCap, geniusWill, isAccord, readingDue, instarRule } from '../rules/resonance';
 import { rankFor, crossTitle, foundingEligible, gradeFor, type Rank } from '../rules/marks';
@@ -144,8 +144,9 @@ export function simulate(life: Life): SimResult {
     const pick = life.picks?.[String(n)];
     let picked = result.candidates[0];
     let settled = true;
-    if (pick) {
-      const m = result.candidates.find((c) => (pick.form ? c.form === pick.form : true) && (pick.expression ? c.expression === pick.expression : true));
+    if (pick?.turn && result.turning) { picked = result.turning.candidates[0]; settled = false; }
+    else if (pick && (pick.form || pick.base || pick.expression)) {
+      const m = result.candidates.find((c) => (pick.form ? c.form === pick.form : true) && (pick.base ? c.base === pick.base : true) && (pick.expression ? c.expression === pick.expression : true));
       if (m) { picked = m; settled = false; } else warnings.push(`Day ${day}: pick for instar ${n} (${JSON.stringify(pick)}) not among candidates; settled`);
     }
     const offered = n >= 2 ? pendingGrafts.splice(0) : [];
@@ -153,6 +154,7 @@ export function simulate(life: Life): SimResult {
     const accepted = life.grafts === 'decline' ? [] : offered.slice(0, room);
     const adaptationsAtReading = genius?.adaptations.map((a) => a.id) ?? [];
     const fixed = picked.heritage.filter((h) => adaptationsAtReading.includes(h));
+    if (result.turning) say(day, `The play has turned toward the ${byId(data.bases, result.turning.second).name}: ${result.turning.name} is offered (${result.turning.other} against ${result.turning.own})`);
     for (const a of adaptationsAtReading) {
       const h = adaptationHistory.find((x) => x.id === a && x.lost === null);
       if (h) { h.lost = day; h.how = fixed.includes(a) ? 'fixed as heritage' : 'lost at the Reading'; }
@@ -162,11 +164,12 @@ export function simulate(life: Life): SimResult {
     instarDays[n] = day;
     if (n === 4 && life.focus) focus = life.focus;
     readings.push({ day, instar: n, unlockedBy, result, picked, settled, graftsOffered: offered, graftsAccepted: accepted, adaptationsAtReading, fixed, tierAtReading: tier, resonanceAtReading: resonance(n, tier) });
-    say(day, `Reading → ${instarRule(n).name}: ${picked.name} (${picked.expression})${settled ? ', settled' : ', picked'}; unlocked by ${unlockedBy}`);
+    if (result.grows) say(day, `It grows → ${instarRule(n).name}: ${picked.name}, the same form an age on; unlocked by ${unlockedBy}`);
+    else say(day, `Reading → ${instarRule(n).name}: ${picked.name} (${picked.expression})${settled ? ', settled' : ', picked'}; unlocked by ${unlockedBy}`);
     // The Tally is since the last Reading; the Pattern stays the intention.
     tally = emptyTally();
     fadedAt = {};
-    if (pattern) tally.intention = { form: pattern.form, terms: pattern.terms, fires: 0 };
+    if (pattern) tally.intention = { form: pattern.form, terms: pattern.terms, fires: 0, sworn: pattern.sworn };
     // Secondary forms that no longer fit go vestigial.
     for (const s of secondary) s.vestigial = !meets(byId(data.secondaryForms, s.id).requires.filter((r) => r.kind === 'expression'), day);
   };
@@ -174,7 +177,7 @@ export function simulate(life: Life): SimResult {
   const meets = (reqs: typeof data.secondaryForms[number]['requires'], _day: number): boolean =>
     reqs.every((r) => {
       switch (r.kind) {
-        case 'expression': return !!genius && r.in.includes(genius.expression);
+        case 'expression': return !!genius && (r.in as string[]).includes(genius.expression);
         case 'counter': return (lifetime[r.metric] ?? 0) >= r.atLeast;
         case 'patternFamily': return pattern?.form === r.family;
         case 'instar': return instar >= r.atLeast;
@@ -191,6 +194,7 @@ export function simulate(life: Life): SimResult {
       case 'swear':
         if (!pattern) { warnings.push(`Day ${day}: swear with no Pattern`); break; }
         pattern = { ...pattern, ...buildPattern({ ...pattern, sworn: true }, { shape: life.shape, swornCharacter: life.swornCharacter }), uses: pattern.uses, builtDay: pattern.builtDay, tier: pattern.tier };
+        if (tally.intention) tally.intention.sworn = true;
         say(day, `Swears ${pattern.name} at the hearth: x${pattern.multiplier}`);
         break;
       case 'shade-accept': {
@@ -203,6 +207,7 @@ export function simulate(life: Life): SimResult {
       }
       case 'named-kill': {
         namedKills[e.beast] = (namedKills[e.beast] ?? 0) + 1;
+        add(tally.bonds, 'named', 1);
         if (namedKills[e.beast] >= G.namedBeastKills && e.features?.[0]) offerGraft(day, { id: `beast:${e.beast}`, feature: e.features[0], source: `beast:${e.beast}` });
         break;
       }
@@ -248,6 +253,12 @@ export function simulate(life: Life): SimResult {
         add(tally.company, c, n);
         add(tally.counters, `runs.company.${c}`, n);
       }
+      // Who they went out with: a run with anyone of the party is a run in company.
+      const inCompany = Math.min(1, Object.values(ph.company ?? {}).reduce((a: number, b) => a + (b ?? 0), 0));
+      add(tally.counters, 'runs.party', acc.take('party', runsRate * inCompany));
+      add(tally.counters, 'runs.alone', acc.take('alone', runsRate * (1 - inCompany)));
+      // How they met a blow.
+      for (const [k, perFight] of Object.entries(ph.meets ?? {})) add(tally.counters, `fights.${k}`, acc.take(`meets.${k}`, fightRate * (perFight ?? 0)));
       for (const [w, s] of Object.entries(ph.runsWith ?? {})) {
         const n = acc.take(`with.${w}`, runsRate * s);
         add(tally.runsWith, w, n);
@@ -306,7 +317,7 @@ export function simulate(life: Life): SimResult {
       stage = 4;
       stage4Day = day;
       pendingBuild = null;
-      tally.intention = { form: built.form, terms: built.terms, fires: 0 };
+      tally.intention = { form: built.form, terms: built.terms, fires: 0, sworn: built.sworn };
       say(day, `Stage 4. Builds ${built.name}: ${built.form} + ${built.terms.join(', ')}; x${built.multiplier}${built.sworn ? ' sworn' : ''}; ${built.chainBeats}-beat chain`);
       mark('pattern-built', day);
     }

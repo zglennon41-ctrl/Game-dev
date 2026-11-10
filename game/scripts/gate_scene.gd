@@ -1,5 +1,6 @@
-## The Gate, played: the genius's Second Form is read from the term (three candidates, with the
-## lines of the Tally that chose them), the player chooses or lets it settle, the old body goes
+## The Gate, played: the genius's first refinement is read from the term (the three paths of
+## its base, each with the lines of the Tally that speak for it, and a turning where the play
+## has turned), the player chooses or lets it settle, the old body goes
 ## into light and the new one comes out of it; then the cohort's write-up, and Commencement.
 class_name GateScene
 extends RefCounted
@@ -30,7 +31,7 @@ func start() -> void:
 	world.cine_look = p + Vector3(0, 1.3, 0)
 	ac.say(cfg["instructor"], cfg["lines"]["intro"], _offer)
 
-## The Reading: the genius reads the Tally for its Second Form and offers three.
+## The Reading: the Tally since the rite, read against the three paths of what it settled as.
 func _offer() -> void:
 	var g: Genius = ac.genius
 	g.milestone("gate")
@@ -58,7 +59,7 @@ func _take(i: int) -> void:
 	sfx.play("heavy", 0.6)
 	world.build_hero(hero)
 	var feats: Array = c["features"].map(func(f): return Rite.feature_label(String(f)))
-	ac.title_card(g.form_name().to_upper(), "SECOND FORM  ·  %s  ·  %s" % [String(c["expression"]).to_upper(), ", ".join(feats)], col)
+	ac.title_card(g.form_name().to_upper(), "SECOND FORM  ·  %s  ·  %s" % [g.kind().to_upper(), ", ".join(feats)], col)
 	ac.show_card(g.to_dict(), col, "SECOND FORM")
 	var key := "settled" if i == -1 else "chosen"
 	var line := String(cfg["lines"][key]).replace("{genius_name}", g.name).replace("{form}", g.form_name().to_lower()).replace("{was}", old_name.to_lower())

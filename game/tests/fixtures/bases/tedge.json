@@ -1,0 +1,547 @@
+{
+ "id": "tedge",
+ "name": "Test Edge",
+ "class": "weapon",
+ "expression": "relic",
+ "silhouette": "relic-knife",
+ "spark": "A test mote, kept for the engine's tests only.",
+ "nature": {
+  "range": {
+   "close": 1.0
+  },
+  "fights": {
+   "parries": 0.8
+  },
+  "shape": {
+   "cast": 0.5
+  }
+ },
+ "calls": {
+  "seed": {
+   "i-can-hold": 1.0
+  },
+  "shape": {
+   "cast": 0.6,
+   "read": 0.3
+  },
+  "blood": {
+   "long-stride": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Edged",
+  "gift": [
+   "edge"
+  ],
+  "text": "It is a test of the test edge."
+ },
+ "settled": {
+  "id": "tedge-small",
+  "name": "Small test edge",
+  "text": "The small of a test base, kept for the engine's tests only.",
+  "features": [
+   "edge",
+   "grip"
+  ]
+ },
+ "paths": [
+  {
+   "id": "tedge-a",
+   "name": "Test Edge Path A",
+   "text": "A test path of the test edge, kept for the engine's tests only.",
+   "leans": {
+    "shape": {
+     "read": 1.0
+    },
+    "quests": {
+     "hunt": 0.5
+    }
+   },
+   "features": [
+    "pulse"
+   ],
+   "prongs": [
+    {
+     "id": "tedge-a1",
+     "name": "Test Edge Prong A1",
+     "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "leans": {
+      "shape": {
+       "cast": 1.0
+      },
+      "fights": {
+       "dodges": 0.5
+      }
+     },
+     "features": [
+      "sheath"
+     ],
+     "finishes": [
+      {
+       "id": "tedge-a1x",
+       "name": "Test Edge Finish A1X",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "fights": {
+         "parries": 0.5
+        }
+       },
+       "features": [
+        "edge"
+       ]
+      },
+      {
+       "id": "tedge-a1y",
+       "name": "Test Edge Finish A1Y",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "pattern": {
+         "fires": 0.5
+        }
+       },
+       "features": [
+        "grip"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tedge-a2",
+     "name": "Test Edge Prong A2",
+     "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "leans": {
+      "fights": {
+       "dodges": 1.0
+      },
+      "ground": {
+       "ruin": 0.5
+      }
+     },
+     "features": [
+      "far-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "tedge-a2x",
+       "name": "Test Edge Finish A2X",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "company": {
+         "alone": 0.5
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      },
+      {
+       "id": "tedge-a2y",
+       "name": "Test Edge Finish A2Y",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "orders": {
+         "hunt": 1.0
+        },
+        "shape": {
+         "read": 0.5
+        }
+       },
+       "features": [
+        "brass-plate"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tedge-a3",
+     "name": "Test Edge Prong A3",
+     "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "leans": {
+      "bonds": {
+       "named": 1.0
+      },
+      "orders": {
+       "hunt": 0.5
+      }
+     },
+     "features": [
+      "sheath"
+     ],
+     "finishes": [
+      {
+       "id": "tedge-a3x",
+       "name": "Test Edge Finish A3X",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "quests": {
+         "hunt": 1.0
+        },
+        "range": {
+         "close": 0.5
+        }
+       },
+       "features": [
+        "edge"
+       ]
+      },
+      {
+       "id": "tedge-a3y",
+       "name": "Test Edge Finish A3Y",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "company": {
+         "alone": 1.0
+        },
+        "shape": {
+         "cast": 0.5
+        }
+       },
+       "features": [
+        "grip"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tedge-b",
+   "name": "Test Edge Path B",
+   "text": "A test path of the test edge, kept for the engine's tests only.",
+   "leans": {
+    "quests": {
+     "hunt": 1.0
+    },
+    "range": {
+     "close": 0.5
+    }
+   },
+   "features": [
+    "grip"
+   ],
+   "prongs": [
+    {
+     "id": "tedge-b1",
+     "name": "Test Edge Prong B1",
+     "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "leans": {
+      "range": {
+       "mid": 1.0
+      }
+     },
+     "features": [
+      "edge"
+     ],
+     "finishes": [
+      {
+       "id": "tedge-b1x",
+       "name": "Test Edge Finish B1X",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        },
+        "bonds": {
+         "named": 0.5
+        }
+       },
+       "features": [
+        "brass-plate"
+       ]
+      },
+      {
+       "id": "tedge-b1y",
+       "name": "Test Edge Finish B1Y",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "ground": {
+         "ruin": 1.0
+        },
+        "pattern": {
+         "sworn": 0.5
+        }
+       },
+       "features": [
+        "far-eyes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tedge-b2",
+     "name": "Test Edge Prong B2",
+     "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "leans": {
+      "shape": {
+       "cast": 1.0
+      },
+      "fights": {
+       "dodges": 0.5
+      }
+     },
+     "features": [
+      "pulse"
+     ],
+     "finishes": [
+      {
+       "id": "tedge-b2x",
+       "name": "Test Edge Finish B2X",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "fights": {
+         "parries": 0.5
+        }
+       },
+       "features": [
+        "grip"
+       ]
+      },
+      {
+       "id": "tedge-b2y",
+       "name": "Test Edge Finish B2Y",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "pattern": {
+         "fires": 0.5
+        }
+       },
+       "features": [
+        "sheath"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tedge-b3",
+     "name": "Test Edge Prong B3",
+     "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "leans": {
+      "fights": {
+       "dodges": 1.0
+      },
+      "ground": {
+       "ruin": 0.5
+      }
+     },
+     "features": [
+      "edge"
+     ],
+     "finishes": [
+      {
+       "id": "tedge-b3x",
+       "name": "Test Edge Finish B3X",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "company": {
+         "alone": 0.5
+        }
+       },
+       "features": [
+        "brass-plate"
+       ]
+      },
+      {
+       "id": "tedge-b3y",
+       "name": "Test Edge Finish B3Y",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "orders": {
+         "hunt": 1.0
+        },
+        "shape": {
+         "read": 0.5
+        }
+       },
+       "features": [
+        "far-eyes"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tedge-c",
+   "name": "Test Edge Path C",
+   "text": "A test path of the test edge, kept for the engine's tests only.",
+   "leans": {
+    "pattern": {
+     "fires": 1.0
+    },
+    "company": {
+     "alone": 0.5
+    }
+   },
+   "features": [
+    "far-eyes"
+   ],
+   "prongs": [
+    {
+     "id": "tedge-c1",
+     "name": "Test Edge Prong C1",
+     "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "leans": {
+      "shape": {
+       "read": 1.0
+      },
+      "quests": {
+       "hunt": 0.5
+      }
+     },
+     "features": [
+      "brass-plate"
+     ],
+     "finishes": [
+      {
+       "id": "tedge-c1x",
+       "name": "Test Edge Finish C1X",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "company": {
+         "alone": 1.0
+        },
+        "shape": {
+         "cast": 0.5
+        }
+       },
+       "features": [
+        "sheath"
+       ]
+      },
+      {
+       "id": "tedge-c1y",
+       "name": "Test Edge Finish C1Y",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "orders": {
+         "hunt": 0.5
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tedge-c2",
+     "name": "Test Edge Prong C2",
+     "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "leans": {
+      "range": {
+       "mid": 1.0
+      }
+     },
+     "features": [
+      "grip"
+     ],
+     "finishes": [
+      {
+       "id": "tedge-c2x",
+       "name": "Test Edge Finish C2X",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        },
+        "bonds": {
+         "named": 0.5
+        }
+       },
+       "features": [
+        "far-eyes"
+       ]
+      },
+      {
+       "id": "tedge-c2y",
+       "name": "Test Edge Finish C2Y",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "ground": {
+         "ruin": 1.0
+        },
+        "pattern": {
+         "sworn": 0.5
+        }
+       },
+       "features": [
+        "edge"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tedge-c3",
+     "name": "Test Edge Prong C3",
+     "text": "A test prong of the test edge, kept for the engine's tests only.",
+     "leans": {
+      "shape": {
+       "cast": 1.0
+      },
+      "fights": {
+       "dodges": 0.5
+      }
+     },
+     "features": [
+      "brass-plate"
+     ],
+     "finishes": [
+      {
+       "id": "tedge-c3x",
+       "name": "Test Edge Finish C3X",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "fights": {
+         "parries": 0.5
+        }
+       },
+       "features": [
+        "sheath"
+       ]
+      },
+      {
+       "id": "tedge-c3y",
+       "name": "Test Edge Finish C3Y",
+       "text": "A test finish of the test edge, kept for the engine's tests only.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "pattern": {
+         "fires": 0.5
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

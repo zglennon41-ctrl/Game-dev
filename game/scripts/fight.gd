@@ -759,9 +759,12 @@ func _record(evs: Array) -> void:
 			"genius-hold": genius.gave_order("hold")
 			"free": genius.gave_order("free")
 			# how its partner meets a blow: what Free judges by
-			"parry": genius.counter("fights.parries")
-			"hurt": genius.counter("fights.hurts")
-			"block": genius.counter("fights.blocks")
+			"parry": genius.met_blow("parries")
+			"hurt": genius.met_blow("hurts")
+			"block": genius.met_blow("blocks")
+			"evade":
+				if String(e.get("how", "")) == "dodged":
+					genius.met_blow("dodges")
 
 func dist() -> float:
 	return p_pos.distance_to(w_pos)

@@ -1,0 +1,12 @@
+{
+ "$comment": "Hybrids (docs/genius-tree.md): the genius of someone whose play turned after it settled and before its first refinement. rule: at the first refinement a genius may turn toward the base whose nature fits the play best, if that fit is at least `min` and better than its own base's by `margin` (as a share of its own). The hybrid's tree is composed from the two bases: its paths are the first base's, their leans bent `bend` of the way toward the second's nature and named by `path` ({adj} is the second's hybrid.adj, {name} the path's); in each path the prong furthest from the second's nature gives way to the second's prong nearest that path, carried across with its finishes and named by `carried` ({adj} is the first's hybrid.adj). kind names the hybrid itself ({adj} the second's, {name} the first base's). pairs: a pair written by hand, keyed first+second: its `name`, its `text`, and `nodes` (by the id of the form of either base it came from: `name`, `text`) where the rule's words are not good enough.",
+ "rule": {
+  "margin": 0.25,
+  "min": 0.3,
+  "bend": 0.5,
+  "kind": "{adj} {name}",
+  "path": "{adj} {name}",
+  "carried": "{adj} {name}"
+ },
+ "pairs": {}
+}

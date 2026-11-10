@@ -68,7 +68,8 @@ func _build(info: Dictionary, color: Color, title: String) -> void:
 	var sub := Label.new()
 	Style.label(sub, 15, Style.DIM, "italic")
 	var instar := int(info.get("instar", 1))
-	sub.text = "%s  ·  %s  ·  %s" % [_form_name(form), String(info.get("expression", "")).capitalize(), GeniusResonance.instar_rule(maxi(1, instar)).get("name", "")]
+	var fm := Data.form(form)
+	sub.text = "%s  ·  %s  ·  %s" % [String(fm.get("kind", _form_name(form))), String(info.get("expression", "")).capitalize(), GeniusResonance.instar_rule(maxi(1, instar)).get("name", "")]
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sub)
 	var r := Style.rule(W - 40, Style.BRASS_DIM)
@@ -83,18 +84,20 @@ func _build(info: Dictionary, color: Color, title: String) -> void:
 	txt.custom_minimum_size = Vector2(W - 28, 0)
 	Style.rich(txt, 15, Style.FG, "body")
 	var lines: Array = []
-	for f in feats:
+	# a small card names its first parts; the page names them all
+	var named: Array = feats if W >= W_FULL else feats.slice(0, 6)
+	for f in named:
 		var slot := GeniusBody._slot_of(f)
 		var lbl := Rite.feature_label(f)
 		lines.append("[color=#a8803f]%s[/color]   %s%s" % [slot.to_upper(), lbl, "   [i][color=#9e958a](the Seed-mark)[/color][/i]" if f == mark or (mark == "" and f == feats[0]) else ""])
+	if named.size() < feats.size():
+		lines.append("[color=#9e958a][i]and %d more[/i][/color]" % (feats.size() - named.size()))
 	txt.text = "\n".join(lines)
 	v.add_child(txt)
 
 static func _form_name(id: String) -> String:
-	for f in Data.forms():
-		if f["id"] == id:
-			return f["name"]
-	return id.capitalize()
+	var f := Data.form(id)
+	return String(f["name"]) if not f.is_empty() else id.capitalize()
 
 ## A small world of its own: the genius on a dark ground, lit from behind in its colour.
 func _portrait(info: Dictionary, color: Color) -> Control:

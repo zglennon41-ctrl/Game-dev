@@ -5,6 +5,15 @@ import { join, basename } from 'node:path';
 
 export interface Problem { file: string; message: string }
 
+/** The lines of the Tally a form of the tree may lean on, and their keys (docs/genius-tree.md). */
+export const TREE_LEANS: Record<string, string[]> = {
+  range: ['close', 'mid', 'far'], orders: ['guard', 'hunt', 'hold', 'free'], shape: ['anchor', 'turn', 'cast', 'read', 'bind', 'make'],
+  fights: ['parries', 'blocks', 'hurts', 'dodges'], company: ['alone', 'party'], ground: ['line', 'wild', 'water', 'ruin', 'night', 'quiet'],
+  pattern: ['fires', 'sworn'], bonds: ['classmate', 'shade', 'named'], quests: ['linework', 'salvage', 'hunt', 'escort', 'writ', 'deep-run'],
+};
+/** The bases the specification names: a home may lean on one before its file is written. */
+export const TREE_ROSTER = ['wolf', 'hawk', 'stag', 'tortoise', 'fox', 'imp', 'lurker', 'fiend', 'drake', 'sprite', 'homunculus', 'ember', 'fog', 'lantern', 'astrolabe', 'bell', 'blade', 'gun', 'bow', 'shield', 'gauntlet', 'coat'];
+
 const read = (f: string) => JSON.parse(readFileSync(f, 'utf8'));
 
 export function validateData(dir = 'data'): Problem[] {
@@ -22,6 +31,11 @@ export function validateData(dir = 'data'): Problem[] {
   for (const f of lives) {
     if (!lifeCheck(read(join(dir, 'lives', f)))) for (const e of lifeCheck.errors ?? []) problems.push({ file: `lives/${f}`, message: `${e.instancePath || '/'} ${e.message}` });
   }
+  const baseCheck = ajv.compile(read(join(dir, 'schemas', 'genius-base.schema.json')));
+  const baseFiles = existsSync(join(dir, 'genius-bases')) ? readdirSync(join(dir, 'genius-bases')).filter((f) => f.endsWith('.json')).sort() : [];
+  for (const f of baseFiles) {
+    if (!baseCheck(read(join(dir, 'genius-bases', f)))) for (const e of baseCheck.errors ?? []) problems.push({ file: `genius-bases/${f}`, message: `${e.instancePath || '/'} ${e.message}` });
+  }
   if (problems.length) return problems;
 
   // References between files.
@@ -29,19 +43,51 @@ export function validateData(dir = 'data'): Problem[] {
   const ids = (n: string) => new Set<string>(D(n).map((x: { id: string }) => x.id));
   const features = ids('features');
   const need = (file: string, set: Set<string>, id: string, what: string) => { if (!set.has(id)) problems.push({ file, message: `unknown ${what}: ${id}` }); };
-  for (const f of D('forms')) {
-    for (const x of f.features) need('forms.json', features, x, `feature on ${f.id}`);
-    if (f.instars.min > f.instars.max) problems.push({ file: 'forms.json', message: `${f.id}: instars.min > max` });
-    // A home's kind names a home of data/bodies.json.
-    if (f.home && !D('bodies').homes[f.home]) problems.push({ file: 'forms.json', message: `${f.id}: home "${f.home}" is not a home in bodies.json` });
-    // The elder of its kind must be a form, of the same Expression, that it can grow into.
-    if (f.growsInto) {
-      const elder = D('forms').find((g: { id: string }) => g.id === f.growsInto);
-      if (!elder) problems.push({ file: 'forms.json', message: `${f.id}: growsInto "${f.growsInto}" is not a form` });
-      else if (elder.expression !== f.expression) problems.push({ file: 'forms.json', message: `${f.id}: its elder ${elder.id} is another Expression; a kind keeps its Expression` });
-      else if (elder.instars.max <= f.instars.max) problems.push({ file: 'forms.json', message: `${f.id}: its elder ${elder.id} does not outlast it` });
-    }
+  // The genius tree (docs/genius-tree.md): every base is a tree of thirty-one forms.
+  const bases: any[] = baseFiles.map((f) => ({ file: `genius-bases/${f}`, ...read(join(dir, 'genius-bases', f)) }));
+  for (const b of bases) for (const nf of b.newFeatures ?? []) features.add(nf.id);
+  const seedIds = ids('seeds');
+  const bloodIds = ids('bloods');
+  const SHAPES = new Set(['anchor', 'turn', 'cast', 'read', 'bind', 'make']);
+  const bodyDir = join(dir, '..', 'game', 'assets', 'genius', 'bodies');
+  const hasBody = (sil: string) => !existsSync(bodyDir) || existsSync(join(bodyDir, `${sil}.glb`));
+  const formIds = new Set<string>();
+  const formNames = new Map<string, string>();
+  for (const b of bases) {
+    const say = (message: string) => problems.push({ file: b.file, message });
+    if (b.file !== `genius-bases/${b.id}.json`) say('the file is not named for its id');
+    if (!hasBody(b.silhouette) && !(b.toBuild ?? []).includes(b.silhouette)) say(`no body ${b.silhouette} in game/assets/genius/bodies (name it in toBuild if it is still to be built)`);
+    for (const k of Object.keys(b.calls.seed ?? {})) if (!seedIds.has(k)) say(`calls.seed.${k} is not a Seed`);
+    for (const k of Object.keys(b.calls.blood ?? {})) if (!bloodIds.has(k)) say(`calls.blood.${k} is not a blood`);
+    for (const k of Object.keys(b.calls.shape ?? {})) if (!SHAPES.has(k)) say(`calls.shape.${k} is not a Shape`);
+    for (const f of b.hybrid.gift) if (!features.has(f)) say(`hybrid.gift: unknown feature ${f}`);
+    const leansOk = (where: string, leans: Record<string, Record<string, number>>) => {
+      for (const [line, keys] of Object.entries(leans)) for (const k of Object.keys(keys)) if (!(TREE_LEANS[line] ?? []).includes(k)) say(`${where} leans on ${line}.${k}; ${line} has ${(TREE_LEANS[line] ?? []).join(', ')}`);
+    };
+    leansOk('nature', b.nature);
+    const node = (n: any, level: number) => {
+      if (!n.id.startsWith(`${b.id}-`)) say(`${n.id}: an id begins with its base's (${b.id}-)`);
+      if (formIds.has(n.id)) say(`${n.id} is used twice`);
+      formIds.add(n.id);
+      if (formNames.has(n.name)) say(`the name ${n.name} is used twice (by ${n.id} and ${formNames.get(n.name)})`);
+      formNames.set(n.name, n.id);
+      for (const f of n.features) if (!features.has(f)) say(`${n.id}: feature ${f} is not in features.json nor in this base's newFeatures`);
+      if (n.silhouette && !hasBody(n.silhouette)) say(`${n.id}: no body ${n.silhouette}`);
+      if (level > 1) leansOk(n.id, n.leans ?? {});
+      for (const c of n.prongs ?? n.finishes ?? []) node(c, level + 1);
+    };
+    node({ ...b.settled, prongs: b.paths }, 1);
   }
+  // A home's lean names a home and bases; a pair written by hand names two bases.
+  const baseIds = new Set<string>(bases.map((b) => b.id));
+  const homeIds = new Set(Object.keys(D('bodies').homes));
+  for (const [home, leans] of Object.entries<Record<string, number>>(D('genius-homes'))) {
+    if (home.startsWith('$')) continue;
+    if (!homeIds.has(home)) problems.push({ file: 'genius-homes.json', message: `${home} is not a home in bodies.json` });
+    // a base still to be written is not a mistake while the tree is being filled; a name that is no base's of the roster is
+    for (const k of Object.keys(leans)) if (!baseIds.has(k) && !TREE_ROSTER.includes(k)) problems.push({ file: 'genius-homes.json', message: `${home}: ${k} is not a base` });
+  }
+  for (const pair of Object.keys(D('genius-hybrids').pairs)) for (const k of pair.split('+')) if (!baseIds.has(k)) problems.push({ file: 'genius-hybrids.json', message: `${pair}: ${k} is not a base` });
   for (const s of D('seeds')) need('seeds.json', features, s.seedMark, `seed-mark of ${s.id}`);
   for (const a of D('adaptations')) need('adaptations.json', features, a.id, 'adaptation feature');
   for (const s of D('shades')) need('shades.json', features, s.graftFeature, `graft of ${s.id}`);
@@ -70,21 +116,12 @@ export function validateData(dir = 'data'): Problem[] {
   for (const b of D('bloods')) for (const m of b.marks ?? []) need('bloods.json', peopleFeatures, m, `mark of ${b.id}`);
   const disciplines = ids('disciplines');
   for (const a of D('archetypes')) need('archetypes.json', disciplines, a.discipline, `discipline of ${a.id}`);
-  const reading = D('reading');
-  for (const [line, keys] of Object.entries(reading.leans as Record<string, Record<string, { features: Record<string, number> }>>)) {
-    for (const [key, lean] of Object.entries(keys)) for (const f of Object.keys(lean.features)) need('reading.json', features, f, `feature in leans.${line}.${key}`);
-  }
-  const tags = new Set<string>(D('terms').flatMap((t: { tags: string[] }) => t.tags));
-  for (const t of tags) if (!reading.leans.intention[`tag:${t}`]) problems.push({ file: 'reading.json', message: `Term tag "${t}" has no lean in leans.intention (add "tag:${t}")` });
-  // Every instar must have at least three forms to offer.
-  const forms = D('forms');
-  for (let n = 1; n <= 6; n++) {
-    const count = forms.filter((f: { instars: { min: number; max: number } }) => f.instars.min <= n && n <= f.instars.max).length;
-    if (count < 4) problems.push({ file: 'forms.json', message: `only ${count} forms for instar ${n}; a Reading needs three besides the current form` });
-  }
+  const forms = bases.flatMap((b) => { const out: Array<{ id: string; silhouette: string }> = []; const walk = (n: any) => { out.push({ id: n.id, silhouette: n.silhouette ?? b.silhouette }); for (const c of n.prongs ?? n.finishes ?? []) walk(c); }; walk({ ...b.settled, prongs: b.paths }); return out; });
   // Every silhouette in the lattice can be assembled, and every slot has sockets.
   const bodies = D('genius-bodies');
-  for (const f of forms) if (!bodies.silhouettes[f.silhouette]) problems.push({ file: 'genius-bodies.json', message: `no body for silhouette ${f.silhouette} (form ${f.id})` });
+  for (const f of forms) if (!bodies.silhouettes[f.silhouette] && hasBody(f.silhouette)) problems.push({ file: 'genius-bodies.json', message: `no body for silhouette ${f.silhouette} (form ${f.id})` });
+  const looked = D('genius-looks').bodies;
+  for (const b of bases) if (hasBody(b.silhouette) && existsSync(bodyDir) && !looked[b.silhouette]) problems.push({ file: 'genius-looks.json', message: `no coats for ${b.silhouette}, the body of the base ${b.id}` });
   for (const ft of D('features')) if (ft.slot !== 'surface' && !bodies.slotSockets[ft.slot]) problems.push({ file: 'genius-bodies.json', message: `no sockets for slot ${ft.slot}` });
   for (const [sil, sp] of Object.entries(bodies.silhouettes as Record<string, { kind: string }>)) if (!bodies.kinds[sp.kind]) problems.push({ file: 'genius-bodies.json', message: `${sil}: unknown kind ${sp.kind}` });
   // What a genius may look like: every body named is a silhouette, has a palette that exists,
@@ -94,7 +131,6 @@ export function validateData(dir = 'data'): Problem[] {
     if (!bodies.silhouettes[sil]) problems.push({ file: 'genius-looks.json', message: `bodies.${sil} is not a silhouette in genius-bodies.json` });
     if (!looks.palettes[b.coats]) problems.push({ file: 'genius-looks.json', message: `bodies.${sil}: no palette "${b.coats}"` });
   }
-  const formIds = new Set<string>(forms.map((f: { id: string }) => f.id));
   for (const [fid, f] of Object.entries(looks.forms as Record<string, { coats: string }>)) {
     need('genius-looks.json', formIds, fid, 'form with its own coats');
     if (!looks.palettes[f.coats]) problems.push({ file: 'genius-looks.json', message: `forms.${fid}: no palette "${f.coats}"` });

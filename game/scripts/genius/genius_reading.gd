@@ -1,133 +1,118 @@
-## The Reading: score the lattice against the Tally and offer three candidates with heritage.
+## The Readings on the genius tree (docs/genius-tree.md): the rite offers three bases; a
+## refinement offers the children of the form the genius is, and once, a turning.
 ## A faithful copy of the tools' src/rules/reading.ts (the tests hold the two to the same
-## answers, game/tests/fixtures/readings.json). Every number is in data/reading.json.
+## answers, game/tests/fixtures/readings.json). Every number is in data/reading.json and
+## data/genius-hybrids.json.
 class_name GeniusReading
 extends RefCounted
 
-const EXPRESSIONS := ["beast", "kith", "engine", "relic", "daemon", "aspect"]
-const COUNT_LINES := ["families", "range", "orders", "company", "ground", "discipline"]
+const SHAPES := ["anchor", "turn", "cast", "read", "bind", "make"]
+const ORDERS := ["guard", "hunt", "hold", "free"]
+const FIGHTS := ["parries", "blocks", "hurts", "dodges"]
+const QUESTS := ["linework", "salvage", "hunt", "escort", "writ", "deep-run"]
+## Where a run was, in the tree's words.
+const GROUND := { "tunnel": "line", "line": "line", "post": "line", "junction": "line", "river": "water", "sky": "wild", "wild": "wild", "water": "water", "ruin": "ruin", "night": "night", "quiet": "quiet" }
+## The lines a refinement reads, in order.
+const PLAY_LINES := ["range", "orders", "shape", "fights", "company", "ground", "pattern", "bonds", "quests"]
 
 ## The record of play since the last Reading. Counts, not shares.
 static func empty_tally() -> Dictionary:
 	return { "families": {}, "range": {}, "orders": {}, "company": {}, "ground": {}, "discipline": {}, "bonds": {},
 		"intention": null, "runsWith": {}, "counters": {} }
 
-## The intention line: the Pattern's Form, and its Terms' tags shared out.
-static func intention_keys(form: String, terms: Array) -> Dictionary:
-	var keys := { "family:" + form: 1.0 }
-	var tags: Array = []
-	for id in terms:
-		for t in Data.terms:
-			if t["id"] == id:
-				tags.append_array(t["tags"])
-	for tag in tags:
-		keys["tag:" + tag] = float(keys.get("tag:" + tag, 0.0)) + 1.0 / tags.size()
-	return keys
-
-## A Tally as per-line shares, and how much each line counts (its emphasis).
-static func lines_of(t: Dictionary, origin: Dictionary, cfg: Dictionary) -> Dictionary:
+## The Tally as the tree reads it: for each line, the share of each key and how much the line counts.
+static func play_lines(t: Dictionary, cfg: Dictionary = {}) -> Dictionary:
+	if cfg.is_empty():
+		cfg = Data.rules_reading()
+	var ref: Dictionary = cfg["refine"]["reference"]
+	var counts := { "range": {}, "orders": {}, "shape": {}, "fights": {}, "company": {}, "ground": {}, "quests": {} }
+	var counters: Dictionary = t.get("counters", {})
+	for k in ["close", "mid", "far"]:
+		if float(t.get("range", {}).get(k, 0.0)) != 0.0:
+			counts["range"][k] = float(t["range"][k])
+	for k in ORDERS:
+		if float(t.get("orders", {}).get(k, 0.0)) != 0.0:
+			counts["orders"][k] = float(t["orders"][k])
+	for k in t.get("families", {}):
+		var s := String(k).split(".")[0]
+		var v := float(t["families"][k])
+		if SHAPES.has(s) and v != 0.0:
+			counts["shape"][s] = float(counts["shape"].get(s, 0.0)) + v
+	for k in FIGHTS:
+		if float(counters.get("fights." + k, 0.0)) != 0.0:
+			counts["fights"][k] = float(counters["fights." + k])
+	for k in ["alone", "party"]:
+		if float(counters.get("runs." + k, 0.0)) != 0.0:
+			counts["company"][k] = float(counters["runs." + k])
+	for k in t.get("ground", {}):
+		var v := float(t["ground"][k])
+		if v != 0.0:
+			var g := String(GROUND.get(k, "wild"))
+			counts["ground"][g] = float(counts["ground"].get(g, 0.0)) + v
+	for k in QUESTS:
+		if float(counters.get("runs.quest." + k, 0.0)) != 0.0:
+			counts["quests"][k] = float(counters["runs.quest." + k])
 	var shares := {}
 	var emphasis := {}
-	for line in COUNT_LINES:
-		var counts: Dictionary = t.get(line, {})
+	for line in counts:
 		var total := 0.0
-		for k in counts:
-			total += float(counts[k])
+		for k in counts[line]:
+			total += float(counts[line][k])
 		var s := {}
 		if total > 0.0:
-			for k in counts:
-				s[k] = float(counts[k]) / total
+			for k in counts[line]:
+				s[k] = float(counts[line][k]) / total
 		shares[line] = s
-		emphasis[line] = minf(1.0, total / float(cfg["emphasis"]["reference"].get(line, 1)))
-	var bonds := {}
-	var any_bond := false
-	for k in t.get("bonds", {}):
-		bonds[k] = 1.0 if float(t["bonds"][k]) > 0.0 else 0.0
-		any_bond = any_bond or float(t["bonds"][k]) > 0.0
-	shares["bonds"] = bonds
-	emphasis["bonds"] = 1.0 if any_bond else 0.0
+		emphasis[line] = minf(1.0, total / float(ref.get(line, 1)))
 	var it: Variant = t.get("intention")
 	if it is Dictionary and not (it as Dictionary).is_empty():
-		shares["intention"] = intention_keys(it["form"], it["terms"])
-		var base := float(cfg["emphasis"]["intentionBase"])
-		emphasis["intention"] = base + (1.0 - base) * minf(1.0, float(it["fires"]) / float(cfg["emphasis"]["intentionFires"]))
+		shares["pattern"] = { "fires": minf(1.0, float(it.get("fires", 0)) / float(cfg["refine"]["patternFires"])), "sworn": 1.0 if it.get("sworn", false) else 0.0 }
+		emphasis["pattern"] = 1.0
 	else:
-		shares["intention"] = {}
-		emphasis["intention"] = 0.0
-	shares["seed"] = { origin["seed"]: 1.0 }
-	shares["blood"] = { origin["blood"]: 1.0 }
-	shares["shape"] = { origin["shape"]: 1.0 }
-	emphasis["seed"] = 1.0
-	emphasis["blood"] = 1.0
-	emphasis["shape"] = 1.0
+		shares["pattern"] = {}
+		emphasis["pattern"] = 0.0
+	var tb: Dictionary = t.get("bonds", {})
+	var ran_with := false
+	for k in t.get("runsWith", {}):
+		ran_with = ran_with or float(t["runsWith"][k]) > 0.0
+	var bonds := {
+		"classmate": 1.0 if float(tb.get("classmate", 0.0)) > 0.0 or ran_with else 0.0,
+		"shade": 1.0 if float(tb.get("shade", 0.0)) > 0.0 or float(tb.get("hearth", 0.0)) > 0.0 else 0.0,
+		"named": 1.0 if float(tb.get("named", 0.0)) > 0.0 else 0.0,
+	}
+	shares["bonds"] = bonds
+	emphasis["bonds"] = 1.0 if bonds["classmate"] + bonds["shade"] + bonds["named"] > 0.0 else 0.0
 	return { "shares": shares, "emphasis": emphasis }
 
-static func _lean(cfg: Dictionary, line: String, key: String) -> Dictionary:
-	return cfg["leans"].get(line, {}).get(key, {})
-
-static func _key_fit(lean: Dictionary, expression: String, features: Array) -> float:
-	if lean.is_empty():
-		return 0.0
-	var v := float(lean.get("expression", {}).get(expression, 0.0))
-	for f in features:
-		v += float(lean.get("features", {}).get(f, 0.0))
-	return v
-
-static func _score_form(form: Dictionary, shares: Dictionary, emphasis: Dictionary, weights: Dictionary, cfg: Dictionary) -> Dictionary:
-	var score := 0.0
+## How well the play fits a set of leans, 0 to 1 or so, and the lines that speak for it.
+static func fit(leans: Dictionary, lines: Dictionary, cfg: Dictionary = {}) -> Dictionary:
+	if cfg.is_empty():
+		cfg = Data.rules_reading()
+	var num := 0.0
+	var den := 0.0
 	var reasons: Array = []
-	for line in weights:
-		if line.begins_with("$"):
-			continue
-		var w := float(weights[line])
-		var e := float(emphasis.get(line, 0.0))
-		if w == 0.0 or e == 0.0:
-			continue
-		var sh: Dictionary = shares.get(line, {})
-		for key in sh:
-			var c := w * e * float(sh[key]) * _key_fit(_lean(cfg, line, key), form["expression"], form["features"])
+	for line in leans:
+		var w := float(cfg["refine"]["weights"].get(line, 0.0)) * float(lines["emphasis"].get(line, 0.0))
+		for key in leans[line]:
+			var lean := float(leans[line][key])
+			den += lean
+			var share := float(lines["shares"].get(line, {}).get(key, 0.0))
+			var c := w * lean * share
 			if c > 0.0:
-				score += c
-				reasons.append({ "line": line, "key": key, "share": float(sh[key]), "contribution": c })
-	reasons.sort_custom(func(a, b): return a["contribution"] > b["contribution"])
-	return { "score": score, "reasons": reasons.slice(0, 3) }
+				num += c
+				reasons.append({ "line": line, "key": key, "share": share, "contribution": c })
+	if den > 0.0:
+		for r in reasons:
+			r["contribution"] = float(r["contribution"]) / den
+	reasons.sort_custom(_by_weight)
+	return { "score": (num / den) if den > 0.0 else 0.0, "reasons": reasons.slice(0, 3) }
 
-static func _score_feature(feature: String, shares: Dictionary, emphasis: Dictionary, weights: Dictionary, cfg: Dictionary) -> float:
-	var s := 0.0
-	for line in weights:
-		if line.begins_with("$"):
-			continue
-		var w := float(weights[line])
-		var e := float(emphasis.get(line, 0.0))
-		var sh: Dictionary = shares.get(line, {})
-		for key in sh:
-			s += w * e * float(sh[key]) * float(_lean(cfg, line, key).get("features", {}).get(feature, 0.0))
-	return s
-
-## For each line, which Expression it points at most, and how hard.
-static func line_leads(shares: Dictionary, emphasis: Dictionary, weights: Dictionary, cfg: Dictionary) -> Array:
-	var out: Array = []
-	for line in weights:
-		if line.begins_with("$"):
-			continue
-		var w := float(weights[line])
-		var e := float(emphasis.get(line, 0.0))
-		if w == 0.0 or e == 0.0:
-			continue
-		var best := ""
-		var best_v := 0.0
-		for x in EXPRESSIONS:
-			var v := 0.0
-			var sh: Dictionary = shares.get(line, {})
-			for key in sh:
-				v += float(sh[key]) * float(_lean(cfg, line, key).get("expression", {}).get(x, 0.0))
-			if v > best_v:
-				best_v = v
-				best = x
-		if best != "":
-			out.append({ "line": line, "expression": best, "weight": w * e * best_v })
-	out.sort_custom(func(a, b): return a["weight"] > b["weight"])
-	return out
+static func _by_weight(a: Dictionary, b: Dictionary) -> bool:
+	if a["contribution"] != b["contribution"]:
+		return a["contribution"] > b["contribution"]
+	if a["line"] != b["line"]:
+		return String(a["line"]) < String(b["line"])
+	return String(a["key"]) < String(b["key"])
 
 static func is_adaptation(id: String) -> bool:
 	for f in Data.features():
@@ -147,111 +132,143 @@ static func seed_mark(seed_id: String) -> String:
 			return s["seedMark"]
 	return ""
 
-## Score every eligible form and offer three. current: the genius's form now (a dictionary as
-## take() makes), or {} for the First Form. noise / noise_seed: the rite's bowl may add a
-## little chance to each score (0 for the pure Reading).
-static func read(instar: int, tally: Dictionary, origin: Dictionary, current: Dictionary, noise := 0.0, noise_seed := 0) -> Dictionary:
-	var cfg: Dictionary = Data.rules_reading()
-	var genius_rules: Dictionary = Data.rules["genius"]
-	var first := instar == 1 or current.is_empty()
-	var weights: Dictionary = cfg["firstFormWeights"] if first else cfg["weights"]
-	var lo := lines_of(tally, origin, cfg)
-	var shares: Dictionary = lo["shares"]
-	var emphasis: Dictionary = lo["emphasis"]
-	var leads := line_leads(shares, emphasis, weights, cfg)
-	var mark := seed_mark(origin["seed"])
-	var top := leads.slice(0, 3)
-	var crossing := current.is_empty() or top.filter(func(l): return l["expression"] != current["expression"]).size() >= int(cfg["crossing"]["linesAway"])
+static func _candidate(f: Dictionary, score: float, reasons: Array, mark: String, heritage: Array, grafts: Array) -> Dictionary:
+	var feats: Array = []
+	for x in [mark] + f["features"] + heritage + grafts:
+		if x != "" and not feats.has(x):
+			feats.append(x)
+	return { "form": f["id"], "base": f["base"], "kind": f["kind"], "name": f["name"], "text": f["text"], "expression": f["expression"],
+		"silhouette": f["silhouette"], "coatOf": f["coatOf"], "level": int(f["level"]), "score": _round(score),
+		"own": (f["features"] as Array).duplicate(), "heritage": heritage.duplicate(), "seedMark": mark, "features": feats,
+		"reasons": reasons.map(func(r): return { "line": r["line"], "key": r["key"], "share": _round(r["share"]), "contribution": _round(r["contribution"]) }) }
+
+## The rite: three bases, read from the Seed, the blood and the Shape, leaned by the home.
+## noise / noise_seed: the bowl may add a little chance to each base (0 for the pure Reading).
+static func _rite(origin: Dictionary, cfg: Dictionary, mark: String, noise: float, noise_seed: int) -> Dictionary:
+	var own := { "seed": String(origin.get("seed", "")), "blood": String(origin.get("blood", "")), "shape": String(origin.get("shape", "")) }
+	var home := String(origin.get("home", ""))
+	var lean: Dictionary = Data.genius_homes().get(home, {}) if home != "" and not home.begins_with("$") else {}
 	var rng := RandomNumberGenerator.new()
 	rng.seed = noise_seed
-	var scored: Array = []
-	var lattice: Array = Data.forms().duplicate()
-	lattice.sort_custom(func(a, b): return a["id"] < b["id"])
-	# A home's kinds come only at the rite (after it they are kept, by keeping its kind). There,
-	# a kind of another home counts for less everywhere; a kind of the character's own home
-	# counts for more, but only for the second and third offers: the best fit is the field's.
-	var hcfg: Dictionary = cfg["home"]
-	var home := String(origin.get("home", ""))
-	for f in lattice:
-		if int(f["instars"]["min"]) > instar or instar > int(f["instars"]["max"]) or f["id"] == current.get("form", ""):
-			continue
-		var fhome := String(f.get("home", ""))
-		if not first and fhome != "":
-			continue
-		var s := _score_form(f, shares, emphasis, weights, cfg)
-		var stay := 1.0
-		if not current.is_empty() and not crossing and f["expression"] == current["expression"]:
-			stay = 1.0 + float(cfg["crossing"]["stayBonus"])
-		var away := float(hcfg["away"]) if first and fhome != "" and fhome != home and not (hcfg["open"] as Array).has(fhome) else 1.0
-		var sc := float(s["score"]) * stay * away
+	var pool: Array = []
+	for b in Data.bases():
+		var raw := 0.0
+		var reasons: Array = []
+		for line in ["seed", "blood", "shape"]:
+			var c := float(cfg["rite"]["weights"].get(line, 0.0)) * float(b["calls"].get(line, {}).get(own[line], 0.0))
+			if c > 0.0:
+				raw += c
+				reasons.append({ "line": line, "key": own[line], "share": 1.0, "contribution": c })
+		reasons.sort_custom(_by_weight)
 		if noise > 0.0:
-			sc += rng.randf() * noise
-		var own := first and fhome != "" and fhome == home
-		scored.append({ "f": f, "score": sc, "lean": (sc * (1.0 + float(hcfg["bonus"])) + float(hcfg["floor"])) if own else sc, "own": own, "reasons": s["reasons"] })
-	scored.sort_custom(func(a, b): return a["score"] > b["score"] or (a["score"] == b["score"] and a["f"]["id"] < b["f"]["id"]))
-	# Greedy pick of three, discounting repeats of an Expression so three bodies are offered.
+			raw += rng.randf() * noise
+		pool.append({ "b": b, "raw": raw, "leaned": raw * float(lean.get(b["id"], 1.0)), "reasons": reasons })
 	var picked: Array = []
-	var pool := scored.duplicate()
 	while picked.size() < 3 and not pool.is_empty():
-		var best_i := -1
+		var best_i := 0
 		var best_v := -INF
-		var homes := picked.filter(func(p): return p["own"]).size()
 		for i in pool.size():
 			var c: Dictionary = pool[i]
-			if c["own"] and homes >= int(hcfg["most"]):
-				continue
-			var same := picked.filter(func(p): return p["f"]["expression"] == c["f"]["expression"]).size()
-			var v := float(c["score"] if picked.is_empty() else c["lean"]) * pow(float(cfg["diversity"]["sameExpression"]), same)
+			var same := picked.filter(func(p): return p["b"]["class"] == c["b"]["class"]).size()
+			# the best fit is the field's own; the home leans only what is offered beside it
+			var v := float(c["raw"] if picked.is_empty() else c["leaned"]) * pow(float(cfg["rite"]["sameClass"]), same)
 			if v > best_v:
 				best_v = v
 				best_i = i
-		if best_i < 0:
-			break
 		var got: Dictionary = pool.pop_at(best_i)
-		# The score stays the Reading's own; a kind offered for the home's sake says so in its reasons.
-		if not picked.is_empty() and got["own"]:
-			got["reasons"] = got["reasons"] + [{ "line": "home", "key": home, "share": 1.0, "contribution": float(got["lean"]) - float(got["score"]) }]
+		if not picked.is_empty() and float(got["leaned"]) > float(got["raw"]):
+			got["reasons"] = got["reasons"] + [{ "line": "home", "key": home, "share": 1.0, "contribution": float(got["leaned"]) - float(got["raw"]) }]
 		picked.append(got)
-	var heritage_pool: Array = []
-	if not current.is_empty():
-		var raw: Array = current["own"] + current["heritage"] + current.get("adaptations", []).map(func(a): return a["id"])
-		var graft_feats: Array = current.get("grafts", []).map(func(g): return g["feature"])
-		for x in raw:
-			if x != current["seedMark"] and not graft_feats.has(x) and not heritage_pool.has(x):
-				heritage_pool.append(x)
 	var candidates: Array = []
 	for p in picked:
-		var f: Dictionary = p["f"]
-		var heritage: Array = []
-		if not current.is_empty():
-			var options: Array = []
-			for x in heritage_pool:
-				if f["features"].has(x):
-					continue
-				if is_adaptation(x) and not _is_fixable(x):
-					continue
-				options.append({ "x": x, "s": _score_feature(x, shares, emphasis, weights, cfg) })
-			options.sort_custom(func(a, b): return a["s"] > b["s"] or (a["s"] == b["s"] and a["x"] < b["x"]))
-			for o in options:
-				if float(o["s"]) >= float(cfg["heritage"]["minScore"]) and heritage.size() < int(genius_rules["heritageMax"]):
-					heritage.append(o["x"])
-			if heritage.size() < int(genius_rules["heritageMin"]) and not options.is_empty():
-				heritage = options.slice(0, int(genius_rules["heritageMin"])).map(func(o): return o["x"])
-		var grafts: Array = current.get("grafts", []).map(func(g): return g["feature"])
-		var feats: Array = []
-		for x in [mark] + f["features"] + heritage + grafts:
-			if x != "" and not feats.has(x):
-				feats.append(x)
-		candidates.append({ "form": f["id"], "name": f["name"], "expression": f["expression"], "silhouette": f["silhouette"],
-			"score": _round(float(p["score"])), "own": f["features"].duplicate(), "heritage": heritage, "seedMark": mark,
-			"features": feats, "reasons": p["reasons"].map(func(r): return { "line": r["line"], "key": r["key"], "share": _round(r["share"]), "contribution": _round(r["contribution"]) }) })
-	return { "instar": instar, "crossingAllowed": crossing, "lineLeads": leads, "candidates": candidates }
+		candidates.append(_candidate(Data.form(String(p["b"]["settled"]["id"])), float(p["raw"]), p["reasons"], mark, [], []))
+	return { "instar": 1, "level": 1, "candidates": candidates, "turning": {}, "grows": false }
 
-## The genius's body after a candidate is taken. Fixed adaptations became heritage; the rest go.
+static func _offer(forms: Array, lines: Dictionary, cfg: Dictionary, mark: String, heritage: Array, grafts: Array) -> Array:
+	var scored: Array = []
+	for i in forms.size():
+		var s := fit(forms[i].get("leans", {}), lines, cfg)
+		scored.append({ "f": forms[i], "i": i, "score": s["score"], "reasons": s["reasons"] })
+	scored.sort_custom(func(a, b): return a["score"] > b["score"] or (a["score"] == b["score"] and a["i"] < b["i"]))
+	return scored.map(func(x): return _candidate(x["f"], x["score"], x["reasons"], mark, heritage, grafts))
+
+## Read for instar n. The rite (no genius yet: current is {}) offers three bases. A refinement
+## offers the children of the form the genius is, best fit first; the first refinement may
+## also offer a turning ("turning": {} when there is none). From the fifth instar nothing is
+## offered: the finished form grows ("grows": true).
+static func read(instar: int, tally: Dictionary, origin: Dictionary, current: Dictionary, noise := 0.0, noise_seed := 0) -> Dictionary:
+	var cfg: Dictionary = Data.rules_reading()
+	var mark := seed_mark(String(origin.get("seed", "")))
+	if current.is_empty() or instar == 1:
+		return _rite(origin, cfg, mark, noise, noise_seed)
+	var kids := Data.children_of(String(current.get("form", "")))
+	# What it kept fed becomes part of it.
+	var heritage: Array = []
+	for x in current.get("heritage", []) + current.get("adaptations", []).map(func(a): return a["id"]).filter(func(id): return _is_fixable(id)):
+		if not heritage.has(x):
+			heritage.append(x)
+	heritage = heritage.slice(0, int(Data.rules["genius"]["heritageMax"]))
+	var grafts: Array = current.get("grafts", []).map(func(g): return g["feature"])
+	# A finished form is offered nothing new: it grows, as itself, an age on.
+	if kids.is_empty():
+		var me := Data.form(String(current.get("form", "")))
+		return { "instar": instar, "level": int(me.get("level", 4)), "candidates": [] if me.is_empty() else [_candidate(me, 0.0, [], mark, heritage, grafts)], "turning": {}, "grows": true }
+	var lines := play_lines(tally, cfg)
+	var candidates := _offer(kids, lines, cfg, mark, heritage, grafts)
+	var turning := {}
+	var mine := Data.base(String(current.get("base", "")))
+	if int(kids[0]["level"]) == 2 and not mine.is_empty():
+		var rule: Dictionary = Data.genius_hybrids()["rule"]
+		var own := float(fit(mine["nature"], lines, cfg)["score"])
+		var best_id := ""
+		var best_s := 0.0
+		var best_r: Array = []
+		for b in Data.bases():
+			if b["id"] == mine["id"]:
+				continue
+			var ft := fit(b["nature"], lines, cfg)
+			var s := float(ft["score"])
+			if best_id == "" or s > best_s:
+				best_s = s
+				best_id = b["id"]
+				best_r = ft["reasons"]
+		if best_id != "" and best_s >= float(rule["min"]) and best_s >= own * (1.0 + float(rule["margin"])):
+			var other := Data.base(best_id)
+			var paths := Data.hybrid_forms(mine["id"], best_id).filter(func(f): return int(f["level"]) == 2)
+			turning = { "second": best_id, "base": GeniusTree.hybrid_id(mine["id"], best_id), "name": GeniusTree.hybrid_name(mine, other, Data.genius_hybrids()),
+				"own": _round(own), "other": _round(best_s),
+				"reasons": best_r.map(func(r): return { "line": r["line"], "key": r["key"], "share": _round(r["share"]), "contribution": _round(r["contribution"]) }),
+				"candidates": _offer(paths, lines, cfg, mark, heritage, grafts) }
+	return { "instar": instar, "level": int(kids[0]["level"]), "candidates": candidates, "turning": turning, "grows": false }
+
+## The genius's body after a candidate is taken: its form, what it kept, and its grafts.
+## Adaptations start again.
 static func take(current: Dictionary, c: Dictionary, accepted_grafts: Array = []) -> Dictionary:
-	return { "form": c["form"], "expression": c["expression"], "silhouette": c["silhouette"], "own": c["own"].duplicate(),
-		"heritage": c["heritage"].duplicate(), "seedMark": c["seedMark"],
+	return { "form": c["form"], "base": c["base"], "expression": c["expression"], "silhouette": c["silhouette"], "coatOf": c.get("coatOf", c["silhouette"]),
+		"own": c["own"].duplicate(), "heritage": c["heritage"].duplicate(), "seedMark": c["seedMark"],
 		"grafts": current.get("grafts", []).duplicate(true) + accepted_grafts, "adaptations": [] }
+
+## A line and key of the Tally in plain words ("fighting close"; data/reading.json, words).
+static func words(line: String, key: String) -> String:
+	var w: Dictionary = Data.rules_reading().get("words", {})
+	if line == "home":
+		return "%s (%s)" % [String(w.get("rite", {}).get("home", "home")), key.capitalize()]
+	if w.get("rite", {}).has(line):
+		return String(w["rite"][line])
+	return String(w.get(line, {}).get(key, "%s %s" % [line, key]))
+
+## What play leads to a form, in plain words: its strongest leans first.
+static func lean_words(leans: Dictionary, most := 3) -> String:
+	var all: Array = []
+	for line in leans:
+		for key in leans[line]:
+			all.append({ "line": line, "key": key, "contribution": float(leans[line][key]) })
+	all.sort_custom(_by_weight)
+	return ", ".join(all.slice(0, most).map(func(x): return words(x["line"], x["key"])))
+
+## The lines that spoke for a candidate, in plain words.
+static func reason_words(reasons: Array) -> String:
+	return ", ".join(reasons.map(func(r): return words(String(r["line"]), String(r["key"]))))
 
 static func _round(x: float) -> float:
 	return roundf(x * 1000.0) / 1000.0

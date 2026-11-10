@@ -1,6 +1,6 @@
-## The rite's reading, pure: what Shape the bowl finds, and what First Form the genius takes.
-## The same hero, record and seed always read the same; the numbers are in data/academy.json
-## ("rite") and data/reading.json ("firstFormWeights", "leans").
+## The rite's reading, pure: what Shape the bowl finds, and which bases it offers the genius
+## to settle as. The same hero, record and seed always read the same; the numbers are in
+## data/academy.json ("rite"), data/reading.json ("rite") and data/genius-homes.json.
 class_name Rite
 extends RefCounted
 
@@ -40,8 +40,9 @@ static func read_shape(hero: Dictionary, record: Dictionary, seed_value: int) ->
 			best = s
 	return { "shape": best, "was": was, "surprise": best != was, "scores": scores }
 
-## The First Form: the Reading of the Seed, the blood and the Shape (genius_reading.gd), with
-## a little of the bowl's chance (rite.formNoise), settled on the best fit.
+## What it settles as: the Reading of the Seed, the blood and the Shape over every base
+## (genius_reading.gd), leaned by the home, with a little of the bowl's chance
+## (rite.formNoise). The best fit, and the Reading with all three offers.
 static func first_form(hero: Dictionary, shape: String, seed_value: int) -> Dictionary:
 	var origin := { "seed": String(hero.get("seed", "")), "blood": String(hero.get("blood", "")), "shape": shape, "home": String(hero.get("city", "")) }
 	var r := GeniusReading.read(1, GeniusReading.empty_tally(), origin, {}, float(Data.academy["rite"]["formNoise"]), seed_value * 31 + 7)

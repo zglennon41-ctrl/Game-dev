@@ -200,7 +200,7 @@ func _genius(dt: float) -> void:
 			form = { "form": c["form"], "name": Genius.form_name_at(String(c["form"]), 1), "expression": c["expression"], "silhouette": c["silhouette"],
 				"features": c["features"], "seedMark": c["seedMark"], "reading": form["reading"], "look": form.get("look", Rite.born_look(hero)) }
 			_feat_i = 0
-			_go("making"), "The bowl offers three", "Read from your Seed, your blood and your Shape. Every one carries the Seed-mark.")
+			_go("making"), "The bowl offers three", "Read from your Seed, your blood and your Shape. Whichever settles carries the Seed-mark, and grows by how you play.")
 
 func _making(dt: float) -> void:
 	var col: Color = World.SHAPE_COLORS[hero["shape"]].lightened(0.15)
@@ -241,7 +241,7 @@ func _burst_form() -> void:
 	world.cine_look = World.BOWL + Vector3(0, 2.3, 0)
 	world.cine_speed = 2.0
 	var feats: Array = form["features"].map(func(f): return Rite.feature_label(String(f)))
-	ac.title_card(String(form["name"]).to_upper(), "FIRST FORM  ·  %s  ·  %s" % [String(form["expression"]).to_upper(), ", ".join(feats)], col)
+	ac.title_card(String(form["name"]).to_upper(), "SETTLED  ·  %s  ·  %s" % [String(Data.form(String(form["form"])).get("kind", form["expression"])).to_upper(), ", ".join(feats)], col)
 
 func _form(dt: float) -> void:
 	if _form_node:

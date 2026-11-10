@@ -1,0 +1,538 @@
+{
+ "id": "tlamp",
+ "name": "Test Lamp",
+ "class": "item",
+ "expression": "engine",
+ "silhouette": "engine-lantern",
+ "spark": "A test mote, kept for the engine's tests only.",
+ "nature": {
+  "orders": {
+   "hold": 1.0
+  },
+  "ground": {
+   "night": 0.8
+  },
+  "shape": {
+   "read": 0.6
+  }
+ },
+ "calls": {
+  "seed": {
+   "never-alive": 1.0,
+   "remembers": 0.4
+  },
+  "shape": {
+   "read": 0.6,
+   "make": 0.5
+  },
+  "blood": {
+   "forgeborn": 0.4
+  }
+ },
+ "hybrid": {
+  "adj": "Lantern",
+  "gift": [
+   "lantern"
+  ],
+  "text": "It is a test of the test lamp."
+ },
+ "settled": {
+  "id": "tlamp-small",
+  "name": "Small test lamp",
+  "text": "The small of a test base, kept for the engine's tests only.",
+  "features": [
+   "lantern",
+   "glow"
+  ]
+ },
+ "paths": [
+  {
+   "id": "tlamp-a",
+   "name": "Test Lamp Path A",
+   "text": "A test path of the test lamp, kept for the engine's tests only.",
+   "leans": {
+    "fights": {
+     "blocks": 1.0
+    },
+    "company": {
+     "party": 0.5
+    }
+   },
+   "features": [
+    "iron-hide"
+   ],
+   "prongs": [
+    {
+     "id": "tlamp-a1",
+     "name": "Test Lamp Prong A1",
+     "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "leans": {
+      "shape": {
+       "read": 1.0
+      },
+      "quests": {
+       "linework": 0.5
+      }
+     },
+     "features": [
+      "cold-core"
+     ],
+     "finishes": [
+      {
+       "id": "tlamp-a1x",
+       "name": "Test Lamp Finish A1X",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "ground": {
+         "night": 0.5
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      },
+      {
+       "id": "tlamp-a1y",
+       "name": "Test Lamp Finish A1Y",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "ground": {
+         "night": 1.0,
+         "line": 0.5
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tlamp-a2",
+     "name": "Test Lamp Prong A2",
+     "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "leans": {
+      "quests": {
+       "linework": 1.0,
+       "escort": 0.5
+      }
+     },
+     "features": [
+      "old-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "tlamp-a2x",
+       "name": "Test Lamp Finish A2X",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "bonds": {
+         "shade": 0.5
+        }
+       },
+       "features": [
+        "iron-hide"
+       ]
+      },
+      {
+       "id": "tlamp-a2y",
+       "name": "Test Lamp Finish A2Y",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "orders": {
+         "guard": 1.0
+        },
+        "fights": {
+         "blocks": 0.5
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tlamp-a3",
+     "name": "Test Lamp Prong A3",
+     "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "leans": {
+      "shape": {
+       "make": 1.0
+      },
+      "orders": {
+       "guard": 0.5
+      }
+     },
+     "features": [
+      "cold-core"
+     ],
+     "finishes": [
+      {
+       "id": "tlamp-a3x",
+       "name": "Test Lamp Finish A3X",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "orders": {
+         "hold": 0.5
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      },
+      {
+       "id": "tlamp-a3y",
+       "name": "Test Lamp Finish A3Y",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        },
+        "shape": {
+         "read": 0.5
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tlamp-b",
+   "name": "Test Lamp Path B",
+   "text": "A test path of the test lamp, kept for the engine's tests only.",
+   "leans": {
+    "company": {
+     "party": 1.0
+    },
+    "orders": {
+     "hold": 0.5
+    }
+   },
+   "features": [
+    "glow"
+   ],
+   "prongs": [
+    {
+     "id": "tlamp-b1",
+     "name": "Test Lamp Prong B1",
+     "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "leans": {
+      "range": {
+       "far": 1.0
+      }
+     },
+     "features": [
+      "lantern"
+     ],
+     "finishes": [
+      {
+       "id": "tlamp-b1x",
+       "name": "Test Lamp Finish B1X",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        },
+        "shape": {
+         "make": 0.5
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      },
+      {
+       "id": "tlamp-b1y",
+       "name": "Test Lamp Finish B1Y",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "ground": {
+         "quiet": 0.5
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tlamp-b2",
+     "name": "Test Lamp Prong B2",
+     "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "leans": {
+      "shape": {
+       "read": 1.0
+      },
+      "quests": {
+       "linework": 0.5
+      }
+     },
+     "features": [
+      "iron-hide"
+     ],
+     "finishes": [
+      {
+       "id": "tlamp-b2x",
+       "name": "Test Lamp Finish B2X",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "ground": {
+         "night": 0.5
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      },
+      {
+       "id": "tlamp-b2y",
+       "name": "Test Lamp Finish B2Y",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "ground": {
+         "night": 1.0,
+         "line": 0.5
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tlamp-b3",
+     "name": "Test Lamp Prong B3",
+     "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "leans": {
+      "quests": {
+       "linework": 1.0,
+       "escort": 0.5
+      }
+     },
+     "features": [
+      "lantern"
+     ],
+     "finishes": [
+      {
+       "id": "tlamp-b3x",
+       "name": "Test Lamp Finish B3X",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "bonds": {
+         "shade": 0.5
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      },
+      {
+       "id": "tlamp-b3y",
+       "name": "Test Lamp Finish B3Y",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "orders": {
+         "guard": 1.0
+        },
+        "fights": {
+         "blocks": 0.5
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tlamp-c",
+   "name": "Test Lamp Path C",
+   "text": "A test path of the test lamp, kept for the engine's tests only.",
+   "leans": {
+    "ground": {
+     "line": 1.0
+    },
+    "bonds": {
+     "shade": 0.5
+    }
+   },
+   "features": [
+    "old-eyes"
+   ],
+   "prongs": [
+    {
+     "id": "tlamp-c1",
+     "name": "Test Lamp Prong C1",
+     "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "leans": {
+      "fights": {
+       "blocks": 1.0
+      },
+      "company": {
+       "party": 0.5
+      }
+     },
+     "features": [
+      "ring"
+     ],
+     "finishes": [
+      {
+       "id": "tlamp-c1x",
+       "name": "Test Lamp Finish C1X",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        },
+        "shape": {
+         "read": 0.5
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      },
+      {
+       "id": "tlamp-c1y",
+       "name": "Test Lamp Finish C1Y",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "shape": {
+         "make": 1.0
+        },
+        "orders": {
+         "guard": 0.5
+        }
+       },
+       "features": [
+        "iron-hide"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tlamp-c2",
+     "name": "Test Lamp Prong C2",
+     "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "leans": {
+      "range": {
+       "far": 1.0
+      }
+     },
+     "features": [
+      "glow"
+     ],
+     "finishes": [
+      {
+       "id": "tlamp-c2x",
+       "name": "Test Lamp Finish C2X",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        },
+        "shape": {
+         "make": 0.5
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      },
+      {
+       "id": "tlamp-c2y",
+       "name": "Test Lamp Finish C2Y",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "ground": {
+         "quiet": 0.5
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tlamp-c3",
+     "name": "Test Lamp Prong C3",
+     "text": "A test prong of the test lamp, kept for the engine's tests only.",
+     "leans": {
+      "shape": {
+       "read": 1.0
+      },
+      "quests": {
+       "linework": 0.5
+      }
+     },
+     "features": [
+      "ring"
+     ],
+     "finishes": [
+      {
+       "id": "tlamp-c3x",
+       "name": "Test Lamp Finish C3X",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "ground": {
+         "night": 0.5
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      },
+      {
+       "id": "tlamp-c3y",
+       "name": "Test Lamp Finish C3Y",
+       "text": "A test finish of the test lamp, kept for the engine's tests only.",
+       "leans": {
+        "ground": {
+         "night": 1.0,
+         "line": 0.5
+        }
+       },
+       "features": [
+        "iron-hide"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -3,100 +3,86 @@
   "title": "reading",
   "type": "object",
   "required": [
-    "weights",
-    "firstFormWeights",
-    "emphasis",
-    "diversity",
-    "crossing",
-    "heritage",
-    "leans",
-    "home"
+    "rite",
+    "refine",
+    "words"
   ],
+  "additionalProperties": false,
   "properties": {
-    "weights": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "number"
-      }
+    "$comment": {
+      "type": "string"
     },
-    "firstFormWeights": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "number"
-      }
-    },
-    "leans": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "additionalProperties": {
-          "type": "object",
-          "properties": {
-            "expression": {
-              "type": "object",
-              "propertyNames": {
-                "enum": [
-                  "beast",
-                  "kith",
-                  "engine",
-                  "relic",
-                  "daemon",
-                  "aspect"
-                ]
-              },
-              "additionalProperties": {
-                "type": "number"
-              }
-            },
-            "features": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "number"
-              }
-            }
-          },
-          "required": [
-            "expression",
-            "features"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "home": {
+    "rite": {
       "type": "object",
       "required": [
-        "bonus",
-        "floor",
-        "away",
-        "most",
-        "open"
+        "weights",
+        "sameClass"
       ],
+      "additionalProperties": false,
       "properties": {
-        "bonus": {
-          "type": "number",
-          "minimum": 0
+        "weights": {
+          "type": "object",
+          "required": [
+            "seed",
+            "blood",
+            "shape"
+          ],
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0
+          }
         },
-        "floor": {
-          "type": "number",
-          "minimum": 0
-        },
-        "away": {
+        "sameClass": {
           "type": "number",
           "minimum": 0,
           "maximum": 1
-        },
-        "most": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 3
-        },
-        "open": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
+      }
+    },
+    "refine": {
+      "type": "object",
+      "required": [
+        "weights",
+        "reference",
+        "patternFires"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "weights": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "reference": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "patternFires": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "words": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ]
       }
     }
   }

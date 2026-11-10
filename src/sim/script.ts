@@ -28,6 +28,8 @@ export interface Phase {
   night?: number;
   /** Share of runs by quest type (linework, salvage, hunt, escort, writ). */
   questTypes?: Record<string, number>;
+  /** How the partner meets a blow, per fight: parries, blocks, hurts, dodges. */
+  meets?: Partial<Record<'parries' | 'blocks' | 'hurts' | 'dodges', number>>;
   /** The Pattern's fires per day (only once built). */
   patternFiresPerDay?: number;
   /** Uses of techniques in the genius's field by anyone, per day ("make.ward"). */
@@ -69,7 +71,7 @@ export interface Life {
   phases: Phase[];
   events: LifeEvent[];
   /** What the player picks at a Reading, by instar. Absent: settle on the best fit. */
-  picks?: Record<string, { expression?: string; form?: string }>;
+  picks?: Record<string, { expression?: string; form?: string; /** At the rite: the base to settle as. */ base?: string; /** At the first refinement: take the turning if one is offered. */ turn?: boolean }>;
   focus?: string;
   grafts?: 'accept' | 'decline';
   /** Feature each companion's genius gives in a Kin-form, for companions not in data/roster.json. */

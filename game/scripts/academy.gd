@@ -344,7 +344,9 @@ func go(place_id: String, quiet := false, from := "") -> void:
 			world.lock_on = true
 			world.show_wolf = true
 		if genius and genius.is_born():
-			genius.ran(String(zone.get("ground", "wild")), zone.get("night", false))
+			genius.ran(String(zone.get("ground", "wild")), zone.get("night", false), fight.allies.filter(func(al): return not al.get("passenger", false)).size())
+			if in_lesson() and _lesson.get("quest", false):
+				genius.took_work(String(_lesson.get("kind", "")))
 	world.reset_feedback()
 	world.cam_yaw = atan2(spawn.x, spawn.y) if spawn.length() > 0.1 else 0.0
 	world.snap_camera_behind(fight)
@@ -2060,9 +2062,11 @@ func _gate_done() -> void:
 	save()
 	settled_sheet()
 
-## The Reading laid out: three cards with the lines of the Tally that chose each, a choice,
-## or "let it settle".
-func show_reading(reading: Dictionary, then: Callable, heading := "The Reading: a Second Form", subheading := "") -> void:
+## The Reading laid out (docs/genius-tree.md). At the rite: the three bases the bowl offers.
+## At a refinement: the forms its own may become, best fit first, each with the play that
+## spoke for it; and, where the play has turned since it settled, the turning beside them.
+## A choice, or "let it settle". then(i): the candidate's number, -1 to settle, Genius.TURN.
+func show_reading(reading: Dictionary, then: Callable, heading := "", subheading := "") -> void:
 	hide_reading()
 	var col: Color = World.SHAPE_COLORS.get(hero["shape"], Color.WHITE)
 	var root := Control.new()
@@ -2078,86 +2082,54 @@ func show_reading(reading: Dictionary, then: Callable, heading := "The Reading: 
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 10)
 	centre.add_child(v)
+	var n := int(reading.get("instar", 2))
+	var level := int(reading.get("level", 1))
+	var rite := level <= 1
+	var kind := genius.kind() if genius and genius.is_born() else ""
 	var title := Label.new()
 	Style.label(title, 30, Style.FG, "title")
-	title.text = heading
+	title.text = heading if heading != "" else String(["", "The bowl offers three", "The first refinement: its path", "The second refinement: its prong", "The last refinement: its finish"][clampi(level, 1, 4)])
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(title)
 	var sub := Label.new()
 	Style.label(sub, 16, Style.DIM, "italic")
-	var leads: Array = reading.get("lineLeads", []).slice(0, 3).map(func(l): return GeniusPage.LINE_WORDS.get(l["line"], String(l["line"])).to_lower())
-	sub.text = subheading if subheading != "" else "Read from %s. Every one carries the Seed-mark and heritage from the First Form." % (", ".join(leads) if not leads.is_empty() else "the term")
+	sub.text = subheading if subheading != "" else ("Read from your Seed, your blood and your Shape." if rite else "Read from the Tally since its last Reading. It stays %s; what your play decides is which." % _a(kind))
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sub)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 18)
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	v.add_child(row)
+	var look: Dictionary = genius.look if genius and not genius.look.is_empty() else Rite.born_look(hero)
 	var cands: Array = reading["candidates"]
 	for i in cands.size():
 		var c: Dictionary = cands[i]
-		var col_v := VBoxContainer.new()
-		col_v.add_theme_constant_override("separation", 8)
-		var info := c.duplicate()
-		info["instar"] = 2 if int(reading.get("instar", 2)) >= 2 else 1
-		info["name"] = Genius.form_name_at(String(c["form"]), int(info["instar"]))
-		# Each is shown as this hero's genius would wear it: its own coat, its own markings.
-		info["look"] = genius.look if genius and not genius.look.is_empty() else Rite.born_look(hero)
-		var card := GeniusCard.make(info, col, "CANDIDATE %d" % (i + 1), true)
-		col_v.add_child(card)
-		var why := RichTextLabel.new()
-		why.bbcode_enabled = true
-		why.fit_content = true
-		why.scroll_active = false
-		why.custom_minimum_size = Vector2(300, 0)
-		Style.rich(why, 13, Style.DIM, "italic")
-		var reasons: Array = []
-		for r in c.get("reasons", []):
-			reasons.append("%s: %s" % [GeniusPage.LINE_WORDS.get(r["line"], String(r["line"])).to_lower(), String(r["key"]).replace(".", " · ").replace("family:", "").replace("tag:", "")])
+		var why := ""
+		var reasons: Array = c.get("reasons", [])
+		if rite:
+			why = "Called by %s." % GeniusReading.reason_words(reasons) if not reasons.is_empty() else "The bowl's own chance."
+		else:
+			why = "Because of %s." % _reason_shares(reasons) if not reasons.is_empty() else "Nothing in the Tally speaks for it yet."
+			why += "  It comes of %s." % GeniusReading.lean_words(Data.form(String(c["form"])).get("leans", {}))
 		var her: Array = c.get("heritage", []).map(func(f): return Rite.feature_label(String(f)))
-		why.text = ("Because of " + "; ".join(reasons) + "." if not reasons.is_empty() else "") + (("  Carries %s from the First Form." % ", ".join(her)) if not her.is_empty() else "")
-		col_v.add_child(why)
-		var b := Button.new()
-		b.text = "This one"
-		Style.button(b, i == 0, 18)
-		b.pressed.connect(func():
-			sfx.play("ui-take", 1.0, -6.0)
+		if not her.is_empty():
+			why += "  Keeps %s." % ", ".join(her)
+		var b := _reading_card(row, c, n, look, col, ("OFFERED %d" % (i + 1)) if rite else ("BEST FIT" if i == 0 else "ITS OWN"), why, "This one", i == 0, func():
 			hide_reading()
 			then.call(i))
-		col_v.add_child(b)
-		row.add_child(col_v)
 		if i == 0:
 			b.call_deferred("grab_focus")
-	# Its own kind, grown: beside what the Tally read, it may always stay what it is.
-	var own_kind: Dictionary = genius.kept_kind(int(reading.get("instar", 2))) if genius and genius.is_born() else {}
-	if not own_kind.is_empty():
-		var kn := int(reading.get("instar", 2))
-		var keep_v := VBoxContainer.new()
-		keep_v.add_theme_constant_override("separation", 8)
-		var kinfo := own_kind.duplicate()
-		kinfo["instar"] = kn
-		kinfo["name"] = Genius.form_name_at(String(own_kind["form"]), kn)
-		kinfo["look"] = genius.look
-		keep_v.add_child(GeniusCard.make(kinfo, col, "ITS OWN KIND", true))
-		var kwhy := RichTextLabel.new()
-		kwhy.bbcode_enabled = true
-		kwhy.fit_content = true
-		kwhy.scroll_active = false
-		kwhy.custom_minimum_size = Vector2(300, 0)
-		Style.rich(kwhy, 13, Style.DIM, "italic")
-		var kher: Array = own_kind.get("heritage", []).map(func(f): return Rite.feature_label(String(f)))
-		kwhy.text = "It stays what it is and grows: %s, %s.%s" % [String(kinfo["name"]).to_lower(), String(Genius.age_at(kn).get("word", "grown")), ("  Keeps %s." % ", ".join(kher)) if not kher.is_empty() else ""]
-		keep_v.add_child(kwhy)
-		var kb := Button.new()
-		kb.text = "Keep its kind"
-		Style.button(kb, false, 18)
-		kb.pressed.connect(func():
-			sfx.play("ui-take", 1.0, -6.0)
+	# The turning: the play since it settled is another base's more than its own.
+	var turning: Dictionary = reading.get("turning", {})
+	if not turning.is_empty() and not (turning["candidates"] as Array).is_empty():
+		var tc: Dictionary = turning["candidates"][0]
+		var second := Data.base(String(turning["second"]))
+		var gift: Array = second["hybrid"]["gift"].map(func(f): return Rite.feature_label(String(f)))
+		var twhy := "Since it settled you have fought like %s: %s. It may turn, and be %s: its own body with %s, in %s's coat." % [
+			_a(String(second["name"])), GeniusReading.reason_words(turning.get("reasons", [])), _a(String(turning["name"])), " and ".join(gift), _a(String(second["name"]))]
+		_reading_card(row, tc, n, look, col, "THE TURNING  ·  %s" % String(turning["name"]).to_upper(), twhy, "Let it turn", false, func():
 			hide_reading()
-			then.call(Genius.KEEP))
-		keep_v.add_child(kb)
-		row.add_child(keep_v)
-		row.move_child(keep_v, 0)
+			then.call(Genius.TURN))
 	var settle := Button.new()
 	settle.text = "Let it settle on the best fit"
 	Style.button(settle, false, 17)
@@ -2172,6 +2144,45 @@ func show_reading(reading: Dictionary, then: Callable, heading := "The Reading: 
 	if auto:
 		var hold := 14.0 if OS.get_cmdline_user_args().has("--slowchoice") else 1.5
 		get_tree().create_timer(hold).timeout.connect(func(): if _reading_box: hide_reading(); then.call(-1))
+
+## One card of the Reading: the form as this hero's genius would wear it (its own coat, its own
+## markings), why it is offered, and a button.
+func _reading_card(row: Control, c: Dictionary, n: int, look: Dictionary, col: Color, title: String, why_text: String, button: String, first: bool, pressed: Callable) -> Button:
+	var col_v := VBoxContainer.new()
+	col_v.add_theme_constant_override("separation", 8)
+	var info := c.duplicate()
+	info["instar"] = maxi(1, n)
+	info["name"] = Genius.form_name_at(String(c["form"]), maxi(1, n))
+	info["look"] = look
+	col_v.add_child(GeniusCard.make(info, col, title, true))
+	var why := RichTextLabel.new()
+	why.bbcode_enabled = true
+	why.fit_content = true
+	why.scroll_active = false
+	why.custom_minimum_size = Vector2(300, 0)
+	Style.rich(why, 13, Style.DIM, "italic")
+	why.text = why_text
+	col_v.add_child(why)
+	var b := Button.new()
+	b.text = button
+	Style.button(b, first, 18)
+	b.pressed.connect(func():
+		sfx.play("ui-take", 1.0, -6.0)
+		pressed.call())
+	col_v.add_child(b)
+	row.add_child(col_v)
+	return b
+
+## The lines that spoke for a candidate, with how much of the play each was.
+static func _reason_shares(reasons: Array) -> String:
+	var parts: Array = []
+	for r in reasons:
+		var w := GeniusReading.words(String(r["line"]), String(r["key"]))
+		parts.append("%s (%d%%)" % [w, roundi(100.0 * float(r["share"]))] if String(r["line"]) not in ["pattern", "bonds", "home", "seed", "blood", "shape"] else w)
+	return ", ".join(parts)
+
+static func _a(noun: String) -> String:
+	return ("an " if noun.substr(0, 1).to_lower() in ["a", "e", "i", "o", "u"] else "a ") + noun
 
 func hide_reading() -> void:
 	if _reading_box:
@@ -2286,6 +2297,13 @@ func classmate_genius(c: Dictionary) -> Dictionary:
 			"seedMark": ff["seedMark"], "look": ff["look"], "home": like["city"], "name": ff["name"] }
 	var info: Dictionary = (_cohort_genii[cid] as Dictionary).duplicate()
 	info["instar"] = clampi(genius.instar if genius and genius.is_born() else 1, 1, 2)
+	# after the Gate each has taken a path of its own tree: which, by who they are
+	var paths := Data.children_of(String(info["form"]))
+	if int(info["instar"]) >= 2 and not paths.is_empty():
+		var path: Dictionary = paths[absi((cid + String(c.get("name", ""))).hash()) % paths.size()]
+		info["form"] = path["id"]
+		info["name"] = path["name"]
+		info["features"] = [info["seedMark"]] + (path["features"] as Array).filter(func(f): return f != info["seedMark"])
 	info["ready"] = genius.readiness() if genius and genius.is_born() else 0.0
 	return info
 
