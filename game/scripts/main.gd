@@ -903,6 +903,33 @@ func enter_academy() -> void:
 			await _shot("rite-offer")
 			get_tree().quit()
 		return
+	if _args.has("becoming") and academy.genius and academy.genius.is_born():
+		# --becoming (with --academy --fresh --gate --shots=DIR): the change of form at the Gate,
+		# taken at once (the first offer), and shot as it goes: the old body into light, the new
+		# out of it. --becoming=<base> for a genius of that base.
+		var bg: Genius = academy.genius
+		var want := str(_args["becoming"])
+		if not Data.base(want).is_empty():
+			bg = Genius.at_form(String(Data.base(want)["settled"]["id"]))
+			bg.look = academy.genius.look
+			academy.genius = bg
+			bg.save_to(academy.hero)
+			world.build_hero(academy.hero)
+		bg.milestone("gate")
+		bg.day = maxi(bg.day, 7)
+		academy.auto = false
+		await get_tree().create_timer(4.0).timeout      # the place's own title card has gone by then
+		var gate := GateScene.new(academy, academy.hero)
+		world.cine = true
+		gate.reading = bg.read(2)
+		gate._take(0)
+		var n := 0
+		for wait in [0.7, 0.7, 0.5, 0.25, 0.5, 1.2, 1.5]:
+			await get_tree().create_timer(wait).timeout
+			n += 1
+			await _shot("becoming-%d" % n)
+		get_tree().quit()
+		return
 	if _args.has("reading") and academy.genius and academy.genius.is_born():
 		# --reading (with --academy --gate): open the Gate's Reading at once, to look at it.
 		var rg: Genius = academy.genius
