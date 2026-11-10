@@ -7,7 +7,7 @@ import { mkdtempSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { data, loadBases, useBases, formOf, childrenOf, hybridForms, baseOf, type Base, type Form } from '../src/data';
-import { flatten, compose, signature, alike, bend } from '../src/data/tree';
+import { flatten, compose, signature, alike, bend, rename } from '../src/data/tree';
 import { read, take, fit, playLines, emptyTally, PLAY_LINES, type GeniusForm, type Tally } from '../src/rules/reading';
 import { validateData, TREE_LEANS } from '../src/data/validate';
 
@@ -415,7 +415,7 @@ describe('the rules, on the three test bases', () => {
     it('two paths are never earned by the same play: a path that would be bends less far', () => {
       // a second base whose nature outweighs every path of the first
       const heavy: Base = { ...baseOf('tedge')!, id: 'theavy', nature: { range: { close: 1 }, fights: { parries: 1 } } };
-      const light: Base = { ...baseOf('trun')!, paths: baseOf('trun')!.paths.map((p, i) => ({ ...p, leans: [{ orders: { hunt: 0.4 }, ground: { wild: 0.3 } }, { orders: { guard: 0.4 }, ground: { ruin: 0.3 } }, { bonds: { named: 0.4 }, ground: { night: 0.3 } }][i] })) };
+      const light: Base = { ...baseOf('trun')!, paths: baseOf('trun')!.paths.map((p, i) => ({ ...p, leans: ([{ orders: { hunt: 0.4 }, ground: { wild: 0.3 } }, { orders: { guard: 0.4 }, ground: { ruin: 0.3 } }, { bonds: { named: 0.4 }, ground: { night: 0.3 } }] as Record<string, Record<string, number>>[])[i] })) };
       const paths = compose(light, heavy, data.hybrids).filter((f) => f.level === 2);
       const sigs = paths.map((f) => signature(f.leans).sig.join('|'));
       expect(sigs[0]).toBe('fights.parries|range.close');      // the first is bent all the way the rule says
@@ -430,6 +430,11 @@ describe('the rules, on the three test bases', () => {
       expect(forms.find((f) => f.id === 'trun+tedge:tedge-b3')!.name).toBe('Borrowed Edge');
       // what is not written by hand is still the rule's
       expect(forms.find((f) => f.id === 'trun+tedge:trun-b')!.name).toBe('Edged Test Runner Path B');
+    });
+
+    it('a name that begins with The keeps it in front', () => {
+      expect(rename('{adj} {name}', 'Winged', 'Mantler')).toBe('Winged Mantler');
+      expect(rename('{adj} {name}', 'Winged', 'The Last Word')).toBe('The Winged Last Word');
     });
 
     it('signature: the two heaviest leans; of equal ones the first written', () => {

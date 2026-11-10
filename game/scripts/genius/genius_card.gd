@@ -101,7 +101,7 @@ func _build(info: Dictionary, color: Color, title: String) -> void:
 	Style.rich(txt, 15, Style.FG, "body")
 	var lines: Array = []
 	# a small card names its first parts; the page names them all
-	var named: Array = feats if W >= W_FULL else feats.slice(0, 5)
+	var named: Array = feats if feats.size() <= 5 else feats.slice(0, 4)
 	for f in named:
 		var slot := GeniusBody._slot_of(f)
 		var lbl := Rite.feature_label(f)

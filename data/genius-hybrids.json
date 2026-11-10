@@ -10,5 +10,156 @@
   "of": "{of}, turned toward the {second}'s way",
   "sign": "{sign} It wears {gift}, the {second}'s."
  },
- "pairs": {}
+ "pairs": {
+  "wolf+blade": {
+   "name": "Edged Wolf",
+   "nodes": {
+    "wolf-counting-wolf": {
+     "of": "one who counts everyone at the door, and keeps an edge ready for the gap"
+    },
+    "wolf-third-day-wolf": {
+     "of": "one who cannot let a thing go, and has learned to end it close"
+    },
+    "wolf-night-watch": {
+     "of": "one who cannot sleep while the others do, and keeps steel by the bed"
+    },
+    "blade-wooden-sword": {
+     "name": "Sparring Wolf",
+     "sign": "Its fangs are blunt as practice steel, and it has never once closed its jaw on a friend."
+    },
+    "blade-masters-stick": {
+     "name": "Old Sparring-master",
+     "sign": "Grey in the muzzle, with a tap of the paw for every mistake you make."
+    },
+    "blade-bare-steel": {
+     "name": "Bare-fang",
+     "sign": "It has stopped playing. Its teeth show the whole way back, clean as a drawn blade."
+    },
+    "blade-pack-cutter": {
+     "name": "Cutting Wolf",
+     "sign": "A ridge of fur like a blade's back runs down its spine, and it looks at a herd the way a knife looks at a seam."
+    },
+    "blade-name-taker": {
+     "name": "Tally-fang",
+     "sign": "Notches along one fang, one for each name, and it sounds them over under its breath."
+    },
+    "blade-skinning-knife": {
+     "name": "Lean Knife-wolf",
+     "sign": "Nothing spare on it anywhere: ribs, edge, and the one worn tooth it favours."
+    },
+    "blade-grave-blade": {
+     "name": "Grave-wolf",
+     "sign": "Earth on its paws that is not from here, and a blade-shine along its jaw when the lamp is low."
+    },
+    "blade-heirloom": {
+     "name": "Inherited Wolf",
+     "sign": "It wears an old collar you did not give it, with a name on it you cannot quite read."
+    },
+    "blade-night-edge": {
+     "name": "Night-fang",
+     "sign": "Only the edge of its teeth shows in the dark: a thin bright line, coming closer."
+    }
+   }
+  },
+  "shield+hawk": {
+   "name": "Winged Shield",
+   "nodes": {
+    "shield-wall": {
+     "of": "one who, having said no, has finished speaking, and now says it from above"
+    },
+    "shield-gate": {
+     "of": "one who belongs to a place, and watches every road into it"
+    },
+    "shield-shelter": {
+     "of": "one who cannot watch it land on someone else, and gets there first"
+    },
+    "hawk-wind-hover": {
+     "name": "Hovering Shield",
+     "sign": "It hangs a hand above the ground on two short wings and does not drift, whatever the wind is doing."
+    },
+    "hawk-storm-kite": {
+     "name": "Storm-shield",
+     "sign": "Its rim hums in rough weather, and its wings open wider the harder it blows."
+    },
+    "hawk-line-falcon": {
+     "name": "Outrider Shield",
+     "sign": "It flies a post ahead of you down the line and is waiting, face out, when you arrive."
+    },
+    "hawk-mantler": {
+     "name": "Mantling Shield",
+     "sign": "Its wings come round whatever it is set over, feathers to the ground, like a tent."
+    },
+    "hawk-post-eagle": {
+     "name": "Post-shield",
+     "sign": "It perches on the lamp post by its talons, boss outward, and has worn the iron bright."
+    },
+    "hawk-lord-of-the-broken-tower": {
+     "name": "Shield of the Broken Tower",
+     "sign": "Scorched, grey with old stone dust, and gripping the one wall still standing."
+    },
+    "hawk-flock-leader": {
+     "name": "Flight-shield",
+     "sign": "When it lifts, every shield on the wall rattles on its hook."
+    },
+    "hawk-passengers-hawk": {
+     "name": "Stranger's Shield",
+     "sign": "One wing is always half open, and there is usually someone under it who was not there this morning."
+    },
+    "hawk-cohort-eagle": {
+     "name": "Cohort Shield",
+     "sign": "Small marks all round its rim, one for each of its own, kept bright with the edge of a talon."
+    }
+   }
+  },
+  "fox+lantern": {
+   "name": "Lantern Fox",
+   "nodes": {
+    "fox-gone-away": {
+     "of": "one who is never where the consequences land, but leaves a light on behind"
+    },
+    "fox-cache-fox": {
+     "of": "one who cannot pass a thing left lying, and sees it better than anyone"
+    },
+    "fox-fire-tail": {
+     "of": "one who is a different person in every room, and the same light in all of them"
+    },
+    "lantern-tunnel-lamp": {
+     "name": "Tunnel-fox",
+     "sign": "The light at its tail-tip goes down the dark ahead of it, and it follows a pace behind, looking back for you."
+    },
+    "lantern-deep-light": {
+     "name": "Deep-fox",
+     "sign": "Its glow is steadiest where the roof is lowest. Its eyes do not shine back; they give light."
+    },
+    "lantern-finders-lamp": {
+     "name": "Finder Fox",
+     "sign": "Its light falls yellow on rubbish and white on the one thing worth carrying out."
+    },
+    "lantern-line-lamp": {
+     "name": "Line-fox",
+     "sign": "It trots the rail ahead of the party with its tail held up like a lamp on a pole."
+    },
+    "lantern-post-flame": {
+     "name": "Post-fire Fox",
+     "sign": "Other people's lamps are lit from its tail, and it is no dimmer for it."
+    },
+    "lantern-signal-lamp": {
+     "name": "Signal Fox",
+     "sign": "When its tail goes red, people stop walking before they know why."
+    },
+    "lantern-oath-lamp": {
+     "name": "Oath-fox",
+     "sign": "A small steady flame sits between its ears, where it cannot help but see it."
+    },
+    "lantern-oath-flame": {
+     "name": "Turned Fox",
+     "sign": "One side of its brush is singed short, from the night it turned back."
+    },
+    "lantern-beat-keeper": {
+     "name": "Beat-fox",
+     "sign": "Its light swings as it walks, the same arc at every step, like a lamp carried on a round."
+    }
+   }
+  }
+ }
 }

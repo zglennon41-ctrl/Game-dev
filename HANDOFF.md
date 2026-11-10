@@ -229,18 +229,21 @@ All rules are JSON in `data/`, validated by schema. Sketches, not final.
 { "form": "brace", "terms": ["with-member-behind", "half-health"], "sworn": true,
   "name": "Ridgeback", "uses": 212, "tier": 3 }
 
-// data/forms.json (the lattice)
-{ "id": "harrier", "expression": "beast", "silhouette": "beast-ground-hunter",
-  "features": ["far-eyes", "crest", "ground-claws"], "fit": {
-    "range": { "close": 0.6, "mid": 0.4 }, "families": { "cast.reach": 0.5, "anchor.wall": 0.3 },
-    "orders": { "guard": 0.5 }, "seeds": { "watches-from-above": 0.4 } } }
+// data/genius-bases/<id>.json (a base of the genius tree: docs/genius-tree.md; the lattice,
+// data/forms.json, is gone). One settled form, three paths, three prongs a path, two finishes a prong.
+{ "id": "hawk", "name": "Hawk", "class": "animal", "expression": "beast", "silhouette": "beast-flier",
+  "soul": "...", "nature": { "range": { "far": 1.0 } }, "calls": { "seed": { "watches-from-above": 1.0 } },
+  "hybrid": { "adj": "Winged", "gift": ["wings", "talons"], "text": "..." },
+  "settled": { "id": "hawk-fledgling-hawk", "name": "Fledgling hawk", "sign": "...", "habit": "...", "features": ["wings", "beak"] },
+  "paths": [{ "id": "hawk-stooper", "name": "Stooper", "of": "one who ...", "leans": { "shape": { "cast": 1.0 }, "pattern": { "fires": 0.7 } },
+    "features": ["talons"], "prongs": [{ "...": "three, each with two finishes" }] }] }
 
 // data/features.json
 { "id": "far-eyes", "slot": "eyes", "bonus": { "readRange": 1.2 }, "fixable": true }
 
 // a genius on a character
 { "seed": "watches-from-above", "seedMark": "far-eyes", "instar": 3,
-  "form": "hawk-mask", "expression": "relic", "heritage": ["far-eyes", "set-feet"],
+  "form": "hawk-stooper", "base": "hawk", "expression": "beast", "heritage": ["set-feet"],
   "adaptations": [{ "id": "dark-eyed", "lastFed": "2027-03-01" }],
   "grafts": [{ "id": "horn-brow", "source": "kin:oona" }], "focus": null,
   "secondary": [], "shadows": [{ "pattern": "stoop", "uses": 14 }], "will": 60 }
@@ -441,7 +444,8 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   audit of every aspect against it, and the order to work in are `docs/genius-signature.md`.
   First consequence, built: a genius may always keep its kind at a Reading and grow (a pup
   into a wolf; a hawk into a griffin, the elder of its kind), and its coat goes with it
-  into a new body.
+  into a new body. (The genius tree, below, made this the whole rule: a refinement offers
+  only the forms of its own tree, so there is nothing else to keep and no fourth choice.)
 - **Full variety, logically sound, the diversity of humanity** (owner, 2026-11-10): "Build
   the most complex and full variety version that is logically sound and clever while
   capturing the diversity of humanity." Variety must come from somewhere a player can name:

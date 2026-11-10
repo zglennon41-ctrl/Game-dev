@@ -1988,6 +1988,7 @@ func _pick_party(n: int) -> void:
 			for c in cohort:
 				if c["id"] == id:
 					genius.bonded("party")
+					genius.bonded("classmate")   # a classmate fought beside (the tree's bonds line)
 		save()
 		_pick_party(n))
 
@@ -2679,6 +2680,8 @@ func _finish_quest() -> void:
 		if not progress.has("named"):
 			progress["named"] = {}
 		progress["named"][String(lesson["named"]["id"])] = { "escaped": named_escapes(String(lesson["named"]["id"])), "felled": true }
+		if genius:
+			genius.bonded("named")   # a named beast felled (the tree's bonds line)
 	if genius:
 		genius.bonded("party")
 	var carried := _carry_out_fallen()

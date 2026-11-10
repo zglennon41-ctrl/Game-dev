@@ -106,6 +106,12 @@ static func signature(leans: Dictionary) -> Dictionary:
 static func hybrid_id(first: String, second: String) -> String:
 	return "%s+%s" % [first, second]
 
+## A name made of another's word and a form's name: a Winged Mantler; The Winged Last Word.
+static func rename(pattern: String, adj: String, name: String) -> String:
+	if name.begins_with("The "):
+		return "The " + fill(pattern, { "adj": adj, "name": name.substr(4) })
+	return fill(pattern, { "adj": adj, "name": name })
+
 ## The hybrid's name: a pair written by hand, or the rule's.
 static func hybrid_name(a: Dictionary, b: Dictionary, hy: Dictionary) -> String:
 	var pair: Dictionary = hy["pairs"].get(hybrid_id(a["id"], b["id"]), {})
@@ -171,9 +177,9 @@ static func compose(a: Dictionary, b: Dictionary, hy: Dictionary, labels: Dictio
 		var theirs_fins: Array = best.get("finishes", [])
 		for j in theirs_fins.size():
 			var f: Dictionary = theirs_fins[j]
-			fins.append(_said({ "id": f["id"], "name": fill(rule["carried"], { "adj": a["hybrid"]["adj"], "name": f["name"] }), "text": f["text"], "of": f.get("of", ""), "sign": "",
+			fins.append(_said({ "id": f["id"], "name": rename(rule["carried"], String(a["hybrid"]["adj"]), String(f["name"])), "text": f["text"], "of": f.get("of", ""), "sign": "",
 				"habit": _or(gone_fins[j].get("habit") if j < gone_fins.size() else null, f.get("habit")), "features": f["features"], "leans": f.get("leans", {}) }, pair, rule, words))
-		var carried := _said({ "id": best["id"], "name": fill(rule["carried"], { "adj": a["hybrid"]["adj"], "name": best["name"] }), "text": best["text"], "of": best.get("of", ""), "sign": "",
+		var carried := _said({ "id": best["id"], "name": rename(rule["carried"], String(a["hybrid"]["adj"]), String(best["name"])), "text": best["text"], "of": best.get("of", ""), "sign": "",
 			"habit": _or(gone.get("habit"), best.get("habit")), "features": best["features"], "leans": best.get("leans", {}), "finishes": fins }, pair, rule, words)
 		var prongs: Array = []
 		for i in mine.size():
@@ -191,7 +197,7 @@ static func compose(a: Dictionary, b: Dictionary, hy: Dictionary, labels: Dictio
 			leans = bend(P.get("leans", {}), b["nature"], t)
 		taken.append("|".join(signature(leans)["sig"]))
 		var path: Dictionary = (P as Dictionary).duplicate()
-		path["name"] = fill(rule["path"], { "adj": b["hybrid"]["adj"], "name": P["name"] })
+		path["name"] = rename(rule["path"], String(b["hybrid"]["adj"]), String(P["name"]))
 		path["text"] = "%s %s" % [P["text"], b["hybrid"]["text"]]
 		var ow := words.duplicate()
 		ow["of"] = String(P.get("of", ""))

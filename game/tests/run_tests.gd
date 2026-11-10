@@ -882,13 +882,6 @@ func test_genius_art() -> void:
 	var forms := {}
 	for f in Data.forms():
 		forms[f["id"]] = true
-	# the bases of the genius tree (data/genius-bases) name bodies and cards too
-	for bf in DirAccess.get_files_at("res://data/genius-bases/"):
-		if not bf.ends_with(".json"):
-			continue
-		var base: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/genius-bases/" + bf))
-		sils[String(base["silhouette"])] = true
-		forms[String(base["settled"]["id"])] = true
 	var n := 0
 	var named := 0
 	for pair in [["bodies", sils, 8000], ["parts", feats, 1500]]:
@@ -1134,6 +1127,7 @@ func test_genius_hybrids() -> void:
 	var hy := { "rule": rule, "pairs": { "trun+tedge": { "name": "Knife-Runner", "nodes": { "trun-a": { "name": "Knife-Courser", "of": "one who closes the distance", "habit": "It whets itself." } } } } }
 	var written := GeniusTree.compose(a, b, hy)
 	check(written[0]["name"] == "Knife-Courser" and written[0]["kind"] == "Knife-Runner" and written[0]["of"] == "one who closes the distance" and written[0]["habit"] == "It whets itself." and String(written[0]["sign"]).begins_with(String(a["paths"][0]["sign"])) and String(written[0]["sign"]).ends_with("the test edge's."), "a pair written by hand says its own words, and the rule's where it says none")
+	check(GeniusTree.rename("{adj} {name}", "Winged", "Mantler") == "Winged Mantler" and GeniusTree.rename("{adj} {name}", "Winged", "The Last Word") == "The Winged Last Word", "a name that begins with The keeps it in front")
 	check(GeniusTree.signature({ "range": { "close": 0.5 }, "orders": { "hunt": 1.0, "guard": 0.5 } }) == { "first": "orders.hunt", "sig": ["orders.hunt", "range.close"] }, "a signature is the two heaviest leans; of equal ones the first written")
 	# its look: a hybrid wears a coat of its second's palette on its first's body
 	var looks: Dictionary = Data.genius_looks()

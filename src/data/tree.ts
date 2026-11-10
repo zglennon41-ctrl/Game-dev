@@ -126,6 +126,11 @@ export function signature(leans: Leans): { first: string; sig: string[] } {
 
 export const hybridId = (first: string, second: string) => `${first}+${second}`;
 
+/** A name made of another's word and a form's name: a Winged Mantler; The Winged Last Word. */
+export function rename(pattern: string, adj: string, name: string): string {
+  return name.startsWith('The ') ? `The ${fill(pattern, { adj, name: name.slice(4) })}` : fill(pattern, { adj, name });
+}
+
 /** The hybrid's name: a pair written by hand, or the rule's. */
 export function hybridName(a: Base, b: Base, hy: Hybrids): string {
   return hy.pairs[hybridId(a.id, b.id)]?.name ?? fill(hy.rule.kind, { adj: b.hybrid.adj, name: a.name });
@@ -166,10 +171,10 @@ export function compose(a: Base, b: Base, hy: Hybrids, labels: Record<string, st
     mine.forEach((q, i) => { const s = alike(q.leans ?? {}, b.nature); if (s <= dropS) { dropS = s; drop = i; } });
     const gone = mine[drop];
     const carried: TreeNode = said({
-      id: best.id, name: fill(rule.carried, { adj: a.hybrid.adj, name: best.name }), text: best.text, of: best.of, sign: '', habit: gone?.habit || best.habit,
+      id: best.id, name: rename(rule.carried, a.hybrid.adj, best.name), text: best.text, of: best.of, sign: '', habit: gone?.habit || best.habit,
       features: best.features, leans: best.leans,
       finishes: (best.finishes ?? []).map((f, j) => said({
-        id: f.id, name: fill(rule.carried, { adj: a.hybrid.adj, name: f.name }), text: f.text, of: f.of, sign: '', habit: gone?.finishes?.[j]?.habit || f.habit, features: f.features, leans: f.leans,
+        id: f.id, name: rename(rule.carried, a.hybrid.adj, f.name), text: f.text, of: f.of, sign: '', habit: gone?.finishes?.[j]?.habit || f.habit, features: f.features, leans: f.leans,
       })),
     });
     // every path of a hybrid is earned by its own play: bend less far while two would share a signature
@@ -180,7 +185,7 @@ export function compose(a: Base, b: Base, hy: Hybrids, labels: Record<string, st
     }
     taken.push(signature(leans).sig.join('|'));
     return said({
-      ...P, name: fill(rule.path, { adj: b.hybrid.adj, name: P.name }), text: `${P.text} ${b.hybrid.text}`, of: P.of ? fill(rule.of, { ...words, of: P.of }) : '', leans,
+      ...P, name: rename(rule.path, b.hybrid.adj, P.name), text: `${P.text} ${b.hybrid.text}`, of: P.of ? fill(rule.of, { ...words, of: P.of }) : '', leans,
       prongs: mine.map((q, i) => (i === drop ? carried : { ...said(q), finishes: (q.finishes ?? []).map(said) })),
     });
   });

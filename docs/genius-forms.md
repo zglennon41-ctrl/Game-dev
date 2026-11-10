@@ -30,6 +30,12 @@ so the game's cel bands and ink outline do the drawing.
 
 ## The forms
 
+> **Superseded (2026-11-10).** The lattice of forms (`data/forms.json`) and the kinds of the
+> thirteen homes were replaced by the genius tree: `docs/genius-tree.md`. The bodies, parts and cards described
+> here are all kept in `game/assets/genius` and are what the trees' forms wear; the list of forms
+> below is the old lattice's, kept as the record of what each body was built for.
+
+
 First Forms:
 
 - **Hawk** (`beast-flier`): a raptor on the wing. Deep barred breast, hooded brow, fanned
@@ -170,6 +176,11 @@ the feature's id.
 
 ## The second set: more forms (2026-11-10)
 
+> **Superseded (2026-11-10).** The lattice of forms (`data/forms.json`) and the kinds of the
+> thirteen homes were replaced by the genius tree: `docs/genius-tree.md`. What follows is the record of the
+> bodies built then; the forms that wore them are now forms of the trees.
+
+
 The owner asked for more possible forms. The lattice (`data/forms.json`) went from 35 forms
 to 52, and from 11 First Forms to 22: every Expression now has at least three ways in at the
 rite, the Relic among them (it had none). All of it is a first draft for the owner: names,
@@ -284,6 +295,15 @@ in it, a pulse in the leather); what a genius is born with against what its part
 choose; three coats on offer; the four keepsakes and five colours; the names of the coats.
 
 ## The kinds of the thirteen homes (2026-11-10)
+
+> **Superseded (2026-11-10).** The lattice of forms (`data/forms.json`) and the kinds of the
+> thirteen homes were replaced by the genius tree: `docs/genius-tree.md`. A home no longer has kinds of
+> its own: it raises the chance of some bases at the rite (`data/genius-homes.json`). The
+> bodies and cards built for the home kinds are kept, and several are the bodies of bases
+> and of forms on their trees (`silhouette` in `data/genius-bases/*.json`). The `home` block of
+> `data/reading.json`, `growsInto` and "keeping its kind" as a fourth choice are gone from
+> the rules: a genius always keeps its kind now, because a refinement offers nothing else.
+
 
 The owner asked for the fullest variety that is logically sound, and for it to carry the
 diversity of the people in the game. So where a character grew up now shapes what the field

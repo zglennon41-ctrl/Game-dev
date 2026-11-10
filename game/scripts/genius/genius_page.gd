@@ -76,7 +76,7 @@ func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	outer.add_child(row)
 	var info := g.to_dict()
-	var card := GeniusCard.make(info, color, "")
+	var card := GeniusCard.make(info, color, "", false, 330.0)   # a little shorter, so a card with a long name still fits the sheet
 	card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	row.add_child(card)
 	_card = card
@@ -312,12 +312,11 @@ func _tree_form(col: Control, f: Dictionary, depth: int, here: String, road: Arr
 	r.scroll_active = false
 	r.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	Style.rich(r, [17, 15, 14][depth], Style.DIM, "body")
-	var indent := ["", "    ", "        "][depth] as String
 	var mark := ["", "> ", "- "][depth] as String
-	var pad := indent + ("" if depth == 0 else "  ")
 	var pic := String(f.get("of", ""))
-	r.text = "%s[color=%s]%s%s[/color]%s%s\n%s[i]comes of %s[/i]" % [indent, name_col, mark, "[b]%s[/b]" % f["name"] if depth == 0 else String(f["name"]), tag,
-		("\n%s[color=#d9cfc0]%s[/color]" % [pad, pic]) if pic != "" else "", pad, GeniusReading.lean_words(f.get("leans", {}))]
+	# a prong stands in from its path and a finish from its prong, wrapped lines and all
+	r.text = "%s[color=%s]%s%s[/color]%s%s\n[i]comes of %s[/i]%s" % ["[indent]".repeat(depth), name_col, mark, "[b]%s[/b]" % f["name"] if depth == 0 else String(f["name"]), tag,
+		("\n[color=#d9cfc0]%s[/color]" % pic) if pic != "" else "", GeniusReading.lean_words(f.get("leans", {})), "[/indent]".repeat(depth)]
 	r.tooltip_text = String(f.get("text", ""))
 	col.add_child(r)
 

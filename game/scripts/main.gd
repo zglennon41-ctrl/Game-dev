@@ -181,6 +181,7 @@ func _ready() -> void:
 					pg.pending_reading = { "instar": int(st["level"]), "candidates": [GeniusReading._candidate(st, 0.0, [], String(pg.body.get("seedMark", "")), [], [])], "unlockedBy": "gate" }
 					pg.take(0)
 				pg.history = pg.history.slice(1) if not steps.is_empty() else pg.history
+				pg.name = String(steps[0]["name"]) if not steps.is_empty() else pg.name
 			for i in 22: pg.hit_at(1.5)
 			for i in 9: pg.hit_at(6.0)
 			for i in 14: pg.gave_order("hunt")
@@ -201,9 +202,15 @@ func _ready() -> void:
 		_lineage(str(_args["lineage"]))
 		return
 	if _args.has("gallery"):
-		# The genius tree, assembled: a check of the bodies. --gallery: every base, a row each
-		# (its settled form, then each path with its prongs and their finishes). --gallery=wolf:
-		# one base's tree, a row for each level. --gallery=wolf+hawk: a hybrid's.
+		# The genius tree, assembled: a check of the bodies.
+		#   --gallery=wolf        one base's whole tree: the settled form, its three paths, the
+		#                         nine prongs, and the eighteen finishes in two rows
+		#   --gallery=wolf+hawk   a hybrid's
+		#   --gallery             every base, a row each: its settled form, and down each path
+		#                         the path, its first prong and that prong's first finish
+		#   --gallery=animal      the same for the bases of one class (animal, monster,
+		#                         creature, item, weapon, armor)
+		#   --gallery=everything  every base's whole tree, a row each
 		mode = "gallery"
 		hud.hide_screen()
 		hud.play_ui.visible = false
@@ -214,11 +221,20 @@ func _ready() -> void:
 		var grid: Array = []      # rows of forms
 		if only != "" and only != "true" and not Data.tree_of(only).is_empty():
 			var tree := Data.tree_of(only)
-			for lv in [1, 2, 3, 4]:
+			for lv in [1, 2, 3]:
 				grid.append(tree.filter(func(f): return int(f["level"]) == lv))
+			var fins: Array = tree.filter(func(f): return int(f["level"]) == 4)
+			grid.append(fins.slice(0, 9))
+			grid.append(fins.slice(9))
 		else:
 			for b in Data.bases():
-				grid.append(Data.tree_of(String(b["id"])))
+				if only == "everything":
+					grid.append(Data.tree_of(String(b["id"])))
+				elif only in ["", "true"] or only == String(b["class"]):
+					var row: Array = [Data.form(String(b["settled"]["id"]))]
+					for k in 3:
+						row.append_array(Genius.road_of(String(b["id"]), [k, 0, 0]).slice(1))
+					grid.append(row)
 		var rows := grid.size()
 		var widest := 1
 		for r in grid:
@@ -238,11 +254,14 @@ func _ready() -> void:
 				l.text = String(f["name"]).to_upper()
 				l.font = Style.font("title")
 				l.font_size = 30 if step > 2.0 else 22
-				l.pixel_size = 0.005
-				l.position = b.position + Vector3(0, -0.15, 0.9)
-				l.rotation.x = -0.6
+				l.pixel_size = 0.005 if rows > 8 else 0.008
+				l.outline_size = 8
+				l.modulate = Style.BRASS_HI
+				l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+				l.no_depth_test = true
+				l.position = b.position + Vector3(0, 0.08, 0.95)
 				world.add_child(l)
-		rows = maxi(rows, ceili(widest * step / 6.0))
+		rows = maxi(rows + 1, ceili(widest * step / 3.6))
 		world.cine = true
 		# the camera stands back far enough for every row
 		world.cine_pos = Vector3(0, 2.4 + rows * 1.35, rows * 1.3 + 2.6)
@@ -727,6 +746,8 @@ func enter_academy() -> void:
 			rg.tally = GeniusReading.empty_tally()
 			_play_like(rg, like["nature"], 40)
 		academy.auto = false
+		if _args.has("shots"):
+			await get_tree().create_timer(4.0).timeout   # the place's own title card has gone by then
 		academy.show_reading(rg.read(2), func(_i: int): pass)
 		if _args.has("shots"):
 			await get_tree().create_timer(2.0).timeout

@@ -12,7 +12,7 @@ export const TREE_LEANS: Record<string, string[]> = {
   fights: ['parries', 'blocks', 'hurts', 'dodges'], company: ['alone', 'party'], ground: ['line', 'wild', 'water', 'ruin', 'night', 'quiet'],
   pattern: ['fires', 'sworn'], bonds: ['classmate', 'shade', 'named'], quests: ['linework', 'salvage', 'hunt', 'escort', 'writ', 'deep-run'],
 };
-/** The bases the specification names: a home may lean on one before its file is written. */
+/** The bases the specification names. */
 export const TREE_ROSTER = ['wolf', 'hawk', 'stag', 'tortoise', 'fox', 'imp', 'lurker', 'fiend', 'drake', 'sprite', 'homunculus', 'ember', 'fog', 'lantern', 'astrolabe', 'bell', 'blade', 'gun', 'bow', 'shield', 'gauntlet', 'coat'];
 
 const read = (f: string) => JSON.parse(readFileSync(f, 'utf8'));
@@ -129,12 +129,22 @@ export function validateData(dir = 'data', opts: { basesDir?: string } = {}): Pr
   for (const [home, leans] of Object.entries<Record<string, number>>(D('genius-homes'))) {
     if (home.startsWith('$')) continue;
     if (!homeIds.has(home)) problems.push({ file: 'genius-homes.json', message: `${home} is not a home in bodies.json` });
-    // a base still to be written is not a mistake while the tree is being filled; a name that is no base's of the roster is
-    for (const k of Object.keys(leans)) if (!baseIds.has(k) && !TREE_ROSTER.includes(k)) problems.push({ file: 'genius-homes.json', message: `${home}: ${k} is not a base` });
+    // checking another folder of bases (a test's own), a lean may name one of the game's that is not in it
+    for (const [k, x] of Object.entries(leans)) {
+      if (!baseIds.has(k) && !(opts.basesDir && TREE_ROSTER.includes(k))) problems.push({ file: 'genius-homes.json', message: `${home}: ${k} is not a base` });
+      if (!(x > 1)) problems.push({ file: 'genius-homes.json', message: `${home}: its lean on ${k} is ${x}; a lean raises a base (above 1)` });
+    }
   }
   for (const [pair, written] of Object.entries<{ nodes?: Record<string, unknown> }>(D('genius-hybrids').pairs)) {
+    // checking another folder of bases (a test's own), a pair of the game's bases is not in it
+    if (opts.basesDir && pair.split('+').every((k) => TREE_ROSTER.includes(k) && !baseIds.has(k))) continue;
     for (const k of pair.split('+')) if (!baseIds.has(k)) problems.push({ file: 'genius-hybrids.json', message: `${pair}: ${k} is not a base` });
-    for (const id of Object.keys(written.nodes ?? {})) if (!formIds.has(id) || !pair.split('+').includes(id.split('-')[0])) problems.push({ file: 'genius-hybrids.json', message: `${pair}: ${id} is not a form of either base` });
+    for (const [id, said] of Object.entries<{ name?: string }>((written.nodes ?? {}) as Record<string, { name?: string }>)) {
+      if (!formIds.has(id) || !pair.split('+').includes(id.split('-')[0])) problems.push({ file: 'genius-hybrids.json', message: `${pair}: ${id} is not a form of either base` });
+      if (said.name && formNames.has(said.name)) problems.push({ file: 'genius-hybrids.json', message: `${pair}: the name ${said.name} is already ${formNames.get(said.name)}'s` });
+    }
+    const names = Object.values<{ name?: string }>((written.nodes ?? {}) as Record<string, { name?: string }>).map((x) => x.name).filter(Boolean);
+    if (new Set(names).size < names.length) problems.push({ file: 'genius-hybrids.json', message: `${pair}: two of its forms are given the same name` });
   }
   for (const s of D('seeds')) need('seeds.json', features, s.seedMark, `seed-mark of ${s.id}`);
   for (const a of D('adaptations')) need('adaptations.json', features, a.id, 'adaptation feature');

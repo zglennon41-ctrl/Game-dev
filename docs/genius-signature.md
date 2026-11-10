@@ -81,7 +81,7 @@ State: **built** (in the game and tested), **part** (works, with a named gap), *
 | The mote before the rite | The field has not taken a body yet | built | |
 | The Seed | A sentence about what you want beside you; it leaves one mark for life | built | The Seed-mark sits where each body has a place for it; three marks show as parts, the rest as eyes or light |
 | The First Form | Read from Seed, blood, Shape and home; three offered | built | Forty-eight First Forms, twenty-six of them native to a home; Wolf, Otter and Shadow are reached only through a blood (decision 72) |
-| Its kind, and keeping it | **A genius may always keep its kind**: at every Reading, beside the three forms the Tally reads, it may grow into the next age of what it is, or the elder of its kind (a hawk into a griffin, a kept knife into a living blade) | built | Fourteen kinds name an elder; the rest grow great as themselves. Which is right for each kind is the owner's (below) |
+| Its kind, and keeping it (superseded 2026-11-10: on the genius tree it always keeps its kind, `docs/genius-tree.md`) | **A genius may always keep its kind**: at every Reading, beside the three forms the Tally reads, it may grow into the next age of what it is, or the elder of its kind (a hawk into a griffin, a kept knife into a living blade) | built | Fourteen kinds name an elder; the rest grow great as themselves. Which is right for each kind is the owner's (below) |
 | Its age | Each instar is an age; the young of its kind first | built | Proportions on rigged bodies only; the others need a young body each |
 | Its name | The form's, or its young's, or the great of its kind | built | Names of the young and the great are drafts |
 | Its size | A pup to taller than its partner | built | One ladder for every Expression (open) |
@@ -159,7 +159,7 @@ In order of how much each closes the gap between the design and what a player fe
    written to replace the form with the play ("the hawk is gone, and the player's play is
    standing in its place"). A middle way: keeping its kind is offered only when the Tally
    scores its kind above some line.
-2. **Which kinds have an elder** (`data/forms.json`, `growsInto`): hawk to griffin, crow to
+2. (Superseded 2026-11-10 by the genius tree: every base has a whole tree.) **Which kinds have an elder** (`data/forms.json`, `growsInto`): hawk to griffin, crow to
    storm-crow, otter to weir-otter, tortoise to cairn-back, clockwork wren to brass kite,
    iron hound to clockwork hound, kept knife to living blade, worn glove to talon relic,
    ledger-imp to contract daemon to the Ledger Closed, lantern-sprite to lamplighter,

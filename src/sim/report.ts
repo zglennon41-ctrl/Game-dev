@@ -45,7 +45,7 @@ export function report(r: SimResult, opts: { log?: boolean } = {}): string {
   if (now?.of) p(`  The picture of: ${now.of}`);
   if (now?.sign) p(`  Its sign: ${now.sign}`);
   if (now?.habit) p(`  Its habit: ${now.habit}`);
-  p(`  Wears: ${[g.seedMark, ...g.own, ...g.heritage, ...g.grafts.map((x) => x.feature)].map(label).join('; ')}`);
+  p(`  Wears: ${[...new Set([g.seedMark, ...g.own, ...g.heritage, ...g.grafts.map((x) => x.feature)])].map(label).join('; ')}`);
   p(`  Secondary forms: ${g.secondary.length ? g.secondary.map((s) => `${s.id}${s.vestigial ? ' (vestigial)' : ''} from ${dateLabel(s.day)}`).join('; ') : 'none'}`);
   p(`  Shadows: ${g.shadows.length ? g.shadows.map((s) => `${s.pattern} (${s.uses} witnessed)`).join('; ') : 'none'}`);
   p(`  Adaptations over the life: ${r.adaptationHistory.map((a) => `${a.id} day ${a.gained}${a.lost !== null ? `→${a.lost} ${a.how}` : ' (held)'}`).join('; ') || 'none'}`);

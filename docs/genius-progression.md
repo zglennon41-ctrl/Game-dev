@@ -44,7 +44,10 @@ Four things follow, and all four are in the game now (see "Ages" and "The echo" 
 
 How it is built:
 
-- **Names** are in `data/forms.json` (`ages`): a name for each instar at which the form is
+- **Names** (superseded 2026-11-10 by `docs/genius-tree.md`: every form of a tree has a name of
+  its own, so the young of a base is its settled form's name, a Wolf pup or a Buckler, and
+  only the two ages after the finish are named by rule: Great X, X of the Line). As it was:
+  names were in `data/forms.json` (`ages`): a name for each instar at which the form is
   not yet grown. Eighteen forms have them (wolf pup, ram lamb, otter kit, crow fledgling,
   tortoise hatchling, iron whelp, impling, spark, young stag uncrowned, and so on). The
   Reading's rules still speak of the form; only what the player is shown changes, so the
@@ -157,6 +160,12 @@ Pattern four hundred times and never passes a milestone has a small genius that 
 a furnace, which is what the rules say it is.
 
 ## At a Reading
+
+> **Changed (2026-11-10).** A Reading is now a refinement on the genius tree
+> (`docs/genius-tree.md`): the forms offered are the children of the form it is, with the
+> lines of the Tally that speak for each; at the first refinement a turning may be offered
+> beside them; from the fifth instar nothing new is offered and it grows. What is said below
+> of how a Reading shows (the old body into light, the new out of it, the coat carried) stands.
 
 Today: a flash, a burst, the new body. Proposed, in six beats, about twelve seconds, every
 one skippable:
