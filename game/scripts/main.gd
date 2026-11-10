@@ -611,6 +611,7 @@ func _sheet(what: String) -> void:
 	var shape := (vp.y / ROWS) / (vp.x / COLS)
 	var pitch := deg_to_rad(10.0)
 	var discs: Array = []
+	var lift: Array = bodies.map(func(b): return 0.35 if (b as GeniusBody).hover else 0.0)      # how high each floats
 	# stand them in cells of this width, with or without the ground under each
 	var place := func(cell_w: float, grounded: bool) -> void:
 		var cell_h := cell_w * shape
@@ -620,7 +621,7 @@ func _sheet(what: String) -> void:
 		for i in bodies.size():
 			var b: Node3D = bodies[i]
 			var at := Vector3((i % COLS - (COLS - 1) / 2.0) * cell_w, HIGH - (i / COLS) * cell_h, 0)
-			b.position = at + Vector3(0, (0.35 if (b as GeniusBody).hover else 0.0) * b.scale.y, 0)
+			b.position = at + Vector3(0, float(lift[i]), 0)
 			if grounded:
 				var disc := MeshInstance3D.new()
 				var dm := CylinderMesh.new()
@@ -655,9 +656,11 @@ func _sheet(what: String) -> void:
 	var back := img.get_pixel(1, 1)
 	var wide: Array = []      # of each, from the middle of its cell, and how tall, in hundredths of a cell
 	var tall: Array = []
+	var low: Array = []       # and how far above its ground its underside is
 	for i in bodies.size():
 		wide.append(1.0)
 		tall.append(1.0)
+		low.append(100.0)
 	for y in img.get_height():
 		for x in img.get_width():
 			var n := (y / 100) * COLS + x / 100
@@ -671,10 +674,20 @@ func _sheet(what: String) -> void:
 				continue      # what hangs below its ground is not counted
 			wide[n] = maxf(wide[n], absf(float(x % 100) + 0.5 - 50.0) + 1.0)
 			tall[n] = maxf(tall[n], up + 1.0)
+			low[n] = minf(low[n], up)
 	const FILL := [0.56, 0.68, 0.78, 0.9]
 	for i in bodies.size():
 		var fill: float = FILL[clampi(int(tree[i]["level"]) - 1, 0, 3)]
-		(bodies[i] as Node3D).scale *= fill * minf(46.0 / float(wide[i]), (1.0 - FLOOR - 0.05) * 100.0 / float(tall[i]))
+		var room := (1.0 - FLOOR - 0.05) * 100.0
+		if float(lift[i]) > 0.0:
+			# one that floats is measured by its own height, and floats a tenth of a cell up
+			var own := maxf(1.0, float(tall[i]) - float(low[i]))
+			var k := fill * minf(46.0 / float(wide[i]), (room - 10.0) / own)
+			var px := cell * shape / 100.0      # a hundredth of a cell's height, in metres
+			lift[i] = 10.0 * px - (float(low[i]) * px - float(lift[i])) * k
+			(bodies[i] as Node3D).scale *= k
+		else:
+			(bodies[i] as Node3D).scale *= fill * minf(46.0 / float(wide[i]), room / float(tall[i]))
 	place.call(cell, true)
 	if _args.has("shots"):
 		await get_tree().create_timer(1.2).timeout
