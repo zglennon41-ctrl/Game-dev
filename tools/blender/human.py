@@ -276,11 +276,13 @@ TRUNK_BONES = ("pelvis", "spine_01", "spine_02", "spine_03", "neck_01", "head", 
 class Human:
     """One form (sex, build, a home's ancestry and details), posed and at the game's size."""
 
-    def __init__(self, sex, ancestry, details=None, build=(0.5, 0.5), height=2.4, cup=0.5, proportions=0.6, like=None):
+    def __init__(self, sex, ancestry, details=None, build=(0.5, 0.5), height=2.4, cup=0.5, proportions=0.6, like=None, age=0.5):
         base = self.base = Base.get()
         self.sex = sex
         muscle, weight = build
-        targets = base.macro_targets(1.0 if sex == "m" else 0.0, muscle, weight, ancestry, proportions=proportions, cup=cup, firmness=0.6)
+        # age: 0.5 is a young adult; below it MakeHuman's child and baby forms (the genius kit's
+        # small people; only the average build's targets are kept for those ages)
+        targets = base.macro_targets(1.0 if sex == "m" else 0.0, muscle, weight, ancestry, age=age, proportions=proportions, cup=cup, firmness=0.6)
         targets.update(base.detail_targets(details))
         self.targets = targets
         v = base.shaped(targets)

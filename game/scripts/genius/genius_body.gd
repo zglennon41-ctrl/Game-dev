@@ -87,14 +87,20 @@ func _assemble(instar: int) -> void:
 		_model = load(BODY_DIR % sil).instantiate()
 		add_child(_model)
 		uses_art = true
-		for n in _model.find_children("socket_*", "", true, false):
-			sockets[String(n.name)] = n
+		_art_sockets(_model)
 		anim = _model.find_child("AnimationPlayer", true, false)
+		if anim:
+			anim_names = _clips(cfg["kinds"].get(kind, {}).get("anim", {}))
 		_adopt_art(_model)
 	else:
 		_placeholder_body(cfg["kinds"][kind], spec)
 	var sc: Array = spec.get("scale", [1, 1, 1])
-	_fit_height(float(Data.genius()["size"].get(str(maxi(1, instar)), 0.6)), Vector3(sc[0], sc[1], sc[2]))
+	var proportions := Vector3(sc[0], sc[1], sc[2])
+	if uses_art:
+		# An art body carries its own proportions: the data says only how tall it stands
+		# against its instar's size (an otter stands half as tall as a wolf).
+		proportions = Vector3.ONE * float(spec.get("artSize", 1.0))
+	_fit_height(float(Data.genius()["size"].get(str(maxi(1, instar)), 0.6)), proportions)
 	# Parts, on the sockets for their slots.
 	var feats: Array = info.get("features", [])
 	var slot_count := {}
@@ -102,17 +108,25 @@ func _assemble(instar: int) -> void:
 		var slot := _slot_of(f)
 		if slot == "surface":
 			continue
+		# An art body may carry a feature in its own design (the stag its antlers): no part hangs.
+		if uses_art and (spec.get("carries", []) as Array).has(f):
+			continue
 		var socks: Array = cfg["slotSockets"].get(slot, ["socket_body"])
 		var i: int = slot_count.get(slot, 0)
 		slot_count[slot] = i + 1
 		if ResourceLoader.exists(PART_DIR % f):
-			# A part made for a paired slot (limbs, arms) goes on every socket the body has for it.
-			var targets: Array = socks.filter(func(sn): return sockets.has(sn)) if socks.size() > 1 else [socks[0]]
+			# A part made for a paired slot (limbs, arms) goes on every socket the body has for it;
+			# some features name their own sockets (a beak at the mouth, hands at the wrists).
+			var named: Array = cfg.get("featureSockets", {}).get(f, []).filter(func(sn): return sockets.has(sn))
+			var targets: Array = named if not named.is_empty() else (socks.filter(func(sn): return sockets.has(sn)) if socks.size() > 1 else [socks[0]])
 			if targets.is_empty():
 				targets = [socks[i % socks.size()]]
 			for sn in targets:
 				var art: Node3D = load(PART_DIR % f).instantiate()
 				_socket(sn).add_child(art)
+				# Parts of a pair are made for the left; the right wears the mirror.
+				if is_right(String(sn)):
+					art.scale.x = -1.0
 				_adopt_art(art)
 			parts_from_art.append(f)
 		else:
@@ -144,11 +158,62 @@ func _adopt_art(n: Node) -> void:
 				t.emission_energy_multiplier = 1.8
 				t.albedo_color = color.darkened(0.7)
 				mi.set_surface_override_material(i, t)
-	for side in [["wing_l", -1.0], ["wing_r", 1.0]]:
+	# The character's left is +X: the left wing rises with a positive turn about the way it faces.
+	for side in [["wing_l", 1.0], ["wing_r", -1.0]]:
 		var w: Node = n.find_child(side[0], true, false)
-		if w:
-			w.set_meta("wing", side[1])
-			_wings.append(w)
+		# A wing that rides a bone is a mesh under its attachment: the mesh is what beats.
+		if w is BoneAttachment3D and w.get_child_count() > 0:
+			w = w.get_child(0)
+		if w is Node3D:
+			var w3 := w as Node3D
+			w3.set_meta("wing", side[1])
+			w3.set_meta("wing_rest", w3.transform)
+			# the axis it beats about: the model's forward, seen from the wing's own frame
+			w3.set_meta("wing_axis", (_rest_xf(w3, n).basis.orthonormalized().inverse() * Vector3(0, 0, 1)).normalized())
+			_wings.append(w3)
+
+## An art body's sockets: nodes named socket_<name>, or, on a rigged body, bones of that name
+## (an empty parented to a bone comes through the importer as a bone), each given a node to
+## hang parts from that rides the bone.
+func _art_sockets(model: Node3D) -> void:
+	for n in model.find_children("socket_*", "", true, false):
+		sockets[String(n.name)] = n
+	for sk in model.find_children("*", "Skeleton3D", true, false):
+		var skel := sk as Skeleton3D
+		for i in skel.get_bone_count():
+			var bn := skel.get_bone_name(i)
+			if bn.begins_with("socket_") and not sockets.has(bn):
+				var att := BoneAttachment3D.new()
+				att.name = bn
+				att.bone_name = bn
+				skel.add_child(att)
+				sockets[bn] = att
+
+## The clips this body has, by what they are for (idle, walk, run), from its kind's names.
+func _clips(names: Dictionary) -> Dictionary:
+	var out := {}
+	for k in names:
+		if anim.has_animation(names[k]):
+			out[k] = names[k]
+	return out
+
+## Parts of a pair are made for the left; a right-hand socket wears the mirror.
+static func is_right(socket_name: String) -> bool:
+	return socket_name.ends_with("_r") or socket_name.ends_with("fr") or socket_name.ends_with("br")
+
+## A node's transform up to `root`, in the rest pose (a bone attachment stands at its bone's rest).
+func _rest_xf(n: Node3D, root: Node) -> Transform3D:
+	var xf := Transform3D.IDENTITY
+	var cur: Node = n
+	while cur and cur != root:
+		if cur is BoneAttachment3D and cur.get_parent() is Skeleton3D:
+			var skel := cur.get_parent() as Skeleton3D
+			var bi := skel.find_bone((cur as BoneAttachment3D).bone_name)
+			xf = (skel.get_bone_global_rest(bi) if bi >= 0 else (cur as Node3D).transform) * xf
+		elif cur is Node3D:
+			xf = (cur as Node3D).transform * xf
+		cur = cur.get_parent()
+	return xf
 
 ## Whether it walks (and so follows at the heel) or floats and flies (at the shoulder).
 func walks() -> bool:
@@ -174,7 +239,12 @@ func _process(dt: float) -> void:
 	_t += dt
 	for w in _wings:
 		var side: float = w.get_meta("wing")
-		(w as Node3D).rotation.z = side * (0.35 + 0.45 * sin(_t * 14.0))
+		var beat := side * (0.35 + 0.45 * sin(_t * 14.0))
+		if w.has_meta("wing_rest"):
+			var rest: Transform3D = w.get_meta("wing_rest")
+			(w as Node3D).transform = rest * Transform3D(Basis(w.get_meta("wing_axis") as Vector3, beat), Vector3.ZERO)
+		else:
+			(w as Node3D).rotation.z = beat
 	if _spinners.is_empty():
 		for n in find_children("*", "MeshInstance3D", true, false):
 			if n.has_meta("spin"):
@@ -446,7 +516,7 @@ func _fit_height(height: float, proportions: Vector3) -> void:
 		var mi := m as MeshInstance3D
 		if not _shown(mi):
 			continue
-		var xf := _local_xf(mi)
+		var xf := _mesh_xf(mi)
 		var ab: AABB = xf * mi.get_aabb()
 		top = maxf(top, ab.end.y)
 		bottom = minf(bottom, ab.position.y)
@@ -461,6 +531,21 @@ func _shown(n: Node) -> bool:
 			return false
 		cur = cur.get_parent()
 	return true
+
+## Where a mesh's own points stand in this body. A skinned mesh of an art body stands where
+## its skeleton binds it (its bones may carry a scale the mesh's node does not), not where its
+## node is.
+func _mesh_xf(mi: MeshInstance3D) -> Transform3D:
+	if uses_art and mi.skin and mi.skin.get_bind_count() > 0:
+		var skel := mi.get_node_or_null(mi.skeleton) as Skeleton3D
+		if skel:
+			var b := mi.skin.get_bind_bone(0)
+			if b < 0:
+				b = skel.find_bone(mi.skin.get_bind_name(0))
+			if b >= 0:
+				return _local_xf(skel) * skel.get_bone_global_rest(b) * mi.skin.get_bind_pose(0)
+	# a piece that rides a bone stands at the bone's rest (its attachment has not moved yet)
+	return _rest_xf(mi, self) if uses_art else _local_xf(mi)
 
 func _local_xf(n: Node3D) -> Transform3D:
 	var xf := Transform3D.IDENTITY

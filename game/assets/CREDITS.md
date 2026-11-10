@@ -12,8 +12,11 @@ All placeholder art is CC0 (public domain): free for any use, credit not require
 ## Genius art (made for WILDLINE)
 
 `game/assets/genius/` (bodies, parts and cards) is built by `tools/blender/genius_kit.py`
-in Blender and owned by the project. Placeholder quality: a proof of the pipeline in
-`docs/art-bible.md`, section 8.
+in Blender and owned by the project (`docs/genius-forms.md`). The four-legged bodies are
+made on the CC0 Quaternius wolf above (its skeleton and three of its clips, reshaped and
+dressed); the small people (kith and the small daemons) are made from MakeHuman's CC0 base
+mesh and targets, credited under People below, on the CC0 KayKit rig with three of its
+clips; the rest is modelled from plain geometry.
 
 ## Wild kit (made for WILDLINE)
 

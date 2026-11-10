@@ -4,6 +4,7 @@
   "type": "object",
   "required": ["slotSockets", "kinds", "silhouettes", "surfaces"],
   "properties": {
-    "silhouettes": { "type": "object", "additionalProperties": { "type": "object", "required": ["kind"] } }
+    "silhouettes": { "type": "object", "additionalProperties": { "type": "object", "required": ["kind"] } },
+    "featureSockets": { "type": "object", "additionalProperties": { "type": "array", "items": { "type": "string", "pattern": "^socket_" } } }
   }
 }
