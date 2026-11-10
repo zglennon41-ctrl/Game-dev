@@ -2098,7 +2098,7 @@ func show_reading(reading: Dictionary, then: Callable, heading := "The Reading: 
 		col_v.add_theme_constant_override("separation", 8)
 		var info := c.duplicate()
 		info["instar"] = 2 if int(reading.get("instar", 2)) >= 2 else 1
-		info["name"] = c["name"]
+		info["name"] = Genius.form_name_at(String(c["form"]), int(info["instar"]))
 		# Each is shown as this hero's genius would wear it: its own coat, its own markings.
 		info["look"] = genius.look if genius and not genius.look.is_empty() else Rite.born_look(hero)
 		var card := GeniusCard.make(info, col, "CANDIDATE %d" % (i + 1), true)

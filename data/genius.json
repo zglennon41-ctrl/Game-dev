@@ -102,13 +102,13 @@
     "mid": 7.0
   },
   "size": {
-    "$comment": "How tall a genius stands, by instar, in metres.",
+    "$comment": "How tall a genius stands, by instar, in metres: the young of its kind at the First Form, grown at the Third (a wolf at the shoulder and head), and at Apex taller than its partner.",
     "1": 0.6,
     "2": 0.8,
     "3": 1.0,
-    "4": 1.25,
-    "5": 1.5,
-    "6": 1.9
+    "4": 1.3,
+    "5": 1.7,
+    "6": 2.3
   },
   "progression": {
     "$comment": "How a genius's progress shows between Readings (docs/genius-progression.md). growth: how far it grows toward the next instar's size before the Reading comes (0 none, 1 all the way). molt: its readiness for the next Reading (0 to 1: the share of the minimum days lived, 1 once the milestone is reached too) at which the molt lines begin to show along its body, and their strength when the Reading is due.",
@@ -116,6 +116,107 @@
     "molt": {
       "from": 0.55,
       "strength": 1.0
+    },
+    "ages": {
+      "$comment": "A genius is a living thing with an age: each instar is one. The age shapes the body (data/genius-bodies.json, ages: the young have large heads and short legs, the great are deep in the chest) and may name it (data/forms.json, ages: a Field-wolf at the First Form is a wolf pup). word is how its page says it.",
+      "1": {
+        "id": "young",
+        "word": "young"
+      },
+      "2": {
+        "id": "half-grown",
+        "word": "half-grown"
+      },
+      "3": {
+        "id": "grown",
+        "word": "grown"
+      },
+      "4": {
+        "id": "prime",
+        "word": "in its prime"
+      },
+      "5": {
+        "id": "great",
+        "word": "great"
+      },
+      "6": {
+        "id": "apex",
+        "word": "at its apex"
+      }
+    },
+    "presence": {
+      "$comment": "What the later instars add that can be seen from across a yard. lines: seams of steady light along the body (0 to 1). mantle: blades of light standing behind its head and shoulders, this many. ground: a light under it in its partner's Shape colour, this strong.",
+      "4": {
+        "lines": 0.14
+      },
+      "5": {
+        "lines": 0.24,
+        "mantle": 5,
+        "ground": 0.9
+      },
+      "6": {
+        "lines": 0.36,
+        "mantle": 9,
+        "ground": 1.8
+      }
+    }
+  },
+  "echo": {
+    "$comment": "The echo: what a genius's growth writes onto its partner's body, instar by instar (World.features_of; the features are in data/people-features.json). all: for every genius. byExpression: a piece worn at the throat or over the heart from the Third Form, in the genius's own coat colour, by what the genius is. grow: how large that piece is at each instar. field: how strongly the field shows under the skin, by instar, as a multiple.",
+    "all": {
+      "1": [
+        "cloak-genius"
+      ],
+      "2": [
+        "eyes-genius"
+      ],
+      "3": [
+        "skin-field"
+      ]
+    },
+    "byExpression": {
+      "beast": {
+        "3": [
+          "echo-ruff"
+        ]
+      },
+      "kith": {
+        "3": [
+          "echo-charm"
+        ]
+      },
+      "engine": {
+        "3": [
+          "echo-gorget"
+        ]
+      },
+      "relic": {
+        "3": [
+          "echo-gorget"
+        ]
+      },
+      "daemon": {
+        "3": [
+          "echo-brand"
+        ]
+      },
+      "aspect": {
+        "3": [
+          "echo-motes"
+        ]
+      }
+    },
+    "grow": {
+      "3": 0.85,
+      "4": 1.0,
+      "5": 1.15,
+      "6": 1.3
+    },
+    "field": {
+      "3": 1.0,
+      "4": 1.4,
+      "5": 1.9,
+      "6": 2.6
     }
   }
 }

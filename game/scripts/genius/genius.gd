@@ -101,11 +101,23 @@ func features_by_slot() -> Dictionary:
 		out[slot].append(f)
 	return out
 
+## What it is called now: the form's name, or the name of its young while it is not yet grown
+## (data/forms.json, ages: a Field-wolf at the First Form is a wolf pup).
 func form_name() -> String:
+	return Genius.form_name_at(String(body.get("form", "")), instar)
+
+static func form_name_at(form_id: String, at_instar: int) -> String:
 	for f in Data.forms():
-		if f["id"] == body.get("form", ""):
-			return f["name"]
-	return String(body.get("form", "")).capitalize()
+		if f["id"] == form_id:
+			return String(f.get("ages", {}).get(str(at_instar), f["name"]))
+	return form_id.capitalize()
+
+## Its age: each instar is one (data/genius.json, progression.ages): { id, word }.
+func age() -> Dictionary:
+	return Genius.age_at(instar)
+
+static func age_at(at_instar: int) -> Dictionary:
+	return Data.genius().get("progression", {}).get("ages", {}).get(str(clampi(at_instar, 1, 6)), { "id": "grown", "word": "grown" })
 
 func instar_name() -> String:
 	var r := GeniusResonance.instar_rule(instar)

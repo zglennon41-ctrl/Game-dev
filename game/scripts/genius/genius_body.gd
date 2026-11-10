@@ -75,6 +75,9 @@ var uses_art := false              # the body came from an art file, not a place
 var nearness := 0.0                # how near its next Reading is (Genius.readiness), 0 to 1
 var molt := 0.0                    # the molt lines showing for it, 0 to 1
 var stands := 0.6                  # how tall it stands now, in metres
+var age := "grown"                 # young, half-grown, grown, prime, great, apex (by instar)
+var lines := 0.0                   # the steady light along its body at the later instars, 0 to 1
+var mantle: Node3D = null          # the blades of light behind a great one's head
 var parts_from_art: Array = []     # features whose parts came from art files
 var look: Dictionary = {}          # how this one looks, resolved (GeniusLook.resolve); {} for none
 var keepsake := ""                 # the keepsake it wears, if its body has a place for it
@@ -177,10 +180,28 @@ func _assemble(instar: int) -> void:
 		else:
 			_placeholder_part(f, slot, socks)
 	_wear_keepsake()
+	# Its age shapes it: the young of its kind at the First Form, great at the Fifth.
+	age = String(prog.get("ages", {}).get(str(clampi(instar, 1, 6)), {}).get("id", "grown"))
+	_apply_age(cfg.get("ages", {}).get(kind, {}).get(age, {}))
+	# What the later instars add: steady lines of light, a mantle, the ground lit under it.
+	var pres: Dictionary = prog.get("presence", {}).get(str(clampi(instar, 1, 6)), {})
+	lines = float(pres.get("lines", 0.0))
+	if int(pres.get("mantle", 0)) > 0:
+		_mantle(int(pres["mantle"]))
+	if float(pres.get("ground", 0.0)) > 0.0:
+		var gl := OmniLight3D.new()
+		gl.name = "GroundLight"
+		gl.light_color = color
+		gl.light_energy = float(pres["ground"])
+		gl.omni_range = stands * 2.2
+		gl.omni_attenuation = 1.6
+		gl.position = Vector3(0, stands * 0.25, 0)
+		add_child(gl)
 	# Near the Reading it molts: seams of light where the body will split.
 	var mfrom := float(prog.get("molt", {}).get("from", 0.55))
-	if nearness > mfrom:
-		set_molt((nearness - mfrom) / maxf(0.01, 1.0 - mfrom) * float(prog.get("molt", {}).get("strength", 1.0)))
+	var molting := (nearness - mfrom) / maxf(0.01, 1.0 - mfrom) * float(prog.get("molt", {}).get("strength", 1.0)) if nearness > mfrom else 0.0
+	if maxf(molting, lines) > 0.0:
+		set_molt(maxf(molting, lines))
 	if anim and anim_names.has("idle") and anim.has_animation(anim_names["idle"]):
 		for k in anim_names:
 			if anim.has_animation(anim_names[k]):
@@ -329,6 +350,64 @@ func move_at(speed: float) -> void:
 	if want != "" and anim.has_animation(want) and anim.current_animation != want:
 		anim.play(want, 0.2)
 
+## The proportions of its age, on a rigged body: each bone named is scaled, and the body set
+## down again so its feet stay on the ground when its legs are shorter or longer.
+func _apply_age(bones: Dictionary) -> void:
+	if bones.is_empty() or _model == null:
+		return
+	var sks := _model.find_children("*", "Skeleton3D", true, false)
+	if sks.is_empty():
+		return
+	var sk: Skeleton3D = sks[0]
+	var low := func() -> float:
+		var y := INF
+		for i in sk.get_bone_count():
+			y = minf(y, sk.get_bone_global_pose(i).origin.y)
+		return y
+	var before: float = low.call()
+	for bn in bones:
+		var idx := sk.find_bone(String(bn))
+		if idx >= 0:
+			sk.set_bone_pose_scale(idx, Vector3.ONE * float(bones[bn]))
+	var after: float = low.call()
+	# the skeleton's own height above the model's floor, in the model's units
+	sk.position.y -= (after - before) * sk.scale.y
+	aged = true
+
+var aged := false
+
+## The mantle of a great genius: blades of light standing in a fan behind its head and
+## shoulders, in its partner's Shape colour, breathing slowly. It is what says, from across a
+## yard, that this one has come a long way.
+func _mantle(count: int) -> void:
+	mantle = Node3D.new()
+	mantle.name = "Mantle"
+	add_child(mantle)
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.albedo_color = Color(color.lightened(0.25), 0.85)
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var blade := PrismMesh.new()
+	blade.size = Vector3(0.09, 1.0, 0.012)
+	for i in count:
+		var t := (float(i) / float(maxi(1, count - 1))) - 0.5          # -0.5 to 0.5 across the fan
+		var mi := MeshInstance3D.new()
+		mi.mesh = blade
+		mi.material_override = mat
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var length := stands * (0.62 - 0.5 * absf(t))                  # the middle blades the longest
+		var pivot := Node3D.new()
+		pivot.rotation.z = -t * 2.3                                    # fanned to either side
+		mi.scale = Vector3(stands * 0.9, length, 1.0)
+		mi.position = Vector3(0, length * 0.5 + stands * 0.16, 0)
+		pivot.add_child(mi)
+		mantle.add_child(pivot)
+	# behind and above the shoulders: on the head's socket where the body has one
+	mantle.position = Vector3(0, stands * 0.7, stands * (0.22 if kind == "quadruped" else -0.1))
+	mantle.set_meta("rest", mantle.position)
+
 ## The molt lines: seams of light along the body as its next Reading nears (0 none, 1 due).
 func set_molt(k: float) -> void:
 	molt = clampf(k, 0.0, 1.0)
@@ -375,6 +454,9 @@ func _process(dt: float) -> void:
 				(fm as StandardMaterial3D).emission_energy_multiplier = float(fs[2]) * k
 			elif fm is ShaderMaterial:
 				(fm as ShaderMaterial).set_shader_parameter("emission_energy", float(fs[2]) * k)
+	if mantle:
+		mantle.scale = Vector3.ONE * (1.0 + 0.04 * sin(_t * 1.3))
+		mantle.rotation.x = -0.12 + 0.03 * sin(_t * 0.9)
 	if hover and _model:
 		_model.position.y = 0.06 * sin(_t * 2.2)
 	elif _model and anim == null and uses_art:

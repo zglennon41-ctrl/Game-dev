@@ -10,6 +10,84 @@ the end.
 The aim in one line: *at any moment a player can look at their genius, without opening a
 page, and see what it is, how far along it is, and that it is theirs.*
 
+## The owner's direction (2026-11-10)
+
+> "I want the genius system to be incredibly deep but also logical: if the size is too
+> small to be a wolf, maybe it is a pup and evolves into a wolf. I want the final stage to
+> be an impressive ally. The process of growth reflected by their design, and the echo
+> effect on the player."
+
+Four things follow, and all four are in the game now (see "Ages" and "The echo" below):
+
+1. **A genius has an age, and its body says so.** Each instar is an age: young, half-grown,
+   grown, in its prime, great, at its apex. A First Form is the young of its kind.
+2. **The name follows the age.** A Field-wolf at the First Form is a *wolf pup*, at the
+   Second a *yearling wolf*, and a Field-wolf from the Third.
+3. **The last stage is an impressive ally.** An Apex genius stands taller than its partner,
+   carries a mantle of light, and lights the ground it stands on.
+4. **Its growth echoes on its partner.** Each instar writes something on the partner's own
+   body, in the genius's own coat.
+
+## Ages
+
+| Instar | Age | A wolf is | Stands | Its body |
+|---|---|---|---|---|
+| First | young | a wolf pup | 0.6 m | large head and ears, short legs, short tail |
+| Second | half-grown | a yearling wolf | 0.8 m | the head still large for it, the legs coming |
+| Third | grown | a Field-wolf | 1.0 m | the creature its name says |
+| Fourth | in its prime | | 1.3 m | deeper in the chest; steady lines of light along it |
+| Fifth | great | | 1.7 m | long in the leg, the head small for its size; a mantle of five blades of light; the ground lit |
+| Apex | at its apex | | 2.3 m | taller than its partner; a mantle of nine; the ground lit for paces round |
+
+How it is built:
+
+- **Names** are in `data/forms.json` (`ages`): a name for each instar at which the form is
+  not yet grown. Eighteen forms have them (wolf pup, ram lamb, otter kit, crow fledgling,
+  tortoise hatchling, iron whelp, impling, spark, young stag uncrowned, and so on). The
+  Reading's rules still speak of the form; only what the player is shown changes, so the
+  three scripted lives read as before.
+- **Proportions** are scales on the bones of a rigged body, by age and by kind of body
+  (`data/genius-bodies.json`, `ages`). The wolf's rig and the small people's take them now.
+  A body with no rig (the hawk, the relics, the engines that are not hounds, the Aspects)
+  shows its age by size and by what it carries; a young body of its own for each is art
+  still to make.
+- **Size** is `data/genius.json`, `size`.
+- **Presence** (the lines, the mantle, the lit ground) is `data/genius.json`,
+  `progression.presence`.
+
+`godot --path . -- --lineage=life` stands a wolf's whole life in a row with its partner
+beside it at every age.
+
+## The echo
+
+What a genius's growth writes on its partner (`data/genius.json`, `echo`):
+
+| From | On the partner | Drawn in |
+|---|---|---|
+| First Form | its colour threads the cloak | the genius's own coat |
+| Second Form | its light in the eyes | the field's colour |
+| Third Form | the field under the skin, stronger at every instar after | the field's colour |
+| Third Form | **a piece that says what the genius is**, larger at every instar after | the genius's own coat |
+
+The piece, by Expression:
+
+| The genius is a | Its partner wears |
+|---|---|
+| Beast | a ruff of its fur at the collar |
+| Kith | a charm at the throat that it made |
+| Engine or Relic | a gorget of its metal, with a boss that burns |
+| Daemon | a brand over the heart |
+| Aspect | motes of its field that keep to the shoulders |
+
+So two partners of the same Shape and city are told apart, at a glance, by what stands
+beside them, even when it is not beside them. When a Reading carries the genius into
+another Expression the piece changes with it: the partner of a Beast that becomes a Relic
+trades the ruff for the gorget.
+
+Not built yet, and proposed as the next echoes: the genius's markings on the partner (a
+wolf's mask as a band across the eyes, a hawk's bars on the forearms) at the Fourth Form;
+the partner's footfall lit at the Fifth; and at Apex the mantle shared in Union.
+
 ## Where it stands today
 
 | Shows now | Does not show yet |
@@ -123,15 +201,16 @@ its neighbours. The page still lets the partner change it.
 ## Each instar, at a glance
 
 A Fifth Form should read as more than a Second from across the quad, whatever the form.
+The body's age is in "Ages" above; this is what else each instar adds.
 
-| Instar | Stands | Parts it carries | Light | New at this instar |
-|---|---|---|---|---|
-| First | 0.60 m | 3 and the Seed-mark | Eyes only | The mote becomes a body |
-| Second | 0.80 m | +1 heritage | Eyes and one seam | An adaptation can show; one shadow mark |
-| Third | 1.00 m | +1 | The Seed-mark glows | Secondary forms: it can Shift; two shadow marks |
-| Fourth | 1.25 m | +1, grafts likely | Light along the limbs | It joins the Pattern (Duet): its light takes the Pattern's beat |
-| Fifth | 1.50 m | A mantle: one large part for its Expression (antlers, a banner, a cowl, a halo of gears) | The ground under it is lit | Its tread leaves light |
-| Apex | 1.90 m | Everything it kept | The field stands around it, with the Pattern's glyph in it | Union |
+| Instar | Parts it carries | Light | New at this instar |
+|---|---|---|---|
+| First | 3 and the Seed-mark | Eyes only | The mote becomes a body |
+| Second | +1 heritage | Eyes and one seam | An adaptation can show; one shadow mark |
+| Third | +1 | The Seed-mark glows | Secondary forms: it can Shift; two shadow marks |
+| Fourth | +1, grafts likely | Lines along the body (built) | It joins the Pattern (Duet): its light takes the Pattern's beat |
+| Fifth | A mantle of light (built); a piece of its Expression's own to come (antlers, a banner, a cowl, a halo of gears) | The ground under it is lit (built) | Its tread leaves light |
+| Apex | Everything it kept | The field stands around it, with the Pattern's glyph in it | Union |
 
 ## Secondary forms, and the end
 
@@ -173,6 +252,10 @@ Each step is playable on its own. Sizes: S is a day, M a few days, L a week or m
 | # | Step | Size | Needs |
 |---|---|---|---|
 | 1 | Readiness, growth and the molt seams | done | |
+| 1a | Ages: names, proportions on the rigged bodies, the size ladder | done | |
+| 1b | The Apex's presence: lines, the mantle, the lit ground | done | |
+| 1c | The echo on the partner: cloak, eyes, field, and a piece by Expression | done | |
+| 1d | A young body of its own for each form with no rig (a fledgling hawk, a hand-lantern) | L | art |
 | 2 | The Reading as six beats (kept parts hang, the new body closes round them) | M | |
 | 3 | The coat carried across forms | S | the coat rule, below |
 | 4 | The lineage and the leaning silhouettes on the page | S | |
@@ -201,5 +284,12 @@ to the server's years, and step 13 is the large one whenever the game goes past 
 5. **Resonance as light, instar as body**, so the two can disagree in plain sight.
 6. **The six beats of the Reading**, and how long it may run (twelve seconds proposed).
 7. **The table of instars**: what each one adds, and the mantle at the Fifth.
-8. **Is a First Form too small?** At 0.6 m it is a hawk on the ground or a wolf the size of
-   a cat. The ladder (0.6 to 1.9 m) is data; it could start at 0.8.
+8. *(Answered, 2026-11-10: a First Form is the young of its kind. See "Ages".)*
+9. **The names of the young** (`data/forms.json`, `ages`): eighteen drafts.
+10. **The size ladder**: 0.6 m to 2.3 m. Is an Apex taller than its partner right for every
+    Expression (a 2.3 m lantern, a 2.3 m blade), or should the Relics and the small Kith
+    have a ladder of their own?
+11. **The echo's pieces** by Expression, and that they change when the genius crosses to
+    another Expression.
+12. **The mantle** is one design for all (blades of light) until each Expression has its
+    own.

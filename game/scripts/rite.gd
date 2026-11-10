@@ -46,7 +46,7 @@ static func first_form(hero: Dictionary, shape: String, seed_value: int) -> Dict
 	var origin := { "seed": String(hero.get("seed", "")), "blood": String(hero.get("blood", "")), "shape": shape }
 	var r := GeniusReading.read(1, GeniusReading.empty_tally(), origin, {}, float(Data.academy["rite"]["formNoise"]), seed_value * 31 + 7)
 	var c: Dictionary = r["candidates"][0]
-	return { "form": c["form"], "name": c["name"], "expression": c["expression"], "silhouette": c["silhouette"],
+	return { "form": c["form"], "name": Genius.form_name_at(String(c["form"]), 1), "expression": c["expression"], "silhouette": c["silhouette"],
 		"features": c["features"], "score": c["score"], "seedMark": c["seedMark"], "reading": r, "look": born_look(hero) }
 
 ## How this hero's genius will look, whatever form it takes: drawn from who they are.

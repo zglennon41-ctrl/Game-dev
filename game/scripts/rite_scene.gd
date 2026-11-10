@@ -197,7 +197,7 @@ func _genius(dt: float) -> void:
 		ac.show_reading(form["reading"], func(i: int):
 			_pick = i
 			var c: Dictionary = form["reading"]["candidates"][maxi(i, 0)]
-			form = { "form": c["form"], "name": c["name"], "expression": c["expression"], "silhouette": c["silhouette"],
+			form = { "form": c["form"], "name": Genius.form_name_at(String(c["form"]), 1), "expression": c["expression"], "silhouette": c["silhouette"],
 				"features": c["features"], "seedMark": c["seedMark"], "reading": form["reading"], "look": form.get("look", Rite.born_look(hero)) }
 			_feat_i = 0
 			_go("making"), "The bowl offers three", "Read from your Seed, your blood and your Shape. Every one carries the Seed-mark.")

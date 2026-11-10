@@ -72,6 +72,12 @@
           },
           "emission": {
             "type": "number"
+          },
+          "color": {
+            "enum": [
+              "genius"
+            ],
+            "description": "genius: the part takes the bonded genius's coat colour, and its glowing surfaces the field's."
           }
         }
       }

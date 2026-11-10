@@ -497,7 +497,9 @@ func _lineage(what: String) -> void:
 		for st in [[0.0, "THE DAY OF THE RITE"], [0.5, "HALF THE DAYS LIVED\nit has grown"], [0.85, "NEAR\nthe seams show"], [1.0, "THE READING IS DUE\nit molts"]]:
 			stand.append([{ "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": f["features"], "instar": 1, "look": look, "ready": st[0] }, String(st[1])])
 	else:
-		var ids: Array = ["hawk", "harrier", "griffin", "relic-bastion", "closed-ledger"] if what in ["true", "", "life"] else Array(what.split(","))
+		# by default one kind through all its ages: a wolf, pup to Apex (the rules would read it into
+		# other forms on the way; this row is to see the ages)
+		var ids: Array = ["field-wolf", "field-wolf", "field-wolf", "field-wolf", "field-wolf", "field-wolf"] if what in ["true", "", "life"] else Array(what.split(","))
 		var carried: Array = []
 		for i in ids.size():
 			var f: Dictionary = by_id.call(String(ids[i]))
@@ -512,9 +514,9 @@ func _lineage(what: String) -> void:
 				feats.append("far-eyes")
 			carried = ["far-eyes", String(f["features"][0])]
 			stand.append([{ "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": feats, "instar": i + 1, "look": look, "ready": 0.0 },
-				"%s\n%s  ·  %.2f m" % [String(names[mini(i, 5)]).to_upper(), f["name"], float(Data.genius()["size"][str(i + 1)])]])
+				"%s\n%s  ·  %.2f m" % [String(names[mini(i, 5)]).to_upper(), Genius.form_name_at(String(f["id"]), i + 1), float(Data.genius()["size"][str(i + 1)])]])
 	var spot := world.stage_spot()
-	var widths: Array = stand.map(func(sd): return 2.3 if what == "molt" else 1.0 + float(Data.genius()["size"][str(int(sd[0]["instar"]))]) * 0.9)
+	var widths: Array = stand.map(func(sd): return 2.3 if what == "molt" else 2.0 + float(Data.genius()["size"][str(int(sd[0]["instar"]))]) * 0.8)
 	var wide := 0.0
 	for wv in widths:
 		wide += float(wv)
@@ -526,6 +528,18 @@ func _lineage(what: String) -> void:
 		world.add_child(b)
 		b.position = Vector3(spot.x + x, 0.35 if (b as GeniusBody).hover else 0.0, spot.y)
 		b.rotation.y = 0.55
+		if what != "molt":
+			# its partner beside it, wearing the echo of that instar
+			var partner_hero := { "shape": "anchor", "blood": "", "city": "cahokia", "body": "cahokia-f", "genius": sdef[0] }
+			var pn: Node3D = load(world._person_model("cahokia-f")).instantiate()
+			world.add_child(pn)
+			world.toonify(pn)
+			world.dress(pn, { "headgear": false, "cape": true, "cape_color": "plain", "hair": "braid", "hair_color": "black", "skin": "tan" }, partner_hero)
+			pn.position = Vector3(spot.x + x - 0.75 - float(Data.genius()["size"][str(int(sdef[0]["instar"]))]) * 0.3, 0, spot.y - 0.5)
+			pn.rotation.y = 0.35
+			var pa: AnimationPlayer = pn.find_child("AnimationPlayer", true, false)
+			if pa and pa.has_animation("Idle"):
+				pa.play("Idle")
 		var l := Label3D.new()
 		l.text = String(sdef[1])
 		l.font = Style.font("title")
@@ -539,8 +553,8 @@ func _lineage(what: String) -> void:
 		world.add_child(l)
 		x += float(widths[k]) / 2.0
 	world.cine = true
-	world.cine_pos = Vector3(spot.x + 0.4, 1.0 + wide * 0.05, spot.y + 1.2 + wide * (0.42 if what == "molt" else 0.5))
-	world.cine_look = Vector3(spot.x, 0.4 if what == "molt" else 0.6, spot.y)
+	world.cine_pos = Vector3(spot.x + 0.4, 1.0 + wide * 0.05, spot.y + 1.2 + wide * (0.42 if what == "molt" else 0.46))
+	world.cine_look = Vector3(spot.x, 0.4 if what == "molt" else 0.95, spot.y)
 	world._cam_pos = world.cine_pos
 	world._cam_look = world.cine_look
 	if _args.has("shots"):

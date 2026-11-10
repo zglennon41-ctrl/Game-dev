@@ -99,8 +99,8 @@ func open(g: Genius, color: Color, tier := 0, marks := 0) -> void:
 	foot.add_child(hint)
 	if marks > 0:
 		_p(v, "Your record: %d Marks." % marks, Style.DIM)
-	_p(v, "A %s, %s. Resonance %d: it fights with %d Will and can carry %d shadow%s. Day %d since the rite." % [
-		String(g.body.get("expression", "")).capitalize(), g.form_name(), g.resonance(tier), int(g.will_max(tier)), g.shadow_cap(tier), "" if g.shadow_cap(tier) == 1 else "s", g.day])
+	_p(v, "A %s, %s, %s. Resonance %d: it fights with %d Will and can carry %d shadow%s. Day %d since the rite." % [
+		String(g.body.get("expression", "")).capitalize(), g.form_name(), String(g.age().get("word", "grown")), g.resonance(tier), int(g.will_max(tier)), g.shadow_cap(tier), "" if g.shadow_cap(tier) == 1 else "s", g.day])
 	if g.is_born() and not g.look.is_empty():
 		_look_section(v, g)
 	# The next Reading.

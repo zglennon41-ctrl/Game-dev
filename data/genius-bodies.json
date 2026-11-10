@@ -1,5 +1,24 @@
 {
   "$comment": "How a genius is assembled: its body (one per silhouette) and parts (one per feature) on named sockets. When the art exists, the body is game/assets/genius/bodies/<silhouette>.glb with empties named socket_<name>, and each part is game/assets/genius/parts/<feature>.glb; the game uses them and ignores the placeholders below. Placeholder bodies are built from a kind: quadruped and humanoid kinds borrow a rigged model, so they walk; the rest are shapes. Socket positions are in metres on the placeholder before it is scaled to the genius's height; 'bone' sockets ride the rig. featureSockets names the sockets some features use instead of their slot's (a beak and fangs at the mouth, small hands at the wrists, a brush in the grip, a tail at the tail's root); a body without those sockets falls back to the slot's. A part hung on a right-hand socket (a name ending in _r, fr or br) is mirrored: parts of a pair are made for the left. artSize is how tall a silhouette's art body stands against its instar's size (default 1): an art body carries its own proportions, so scale applies only to the placeholder. carries lists features a silhouette's art body already wears in its own design (the stag its antlers), so no part is hung for them. A surface feature hangs nothing unless it has a part and is named in featureSockets (the Seed-marks a grip and a ledger: a handle on its back, a book at its chest). How one genius differs from another of its form (coat, markings, build, keepsake) is in genius-looks.json.",
+  "ages": {
+    "$comment": "The body's proportions by age (data/genius.json, progression.ages), as scales on the bones of a rigged body, by its kind: each bone named is scaled, and what hangs from it with it. A young quadruped has a large head, large ears, short legs and a short tail; a great one is deep in the chest with a smaller head for its size. Bodies with no rig show their age by size and by what they carry.",
+    "quadruped": {
+      "young": {"Head": 1.34, "Tail1": 0.62, "FrontUpperLeg.L": 0.74, "FrontUpperLeg.R": 0.74, "BackUpperLeg.L": 0.74, "BackUpperLeg.R": 0.74, "Ear1.L": 1.2, "Ear1.R": 1.2, "Neck1": 0.82},
+      "half-grown": {"Head": 1.15, "Tail1": 0.85, "FrontUpperLeg.L": 0.9, "FrontUpperLeg.R": 0.9, "BackUpperLeg.L": 0.9, "BackUpperLeg.R": 0.9, "Ear1.L": 1.08, "Ear1.R": 1.08},
+      "grown": {},
+      "prime": {"Head": 0.98, "Tail1": 1.05, "FrontUpperLeg.L": 1.03, "FrontUpperLeg.R": 1.03, "BackUpperLeg.L": 1.03, "BackUpperLeg.R": 1.03, "Torso2": 1.05},
+      "great": {"Head": 0.93, "Tail1": 1.15, "FrontUpperLeg.L": 1.06, "FrontUpperLeg.R": 1.06, "BackUpperLeg.L": 1.06, "BackUpperLeg.R": 1.06, "Torso2": 1.11},
+      "apex": {"Head": 0.9, "Tail1": 1.25, "FrontUpperLeg.L": 1.1, "FrontUpperLeg.R": 1.1, "BackUpperLeg.L": 1.1, "BackUpperLeg.R": 1.1, "Torso2": 1.16}
+    },
+    "humanoid": {
+      "young": {"head": 1.28, "upperleg.l": 0.84, "upperleg.r": 0.84, "upperarm.l": 0.9, "upperarm.r": 0.9},
+      "half-grown": {"head": 1.12, "upperleg.l": 0.94, "upperleg.r": 0.94},
+      "grown": {},
+      "prime": {"chest": 1.04},
+      "great": {"chest": 1.09, "head": 0.95},
+      "apex": {"chest": 1.13, "head": 0.92, "upperleg.l": 1.05, "upperleg.r": 1.05}
+    }
+  },
   "slotSockets": {
     "head": ["socket_head"], "eyes": ["socket_eyes"], "wings": ["socket_back"], "body": ["socket_body"],
     "arms": ["socket_arm_r", "socket_arm_l"], "limbs": ["socket_limb_fl", "socket_limb_fr", "socket_limb_bl", "socket_limb_br"],

@@ -52,6 +52,16 @@
           "max"
         ],
         "additionalProperties": false
+      },
+      "ages": {
+        "type": "object",
+        "description": "What the form is called while it is young: a name for an instar (\"1\", \"2\") at which it is not yet grown.",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "propertyNames": {
+          "pattern": "^[1-6]$"
+        }
       }
     },
     "required": [

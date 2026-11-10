@@ -427,6 +427,14 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   seams, and a lineage view. The elites were tuned against a bot that parries everything;
   they are now measured against four hands and made fair (`docs/zones.md`, "Elites and
   their guard"). Calls left for the owner: `docs/decisions-needed.md` 73 and 74.
+- **A genius has an age** (owner, 2026-11-10): "I want the genius system to be incredibly
+  deep but also logical: if the size is too small to be a wolf, maybe it is a pup and
+  evolves into a wolf. I want the final stage to be an impressive ally. The process of
+  growth reflected by their design, and the echo effect on the player." So: each instar is
+  an age (young, half-grown, grown, prime, great, apex); a First Form is the young of its
+  kind in name and in proportion; an Apex genius stands taller than its partner with a
+  mantle of light; and each instar echoes on the partner's own body, in the genius's coat
+  (`docs/genius-progression.md`, "Ages" and "The echo").
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.

@@ -470,6 +470,13 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 	# on the sockets; a glow lights the skin.
 	var feats := features_of(hero, look)
 	var shape_col := _shape_color(String(hero.get("shape", "anchor")))
+	# what the echo is drawn in: the genius's own coat, how far it has come
+	var gd: Dictionary = hero.get("genius", {}) if hero.get("genius", {}) is Dictionary else {}
+	var g_instar := int(gd.get("instar", 0))
+	var g_coat := genius_coat(gd, shape_col)
+	var echo_cfg: Dictionary = Data.genius().get("echo", {})
+	var echo_grow := float(echo_cfg.get("grow", {}).get(str(g_instar), 1.0))
+	var echo_field := float(echo_cfg.get("field", {}).get(str(g_instar), 1.0))
 	var iris := Color(0.12, 0.09, 0.07)
 	var iris_glow := 0.0
 	var glow := Color(0, 0, 0)
@@ -488,7 +495,7 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 			"glow":
 				var g: Array = f.get("glow", [1.0, 0.85, 0.55])
 				glow = shape_col if f.get("shapeColor", "") == "glow" else Color(g[0], g[1], g[2])
-				glow_k = float(f.get("strength", 0.35))
+				glow_k = float(f.get("strength", 0.35)) * (echo_field if f.get("shapeColor", "") == "glow" else 1.0)
 			"cape":
 				cape_thread = float(f.get("strength", 0.5))
 	var skel: Skeleton3D = node.find_child("Skeleton3D", true, false)
@@ -523,6 +530,13 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 				if f.get("shapeColor", "") == "trim":
 					for m2 in att.find_children("*", "MeshInstance3D", true, false):
 						_recolor_named(m2, "trim", shape_col, shape_col, 0.6)
+				if f.get("color", "") == "genius":
+					# an echo of the genius: in its coat, its light in the field's colour, grown with it
+					for m2 in att.find_children("*", "MeshInstance3D", true, false):
+						_recolor_named(m2, "echo", g_coat)
+						_recolor_named(m2, "echo_glow", shape_col, shape_col, 1.6)
+					if att.get_child_count() > 0:
+						(att.get_child(0) as Node3D).scale *= echo_grow
 		# A kit body's cloak is a part on the back socket, in the colour the look names, and
 		# threaded with the bonded genius's colour once there is one.
 		if look.get("cape", true) and skel.find_bone("socket_back") >= 0:
@@ -530,7 +544,7 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 			cape.name = "feature_cape_socket_back"
 			var col := cape_color_for(hero, String(look.get("cape_color", "shape")))
 			if cape_thread > 0.0:
-				col = col.lerp(shape_col, cape_thread)
+				col = col.lerp(g_coat, cape_thread)
 			_recolor(cape, col)
 	if glow_k > 0.0 and node == _player:
 		if _glow_light == null:
@@ -582,6 +596,15 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 				if a.visible and not hero.is_empty():
 					_tint_cape(a, hero, String(look.get("cape_color", "shape")))
 
+## The colour a genius's echo is drawn in on its partner: the main colour of the coat it
+## wears (genius_look.gd), or the partner's Shape colour for a genius with no look of its own.
+func genius_coat(g: Dictionary, fallback: Color) -> Color:
+	var lk: Dictionary = g.get("look", {}) if g.get("look", {}) is Dictionary else {}
+	if lk.is_empty() or String(g.get("silhouette", "")) == "":
+		return fallback
+	var coat: Dictionary = GeniusLook.resolve(lk, String(g.get("form", "")), String(g["silhouette"]), int(g.get("instar", 1))).get("coat", {})
+	return Color(String(coat["main"])) if coat.has("main") else fallback
+
 ## A skin tone by its name in data/creation.json.
 func skin_color(id: String) -> Color:
 	var tones: Dictionary = Data.creation.get("look", {}).get("skinTones", {})
@@ -602,14 +625,18 @@ func features_of(hero: Dictionary, look: Dictionary = {}) -> Array:
 	# its second instar; the field under the skin from its third.
 	if not hero.get("archetypes", []).is_empty():
 		out.append("trim-journeyman")
+	# The echo (data/genius.json, echo): each instar of the genius writes something on its
+	# partner, and from the Third Form a piece that says what kind of thing the genius is.
 	var g: Dictionary = hero.get("genius", {}) if hero.get("genius", {}) is Dictionary else {}
 	var instar := int(g.get("instar", 0))
-	if instar >= 1:
-		out.append("cloak-genius")
-	if instar >= 2:
-		out.append("eyes-genius")
-	if instar >= 3:
-		out.append("skin-field")
+	var echo: Dictionary = Data.genius().get("echo", {})
+	var expr := String(g.get("expression", g.get("body", {}).get("expression", "") if g.get("body", {}) is Dictionary else ""))
+	for src in [echo.get("all", {}), echo.get("byExpression", {}).get(expr, {})]:
+		for at in src:
+			if instar >= int(at):
+				for fid in src[at]:
+					if not out.has(fid):
+						out.append(fid)
 	for f in hero.get("features", []):
 		if not out.has(f):
 			out.append(f)

@@ -246,6 +246,56 @@
    ],
    "strength": 0.18,
    "shapeColor": "glow"
+  },
+  "echo-ruff": {
+   "slot": "collar",
+   "kind": "part",
+   "label": "a ruff at the collar in its genius's coat (a Beast's echo, from the Third Form)",
+   "part": "echo-ruff",
+   "sockets": [
+    "socket_throat"
+   ],
+   "color": "genius"
+  },
+  "echo-charm": {
+   "slot": "collar",
+   "kind": "part",
+   "label": "a charm at the throat that its genius made (a Kith's echo)",
+   "part": "echo-charm",
+   "sockets": [
+    "socket_throat"
+   ],
+   "color": "genius"
+  },
+  "echo-gorget": {
+   "slot": "collar",
+   "kind": "part",
+   "label": "a gorget of its genius's metal (an Engine's or a Relic's echo)",
+   "part": "echo-gorget",
+   "sockets": [
+    "socket_throat"
+   ],
+   "color": "genius"
+  },
+  "echo-brand": {
+   "slot": "chest",
+   "kind": "part",
+   "label": "a brand over the heart that burns in its field's colour (a Daemon's echo)",
+   "part": "echo-brand",
+   "sockets": [
+    "socket_light"
+   ],
+   "color": "genius"
+  },
+  "echo-motes": {
+   "slot": "back",
+   "kind": "part",
+   "label": "motes of its field that keep to its shoulders (an Aspect's echo)",
+   "part": "echo-motes",
+   "sockets": [
+    "socket_back"
+   ],
+   "color": "genius"
   }
  }
 }

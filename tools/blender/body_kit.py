@@ -1167,7 +1167,87 @@ def part_cape():
     return [ob]
 
 
+# --- The echo: what a genius's growth writes on its partner (data/genius.json, echo). Each is
+# worn at the collar, over the heart or at the shoulders; material "echo" takes the genius's
+# coat colour in the game, "echo_glow" the field's.
+
+def _collar_ring(r_x, r_y, drop, n=20):
+    return [Vector((r_x * math.cos(2 * math.pi * i / n), r_y * math.sin(2 * math.pi * i / n) + 0.01, drop - 0.01 * math.cos(2 * math.pi * i / n))) for i in range(n + 1)]
+
+
+def part_echo_ruff():
+    """A Beast's echo: a ruff of fur at the collar, tufts standing out and down all round."""
+    mat = pk._material("echo", (0.45, 0.33, 0.22, 1), rough=0.95)
+    out = [_ob("Echo_ruff_band", pk._tube_bm(_collar_ring(0.09, 0.08, -0.05), [0.02] * 21, segments=8), mat)]
+    n = 18
+    for i in range(n):
+        a = 2 * math.pi * i / n
+        base = Vector((0.092 * math.cos(a), 0.082 * math.sin(a) + 0.01, -0.05))
+        outv = Vector((math.cos(a), math.sin(a), -0.55 - 0.25 * (i % 2))).normalized()
+        long = 0.075 + 0.02 * (i % 3)
+        out.append(_ob("Echo_ruff_%02d" % i, pk._tube_bm([base - outv * 0.01, base + outv * long * 0.5, base + outv * long], [0.024, 0.016, 0.002], segments=6), mat))
+    for o in out:
+        pk._smooth(o)
+    return out
+
+
+def part_echo_charm():
+    """A Kith's echo: a cord at the throat and a small charm hung on it."""
+    cord = pk._material("echo", (0.45, 0.33, 0.22, 1), rough=0.9)
+    glow = pk._material("echo_glow", (1.0, 0.85, 0.5, 1), rough=0.4, emission=(1.0, 0.85, 0.5), strength=1.5)
+    out = [_ob("Echo_charm_cord", pk._tube_bm(_collar_ring(0.085, 0.075, -0.05), [0.005] * 21, segments=6), cord)]
+    c = Vector((0.0, -0.068, -0.095))
+    bm = bmesh.new()
+    bmesh.ops.create_icosphere(bm, subdivisions=1, radius=0.02)
+    for v in bm.verts:
+        v.co = Vector((v.co.x * 0.8, v.co.y * 0.6, v.co.z * 1.3)) + c
+    out.append(_ob("Echo_charm", bm, glow))
+    out.append(_ob("Echo_charm_loop", pk._tube_bm([Vector((0, -0.066, -0.055)), c + Vector((0, 0, 0.026))], [0.004, 0.004], segments=6), cord))
+    return out
+
+
+def part_echo_gorget():
+    """An Engine's or a Relic's echo: a gorget at the collar, a plate at the front with a boss."""
+    mat = pk._material("echo", (0.55, 0.45, 0.25, 1), rough=0.45)
+    glow = pk._material("echo_glow", (1.0, 0.85, 0.5, 1), rough=0.4, emission=(1.0, 0.85, 0.5), strength=1.5)
+    out = [_ob("Echo_gorget_band", pk._tube_bm(_collar_ring(0.088, 0.078, -0.052), [0.014] * 21, segments=8), mat)]
+    plate = pk._box_bm(Vector((-0.045, -0.085, -0.13)), Vector((0.045, -0.07, -0.05)), taper=(0.35, 1.0))
+    out.append(_ob("Echo_gorget_plate", plate, mat))
+    bm = bmesh.new()
+    bmesh.ops.create_icosphere(bm, subdivisions=1, radius=0.014)
+    for v in bm.verts:
+        v.co = Vector((v.co.x, v.co.y * 0.5, v.co.z)) + Vector((0, -0.088, -0.078))
+    out.append(_ob("Echo_gorget_boss", bm, glow))
+    return out
+
+
+def part_echo_brand():
+    """A Daemon's echo: a brand over the heart, a ring and a mark inside it, burning."""
+    glow = pk._material("echo_glow", (1.0, 0.5, 0.3, 1), rough=0.4, emission=(1.0, 0.5, 0.3), strength=2.0)
+    y = -0.012
+    ring = [Vector((0.038 * math.cos(2 * math.pi * i / 16), y, 0.038 * math.sin(2 * math.pi * i / 16))) for i in range(17)]
+    out = [_ob("Echo_brand_ring", pk._tube_bm(ring, [0.0045] * 17, segments=6), glow)]
+    tri = [Vector((0.03 * math.cos(a), y, 0.03 * math.sin(a))) for a in (math.pi / 2, math.pi * 7 / 6, math.pi * 11 / 6, math.pi / 2)]
+    out.append(_ob("Echo_brand_mark", pk._tube_bm(tri, [0.004] * 4, segments=6), glow))
+    return out
+
+
+def part_echo_motes():
+    """An Aspect's echo: three motes of its field that keep to the shoulders."""
+    glow = pk._material("echo_glow", (0.8, 0.9, 1.0, 1), rough=0.3, emission=(0.8, 0.9, 1.0), strength=2.5)
+    out = []
+    for i, (x, yb, z, r) in enumerate(((0.21, 0.03, 0.2, 0.022), (-0.2, 0.05, 0.24, 0.018), (0.04, 0.11, 0.33, 0.026))):
+        bm = bmesh.new()
+        bmesh.ops.create_icosphere(bm, subdivisions=2, radius=r)
+        for v in bm.verts:
+            v.co += Vector((x, yb, z))
+        out.append(_ob("Echo_mote_%d" % i, bm, glow))
+    return out
+
+
 PARTS = {
+    "echo-ruff": part_echo_ruff, "echo-charm": part_echo_charm, "echo-gorget": part_echo_gorget,
+    "echo-brand": part_echo_brand, "echo-motes": part_echo_motes,
     "trim": part_trim, "cape": part_cape,
     "horns": part_horns, "tail": part_tail, "wings": part_wings, "scales-throat": part_scales_throat,
     "scales-hand": part_scales_hand, "gill-lines": part_gill_lines, "fur-ears": part_fur_ears, "claws": part_claws,

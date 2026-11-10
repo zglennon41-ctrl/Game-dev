@@ -64,6 +64,7 @@ func _run() -> void:
 	test_creator()
 	test_guard()
 	test_progression()
+	test_ages()
 	test_blood_marks()
 	test_life_features()
 	test_bots()
@@ -2100,3 +2101,72 @@ func test_progression() -> void:
 	due.queue_free()
 	fresh.queue_free()
 	plain.queue_free()
+
+## A genius has an age (owner, 2026-11-10: a First Form too small to be a wolf is a pup that
+## grows into one; the last stage is an impressive ally; its growth shows in its design and
+## echoes on its partner). Names, proportions, size, presence, and the echo, by instar.
+func test_ages() -> void:
+	check(Genius.form_name_at("field-wolf", 1) == "Wolf pup" and Genius.form_name_at("field-wolf", 2) == "Yearling wolf" and Genius.form_name_at("field-wolf", 3) == "Field-wolf", "a Field-wolf is a pup, then a yearling, then a wolf")
+	check(Genius.form_name_at("griffin", 3) == "Griffin", "a form with no young keeps its name")
+	var ages := {}
+	for i in range(1, 7):
+		ages[String(Genius.age_at(i)["id"])] = true
+	check(ages.size() == 6 and Genius.age_at(1)["id"] == "young" and Genius.age_at(6)["id"] == "apex", "six instars, six ages, young to apex")
+	var sizes: Dictionary = Data.genius()["size"]
+	var rising := true
+	for i in range(1, 6):
+		rising = rising and float(sizes[str(i + 1)]) > float(sizes[str(i)])
+	check(rising and float(sizes["6"]) > 1.8 and float(sizes["1"]) <= 0.7, "it grows at every instar, from the young of its kind to taller than its partner (%.1f to %.1f m)" % [float(sizes["1"]), float(sizes["6"])])
+	var wolf := func(instar: int) -> GeniusBody:
+		var b := GeniusBody.build({ "form": "field-wolf", "silhouette": "beast-runner", "expression": "beast", "features": ["fangs"], "instar": instar }, Color.ORANGE, instar)
+		add_child(b)
+		return b
+	var pup: GeniusBody = wolf.call(1)
+	var grown: GeniusBody = wolf.call(3)
+	var apex: GeniusBody = wolf.call(6)
+	var head_of := func(b: GeniusBody) -> float:
+		var sk: Skeleton3D = b.find_children("*", "Skeleton3D", true, false)[0]
+		return sk.get_bone_pose_scale(sk.find_bone("Head")).x
+	var leg_of := func(b: GeniusBody) -> float:
+		var sk: Skeleton3D = b.find_children("*", "Skeleton3D", true, false)[0]
+		return sk.get_bone_pose_scale(sk.find_bone("FrontUpperLeg.L")).x
+	check(pup.age == "young" and head_of.call(pup) > 1.2 and leg_of.call(pup) < 0.85, "the pup has a large head and short legs (head %.2f, legs %.2f)" % [head_of.call(pup), leg_of.call(pup)])
+	check(grown.age == "grown" and is_equal_approx(head_of.call(grown), 1.0), "the grown wolf has its own proportions")
+	check(apex.age == "apex" and head_of.call(apex) < 1.0 and leg_of.call(apex) > 1.0, "at its apex it is long in the leg and its head small for its size")
+	check(pup.mantle == null and grown.mantle == null and apex.mantle != null and apex.mantle.get_child_count() >= 7, "only the great carry a mantle of light (%d blades at Apex)" % (apex.mantle.get_child_count() if apex.mantle else 0))
+	check(apex.find_child("GroundLight", false, false) != null and grown.find_child("GroundLight", false, false) == null, "the ground is lit under an Apex genius")
+	check(is_zero_approx(pup.lines) and apex.lines > 0.3 and apex.molt >= apex.lines, "lines of light run along the great, none along the young")
+	check(apex.stands > grown.stands * 2.0 and grown.stands > pup.stands, "the Apex stands more than twice the grown wolf")
+	for b in [pup, grown, apex]:
+		b.queue_free()
+	# the echo on the partner
+	var w := World.new()
+	add_child(w)
+	var hero := Fight.default_hero()
+	hero["body"] = "cahokia-f"
+	var g := { "instar": 1, "expression": "beast", "form": "field-wolf", "silhouette": "beast-runner", "look": GeniusLook.born(4711) }
+	hero["genius"] = g
+	check(w.features_of(hero) == ["cloak-genius"], "the First Form's echo is its coat in the cloak (%s)" % str(w.features_of(hero)))
+	g["instar"] = 3
+	var f3: Array = w.features_of(hero)
+	check(f3.has("eyes-genius") and f3.has("skin-field") and f3.has("echo-ruff"), "by the Third Form: its light in the eyes, the field under the skin, and a Beast's ruff (%s)" % str(f3))
+	for ex in Data.genius()["echo"]["byExpression"]:
+		g["expression"] = ex
+		var piece: Array = w.features_of(hero).filter(func(x): return String(x).begins_with("echo-"))
+		check(piece.size() == 1 and Data.people_features.has(piece[0]), "a %s leaves a piece of its own on its partner (%s)" % [ex, str(piece)])
+	g["expression"] = "beast"
+	hero["look"] = { "cape": true, "cape_color": "plain", "skin": "tan" }
+	w.build_hero(hero)
+	var skel: Skeleton3D = w._player.find_child("Skeleton3D", true, false)
+	var ruff: Node3D = skel.find_child("feature_echo-ruff_socket_throat", false, false)
+	check(ruff != null, "the ruff hangs at the partner's collar")
+	var coat := w.genius_coat(g, Color.WHITE)
+	check(not coat.is_equal_approx(Color.WHITE), "the echo is drawn in the genius's own coat")
+	var s3 := (ruff.get_child(0) as Node3D).scale.x if ruff and ruff.get_child_count() > 0 else 0.0
+	g["instar"] = 6
+	w.build_hero(hero)
+	skel = w._player.find_child("Skeleton3D", true, false)
+	ruff = skel.find_child("feature_echo-ruff_socket_throat", false, false)
+	var s6 := (ruff.get_child(0) as Node3D).scale.x if ruff and ruff.get_child_count() > 0 else 0.0
+	check(s6 > s3 and s3 > 0.0, "and it grows as the genius does (%.2f at the Third Form, %.2f at Apex)" % [s3, s6])
+	w.queue_free()
