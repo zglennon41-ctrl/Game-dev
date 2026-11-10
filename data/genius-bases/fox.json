@@ -1,0 +1,509 @@
+{
+ "id": "fox",
+ "name": "Fox",
+ "class": "animal",
+ "expression": "beast",
+ "silhouette": "beast-fox",
+ "spark": "The mote is never where you last saw it. It is behind the thing you are looking at.",
+ "nature": {
+  "fights": {
+   "dodges": 1.0
+  },
+  "orders": {
+   "free": 0.7
+  },
+  "company": {
+   "alone": 0.5
+  },
+  "ground": {
+   "night": 0.4
+  }
+ },
+ "calls": {
+  "seed": {
+   "owes-me": 0.5,
+   "with-a-voice": 0.4,
+   "watches-from-above": 0.2
+  },
+  "shape": {
+   "read": 0.5,
+   "bind": 0.5,
+   "turn": 0.3
+  },
+  "blood": {
+   "shapechanger": 0.7,
+   "nightfolk": 0.4,
+   "fogborn": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Foxfire",
+  "gift": [
+   "tail",
+   "glow"
+  ],
+  "text": "It wins by being somewhere else, and by getting the foe to look there."
+ },
+ "settled": {
+  "id": "fox-kit",
+  "name": "Fox kit",
+  "text": "Too much tail, and the conviction that everything in the dormitory is either food or a game.",
+  "features": [
+   "tail"
+  ]
+ },
+ "paths": [
+  {
+   "id": "fox-feinter",
+   "name": "Feinter",
+   "text": "It learned from you that the blow you make the foe waste is the cheapest one.",
+   "leans": {
+    "fights": {
+     "dodges": 1.0
+    },
+    "orders": {
+     "free": 0.6
+    }
+   },
+   "features": [
+    "whiskers"
+   ],
+   "prongs": [
+    {
+     "id": "fox-red-decoy",
+     "name": "Red Decoy",
+     "text": "It runs across the foe's eye at the moment your friends need it looking elsewhere.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      }
+     },
+     "features": [
+      "long-legs"
+     ],
+     "finishes": [
+      {
+       "id": "fox-brush-flag",
+       "name": "Brush-flag",
+       "text": "A white tail-tip going the wrong way. The pack follows it every time. Your cohort has stopped laughing.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "bonds": {
+         "classmate": 0.5
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      },
+      {
+       "id": "fox-hen-house-ghost",
+       "name": "Hen-house Ghost",
+       "text": "In and out before the dog lifts its head. Alone with you at night it is the same, and the dog is your problem.",
+       "leans": {
+        "company": {
+         "alone": 1.0
+        },
+        "ground": {
+         "night": 0.6
+        }
+       },
+       "features": [
+        "shadow-cloak"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fox-double-back",
+     "name": "Double-back",
+     "text": "It is behind the foe when the strike lands where it was. You parry; it punishes.",
+     "leans": {
+      "fights": {
+       "parries": 1.0
+      }
+     },
+     "features": [
+      "fangs"
+     ],
+     "finishes": [
+      {
+       "id": "fox-turnabout",
+       "name": "Turnabout",
+       "text": "The foe turns to it, and your Pattern arrives in the back the foe just offered.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      },
+      {
+       "id": "fox-hole-in-the-hedge",
+       "name": "Hole-in-the-hedge",
+       "text": "There is always a gap, and it is always already through it, looking back at you to hurry.",
+       "leans": {
+        "ground": {
+         "wild": 1.0
+        }
+       },
+       "features": [
+        "tunnel-ear"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fox-mask-wearer",
+     "name": "Mask-wearer",
+     "text": "It can wear a face the foe will follow. You taught it that a leash is mostly persuasion.",
+     "leans": {
+      "shape": {
+       "bind": 1.0
+      }
+     },
+     "features": [
+      "mask"
+     ],
+     "finishes": [
+      {
+       "id": "fox-of-two-faces",
+       "name": "Fox of Two Faces",
+       "text": "One face for you and one for everything else. Do not ask which this is.",
+       "leans": {
+        "shape": {
+         "bind": 1.0
+        },
+        "orders": {
+         "free": 0.5
+        }
+       },
+       "features": [
+        "second-face"
+       ]
+      },
+      {
+       "id": "fox-contract-fox",
+       "name": "Contract Fox",
+       "text": "It was party to your oath and found the one thing the Terms did not forbid. It is saving it.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        }
+       },
+       "features": [
+        "ledger"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fox-mouser",
+   "name": "Mouser",
+   "text": "It learned from you to listen for the thing under the snow and go in nose first.",
+   "leans": {
+    "orders": {
+     "hunt": 1.0
+    },
+    "range": {
+     "close": 0.6
+    }
+   },
+   "features": [
+    "maw"
+   ],
+   "prongs": [
+    {
+     "id": "fox-den-digger",
+     "name": "Den-digger",
+     "text": "It goes down the hole after what you hunt and comes out the other end driving it.",
+     "leans": {
+      "quests": {
+       "hunt": 1.0
+      }
+     },
+     "features": [
+      "ground-claws"
+     ],
+     "finishes": [
+      {
+       "id": "fox-name-thief",
+       "name": "Name-thief",
+       "text": "It has taken something from every named beast you felled, before you felled it. They noticed.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      },
+      {
+       "id": "fox-culvert-king",
+       "name": "Culvert King",
+       "text": "No den, tunnel or culvert on the line is closed to it. It knows them better than what lives there.",
+       "leans": {
+        "quests": {
+         "hunt": 1.0
+        },
+        "ground": {
+         "ruin": 0.4
+        }
+       },
+       "features": [
+        "sleek-coat"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fox-snow-pouncer",
+     "name": "Snow-pouncer",
+     "text": "It goes straight up and comes straight down on the place the foe will be standing.",
+     "leans": {
+      "range": {
+       "mid": 1.0
+      }
+     },
+     "features": [
+      "long-legs"
+     ],
+     "finishes": [
+      {
+       "id": "fox-frost-fox",
+       "name": "Frost Fox",
+       "text": "Your cold went into its coat. It lands, and the ground under the foe is ice.",
+       "leans": {
+        "shape": {
+         "turn": 1.0
+        }
+       },
+       "features": [
+        "rime"
+       ]
+      },
+      {
+       "id": "fox-cinder-brush",
+       "name": "Cinder-brush",
+       "text": "When you bleed its tail-tip lights. What it pounces on then stays lit.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fox-night-raider",
+     "name": "Night-raider",
+     "text": "It hunts in the hours you keep. Its eyes give back the lamp from further off than they should.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      }
+     },
+     "features": [
+      "dark-eyed"
+     ],
+     "finishes": [
+      {
+       "id": "fox-dock-fox",
+       "name": "Dock Fox",
+       "text": "It works the yards and platforms after the last car, and brings you what the line dropped.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "quests": {
+         "salvage": 0.5
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      },
+      {
+       "id": "fox-graveyard-fox",
+       "name": "Graveyard Fox",
+       "text": "It dens in ruins and knows which floor will hold. It has been wrong once, and that was not its floor.",
+       "leans": {
+        "ground": {
+         "ruin": 1.0
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fox-fire-tail",
+   "name": "Fire-tail",
+   "text": "It learned from you that the field will hold a light if it is asked nicely.",
+   "leans": {
+    "shape": {
+     "turn": 1.0,
+     "cast": 0.4
+    }
+   },
+   "features": [
+    "glow"
+   ],
+   "prongs": [
+    {
+     "id": "fox-marsh-light-fox",
+     "name": "Marsh-light Fox",
+     "text": "It walks out over the water with its tail lit, and things follow it to where the footing ends.",
+     "leans": {
+      "ground": {
+       "water": 1.0
+      }
+     },
+     "features": [
+      "webbed"
+     ],
+     "finishes": [
+      {
+       "id": "fox-ferry-fox",
+       "name": "Ferry-fox",
+       "text": "It leads the passenger across by the only stones that hold. It has a ferryman's contempt for swimmers.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        }
+       },
+       "features": [
+        "fins"
+       ]
+      },
+      {
+       "id": "fox-fen-candle",
+       "name": "Fen Candle",
+       "text": "A small flame over black water that is never quite reachable. Others followed it. You it waits for.",
+       "leans": {
+        "ground": {
+         "water": 1.0,
+         "night": 0.5
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fox-split-tail",
+     "name": "Split-tail",
+     "text": "Every time your Pattern went off cleanly its tail thought about dividing. It has now.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      }
+     },
+     "features": [
+      "second-tail"
+     ],
+     "finishes": [
+      {
+       "id": "fox-of-many-tails",
+       "name": "Fox of Many Tails",
+       "text": "Count them when it is asleep. You will get a different number than your friends do.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "shape": {
+         "cast": 0.5
+        }
+       },
+       "features": [
+        "many-tails"
+       ]
+      },
+      {
+       "id": "fox-reynard-of-the-hall",
+       "name": "Reynard of the Hall",
+       "text": "The shades taught it their stories and it tells them back wrong on purpose. They adore it.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        }
+       },
+       "features": [
+        "voice"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fox-listening-fox",
+     "name": "Listening Fox",
+     "text": "It hears the wind-up through the ground, head tilted, and is gone before you know why you should be.",
+     "leans": {
+      "shape": {
+       "read": 1.0
+      }
+     },
+     "features": [
+      "tunnel-ear"
+     ],
+     "finishes": [
+      {
+       "id": "fox-at-the-crossroads",
+       "name": "Fox at the Crossroads",
+       "text": "It sits where two houses' interests meet and watches which way you turn. It will remember.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        }
+       },
+       "features": [
+        "watching-eye"
+       ]
+      },
+      {
+       "id": "fox-snow-silent-fox",
+       "name": "Snow-silent Fox",
+       "text": "It leaves no track in the Quiet, and neither do you while you walk in its.",
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        }
+       },
+       "features": [
+        "quiet-place"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "newFeatures": [
+  {
+   "id": "second-tail",
+   "slot": "limbs",
+   "label": "a second tail"
+  },
+  {
+   "id": "many-tails",
+   "slot": "limbs",
+   "label": "more tails than can be counted"
+  }
+ ]
+}

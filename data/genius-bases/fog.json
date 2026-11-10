@@ -1,0 +1,501 @@
+{
+ "id": "fog",
+ "name": "Fog",
+ "class": "creature",
+ "expression": "aspect",
+ "silhouette": "aspect-fog",
+ "spark": "The mote has no edge. Some mornings it is a point of light, and some mornings the whole room is slightly harder to see across.",
+ "nature": {
+  "fights": {
+   "dodges": 0.8
+  },
+  "ground": {
+   "water": 0.8,
+   "night": 0.5
+  },
+  "company": {
+   "alone": 0.5
+  },
+  "orders": {
+   "free": 0.5
+  }
+ },
+ "calls": {
+  "seed": {
+   "never-alive": 0.7,
+   "remembers": 0.4,
+   "stands-between": 0.2
+  },
+  "shape": {
+   "read": 0.5,
+   "turn": 0.5,
+   "bind": 0.3
+  },
+  "blood": {
+   "fogborn": 1.0,
+   "tidewater": 0.6,
+   "riverborn": 0.5,
+   "hollowfolk": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Mist-veiled",
+  "gift": [
+   "mist",
+   "glow"
+  ],
+  "text": "It is weather that came indoors and stayed. It hides what it likes and it likes you."
+ },
+ "settled": {
+  "id": "fog-wisp-of-fog",
+  "name": "Wisp of Fog",
+  "text": "A breath of fog that stays when the window is shut. It gathers on your shoulder when you are still and trails behind when you run.",
+  "features": [
+   "mist"
+  ]
+ },
+ "paths": [
+  {
+   "id": "fog-shroud",
+   "name": "Fog-shroud",
+   "text": "It learned from you that what cannot be seen is seldom hit.",
+   "leans": {
+    "fights": {
+     "dodges": 1.0
+    },
+    "orders": {
+     "guard": 0.6
+    }
+   },
+   "features": [
+    "shadow-cloak"
+   ],
+   "prongs": [
+    {
+     "id": "fog-ground-veil",
+     "name": "Ground-veil",
+     "text": "It lies over the whole party on the approach. The pack smells you and cannot find you.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      }
+     },
+     "features": [
+      "standing-air"
+     ],
+     "finishes": [
+      {
+       "id": "fog-smugglers-weather",
+       "name": "Smuggler's Weather",
+       "text": "Nobody sees the passenger arrive. The house's man counts you twice and then stops asking.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        }
+       },
+       "features": [
+        "mask"
+       ]
+      },
+      {
+       "id": "fog-harbour-fog",
+       "name": "Harbour Fog",
+       "text": "It comes in round the cohort like a tide when one of you is hurt, and what was chasing loses the trail.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fog-smother",
+     "name": "Smother",
+     "text": "Blows that reach you through it arrive tired. Fires that reach you through it arrive out.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      }
+     },
+     "features": [
+      "current"
+     ],
+     "finishes": [
+      {
+       "id": "fog-dousing-mist",
+       "name": "Dousing Mist",
+       "text": "It drinks your foe's element and gives back steam. Turn-fire is a thing it finds delicious.",
+       "leans": {
+        "shape": {
+         "turn": 1.0
+        }
+       },
+       "features": [
+        "rime"
+       ]
+      },
+      {
+       "id": "fog-grey-pall",
+       "name": "Grey Pall",
+       "text": "When you are down it settles over you, grey and close. Nothing has yet come through it to finish the work.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "company": {
+         "alone": 0.4
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fog-standing-fog",
+     "name": "Standing Fog",
+     "text": "Told to stay, it stays: a wall with no stones in it. Things walk in and walk out the way they came.",
+     "leans": {
+      "orders": {
+       "hold": 1.0
+      }
+     },
+     "features": [
+      "door"
+     ],
+     "finishes": [
+      {
+       "id": "fog-bank",
+       "name": "Fog-bank",
+       "text": "It sits on a post like weather on a hill. The line's dark has learned it cannot see what it is attacking.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "ground": {
+         "line": 0.6
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      },
+      {
+       "id": "fog-sea-fret",
+       "name": "Sea-fret",
+       "text": "It comes in off the water faster than a walking pace, and stays till you are across.",
+       "leans": {
+        "ground": {
+         "water": 1.0
+        }
+       },
+       "features": [
+        "fins"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fog-creeping-chill",
+   "name": "Creeping Chill",
+   "text": "It learned from you that cold and wet will do a foe's work for it, given time.",
+   "leans": {
+    "orders": {
+     "hunt": 1.0
+    },
+    "shape": {
+     "turn": 0.5
+    }
+   },
+   "features": [
+    "smoke"
+   ],
+   "prongs": [
+    {
+     "id": "fog-choke-damp",
+     "name": "Choke-damp",
+     "text": "It goes down the foe's throat as the foe breathes in to roar. The roar is smaller.",
+     "leans": {
+      "range": {
+       "close": 1.0
+      }
+     },
+     "features": [
+      "maw"
+     ],
+     "finishes": [
+      {
+       "id": "fog-black-damp",
+       "name": "Black Damp",
+       "text": "In the deep places it sinks to the floor and waits there. Things that live low stop living low.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        }
+       },
+       "features": [
+        "dark-eyed"
+       ]
+      },
+      {
+       "id": "fog-drowning-air",
+       "name": "Drowning Air",
+       "text": "Close to, it is as thick as water. The foe swings as if wading.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        }
+       },
+       "features": [
+        "webbed"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fog-night-frost",
+     "name": "Night-frost",
+     "text": "It settles at night on whatever stands still, and by morning that thing is white and slow.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      }
+     },
+     "features": [
+      "rime"
+     ],
+     "silhouette": "aspect-frost",
+     "finishes": [
+      {
+       "id": "fog-hoar",
+       "name": "Hoar",
+       "text": "Every edge it has touched wears white needles. It makes no sound. The breaking does.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        }
+       },
+       "features": [
+        "cold-core"
+       ],
+       "silhouette": "aspect-frost"
+      },
+      {
+       "id": "fog-black-ice",
+       "name": "Black Ice",
+       "text": "You step aside, and it is already under the foe's feet where you were.",
+       "leans": {
+        "fights": {
+         "dodges": 1.0
+        }
+       },
+       "features": [
+        "sleek-coat"
+       ],
+       "silhouette": "aspect-frost"
+      }
+     ]
+    },
+    {
+     "id": "fog-driven-mist",
+     "name": "Driven Mist",
+     "text": "It goes where your shot goes, a grey line across the ground, and closes behind.",
+     "leans": {
+      "range": {
+       "far": 1.0
+      },
+      "shape": {
+       "cast": 0.5
+      }
+     },
+     "features": [
+      "long-legged"
+     ],
+     "finishes": [
+      {
+       "id": "fog-rising-water",
+       "name": "Rising Water",
+       "text": "Enough fog in one place is a river. It rises round the foe's knees, brown and patient.",
+       "leans": {
+        "ground": {
+         "water": 1.0
+        }
+       },
+       "features": [
+        "roots"
+       ],
+       "silhouette": "aspect-flood"
+      },
+      {
+       "id": "fog-storm-front",
+       "name": "Storm-front",
+       "text": "It rolls in across open ground ahead of you, with your Pattern inside it like lightning in a cloud.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "shape": {
+         "cast": 0.5
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fog-listening-fog",
+   "name": "Listening Fog",
+   "text": "It learned from you that fog carries sound. It has been listening to everything, for you.",
+   "leans": {
+    "shape": {
+     "read": 1.0
+    },
+    "orders": {
+     "free": 0.4
+    }
+   },
+   "features": [
+    "tunnel-ear"
+   ],
+   "prongs": [
+    {
+     "id": "fog-echo",
+     "name": "Fog-echo",
+     "text": "It gives the foe back its own voice from the wrong direction, and the foe goes to see.",
+     "leans": {
+      "shape": {
+       "bind": 1.0
+      }
+     },
+     "features": [
+      "voice"
+     ],
+     "finishes": [
+      {
+       "id": "fog-calling-mist",
+       "name": "Calling Mist",
+       "text": "Something in it calls the foe by a name it answers to. You have never heard what the name is.",
+       "leans": {
+        "shape": {
+         "bind": 1.0
+        },
+        "orders": {
+         "free": 0.5
+        }
+       },
+       "features": [
+        "second-face"
+       ]
+      },
+      {
+       "id": "fog-lost-road",
+       "name": "Lost-road",
+       "text": "The other house's car left before yours and has not arrived. It was foggy on their road. It was not on yours.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        }
+       },
+       "features": [
+        "ledger"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fog-grave-mist",
+     "name": "Grave Mist",
+     "text": "The shades of your hall walk in it at the lamp hour and can be seen. They asked it to come.",
+     "leans": {
+      "bonds": {
+       "shade": 1.0
+      }
+     },
+     "features": [
+      "old-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "fog-mist-of-the-named-dead",
+       "name": "Mist of the Named Dead",
+       "text": "It holds the shape of each shade a moment after they have gone, so you can finish what you were saying.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      },
+      {
+       "id": "fog-trail-keeper",
+       "name": "Trail-keeper",
+       "text": "It hangs where a named beast has passed and shows you the print of it, hours old, in standing grey.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        }
+       },
+       "features": [
+        "far-eyes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "fog-of-stillness",
+     "name": "Fog of Stillness",
+     "text": "It has been into the Quiet and came back thinner. It knows how to be where the field is not.",
+     "leans": {
+      "ground": {
+       "quiet": 1.0
+      }
+     },
+     "features": [
+      "quiet-place"
+     ],
+     "finishes": [
+      {
+       "id": "fog-the-quiets-edge",
+       "name": "The Quiet's Edge",
+       "text": "It marks where the Quiet begins, a grey wall you can see, so that you never again walk into it by mistake.",
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        }
+       },
+       "features": [
+        "standing-air"
+       ]
+      },
+      {
+       "id": "fog-sudden-clearing",
+       "name": "Sudden Clearing",
+       "text": "At the instant you parry it lifts, and the foe is standing in plain light with its guard open.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        }
+       },
+       "features": [
+        "watching-eye"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
