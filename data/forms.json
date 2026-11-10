@@ -33,5 +33,22 @@
   {"id":"ember","name":"Ember","expression":"aspect","silhouette":"aspect-flame","features":["ember","glow","smoke"],"instars":{"min":1,"max":4}},
   {"id":"shadow","name":"Shadow","expression":"aspect","silhouette":"aspect-shadow","features":["shadow-cloak","glow","smoke"],"instars":{"min":1,"max":4}},
   {"id":"chord","name":"Chord","expression":"aspect","silhouette":"aspect-chord","features":["voice","glow","ring"],"instars":{"min":2,"max":5}},
-  {"id":"weight-of-air","name":"A Weight of Air","expression":"aspect","silhouette":"aspect-weather","features":["standing-air","glow","ring"],"instars":{"min":4,"max":6}}
+  {"id":"weight-of-air","name":"A Weight of Air","expression":"aspect","silhouette":"aspect-weather","features":["standing-air","glow","ring"],"instars":{"min":4,"max":6}},
+  {"id":"crow","name":"Hooded Crow","expression":"beast","silhouette":"beast-corvid","features":["wings","beak","voice"],"instars":{"min":1,"max":1}},
+  {"id":"tortoise","name":"Cairn-tortoise","expression":"beast","silhouette":"beast-shell","features":["shell","stone-skin","old-eyes"],"instars":{"min":1,"max":1}},
+  {"id":"storm-crow","name":"Storm-crow","expression":"beast","silhouette":"beast-corvid","features":["wings","voice","old-eyes"],"instars":{"min":2,"max":5}},
+  {"id":"weir-otter","name":"Weir-otter","expression":"beast","silhouette":"beast-swimmer","features":["fins","sleek-coat","fangs"],"instars":{"min":2,"max":5}},
+  {"id":"cairn-back","name":"Old Cairn-back","expression":"beast","silhouette":"beast-shell","features":["shell","stone-skin","horn-brow"],"instars":{"min":2,"max":6}},
+  {"id":"fledgling","name":"Fledgling Kith","expression":"kith","silhouette":"kith-fledgling","features":["wing-cloak","voice","small-hands"],"instars":{"min":1,"max":1}},
+  {"id":"lamplighter","name":"Lamplighter","expression":"kith","silhouette":"kith-lamplighter","features":["lantern","old-eyes","voice"],"instars":{"min":2,"max":5}},
+  {"id":"clockwork-wren","name":"Clockwork Wren","expression":"engine","silhouette":"engine-flier","features":["wings","gears","beak"],"instars":{"min":1,"max":1}},
+  {"id":"hearth-stove","name":"Hearth-stove","expression":"engine","silhouette":"engine-stove","features":["ember","iron-hide","smoke"],"instars":{"min":1,"max":1}},
+  {"id":"brass-kite","name":"Brass Kite","expression":"engine","silhouette":"engine-flier","features":["wings","gears","sight-glass"],"instars":{"min":2,"max":5}},
+  {"id":"watch-buckle","name":"Watch-buckle","expression":"relic","silhouette":"relic-buckle","features":["watching-eye","pulse","grip"],"instars":{"min":1,"max":1}},
+  {"id":"kept-knife","name":"Kept Knife","expression":"relic","silhouette":"relic-knife","features":["short-blade","sheath","watching-eye"],"instars":{"min":1,"max":1}},
+  {"id":"worn-glove","name":"Worn Glove","expression":"relic","silhouette":"relic-glove","features":["grip","pulse","small-hands"],"instars":{"min":1,"max":1}},
+  {"id":"wick-fiend","name":"Wick-fiend","expression":"daemon","silhouette":"daemon-wick","features":["ember","horns","tail"],"instars":{"min":1,"max":1}},
+  {"id":"whisperer","name":"Whisperer","expression":"daemon","silhouette":"daemon-whisper","features":["voice","second-face","shadow-cloak"],"instars":{"min":1,"max":1}},
+  {"id":"rime","name":"Rime","expression":"aspect","silhouette":"aspect-frost","features":["cold-core","glow","rime"],"instars":{"min":1,"max":1}},
+  {"id":"wisp-train","name":"Wisp-train","expression":"aspect","silhouette":"aspect-wisps","features":["ember","glow","lantern"],"instars":{"min":2,"max":5}}
 ]

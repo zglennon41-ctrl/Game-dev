@@ -4,11 +4,16 @@
 ##   game/assets/genius/parts/<feature>.glb
 ## Until then, placeholder bodies borrow a rigged model (four-legged and humanoid kinds) or are
 ## built from shapes, in shadow lit at the edges by the partner's Shape colour.
+## A genius with a look (genius_look.gd, data/genius-looks.json) is painted as itself: its coat
+## on the body's coat materials, its markings on the materials named mark_<region>, its build
+## on the body's blend shapes (or the whole body, where it has none), its light in its own
+## style, and its keepsake hung where the body has a place for one.
 class_name GeniusBody
 extends Node3D
 
 const BODY_DIR := "res://game/assets/genius/bodies/%s.glb"
 const PART_DIR := "res://game/assets/genius/parts/%s.glb"
+const KEEP_DIR := "res://game/assets/genius/keepsakes/%s.glb"
 
 const SILHOUETTE := """
 shader_type spatial;
@@ -53,6 +58,13 @@ var anim_names: Dictionary = {}
 var sockets: Dictionary = {}       # name -> Node3D
 var uses_art := false              # the body came from an art file, not a placeholder
 var parts_from_art: Array = []     # features whose parts came from art files
+var look: Dictionary = {}          # how this one looks, resolved (GeniusLook.resolve); {} for none
+var keepsake := ""                 # the keepsake it wears, if its body has a place for it
+var painted := 0                   # how many surfaces took the coat's colours
+var shapes_set: Dictionary = {}    # blend shape -> value, as set on its meshes
+var _field_surfaces: Array = []    # [mesh, surface, energy]: the field's surfaces, for a light that pulses
+var _rims: Array = []              # the edge-light laid over its art, so a portrait can turn it down
+var _glow := 1.0
 var _mat: ShaderMaterial
 var _model: Node3D
 var _wings: Array = []
@@ -83,6 +95,11 @@ func _assemble(instar: int) -> void:
 	_mat.shader = _shader
 	_mat.set_shader_parameter("glow", color)
 	_apply_surfaces(cfg)
+	_glow = GeniusLook.glow(int(info.get("instar", instar)))
+	var born: Dictionary = info.get("look", {})
+	if not born.is_empty():
+		look = GeniusLook.resolve(born, String(info.get("form", "")), sil, int(info.get("instar", instar)))
+		_glow *= float(look["eyes"]["energy"])
 	if ResourceLoader.exists(BODY_DIR % sil):
 		_model = load(BODY_DIR % sil).instantiate()
 		add_child(_model)
@@ -100,13 +117,16 @@ func _assemble(instar: int) -> void:
 		# An art body carries its own proportions: the data says only how tall it stands
 		# against its instar's size (an otter stands half as tall as a wolf).
 		proportions = Vector3.ONE * float(spec.get("artSize", 1.0))
+	proportions *= _apply_proportions()
 	_fit_height(float(Data.genius()["size"].get(str(maxi(1, instar)), 0.6)), proportions)
 	# Parts, on the sockets for their slots.
 	var feats: Array = info.get("features", [])
 	var slot_count := {}
 	for f in feats:
 		var slot := _slot_of(f)
-		if slot == "surface":
+		# A surface changes the skin and hangs nothing, unless it has a part and a place of its
+		# own (the Seed-marks: a grip to hold it by, a ledger at its chest).
+		if slot == "surface" and not (ResourceLoader.exists(PART_DIR % f) and cfg.get("featureSockets", {}).has(f)):
 			continue
 		# An art body may carry a feature in its own design (the stag its antlers): no part hangs.
 		if uses_art and (spec.get("carries", []) as Array).has(f):
@@ -131,6 +151,7 @@ func _assemble(instar: int) -> void:
 			parts_from_art.append(f)
 		else:
 			_placeholder_part(f, slot, socks)
+	_wear_keepsake()
 	if anim and anim_names.has("idle") and anim.has_animation(anim_names["idle"]):
 		for k in anim_names:
 			if anim.has_animation(anim_names[k]):
@@ -146,6 +167,7 @@ func _adopt_art(n: Node) -> void:
 	var rim := ShaderMaterial.new()
 	rim.shader = _rim_shader
 	rim.set_shader_parameter("glow", color)
+	_rims.append(rim)
 	for m in n.find_children("*", "MeshInstance3D", true, false):
 		var mi := m as MeshInstance3D
 		mi.material_overlay = rim
@@ -155,9 +177,16 @@ func _adopt_art(n: Node) -> void:
 				var t := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
 				t.emission_enabled = true
 				t.emission = color
-				t.emission_energy_multiplier = 1.8
+				t.emission_energy_multiplier = 1.8 * _glow
 				t.albedo_color = color.darkened(0.7)
 				mi.set_surface_override_material(i, t)
+				_field_surfaces.append([mi, i, 1.8 * _glow])
+			elif mat and mat is StandardMaterial3D and look.get("colors", {}).has(String(mat.resource_name)):
+				# its own coat, and its markings: shown in the marking's colour, or hidden in the coat's
+				var c := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
+				c.albedo_color = look["colors"][String(mat.resource_name)]
+				mi.set_surface_override_material(i, c)
+				painted += 1
 	# The character's left is +X: the left wing rises with a positive turn about the way it faces.
 	for side in [["wing_l", 1.0], ["wing_r", -1.0]]:
 		var w: Node = n.find_child(side[0], true, false)
@@ -171,6 +200,45 @@ func _adopt_art(n: Node) -> void:
 			# the axis it beats about: the model's forward, seen from the wing's own frame
 			w3.set_meta("wing_axis", (_rest_xf(w3, n).basis.orthonormalized().inverse() * Vector3(0, 0, 1)).normalized())
 			_wings.append(w3)
+
+## Its build: each proportion on the body's blend shapes where the art carries them (lean and
+## heavy, a longer tail); where it does not, the whole body a little broader or narrower.
+## Returns that scale.
+func _apply_proportions() -> Vector3:
+	var scale_by := Vector3.ONE
+	if look.is_empty() or _model == null:
+		return scale_by
+	var meshes := _model.find_children("*", "MeshInstance3D", true, false)
+	for p in Data.genius_looks()["proportions"]:
+		var v := clampf(float(look["proportions"].get(p["id"], 0.0)), -1.0, 1.0)
+		var shape_name := String(p["shapes"][0] if v < 0.0 else p["shapes"][1])
+		var found := false
+		for m in meshes:
+			var mi := m as MeshInstance3D
+			for sh in p["shapes"]:
+				if sh != "" and mi.find_blend_shape_by_name(sh) >= 0:
+					found = true
+					mi.set_blend_shape_value(mi.find_blend_shape_by_name(sh), absf(v) if sh == shape_name else 0.0)
+		if found:
+			if shape_name != "":
+				shapes_set[shape_name] = absf(v)
+		else:
+			scale_by *= Vector3(1.0 + float(p["scale"][0]) * v, 1.0 + float(p["scale"][1]) * v, 1.0 + float(p["scale"][2]) * v)
+	return scale_by
+
+## Its keepsake, on the first socket the body has for it (a collar needs a neck).
+func _wear_keepsake() -> void:
+	var k: Dictionary = look.get("keepsake", {})
+	if k.is_empty() or not ResourceLoader.exists(KEEP_DIR % String(k["id"])):
+		return
+	for sn in k["sockets"]:
+		if sockets.has(sn):
+			var art: Node3D = load(KEEP_DIR % String(k["id"])).instantiate()
+			art.name = "Keepsake"
+			_socket(sn).add_child(art)
+			_adopt_art(art)
+			keepsake = String(k["id"])
+			return
 
 ## An art body's sockets: nodes named socket_<name>, or, on a rigged body, bones of that name
 ## (an empty parented to a bone comes through the importer as a bone), each given a node to
@@ -235,6 +303,12 @@ func move_at(speed: float) -> void:
 func set_strength(k: float) -> void:
 	_mat.set_shader_parameter("strength", k)
 
+## How strongly the Shape colour lies along its edges (1 in the world; a portrait that must
+## show its coat turns it down).
+func set_rim(k: float) -> void:
+	for r in _rims:
+		(r as ShaderMaterial).set_shader_parameter("strength", k)
+
 func _process(dt: float) -> void:
 	_t += dt
 	for w in _wings:
@@ -251,6 +325,19 @@ func _process(dt: float) -> void:
 				_spinners.append(n)
 	for sp in _spinners:
 		(sp as Node3D).rotate_object_local(Vector3.UP, dt * float(sp.get_meta("spin")))
+	# A light that pulses or flickers: the field's surfaces breathe (the cel shader's copies too).
+	var pulse := float(look.get("eyes", {}).get("pulse", 0.0)) if not look.is_empty() else 0.0
+	if pulse > 0.0:
+		var rate := float(look["eyes"].get("rate", 1.0))
+		var k := 1.0 + pulse * (sin(_t * rate * TAU) if rate < 4.0 else sin(_t * rate * TAU) * sin(_t * rate * 2.7))
+		for fs in _field_surfaces:
+			if not is_instance_valid(fs[0]):
+				continue
+			var fm: Material = (fs[0] as MeshInstance3D).get_surface_override_material(int(fs[1]))
+			if fm is StandardMaterial3D:
+				(fm as StandardMaterial3D).emission_energy_multiplier = float(fs[2]) * k
+			elif fm is ShaderMaterial:
+				(fm as ShaderMaterial).set_shader_parameter("emission_energy", float(fs[2]) * k)
 	if hover and _model:
 		_model.position.y = 0.06 * sin(_t * 2.2)
 	elif _model and anim == null and uses_art:

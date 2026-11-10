@@ -138,6 +138,9 @@ func enter(h: Dictionary) -> void:
 		progress.erase("rested")
 	cohort = Academy.make_cohort(int(progress["seed"]), hero)
 	genius = Genius.for_hero(hero)
+	var gp: Variant = get_parent().get("page") if get_parent() else null
+	if gp is GeniusPage and not (gp as GeniusPage).look_changed.is_connected(_genius_look_changed):
+		(gp as GeniusPage).look_changed.connect(_genius_look_changed)
 	visible = true
 	_carrying = false
 	if progress.get("quest", {}) is Dictionary and not progress.get("quest", {}).is_empty():
@@ -152,6 +155,21 @@ func enter(h: Dictionary) -> void:
 		say(a["speaker"], a["lines"], func(): progress["arrived"] = true; save())
 
 var genius: Genius = null
+
+## The partner chose a coat, a marking or a keepsake on the genius's page: it is saved, and the
+## genius walking beside them changes to match.
+func _genius_look_changed(g: Genius) -> void:
+	if g != genius or genius == null or not genius.is_born():
+		return
+	var gp: Variant = get_parent().get("page") if get_parent() else null
+	if gp is GeniusPage:
+		(gp as GeniusPage).look_saved = true
+	save()
+	if world and world._g_form:
+		var at: Vector3 = world._g_form.global_position
+		var form := world.make_form(hero["genius"], World.SHAPE_COLORS[hero["shape"]].lightened(0.15))
+		form.position = at
+		world.set_form(hero["genius"], form)
 
 func save() -> void:
 	if genius and genius.is_born():
@@ -2077,6 +2095,8 @@ func show_reading(reading: Dictionary, then: Callable, heading := "The Reading: 
 		var info := c.duplicate()
 		info["instar"] = 2 if int(reading.get("instar", 2)) >= 2 else 1
 		info["name"] = c["name"]
+		# Each is shown as this hero's genius would wear it: its own coat, its own markings.
+		info["look"] = genius.look if genius and not genius.look.is_empty() else Rite.born_look(hero)
 		var card := GeniusCard.make(info, col, "CANDIDATE %d" % (i + 1), true)
 		col_v.add_child(card)
 		var why := RichTextLabel.new()

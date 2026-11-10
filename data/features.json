@@ -64,5 +64,9 @@
   { "id": "hall-fat", "slot": "body", "label": "sleek, heavier, content", "bonus": { "fallRecoveryDays": -1 }, "fixable": true, "adaptation": true },
   { "id": "scorched", "slot": "surface", "label": "singed edges, ember eyes", "bonus": { "resist": "fire" }, "fixable": true, "adaptation": true },
   { "id": "tunnel-ear", "slot": "head", "label": "larger ears, a listening tilt", "bonus": { "hearsPostBreak": 1 }, "fixable": true, "adaptation": true },
-  { "id": "quiet-place", "slot": "surface", "label": "a place on it with no field", "bonus": {} }
+  { "id": "quiet-place", "slot": "surface", "label": "a place on it with no field", "bonus": {} },
+  { "id": "shell", "slot": "body", "label": "a shell", "bonus": {} },
+  { "id": "rime", "slot": "surface", "label": "a skin of rime", "bonus": {} },
+  { "id": "watching-eye", "slot": "eyes", "label": "an eye that opens in it", "bonus": {} },
+  { "id": "pulse", "slot": "surface", "label": "a pulse in the leather", "bonus": {} }
 ]

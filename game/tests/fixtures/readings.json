@@ -31,6 +31,11 @@
       "weight": 0.6
      },
      {
+      "line": "blood",
+      "expression": "beast",
+      "weight": 0.3
+     },
+     {
       "line": "shape",
       "expression": "beast",
       "weight": 0.3
@@ -42,7 +47,7 @@
       "name": "Hawk",
       "expression": "beast",
       "silhouette": "beast-flier",
-      "score": 2.12,
+      "score": 3.12,
       "own": [
        "wings",
        "talons",
@@ -64,38 +69,10 @@
         "contribution": 1.7
        },
        {
-        "line": "shape",
-        "key": "cast",
+        "line": "blood",
+        "key": "aerie-born",
         "share": 1,
-        "contribution": 0.42
-       }
-      ]
-     },
-     {
-      "form": "field-wolf",
-      "name": "Field-wolf",
-      "expression": "beast",
-      "silhouette": "beast-runner",
-      "score": 1.02,
-      "own": [
-       "long-legs",
-       "fangs",
-       "ruff"
-      ],
-      "heritage": [],
-      "seedMark": "far-eyes",
-      "features": [
-       "far-eyes",
-       "long-legs",
-       "fangs",
-       "ruff"
-      ],
-      "reasons": [
-       {
-        "line": "seed",
-        "key": "watches-from-above",
-        "share": 1,
-        "contribution": 0.6
+        "contribution": 1
        },
        {
         "line": "shape",
@@ -106,36 +83,82 @@
       ]
      },
      {
-      "form": "otter",
-      "name": "River-otter",
+      "form": "crow",
+      "name": "Hooded Crow",
       "expression": "beast",
-      "silhouette": "beast-swimmer",
-      "score": 0.9,
+      "silhouette": "beast-corvid",
+      "score": 2.62,
       "own": [
-       "fins",
-       "sleek-coat",
-       "small-hands"
+       "wings",
+       "beak",
+       "voice"
       ],
       "heritage": [],
       "seedMark": "far-eyes",
       "features": [
        "far-eyes",
-       "fins",
-       "sleek-coat",
-       "small-hands"
+       "wings",
+       "beak",
+       "voice"
       ],
       "reasons": [
        {
         "line": "seed",
         "key": "watches-from-above",
         "share": 1,
-        "contribution": 0.6
+        "contribution": 1.5
+       },
+       {
+        "line": "blood",
+        "key": "aerie-born",
+        "share": 1,
+        "contribution": 0.7
        },
        {
         "line": "shape",
         "key": "cast",
         "share": 1,
-        "contribution": 0.3
+        "contribution": 0.42
+       }
+      ]
+     },
+     {
+      "form": "clockwork-wren",
+      "name": "Clockwork Wren",
+      "expression": "engine",
+      "silhouette": "engine-flier",
+      "score": 1.42,
+      "own": [
+       "wings",
+       "gears",
+       "beak"
+      ],
+      "heritage": [],
+      "seedMark": "far-eyes",
+      "features": [
+       "far-eyes",
+       "wings",
+       "gears",
+       "beak"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "watches-from-above",
+        "share": 1,
+        "contribution": 0.9
+       },
+       {
+        "line": "blood",
+        "key": "aerie-born",
+        "share": 1,
+        "contribution": 0.4
+       },
+       {
+        "line": "shape",
+        "key": "cast",
+        "share": 1,
+        "contribution": 0.12
        }
       ]
      }
@@ -265,36 +288,36 @@
       ]
      },
      {
-      "form": "walking-lantern",
-      "name": "Walking Lantern",
+      "form": "hearth-stove",
+      "name": "Hearth-stove",
       "expression": "engine",
-      "silhouette": "engine-lantern",
-      "score": 1.08,
+      "silhouette": "engine-stove",
+      "score": 1.68,
       "own": [
-       "lantern",
-       "roots",
-       "cold-core"
+       "ember",
+       "iron-hide",
+       "smoke"
       ],
       "heritage": [],
       "seedMark": "broad-guard",
       "features": [
        "broad-guard",
-       "lantern",
-       "roots",
-       "cold-core"
+       "ember",
+       "iron-hide",
+       "smoke"
       ],
       "reasons": [
        {
         "line": "seed",
         "key": "stands-between",
         "share": 1,
-        "contribution": 0.6
+        "contribution": 0.9
        },
        {
         "line": "blood",
         "key": "ridgefolk",
         "share": 1,
-        "contribution": 0.3
+        "contribution": 0.6
        },
        {
         "line": "shape",
@@ -389,25 +412,37 @@
       ]
      },
      {
-      "form": "homunculus",
-      "name": "Homunculus",
-      "expression": "kith",
-      "silhouette": "kith-homunculus",
-      "score": 0.18,
+      "form": "wick-fiend",
+      "name": "Wick-fiend",
+      "expression": "daemon",
+      "silhouette": "daemon-wick",
+      "score": 2.48,
       "own": [
-       "small-hands",
-       "brush",
-       "old-eyes"
+       "ember",
+       "horns",
+       "tail"
       ],
       "heritage": [],
       "seedMark": "ledger",
       "features": [
        "ledger",
-       "small-hands",
-       "brush",
-       "old-eyes"
+       "ember",
+       "horns",
+       "tail"
       ],
       "reasons": [
+       {
+        "line": "seed",
+        "key": "owes-me",
+        "share": 1,
+        "contribution": 1.2
+       },
+       {
+        "line": "blood",
+        "key": "demon-blooded",
+        "share": 1,
+        "contribution": 1.1
+       },
        {
         "line": "shape",
         "key": "bind",
@@ -417,25 +452,37 @@
       ]
      },
      {
-      "form": "lantern-sprite",
-      "name": "Lantern-sprite",
-      "expression": "kith",
-      "silhouette": "kith-fey",
-      "score": 0.18,
+      "form": "whisperer",
+      "name": "Whisperer",
+      "expression": "daemon",
+      "silhouette": "daemon-whisper",
+      "score": 2.08,
       "own": [
-       "lantern",
        "voice",
-       "small-hands"
+       "second-face",
+       "shadow-cloak"
       ],
       "heritage": [],
       "seedMark": "ledger",
       "features": [
        "ledger",
-       "lantern",
        "voice",
-       "small-hands"
+       "second-face",
+       "shadow-cloak"
       ],
       "reasons": [
+       {
+        "line": "seed",
+        "key": "owes-me",
+        "share": 1,
+        "contribution": 1
+       },
+       {
+        "line": "blood",
+        "key": "demon-blooded",
+        "share": 1,
+        "contribution": 0.9
+       },
        {
         "line": "shape",
         "key": "bind",
@@ -478,6 +525,11 @@
       "weight": 0.6
      },
      {
+      "line": "blood",
+      "expression": "aspect",
+      "weight": 0.4
+     },
+     {
       "line": "shape",
       "expression": "aspect",
       "weight": 0.24
@@ -489,7 +541,7 @@
       "name": "Ember",
       "expression": "aspect",
       "silhouette": "aspect-flame",
-      "score": 1.36,
+      "score": 1.96,
       "own": [
        "ember",
        "glow",
@@ -510,6 +562,12 @@
         "contribution": 1
        },
        {
+        "line": "blood",
+        "key": "fogborn",
+        "share": 1,
+        "contribution": 0.6
+       },
+       {
         "line": "shape",
         "key": "turn",
         "share": 1,
@@ -522,7 +580,7 @@
       "name": "Shadow",
       "expression": "aspect",
       "silhouette": "aspect-shadow",
-      "score": 0.84,
+      "score": 1.84,
       "own": [
        "shadow-cloak",
        "glow",
@@ -537,6 +595,12 @@
        "smoke"
       ],
       "reasons": [
+       {
+        "line": "blood",
+        "key": "fogborn",
+        "share": 1,
+        "contribution": 1
+       },
        {
         "line": "seed",
         "key": "that-burns",
@@ -552,14 +616,14 @@
       ]
      },
      {
-      "form": "ledger-imp",
-      "name": "Ledger-imp",
+      "form": "wick-fiend",
+      "name": "Wick-fiend",
       "expression": "daemon",
-      "silhouette": "daemon-small",
-      "score": 0.4,
+      "silhouette": "daemon-wick",
+      "score": 0.92,
       "own": [
+       "ember",
        "horns",
-       "ledger",
        "tail"
       ],
       "heritage": [],
@@ -567,7 +631,6 @@
       "features": [
        "ember",
        "horns",
-       "ledger",
        "tail"
       ],
       "reasons": [
@@ -575,7 +638,13 @@
         "line": "seed",
         "key": "that-burns",
         "share": 1,
-        "contribution": 0.4
+        "contribution": 0.8
+       },
+       {
+        "line": "shape",
+        "key": "turn",
+        "share": 1,
+        "contribution": 0.12
        }
       ]
      }
@@ -611,6 +680,11 @@
       "line": "seed",
       "expression": "kith",
       "weight": 0.8
+     },
+     {
+      "line": "blood",
+      "expression": "aspect",
+      "weight": 0.3
      },
      {
       "line": "shape",
@@ -653,13 +727,46 @@
       ]
      },
      {
-      "form": "lantern-sprite",
-      "name": "Lantern-sprite",
+      "form": "tortoise",
+      "name": "Cairn-tortoise",
+      "expression": "beast",
+      "silhouette": "beast-shell",
+      "score": 0.82,
+      "own": [
+       "shell",
+       "stone-skin",
+       "old-eyes"
+      ],
+      "heritage": [],
+      "seedMark": "old-eyes",
+      "features": [
+       "old-eyes",
+       "shell",
+       "stone-skin"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "remembers",
+        "share": 1,
+        "contribution": 0.7
+       },
+       {
+        "line": "shape",
+        "key": "read",
+        "share": 1,
+        "contribution": 0.12
+       }
+      ]
+     },
+     {
+      "form": "fledgling",
+      "name": "Fledgling Kith",
       "expression": "kith",
-      "silhouette": "kith-fey",
+      "silhouette": "kith-fledgling",
       "score": 0.98,
       "own": [
-       "lantern",
+       "wing-cloak",
        "voice",
        "small-hands"
       ],
@@ -667,7 +774,7 @@
       "seedMark": "old-eyes",
       "features": [
        "old-eyes",
-       "lantern",
+       "wing-cloak",
        "voice",
        "small-hands"
       ],
@@ -685,27 +792,6 @@
         "contribution": 0.18
        }
       ]
-     },
-     {
-      "form": "ember",
-      "name": "Ember",
-      "expression": "aspect",
-      "silhouette": "aspect-flame",
-      "score": 0,
-      "own": [
-       "ember",
-       "glow",
-       "smoke"
-      ],
-      "heritage": [],
-      "seedMark": "old-eyes",
-      "features": [
-       "old-eyes",
-       "ember",
-       "glow",
-       "smoke"
-      ],
-      "reasons": []
      }
     ]
    }
@@ -741,6 +827,11 @@
       "weight": 0.6
      },
      {
+      "line": "blood",
+      "expression": "engine",
+      "weight": 0.4
+     },
+     {
       "line": "shape",
       "expression": "engine",
       "weight": 0.3
@@ -748,11 +839,51 @@
     ],
     "candidates": [
      {
+      "form": "clockwork-wren",
+      "name": "Clockwork Wren",
+      "expression": "engine",
+      "silhouette": "engine-flier",
+      "score": 1.72,
+      "own": [
+       "wings",
+       "gears",
+       "beak"
+      ],
+      "heritage": [],
+      "seedMark": "cold-core",
+      "features": [
+       "cold-core",
+       "wings",
+       "gears",
+       "beak"
+      ],
+      "reasons": [
+       {
+        "line": "blood",
+        "key": "forgeborn",
+        "share": 1,
+        "contribution": 0.7
+       },
+       {
+        "line": "seed",
+        "key": "never-alive",
+        "share": 1,
+        "contribution": 0.6
+       },
+       {
+        "line": "shape",
+        "key": "make",
+        "share": 1,
+        "contribution": 0.42
+       }
+      ]
+     },
+     {
       "form": "walking-lantern",
       "name": "Walking Lantern",
       "expression": "engine",
       "silhouette": "engine-lantern",
-      "score": 1.3,
+      "score": 1.7,
       "own": [
        "lantern",
        "roots",
@@ -773,38 +904,10 @@
         "contribution": 1
        },
        {
-        "line": "shape",
-        "key": "make",
+        "line": "blood",
+        "key": "forgeborn",
         "share": 1,
-        "contribution": 0.3
-       }
-      ]
-     },
-     {
-      "form": "iron-hound",
-      "name": "Iron Hound",
-      "expression": "engine",
-      "silhouette": "engine-quadruped",
-      "score": 0.9,
-      "own": [
-       "broad-chest",
-       "iron-hide",
-       "lantern"
-      ],
-      "heritage": [],
-      "seedMark": "cold-core",
-      "features": [
-       "cold-core",
-       "broad-chest",
-       "iron-hide",
-       "lantern"
-      ],
-      "reasons": [
-       {
-        "line": "seed",
-        "key": "never-alive",
-        "share": 1,
-        "contribution": 0.6
+        "contribution": 0.4
        },
        {
         "line": "shape",
@@ -815,30 +918,29 @@
       ]
      },
      {
-      "form": "ember",
-      "name": "Ember",
+      "form": "rime",
+      "name": "Rime",
       "expression": "aspect",
-      "silhouette": "aspect-flame",
-      "score": 0.4,
+      "silhouette": "aspect-frost",
+      "score": 1.1,
       "own": [
-       "ember",
+       "cold-core",
        "glow",
-       "smoke"
+       "rime"
       ],
       "heritage": [],
       "seedMark": "cold-core",
       "features": [
        "cold-core",
-       "ember",
        "glow",
-       "smoke"
+       "rime"
       ],
       "reasons": [
        {
         "line": "seed",
         "key": "never-alive",
         "share": 1,
-        "contribution": 0.4
+        "contribution": 1.1
        }
       ]
      }
@@ -932,6 +1034,11 @@
      {
       "line": "company",
       "expression": "kith",
+      "weight": 0.06
+     },
+     {
+      "line": "blood",
+      "expression": "beast",
       "weight": 0.06
      },
      {

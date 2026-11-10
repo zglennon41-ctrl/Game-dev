@@ -70,6 +70,9 @@ PALETTE = {
     "paper": ((0.72, 0.66, 0.52), 0.8, 0.0), "eye_white": ((0.85, 0.83, 0.78), 0.3, 0.0), "eye_dark": ((0.02, 0.02, 0.025), 0.2, 0.0),
     "shade": ((0.022, 0.02, 0.032), 0.9, 0.0), "shade_edge": ((0.075, 0.065, 0.1), 0.85, 0.0), "void": ((0.004, 0.004, 0.006), 1.0, 0.0),
     "hand_skin": ((0.56, 0.44, 0.36), 0.6, 0.0), "hide_red": ((0.3, 0.17, 0.09), 0.9, 0.0), "coal": ((0.04, 0.035, 0.035), 0.9, 0.0), "root": ((0.16, 0.11, 0.075), 0.9, 0.0), "bristle": ((0.1, 0.08, 0.06), 0.9, 0.0), "wood": ((0.27, 0.17, 0.09), 0.8, 0.0),
+    "leather_dark": ((0.1, 0.06, 0.04), 0.75, 0.0), "ice": ((0.47, 0.56, 0.6), 0.15, 0.0), "ice_dark": ((0.27, 0.36, 0.41), 0.2, 0.0), "ice_pale": ((0.74, 0.81, 0.82), 0.12, 0.0),
+    "wax": ((0.72, 0.66, 0.5), 0.35, 0.0), "cord": ((0.33, 0.25, 0.16), 0.9, 0.0), "keepsake_tint": ((0.16, 0.03, 0.025), 0.8, 0.0), "crow_dark": ((0.024, 0.023, 0.028), 0.55, 0.0),
+    "crow_mid": ((0.035, 0.034, 0.042), 0.5, 0.0), "crow_pale": ((0.33, 0.32, 0.3), 0.7, 0.0), "cloth_wool": ((0.2, 0.19, 0.16), 0.95, 0.0), "cloth_dark": ((0.07, 0.065, 0.06), 0.95, 0.0),
 }
 
 
@@ -113,6 +116,35 @@ def field(name, strength=2.5):
     return m
 
 
+def mark(region, like):
+    """The material of a marking region (mask, socks, saddle...): the game shows it in the
+    marking's colour or hides it in the coat's (data/genius-looks.json). Here it is born the
+    colour of the coat it lies on, so a body with no look is unmarked."""
+    name = "mark_" + region
+    m = bpy.data.materials.get(name)
+    if m:
+        return m
+    src = like if not isinstance(like, str) else mat(like)
+    b = src.node_tree.nodes.get("Principled BSDF")
+    c = b.inputs["Base Color"].default_value
+    return mat(name, (c[0], c[1], c[2]), rough=b.inputs["Roughness"].default_value, metallic=b.inputs["Metallic"].default_value)
+
+
+def shape_key(ob, name, move):
+    """A blend shape on a finished mesh: move(world position, vertex index) gives where a
+    point goes (or None to leave it). The game sets it from the genius's build."""
+    if ob.data.shape_keys is None:
+        ob.shape_key_add(name="Basis")
+    key = ob.shape_key_add(name=name)
+    M = ob.matrix_world.copy()
+    Mi = M.inverted()
+    for i, v in enumerate(ob.data.vertices):
+        q = move(M @ v.co, i)
+        if q is not None:
+            key.data[i].co = Mi @ V(q)
+    return key
+
+
 # ======================================================================================
 # A built body: what is exported, where its sockets are, how to pose it for its card
 # ======================================================================================
@@ -134,7 +166,9 @@ class Built:
             bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_yup=True, export_apply=False,
                                       export_animations=True, export_animation_mode="ACTIONS", export_skins=True)
         else:
-            bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=True, export_yup=True)
+            # a body with blend shapes keeps them only if modifiers are not applied (it has none)
+            keyed = any(o.type == "MESH" and o.data.shape_keys for o in self.objects)
+            bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=not keyed, export_yup=True)
         tris = sum(sum(len(p.vertices) - 2 for p in o.data.polygons) for o in self.objects if o.type == "MESH")
         log("wrote", os.path.relpath(path, ROOT), "%d triangles, %d KB, sockets: %d" % (tris, os.path.getsize(path) // 1024, len(self.sockets)))
         return tris
@@ -250,11 +284,68 @@ def _neck_ring(r, bone, half_width=0.34):
 
 
 WOLF_CLIPS = ("AnimalArmature|Idle", "AnimalArmature|Walk", "AnimalArmature|Gallop")
+LOWER_LEGS = ("FrontLowerLeg.L", "FrontLowerLeg.R", "BackLowerLeg.L", "BackLowerLeg.R")
 
 
-def _finish_wolf(r, extra=None):
-    """Stand it, bring it to the kit's size, and put its sockets on its bones."""
+def _wolf_marks(r, coat, regions, lies_on=None):
+    """Marking regions on the beast's own skin: the faces of its main coat (coat[0], or the
+    material lies_on names for a region) that lie in a region take the material mark_<region>.
+    Only that one material's faces, so a marking that is hidden is the coat exactly."""
+    import beast_kit as bk
+    me = r.mesh.data
+    names = [m.name for m in me.materials]
+    on = {reg: names.index((lies_on or {}).get(reg, coat[0])) for reg in regions if (lies_on or {}).get(reg, coat[0]) in names}
+    eye, nose = _eye(r), _nose(r)
+    w = {"socks": r._weights([b for leg in LOWER_LEGS for b in r.family(leg)]), "tailtip": r._weights(r.family("Tail4")),
+         "head": r._weights(r.family("Head")), "torso": r._weights(bk.TORSO)}
+    ya, yb = sorted((r.bone("Torso3").y, r.bone("Back").y))
+    R = r.M.to_3x3()
+    got = {}
+    for p in me.polygons:
+        if p.material_index not in on.values():
+            continue
+        c, n = r.M @ p.center, (R @ p.normal).normalized()
+        share = lambda arr: sum(arr[i] for i in p.vertices) / len(p.vertices)  # noqa: E731
+        region = None
+        if "socks" in regions and share(w["socks"]) > 0.55:
+            region = "socks"
+        elif "tailtip" in regions and share(w["tailtip"]) > 0.55:
+            region = "tailtip"
+        elif "mask" in regions and share(w["head"]) > 0.55 and c.y < eye.y + 0.1 and c.z > nose.z - 0.06:
+            region = "mask"
+        elif "saddle" in regions and share(w["torso"]) > 0.55 and n.z > 0.45 and ya - 0.1 <= c.y <= yb + 0.1:
+            region = "saddle"
+        if region is None or on.get(region) != p.material_index:
+            continue
+        m = mark(region, me.materials[p.material_index])
+        if m.name not in [x.name for x in me.materials]:
+            me.materials.append(m)
+        p.material_index = [x.name for x in me.materials].index(m.name)
+        got[region] = got.get(region, 0) + 1
+    log("marks", got)
+
+
+def _wolf_shapes(r, tail=True):
+    """The beast's build as blend shapes: heavy (a deeper belly, broader flanks), lean, and a
+    longer tail."""
+    import beast_kit as bk
+    ob = r.mesh
+    wt = r._weights(bk.TORSO + bk.NECK)
+    zc = r.bone("Torso2").z
+    for name, k in (("heavy", 0.18), ("lean", -0.13)):
+        shape_key(ob, name, lambda p, i, k=k: Vector((p.x * (1 + k * wt[i]), p.y, zc + (p.z - zc) * (1 + k * 0.85 * wt[i]))) if wt[i] > 0.0 else None)
+    if tail:
+        wl = r._weights(r.family("Tail1"))
+        root = r.bone("Tail1")
+        shape_key(ob, "long_tail", lambda p, i: root + (p - root) * (1 + 0.4 * wl[i]) if wl[i] > 0.0 else None)
+
+
+def _finish_wolf(r, extra=None, coat=None, marks=("socks", "mask", "saddle", "tailtip"), tail=True, lies_on=None):
+    """Stand it, bring it to the kit's size, and put its sockets on its bones. `coat` names
+    the materials of its own skin: its marking regions are cut from them."""
     r.settle()
+    if coat:
+        _wolf_marks(r, coat, marks, lies_on)
     eye, nose = _eye(r), _nose(r)
     hb = r.bone("Head")
     crown = r.top(hb.y + 0.06, half_width=0.25)
@@ -273,6 +364,11 @@ def _finish_wolf(r, extra=None):
         "socket_arm_l": ("Torso3", (r.side(sh.y, sh.z + 0.2) + 0.02, sh.y, sh.z + 0.2), None),
         "socket_arm_r": ("Torso3", (-r.side(sh.y, sh.z + 0.2) - 0.02, sh.y, sh.z + 0.2), None),
     }
+    # where a collar goes: the neck's own section, so the collar (a hoop a tenth of a unit in
+    # radius, in its own XZ plane) comes out the size of this neck
+    nb = r.bone("Neck2")
+    chw = r.side(nb.y, nb.z)
+    spots["socket_collar"] = ("Neck2", (0, nb.y, nb.z), lambda k, a=chw: Matrix.Diagonal(((a + 0.03) * k / 0.1, 1.0, (a * 1.12 + 0.03) * k / 0.1)))
     for tag, bone, foot in (("fl", "FrontLowerLeg.L", "FF.L"), ("fr", "FrontLowerLeg.R", "FF.R"), ("bl", "BackLowerLeg.L", "FFB.L"), ("br", "BackLowerLeg.R", "FFB.R")):
         f = r.bone(foot)
         spots["socket_limb_" + tag] = (bone, (f.x, f.y + 0.06, 0.12), None)
@@ -293,6 +389,8 @@ def _finish_wolf(r, extra=None):
                 r.arm.animation_data.nla_tracks.remove(tr)
     # a socket may carry a size as well as a turn: a head twice as broad wears its parts twice as big
     sockets = {name: bone_socket(r.arm, name, bone, Vector(at) * k, rot(k) if callable(rot) else rot) for name, (bone, at, rot) in spots.items()}
+    if coat:
+        _wolf_shapes(r, tail=tail)
     return Built([r.arm, r.mesh], sockets, arm=r.arm)
 
 
@@ -338,7 +436,7 @@ def field_wolf_body():
     _add(r, "second_eyes", eyes, "Head", field("eyes", 3.0))
     # the seam along the spine
     r.fin("seam_spine", r.bone("Torso3").y, r.bone("Tail2").y, 0.03, field("seam", 1.6), thickness=0.07, steps=16, sink=0.05)
-    return _finish_wolf(r)
+    return _finish_wolf(r, coat=("fur_dark", "fur_light"))
 
 
 def ram_body():
@@ -397,7 +495,8 @@ def ram_body():
     # the head's socket is as big as the head: the horns (a part, made for a head of ordinary
     # breadth) grow to clear it
     crown = r.top(hb.y + 0.06, half_width=0.25)
-    return _finish_wolf(r, {"socket_head": ("Head", (0, hb.y + 0.06, crown - 0.04), lambda k: Matrix.Scale(RAM_HEAD, 3))})
+    return _finish_wolf(r, {"socket_head": ("Head", (0, hb.y + 0.06, crown - 0.04), lambda k: Matrix.Scale(RAM_HEAD, 3))},
+                        coat=("stone_hide", "stone_light"), marks=("socks", "mask", "saddle"), tail=False)
 
 
 def otter_body():
@@ -442,7 +541,7 @@ def otter_body():
     mids = [sum(mids[max(0, i - 2):i + 3]) / len(mids[max(0, i - 2):i + 3]) for i in range(21)]
     for s in (-1, 1):
         r.flank_line("lateral_%d" % s, la, lb, lambda t: mids[int(round(t * 20))], line, height=0.04, depth=0.06, steps=20, side=s)
-    return _finish_wolf(r)
+    return _finish_wolf(r, coat=("fur_sleek", "fur_cream"))
 
 
 def hound_body(clockwork=False):
@@ -503,7 +602,7 @@ def hound_body(clockwork=False):
     if clockwork:
         key = g.merge(g.tube([(0, fy, topz), (0, fy, topz + 0.36)], [0.045, 0.045], n=6), g.box((0, fy, topz + 0.5), (0.5, 0.06, 0.3)))
         _add(r, "key", key, "Torso2", brass)
-    return _finish_wolf(r)
+    return _finish_wolf(r, coat=("metal_iron", "metal_iron_light", "metal_brass"), marks=("socks", "mask", "saddle"), tail=False, lies_on={"socks": "metal_brass"})
 
 
 # ======================================================================================
@@ -525,9 +624,14 @@ def _sockets(table):
     return {name: free_socket(name, at[0], at[1] if len(at) > 1 else None) for name, at in table.items()}
 
 
-def hawk_body():
+def hawk_body(corvid=False):
     """The hawk, on the wing: a deep-breasted body, a flat hooded head with a fierce brow, the
-    breast barred, the tail fanned, the legs tucked in their feathers. The wings are a part."""
+    breast barred, the tail fanned, the legs tucked in their feathers. The wings are a part.
+    As a corvid (the hooded crow) it is black and grey, smooth-browed, shag-throated, with a
+    straight heavy bill of its own."""
+    if corvid:
+        for name, src in (("feather_dark", "crow_dark"), ("feather_mid", "crow_mid"), ("feather_pale", "crow_pale")):
+            mat(name, PALETTE[src][0], rough=PALETTE[src][1])
     dark, mid, pale = mat("feather_dark"), mat("feather_mid"), mat("feather_pale")
     spine = [(0.22, 0.40, 0.034, 0.028), (0.14, 0.42, 0.07, 0.06), (0.02, 0.44, 0.105, 0.095), (-0.10, 0.47, 0.112, 0.105),
              (-0.19, 0.505, 0.09, 0.085), (-0.25, 0.54, 0.062, 0.06), (-0.29, 0.568, 0.064, 0.06), (-0.335, 0.582, 0.067, 0.062),
@@ -536,6 +640,8 @@ def hawk_body():
     body = g.to_object("hawk_body", g.loft(rings), dark)
     # the underside from the throat back is pale
     paint(body, lambda c, n, i: n.z < -0.15 and c.y > -0.3, pale)
+    # the hood: the head and nape, a marking
+    paint(body, lambda c, n, i: c.y < -0.245 and n.z >= -0.15, mark("hood", dark))
     items = []
     # the breast: three rows of barred feathers lying back along it
     for row, (si, n, L) in enumerate(((3, 5, 0.085), (2, 6, 0.09), (1, 4, 0.08))):
@@ -562,18 +668,29 @@ def hawk_body():
     for sgn in (1, -1):
         brow = g.merge(brow, g.blade((sgn * 0.012, -0.405, 0.6), (sgn * 0.078, -0.3, 0.604), 0.05, normal=(sgn * 0.5, -0.2, 1), belly=0.45))
         eyes = g.merge(eyes, g.ico((sgn * 0.05, -0.362, 0.585), 0.017, sub=1, scale=(0.6, 1.0, 0.9)))
-    items += [(brow, dark), (eyes, field("eyes", 3.0))]
-    # the bill's root (the beak itself is a part) and the cere over it
-    items.append((g.merge(g.box((0, -0.412, 0.572), (0.03, 0.03, 0.02)), g.blade((0, -0.4, 0.556), (0, -0.44, 0.548), 0.026, normal=(0, 0, -1))), mat("beak")))
+    items += [(brow, dark)] if not corvid else []
+    items.append((eyes, field("eyes", 3.0)))
+    if corvid:
+        # its own bill: straight, heavy, dark, bristled at the root; hackles at the throat
+        bill = mat("talon")
+        items.append((g.tube([(0, -0.395, 0.566), (0, -0.445, 0.56), (0, -0.505, 0.546)], [0.024, 0.02, 0.003], n=5, flat=0.8), bill))
+        items.append((g.blade((0, -0.39, 0.585), (0, -0.44, 0.572), 0.03, normal=(0, 0, 1), belly=0.4), dark))
+        hack = None
+        for i, (dx, L) in enumerate(((-0.03, 0.06), (-0.012, 0.075), (0.012, 0.075), (0.03, 0.06))):
+            hack = g.merge(hack, g.blade((dx, -0.33, 0.535), (dx * 1.3, -0.3, 0.535 - L), 0.03, normal=(0, -1, -0.3), belly=0.4))
+        items.append((hack, mid))
+    else:
+        # the bill's root (the beak itself is a part) and the cere over it
+        items.append((g.merge(g.box((0, -0.412, 0.572), (0.03, 0.03, 0.02)), g.blade((0, -0.4, 0.556), (0, -0.44, 0.548), 0.026, normal=(0, 0, -1))), mat("beak")))
     # the tail: seven feathers fanned, a pale band at their ends
     for i in range(7):
         a = math.radians(-33 + 11 * i)
         tipv = Vector((math.sin(a) * 0.27, math.cos(a) * 0.27, -0.03 - 0.008 * abs(i - 3)))
         base = Vector((math.sin(a) * 0.02, 0.2, 0.402 - 0.002 * abs(i - 3)))
         items.append((g.blade(base, base + tipv, 0.062, normal=(0, 0, 1), belly=0.72), mid if i % 2 == 0 else dark))
-        items.append((g.blade(base + tipv * 0.8, base + tipv * 1.02, 0.05, normal=(0, 0, 1), belly=0.4, thick=0.008), pale))
+        items.append((g.blade(base + tipv * 0.8, base + tipv * 1.02, 0.05, normal=(0, 0, 1), belly=0.4, thick=0.008), mark("band", mid if corvid else pale)))
     # the legs: feathered thighs, the shanks tucked back, the feet closed
-    leg_y = mat("beak")
+    leg_y = mat("beak") if not corvid else mat("talon")
     for sgn in (1, -1):
         items.append((g.tube([(sgn * 0.05, 0.02, 0.4), (sgn * 0.056, 0.09, 0.345), (sgn * 0.056, 0.125, 0.325)], [0.045, 0.034, 0.014], n=6), pale))
         items.append((g.tube([(sgn * 0.056, 0.12, 0.327), (sgn * 0.056, 0.185, 0.312)], [0.011, 0.009], n=5), leg_y))
@@ -583,7 +700,9 @@ def hawk_body():
         items.append((toes, leg_y))
     extra = g.pieces("hawk_dress", items)
     ob = g.join("hawk_body", [body, extra])
+    shape_key(ob, "long_tail", lambda p, i: Vector((p.x * 1.12, 0.2 + (p.y - 0.2) * 1.4, p.z)) if p.y > 0.202 and p.z > 0.36 else None)
     socks = _sockets({
+        "socket_collar": [(0, -0.262, 0.548), Matrix.Rotation(-0.45, 3, "X") @ Matrix.Diagonal((0.74, 1.0, 0.7))],
         "socket_head": [(0, -0.33, 0.646)], "socket_eyes": [(0, -0.392, 0.588)], "socket_mouth": [(0, -0.418, 0.566)], "socket_grip": [(0, 0.19, 0.29)],
         "socket_throat": [(0, -0.27, 0.488)], "socket_light": [(0, 0.19, 0.292)], "socket_back": [(0, -0.17, 0.588)], "socket_body": [(0, -0.2, 0.415)],
         "socket_tail": [(0, 0.22, 0.4)], "socket_limb_fl": [(0.056, 0.19, 0.3)], "socket_limb_fr": [(-0.056, 0.19, 0.3)],
@@ -1154,7 +1273,7 @@ def stag_body():
     loop = [(0.24 * math.cos(t), cy + 0.2 * math.sin(t), cz + 0.05 * math.sin(t)) for t in [2 * math.pi * i / 16 for i in range(17)]]
     _add(r, "crown", g.tube(loop, [0.022] * 17, n=4, caps=False), "Head", field("crown", 3.5))
     r.fin("seam_spine", r.bone("Torso3").y, r.bone("Tail1").y, 0.03, field("seam", 1.6), thickness=0.07, steps=14, sink=0.05)
-    return _finish_wolf(r)
+    return _finish_wolf(r, coat=("hide_red", "fur_cream"), tail=False)
 
 
 def harrier_body():
@@ -1206,7 +1325,7 @@ def harrier_body():
             geo = g.merge(geo, g.tongue([(f.x + dx, f.y - 0.12, 0.12), (f.x + dx * 1.3, f.y - 0.3, 0.17), (f.x + dx * 1.4, f.y - 0.4, 0.02)], [0.05, 0.04, 0.004], thick=0.7, normal=(0, 0, 1)))
         _add(r, "claws_" + foot, geo, bone, mat("talon"))
     r.fin("seam_spine", r.bone("Torso2").y, r.bone("Tail2").y, 0.03, field("seam", 1.6), thickness=0.07, steps=14, sink=0.05)
-    return _finish_wolf(r)
+    return _finish_wolf(r, coat=("feather_dark", "feather_pale"))
 
 
 def chord_body():
@@ -1824,8 +1943,9 @@ def build_part(feature):
 SHAPE_RIMS = {"beast": (0.95, 0.68, 0.25), "kith": (0.5, 1.0, 0.6), "engine": (1.0, 0.42, 0.15), "daemon": (0.75, 0.45, 1.0), "aspect": (0.55, 0.85, 1.0), "relic": (0.85, 0.85, 1.0)}
 
 
-CARD_VIEWS = {"hawk": (1.15, -0.95, 0.3), "griffin": (1.15, -0.95, 0.3)}
-CARD_ZOOM = {"hawk": 1.3, "griffin": 1.3}      # a spread of wings leaves the box around it mostly empty
+CARD_VIEWS = {"hawk": (1.15, -0.95, 0.3), "griffin": (1.15, -0.95, 0.3), "crow": (1.15, -0.95, 0.3), "storm-crow": (1.15, -0.95, 0.3), "thinking-gun": (1.3, -0.75, 0.3),
+              "clockwork-wren": (1.1, -1.0, 0.3), "brass-kite": (1.1, -1.0, 0.3), "tortoise": (0.95, -1.15, 0.4), "cairn-back": (0.95, -1.15, 0.4), "wisp-train": (1.2, -0.9, 0.25)}
+CARD_ZOOM = {"hawk": 1.3, "griffin": 1.3, "crow": 1.3, "storm-crow": 1.3, "clockwork-wren": 1.2, "brass-kite": 1.2, "tortoise": 1.15, "cairn-back": 1.15}      # a spread of wings leaves the box around it mostly empty
 
 
 def build_card(form_id, path=None, res=(768, 1024), samples=48, card=True, view=None):
@@ -1853,10 +1973,38 @@ def sheet(forms=None, out=None, cell=(384, 512)):
     tile(paths, out or os.path.join(SCRATCH, "genius_sheet.png"), 6, cell)
 
 
+def _more():
+    """The second set of forms, the relics, the parts added with them and the keepsakes."""
+    import genius_forms2
+    import genius_relics
+    kit = sys.modules[__name__]
+    genius_forms2.register(kit)
+    genius_relics.register(kit)
+
+
+KEEPSAKES = {}
+_more()
+
+
 if __name__ == "__main__":
     # no arguments: every body, every part, every card, the sheet. Otherwise any of:
-    # bodies | parts | cards | sheet | <form id>... (a form id builds that form's body and card)
+    # bodies | parts | cards | sheet | <form id>... (a form id builds that form's body and card),
+    # or: keepsakes (the keepsakes), or: looks <form> [n] (a sheet of one form's looks)
     args = sys.argv[1:]
+    if args and args[0] == "keepsakes":
+        import genius_relics
+        for kid in KEEPSAKES:
+            genius_relics.build_keepsake(kid)
+        sys.exit(0)
+    if args and args[0] == "looks":
+        # looks <form> [how many]: one form in a spread of the looks the game would give it
+        import genius_relics
+        n = int(args[2]) if len(args) > 2 else 8
+        worn = ["", "collar", "ribbon", "charm", "bell"]
+        tints = ["oxblood", "indigo", "moss", "ochre", "bone"]
+        looks = [{"seed": 1000003 * (i + 1) + 77 * i * i, "coat": 0, "marks": {}, "keepsake": worn[i % 5], "keepsakeColor": tints[i % 5]} for i in range(n)]
+        genius_relics.look_sheet(args[1], looks, os.path.join(SCRATCH, "genius_looks_%s.png" % args[1]))
+        sys.exit(0)
     words = [a for a in args if a in ("bodies", "parts", "cards", "sheet")]
     forms = [a for a in args if a not in words] or forms_with_art()
     everything = not args

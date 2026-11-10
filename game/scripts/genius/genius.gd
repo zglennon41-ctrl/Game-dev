@@ -3,7 +3,8 @@
 ## server) has the same thing to talk to:
 ##   its body now (form, own features, heritage, the Seed-mark, grafts, adaptations), its
 ##   instar and history, the Tally of play since the last Reading, lifetime counters, its
-##   orders, Will and falls, secondary forms, witnessed Patterns and shadows.
+##   orders, Will and falls, secondary forms, witnessed Patterns and shadows, and its look
+##   (the coat, markings and build it was born with, and the keepsake its partner gave it).
 ## Pure and saveable: to_dict() / from_dict() round-trip through the hero's save.
 ## The rules are in data/rules.json ("genius", "instars", "tiers"), data/reading.json and
 ## data/genius.json; the Reading itself in genius_reading.gd.
@@ -28,6 +29,7 @@ var order := "guard"
 var falls_this_season := 0
 var fallen := false
 var pending_reading: Dictionary = {}
+var look: Dictionary = {}        # what it was born looking like and what its partner chose (genius_look.gd)
 
 # --- Making and saving ------------------------------------------------------------
 
@@ -36,7 +38,7 @@ static func from_dict(d: Dictionary) -> Genius:
 	if d.is_empty():
 		return g
 	for k in ["name", "instar", "body", "origin", "tally", "lifetime", "history", "milestones", "day", "secondary",
-			"witnessed", "shadows", "pending_grafts", "faded_at", "order", "falls_this_season", "fallen"]:
+			"witnessed", "shadows", "pending_grafts", "faded_at", "order", "falls_this_season", "fallen", "look"]:
 		if d.has(k):
 			g.set(k, d[k])
 	# Saves from before the genius system: a First Form with its fields at the top level.
@@ -50,7 +52,7 @@ static func from_dict(d: Dictionary) -> Genius:
 func to_dict() -> Dictionary:
 	var d := {}
 	for k in ["name", "instar", "body", "origin", "tally", "lifetime", "history", "milestones", "day", "secondary",
-			"witnessed", "shadows", "pending_grafts", "faded_at", "order", "falls_this_season", "fallen"]:
+			"witnessed", "shadows", "pending_grafts", "faded_at", "order", "falls_this_season", "fallen", "look"]:
 		d[k] = get(k)
 	# Kept at the top level too, for the parts of the game that only need to draw it.
 	d["form"] = body.get("form", "")
@@ -64,6 +66,9 @@ static func for_hero(hero: Dictionary) -> Genius:
 	g.origin = { "seed": hero.get("seed", ""), "blood": hero.get("blood", ""), "shape": hero.get("shape", "") }
 	if g.tally.get("intention") == null and hero.has("pattern"):
 		g.tally["intention"] = { "form": hero["pattern"]["form"], "terms": hero["pattern"]["terms"], "fires": 0 }
+	# A genius born before looks existed gets the one it would have been born with.
+	if g.is_born() and g.look.is_empty():
+		g.look = GeniusLook.born(GeniusLook.identity(hero))
 	return g
 
 func save_to(hero: Dictionary) -> void:

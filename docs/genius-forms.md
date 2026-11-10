@@ -168,8 +168,125 @@ and the armature if it is rigged), add it to `BODIES` under its silhouette, and 
 with the form's id. To add a part: a function returning its objects, added to `PARTS` under
 the feature's id.
 
+## The second set: more forms (2026-11-10)
+
+The owner asked for more possible forms. The lattice (`data/forms.json`) went from 35 forms
+to 52, and from 11 First Forms to 22: every Expression now has at least three ways in at the
+rite, the Relic among them (it had none). All of it is a first draft for the owner: names,
+features and who is offered what are design calls, listed at the end of this section.
+
+New First Forms (offered only at the rite, like the Hawk):
+
+| Form | Expression | Body | Who is offered it |
+| --- | --- | --- | --- |
+| Hooded Crow | Beast | `beast-corvid` | "watches from above"; "with a voice" for a Cast; aerie-born, beast-voice, winged |
+| Cairn-tortoise | Beast | `beast-shell` | "remembers"; Anchors; ridgefolk, mound-kin |
+| Fledgling Kith | Kith | `kith-fledgling` | "with a voice"; "remembers"; "watches from above" for a Read or a Bind; winged |
+| Clockwork Wren | Engine | `engine-flier` | "watches from above" (first for a Make); "never alive"; forgeborn, ironblooded |
+| Hearth-stove | Engine | `engine-stove` | "stands between"; "that burns" for an Anchor or a Make; forgeborn, iron-blood |
+| Watch-buckle | Relic | `relic-buckle` | "something I can hold"; second-heart, fused |
+| Kept Knife | Relic | `relic-knife` | "something I can hold"; eyes-heat |
+| Worn Glove | Relic | `relic-glove` | "something I can hold"; second-heart, fused, riverborn |
+| Wick-fiend | Daemon | `daemon-wick` | "that burns"; "owes me"; demon-blooded, dragon-blooded |
+| Whisperer | Daemon | `daemon-whisper` | "with a voice"; "owes me"; demon-blooded, nightfolk, hollowfolk |
+| Rime | Aspect | `aspect-frost` | "never alive"; "that burns" for a Turn; a Turn of any Seed |
+
+New Second Forms (from the Gate on): Storm-crow (the crow's body, a voice and old eyes),
+Weir-otter (the otter's body, fangs), Old Cairn-back (the tortoise's body, a horned brow),
+Lamplighter (`kith-lamplighter`: an old kith with the light on a pole over his head), Brass
+Kite (the wren's body, a sight-glass), Wisp-train (`aspect-wisps`: five flames in procession,
+the first in a cage).
+
+The placeholders a student could reach at the Gate now have bodies: the Shield-faced Engine
+(`engine-sentinel`), the Thinking Gun (`engine-weapon`), the Talon Relic (`relic-gauntlet`),
+the Living Blade (`relic-blade`), the Tower-shield Hound (`relic-shield`) and the Coat That
+Listens (`relic-coat`). The relics are worn equipment that is alive: an eye in a buckle and
+in a pommel, a line of the field beating in the leather, a coat with nobody in it.
+
+Twenty-three bloods had no lean in the Reading; each now leans toward an Expression and a
+feature or two (`data/reading.json`, `leans.blood`), so the bowl's three depend on the
+answers that gave the blood as well as on the Seed and the Shape. The three scripted lives
+(`docs/three-lives.md`) become what they became before; only the two offers Mira, Tobiah and
+Sable did not take at the rite have changed. `npx tsx tools/genius-offers.ts` prints the
+bowl's three for every Seed and Shape.
+
+Seed-marks that had nothing to show on an art body now have parts: a grip (a leather-bound
+handle on its back), a ledger (a strapped book at its chest), a broad guard (a plate on each
+shoulder). A watching eye and a shell have parts too, for when they are heritage.
+
+Where the new bodies are built: the crow is the hawk with `corvid=True` in
+`genius_kit.py`; the rest of the beasts, engines, daemons, aspects and kith are in
+`tools/blender/genius_forms2.py`; the relics, the new parts and the keepsakes in
+`tools/blender/genius_relics.py`. The kit loads both.
+
+## Looks: no two of a form alike (2026-11-10)
+
+`data/genius-looks.json` says how one genius differs from another of its form;
+`game/scripts/genius/genius_look.gd` reads it; `genius_body.gd` paints it. A genius carries a
+small `look`, saved with it: the number it was born with and what its partner chose.
+
+**Born with** (drawn from the partner's Seed, Pattern, spark and name; the same every time,
+and its own through every instar):
+
+- its coats: three out of its body's palette (`palettes`, `bodies.<silhouette>.coats`, or a
+  form's own under `forms`), the first of which it is born in. Every coat is a muted earth,
+  stone or metal: the Shape colour stays the one loud colour.
+- its markings: which of its body's marking regions show (about half, no more than two).
+- its build: lean to heavy, and a longer or shorter tail.
+- its light: steady, bright, banked, a slow pulse, a flicker.
+
+**The partner chooses**, on the genius's page (J), under "How it looks": which of its three
+coats it wears, each marking on or off, and a keepsake (a collar, a ribbon, a charm, a bell)
+in one of five colours. The bowl's three offers at the rite are shown as this hero's genius
+would wear them, so the same form looks different for another student.
+
+**Play writes**: the Seed-mark is always a part on the body; heritage carries over as
+before; every instar the body is bigger and its light is stronger (`instarGlow`).
+
+How the art carries it (the conventions a new body follows):
+
+- **Coat**: the body uses the palette's material names; `bodies.<silhouette>.roles` maps
+  each to a role (`main`, `under`, `trim`) and the game paints the role's colour. Parts that
+  share those names (the hawk's wings) are painted with the body.
+- **Markings**: faces in a marking region use a material named `mark_<region>`
+  (`mark("socks", like)` in the kit), born the colour of the coat under it. The game shows
+  it in the coat's marking colour or hides it in the role named by `on`. Wolf-rig bodies get
+  socks, a mask, a saddle and a tail tip cut from their own skin (`_finish_wolf(coat=...)`);
+  the others name what suits them (a hood, ringed scutes, stitching, a blazon, enamel).
+- **Build**: blend shapes named `lean`, `heavy`, `long_tail` (`shape_key(ob, name, move)`).
+  A body without them is made a little broader or narrower as a whole.
+- **Keepsake**: hung on `socket_keepsake`, or the throat, or the chest. A collar goes on
+  `socket_collar`, whose scale is the size of the neck (the collar is a hoop 0.1 in radius
+  in its own XZ plane); a body with no such socket is not offered a collar. Keepsakes are in
+  `game/assets/genius/keepsakes/`; the material `keepsake_tint` takes the chosen colour.
+
+A body with a look is shown on its card as itself (the live model); the painted card is the
+form's and is used where there is no look (a shade, the gallery).
+
+```
+python tools/blender/genius_kit.py keepsakes            # the keepsakes
+python tools/blender/genius_kit.py looks field-wolf 8   # one form in eight looks, as the game paints it
+```
+
+The second writes `genius_looks_<form>.png` to the kit's scratch folder. The kit's copy of
+the look rules is in `genius_relics.py` (`resolve_look`); keep it in step with
+`genius_look.gd`.
+
+What is rough: the small people (sprite, homunculus, imp, the kiths) take coats but have no
+marking regions or blend shapes yet; surface features (stone skin, a sleek coat) still do
+not change an art body's skin; later forms (the Third on) that have no body of their own
+are still placeholders.
+
+**Design calls in this set, for the owner to confirm or change:** the seventeen new forms'
+names and features; that the new First Forms are offered only at the rite; the leans given
+to twenty-three bloods; the four new features (a shell, a skin of rime, an eye that opens
+in it, a pulse in the leather); what a genius is born with against what its partner may
+choose; three coats on offer; the four keepsakes and five colours; the names of the coats.
+
 ## Sources
 
 The wolf (Quaternius, CC0), the KayKit rig and its clips (Kay Lousberg, CC0) and the
 MakeHuman base mesh and targets (CC0) are credited in `game/assets/CREDITS.md`. The child
 and baby proportion targets used for the small people come from the same MakeHuman set.
+The second set of forms, the relics, the parts and the keepsakes use nothing from outside:
+they are modelled in the kit.

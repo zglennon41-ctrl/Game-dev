@@ -36,6 +36,9 @@ func _run() -> void:
 	test_genius_fights()
 	test_genius_assembly()
 	test_genius_art()
+	test_genius_lattice()
+	test_genius_looks()
+	test_genius_looks_on_the_body()
 	test_sparring()
 	test_disciplines()
 	test_party()
@@ -748,6 +751,188 @@ func test_genius_art() -> void:
 		var tex: Texture2D = load("res://game/assets/genius/cards/" + file)
 		check(absf(float(tex.get_width()) / tex.get_height() - 0.75) < 0.01, "cards/%s is a 3:4 portrait" % file)
 	check(n > 0, "there is genius art to check (%d files)" % n)
+
+## The lattice the bowl reads from: every Expression has ways in at the rite (the Relic too),
+## and no First Form is out of reach of every Seed, blood and Shape.
+func test_genius_lattice() -> void:
+	var firsts := {}
+	for f in Data.forms():
+		if int(f["instars"]["min"]) == 1:
+			firsts[f["expression"]] = int(firsts.get(f["expression"], 0)) + 1
+	for e in ["beast", "kith", "engine", "relic", "daemon", "aspect"]:
+		check(int(firsts.get(e, 0)) >= 3, "the %s has at least three First Forms (%d)" % [e, int(firsts.get(e, 0))])
+	var seen := {}
+	var trios := {}
+	for sd in Data.seeds():
+		for sh in Creation.SHAPES:
+			for b in [""] + Data.bloods.map(func(x): return x["id"]):
+				var r := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": sd["id"], "blood": b, "shape": sh }, {})
+				var ids: Array = r["candidates"].map(func(c): return c["form"])
+				trios[",".join(ids)] = true
+				for c in r["candidates"]:
+					seen[c["form"]] = true
+					check(c["features"].has(sd["seedMark"]), "every offer carries the Seed-mark (%s on %s)" % [sd["seedMark"], c["form"]]) if b == "" and sh == "anchor" else null
+	var unreachable: Array = Data.forms().filter(func(f): return int(f["instars"]["min"]) == 1 and not seen.has(f["id"])).map(func(f): return f["id"])
+	check(unreachable.is_empty(), "every First Form is offered to somebody (never offered: %s)" % str(unreachable))
+	check(trios.size() >= 60, "the bowl's three vary by Seed, blood and Shape (%d different offers)" % trios.size())
+	var relic := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": "i-can-hold", "blood": "", "shape": "cast" }, {})
+	check(relic["candidates"][0]["expression"] == "relic", "something to hold is a Relic from the first day (%s)" % relic["candidates"][0]["form"])
+	# Every Seed-mark has something to show on an art body: a part of its own.
+	for sd in Data.seeds():
+		check(ResourceLoader.exists(GeniusBody.PART_DIR % String(sd["seedMark"])), "the Seed-mark %s has a part to show" % sd["seedMark"])
+	# Every form a student can reach in the Academy (the rite, the Gate) has an art body.
+	var bare: Array = Data.forms().filter(func(f): return int(f["instars"]["min"]) <= 2 and not ResourceLoader.exists(GeniusBody.BODY_DIR % String(f["silhouette"]))).map(func(f): return f["id"])
+	check(bare.is_empty(), "every form the Academy can give has a body of its own (placeholders: %s)" % str(bare))
+
+## One genius is not another of its form: what it is born with comes from who its partner is,
+## the same every time; the partner chooses its coat, its markings and its keepsake.
+func test_genius_looks() -> void:
+	var h := Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
+	h["name"] = "Wren"
+	var id := GeniusLook.identity(h)
+	check(id == GeniusLook.identity(h.duplicate(true)) and id != 0, "a genius's number comes from its partner, the same every time (%d)" % id)
+	var h2 := h.duplicate(true)
+	h2["pattern"]["terms"] = h2["pattern"]["terms"] + ["at-night"]
+	var h3 := h.duplicate(true)
+	h3["seed"] = "owes-me" if h["seed"] != "owes-me" else "remembers"
+	check(GeniusLook.identity(h2) != id and GeniusLook.identity(h3) != id, "another Pattern or another Seed is another number")
+	var look := GeniusLook.born(id)
+	var a := GeniusLook.resolve(look, "field-wolf", "beast-runner", 1)
+	var b := GeniusLook.resolve(look.duplicate(true), "field-wolf", "beast-runner", 1)
+	check(str(a) == str(b) and not a["coat"].is_empty(), "the same look is the same wolf (%s)" % GeniusLook.describe(look, "field-wolf", "beast-runner"))
+	# Forty wolves, from forty partners: no one look takes them all.
+	var kinds := {}
+	var coats := {}
+	for i in 40:
+		var l := GeniusLook.born(GeniusLook.roll(i, "wolf") * 4000000.0 as int)
+		var r := GeniusLook.resolve(l, "field-wolf", "beast-runner", 1)
+		kinds["%s|%s|%d|%s" % [r["coat"]["id"], str(r["marks"]), roundi(float(r["proportions"]["build"]) * 3.0), r["eyes"]["id"]]] = true
+		coats[r["coat"]["id"]] = true
+	check(kinds.size() >= 30 and coats.size() >= 5, "forty wolves are born many ways (%d looks, %d coats)" % [kinds.size(), coats.size()])
+	# What the partner chooses: one of a few coats, each marking, a keepsake and its colour.
+	var offered := GeniusLook.offered_coats(look, "field-wolf", "beast-runner")
+	check(offered.size() == int(Data.genius_looks()["born"]["coatsOffered"]) and offered[0]["id"] == a["coat"]["id"], "it has a few coats of its own, the born one first")
+	var chosen := look.duplicate(true)
+	chosen["coat"] = 1
+	var c := GeniusLook.resolve(chosen, "field-wolf", "beast-runner", 1)
+	check(c["coat"]["id"] == offered[1]["id"] and c["colors"]["fur_dark"] != a["colors"]["fur_dark"], "choosing another coat changes its colours")
+	var was: bool = a["marks"]["socks"]
+	chosen["marks"] = { "socks": not was }
+	c = GeniusLook.resolve(chosen, "field-wolf", "beast-runner", 1)
+	check(c["marks"]["socks"] == (not was) and c["colors"]["mark_socks"] == Color(String(c["coat"]["mark"] if not was else c["coat"]["main"])), "a marking shows in its own colour, or hides in the coat's")
+	chosen["keepsake"] = "ribbon"
+	chosen["keepsakeColor"] = "indigo"
+	c = GeniusLook.resolve(chosen, "field-wolf", "beast-runner", 1)
+	check(c["keepsake"]["id"] == "ribbon" and c["keepsake_color"]["id"] == "indigo" and GeniusLook.describe(chosen, "field-wolf", "beast-runner").contains("ribbon"), "a keepsake and its colour are kept (%s)" % GeniusLook.describe(chosen, "field-wolf", "beast-runner"))
+	# The look goes with the genius: born at the rite, saved, kept through a new form.
+	var hero := Creation.generate([1, 0, 2, 1, 0, 2, 1, 0, 2, 1], "", 5)
+	hero["name"] = "Ost"
+	var ff := Rite.first_form(hero, hero["shape"], 11)
+	check(ff["look"] == Rite.born_look(hero) and int(ff["look"]["seed"]) == GeniusLook.identity(hero), "the bowl shows each offer as this hero's genius would wear it")
+	var g := Rite.birth(hero, ff["reading"], "Pip")
+	check(not g.look.is_empty() and int(g.look["seed"]) == GeniusLook.identity(hero), "a genius is born with its look")
+	g.look["keepsake"] = "bell"
+	g.save_to(hero)
+	var again := Genius.for_hero(JSON.parse_string(JSON.stringify(hero)))
+	check(again.look["keepsake"] == "bell" and int(again.look["seed"]) == int(g.look["seed"]), "the look survives saving")
+	check(str(GeniusLook.resolve(again.look, "ram", "beast-grazer")["proportions"]) == str(GeniusLook.resolve(g.look, "field-wolf", "beast-runner")["proportions"]), "its build is its own in every form")
+	var old := { "seed": hero["seed"], "blood": hero["blood"], "shape": hero["shape"], "pattern": hero["pattern"], "name": "Ost", "spark": hero.get("spark", 0), "genius": g.to_dict() }
+	old["genius"].erase("look")
+	check(int(Genius.for_hero(old).look["seed"]) == GeniusLook.identity(old), "a genius from before looks is given the one it would have been born with")
+	check(GeniusLook.glow(1) < GeniusLook.glow(3) and GeniusLook.glow(3) < GeniusLook.glow(6), "its light grows with every instar")
+
+## The look on the body: the coat and markings painted, the build on the blend shapes, the
+## keepsake hung; and the art carries everything the data says it does.
+func test_genius_looks_on_the_body() -> void:
+	var info := { "form": "field-wolf", "silhouette": "beast-runner", "expression": "beast", "features": ["far-eyes", "long-legs", "fangs", "ruff"], "instar": 1 }
+	var plain := GeniusBody.build(info, Color.ORANGE, 1)
+	check(plain.painted == 0 and plain.keepsake == "", "a genius with no look keeps the colours it was made in")
+	var look := GeniusLook.born(424242)
+	look["marks"] = { "socks": true, "mask": false }
+	look["keepsake"] = "collar"
+	var with := info.duplicate(true)
+	with["look"] = look
+	var body := GeniusBody.build(with, Color.ORANGE, 1)
+	var res := GeniusLook.resolve(look, "field-wolf", "beast-runner", 1)
+	var got := {}
+	for m in body.find_children("*", "MeshInstance3D", true, false):
+		var mi := m as MeshInstance3D
+		for i in mi.mesh.get_surface_count():
+			var base: Material = mi.mesh.surface_get_material(i)
+			var over: Material = mi.get_surface_override_material(i)
+			if base and over is StandardMaterial3D:
+				got[String(base.resource_name)] = (over as StandardMaterial3D).albedo_color
+	check(body.painted > 0 and got.get("fur_dark", Color.BLACK).is_equal_approx(Color(String(res["coat"]["main"]))) and got.get("fur_light", Color.BLACK).is_equal_approx(Color(String(res["coat"]["under"]))), "its coat is painted on its body")
+	check(got.get("mark_socks", Color.BLACK).is_equal_approx(Color(String(res["coat"]["mark"]))) and got.get("mark_mask", Color.BLACK).is_equal_approx(Color(String(res["coat"]["main"]))), "its socks show and its mask hides")
+	check(body.keepsake == "collar" and body.find_child("Keepsake", true, false) != null, "it wears its collar")
+	var build := float(res["proportions"]["build"])
+	check(body.shapes_set.has("lean" if build < 0.0 else "heavy") and is_equal_approx(float(body.shapes_set["lean" if build < 0.0 else "heavy"]), absf(build)), "its build is on the body's blend shapes (%s)" % str(body.shapes_set))
+	var e3 := with.duplicate(true)
+	e3["instar"] = 3
+	var older := GeniusBody.build(e3, Color.ORANGE, 3)
+	check(older._glow > body._glow, "an instar brightens its light")
+	plain.free()
+	body.free()
+	older.free()
+	# A flame has no neck: a collar is not offered, a ribbon is.
+	var ember := { "form": "ember", "silhouette": "aspect-flame", "expression": "aspect", "features": ["ember", "glow", "smoke"], "instar": 1, "look": { "seed": 7, "coat": 0, "marks": {}, "keepsake": "collar", "keepsakeColor": "" } }
+	var eb := GeniusBody.build(ember, Color.ORANGE, 1)
+	var can: Array = GeniusLook.keepsakes_for(eb.sockets.keys()).map(func(k): return k["id"])
+	check(eb.keepsake == "" and not can.has("collar") and can.has("ribbon"), "a body with no neck wears no collar (it can wear: %s)" % str(can))
+	eb.free()
+	# The art carries what the data says: coat materials, marking regions, blend shapes.
+	var looks: Dictionary = Data.genius_looks()
+	var n := 0
+	for sil in looks["bodies"]:
+		if not ResourceLoader.exists(GeniusBody.BODY_DIR % sil):
+			continue
+		n += 1
+		var scene: Node3D = load(GeniusBody.BODY_DIR % sil).instantiate()
+		var mats := {}
+		var shapes := {}
+		for m in scene.find_children("*", "MeshInstance3D", true, false):
+			var mi := m as MeshInstance3D
+			for i in mi.mesh.get_surface_count():
+				if mi.mesh.surface_get_material(i):
+					mats[String(mi.mesh.surface_get_material(i).resource_name)] = true
+			for bi in mi.mesh.get_blend_shape_count():
+				shapes[String(mi.mesh.get_blend_shape_name(bi))] = true
+		var cfg: Dictionary = looks["bodies"][sil]
+		var missing: Array = cfg["roles"].keys().filter(func(k): return not mats.has(k))
+		missing += cfg.get("marks", {}).keys().map(func(k): return "mark_" + String(k)).filter(func(k): return not mats.has(k))
+		missing += cfg.get("shapes", []).filter(func(k): return not shapes.has(k))
+		check(missing.is_empty(), "bodies/%s carries its coat, its markings and its shapes (missing: %s)" % [sil, str(missing)])
+		scene.free()
+	check(n >= 30, "the looks have bodies to check (%d)" % n)
+	# Keepsakes: one file for each, small.
+	for k in looks["keepsakes"]:
+		var path := GeniusBody.KEEP_DIR % String(k["id"])
+		check(ResourceLoader.exists(path), "the keepsake %s has its art" % k["id"])
+		if ResourceLoader.exists(path):
+			var ks: Node3D = load(path).instantiate()
+			var tris := 0
+			var tinted := false
+			for m in ks.find_children("*", "MeshInstance3D", true, false):
+				var mesh: Mesh = (m as MeshInstance3D).mesh
+				for si in mesh.get_surface_count():
+					var arr := mesh.surface_get_arrays(si)
+					tris += (arr[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3 if arr[Mesh.ARRAY_INDEX] != null else (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+					tinted = tinted or (mesh.surface_get_material(si) and String(mesh.surface_get_material(si).resource_name) == "keepsake_tint")
+			check(tris <= 400 and tinted, "keepsakes/%s is small and takes its colour (%d triangles)" % [k["id"], tris])
+			ks.free()
+	# The page: the look is told and the choices are there; a choice is kept and announced.
+	var g := _born_genius()
+	g.look = GeniusLook.born(99)
+	var page := GeniusPage.new()
+	add_child(page)
+	var heard := []
+	page.look_changed.connect(func(x: Genius): heard.append(x); page.look_saved = true)
+	page.open(g, Color.ORANGE)
+	var buttons := page.find_children("*", "Button", true, false).map(func(x): return (x as Button).text)
+	check(buttons.has("None") and buttons.any(func(t): return String(t).contains("(born)")), "the genius's page offers its coats and a keepsake (%d buttons)" % buttons.size())
+	page._set_look("keepsake", "charm")
+	check(g.look["keepsake"] == "charm" and heard.size() == 1 and heard[0] == g, "choosing on the page changes the genius and says so")
+	page.queue_free()
 
 ## Classmates as foes: a student beast from a classmate, and a spar the skilled bot can win.
 func test_sparring() -> void:
