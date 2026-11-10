@@ -22,7 +22,7 @@ export function emptyTally(): Tally {
 }
 
 /** Who the genius belongs to: fixed facts that are read alongside play. */
-export interface Origin { seed: string; blood: string; shape: string }
+export interface Origin { seed: string; blood: string; shape: string; /** Where the character grew up (a home of data/bodies.json). */ home?: string }
 
 export interface GeniusForm {
   form: string;
@@ -180,12 +180,21 @@ export function read(input: ReadingInput): ReadingResult {
   const top = leads.slice(0, 3);
   const crossingAllowed = !current || top.filter((l) => l.expression !== current.expression).length >= cfg.crossing.linesAway;
 
+  // A home's kinds come only at the rite (after it they are kept, by keeping its kind). There,
+  // a kind of another home counts for less everywhere; a kind of the character's own home
+  // counts for more, but only for the second and third offers: the best fit is the field's.
+  const hcfg = cfg.home;
+  const home = input.origin.home ?? '';
+  const ownHome = (f: Form) => first && !!f.home && f.home === home;
   const scored = lattice
     .filter((f) => f.instars.min <= input.instar && input.instar <= f.instars.max && f.id !== current?.form)
+    .filter((f) => first || !f.home)
     .map((f) => {
       const s = scoreForm(f, shares, emphasis, weights, cfg);
       const stay = current && !crossingAllowed && f.expression === current.expression ? 1 + cfg.crossing.stayBonus : 1;
-      return { f, score: s.score * stay, reasons: s.reasons };
+      const away = first && f.home && f.home !== home && !hcfg.open.includes(f.home) ? hcfg.away : 1;
+      const score = s.score * stay * away;
+      return { f, score, lean: ownHome(f) ? score * (1 + hcfg.bonus) + hcfg.floor : score, reasons: s.reasons };
     })
     .sort((a, b) => b.score - a.score || a.f.id.localeCompare(b.f.id));
 
@@ -193,14 +202,20 @@ export function read(input: ReadingInput): ReadingResult {
   const picked: typeof scored = [];
   const pool = [...scored];
   while (picked.length < 3 && pool.length) {
-    let bestI = 0;
+    let bestI = -1;
     let bestV = -Infinity;
+    const homes = picked.filter((p) => ownHome(p.f)).length;
     pool.forEach((c, i) => {
+      if (ownHome(c.f) && homes >= hcfg.most) return;
       const same = picked.filter((p) => p.f.expression === c.f.expression).length;
-      const v = c.score * Math.pow(cfg.diversity.sameExpression, same);
+      const v = (picked.length === 0 ? c.score : c.lean) * Math.pow(cfg.diversity.sameExpression, same);
       if (v > bestV) { bestV = v; bestI = i; }
     });
-    picked.push(pool.splice(bestI, 1)[0]);
+    if (bestI < 0) break;
+    const got = pool.splice(bestI, 1)[0];
+    // The score stays the Reading's own; a kind offered for the home's sake says so in its reasons.
+    if (picked.length > 0 && ownHome(got.f)) got.reasons = [...got.reasons, { line: 'home', key: home, share: 1, contribution: got.lean - got.score }];
+    picked.push(got);
   }
 
   const heritagePool = current

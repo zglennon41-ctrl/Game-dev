@@ -43,7 +43,7 @@ static func read_shape(hero: Dictionary, record: Dictionary, seed_value: int) ->
 ## The First Form: the Reading of the Seed, the blood and the Shape (genius_reading.gd), with
 ## a little of the bowl's chance (rite.formNoise), settled on the best fit.
 static func first_form(hero: Dictionary, shape: String, seed_value: int) -> Dictionary:
-	var origin := { "seed": String(hero.get("seed", "")), "blood": String(hero.get("blood", "")), "shape": shape }
+	var origin := { "seed": String(hero.get("seed", "")), "blood": String(hero.get("blood", "")), "shape": shape, "home": String(hero.get("city", "")) }
 	var r := GeniusReading.read(1, GeniusReading.empty_tally(), origin, {}, float(Data.academy["rite"]["formNoise"]), seed_value * 31 + 7)
 	var c: Dictionary = r["candidates"][0]
 	return { "form": c["form"], "name": Genius.form_name_at(String(c["form"]), 1), "expression": c["expression"], "silhouette": c["silhouette"],

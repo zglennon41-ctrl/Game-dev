@@ -879,41 +879,42 @@
       ]
      },
      {
-      "form": "walking-lantern",
-      "name": "Walking Lantern",
+      "form": "handcar",
+      "name": "Handcar",
       "expression": "engine",
-      "silhouette": "engine-lantern",
-      "score": 1.7,
+      "silhouette": "engine-handcar",
+      "score": 1.72,
       "own": [
+       "wheels",
        "lantern",
-       "roots",
-       "cold-core"
+       "gears"
       ],
       "heritage": [],
       "seedMark": "cold-core",
       "features": [
        "cold-core",
+       "wheels",
        "lantern",
-       "roots"
+       "gears"
       ],
       "reasons": [
-       {
-        "line": "seed",
-        "key": "never-alive",
-        "share": 1,
-        "contribution": 1
-       },
        {
         "line": "blood",
         "key": "forgeborn",
         "share": 1,
-        "contribution": 0.4
+        "contribution": 0.7
+       },
+       {
+        "line": "seed",
+        "key": "never-alive",
+        "share": 1,
+        "contribution": 0.6
        },
        {
         "line": "shape",
         "key": "make",
         "share": 1,
-        "contribution": 0.3
+        "contribution": 0.42
        }
       ]
      },
@@ -941,6 +942,789 @@
         "key": "never-alive",
         "share": 1,
         "contribution": 1.1
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "first watches-from-above long-stride cast of columbia",
+   "instar": 1,
+   "origin": {
+    "seed": "watches-from-above",
+    "blood": "long-stride",
+    "shape": "cast",
+    "home": "columbia"
+   },
+   "tally": {
+    "families": {},
+    "range": {},
+    "orders": {},
+    "company": {},
+    "ground": {},
+    "discipline": {},
+    "bonds": {},
+    "intention": null,
+    "runsWith": {},
+    "counters": {}
+   },
+   "current": null,
+   "result": {
+    "instar": 1,
+    "crossingAllowed": true,
+    "lineLeads": [
+     {
+      "line": "seed",
+      "expression": "beast",
+      "weight": 0.6
+     },
+     {
+      "line": "shape",
+      "expression": "beast",
+      "weight": 0.3
+     },
+     {
+      "line": "blood",
+      "expression": "beast",
+      "weight": 0.2
+     }
+    ],
+    "candidates": [
+     {
+      "form": "hawk",
+      "name": "Hawk",
+      "expression": "beast",
+      "silhouette": "beast-flier",
+      "score": 2.32,
+      "own": [
+       "wings",
+       "talons",
+       "beak"
+      ],
+      "heritage": [],
+      "seedMark": "far-eyes",
+      "features": [
+       "far-eyes",
+       "wings",
+       "talons",
+       "beak"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "watches-from-above",
+        "share": 1,
+        "contribution": 1.7
+       },
+       {
+        "line": "shape",
+        "key": "cast",
+        "share": 1,
+        "contribution": 0.42
+       },
+       {
+        "line": "blood",
+        "key": "long-stride",
+        "share": 1,
+        "contribution": 0.2
+       }
+      ]
+     },
+     {
+      "form": "ring-tail",
+      "name": "Ring-tail",
+      "expression": "beast",
+      "silhouette": "beast-ringtail",
+      "score": 1.1,
+      "own": [
+       "mask",
+       "small-hands",
+       "tail"
+      ],
+      "heritage": [],
+      "seedMark": "far-eyes",
+      "features": [
+       "far-eyes",
+       "mask",
+       "small-hands",
+       "tail"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "watches-from-above",
+        "share": 1,
+        "contribution": 0.6
+       },
+       {
+        "line": "shape",
+        "key": "cast",
+        "share": 1,
+        "contribution": 0.3
+       },
+       {
+        "line": "blood",
+        "key": "long-stride",
+        "share": 1,
+        "contribution": 0.2
+       },
+       {
+        "line": "home",
+        "key": "columbia",
+        "share": 1,
+        "contribution": 1.54
+       }
+      ]
+     },
+     {
+      "form": "crow",
+      "name": "Hooded Crow",
+      "expression": "beast",
+      "silhouette": "beast-corvid",
+      "score": 2.12,
+      "own": [
+       "wings",
+       "beak",
+       "voice"
+      ],
+      "heritage": [],
+      "seedMark": "far-eyes",
+      "features": [
+       "far-eyes",
+       "wings",
+       "beak",
+       "voice"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "watches-from-above",
+        "share": 1,
+        "contribution": 1.5
+       },
+       {
+        "line": "shape",
+        "key": "cast",
+        "share": 1,
+        "contribution": 0.42
+       },
+       {
+        "line": "blood",
+        "key": "long-stride",
+        "share": 1,
+        "contribution": 0.2
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "first never-alive forgeborn make of colonia",
+   "instar": 1,
+   "origin": {
+    "seed": "never-alive",
+    "blood": "forgeborn",
+    "shape": "make",
+    "home": "colonia"
+   },
+   "tally": {
+    "families": {},
+    "range": {},
+    "orders": {},
+    "company": {},
+    "ground": {},
+    "discipline": {},
+    "bonds": {},
+    "intention": null,
+    "runsWith": {},
+    "counters": {}
+   },
+   "current": null,
+   "result": {
+    "instar": 1,
+    "crossingAllowed": true,
+    "lineLeads": [
+     {
+      "line": "seed",
+      "expression": "engine",
+      "weight": 0.6
+     },
+     {
+      "line": "blood",
+      "expression": "engine",
+      "weight": 0.4
+     },
+     {
+      "line": "shape",
+      "expression": "engine",
+      "weight": 0.3
+     }
+    ],
+    "candidates": [
+     {
+      "form": "clockwork-wren",
+      "name": "Clockwork Wren",
+      "expression": "engine",
+      "silhouette": "engine-flier",
+      "score": 1.72,
+      "own": [
+       "wings",
+       "gears",
+       "beak"
+      ],
+      "heritage": [],
+      "seedMark": "cold-core",
+      "features": [
+       "cold-core",
+       "wings",
+       "gears",
+       "beak"
+      ],
+      "reasons": [
+       {
+        "line": "blood",
+        "key": "forgeborn",
+        "share": 1,
+        "contribution": 0.7
+       },
+       {
+        "line": "seed",
+        "key": "never-alive",
+        "share": 1,
+        "contribution": 0.6
+       },
+       {
+        "line": "shape",
+        "key": "make",
+        "share": 1,
+        "contribution": 0.42
+       }
+      ]
+     },
+     {
+      "form": "handcar",
+      "name": "Handcar",
+      "expression": "engine",
+      "silhouette": "engine-handcar",
+      "score": 1.72,
+      "own": [
+       "wheels",
+       "lantern",
+       "gears"
+      ],
+      "heritage": [],
+      "seedMark": "cold-core",
+      "features": [
+       "cold-core",
+       "wheels",
+       "lantern",
+       "gears"
+      ],
+      "reasons": [
+       {
+        "line": "blood",
+        "key": "forgeborn",
+        "share": 1,
+        "contribution": 0.7
+       },
+       {
+        "line": "seed",
+        "key": "never-alive",
+        "share": 1,
+        "contribution": 0.6
+       },
+       {
+        "line": "shape",
+        "key": "make",
+        "share": 1,
+        "contribution": 0.42
+       }
+      ]
+     },
+     {
+      "form": "fitter",
+      "name": "Fitter",
+      "expression": "kith",
+      "silhouette": "kith-fitter",
+      "score": 0.42,
+      "own": [
+       "small-hands",
+       "gears",
+       "brass-plate"
+      ],
+      "heritage": [],
+      "seedMark": "cold-core",
+      "features": [
+       "cold-core",
+       "small-hands",
+       "gears",
+       "brass-plate"
+      ],
+      "reasons": [
+       {
+        "line": "blood",
+        "key": "forgeborn",
+        "share": 1,
+        "contribution": 0.3
+       },
+       {
+        "line": "shape",
+        "key": "make",
+        "share": 1,
+        "contribution": 0.12
+       },
+       {
+        "line": "home",
+        "key": "colonia",
+        "share": 1,
+        "contribution": 0.928
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "first remembers eyes-heat read of jiangnan",
+   "instar": 1,
+   "origin": {
+    "seed": "remembers",
+    "blood": "eyes-heat",
+    "shape": "read",
+    "home": "jiangnan"
+   },
+   "tally": {
+    "families": {},
+    "range": {},
+    "orders": {},
+    "company": {},
+    "ground": {},
+    "discipline": {},
+    "bonds": {},
+    "intention": null,
+    "runsWith": {},
+    "counters": {}
+   },
+   "current": null,
+   "result": {
+    "instar": 1,
+    "crossingAllowed": true,
+    "lineLeads": [
+     {
+      "line": "seed",
+      "expression": "kith",
+      "weight": 0.8
+     },
+     {
+      "line": "blood",
+      "expression": "aspect",
+      "weight": 0.3
+     },
+     {
+      "line": "shape",
+      "expression": "kith",
+      "weight": 0.18
+     }
+    ],
+    "candidates": [
+     {
+      "form": "clerk",
+      "name": "Clerk",
+      "expression": "kith",
+      "silhouette": "kith-clerk",
+      "score": 1.5,
+      "own": [
+       "brush",
+       "ledger",
+       "old-eyes"
+      ],
+      "heritage": [],
+      "seedMark": "old-eyes",
+      "features": [
+       "old-eyes",
+       "brush",
+       "ledger"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "remembers",
+        "share": 1,
+        "contribution": 1.2
+       },
+       {
+        "line": "shape",
+        "key": "read",
+        "share": 1,
+        "contribution": 0.3
+       }
+      ]
+     },
+     {
+      "form": "homunculus",
+      "name": "Homunculus",
+      "expression": "kith",
+      "silhouette": "kith-homunculus",
+      "score": 1.5,
+      "own": [
+       "small-hands",
+       "brush",
+       "old-eyes"
+      ],
+      "heritage": [],
+      "seedMark": "old-eyes",
+      "features": [
+       "old-eyes",
+       "small-hands",
+       "brush"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "remembers",
+        "share": 1,
+        "contribution": 1.2
+       },
+       {
+        "line": "shape",
+        "key": "read",
+        "share": 1,
+        "contribution": 0.3
+       }
+      ]
+     },
+     {
+      "form": "tortoise",
+      "name": "Cairn-tortoise",
+      "expression": "beast",
+      "silhouette": "beast-shell",
+      "score": 0.82,
+      "own": [
+       "shell",
+       "stone-skin",
+       "old-eyes"
+      ],
+      "heritage": [],
+      "seedMark": "old-eyes",
+      "features": [
+       "old-eyes",
+       "shell",
+       "stone-skin"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "remembers",
+        "share": 1,
+        "contribution": 0.7
+       },
+       {
+        "line": "shape",
+        "key": "read",
+        "share": 1,
+        "contribution": 0.12
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "first i-can-hold  cast of edo",
+   "instar": 1,
+   "origin": {
+    "seed": "i-can-hold",
+    "blood": "",
+    "shape": "cast",
+    "home": "edo"
+   },
+   "tally": {
+    "families": {},
+    "range": {},
+    "orders": {},
+    "company": {},
+    "ground": {},
+    "discipline": {},
+    "bonds": {},
+    "intention": null,
+    "runsWith": {},
+    "counters": {}
+   },
+   "current": null,
+   "result": {
+    "instar": 1,
+    "crossingAllowed": true,
+    "lineLeads": [
+     {
+      "line": "seed",
+      "expression": "relic",
+      "weight": 1
+     },
+     {
+      "line": "shape",
+      "expression": "beast",
+      "weight": 0.3
+     }
+    ],
+    "candidates": [
+     {
+      "form": "watch-buckle",
+      "name": "Watch-buckle",
+      "expression": "relic",
+      "silhouette": "relic-buckle",
+      "score": 1.6,
+      "own": [
+       "watching-eye",
+       "pulse",
+       "grip"
+      ],
+      "heritage": [],
+      "seedMark": "grip",
+      "features": [
+       "grip",
+       "watching-eye",
+       "pulse"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "i-can-hold",
+        "share": 1,
+        "contribution": 1.6
+       }
+      ]
+     },
+     {
+      "form": "wooden-sword",
+      "name": "Wooden Sword",
+      "expression": "relic",
+      "silhouette": "relic-woodsword",
+      "score": 1.6,
+      "own": [
+       "edge",
+       "grip",
+       "pulse"
+      ],
+      "heritage": [],
+      "seedMark": "grip",
+      "features": [
+       "grip",
+       "edge",
+       "pulse"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "i-can-hold",
+        "share": 1,
+        "contribution": 1.6
+       },
+       {
+        "line": "home",
+        "key": "edo",
+        "share": 1,
+        "contribution": 1.99
+       }
+      ]
+     },
+     {
+      "form": "worn-glove",
+      "name": "Worn Glove",
+      "expression": "relic",
+      "silhouette": "relic-glove",
+      "score": 1.6,
+      "own": [
+       "grip",
+       "pulse",
+       "small-hands"
+      ],
+      "heritage": [],
+      "seedMark": "grip",
+      "features": [
+       "grip",
+       "pulse",
+       "small-hands"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "i-can-hold",
+        "share": 1,
+        "contribution": 1.6
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "first stands-between ridgefolk anchor of alexandria",
+   "instar": 1,
+   "origin": {
+    "seed": "stands-between",
+    "blood": "ridgefolk",
+    "shape": "anchor",
+    "home": "alexandria"
+   },
+   "tally": {
+    "families": {},
+    "range": {},
+    "orders": {},
+    "company": {},
+    "ground": {},
+    "discipline": {},
+    "bonds": {},
+    "intention": null,
+    "runsWith": {},
+    "counters": {}
+   },
+   "current": null,
+   "result": {
+    "instar": 1,
+    "crossingAllowed": true,
+    "lineLeads": [
+     {
+      "line": "seed",
+      "expression": "engine",
+      "weight": 0.6
+     },
+     {
+      "line": "blood",
+      "expression": "engine",
+      "weight": 0.3
+     },
+     {
+      "line": "shape",
+      "expression": "beast",
+      "weight": 0.18
+     }
+    ],
+    "candidates": [
+     {
+      "form": "iron-hound",
+      "name": "Iron Hound",
+      "expression": "engine",
+      "silhouette": "engine-quadruped",
+      "score": 2.42,
+      "own": [
+       "broad-chest",
+       "iron-hide",
+       "lantern"
+      ],
+      "heritage": [],
+      "seedMark": "broad-guard",
+      "features": [
+       "broad-guard",
+       "broad-chest",
+       "iron-hide",
+       "lantern"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "stands-between",
+        "share": 1,
+        "contribution": 1.4
+       },
+       {
+        "line": "blood",
+        "key": "ridgefolk",
+        "share": 1,
+        "contribution": 0.6
+       },
+       {
+        "line": "shape",
+        "key": "anchor",
+        "share": 1,
+        "contribution": 0.42
+       }
+      ]
+     },
+     {
+      "form": "handcar",
+      "name": "Handcar",
+      "expression": "engine",
+      "silhouette": "engine-handcar",
+      "score": 1.08,
+      "own": [
+       "wheels",
+       "lantern",
+       "gears"
+      ],
+      "heritage": [],
+      "seedMark": "broad-guard",
+      "features": [
+       "broad-guard",
+       "wheels",
+       "lantern",
+       "gears"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "stands-between",
+        "share": 1,
+        "contribution": 0.6
+       },
+       {
+        "line": "blood",
+        "key": "ridgefolk",
+        "share": 1,
+        "contribution": 0.3
+       },
+       {
+        "line": "shape",
+        "key": "anchor",
+        "share": 1,
+        "contribution": 0.18
+       },
+       {
+        "line": "home",
+        "key": "alexandria",
+        "share": 1,
+        "contribution": 1.522
+       }
+      ]
+     },
+     {
+      "form": "ram",
+      "name": "Ram",
+      "expression": "beast",
+      "silhouette": "beast-grazer",
+      "score": 2.02,
+      "own": [
+       "horn-brow",
+       "broad-chest",
+       "stone-skin"
+      ],
+      "heritage": [],
+      "seedMark": "broad-guard",
+      "features": [
+       "broad-guard",
+       "horn-brow",
+       "broad-chest",
+       "stone-skin"
+      ],
+      "reasons": [
+       {
+        "line": "seed",
+        "key": "stands-between",
+        "share": 1,
+        "contribution": 0.9
+       },
+       {
+        "line": "blood",
+        "key": "ridgefolk",
+        "share": 1,
+        "contribution": 0.7
+       },
+       {
+        "line": "shape",
+        "key": "anchor",
+        "share": 1,
+        "contribution": 0.42
        }
       ]
      }

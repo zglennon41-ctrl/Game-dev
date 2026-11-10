@@ -34,6 +34,14 @@
     "sharedBonus": 0.5,
     "minScore": 0.05
   },
+  "home": {
+    "$comment": "Where a character grew up shapes what the field takes as a body (data/forms.json, home; docs/genius-forms.md). Only at the rite: a home's kinds are never among a later Reading's three (they are kept, by keeping its kind). The bowl's first offer, the best fit, is read from Seed, blood and Shape alone. For the other two, a kind of the character's own home counts for its score times (1 + bonus) plus floor; no more than `most` of the three are of their home. A kind of another home counts for `away` of its score everywhere, except the kinds of the homes named in `open` (Alexandria: everyone passes through).",
+    "bonus": 0.9,
+    "floor": 0.55,
+    "away": 0.5,
+    "most": 1,
+    "open": ["alexandria"]
+  },
   "leans": {
     "seed": {
       "watches-from-above": { "expression": { "beast": 0.6, "kith": 0.4 }, "features": { "wings": 0.6, "wing-cloak": 0.4, "beak": 0.3, "talons": 0.2 } },

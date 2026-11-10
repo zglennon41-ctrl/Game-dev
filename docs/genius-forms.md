@@ -283,6 +283,103 @@ to twenty-three bloods; the four new features (a shell, a skin of rime, an eye t
 in it, a pulse in the leather); what a genius is born with against what its partner may
 choose; three coats on offer; the four keepsakes and five colours; the names of the coats.
 
+## The kinds of the thirteen homes (2026-11-10)
+
+The owner asked for the fullest variety that is logically sound, and for it to carry the
+diversity of the people in the game. So where a character grew up now shapes what the field
+takes as a body: every home has two kinds of genius of its own, First Forms that are the
+young of something from that home's land, its craft or its working life. Twenty-six First
+Forms and four elders (`data/forms.json`, `home`); the lattice went from 52 forms to 82, and
+from 22 First Forms to 48. All of it is a first draft for the owner.
+
+The rule for choosing them: one from the home's real animals, one from what its people make
+or do, something a child of that home could plausibly want beside them. No gods, no sacred
+things, no figures of worship, no people: animals, tools, instruments, weather, work.
+
+| Home | Kind | Expression | What it is | Young | Grown, and its elder |
+| --- | --- | --- | --- | --- | --- |
+| Alexandria | Station Cat | Beast | the cat every platform has | Station kitten | Station Cat |
+| | Handcar | Engine | a pump-trolley of the line, the size of a dog | Little handcar | Handcar, then **Shunter** |
+| Columbia | Ring-tail | Beast | a raccoon: masked, clever-handed | Ring-tail kit | Ring-tail |
+| | Marshal's Star | Relic | a badge nobody is wearing, with an eye in the boss | Tin star | Marshal's Star |
+| Cahokia | Beaver | Beast | the river's builder | Beaver kit | Beaver |
+| | Bell-buoy | Engine | a channel marker: a bell in a cage, a light on top | Little bell-buoy | Bell-buoy, then **Channel-light** |
+| Lunden | Dock Fox | Beast | the fox of the wharves | Fox kit | Dock Fox |
+| | Fog | Aspect | a bank of it that came ashore and stayed | Wisp of fog | Fog; great, a Fog-bank |
+| Colonia | Boar | Beast | the boar of the forest above the works | Boar piglet | Boar |
+| | Fitter | Kith | a small hand of the engine-works: apron, cap, a spanner as long as its arm | Bench-hand | Fitter; great, a Master fitter |
+| Tiber | Wall-mastiff | Beast | the big dog that guards the old walls | Mastiff whelp | Wall-mastiff |
+| | Signal-horn | Relic | a great round horn of brass; the note sits in the bell as a light | Little horn | Signal-horn |
+| Khemet | River-horse | Beast | a barrel on four posts, out of the river | River-horse calf | River-horse |
+| | Flood | Aspect | the rise of brown water the black fields live by | Trickle | Flood; great, a High Flood |
+| Baghdad | Gazelle | Beast | all leg and neck, ringed horns | Gazelle fawn | Gazelle |
+| | Astrolabe | Engine | a brass disc that turns to look at you | Little astrolabe | Astrolabe, then **Armillary** |
+| Varanasi | Mongoose | Beast | long, low and quick, afraid of nothing | Mongoose pup | Mongoose |
+| | Vigil | Daemon | what sits up with you: a hooded shape with a lamp in its lap. Its contract: it stays awake while you do | Small vigil | Vigil; great, a Long Vigil |
+| Jiangnan | Carp | Beast | a golden fish that swims in the air at your shoulder | Carp fry | Carp, then **Gate-carp** (the carp that leaps the gate, as a candidate passes the halls) |
+| | Clerk | Kith | a small scholar: long robe, square cap, a roll of paper | Little clerk | Clerk; great, an Examiner's clerk |
+| Kazan | Steppe Horse | Beast | short, deep-chested, tough | Steppe foal | Steppe Horse |
+| | Dust-devil | Aspect | a column of wind that has picked up the steppe | Breeze | Dust-devil; great, a Steppe-wind |
+| Timbuktu | Camel | Beast | a long way up; the caravans' own | Camel calf | Camel |
+| | Marginal | Daemon | what lives in the margins of a book and wants to be read | Small marginal | Marginal |
+| Edo | Crane | Beast | tall on stilts, a spear of a bill | Crane chick | Crane; great, an Old Crane |
+| | Wooden Sword | Relic | a practice blade of oak | Wooden Sword | then the **Living Blade** (the practice sword becomes the real one) |
+
+By Expression: thirteen Beasts, three Engines, three Relics, three Aspects, two Kith, two
+Daemons.
+
+**How a home leans the bowl** (`data/reading.json`, `home`; the same in
+`src/rules/reading.ts` and `genius_reading.gd`):
+
+- The bowl's first offer, the best fit, is read from Seed, blood and Shape alone, as before.
+  A home does not move it.
+- For the second and third offers, a kind of the character's own home counts for nearly
+  twice its score and a little more (`bonus`, `floor`). At most one of the three is of home
+  (`most`). The offer says so: "home: columbia" is among its reasons.
+- A kind of another home counts for half (`away`), everywhere, so it is rare: a child of
+  Edo is seldom offered a camel. Alexandria's two are open to everyone (`open`): everyone
+  passes through.
+- With no blood and no chance, a kind of home is among the bowl's three in 79 bowls of
+  100, across every home, Seed and Shape (`npx tsx tools/genius-home-offers.ts` prints the
+  count by home). It is the best fit on its own merit in about one bowl in a hundred.
+- A home's kinds come only at the rite. Later Readings offer the common lattice, and the
+  kind is kept by keeping its kind: a carp fry that stays a carp becomes a gate-carp at the
+  Third Form whatever the Tally says.
+
+The three scripted lives pick and become what they did. Mira and Tobiah, both of Columbia,
+are now offered the Ring-tail second at the rite and take the hawk and the iron hound as
+before; Sable's bowl is unchanged.
+
+**Where they are built.** `tools/blender/genius_homes.py` (loaded by the kit). Eleven
+beasts are the wolf's rig reshaped (`_beast`), so the ages in `data/genius-bodies.json`
+shape them: a steppe foal has the large head and short legs of the young. The carp and the
+crane are modelled; the fitter and the clerk are small people on the KayKit rig; the rest
+are modelled things. Each has a palette of coats of its own or shares a fitting one
+(`data/genius-looks.json`: cat, ringtail, fox, bristle, hound, hide, sand, grizzle, horse,
+carp, crane, mist, water, dust, oak, robe), marking regions, and a card.
+
+Ten new features, all of the body's own surface (nothing hangs for them): whiskers, a
+paddle of a tail, a mane, a hump, wheels, a bell, a dial of figures, a body of mist, a
+current, pages.
+
+```
+python tools/blender/genius_kit.py station-cat handcar      # those forms' bodies and cards
+npx tsx tools/genius-home-offers.ts                         # how often each home's kinds are offered
+```
+
+What is rough: the wolf-rig beasts are honest reshapings, not new sculpts (the camel and
+the horse most of all: a wolf's skull on a long neck); the carp's side fins beat as wings
+do; the crane walks with its wings folded and has no flight; the vigil and the marginal
+do not move their hands; the small people take coats but no markings; a new surface
+feature that becomes heritage on another body shows nothing there (as with every surface
+feature).
+
+**Design calls in this set, for the owner:** which two kinds each home has, and their
+names; the names of their young and their great; which have an elder; that a home's kinds
+come only at the rite; that the home never moves the bowl's best fit; how strongly it
+leans the other two (79 in 100); that another home's kind is rare, not impossible; that
+Alexandria's are open to all; the sixteen palettes.
+
 ## Sources
 
 The wolf (Quaternius, CC0), the KayKit rig and its clips (Kay Lousberg, CC0) and the

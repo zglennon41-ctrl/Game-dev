@@ -80,7 +80,7 @@ export function simulate(life: Life): SimResult {
   const say = (day: number, text: string) => log.push({ day, text });
   const warnings: string[] = [];
   const blood = byId(data.bloods, life.blood, 'blood');
-  const origin = { seed: life.seed, blood: life.blood, shape: life.shape };
+  const origin = { seed: life.seed, blood: life.blood, shape: life.shape, home: life.city };
 
   let tally: Tally = emptyTally();
   const lifetime: Record<string, number> = {};

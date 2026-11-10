@@ -167,32 +167,51 @@ static func read(instar: int, tally: Dictionary, origin: Dictionary, current: Di
 	var scored: Array = []
 	var lattice: Array = Data.forms().duplicate()
 	lattice.sort_custom(func(a, b): return a["id"] < b["id"])
+	# A home's kinds come only at the rite (after it they are kept, by keeping its kind). There,
+	# a kind of another home counts for less everywhere; a kind of the character's own home
+	# counts for more, but only for the second and third offers: the best fit is the field's.
+	var hcfg: Dictionary = cfg["home"]
+	var home := String(origin.get("home", ""))
 	for f in lattice:
 		if int(f["instars"]["min"]) > instar or instar > int(f["instars"]["max"]) or f["id"] == current.get("form", ""):
+			continue
+		var fhome := String(f.get("home", ""))
+		if not first and fhome != "":
 			continue
 		var s := _score_form(f, shares, emphasis, weights, cfg)
 		var stay := 1.0
 		if not current.is_empty() and not crossing and f["expression"] == current["expression"]:
 			stay = 1.0 + float(cfg["crossing"]["stayBonus"])
-		var sc := float(s["score"]) * stay
+		var away := float(hcfg["away"]) if first and fhome != "" and fhome != home and not (hcfg["open"] as Array).has(fhome) else 1.0
+		var sc := float(s["score"]) * stay * away
 		if noise > 0.0:
 			sc += rng.randf() * noise
-		scored.append({ "f": f, "score": sc, "reasons": s["reasons"] })
+		var own := first and fhome != "" and fhome == home
+		scored.append({ "f": f, "score": sc, "lean": (sc * (1.0 + float(hcfg["bonus"])) + float(hcfg["floor"])) if own else sc, "own": own, "reasons": s["reasons"] })
 	scored.sort_custom(func(a, b): return a["score"] > b["score"] or (a["score"] == b["score"] and a["f"]["id"] < b["f"]["id"]))
 	# Greedy pick of three, discounting repeats of an Expression so three bodies are offered.
 	var picked: Array = []
 	var pool := scored.duplicate()
 	while picked.size() < 3 and not pool.is_empty():
-		var best_i := 0
+		var best_i := -1
 		var best_v := -INF
+		var homes := picked.filter(func(p): return p["own"]).size()
 		for i in pool.size():
 			var c: Dictionary = pool[i]
+			if c["own"] and homes >= int(hcfg["most"]):
+				continue
 			var same := picked.filter(func(p): return p["f"]["expression"] == c["f"]["expression"]).size()
-			var v := float(c["score"]) * pow(float(cfg["diversity"]["sameExpression"]), same)
+			var v := float(c["score"] if picked.is_empty() else c["lean"]) * pow(float(cfg["diversity"]["sameExpression"]), same)
 			if v > best_v:
 				best_v = v
 				best_i = i
-		picked.append(pool.pop_at(best_i))
+		if best_i < 0:
+			break
+		var got: Dictionary = pool.pop_at(best_i)
+		# The score stays the Reading's own; a kind offered for the home's sake says so in its reasons.
+		if not picked.is_empty() and got["own"]:
+			got["reasons"] = got["reasons"] + [{ "line": "home", "key": home, "share": 1.0, "contribution": float(got["lean"]) - float(got["score"]) }]
+		picked.append(got)
 	var heritage_pool: Array = []
 	if not current.is_empty():
 		var raw: Array = current["own"] + current["heritage"] + current.get("adaptations", []).map(func(a): return a["id"])
