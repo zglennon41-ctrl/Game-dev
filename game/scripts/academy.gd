@@ -420,7 +420,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 		_fade.modulate.a = 1.0
 		var tw := _fade.create_tween()
 		tw.tween_interval(0.15)
-		tw.tween_property(_fade, "modulate:a", 0.0, 0.7).set_trans(Tween.TRANS_SINE)
+		Style.ease_ui(tw.tween_property(_fade, "modulate:a", 0.0, Style.t("ceremony")))
 	save()
 
 ## Marks earned: counted on the record, logged by day, and shown as they land.
@@ -456,9 +456,9 @@ func _show_place(title: String) -> void:
 	_place_card.text = title
 	var tw := _place_card.create_tween()
 	_place_card.modulate.a = 0.0
-	tw.tween_property(_place_card, "modulate:a", 1.0, 0.6)
-	tw.tween_interval(1.6)
-	tw.tween_property(_place_card, "modulate:a", 0.0, 0.9)
+	tw.tween_property(_place_card, "modulate:a", 1.0, Style.t("ceremony"))
+	tw.tween_interval(Style.t("hold"))
+	tw.tween_property(_place_card, "modulate:a", 0.0, Style.t("ceremony"))
 
 # --- Talking -----------------------------------------------------------------
 
@@ -769,7 +769,7 @@ func _rest_now() -> void:
 		_fade.modulate.a = 1.0
 		var tw := _fade.create_tween()
 		tw.tween_interval(0.6)
-		tw.tween_property(_fade, "modulate:a", 0.0, 1.0).set_trans(Tween.TRANS_SINE)
+		Style.ease_ui(tw.tween_property(_fade, "modulate:a", 0.0, Style.t("ceremony")))
 		title_card("DAY %d" % int(progress["day"]), "%s  ·  %s" % [date_line(), Data.academy.get("calendar", {}).get("notes", {}).get(weekday(), "")], Style.GOLD)
 		sfx.play("stance", 0.8, -6.0))
 
@@ -1723,13 +1723,13 @@ func title_card(text: String, sub: String, color: Color) -> void:
 	_big.pivot_offset = Vector2(700, 70)
 	_big.scale = Vector2(1.25, 1.25)
 	var tw := _big.create_tween().set_parallel(true)
-	tw.tween_property(_big, "modulate:a", 1.0, 0.25)
-	tw.tween_property(_big, "scale", Vector2.ONE, 0.6).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.tween_property(_big_sub, "modulate:a", 1.0, 0.6).set_delay(0.5)
+	tw.tween_property(_big, "modulate:a", 1.0, Style.t("quick"))
+	Style.ease_settle(tw.tween_property(_big, "scale", Vector2.ONE, Style.t("ceremony")))
+	tw.tween_property(_big_sub, "modulate:a", 1.0, Style.t("ceremony")).set_delay(Style.t("ceremony") * 0.7)
 	var out := _big.create_tween()
 	out.tween_interval(3.4)
-	out.tween_property(_big, "modulate:a", 0.0, 0.8)
-	out.parallel().tween_property(_big_sub, "modulate:a", 0.0, 0.8)
+	out.tween_property(_big, "modulate:a", 0.0, Style.t("ceremony"))
+	out.parallel().tween_property(_big_sub, "modulate:a", 0.0, Style.t("ceremony"))
 
 ## Name the genius: a box with its form's name already in it.
 func ask_name(default_name: String, then: Callable) -> void:
@@ -1790,8 +1790,8 @@ func show_card(info: Dictionary, color: Color, title: String) -> void:
 	_card.modulate.a = 0.0
 	_card.position.x -= 40
 	var tw := _card.create_tween().set_parallel(true)
-	tw.tween_property(_card, "modulate:a", 1.0, 0.5)
-	tw.tween_property(_card, "position:x", 60.0, 0.6).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	Style.ease_ui(tw.tween_property(_card, "modulate:a", 1.0, Style.t("arrive")))
+	Style.ease_ui(tw.tween_property(_card, "position:x", 60.0, Style.t("arrive") * 1.5))
 
 func hide_card() -> void:
 	if _card:

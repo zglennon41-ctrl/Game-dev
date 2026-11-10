@@ -1,0 +1,264 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "The one style (docs/style.md)",
+  "type": "object",
+  "required": ["cap", "accentCap", "skinCap", "tolerance", "ramps", "accents", "loud", "materials", "shading", "ink", "lights", "film", "genius", "effects", "motion", "type", "interface"],
+  "additionalProperties": false,
+  "definitions": {
+    "hex": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+    "unit": { "type": "number", "minimum": 0, "maximum": 1 },
+    "seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 20 },
+    "rgb": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 2 }, "minItems": 3, "maxItems": 3 },
+    "light": {
+      "type": "object",
+      "required": ["color", "cast", "energy"],
+      "additionalProperties": false,
+      "properties": { "color": { "$ref": "#/definitions/hex" }, "cast": { "$ref": "#/definitions/hex" }, "energy": { "type": "number", "minimum": 0, "maximum": 4 } }
+    }
+  },
+  "properties": {
+    "$comment": { "type": "string" },
+    "cap": { "$ref": "#/definitions/unit" },
+    "accentCap": { "$ref": "#/definitions/unit" },
+    "skinCap": { "$ref": "#/definitions/unit" },
+    "tolerance": { "type": "number", "minimum": 0, "maximum": 0.2 },
+    "ramps": {
+      "type": "object",
+      "minProperties": 8,
+      "additionalProperties": { "type": "array", "items": { "$ref": "#/definitions/hex" }, "minItems": 5, "maxItems": 5 }
+    },
+    "accents": { "type": "array", "items": { "type": "string" } },
+    "loud": {
+      "type": "object",
+      "required": ["shapes", "telegraph", "unshaped"],
+      "additionalProperties": false,
+      "properties": {
+        "shapes": {
+          "type": "object",
+          "required": ["anchor", "turn", "cast", "read", "bind", "make"],
+          "additionalProperties": { "$ref": "#/definitions/hex" }
+        },
+        "telegraph": { "$ref": "#/definitions/hex" },
+        "unshaped": { "$ref": "#/definitions/hex" }
+      }
+    },
+    "materials": {
+      "type": "object",
+      "required": ["words", "classes"],
+      "additionalProperties": false,
+      "properties": {
+        "$comment": { "type": "string" },
+        "words": {
+          "type": "array",
+          "minItems": 10,
+          "items": { "type": "array", "items": { "type": "string", "minLength": 2 }, "minItems": 2, "maxItems": 2 }
+        },
+        "classes": {
+          "type": "object",
+          "required": ["skin", "cloth", "leather", "wood", "stone", "iron", "brass", "bone", "glass", "field", "coat", "growth", "earth", "water", "lit", "eye", "ink", "mixed"],
+          "additionalProperties": {
+            "type": "object",
+            "required": ["ramps", "bands", "shadowTint", "spec", "grain", "grainScale", "wear"],
+            "additionalProperties": false,
+            "properties": {
+              "glows": { "type": "boolean" },
+              "ramps": { "type": "array", "items": { "type": "string" } },
+              "bands": { "type": "integer", "minimum": 1, "maximum": 6 },
+              "shadowTint": { "$ref": "#/definitions/hex" },
+              "spec": { "type": "array", "items": { "type": "number", "minimum": 0 }, "minItems": 2, "maxItems": 2 },
+              "grain": { "type": "string" },
+              "grainScale": { "type": "number", "exclusiveMinimum": 0 },
+              "wear": { "$ref": "#/definitions/unit" }
+            }
+          }
+        }
+      }
+    },
+    "shading": {
+      "type": "object",
+      "required": ["cel", "sky", "rim", "occlusion", "smooth"],
+      "additionalProperties": false,
+      "properties": {
+        "$comment": { "type": "string" },
+        "cel": { "type": "boolean" },
+        "sky": { "type": "boolean" },
+        "rim": {
+          "type": "object",
+          "required": ["strength", "color", "power"],
+          "additionalProperties": false,
+          "properties": { "strength": { "$ref": "#/definitions/unit" }, "color": { "$ref": "#/definitions/hex" }, "power": { "type": "number", "minimum": 0.5, "maximum": 8 } }
+        },
+        "occlusion": { "$ref": "#/definitions/unit" },
+        "smooth": {
+          "type": "object",
+          "required": ["living", "made"],
+          "additionalProperties": false,
+          "properties": { "living": { "type": "boolean" }, "made": { "type": "boolean" } }
+        }
+      }
+    },
+    "ink": {
+      "type": "object",
+      "required": ["color", "screen", "width"],
+      "additionalProperties": false,
+      "properties": {
+        "$comment": { "type": "string" },
+        "color": { "$ref": "#/definitions/hex" },
+        "screen": { "type": "number", "minimum": 240 },
+        "width": {
+          "type": "object",
+          "required": ["people", "beasts", "genii", "weapons", "places"],
+          "additionalProperties": { "type": "number", "minimum": 0, "maximum": 6 }
+        }
+      }
+    },
+    "lights": {
+      "type": "object",
+      "required": ["lamp", "fire", "moon", "window", "stain", "kinds", "sky"],
+      "additionalProperties": false,
+      "properties": {
+        "$comment": { "type": "string" },
+        "lamp": { "$ref": "#/definitions/light" },
+        "fire": { "$ref": "#/definitions/light" },
+        "moon": { "$ref": "#/definitions/light" },
+        "window": {
+          "type": "object",
+          "required": ["color", "energy"],
+          "additionalProperties": false,
+          "properties": { "color": { "$ref": "#/definitions/hex" }, "energy": { "type": "number", "minimum": 0, "maximum": 4 } }
+        },
+        "stain": {
+          "type": "object",
+          "required": ["cast", "energy", "darken"],
+          "additionalProperties": false,
+          "properties": { "cast": { "$ref": "#/definitions/hex" }, "energy": { "type": "number", "minimum": 0, "maximum": 2 }, "darken": { "$ref": "#/definitions/unit" } }
+        },
+        "kinds": {
+          "type": "object",
+          "required": ["hall", "court", "wild", "cut"],
+          "additionalProperties": {
+            "type": "object",
+            "required": ["key", "fill", "sky", "ambient", "ambientEnergy", "fog", "fogDensity", "moon"],
+            "additionalProperties": false,
+            "properties": {
+              "key": { "enum": ["lamp", "fire", "moon"] },
+              "fill": { "enum": ["lamp", "fire", "moon"] },
+              "sky": { "$ref": "#/definitions/hex" },
+              "ambient": { "$ref": "#/definitions/hex" },
+              "ambientEnergy": { "type": "number", "minimum": 0, "maximum": 2 },
+              "fog": { "$ref": "#/definitions/hex" },
+              "fogDensity": { "type": "number", "minimum": 0, "maximum": 0.2 },
+              "moon": { "type": "number", "minimum": 0, "maximum": 3 }
+            }
+          }
+        },
+        "sky": {
+          "type": "object",
+          "required": ["top", "mid", "low", "ember", "stars", "moon", "halo"],
+          "additionalProperties": { "$ref": "#/definitions/hex" }
+        }
+      }
+    },
+    "film": {
+      "type": "object",
+      "required": ["shadows", "highlights", "saturation", "contrast", "exposure", "vignette", "grain", "bloom", "glow"],
+      "additionalProperties": false,
+      "properties": {
+        "$comment": { "type": "string" },
+        "shadows": { "$ref": "#/definitions/rgb" },
+        "highlights": { "$ref": "#/definitions/rgb" },
+        "saturation": { "type": "number", "minimum": 0.5, "maximum": 1.5 },
+        "contrast": { "type": "number", "minimum": 0.5, "maximum": 1.5 },
+        "exposure": { "type": "number", "minimum": 0.2, "maximum": 3 },
+        "vignette": { "$ref": "#/definitions/unit" },
+        "grain": { "type": "number", "minimum": 0, "maximum": 0.2 },
+        "bloom": { "$ref": "#/definitions/unit" },
+        "glow": { "type": "number", "minimum": 0, "maximum": 3 }
+      }
+    },
+    "genius": {
+      "type": "object",
+      "required": ["glowShare", "glowEnergy", "groundLight"],
+      "additionalProperties": false,
+      "properties": {
+        "$comment": { "type": "string" },
+        "glowShare": { "$ref": "#/definitions/unit" },
+        "glowEnergy": { "type": "object", "required": ["1", "2", "3", "4", "5", "6"], "additionalProperties": { "type": "number", "minimum": 0, "maximum": 8 } },
+        "groundLight": { "type": "number", "minimum": 0, "maximum": 4 }
+      }
+    },
+    "effects": {
+      "type": "object",
+      "required": ["colors", "ring", "shard", "puff", "flash", "word"],
+      "additionalProperties": false,
+      "properties": {
+        "$comment": { "type": "string" },
+        "colors": {
+          "type": "object",
+          "required": ["telegraph", "hurt", "guard", "parry", "stagger", "spark", "dust", "smoke", "shot", "text", "dim"],
+          "additionalProperties": { "$ref": "#/definitions/hex" }
+        },
+        "ring": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } },
+        "shard": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } },
+        "puff": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } },
+        "flash": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } },
+        "word": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } }
+      }
+    },
+    "motion": {
+      "type": "object",
+      "required": ["shares", "idle", "hover", "flicker", "hit", "ui", "settle", "word", "camera"],
+      "additionalProperties": false,
+      "properties": {
+        "$comment": { "type": "string" },
+        "shares": {
+          "type": "object",
+          "required": ["anticipation", "strike", "settle"],
+          "additionalProperties": false,
+          "properties": { "anticipation": { "$ref": "#/definitions/unit" }, "strike": { "$ref": "#/definitions/unit" }, "settle": { "$ref": "#/definitions/unit" } }
+        },
+        "idle": { "type": "object", "required": ["period"], "additionalProperties": false, "properties": { "period": { "$ref": "#/definitions/seconds" } } },
+        "hover": { "type": "object", "required": ["period", "rise"], "additionalProperties": false, "properties": { "period": { "$ref": "#/definitions/seconds" }, "rise": { "$ref": "#/definitions/unit" } } },
+        "flicker": { "type": "object", "required": ["period", "depth"], "additionalProperties": false, "properties": { "period": { "$ref": "#/definitions/seconds" }, "depth": { "$ref": "#/definitions/unit" } } },
+        "hit": {
+          "type": "object",
+          "required": ["stopMin", "stopMax", "shakeMin", "shakeMax"],
+          "additionalProperties": false,
+          "properties": { "stopMin": { "$ref": "#/definitions/unit" }, "stopMax": { "$ref": "#/definitions/unit" }, "shakeMin": { "$ref": "#/definitions/unit" }, "shakeMax": { "$ref": "#/definitions/unit" } }
+        },
+        "ui": {
+          "type": "object",
+          "required": ["quick", "arrive", "leave", "ceremony", "stagger", "hold", "ease"],
+          "additionalProperties": false,
+          "properties": { "quick": { "$ref": "#/definitions/seconds" }, "arrive": { "$ref": "#/definitions/seconds" }, "leave": { "$ref": "#/definitions/seconds" }, "ceremony": { "$ref": "#/definitions/seconds" },
+            "stagger": { "$ref": "#/definitions/seconds" }, "hold": { "$ref": "#/definitions/seconds" }, "ease": { "enum": ["out-cubic", "out-sine", "out-quad", "linear"] } }
+        },
+        "settle": { "enum": ["back", "cubic"] },
+        "word": { "type": "object", "required": ["in", "hold"], "additionalProperties": false, "properties": { "in": { "$ref": "#/definitions/seconds" }, "hold": { "$ref": "#/definitions/seconds" } } },
+        "camera": { "type": "object", "required": ["cut", "glide"], "additionalProperties": false, "properties": { "cut": { "type": "number", "exclusiveMinimum": 0 }, "glide": { "type": "number", "exclusiveMinimum": 0 } } }
+      }
+    },
+    "type": {
+      "type": "object",
+      "required": ["title", "body", "ui"],
+      "additionalProperties": false,
+      "properties": { "$comment": { "type": "string" }, "title": { "type": "string" }, "body": { "type": "string" }, "ui": { "type": "string" } }
+    },
+    "interface": {
+      "type": "object",
+      "required": ["colors", "plateAlpha", "cut", "rim"],
+      "additionalProperties": false,
+      "properties": {
+        "$comment": { "type": "string" },
+        "colors": {
+          "type": "object",
+          "required": ["ink", "plate", "plateHi", "plateOn", "brass", "brassDim", "brassHi", "fg", "dim", "faint", "gold", "ember", "blood", "will", "field"],
+          "additionalProperties": { "$ref": "#/definitions/hex" }
+        },
+        "plateAlpha": { "$ref": "#/definitions/unit" },
+        "cut": { "type": "integer", "minimum": 0, "maximum": 40 },
+        "rim": { "type": "integer", "minimum": 0, "maximum": 8 }
+      }
+    }
+  }
+}

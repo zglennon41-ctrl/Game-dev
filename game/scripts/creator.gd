@@ -475,7 +475,7 @@ func _draw_reveal(first := false) -> void:
 	if first:
 		_arrive(v)
 		panel.modulate.a = 0.0
-		panel.create_tween().tween_property(panel, "modulate:a", 1.0, 0.5).set_delay(0.35)
+		Style.ease_ui(panel.create_tween().tween_property(panel, "modulate:a", 1.0, Style.t("arrive")).set_delay(Style.t("arrive")))
 	else:
 		var keep := _scroll_keep
 		scroll.ready.connect(func(): scroll.set_deferred("scroll_vertical", keep))
@@ -1065,7 +1065,7 @@ func _arrive(box: Control) -> void:
 		if c is CanvasItem:
 			var it := c as CanvasItem
 			it.modulate.a = 0.0
-			it.create_tween().tween_property(it, "modulate:a", 1.0, 0.35).set_delay(0.045 * i).set_trans(Tween.TRANS_SINE)
+			Style.ease_ui(it.create_tween().tween_property(it, "modulate:a", 1.0, Style.t("arrive")).set_delay(Style.t("stagger") * i))
 			i += 1
 
 const BACKDROP := """
