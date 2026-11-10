@@ -87,6 +87,15 @@ func _run() -> void:
 	test_homes_hand()
 	test_homes_lean()
 	test_genius_fight()
+	# the three types of genius: the tests' own bases are given types for these, and no others
+	var game_types := Data.genius_types()
+	_all_types()
+	test_types_data()
+	test_types_weapon()
+	test_types_items()
+	test_types_roles()
+	test_types_need_and_bots()
+	Data.use_types(game_types)
 	test_blood_marks()
 	test_life_features()
 	test_bots()
@@ -3080,3 +3089,807 @@ func test_genius_fight() -> void:
 			d.drain()
 		runs.append("%.3f %.3f %.3f %s" % [d.w_hp, d.g_will, d.p_hp, str(d.g_pos)])
 	check(runs[0] == runs[1], "seeded, a fight with a genius plays out the same")
+
+# ===================================================================== the three types of genius
+# docs/genius-types.md; data/genius-types.json. The rules are tested on the tests' own bases
+# (tedge a weapon, tlamp a ritual item, trun a companion: fixtures/types.json) and on numbers
+# a test puts on a fight itself; what is asked of the game's own bases holds whatever they say.
+
+const TEST_TYPES := "res://game/tests/fixtures/types.json"
+
+## The game's types with the tests' own bases' laid over them, for the whole run.
+func _all_types() -> void:
+	var t: Dictionary = (Data._load("res://data/genius-types.json") as Dictionary).duplicate(true)
+	var mine: Dictionary = Data._load(TEST_TYPES)
+	for k in mine["weapon"]:
+		t["weapon"]["bases"][k] = mine["weapon"][k]
+	for k in mine["items"]:
+		t["items"][k] = mine["items"][k]
+	for k in mine["companions"]:
+		t["companions"][k] = mine["companions"][k]
+	Data.use_types(t)
+
+## A fight with a genius standing at a form of the tree, and a foe that stands idle at arm's
+## length until the test moves it.
+func _typed_fight(form_id: String, instar := 0, extra: Dictionary = {}) -> Fight:
+	var opts := { "hero": Fight.default_hero(), "seed": 3, "respawn": false, "genius": _genius_at(form_id, instar), "passive": true }
+	for k in extra:
+		opts[k] = extra[k]
+	var f := Fight.new(opts)
+	f.w_state = "idle"
+	f.w_pos = f.p_pos + Vector2(1.6, 0.0)
+	f.p_facing = 0.0
+	f.p_lock = true
+	return f
+
+## A fight whose genius is an item with exactly this always and this use: the test's own
+## numbers, at full worth.
+func _item_fight(always: Dictionary, use: Dictionary, type := "defense", extra: Dictionary = {}) -> Fight:
+	var f := _typed_fight("tlamp-small", 3, extra)
+	var a := { "name": "always", "text": "", "feeds": "free" }
+	a.merge(always, true)
+	var u := { "name": "use", "short": "use", "effect": "set", "feeds": "guard", "text": "", "wait": 8.0, "will": 5.0 }
+	u.merge(use, true)
+	f.g_type = type
+	f.g_item = { "type": type, "worn": "side", "wornAs": "", "always": a, "use": u, "bend": {} }
+	f.g_worth = 1.0
+	f.g_twait = 1.0
+	return f
+
+## A fight whose genius is a weapon of this type with this one property.
+func _weapon_fight(style: String, sig: Dictionary, will_per_blow := 3.0, instar := 3) -> Fight:
+	var f := _typed_fight("tedge-small", instar)
+	f.g_weapon = { "style": style, "willPerBlow": will_per_blow, "held": { "length": 1.0 }, "inHand": "", "sig": sig }
+	return f
+
+## A fight beside a companion with a role (and a shade), each at a given strength.
+func _role_fight(role: String, order := "guard", beast := "cut-wolf", shade := "", k := 1.0, shade_k := 0.5) -> Fight:
+	var f := _genius_fight("runner", 3, order, beast)
+	var R: Dictionary = Data.genius_types()["roles"]
+	f.g_role = R[role]
+	f.g_role_id = role
+	f.g_role_k = k
+	if shade != "":
+		f.g_shade = R[shade]
+		f.g_shade_id = shade
+		f.g_shade_k = shade_k
+	return f
+
+func _first_hit(evs: Array) -> Dictionary:
+	for e in evs:
+		if e["type"] == "hit":
+			return e
+	return {}
+
+## The game's own bases: every one has a type by its class, and the data is whole.
+func test_types_data() -> void:
+	var T := Data.genius_types()
+	var game := Data.load_bases()
+	var missing: Array = []
+	var bad_paths: Array = []
+	var bad_refs: Array = []
+	var roles_used := {}
+	var counts := {}
+	for b in game:
+		var id := String(b["id"])
+		var type := GeniusTypes.type_of_class(String(b["class"]))
+		counts[type] = int(counts.get(type, 0)) + 1
+		if type == "" or not GeniusTypes.written(type, id):
+			missing.append(id)
+			continue
+		var paths: Array = (b["paths"] as Array).map(func(p): return String(p["id"]))
+		var named: Array = []
+		match type:
+			"weapon":
+				var w: Dictionary = T["weapon"]["bases"][id]
+				named = (w["paths"] as Dictionary).keys()
+				if not Data.room["styles"].has(String(w["style"])):
+					bad_refs.append("%s: style %s" % [id, w["style"]])
+			"defense", "ritual":
+				var it: Dictionary = T["items"][id]
+				named = (it["paths"] as Dictionary).keys()
+				if String(it["type"]) != type:
+					bad_refs.append("%s: says %s, its class says %s" % [id, it["type"], type])
+			"companion":
+				var c: Dictionary = T["companions"][id]
+				named = (c["paths"] as Dictionary).keys()
+				roles_used[String(c["role"])] = true
+		named.sort()
+		paths.sort()
+		if named != paths:
+			bad_paths.append(id)
+	check(missing.is_empty(), "every base of the game has its type written (%s)" % ", ".join(missing))
+	check(bad_paths.is_empty(), "and what each of its three paths changes (%s)" % ", ".join(bad_paths))
+	check(bad_refs.is_empty(), "and names only what exists (%s)" % ", ".join(bad_refs))
+	check(int(counts.get("", 0)) == 0, "every class of base is one of the four types")
+	if int(counts.get("companion", 0)) >= GeniusTypes.ROLES.size():
+		check(roles_used.size() == GeniusTypes.ROLES.size(), "every role has a companion that fills it (%s)" % ", ".join(roles_used.keys()))
+	# what the page says of each: its settled form, and each path
+	var silent: Array = []
+	for b in game:
+		for fid in [String(b["settled"]["id"])] + (b["paths"] as Array).map(func(p): return String(p["id"])):
+			var g := Genius.at_form(fid, 0)
+			var said: Dictionary = GeniusTypes.says(g, Fight.default_hero())
+			if (said["lines"] as Array).size() < 3 or String(said["title"]) == "":
+				silent.append(fid)
+	check(silent.is_empty(), "the page can say what every form does for its partner (%s)" % ", ".join(silent))
+	# a hybrid is its first base's type, and its paths are that base's
+	if game.size() >= 2:
+		var a: Dictionary = game[0]
+		var bb: Dictionary = game[1]
+		var hy := Data.hybrid_forms(String(a["id"]), String(bb["id"]))
+		if not hy.is_empty():
+			var of := GeniusTypes.of_form(hy[0])
+			check(of["base"] == a["id"] and of["type"] == GeniusTypes.type_of_class(String(a["class"])) and (a["paths"] as Array).map(func(p): return String(p["id"])).has(String(of["path"])), "a hybrid is its first base's type, on that base's paths (%s)" % str(of))
+	# the tests' own
+	check(GeniusTypes.of_form(Data.form("tedge-small"))["type"] == "weapon" and GeniusTypes.of_form(Data.form("tlamp-a"))["type"] == "ritual" and GeniusTypes.of_form(Data.form("trun-b1"))["path"] == "trun-b", "a form knows its type and the path it is on")
+	check(is_equal_approx(GeniusTypes.at_worth(1.5, 0.6), 1.3) and is_equal_approx(GeniusTypes.at_worth(0.5, 1.0), 0.5), "what is always true is worth more as it ages")
+	var ages_up := true
+	var last := 0.0
+	for a2 in GeniusTypes.AGES:
+		ages_up = ages_up and float(T["ages"][a2]["worth"]) >= last and float(T["weapon"]["inHand"][a2]) > 0.0
+		last = float(T["ages"][a2]["worth"])
+	check(ages_up, "a genius has more of its function at every age")
+
+## A weapon genius: taken in hand on a switch with the main weapon.
+func test_types_weapon() -> void:
+	var W: Dictionary = Data.genius_types()["weapon"]
+	var chop := float(Data.room["styles"]["blade"]["combo"][0]["damage"])
+	var f := _typed_fight("tedge-small", 3)
+	check(f.g_type == "weapon" and f.genius_key()["does"] == "take" and not f.g_in_hand and f.genius_key()["ready"], "a weapon genius's key takes it in hand")
+	check(f.g_moves.is_empty() and not f._genius_guards(10.0), "it makes no companion's moves and does not guard as one")
+	var main_style := f.style
+	var main_combo := f.combo
+	var main_damage := f.gear_damage
+	f.input("order")
+	check(f.g_in_hand and not is_same(f.style, main_style) and String(f.style["kind"]) == "melee" and f.combo.size() == (Data.room["styles"]["blade"]["combo"] as Array).size() and f.genius_key()["active"], "in hand, its partner fights with the weapon it is")
+	check(is_equal_approx(f.gear_damage, float(W["inHand"]["grown"])), "its blows are worth what its age makes them")
+	var w0 := f.g_will
+	f.input("attack")
+	var evs := run_for(f, 0.7)
+	var cut_hit := _first_hit(evs)
+	check(is_equal_approx(f.g_will, w0 - 4.0), "a blow with it costs it its own Will (%.1f)" % (w0 - f.g_will))
+	check(not cut_hit.is_empty() and is_equal_approx(float(cut_hit["damage"]), roundf(chop * float(W["take"]["drawCut"]["damage"]) * float(W["inHand"]["grown"]))), "taken up rested and struck with at once, its first blow is the cut of the draw (%s)" % str(cut_hit.get("damage", 0)))
+	run_for(f, 3.0)
+	check(is_equal_approx(f.g_will, w0 - 4.0), "held, it gets none of its Will back")
+	f.input("order")
+	check(not f.g_in_hand and is_same(f.style, main_style) and is_same(f.combo, main_combo) and is_equal_approx(f.gear_damage, main_damage), "let go, the weapon that was put away is in the hand again")
+	run_for(f, 4.0)
+	check(f.g_will > w0 - 4.0, "at the shoulder its Will comes back")
+	# no cut without rest, and the cut is quicker
+	var c := _typed_fight("tedge-small", 3)
+	c.input("order")
+	var t0 := c.now
+	c.input("attack")
+	var quick := _first_hit(run_for(c, 0.7))
+	c.input("order")
+	c.input("order")
+	check(c.g_in_hand and c.g_cut_until < c.now, "taken up again at once, there is no cut")
+	c.p_last_attack_end = -9.0
+	var t1 := c.now
+	c.input("attack")
+	var plain := _first_hit(run_for(c, 0.7))
+	check(not plain.is_empty() and is_equal_approx(float(plain["damage"]), roundf(chop * float(W["inHand"]["grown"]))) and float(quick["t"]) - t0 < float(plain["t"]) - t1 - 0.03, "the cut lands sooner and harder than the same blow without it (%.2f s against %.2f s)" % [float(quick["t"]) - t0, float(plain["t"]) - t1])
+	# spent: it leaves the hand of itself
+	var sp := _typed_fight("tedge-small", 3)
+	var sp_main := sp.style
+	sp.input("order")
+	sp.g_will = 3.0
+	sp.input("attack")
+	var spent := false
+	for e in sp.drain():
+		spent = spent or (e["type"] == "genius-take" and not e["in"] and e.get("spent", false))
+	check(not sp.g_in_hand and sp.p_state == "attack" and spent and is_same(sp.style, sp_main), "with too little Will for a blow it leaves the hand of itself, and the press goes to the weapon put away")
+	run_for(sp, 1.0)
+	sp.g_will = 1.0
+	sp.input("order")
+	check(not sp.g_in_hand and not sp.genius_key()["ready"] and float(sp.genius_key()["left"]) > 0.0, "spent, it cannot be taken up until it has rested")
+	sp.g_will = sp.g_will_max
+	sp.input("order")
+	check(sp.g_in_hand, "rested, it can")
+	# it changes hands only when a hand is free: mid-swing the press waits for the swing's end
+	var busy := _typed_fight("tedge-small", 3)
+	busy.input("attack")
+	run_for(busy, 0.15)
+	busy.input("order")
+	check(not busy.g_in_hand and busy.p_queued == "order", "pressed in the middle of a swing, the switch waits")
+	run_for(busy, 0.35)
+	check(busy.g_in_hand, "and is made the moment the swing allows it")
+	var dis := _typed_fight("tedge-small", 3)
+	dis.p_disarmed = true
+	dis.input("order")
+	check(not dis.g_in_hand, "a partner whose Toll was their weapon cannot take it up")
+	# from the shoulder it strikes with its partner, from its First Form; in the hand it is the blow
+	var y := _typed_fight("tedge-small", 1)
+	var every := int(W["with"]["every"])
+	for i in every * 2:
+		y._genius_after_hit(10.0, false)
+	var added := 0
+	for e in y.drain():
+		if e["type"] == "genius-hunt" and e["move"] == "with":
+			added += 1
+	check(added == 2 and float(y.genius.tally["orders"].get("free", 0.0)) >= 2.0, "young, at the shoulder, it adds a blow to every third of its partner's, and the Tally counts those as its own doing")
+	y.input("order")
+	for i in every * 2:
+		y._genius_after_hit(10.0, false)
+	added = 0
+	for e in y.drain():
+		if e["type"] == "genius-hunt" and e["move"] == "with":
+			added += 1
+	check(added == 0, "in the hand it adds none: it is the blow")
+	# what the Tally learns of a weapon: blows landed with it, from a stand or not; blows turned with it
+	var l := _typed_fight("tedge-small", 3)
+	l.input("order")
+	l.p_moved_at = l.now
+	l.input("attack")
+	run_for(l, 0.5)
+	var hunts := float(l.genius.tally["orders"].get("hunt", 0.0))
+	l.p_moved_at = -9.0
+	l.input("attack")
+	run_for(l, 0.6)
+	check(hunts > 0.0 and float(l.genius.tally["orders"].get("hold", 0.0)) > 0.0, "a blow landed with it in hand counts toward Hunt; struck from a stand, toward Hold")
+	biting_wolf(l, 0.1)
+	l.input("block-down")
+	run_for(l, 0.3)
+	l.input("block-up")
+	check(float(l.genius.tally["orders"].get("guard", 0.0)) >= 1.0, "a blow turned with it in hand counts toward Guard")
+	# --- the one property a path gives it
+	var grown := float(W["inHand"]["grown"])
+	var stag := float(Data.room["break"]["staggerDamageFactor"])
+	var r := _typed_fight("tedge-a", 3)
+	check(String(r.g_weapon["sig"].get("name", "")) != "" and r.g_path == "tedge-a", "on a path, it has that path's property")
+	r.input("order")
+	r.g_cut_until = -9.0
+	biting_wolf(r, 0.1)
+	r.input("block-down")
+	run_for(r, 0.3)
+	r.input("block-up")
+	check(r.now < r.g_riposte_until, "a parry made with it in hand arms the answer")
+	var rw := r.g_will
+	r.input("attack")
+	var ans := _first_hit(run_for(r, 0.6))
+	check(not ans.is_empty() and is_equal_approx(float(ans["damage"]), roundf(roundf(chop * grown * 2.0) * stag)) and is_equal_approx(r.g_will, rw) and r.g_riposte_until < r.now, "the answer lands twice as hard, costs it nothing, and is given once (%s)" % str(ans.get("damage", 0)))
+	var sc := _typed_fight("tedge-b", 3)
+	sc._resolve_bite_from(sc.beast["attacks"][0], sc.w_pos, -1)
+	sc._resolve_bite_from(sc.beast["attacks"][0], sc.w_pos, -1)
+	check(sc.g_score == 2, "every blow its partner takes is scored")
+	for i in 5:
+		sc._resolve_bite_from(sc.beast["attacks"][0], sc.w_pos, -1)
+	check(sc.g_score == 3, "up to its most")
+	sc.p_state = "free"
+	sc.p_hp = 100.0
+	sc.w_pos = sc.p_pos + Vector2(1.6, 0.0)
+	sc.input("order")
+	sc.g_cut_until = -9.0
+	sc.input("attack")
+	var paid := _first_hit(run_for(sc, 0.6))
+	check(not paid.is_empty() and is_equal_approx(float(paid["damage"]), roundf(chop * grown * (1.0 + 0.5 * 3))) and sc.g_score == 0, "the next blow that lands with it pays them all back (%s)" % str(paid.get("damage", 0)))
+	var cl := _typed_fight("tedge-c", 3)
+	cl.input("order")
+	check(is_equal_approx(cl.gear_damage, grown * 1.5) and is_equal_approx(cl._parry_k(), 0.5) and float(cl.combo[2].get("knockback", 0.0)) >= 1.0 and float(Data.room["styles"]["blade"]["combo"][2].get("knockback", 0.0)) == 0.0, "a heavier blade: every cut heavier, the third throws the foe back, the moment to parry shorter, and the blade everyone else carries is unchanged")
+	cl.input("order")
+	check(is_equal_approx(cl._parry_k(), 1.0), "and none of that out of the hand")
+	# a bow
+	var bow_max := float(Data.room["styles"]["bow"]["draw"]["max"])
+	var bow_secs := float(Data.room["styles"]["bow"]["draw"]["seconds"])
+	var hb := _weapon_fight("bow", { "firstFullDraw": { "damage": 2.0, "rest": 1.0 }, "fullDraw": { "slow": 0.5, "seconds": 2.0 } })
+	hb.input("order")
+	hb.g_cut_until = -9.0
+	check(hb.ranged and hb.style.has("draw") and hb.g_first_draw, "a bow genius in the hand is a bow")
+	hb.input("attack")
+	run_for(hb, bow_secs + 0.05)
+	hb.input("attack-up")
+	var first := _first_hit(run_for(hb, 0.3))
+	check(not first.is_empty() and is_equal_approx(float(first["damage"]), roundf(bow_max * 2.0 * grown)) and not hb.g_first_draw, "its first arrow from a full draw lands twice as hard (%s)" % str(first.get("damage", 0)))
+	check(hb.now < hb.w_slow_until and is_equal_approx(hb.w_slow, 0.5), "and an arrow from a full draw leaves the foe's time running slow")
+	run_for(hb, 0.6)
+	hb.input("attack")
+	run_for(hb, bow_secs + 0.05)
+	hb.input("attack-up")
+	var second := _first_hit(run_for(hb, 0.3))
+	check(not second.is_empty() and is_equal_approx(float(second["damage"]), roundf(bow_max * grown)), "the second is an arrow like any other (%s)" % str(second.get("damage", 0)))
+	var wb := _weapon_fight("bow", { "onWindup": { "weaken": 0.5 } })
+	wb.input("order")
+	wb.input("attack")
+	run_for(wb, 0.3)
+	biting_wolf(wb, 0.5)
+	wb.input("attack-up")
+	run_for(wb, 0.15)
+	check(wb.now < wb.w_weak_until, "an arrow that lands while the foe winds up takes the weight out of that strike")
+	var hurt_by := 0.0
+	for e in run_for(wb, 0.8):
+		if e["type"] == "hurt":
+			hurt_by = float(e["damage"])
+	check(is_equal_approx(hurt_by, float(wb.beast["attacks"][0]["damage"]) * 0.5), "the strike lands for half (%.1f)" % hurt_by)
+	# a gun: no magazine, its rounds are its Will
+	var shot := float(Data.room["styles"]["pistol"]["shot"]["damage"])
+	var gn := _weapon_fight("pistol", { "everyNth": { "n": 2, "damage": 1.5 }, "still": { "seconds": 0.8, "damage": 2.0 } }, 3.0)
+	gn.input("order")
+	gn.g_cut_until = -9.0
+	check(gn.ranged and gn.p_ammo_max == 0 and not gn.style.has("reload") and (Data.room["styles"]["pistol"] as Dictionary).has("reload"), "a gun genius has no magazine and is never reloaded")
+	var gw := gn.g_will
+	gn.p_moved_at = gn.now
+	gn.input("attack")
+	var s1 := _first_hit(run_for(gn, 0.5))
+	gn.p_moved_at = gn.now
+	gn.input("attack")
+	var s2 := _first_hit(run_for(gn, 0.5))
+	check(is_equal_approx(gn.g_will, gw - 6.0), "its rounds are its Will")
+	check(is_equal_approx(float(s1["damage"]), roundf(shot * grown)) and is_equal_approx(float(s2["damage"]), roundf(shot * 1.5 * grown)), "every second shot in a row lands harder (%s, %s)" % [str(s1["damage"]), str(s2["damage"])])
+	gn.p_moved_at = gn.now - 2.0
+	gn.input("attack")
+	var s3 := _first_hit(run_for(gn, 0.5))
+	check(is_equal_approx(float(s3["damage"]), roundf(shot * 2.0 * grown)), "fired from a stand, feet set, it lands harder (%s)" % str(s3["damage"]))
+	var lg := _weapon_fight("pistol", { "shot": { "range": 17.0 }, "far": { "from": 6.0, "to": 16.0, "damage": 2.0 } })
+	lg.w_pos = lg.p_pos + Vector2(11.0 + float(lg.beast["radius"]) * 0.0, 0.0)
+	lg.input("order")
+	lg.g_cut_until = -9.0
+	lg.p_moved_at = lg.now
+	check(is_equal_approx(float(lg.combo[0]["range"]), 17.0), "a long gun reaches as far as its path says")
+	lg.input("attack")
+	var far_hit := _first_hit(run_for(lg, 0.5))
+	check(not far_hit.is_empty() and float(far_hit["dist"]) > 9.0 and is_equal_approx(float(far_hit["damage"]), roundf(shot * lerpf(1.0, 2.0, clampf((float(far_hit["dist"]) - 6.0) / 10.0, 0.0, 1.0)) * grown)), "and lands harder the farther off the foe is (%s from %.1f m)" % [str(far_hit.get("damage", 0)), float(far_hit.get("dist", 0.0))])
+	# the great have the second hand still
+	var old := _typed_fight("tedge-small", 6)
+	check(String(old.g_great.get("effect", "")) == String(W["great"]["effect"]) and _typed_fight("tedge-small", 3).g_great.is_empty(), "its great move stays")
+
+## An item: something always true, and one thing its partner does with the key.
+func test_types_items() -> void:
+	var bite := float(Data.beast("cut-wolf")["attacks"][0]["damage"])
+	var regen_delay := float(Data.genius()["will"]["regenDelayAfterHit"])
+	check(regen_delay >= 0.0, "there is a wait before an item's Will comes back")
+	# the tests' lamp, as the data has it
+	var lamp := _typed_fight("tlamp-a", 3)
+	var grown_worth := float(Data.genius_types()["ages"]["grown"]["worth"])
+	check(lamp.g_type == "ritual" and lamp.genius_key()["does"] == "use" and String(lamp.g_item["use"]["effect"]) == "light" and is_equal_approx(float(lamp.g_item["use"]["shelter"]), 0.5) and is_equal_approx(float(lamp.g_item["use"]["seconds"]), 6.0 * grown_worth) and lamp.g_moves.is_empty(), "an item has its base's use with its path's laid over it, at the worth of its age")
+	check(not lamp._genius_guards(10.0), "it does not guard as a companion does")
+	lamp.input("order")
+	check(not lamp.g_lamp.is_empty() and not lamp.genius_key()["ready"] and float(lamp.genius.tally["orders"].get("hold", 0.0)) >= 1.0, "the key uses it, its wait begins, and the Tally counts the use toward the line it feeds")
+	# --- set: the shield takes the next blow whole
+	var s := _item_fight({}, { "effect": "set", "seconds": 1.4, "blows": 1, "takes": 0.5 })
+	var sw := s.g_will
+	s.input("order")
+	check(s.now < s.g_set_until and is_equal_approx(s.g_will, sw - 5.0), "the shield is set, for its Will")
+	biting_wolf(s, 0.1)
+	var evs := run_for(s, 0.4)
+	check(types(evs).has("genius-took") and is_equal_approx(s.p_hp, 100.0) and is_equal_approx(s.g_will, sw - 5.0 - bite * 0.5) and s.p_state != "flinch", "set, it takes the next blow whole, out of its own Will")
+	biting_wolf(s, 0.1)
+	evs = run_for(s, 0.4)
+	check(types(evs).has("hurt") and s.g_set_until < s.now, "one blow, and it is no longer set")
+	check(not s.genius_key()["ready"] and float(s.genius_key()["left"]) > 6.0, "and it must come round again")
+	var s2 := _item_fight({}, { "effect": "set", "seconds": 3.0, "blows": 2, "takes": 0.0 })
+	s2.input("order")
+	for i in 2:
+		biting_wolf(s2, 0.1)
+		run_for(s2, 0.4)
+	check(is_equal_approx(s2.p_hp, 100.0), "a wall takes two")
+	s2.g_will = 0.0
+	s2.g_use_at = 0.0
+	s2.input("order")
+	check(s2.g_set_until < s2.now and not s2.genius.fallen, "with no Will it cannot be set; an item does not fall")
+	var door := _item_fight({}, { "effect": "set", "ground": { "radius": 3.0, "seconds": 6.0 }, "blows": 2, "takes": 0.0 })
+	door.input("order")
+	check(not door.g_door.is_empty() and (door.g_door["at"] as Vector2).is_equal_approx(door.p_pos), "a gate is set on the ground where its partner stands")
+	biting_wolf(door, 0.1)
+	run_for(door, 0.4)
+	check(is_equal_approx(door.p_hp, 100.0), "by the door, the blow is the door's")
+	door.p_pos += Vector2(-6.0, 0.0)
+	biting_wolf(door, 0.1)
+	evs = run_for(door, 0.4)
+	check(types(evs).has("hurt"), "away from it, it is not")
+	var cohort := Academy.make_cohort(42, Fight.default_hero())
+	var sh := _item_fight({}, { "effect": "set", "seconds": 2.0, "blows": 1, "takes": 0.0, "allies": 8.0 }, "defense", { "allies": [cohort[0]] })
+	sh.input("order")
+	var ally_hp := float(sh.allies[0]["hp"])
+	sh._hurt_ally(0, 10.0, -1)
+	check(is_equal_approx(float(sh.allies[0]["hp"]), ally_hp), "a shelter covers a classmate: the blow at them is the shield's")
+	var own := _item_fight({}, { "effect": "set", "seconds": 2.0, "blows": 1, "takes": 0.0 }, "defense", { "allies": [cohort[0]] })
+	own.input("order")
+	own._hurt_ally(0, 10.0, -1)
+	check(float(own.allies[0]["hp"]) < ally_hp, "a shield that is only its partner's does not")
+	# --- catch: the hand reaches for a strike before it is thrown
+	var c := _item_fight({}, { "effect": "catch", "reach": 3.2, "flinch": 0.9, "missWait": 2.5, "missWill": 3.0, "wait": 10.0, "will": 9.0 })
+	var cw := c.g_will
+	c.input("order")
+	check(is_equal_approx(c.g_will, cw - 3.0) and not c.genius_key()["ready"] and float(c.genius_key()["left"]) <= 2.5, "reaching for nothing, the hand closes on air: a little Will and a short wait")
+	run_for(c, 3.0)
+	c.g_will = cw
+	biting_wolf(c, 0.3)
+	c.input("order")
+	evs = c.drain()
+	check(c.w_state == "flinch" and types(evs).has("genius-caught") and is_equal_approx(c.g_will, cw - 9.0), "reaching for a foe that is winding up, it catches the strike")
+	evs = run_for(c, 1.2)
+	check(not types(evs).has("hurt") and is_equal_approx(c.p_hp, 100.0), "and the strike is never thrown")
+	var co := _item_fight({}, { "effect": "catch", "reach": 3.2, "flinch": 0.9, "open": 2.5, "exposed": 1.2 }, "defense", { "beast": "green-warden" })
+	check(not co.guard_open(), "an elite keeps its guard")
+	biting_wolf(co, 0.3)
+	co.input("order")
+	check(co.guard_open() and is_equal_approx(co._typed_blow_k(), 1.2), "a maker's hand takes it apart: its guard is down and it takes more")
+	co.now += 3.0
+	co.w_state = "prowl"
+	check(not co.guard_open() and is_equal_approx(co._typed_blow_k(), 1.0), "for a while")
+	var cs := _item_fight({}, { "effect": "catch", "reach": 3.2, "flinch": 0.9, "strike": 3.0, "knockback": 1.5 })
+	biting_wolf(cs, 0.3)
+	var hp0 := cs.w_hp
+	var d0 := cs.dist()
+	cs.input("order")
+	check(is_equal_approx(hp0 - cs.w_hp, roundf(cs._genius_base() * 3.0)) and cs.dist() > d0 + 1.0, "a fighting fist strikes as it closes and throws the foe back")
+	var far := _item_fight({}, { "effect": "catch", "reach": 3.0, "flinch": 0.9, "allyReach": 10.0 }, "defense", { "allies": [cohort[0]] })
+	biting_wolf(far, 0.3)
+	far.w_pos = far.p_pos + Vector2(7.0, 0.0)
+	far.w_target = 0
+	far.input("order")
+	check(far.w_state == "flinch", "an open hand reaches across the ground for a strike wound up at a classmate")
+	far.g_use_at = 0.0
+	biting_wolf(far, 0.3)
+	far.w_pos = far.p_pos + Vector2(7.0, 0.0)
+	far.w_target = -1
+	far.input("order")
+	check(far.w_state == "windup", "and not that far for one at its partner")
+	# --- slip: the coat pulls its partner out
+	var sl := _item_fight({}, { "effect": "slip", "distance": 1.0, "iframes": 0.42 })
+	sl.p_state = "flinch"
+	var pw := sl.p_will
+	var at0 := sl.p_pos
+	sl.input("order")
+	check(sl.p_state == "dodge" and sl.p_invulnerable() and is_equal_approx(sl.p_will, pw), "the slip is made out of a flinch, untouchable at once, for none of its partner's Will")
+	biting_wolf(sl, 0.05)
+	sl.w_pos = sl.p_pos + Vector2(1.3, 0.0)
+	evs = run_for(sl, 0.6)
+	check(types(evs).has("evade") and is_equal_approx(sl.p_hp, 100.0) and sl.p_state == "free" and sl.p_slip.is_empty() and sl.p_pos.distance_to(at0) > 2.0, "the blow lands where they were")
+	var late := _item_fight({}, { "effect": "slip", "distance": 1.0, "iframes": 0.42, "late": { "seconds": 0.33, "back": 0.5 } })
+	biting_wolf(late, 0.05)
+	run_for(late, 0.1)
+	check(is_equal_approx(late.p_hp, 100.0 - bite) and late.p_state == "flinch", "a blow lands")
+	late.input("order")
+	check(is_equal_approx(late.p_hp, 100.0 - bite * 0.5), "a listening coat, slipped at once, takes half of it back")
+	var pun := _item_fight({}, { "effect": "slip", "distance": 1.0, "iframes": 0.42, "punish": { "seconds": 2.2, "damage": 1.5 }, "willBack": 8.0, "haste": { "seconds": 2.0, "speed": 1.25 } })
+	pun.p_will = 50.0
+	biting_wolf(pun, 0.05)
+	pun.input("order")
+	run_for(pun, 0.2)
+	check(pun.now < pun.p_punish_until and pun.p_will > 57.0 and pun.now < pun.p_haste_until, "a blow slipped leaves the foe open to the next; the slip gives Will back and haste")
+	check(is_equal_approx(pun._typed_blow_k(), 1.5) and is_equal_approx(pun._typed_blow_k(), 1.0), "the next blow lands half again as hard, once")
+	# --- light: the lantern set down
+	var l := _item_fight({}, { "effect": "light", "radius": 4.0, "seconds": 6.0, "parryWindow": 2.0, "stagger": 0.5 }, "ritual")
+	check(is_equal_approx(l._parry_k(), 1.0), "before it is lit, the moment to parry is its own")
+	l.input("order")
+	check(not l.g_lamp.is_empty() and is_equal_approx(l._parry_k(), 2.0), "in its light the moment to parry is longer")
+	biting_wolf(l, 0.1)
+	l.input("block-down")
+	run_for(l, 0.2)
+	l.input("block-up")
+	check(l.w_state == "stagger" and is_equal_approx(l.w_duration, float(Data.room["parry"]["staggerSeconds"]) + 0.5), "and a parry made in it staggers the foe longer")
+	l.p_pos += Vector2(-7.0, 0.0)
+	check(is_equal_approx(l._parry_k(), 1.0), "out of its light, no longer")
+	run_for(l, 6.5)
+	check(l.g_lamp.is_empty(), "it burns its time")
+	var found := _item_fight({}, { "effect": "light", "radius": 4.0, "seconds": 6.0, "at": "foe", "found": 2.0 }, "ritual", { "beast": "green-warden" })
+	var guard := float(found.beast["guard"])
+	check(is_equal_approx(found._guarded(100.0), roundf(100.0 * guard)), "a guard lets a share through")
+	found.input("order")
+	check((found.g_lamp["at"] as Vector2).is_equal_approx(found.w_pos) and is_equal_approx(found._guarded(100.0), roundf(100.0 * minf(1.0, guard * 2.0))), "a wayfinder is set at the foe's feet, and a guarded foe in its light lets more through")
+	var shel := _item_fight({}, { "effect": "light", "radius": 4.0, "seconds": 6.0, "shelter": 0.5, "burn": 1.0, "willRegen": 2.0 }, "ritual")
+	shel.input("order")
+	shel.w_state = "idle"
+	var whp := shel.w_hp
+	shel.p_will = 40.0
+	run_for(shel, 2.0)
+	check(shel.w_hp < whp and shel.stats["g_damage"] > 0.0, "what stands in a kept flame burns")
+	var plain_will := _item_fight({}, { "effect": "light", "radius": 4.0, "seconds": 6.0 }, "ritual")
+	plain_will.p_will = 40.0
+	run_for(plain_will, 2.0)
+	check(is_equal_approx(shel.p_will - 40.0, (plain_will.p_will - 40.0) * 2.0), "and its partner's Will comes back faster in it (%.1f against %.1f)" % [shel.p_will - 40.0, plain_will.p_will - 40.0])
+	biting_wolf(shel, 0.05)
+	run_for(shel, 0.2)
+	check(is_equal_approx(shel.p_hp, 100.0 - bite * 0.5), "a blow at one standing in a watch-lamp's light lands for less")
+	# --- sight: the astrolabe
+	var sg := _item_fight({}, { "effect": "sight", "seconds": 7.0, "damage": 1.5, "reach": 18.0, "far": { "from": 7.0, "damage": 1.3 }, "parryWindow": 1.6 }, "ritual")
+	sg.w_state = "down"
+	sg.input("order")
+	check(sg.g_sight_until < sg.now and sg.genius_key()["ready"], "with no foe to sight, nothing is spent")
+	sg.w_state = "prowl"
+	sg.input("order")
+	check(sg.now < sg.g_sight_until and is_equal_approx(sg._typed_blow_k(), 1.0), "a sighted foe is struck as any other, out of its weak moment")
+	sg.w_state = "recover"
+	check(is_equal_approx(sg._typed_blow_k(), 1.5), "in its weak moment, recovering from its own strike, harder")
+	sg.w_state = "stagger"
+	check(is_equal_approx(sg._typed_blow_k(), 1.5) and is_equal_approx(sg._parry_k(), 1.6), "and staggered; and its strikes are easier to parry")
+	sg.w_state = "prowl"
+	sg.w_pos = sg.p_pos + Vector2(9.0, 0.0)
+	check(is_equal_approx(sg._typed_blow_k(), 1.3), "a sighting-glass makes it harder from far off at any moment")
+	sg.now += 8.0
+	check(is_equal_approx(sg._typed_blow_k(), 1.0) and is_equal_approx(sg._parry_k(), 1.0), "the sight lapses")
+	# --- toll: the bell
+	var t := _item_fight({}, { "effect": "toll", "radius": 5.5, "flinch": 0.7, "willBack": 6.0, "mend": 4.0 }, "ritual", { "pack": ["cut-wolf"] })
+	biting_wolf(t, 0.3)
+	(t.foes[0] as Foe).pos = t.p_pos + Vector2(0.0, 2.0)
+	(t.foes[0] as Foe).attack = t.beast["attacks"][0]
+	(t.foes[0] as Foe).set_state("windup", 0.5)
+	t.p_will = 50.0
+	t.p_hp = 60.0
+	t.input("order")
+	check(t.w_state == "flinch" and (t.foes[0] as Foe).state == "flinch", "the toll breaks every strike wound up near its partner, the pack's with the rest")
+	check(is_equal_approx(t.p_will, 56.0) and is_equal_approx(t.p_hp, 64.0), "and steadies them: Will back, and for a rally-bell health")
+	var ts := _item_fight({}, { "effect": "toll", "radius": 5.5, "flinch": 0.7, "stagger": 1.2, "strike": 2.0 }, "ritual")
+	biting_wolf(ts, 0.3)
+	var th := ts.w_hp
+	ts.input("order")
+	check(ts.w_state == "stagger" and ts.w_hp < th, "an alarm-bell staggers what it breaks, and strikes it")
+	var ta := _item_fight({}, { "effect": "toll", "radius": 5.5, "flinch": 0.7, "auto": 22.0 }, "ritual")
+	biting_wolf(ta, 0.3)
+	ta._update_genius(DT)
+	check(ta.w_state == "flinch" and ta.g_auto_at > ta.now + 20.0 and ta.genius_key()["ready"], "an hour-bell tolls of itself when a strike is wound up at its partner, and its own toll is still to hand")
+	# --- what is always true
+	var blk := _item_fight({ "block": { "damage": 0.5, "will": 0.5 } }, {})
+	blk.input("block-down")
+	run_for(blk, 0.5)
+	biting_wolf(blk, 0.02)
+	var blocked := 0.0
+	for e in run_for(blk, 0.1):
+		if e["type"] == "block":
+			blocked = float(e["damage"])
+	check(is_equal_approx(blocked, bite * float(Data.room["block"]["damageFactor"]) * 0.5), "a shield arm: a blocked blow lands for less (%.2f)" % blocked)
+	var pr := _item_fight({ "parryWindow": 1.5, "parryWill": 4.0 }, {})
+	check(is_equal_approx(pr._parry_k(), 1.5), "a sure hand: the moment to parry is longer")
+	pr.g_worth = 0.6
+	check(is_equal_approx(pr._parry_k(), 1.3), "less so while it is young")
+	pr.g_worth = 1.0
+	pr.p_will = 50.0
+	biting_wolf(pr, 0.1)
+	pr.input("block-down")
+	run_for(pr, 0.2)
+	pr.input("block-up")
+	check(pr.p_will >= 50.0 + float(Data.room["parry"]["will"]) + 4.0 - 1.5 and float(pr.genius.tally["orders"].get("free", 0.0)) > 0.0, "a bell: a parry rings it, for a little more Will; what is always true of an item is counted as its own doing")
+	var dg := _item_fight({ "dodge": { "will": 0.5, "iframes": 0.1 } }, {})
+	var plain_dodge := _item_fight({}, {})
+	dg.p_will = 50.0
+	plain_dodge.p_will = 50.0
+	dg.input("dodge")
+	plain_dodge.input("dodge")
+	check(is_equal_approx(50.0 - dg.p_will, (50.0 - plain_dodge.p_will) * 0.5) and is_equal_approx(dg._always_add("dodge", "iframes"), 0.1), "a coat hangs loose: a dodge costs less and is untouchable a moment longer")
+	var ht := _item_fight({ "hurt": 0.8 }, {}, "ritual")
+	biting_wolf(ht, 0.05)
+	run_for(ht, 0.2)
+	check(is_equal_approx(ht.p_hp, 100.0 - bite * 0.8), "a lantern: a blow taken whole lands for a little less")
+	var ms := _item_fight({ "measure": { "per": 0.05, "max": 2 } }, {}, "ritual")
+	for i in 3:
+		biting_wolf(ms, 0.1)
+		ms.input("block-down")
+		run_for(ms, 0.2)
+		ms.input("block-up")
+		ms.w_state = "idle"
+	check(ms.g_measure == 2 and is_equal_approx(ms._typed_blow_k(), 1.10), "an astrolabe takes the measure of every strike answered, up to its most, and each adds to its partner's blows")
+	ms._spawn_wolf()
+	check(ms.g_measure == 0, "another foe is another measure")
+	var keeps := _item_fight({ "measure": { "per": 0.05, "max": 2, "keeps": true } }, {}, "ritual")
+	keeps.g_measure = 2
+	keeps._spawn_wolf()
+	check(keeps.g_measure == 2, "an almanac keeps what it has measured of a kind of beast")
+	var ch := _item_fight({ "chain": 1.5 }, {}, "ritual")
+	var plain_chain := _item_fight({}, {}, "ritual")
+	for ff in [ch, plain_chain]:
+		biting_wolf(ff, 0.1)
+		ff.input("block-down")
+		run_for(ff, 0.3)
+		ff.input("block-up")
+		ff.input("pattern")
+	check(not ch.chain.is_empty() and is_equal_approx(float(ch.chain["window"]), float(plain_chain.chain["window"]) * 1.5), "a bell keeps the time: the moments of the Pattern's chain are wider")
+	var wi := _item_fight({ "with": { "every": 3, "damage": 0.9 } }, {})
+	for i in 6:
+		wi._genius_after_hit(10.0, false)
+	var added := 0
+	for e in wi.drain():
+		if e["type"] == "genius-hunt" and e["move"] == "with":
+			added += 1
+	check(added == 2, "a fighting fist strikes with its partner")
+	var cf := _item_fight({ "catchFall": 1 }, {})
+	cf.p_hp = 5.0
+	cf._resolve_bite_from(cf.beast["attacks"][0], cf.w_pos, -1)
+	check(is_equal_approx(cf.p_hp, 1.0) and cf.p_state != "down", "an open hand catches its partner when a blow would fell them")
+	cf.p_state = "free"
+	cf._resolve_bite_from(cf.beast["attacks"][0], cf.w_pos, -1)
+	check(cf.p_state == "down", "once a fight")
+
+## A companion's role: where it stands, its numbers, the moves it favours, and the one thing only it does.
+func test_types_roles() -> void:
+	var T := Data.genius_types()
+	var R: Dictionary = T["roles"]
+	var worth := func(age: String) -> float: return float(T["ages"][age]["worth"])
+	# read off its form: the tests' runner is a Hunter; a path shades it, or keeps it to its role
+	var pup := _typed_fight("trun-small", 1)
+	check(pup.g_type == "companion" and pup.g_role_id == "hunter" and is_equal_approx(pup.g_role_k, worth.call("young")) and pup.g_shade_id == "" and pup.genius_key()["does"] == "order", "a companion has its base's role from its First Form, at the worth of its age")
+	check(is_equal_approx(pup.g_will_max, pup.genius.will_max() * float(R["hunter"]["numbers"].get("will", 1.0))), "its role sets its Will")
+	var shaded := _typed_fight("trun-a", 3)
+	check(shaded.g_shade_id == "keeper" and is_equal_approx(shaded.g_shade_k, float(R["shade"]["other"]) * worth.call("grown")) and is_equal_approx(shaded.g_role_k, worth.call("grown")), "a path that shades toward another role has that role's own thing at a share of its strength")
+	var pure := _typed_fight("trun-b1", 3)
+	check(pure.g_shade_id == "" and is_equal_approx(pure.g_role_k, float(R["shade"]["pure"]) * worth.call("grown")), "a path that keeps to its role has its own thing stronger, and so do the forms under it")
+	check(is_equal_approx(shaded._own("mend"), shaded.g_shade_k) and is_equal_approx(shaded._own("opening"), shaded.g_role_k) and shaded._own("hold-it") == 0.0, "it has the own things of its role and its shade and no others")
+	shaded.genius.fallen = true
+	check(shaded._own("mend") == 0.0, "fallen, it does nothing")
+	var legacy := _genius_fight("runner", 3, "hunt")
+	check(legacy.g_role.is_empty() and is_equal_approx(legacy._role_n("damage"), 1.0), "a genius no tree has written a type for fights as before, with no role")
+	# its numbers
+	var b := _role_fight("bulwark", "guard")
+	check(is_equal_approx(b._genius_base(), legacy._genius_base() * float(R["bulwark"]["numbers"]["damage"])), "a role's numbers are laid over what it is: a Bulwark strikes for less")
+	var soft := _genius_fight("runner", 3, "guard")
+	soft.g_pos = soft.p_pos
+	b.g_pos = b.p_pos
+	soft._genius_guards(20.0)
+	b._genius_guards(20.0)
+	check(b.g_will_max - b.g_will < soft.g_will_max - soft.g_will and b.g_guard_ready_at < soft.g_guard_ready_at, "and guards for less of its Will, and sooner again")
+	# the moves it favours
+	var ids := func(ms: Array) -> Array: return ms.map(func(m): return String(m["id"]))
+	check(ids.call(Fight.genius_moves("quadruped", "beast", ["wings", "lantern"], 1)) == ["hamstring"] and ids.call(Fight.genius_moves("quadruped", "beast", ["wings", "lantern"], 1, ["light"])) == ["light"] and ids.call(Fight.genius_moves("quadruped", "beast", ["wings", "lantern"], 3, ["light"])) == ["light", "hamstring", "stoop"], "the moves a role favours are the ones it keeps first as it ages")
+	# where it stands
+	var front := _role_fight("bulwark", "guard")
+	var back := _role_fight("lookout", "guard")
+	for ff in [front, back]:
+		ff.passive = true
+		ff.w_state = "idle"
+		ff.w_pos = ff.p_pos + Vector2(6.0, 0.0)
+		for i in 120:
+			ff._update_genius(DT)
+			ff.now += DT
+	check((front.g_pos - front.p_pos).x > 1.0 and (back.g_pos - back.p_pos).x < -1.0, "a Bulwark stands between its partner and the foe, a Lookout behind them (%.1f, %.1f)" % [(front.g_pos - front.p_pos).x, (back.g_pos - back.p_pos).x])
+	# --- a Bulwark holds the foe
+	var hold: Dictionary = R["bulwark"]["own"]
+	var h := _role_fight("bulwark", "guard")
+	h.g_pos = h.p_pos + Vector2(0.0, 3.0)
+	var hw := h.g_will
+	h._role_acts(true)
+	check(h._held() and h.w_target == Fight.HELD and h._tpos().is_equal_approx(h.g_pos) and h.w_state == "approach" and is_equal_approx(h.g_will, hw - float(hold["will"])), "a Bulwark calls the foe onto itself: the foe goes for it")
+	h.w_attack = h.beast["attacks"][0]
+	h.w_pos = h.g_pos + Vector2(1.2, 0.0)
+	h.w_facing = PI
+	h.w_state = "strike"
+	h.w_timer = 0.0
+	h.w_duration = float(h.w_attack["active"])
+	h.w_hit_done = false
+	hw = h.g_will
+	h._update_wolf(DT)
+	var held_evs := types(h.drain())
+	check(held_evs.has("genius-held-blow") and is_equal_approx(h.p_hp, 100.0) and is_equal_approx(h.g_will, hw - float(h.w_attack["damage"]) * float(hold["takes"])), "its strike lands on the genius, out of its Will, and its partner is untouched")
+	h.now = h.g_held_until + 0.1
+	check(not h._held() and h._tpos().is_equal_approx(h.p_pos), "when the hold ends the foe is its partner's again")
+	h._choose_attack()
+	check(h.w_target != Fight.HELD, "and chooses as it did")
+	# --- a Hunter goes for the opening
+	var into := float(R["hunter"]["own"]["damage"])
+	var hu := _role_fight("hunter", "hunt")
+	hu.w_state = "prowl"
+	var before := hu.w_hp
+	hu._genius_hits(100.0, "strike")
+	var shut := before - hu.w_hp
+	hu.w_state = "recover"
+	before = hu.w_hp
+	hu._genius_hits(100.0, "strike")
+	check(is_equal_approx(shut, 100.0) and is_equal_approx(before - hu.w_hp, roundf(100.0 * into)), "a Hunter's blow into an opening lands harder (%d, then %d)" % [int(shut), int(before - hu.w_hp)])
+	hu.g_hunt_at = hu.now + 5.0
+	hu._wolf_set("stagger", 1.0)
+	check(hu.g_hunt_at <= hu.now, "and when the foe staggers it comes at once")
+	var half := _role_fight("bulwark", "hunt", "cut-wolf", "hunter", 1.0, 0.5)
+	half.w_state = "recover"
+	before = half.w_hp
+	half._genius_hits(100.0, "strike")
+	check(is_equal_approx(before - half.w_hp, roundf(100.0 * (1.0 + (into - 1.0) * 0.5))), "a shade of the Hunter has half of that")
+	# --- a Harrier opens the guard
+	var worry: Dictionary = R["harrier"]["own"]
+	var ha := _role_fight("harrier", "hunt", "green-warden")
+	ha.g_pos = ha.w_pos
+	check(not ha.guard_open(), "an elite keeps its guard")
+	ha._role_acts(true)
+	check(ha.guard_open() and is_equal_approx(ha._typed_blow_k(), float(worry["exposed"])), "a Harrier worries it: its guard is down, and every blow on it lands for more")
+	ha.now += float(worry["seconds"]) + 0.1
+	check(not ha.guard_open() and is_equal_approx(ha._typed_blow_k(), 1.0), "for a moment")
+	ha._role_acts(true)
+	check(not ha.guard_open(), "and not again until it has waited")
+	# --- a Keeper mends
+	var mend: Dictionary = R["keeper"]["own"]
+	var k := _role_fight("keeper", "guard")
+	k.g_pos = k.p_pos
+	k.p_hp = 50.0
+	var kw := k.g_will
+	k._role_acts(true)
+	check(is_equal_approx(k.p_hp, 50.0 + float(mend["health"])) and is_equal_approx(k.g_will, kw - float(mend["will"])), "a Keeper mends its partner out of its own Will")
+	k._role_acts(true)
+	check(is_equal_approx(k.p_hp, 50.0 + float(mend["health"])), "a little at a time")
+	k.now += float(mend["every"]) + 0.1
+	k.p_struck_at = k.now
+	k._role_acts(true)
+	check(is_equal_approx(k.p_hp, 50.0 + float(mend["health"])), "not while the blows are still landing")
+	k.p_struck_at = -9.0
+	k.p_hp = 95.0
+	k._role_acts(true)
+	check(is_equal_approx(k.p_hp, 95.0), "and not one who is barely hurt")
+	var cohort := Academy.make_cohort(42, Fight.default_hero())
+	var kp := _genius_fight("runner", 3, "guard", "cut-wolf", { "allies": [cohort[0]] })
+	kp.g_role = R["keeper"]
+	kp.g_role_id = "keeper"
+	kp.g_role_k = 1.0
+	kp.g_pos = kp.allies[0]["pos"]
+	kp.allies[0]["hp"] = float(kp.allies[0]["hp_max"]) * 0.3
+	var a0 := float(kp.allies[0]["hp"])
+	kp._role_acts(true)
+	check(float(kp.allies[0]["hp"]) > a0, "with a party, it sees to whoever is worst hurt")
+	# --- a Lookout reads the fight
+	var calls: Dictionary = R["lookout"]["own"]
+	var lo := _role_fight("lookout", "guard")
+	lo.g_pos = lo.p_pos
+	check(is_equal_approx(lo._parry_k(), float(calls["parryWindow"])), "while a Lookout watches, the moment to parry is longer")
+	lo.g_pos = lo.p_pos + Vector2(40.0, 0.0)
+	check(is_equal_approx(lo._parry_k(), 1.0), "not from out of sight")
+	lo.g_pos = lo.p_pos
+	lo.w_state = "recover"
+	lo.w_duration = 0.9
+	lo._foe_recovers()
+	check(is_equal_approx(lo._typed_blow_k(), float(calls["mark"])), "and when the foe has struck and missed its chance, it calls the opening")
+	lo.w_state = "prowl"
+	check(is_equal_approx(lo._typed_blow_k(), 1.0), "which is over when the foe has recovered")
+	# a fight beside a companion with a role is the same fight twice
+	var runs: Array = []
+	for n in 2:
+		var d := _typed_fight("trun-a", 4, { "passive": false, "beast": "green-warden" })
+		d.w_state = "prowl"
+		for i in 900:
+			d.update(DT, Vector2.ZERO)
+			d.drain()
+		runs.append("%.3f %.3f %.3f %s" % [d.w_hp, d.g_will, d.p_hp, str(d.g_pos)])
+	check(runs[0] == runs[1], "seeded, a fight beside a companion with a role plays out the same")
+
+## What a partner lacks, and bots that use the key.
+func test_types_need_and_bots() -> void:
+	var g := _genius_at("trun-small", 1)
+	var blade := hero_of("anchor", "saber")
+	var gun := hero_of("anchor", "musket")
+	var maul := hero_of("anchor", "hammer")
+	var nb := GeniusTypes.needs(blade, g)
+	var ng := GeniusTypes.needs(gun, g)
+	var nm := GeniusTypes.needs(maul, g)
+	check(float(ng["bulwark"]) > float(nb["bulwark"]) + 0.3, "a partner who fights from far off lacks a front (%.2f against %.2f)" % [ng["bulwark"], nb["bulwark"]])
+	check(float(nm["harrier"]) > float(nb["harrier"]), "one whose weapon is slow lacks the opening (%.2f against %.2f)" % [nm["harrier"], nb["harrier"]])
+	var hurt := _genius_at("trun-small", 1)
+	hurt.lifetime["fights.hurts"] = 30.0
+	hurt.lifetime["fights.parries"] = 3.0
+	var turner := _genius_at("trun-small", 1)
+	turner.lifetime["fights.parries"] = 30.0
+	turner.lifetime["fights.hurts"] = 3.0
+	check(float(GeniusTypes.needs(blade, hurt)["keeper"]) > float(GeniusTypes.needs(blade, turner)["keeper"]) + 0.3 and float(GeniusTypes.needs(blade, turner)["hunter"]) > float(GeniusTypes.needs(blade, hurt)["hunter"]) + 0.3, "one who takes the blows lacks staying; one who turns them lacks the blow to put in the opening")
+	check(GeniusTypes.need_words(0.9) != "" and GeniusTypes.need_words(0.9) != GeniusTypes.need_words(0.0), "the page says how much they need it")
+	var all_in := true
+	for r in GeniusTypes.ROLES:
+		all_in = all_in and float(nb[r]) >= 0.0 and float(nb[r]) <= 1.0
+	check(all_in, "a need is between nothing and everything")
+	# every base of the game, settled and on each path, in a fight with a bot that uses its key: nothing breaks, and the key is used
+	var unused: Array = []
+	var broke: Array = []
+	for b in Data.load_bases():
+		for fid in [String(b["settled"]["id"])] + (b["paths"] as Array).map(func(p): return String(p["id"])):
+			var form := Data.form(fid)
+			var f := Fight.new({ "hero": Fight.default_hero(), "seed": 9, "respawn": true, "genius": _genius_at(fid, maxi(2, int(form["level"]) + 1)) })
+			var used := 0
+			for i in int(40.0 / DT):
+				var to_w := f.w_pos - f.p_pos
+				var move := Vector2.ZERO
+				if GeniusTypes.bot_wants_key(f):
+					f.input("order")
+				if f.w_state == "windup" and f.w_duration - f.w_timer <= 0.1 and f.w_duration - f.w_timer > 0.1 - DT and i % 3 != 0:
+					f.input("block-down")
+				if f.p_block_held and f.w_state != "windup":
+					f.input("block-up")
+				if f.w_state in ["recover", "stagger", "flinch"] and to_w.length() < 2.4:
+					f.input("attack")
+				if to_w.length() > 2.0 and f.w_state != "windup":
+					move = to_w.normalized()
+				f.update(DT, move)
+				for e in f.drain():
+					if e["type"] in ["genius-use", "genius-take"] or (e["type"] == "genius-move" and String(e.get("move", "")) in ["hold-it", "worry", "calls"]) or e["type"] == "genius-mend":
+						used += 1
+				if f.p_state == "down":
+					break
+			if f.g_type != "companion" and used == 0:
+				unused.append(fid)
+			if is_nan(f.w_hp) or is_nan(f.p_hp) or is_nan(f.g_will) or f.g_will < 0.0 or f.g_will > f.g_will_max + 0.01:
+				broke.append(fid)
+	check(broke.is_empty(), "every base of the game fights through with a bot at its key (%s)" % ", ".join(broke))
+	check(unused.is_empty(), "and a bot finds a use for every weapon and item (%s)" % ", ".join(unused))

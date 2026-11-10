@@ -1,0 +1,1027 @@
+{
+  "$comment": "The three types of genius (docs/genius-types.md; HANDOFF.md §9, 'Three types of genius'). A base's class says what a genius does beside its partner: a weapon is taken in hand, a defensive item and a ritual item are worn or carried and used, a companion fights at its partner's side in a role. types: which classes are which, and what the genius's key (G) means for each. ages: how much of its function a genius has at each age (worth) and how long its waits are (wait); an always-true multiplier m is 1 + (m - 1) x worth at that age. weapon, items, roles, companions: one block each, below. A base is named by its id, and a path by the id of the path's form in data/genius-bases (a hybrid is its first base's type, and its paths are that base's). Every number here is a designer's knob; the rules that read them are in game/scripts/fight.gd ('the genius's type') and game/scripts/genius/genius_types.gd.",
+  "types": {
+    "$comment": "key: what G does. take: take it in hand or let it go. use: use it (its function). order: step through its orders. says: one line for the genius's page.",
+    "weapon": {
+      "name": "Weapon",
+      "classes": [
+        "weapon"
+      ],
+      "key": "take",
+      "says": "It is a weapon of its own. You take it in hand in place of the weapon you carry, and let it go again; out of your hand it floats at your shoulder and strikes with you."
+    },
+    "defense": {
+      "name": "Defensive item",
+      "classes": [
+        "armor"
+      ],
+      "key": "use",
+      "says": "You wear it. Something is always true of you while you do, and there is one thing you do with it."
+    },
+    "ritual": {
+      "name": "Ritual item",
+      "classes": [
+        "item"
+      ],
+      "key": "use",
+      "says": "You carry it and use it. Something is always true of you while you do, and there is one thing you do with it."
+    },
+    "companion": {
+      "name": "Companion",
+      "classes": [
+        "animal",
+        "monster",
+        "creature"
+      ],
+      "key": "order",
+      "says": "It fights at your side and takes your orders, in a role that supplies what you lack."
+    }
+  },
+  "ages": {
+    "$comment": "By age (data/genius.json, progression.ages). worth: how strong an item's function, a companion's own move and a weapon's blow from the shoulder are. wait: its waits are this much longer or shorter.",
+    "young": {
+      "worth": 0.6,
+      "wait": 1.25
+    },
+    "half-grown": {
+      "worth": 0.8,
+      "wait": 1.1
+    },
+    "grown": {
+      "worth": 1.0,
+      "wait": 1.0
+    },
+    "prime": {
+      "worth": 1.1,
+      "wait": 0.9
+    },
+    "great": {
+      "worth": 1.2,
+      "wait": 0.8
+    },
+    "apex": {
+      "worth": 1.3,
+      "wait": 0.75
+    }
+  },
+  "caps": {
+    "$comment": "Ceilings. parryWindow: however many things lengthen the moment to parry (a sure hand, a lamp's light, a Lookout), together they never make it more than this many times as long.",
+    "parryWindow": 2.2
+  },
+  "tally": {
+    "$comment": "A weapon or an item takes no orders, but the Reading still reads the Tally's orders line (a path may lean on it). So what its partner does with it is counted there, by this table: each act adds this much to that line. weapon: hit (a blow landed with it in hand: hunt, or hold when it was struck from a stand: the partner's feet set for `stand` seconds, or on the fight's post), turn (a blow parried or blocked with it in hand), with (a blow it added from the shoulder). item: each item's `use` and `always` say which line they feed (feeds); these are how much. after: a blow its partner lands within `afterSeconds` of using an item counts toward hunt.",
+    "weapon": {
+      "hit": {
+        "line": "hunt",
+        "by": 0.34
+      },
+      "set": {
+        "line": "hold",
+        "by": 0.34
+      },
+      "turn": {
+        "line": "guard",
+        "by": 1.0
+      },
+      "with": {
+        "line": "free",
+        "by": 1.0
+      },
+      "stand": 0.8
+    },
+    "item": {
+      "use": 1.0,
+      "always": 0.34,
+      "after": {
+        "line": "hunt",
+        "by": 0.5,
+        "seconds": 1.5
+      }
+    }
+  },
+  "weapon": {
+    "$comment": "A weapon genius (blade, gun, bow). In hand its partner fights with it: a weapon type of the twelve (data/combat-room.json, styles), its blows worth inHand at its age, each blow started costing it willPerBlow of its own Will; it gets no Will back while it is held. Emptied, it leaves the hand of itself and cannot be taken up again until it has `retake` of its Will. take.drawCut: the first blow after it is taken in hand, if it rested `rest` seconds first, starts in `startup` of its time (a bow draws in that much) and lands for `damage`. with: out of hand, every so many of its partner's blows it adds one (a multiple of the Hunt's damage, by Expression and Resonance, at its age's worth). A gun genius has no magazine: its rounds are its Will. great: the move only the great have (it stays what a worn relic's was). paths: the one signature property a path gives it, from these: damage (every blow in hand), parryWindow (the moment to parry while it is held), heavyOn (that cut of its combo throws the foe back and makes it flinch), afterParry { seconds, damage, free } (the next blow after a parry made with it), score { per, max } (each blow its partner takes is scored; the next blow that lands with it pays them all), firstFullDraw { damage, rest } (the first arrow from a full draw each time it is taken up, after that much rest), onWindup { weaken } (an arrow that lands while the foe winds up weakens that strike), fullDraw { slow, seconds } (an arrow from a full draw slows the foe's time), shot { ... } (laid over the type's shot), far { from, to, damage } (more the farther the foe), everyNth { n, damage } (every nth shot in a row), still { seconds, damage } (struck from a stand).",
+    "inHand": {
+      "young": 0.9,
+      "half-grown": 1.05,
+      "grown": 1.2,
+      "prime": 1.3,
+      "great": 1.4,
+      "apex": 1.55
+    },
+    "take": {
+      "retake": 0.3,
+      "drawCut": {
+        "seconds": 0.9,
+        "startup": 0.6,
+        "damage": 1.25,
+        "rest": 2.5
+      }
+    },
+    "with": {
+      "name": "Strikes with you",
+      "every": 3,
+      "damage": 1.1
+    },
+    "great": {
+      "name": "The second hand",
+      "effect": "double",
+      "seconds": 6.0,
+      "share": 0.6
+    },
+    "bases": {
+      "blade": {
+        "style": "blade",
+        "willPerBlow": 2.5,
+        "held": {
+          "length": 0.95
+        },
+        "inHand": "A blade: three cuts, the third wide.",
+        "paths": {
+          "blade-duelling": {
+            "name": "The answer",
+            "text": "After a parry made with it in hand, its next blow within a second and a half lands nearly twice as hard and costs it nothing. The moment to parry is a little longer while you hold it.",
+            "afterParry": {
+              "seconds": 1.5,
+              "damage": 1.8,
+              "free": true
+            },
+            "parryWindow": 1.15
+          },
+          "blade-cleaver": {
+            "name": "No guard",
+            "text": "Every cut is a fifth heavier and the third throws the foe back. The moment to parry is shorter while you hold it: a guard is time not spent cutting.",
+            "damage": 1.2,
+            "parryWindow": 0.7,
+            "heavyOn": 3
+          },
+          "blade-scored": {
+            "name": "The score",
+            "text": "Every blow you take is cut into its flat, up to five. The next blow that lands with it pays them all back: a seventh harder for each.",
+            "score": {
+              "per": 0.14,
+              "max": 5
+            }
+          }
+        }
+      },
+      "bow": {
+        "style": "bow",
+        "willPerBlow": 4.0,
+        "held": {
+          "length": 1.3
+        },
+        "inHand": "A bow: hold to draw, and a full draw hits three times as hard.",
+        "paths": {
+          "bow-hunting": {
+            "name": "The first arrow",
+            "text": "Each time you take it up after it has rested six seconds, its first arrow from a full draw lands twice as hard. The shot is the last and smallest part of a hunt.",
+            "firstFullDraw": {
+              "damage": 2.0,
+              "rest": 6.0
+            }
+          },
+          "bow-war": {
+            "name": "Covering arrows",
+            "text": "An arrow that lands while the foe is winding up takes the weight out of that strike: it lands for half, on you or on whoever it was meant for.",
+            "onWindup": {
+              "weaken": 0.5
+            }
+          },
+          "bow-singing": {
+            "name": "The note",
+            "text": "An arrow from a full draw leaves its note in the foe: for two and a half seconds the foe's time runs slow.",
+            "fullDraw": {
+              "slow": 0.7,
+              "seconds": 2.5
+            }
+          }
+        }
+      },
+      "gun": {
+        "style": "pistol",
+        "willPerBlow": 3.5,
+        "held": {
+          "length": 0.5
+        },
+        "inHand": "A gun with no magazine: its rounds are its Will, so it is never reloaded.",
+        "paths": {
+          "gun-long-gun": {
+            "name": "The long shot",
+            "text": "It reaches as far as a musket and is slower between shots, and a shot lands harder the farther off the foe is: half again as hard and more from sixteen metres.",
+            "shot": {
+              "range": 17.0,
+              "arc": 28,
+              "startup": 0.18,
+              "recovery": 0.6
+            },
+            "far": {
+              "from": 6.0,
+              "to": 16.0,
+              "damage": 1.6
+            }
+          },
+          "gun-repeater": {
+            "name": "The second shot",
+            "text": "It comes back to the aim sooner, and every second shot in a row lands half again as hard.",
+            "shot": {
+              "recovery": 0.26
+            },
+            "everyNth": {
+              "n": 2,
+              "damage": 1.5
+            }
+          },
+          "gun-standing": {
+            "name": "Feet set",
+            "text": "Fired from a stand, when you have not moved for most of a second, its shots land two fifths harder.",
+            "still": {
+              "seconds": 0.8,
+              "damage": 1.4
+            }
+          }
+        }
+      }
+    }
+  },
+  "items": {
+    "$comment": "A defensive item (shield, gauntlet, coat) or a ritual item (lantern, astrolabe, bell). always: what is true of its partner while it is theirs (each multiplier is 1 + (m - 1) x the worth of its age). use: what its partner does with the key: an effect, its wait in seconds (longer or shorter by age), the Will it costs the item, and the numbers of the effect; the keys named in `grows` are multiplied by the worth of its age. feeds: the line of the Tally's orders that using it counts toward (guard, hunt, hold, free). paths: what a path lays over always and use (a key there replaces the base's). An item does not guard or hunt as a companion does and it does not fall: with too little Will, the key does nothing. The effects: set (the shield takes the next `blows` blows whole for `seconds`; ground { radius, seconds }: it stands as a door on that ground instead, and takes blows at whoever stands by it; allies: metres within which a classmate is covered too), catch (within `reach` of a foe that is winding up: the strike is caught and the foe flinches for `flinch`; open: its guard is down and it takes `exposed` more for that long; strike: the catch is a blow of that many Hunts and throws it back; allyReach: it reaches that far for a strike wound up at a classmate; a miss costs missWill and missWait), slip (an instant step of `distance` dodges' length, untouchable for `iframes` seconds, out of anything but the Pattern; willBack and haste { seconds, speed }; punish { seconds, damage }: the next blow after a blow slipped; late { seconds, back }: made that soon after a blow lands, it takes that share of the blow back), light (lit ground of `radius` for `seconds` where its partner stands, or at the foe's feet with at: foe; inside it the moment to parry is parryWindow and a parry staggers `stagger` seconds longer; found: a guarded foe in it lets that much more through its guard; shelter: blows at those inside land for that; burn: Hunts a second on foes inside; willRegen: its partner's Will inside), sight (the locked foe is sighted for `seconds`: blows in its weak moment, staggered or recovering from its own strike, land for `damage`; far { from, damage }: from that far, at any moment; parryWindow and stagger: against the sighted foe's strikes), toll (every foe within `radius` that is winding up is broken out of it and flinches for `flinch`; its partner gets `willBack` Will; mend: health to its partner and every classmate in hearing; stagger: what it breaks is staggered that long instead; strike: and struck for that many Hunts).",
+    "shield": {
+      "type": "defense",
+      "worn": "arm",
+      "wornAs": "On your arm",
+      "always": {
+        "name": "Shield arm",
+        "text": "A blow you block lands for less, and a blocked blow costs you less Will.",
+        "feeds": "free",
+        "block": {
+          "damage": 0.6,
+          "will": 0.5
+        }
+      },
+      "use": {
+        "name": "Set the shield",
+        "short": "Set it",
+        "effect": "set",
+        "feeds": "guard",
+        "text": "For a moment the shield is set: the next blow at you, from anywhere, it takes whole.",
+        "wait": 9.0,
+        "will": 8.0,
+        "seconds": 1.4,
+        "blows": 1,
+        "takes": 0.35,
+        "grows": [
+          "seconds"
+        ]
+      },
+      "great": {
+        "name": "The wall",
+        "effect": "ward",
+        "blows": 3
+      },
+      "paths": {
+        "shield-wall": {
+          "name": "Wall-shield",
+          "text": "It takes two blows, not one, and stays set nearly twice as long.",
+          "use": {
+            "blows": 2,
+            "seconds": 2.6
+          }
+        },
+        "shield-gate": {
+          "name": "Gate-shield",
+          "text": "It is set on the ground where you stand, as a door: for six seconds it takes the blows at you, and at any classmate, while you stand by it. Three blows.",
+          "use": {
+            "ground": {
+              "radius": 3.0,
+              "seconds": 6.0
+            },
+            "blows": 3,
+            "feeds": "hold",
+            "short": "Set the door"
+          }
+        },
+        "shield-shelter": {
+          "name": "Shelter-shield",
+          "text": "Set, it covers whoever is struck first: you, or a classmate within eight metres. It is ready again a third sooner.",
+          "use": {
+            "allies": 8.0,
+            "wait": 6.0
+          }
+        }
+      }
+    },
+    "gauntlet": {
+      "type": "defense",
+      "worn": "hand",
+      "wornAs": "On your hand",
+      "always": {
+        "name": "A sure hand",
+        "text": "The moment to parry is longer.",
+        "feeds": "free",
+        "parryWindow": 1.25
+      },
+      "use": {
+        "name": "Catch it",
+        "short": "Catch it",
+        "effect": "catch",
+        "feeds": "hunt",
+        "text": "Reach for a foe that is winding up, from close: the strike is caught before it is thrown, and the foe flinches. Reach for nothing and the hand closes on air.",
+        "wait": 10.0,
+        "will": 9.0,
+        "reach": 3.2,
+        "flinch": 0.9,
+        "missWait": 2.5,
+        "missWill": 3.0,
+        "grows": [
+          "flinch"
+        ]
+      },
+      "paths": {
+        "gauntlet-maker": {
+          "name": "Maker's Hand",
+          "text": "What it catches it takes apart: for two and a half seconds the foe's guard is down and every blow on it lands a sixth harder.",
+          "use": {
+            "open": 2.5,
+            "exposed": 1.15
+          }
+        },
+        "gauntlet-fist": {
+          "name": "Fighting Fist",
+          "text": "The catch is a blow: it strikes as it closes and throws the foe back. Between catches it strikes with you: every third blow of yours it adds one.",
+          "use": {
+            "strike": 3.0,
+            "knockback": 1.5
+          },
+          "always": {
+            "with": {
+              "every": 3,
+              "damage": 0.9
+            }
+          }
+        },
+        "gauntlet-open": {
+          "name": "Open Hand",
+          "text": "It reaches across the ground for a strike wound up at a classmate. And once a fight, when a blow would fell you, it catches you: you are left standing.",
+          "use": {
+            "allyReach": 10.0
+          },
+          "always": {
+            "catchFall": 1
+          }
+        }
+      }
+    },
+    "coat": {
+      "type": "defense",
+      "worn": "back",
+      "wornAs": "On your back",
+      "always": {
+        "name": "It hangs loose",
+        "text": "A dodge costs you less Will, and you are untouchable in it a moment longer.",
+        "feeds": "free",
+        "dodge": {
+          "will": 0.7,
+          "iframes": 0.06
+        }
+      },
+      "use": {
+        "name": "Slip",
+        "short": "Slip",
+        "effect": "slip",
+        "feeds": "free",
+        "text": "The coat pulls you out: an instant step, untouchable, out of a swing, a reload or a flinch. It costs you no Will.",
+        "wait": 8.0,
+        "will": 8.0,
+        "distance": 1.0,
+        "iframes": 0.42,
+        "grows": [
+          "iframes"
+        ]
+      },
+      "paths": {
+        "coat-travelling": {
+          "name": "Travelling Coat",
+          "text": "The slip carries you nearly half as far again, gives you back Will, and you run faster for two and a half seconds after.",
+          "use": {
+            "distance": 1.4,
+            "willBack": 8.0,
+            "haste": {
+              "seconds": 2.5,
+              "speed": 1.25
+            }
+          }
+        },
+        "coat-shadow": {
+          "name": "Shadow-coat",
+          "text": "A blow you slip lands where you were, and the foe is left looking there: your next blow within two seconds lands half again as hard.",
+          "use": {
+            "punish": {
+              "seconds": 2.2,
+              "damage": 1.5
+            }
+          }
+        },
+        "coat-listening": {
+          "name": "Listening Coat",
+          "text": "It heard it coming. Slip within a third of a second after a blow lands, and most of that blow is taken back.",
+          "use": {
+            "late": {
+              "seconds": 0.33,
+              "back": 0.7
+            }
+          }
+        }
+      }
+    },
+    "lantern": {
+      "type": "ritual",
+      "worn": "side",
+      "wornAs": "At your side",
+      "always": {
+        "name": "Nothing comes unseen",
+        "text": "A blow you neither turned nor blocked lands for a little less: you saw it coming, at least.",
+        "feeds": "free",
+        "hurt": 0.88
+      },
+      "use": {
+        "name": "Set it down",
+        "short": "Set it down",
+        "effect": "light",
+        "feeds": "hold",
+        "text": "It is set on the ground where you stand and lights a circle. Inside it the moment to parry is half again as long, and a parry staggers the foe longer.",
+        "wait": 16.0,
+        "will": 8.0,
+        "radius": 4.5,
+        "seconds": 8.0,
+        "parryWindow": 1.5,
+        "stagger": 0.5,
+        "grows": [
+          "seconds"
+        ]
+      },
+      "great": {
+        "name": "The wall",
+        "effect": "ward",
+        "blows": 3
+      },
+      "paths": {
+        "lantern-wayfinder": {
+          "name": "Wayfinder",
+          "text": "It is set at the foe's feet. A guarded foe standing in its light is found out: blows out of turn land for half again what its guard would let through.",
+          "use": {
+            "at": "foe",
+            "found": 1.5
+          }
+        },
+        "lantern-watch": {
+          "name": "Watch-lamp",
+          "text": "It burns half as long again, and blows at you or a classmate standing in its light land for a fifth less.",
+          "use": {
+            "seconds": 12.0,
+            "shelter": 0.8
+          }
+        },
+        "lantern-kept-flame": {
+          "name": "Kept Flame",
+          "text": "What stands against you in its light burns, and your Will comes back half again as fast while you stand in it.",
+          "use": {
+            "burn": 0.9,
+            "willRegen": 1.5
+          }
+        }
+      }
+    },
+    "astrolabe": {
+      "type": "ritual",
+      "worn": "shoulder",
+      "wornAs": "At your shoulder",
+      "always": {
+        "name": "It takes the measure",
+        "text": "Each strike of a foe that you parry, block or dodge is a measure of it, up to five; every measure adds a little to your blows on that foe.",
+        "feeds": "free",
+        "measure": {
+          "per": 0.03,
+          "max": 5
+        }
+      },
+      "use": {
+        "name": "Take a sight",
+        "short": "Take a sight",
+        "effect": "sight",
+        "feeds": "hunt",
+        "text": "The foe you are locked on to is sighted. For seven seconds your blows in its weak moment, when it is staggered or recovering from its own strike, land half again as hard.",
+        "wait": 14.0,
+        "will": 8.0,
+        "seconds": 7.0,
+        "damage": 1.5,
+        "reach": 18.0,
+        "grows": [
+          "seconds"
+        ]
+      },
+      "paths": {
+        "astrolabe-sighting": {
+          "name": "Sighting-glass",
+          "text": "From seven metres or more, your blows on a sighted foe land a third harder at any moment, weak or not.",
+          "use": {
+            "far": {
+              "from": 7.0,
+              "damage": 1.3
+            }
+          }
+        },
+        "astrolabe-orrery": {
+          "name": "Orrery",
+          "text": "It has worked the strike out. Against a sighted foe the moment to parry is much longer, and a parry staggers it most of a second longer.",
+          "use": {
+            "parryWindow": 1.6,
+            "stagger": 0.8,
+            "feeds": "hold"
+          }
+        },
+        "astrolabe-almanac": {
+          "name": "Almanac",
+          "text": "It writes it down. The sight lasts longer and comes round sooner, and what it has measured of one kind of beast it keeps for the next of that kind.",
+          "use": {
+            "seconds": 12.0,
+            "wait": 11.0
+          },
+          "always": {
+            "measure": {
+              "per": 0.03,
+              "max": 5,
+              "keeps": true
+            }
+          }
+        }
+      }
+    },
+    "bell": {
+      "type": "ritual",
+      "worn": "belt",
+      "wornAs": "At your belt",
+      "always": {
+        "name": "It keeps the time",
+        "text": "The moments of your Pattern's chain are a little wider, and a parry rings it: you get a little more Will back.",
+        "feeds": "free",
+        "chain": 1.15,
+        "parryWill": 4.0
+      },
+      "use": {
+        "name": "Toll",
+        "short": "Toll",
+        "effect": "toll",
+        "feeds": "hunt",
+        "text": "It tolls. Every foe near you that is winding up is broken out of its strike, and you are steadied: a little Will back.",
+        "wait": 13.0,
+        "will": 9.0,
+        "radius": 5.5,
+        "flinch": 0.7,
+        "willBack": 6.0,
+        "grows": [
+          "flinch"
+        ]
+      },
+      "paths": {
+        "bell-rally": {
+          "name": "Rally-bell",
+          "text": "Its toll steadies the whole table: you and every classmate in hearing get health back, and you twice the Will.",
+          "use": {
+            "mend": 6.0,
+            "willBack": 12.0,
+            "feeds": "guard"
+          }
+        },
+        "bell-hour": {
+          "name": "Hour-bell",
+          "text": "It keeps better time: your Pattern's moments are wider still. And every twenty-two seconds, when a strike is wound up at you, it tolls of itself.",
+          "always": {
+            "chain": 1.3,
+            "parryWill": 4.0
+          },
+          "use": {
+            "auto": 22.0,
+            "feeds": "hold"
+          }
+        },
+        "bell-alarm": {
+          "name": "Alarm-bell",
+          "text": "It does not startle, it stuns: what its toll breaks is staggered and struck. It is longer coming round again.",
+          "use": {
+            "stagger": 1.2,
+            "strike": 2.0,
+            "wait": 18.0
+          }
+        }
+      }
+    }
+  },
+  "roles": {
+    "$comment": "A companion's role (docs/genius-types.md, 'Companions'). does: what it does for its partner, in four words. lacks: the partner it balances. stands: where it keeps itself (front: between its partner and the foe; foe: on the foe; flank: behind the foe; side: at its partner's side; back: behind its partner). numbers: multipliers on its Will, the damage and interval of its blows, its speed, and what a guard costs it and how soon it guards again. favours: the moves it keeps first as it ages and makes first; the favourites of its own role come round in favourWait of their wait. own: the one thing only that role does, from the First Form at the worth of its age; a path that shades toward another role has that role's own thing too, at shade.other of its strength, and a path that keeps to its base's role has its own at shade.pure. The own things: hold-it (the foe is held on it for `seconds`: it goes for the genius, and the strike lands on the genius for `takes` of it, out of its Will), opening (its blows on a foe that is staggered or open land for `damage`, and it comes at once when the foe staggers), worry (the foe's guard is down and it takes `exposed` more for `seconds`), mend (while its partner is below `below` of their health and has not been struck for `after` seconds, every `every` seconds it gives `health` for `will` of its own), calls (while it watches, the moment to parry is `parryWindow`; when the foe begins to recover from a strike at its partner, their blows land for `mark` until it has).",
+    "shade": {
+      "pure": 1.3,
+      "other": 0.5
+    },
+    "favourWait": 0.8,
+    "bulwark": {
+      "name": "Bulwark",
+      "does": "It holds the foe.",
+      "supplies": "a front",
+      "lacks": "A partner who fights from far off, or cannot take a blow, has nobody between them and the foe.",
+      "stands": "front",
+      "numbers": {
+        "will": 1.3,
+        "damage": 0.75,
+        "guardCost": 0.7,
+        "guardCooldown": 0.6
+      },
+      "favours": [
+        "call",
+        "brace"
+      ],
+      "own": {
+        "id": "hold-it",
+        "name": "Holds it",
+        "text": "It calls the foe onto itself and holds it there: for a few seconds the foe goes for it and not for you, and its strikes land on the genius, out of its Will.",
+        "wait": 15.0,
+        "will": 8.0,
+        "seconds": 5.0,
+        "takes": 0.45,
+        "reach": 9.0
+      }
+    },
+    "hunter": {
+      "name": "Hunter",
+      "does": "It strikes.",
+      "supplies": "the blow",
+      "lacks": "A partner who turns every blow and holds their ground makes openings and has too little to put in them.",
+      "stands": "foe",
+      "numbers": {
+        "will": 0.9,
+        "damage": 1.25,
+        "interval": 0.85
+      },
+      "favours": [
+        "hamstring",
+        "stoop",
+        "shot",
+        "lay"
+      ],
+      "own": {
+        "id": "opening",
+        "name": "Goes for the opening",
+        "text": "Its blows on a foe that is staggered, or whose guard is down, land half again as hard, and when the foe staggers it comes at once.",
+        "damage": 1.5
+      }
+    },
+    "harrier": {
+      "name": "Harrier",
+      "does": "It opens the guard.",
+      "supplies": "the opening",
+      "lacks": "A partner whose blows are heavy and slow has the weight and seldom the moment.",
+      "stands": "flank",
+      "numbers": {
+        "will": 1.0,
+        "damage": 0.8,
+        "interval": 0.8,
+        "speed": 1.15
+      },
+      "favours": [
+        "hamstring",
+        "debt",
+        "lay"
+      ],
+      "own": {
+        "id": "worry",
+        "name": "Worries it",
+        "text": "It worries the foe from where the foe is not looking: for two seconds its guard is down and every blow on it lands a sixth harder.",
+        "wait": 11.0,
+        "will": 6.0,
+        "seconds": 2.0,
+        "exposed": 1.15,
+        "reach": 2.6
+      }
+    },
+    "keeper": {
+      "name": "Keeper",
+      "does": "It keeps you standing.",
+      "supplies": "staying",
+      "lacks": "A partner who takes the blow to give one runs out of themselves before the foe does.",
+      "stands": "side",
+      "numbers": {
+        "will": 1.25,
+        "damage": 0.6,
+        "guardCost": 0.9
+      },
+      "favours": [
+        "call",
+        "light",
+        "brace"
+      ],
+      "own": {
+        "id": "mend",
+        "name": "Mends",
+        "text": "While you are hurt and nothing has struck you for a moment, it gives you health out of its own Will, a little every two seconds. With a party, it sees to whoever is worst hurt.",
+        "below": 0.7,
+        "after": 2.5,
+        "every": 2.0,
+        "health": 5.0,
+        "will": 4.0,
+        "reach": 5.0
+      }
+    },
+    "lookout": {
+      "name": "Lookout",
+      "does": "It reads the fight.",
+      "supplies": "the moment",
+      "lacks": "A partner who commits to long swings, or has not learned the foe's time, is struck by what they did not see.",
+      "stands": "back",
+      "numbers": {
+        "will": 1.0,
+        "damage": 0.85,
+        "speed": 1.1
+      },
+      "favours": [
+        "light",
+        "call",
+        "stoop",
+        "shot"
+      ],
+      "own": {
+        "id": "calls",
+        "name": "Calls the strike",
+        "text": "While it watches, the moment to parry is a third longer; and when the foe has struck at you and missed its chance, it calls the opening: your blows land a fifth harder until the foe has recovered.",
+        "parryWindow": 1.35,
+        "mark": 1.2,
+        "reach": 14.0
+      }
+    }
+  },
+  "companions": {
+    "$comment": "Every companion base's role, and for each of its three paths the role it shades toward (its own role again: it keeps to it, and its own thing is stronger) and what that means in a sentence.",
+    "wolf": {
+      "role": "hunter",
+      "paths": {
+        "wolf-counting-wolf": {
+          "shade": "keeper",
+          "text": "It counts heads between bites: it mends whoever is hurt."
+        },
+        "wolf-third-day-wolf": {
+          "shade": "hunter",
+          "text": "It does not let go: its blows in an opening are heavier still."
+        },
+        "wolf-night-watch": {
+          "shade": "lookout",
+          "text": "It does not sleep: it calls the strike you would not have seen."
+        }
+      }
+    },
+    "hawk": {
+      "role": "lookout",
+      "paths": {
+        "hawk-high-circler": {
+          "shade": "lookout",
+          "text": "It sees the whole of it: the moment to parry is longer still."
+        },
+        "hawk-eyrie-holder": {
+          "shade": "bulwark",
+          "text": "It keeps the high place: it draws the foe's eye and holds it."
+        },
+        "hawk-stooper": {
+          "shade": "hunter",
+          "text": "It chooses once: it comes down hard into an opening."
+        }
+      }
+    },
+    "stag": {
+      "role": "bulwark",
+      "paths": {
+        "stag-tilter": {
+          "shade": "hunter",
+          "text": "Its head goes down: held, the foe is struck hard when it opens."
+        },
+        "stag-wood-walker": {
+          "shade": "harrier",
+          "text": "It leads the foe a dance: it worries it between holds."
+        },
+        "stag-watch-hart": {
+          "shade": "keeper",
+          "text": "It walks at the back: it mends who is hurt."
+        }
+      }
+    },
+    "tortoise": {
+      "role": "bulwark",
+      "paths": {
+        "tortoise-stone-back": {
+          "shade": "bulwark",
+          "text": "It will not be moved: it holds the foe longer."
+        },
+        "tortoise-cairn-back": {
+          "shade": "keeper",
+          "text": "It is a post that travels: it mends who rests by it."
+        },
+        "tortoise-the-unhurried": {
+          "shade": "hunter",
+          "text": "It arrives anyway: its few blows land in the openings."
+        }
+      }
+    },
+    "fox": {
+      "role": "harrier",
+      "paths": {
+        "fox-gone-away": {
+          "shade": "harrier",
+          "text": "It is never where the foe looks: the guard is down longer."
+        },
+        "fox-cache-fox": {
+          "shade": "keeper",
+          "text": "It brings you what it buried: it mends between worries."
+        },
+        "fox-fire-tail": {
+          "shade": "bulwark",
+          "text": "The foe follows its light: it draws it off you."
+        }
+      }
+    },
+    "imp": {
+      "role": "harrier",
+      "paths": {
+        "imp-debt-collector": {
+          "shade": "hunter",
+          "text": "It goes and gets it: it strikes hard into what it opened."
+        },
+        "imp-stickler": {
+          "shade": "lookout",
+          "text": "It has read the small print: it calls the strike."
+        },
+        "imp-surety": {
+          "shade": "bulwark",
+          "text": "It put its name under yours: it takes the foe on itself."
+        }
+      }
+    },
+    "lurker": {
+      "role": "lookout",
+      "paths": {
+        "lurker-back-stander": {
+          "shade": "bulwark",
+          "text": "It fills the place behind you: it takes the foe onto itself."
+        },
+        "lurker-the-one-who-sits-up": {
+          "shade": "keeper",
+          "text": "It sits up with the hurt: it mends."
+        },
+        "lurker-the-unremarked": {
+          "shade": "harrier",
+          "text": "Eyes slide off it: it worries the foe unseen."
+        }
+      }
+    },
+    "fiend": {
+      "role": "hunter",
+      "paths": {
+        "fiend-flare-up": {
+          "shade": "hunter",
+          "text": "It does not come down until something has paid: heavier into every opening."
+        },
+        "fiend-banked-coal": {
+          "shade": "harrier",
+          "text": "It has a list: it worries the one it is waiting for."
+        },
+        "fiend-grate-fiend": {
+          "shade": "keeper",
+          "text": "It learned to be warm: it mends."
+        }
+      }
+    },
+    "drake": {
+      "role": "bulwark",
+      "paths": {
+        "drake-hoard": {
+          "shade": "bulwark",
+          "text": "It counts you among what it keeps: it holds the foe longer."
+        },
+        "drake-fire": {
+          "shade": "hunter",
+          "text": "It keeps the fire in until it is wanted: then into the opening, unstinted."
+        },
+        "drake-sky": {
+          "shade": "lookout",
+          "text": "From higher up it sees the strike coming, and calls it."
+        }
+      }
+    },
+    "sprite": {
+      "role": "keeper",
+      "paths": {
+        "sprite-hob": {
+          "shade": "keeper",
+          "text": "Somebody has to mind the house: it mends more."
+        },
+        "sprite-lore-sprite": {
+          "shade": "lookout",
+          "text": "Knowing is a light too: it calls the strike."
+        },
+        "sprite-pixy": {
+          "shade": "harrier",
+          "text": "Other eyes go after it: it worries the foe."
+        }
+      }
+    },
+    "homunculus": {
+      "role": "keeper",
+      "paths": {
+        "homunculus-clay-apprentice": {
+          "shade": "keeper",
+          "text": "It does the next thing before you have got to it: it mends more."
+        },
+        "homunculus-likeness": {
+          "shade": "hunter",
+          "text": "It fights like you: it strikes into your openings."
+        },
+        "homunculus-clay-bearer": {
+          "shade": "bulwark",
+          "text": "It chose your purpose: it takes the foe on itself."
+        }
+      }
+    },
+    "ember": {
+      "role": "hunter",
+      "paths": {
+        "ember-kept-fire": {
+          "shade": "keeper",
+          "text": "Near enough to warm: it mends."
+        },
+        "ember-rushlight": {
+          "shade": "lookout",
+          "text": "A small light in a bad place: it calls the strike."
+        },
+        "ember-wildfire": {
+          "shade": "hunter",
+          "text": "It spends the whole of itself: heavier into every opening."
+        }
+      }
+    },
+    "fog": {
+      "role": "harrier",
+      "paths": {
+        "fog-shroud": {
+          "shade": "bulwark",
+          "text": "It gets in the way gently: it takes the foe on itself."
+        },
+        "fog-lingering-mist": {
+          "shade": "lookout",
+          "text": "It stays and listens: it calls the strike."
+        },
+        "fog-shifting-fog": {
+          "shade": "harrier",
+          "text": "It cannot be pinned: the guard is down longer."
+        }
+      }
+    }
+  },
+  "need": {
+    "$comment": "How much a partner lacks what each role supplies, 0 to 1, from how they fight: the sum of each weight times what it measures. ranged: their weapon is a ranged one. far, close: the share of their blows landed far and close (the Tally's range line). turnShare, hurtShare: of the blows that came at them over their life with the genius, the share turned (parried or blocked) and the share taken. noParry: the share not parried. slow: how slow their weapon is, from quick (0) to the slowest (1). words: what the page says for a need at least that great.",
+    "bulwark": {
+      "ranged": 0.55,
+      "far": 0.45
+    },
+    "hunter": {
+      "turnShare": 0.8,
+      "base": 0.1
+    },
+    "harrier": {
+      "slow": 0.7,
+      "close": 0.2,
+      "base": 0.1
+    },
+    "keeper": {
+      "hurtShare": 0.9,
+      "base": 0.05
+    },
+    "lookout": {
+      "hurtShare": 0.45,
+      "noParry": 0.45
+    },
+    "slow": {
+      "from": 0.6,
+      "to": 1.2
+    },
+    "words": [
+      [
+        0.6,
+        "As you fight now, it is what you lack."
+      ],
+      [
+        0.3,
+        "As you fight now, you have some need of it."
+      ],
+      [
+        0.0,
+        "As you fight now, you could do without it; it does it all the same."
+      ]
+    ]
+  }
+}
