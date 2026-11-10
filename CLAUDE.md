@@ -104,4 +104,7 @@ tests/             tests for the tools
 Use the game's words in code and comments: Shape (not class), Stage (not level),
 technique (not skill), archetype (not job), Term (not condition), genius (not pet),
 instar and Reading (not evolution), Mark (not XP), Will (not mana), line color (not
-difficulty). The vocabulary is the design; keeping it keeps the design.
+difficulty). A genius is on a line, and the stages of a line are Baby, Starter, Path,
+Advancement and Final (the owner compared a line to an evolution, 2026-11-10; the game's
+word for the step is an advancement, and for the moment a Reading). The vocabulary is the
+design; keeping it keeps the design.
