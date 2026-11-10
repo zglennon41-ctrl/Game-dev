@@ -257,9 +257,13 @@ func _tree_section(v: Control, g: Genius) -> void:
 	var road: Array = g.road().map(func(f): return String(f["id"]))
 	var next: Array = g.next_forms().map(func(f): return String(f["id"]))
 	var play := GeniusReading.play_lines(g.tally)
-	_section(v, "ITS TREE  ·  %s" % g.kind().to_upper())
-	var said := "It has finished its tree. From here it grows: great, and then to its apex." if next.is_empty() else \
-		"It is %s. At its next Reading it becomes one of %d forms, by how you have played since the last; each says below what play leads to it, and how well the Tally speaks for it now." % [String(Data.form(here).get("name", "")), next.size()]
+	_section(v, "ITS LINE  ·  %s" % g.kind().to_upper())
+	# where it is on its line, in the player's words (data/genius.json, stages)
+	var stages: Dictionary = Data.genius().get("stages", {})
+	var stage_now := String(stages.get(str(g.level()), {}).get("name", "form"))
+	var stage_next := String(stages.get(str(g.level() + 1), {}).get("plural" if next.size() != 1 else "name", "forms"))
+	var said := "This is its %s: it has finished its line. From here it grows: great, and then to its apex." % stage_now if next.is_empty() else \
+		"It is %s, its %s. At its next Reading it becomes one of %d %s, by how you have played since the last; each says below what play leads to it, and how well the Tally speaks for it now." % [String(Data.form(here).get("name", "")), stage_now, next.size(), stage_next]
 	_p(v, "[color=#ffd175]%s[/color]   %s" % ["  >  ".join(g.road().map(func(f): return String(f["name"]))), said])
 	# a turning is only ever offered at the first refinement
 	if g.level() == 1 and not String(g.body.get("base", "")).contains("+"):

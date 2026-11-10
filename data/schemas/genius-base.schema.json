@@ -98,6 +98,9 @@
           "type": "string",
           "minLength": 8,
           "maxLength": 90
+        },
+        "body": {
+          "$ref": "#/definitions/body"
         }
       }
     },
@@ -165,6 +168,9 @@
           "type": "string",
           "minLength": 8,
           "maxLength": 90
+        },
+        "body": {
+          "$ref": "#/definitions/body"
         }
       }
     },
@@ -232,7 +238,37 @@
           "type": "string",
           "minLength": 8,
           "maxLength": 90
+        },
+        "body": {
+          "$ref": "#/definitions/body"
         }
+      }
+    },
+    "body": {
+      "type": "object",
+      "description": "What the form's own body looks like, against its parent's (docs/genius-evolutions.md, 'A body, as data'): a form wears everything its parent wears unless it says otherwise; null takes a thing off. tools/blender/genius_lines.py builds the model from it; coat is how its partner's coat is worn (data/genius-looks.json, shifts).",
+      "properties": {
+        "build": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "coat": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": {
+        "type": [
+          "string",
+          "array",
+          "null",
+          "object",
+          "number"
+        ]
       }
     }
   },
@@ -380,6 +416,9 @@
           "type": "string",
           "minLength": 20,
           "maxLength": 170
+        },
+        "body": {
+          "$ref": "#/definitions/body"
         }
       }
     },

@@ -145,6 +145,14 @@
     "close": 2.5,
     "mid": 7.0
   },
+  "stages": {
+    "$comment": "Where a genius is on its line, in the player's words (docs/genius-evolutions.md), by its form's level on the tree: the Baby is everyone's before the rite; a Starter is a base's settled form, a Path one of its three paths, an Advancement a prong, a Final a finish. plural is how the page counts what comes next.",
+    "0": { "name": "Baby", "plural": "Babies" },
+    "1": { "name": "Starter", "plural": "Starters" },
+    "2": { "name": "Path", "plural": "Paths" },
+    "3": { "name": "Advancement", "plural": "Advancements" },
+    "4": { "name": "Final", "plural": "Finals" }
+  },
   "size": {
     "$comment": "How tall a genius stands, by instar, in metres: the young of its kind at the First Form, grown at the Third (a wolf at the shoulder and head), and at Apex taller than its partner.",
     "1": 0.6,

@@ -13,6 +13,7 @@ extends Node3D
 
 const BODY_DIR := "res://game/assets/genius/bodies/%s.glb"
 const PART_DIR := "res://game/assets/genius/parts/%s.glb"
+const FORM_DIR := "res://game/assets/genius/forms/%s.glb"      # a body of a form's own (docs/genius-evolutions.md)
 const KEEP_DIR := "res://game/assets/genius/keepsakes/%s.glb"
 const TRAP_DIR := "res://game/assets/genius/trappings/%s.glb"
 
@@ -54,8 +55,10 @@ float seams(vec3 p) {
 	return smoothstep(0.08 + 0.2 * molt, 0.0, abs(v));
 }
 void fragment() {
-	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 2.6);
-	vec3 col = glow.rgb * rim * 1.6 * strength;
+	// a thin edge only: the field's colour belongs to its eyes, its seams and what it carries
+	// of light, and a body flooded with it reads as gilt, not as a coat
+	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 4.2);
+	vec3 col = glow.rgb * rim * 0.85 * strength;
 	if (molt > 0.0) {
 		float breathe = 0.75 + 0.25 * sin(TIME * 2.2 + lp.y * 5.0);
 		col += mix(glow.rgb, vec3(1.0), 0.3) * seams(lp * molt_scale) * molt * breathe * 3.2;
@@ -73,6 +76,7 @@ var anim: AnimationPlayer = null
 var anim_names: Dictionary = {}
 var sockets: Dictionary = {}       # name -> Node3D
 var uses_art := false              # the body came from an art file, not a placeholder
+var own_body := ""                 # the form whose own body it wears ("" when it wears its silhouette's)
 var nearness := 0.0                # how near its next Reading is (Genius.readiness), 0 to 1
 var molt := 0.0                    # the molt lines showing for it, 0 to 1
 var stands := 0.6                  # how tall it stands now, in metres
@@ -122,12 +126,22 @@ func _assemble(instar: int) -> void:
 	if not born.is_empty():
 		look = GeniusLook.resolve(born, String(info.get("form", "")), sil, int(info.get("instar", instar)))
 		_glow *= float(look["eyes"]["energy"])
-	if ResourceLoader.exists(BODY_DIR % sil):
-		_model = load(BODY_DIR % sil).instantiate()
+	# A form with a body of its own wears it (a hybrid's form wears the body of the form it came
+	# from, first+second:<form>): its build, its great parts and its marks are in the model.
+	var fid := String(info.get("form", ""))
+	var src := fid.get_slice(":", 1) if fid.contains(":") else fid
+	var carried: Array = []
+	if src != "" and ResourceLoader.exists(FORM_DIR % src):
+		own_body = src
+		carried = Data.form(src).get("features", [])
+	if own_body != "" or ResourceLoader.exists(BODY_DIR % sil):
+		_model = load(FORM_DIR % own_body if own_body != "" else BODY_DIR % sil).instantiate()
 		add_child(_model)
 		uses_art = true
 		_art_sockets(_model)
 		anim = _model.find_child("AnimationPlayer", true, false)
+		if anim == null and own_body != "" and ResourceLoader.exists(BODY_DIR % sil):
+			_borrow_clips(BODY_DIR % sil)
 		if anim:
 			anim_names = _clips(cfg["kinds"].get(kind, {}).get("anim", {}))
 		_adopt_art(_model)
@@ -160,6 +174,10 @@ func _assemble(instar: int) -> void:
 		# An art body may carry a feature in its own design (the stag its antlers): no part hangs.
 		if uses_art and (spec.get("carries", []) as Array).has(f):
 			continue
+		# A body of the form's own carries everything its line gave it: only what came from
+		# elsewhere (heritage, an adaptation, a graft, a hybrid's gift) hangs as a part.
+		if carried.has(f):
+			continue
 		var socks: Array = cfg["slotSockets"].get(slot, ["socket_body"])
 		var i: int = slot_count.get(slot, 0)
 		slot_count[slot] = i + 1
@@ -184,7 +202,9 @@ func _assemble(instar: int) -> void:
 	_wear_trapping()
 	# Its age shapes it: the young of its kind at the First Form, great at the Fifth.
 	age = String(prog.get("ages", {}).get(str(clampi(instar, 1, 6)), {}).get("id", "grown"))
-	_apply_age(cfg.get("ages", {}).get(kind, {}).get(age, {}))
+	# A body of the form's own is modelled at its age; only the great and the apex shape it further.
+	if own_body == "" or instar >= 5:
+		_apply_age(cfg.get("ages", {}).get(kind, {}).get(age, {}))
 	# What the later instars add: steady lines of light, a mantle, the ground lit under it.
 	var pres: Dictionary = prog.get("presence", {}).get(str(clampi(instar, 1, 6)), {})
 	lines = float(pres.get("lines", 0.0))
@@ -209,6 +229,53 @@ func _assemble(instar: int) -> void:
 			if anim.has_animation(anim_names[k]):
 				anim.get_animation(anim_names[k]).loop_mode = Animation.LOOP_LINEAR
 		anim.play(anim_names["idle"])
+
+## A body of a form's own carries no clips of its own: it moves by its base body's, fitted
+## to its own proportions. Each bone keeps where the form's rest puts it and how it lies there,
+## and takes from the clip only how far it moves and turns from rest; so a form with longer
+## legs walks on longer legs, and one that carries its head low keeps it low.
+static var _borrowed := {}      # form id -> AnimationLibrary
+
+func _borrow_clips(donor_path: String) -> void:
+	var sks := _model.find_children("*", "Skeleton3D", true, false)
+	if sks.is_empty():
+		return
+	var sk: Skeleton3D = sks[0]
+	var lib: AnimationLibrary = _borrowed.get(own_body)
+	if lib == null:
+		var donor: Node = load(donor_path).instantiate()
+		var theirs: AnimationPlayer = donor.find_child("AnimationPlayer", true, false)
+		var dsks := donor.find_children("*", "Skeleton3D", true, false)
+		if theirs == null or dsks.is_empty():
+			donor.free()
+			return
+		var dsk: Skeleton3D = dsks[0]
+		lib = AnimationLibrary.new()
+		for clip in theirs.get_animation_list():
+			var a: Animation = theirs.get_animation(clip).duplicate(true)
+			for t in a.get_track_count():
+				var bone := String(a.track_get_path(t).get_concatenated_subnames())
+				var bi := sk.find_bone(bone)
+				var di := dsk.find_bone(bone)
+				if bi < 0 or di < 0:
+					continue
+				var mine := sk.get_bone_rest(bi)
+				var its := dsk.get_bone_rest(di)
+				if a.track_get_type(t) == Animation.TYPE_POSITION_3D:
+					for k in a.track_get_key_count(t):
+						a.track_set_key_value(t, k, mine.origin + ((a.track_get_key_value(t, k) as Vector3) - its.origin))
+				elif a.track_get_type(t) == Animation.TYPE_ROTATION_3D:
+					var fix := mine.basis.get_rotation_quaternion() * its.basis.get_rotation_quaternion().inverse()
+					for k in a.track_get_key_count(t):
+						a.track_set_key_value(t, k, fix * (a.track_get_key_value(t, k) as Quaternion))
+			lib.add_animation(clip, a)
+		donor.free()
+		_borrowed[own_body] = lib
+	var player := AnimationPlayer.new()
+	player.name = "AnimationPlayer"
+	_model.add_child(player)
+	player.add_animation_library("", lib)
+	anim = player
 
 ## Art follows the bible's conventions: materials named field* glow in the partner's Shape
 ## colour; wing_l and wing_r beat.
@@ -236,7 +303,7 @@ func _adopt_art(n: Node) -> void:
 			elif mat and mat is StandardMaterial3D and look.get("colors", {}).has(String(mat.resource_name)):
 				# its own coat, and its markings: shown in the marking's colour, or hidden in the coat's
 				var c := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
-				c.albedo_color = look["colors"][String(mat.resource_name)]
+				c.albedo_color = _worn(look["colors"][String(mat.resource_name)])
 				mi.set_surface_override_material(i, c)
 				painted += 1
 	# The character's left is +X: the left wing rises with a positive turn about the way it faces.
@@ -252,6 +319,19 @@ func _adopt_art(n: Node) -> void:
 			# the axis it beats about: the model's forward, seen from the wing's own frame
 			w3.set_meta("wing_axis", (_rest_xf(w3, n).basis.orthonormalized().inverse() * Vector3(0, 0, 1)).normalized())
 			_wings.append(w3)
+
+## Its partner's coat, as this form wears it (data/genius-looks.json, shifts): a form may wear
+## the coat darker, paler, greyer or warmer than it was born, and it is still that coat.
+func _worn(c: Color) -> Color:
+	if own_body == "":
+		return c
+	var shift: Dictionary = Data.genius_looks().get("shifts", {}).get(String(Data.form(own_body).get("body", {}).get("coat", "")), {})
+	if shift.is_empty():
+		return c
+	var t: Array = shift["tint"]
+	var out := c.lerp(Color(t[0], t[1], t[2]), float(shift["mix"]))
+	out.a = c.a
+	return out
 
 ## Its build: each proportion on the body's blend shapes where the art carries them (lean and
 ## heavy, a longer tail); where it does not, the whole body a little broader or narrower.
@@ -790,6 +870,11 @@ func _fit_height(height: float, proportions: Vector3) -> void:
 		top = maxf(top, ab.end.y)
 		bottom = minf(bottom, ab.position.y)
 	var h := maxf(0.05, top - minf(bottom, 0.0))
+	# A body may say where its own height is measured to (the crown of its head): what it grows
+	# above that (a crest, a lamp on a pole) stands above its instar's height, not inside it.
+	var ref: Node = _model.find_child("ref_top", true, false) if _model else null
+	if ref is Node3D:
+		h = maxf(0.05, _local_xf(ref as Node3D).origin.y)
 	var k := height / h
 	_model.scale = proportions * k
 

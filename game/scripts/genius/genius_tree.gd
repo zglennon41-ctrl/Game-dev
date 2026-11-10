@@ -27,7 +27,22 @@ static func _round(x: float, places: int) -> float:
 	var k := pow(10.0, places)
 	return roundf(x * k) / k
 
-static func _grow(parent_id: String, parent_features: Array, nodes: Array, level: int, silhouette: String, c: Dictionary, out: Array) -> Array:
+## What a form wears of its body (docs/genius-evolutions.md): everything its parent wears,
+## unless it says otherwise; null takes a thing off.
+static func wear(parent: Dictionary, own: Dictionary) -> Dictionary:
+	var out := parent.duplicate(true)
+	for k in own:
+		if own[k] == null:
+			out.erase(k)
+		elif own[k] is Dictionary and out.get(k) is Dictionary:
+			var d: Dictionary = (out[k] as Dictionary).duplicate()
+			d.merge(own[k], true)
+			out[k] = d
+		else:
+			out[k] = own[k]
+	return out
+
+static func _grow(parent_id: String, parent_features: Array, nodes: Array, level: int, silhouette: String, c: Dictionary, out: Array, parent_body: Dictionary = {}) -> Array:
 	var ids: Array = []
 	for n in nodes:
 		# a form wears its own body where it names one; the forms below it on that road wear it too
@@ -38,10 +53,11 @@ static func _grow(parent_id: String, parent_features: Array, nodes: Array, level
 			"expression": c["expression"], "class": c["class"], "silhouette": sil, "coatOf": c["coatOf"] if c["coatOf"] != "" else sil,
 			"own": (n["features"] as Array).duplicate(), "features": _uniq(parent_features + n["features"]), "leans": n.get("leans", {}), "children": [],
 			"instars": { "min": level, "max": 6 if level >= 4 else level },
+			"body": wear(parent_body, n.get("body", {})),
 		}
 		out.append(f)
 		ids.append(f["id"])
-		f["children"] = _grow(f["id"], f["features"], _kids(n), level + 1, sil, c, out)
+		f["children"] = _grow(f["id"], f["features"], _kids(n), level + 1, sil, c, out, f["body"])
 	return ids
 
 ## A base's thirty-one forms, the settled one first.
@@ -207,5 +223,5 @@ static func compose(a: Dictionary, b: Dictionary, hy: Dictionary, labels: Dictio
 		paths.append(_said(path, pair, rule, words))
 	var out: Array = []
 	var c := { "prefix": h + ":", "base": h, "kind": hybrid_name(a, b, hy), "expression": a["expression"], "class": a["class"], "coatOf": String(b["silhouette"]) }
-	_grow(a["settled"]["id"], _uniq(a["settled"]["features"] + b["hybrid"]["gift"]), paths, 2, String(a["silhouette"]), c, out)
+	_grow(a["settled"]["id"], _uniq(a["settled"]["features"] + b["hybrid"]["gift"]), paths, 2, String(a["silhouette"]), c, out, a["settled"].get("body", {}))
 	return out

@@ -2600,7 +2600,7 @@ func test_refinement_and_turning() -> void:
 	page.open(pg, Color.ORANGE)
 	var text := "\n".join(page.find_children("*", "RichTextLabel", true, false).map(func(x): return (x as RichTextLabel).text))
 	var heads := page.find_children("*", "Label", true, false).map(func(x): return (x as Label).text)
-	check(heads.any(func(x): return String(x).begins_with("ITS TREE")) and heads.has("YOUR SOUL, OUTSIDE YOU"), "the genius's page has its tree and its soul")
+	check(heads.any(func(x): return String(x).begins_with("ITS LINE")) and heads.has("YOUR SOUL, OUTSIDE YOU"), "the genius's page has its line and its soul")
 	var all_named := true
 	for f in Data.tree_of("trun"):
 		all_named = all_named and (int(f["level"]) == 1 or text.contains(String(f["name"])))

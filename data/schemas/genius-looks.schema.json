@@ -55,6 +55,10 @@
             "additionalProperties": { "type": "object", "required": ["name", "on"], "additionalProperties": false, "properties": { "name": { "type": "string" }, "on": { "enum": ["main", "under", "trim"] } } } },
           "shapes": { "type": "array", "items": { "type": "string" } } } }
     },
-    "forms": { "type": "object", "additionalProperties": { "type": "object", "required": ["coats"], "additionalProperties": false, "properties": { "coats": { "type": "string" } } } }
+    "forms": { "type": "object", "additionalProperties": { "type": "object", "required": ["coats"], "additionalProperties": false, "properties": { "coats": { "type": "string" } } } },
+    "shifts": { "type": "object", "properties": { "$comment": { "type": "string" } },
+      "additionalProperties": { "type": "object", "required": ["tint", "mix"], "additionalProperties": false, "properties": {
+        "tint": { "type": "array", "items": { "type": "number", "minimum": 0, "maximum": 1 }, "minItems": 3, "maxItems": 3 },
+        "mix": { "type": "number", "minimum": 0, "maximum": 1 } } } }
   }
 }
