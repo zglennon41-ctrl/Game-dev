@@ -273,8 +273,8 @@ static func ink_width(category: String, screen_height := 0.0) -> float:
 static func ink_color() -> Color:
 	return Color(String(data()["ink"]["color"]))
 
-## An effect's colour by what it is for (telegraph, hurt, guard, parry, stagger, spark, dust,
-## smoke, shot, text, dim).
+## An effect's colour by what it is for (telegraph, hurt, guard, stagger, spark, dust, shot,
+## text, dim).
 static func fx(name: String) -> Color:
 	return Color(String(data()["effects"]["colors"].get(name, "#F2E8D6")))
 

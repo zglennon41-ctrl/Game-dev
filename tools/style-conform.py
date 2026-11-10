@@ -22,7 +22,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, 'tools', 'blender'))
 import style  # noqa: E402
 
-MOON_CAP = 0.28       # the most saturated a cool light's cast may be
+MOON_CAP = 0.23       # the most saturated a cool light's cast may be
 AMBIENT_CAP = 0.3     # and an ambient
 
 

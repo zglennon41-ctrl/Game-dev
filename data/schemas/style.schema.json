@@ -195,7 +195,7 @@
         "$comment": { "type": "string" },
         "colors": {
           "type": "object",
-          "required": ["telegraph", "hurt", "guard", "parry", "stagger", "spark", "dust", "smoke", "shot", "text", "dim"],
+          "required": ["telegraph", "hurt", "guard", "stagger", "spark", "dust", "shot", "text", "dim"],
           "additionalProperties": { "$ref": "#/definitions/hex" }
         },
         "ring": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } },

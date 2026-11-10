@@ -109,8 +109,9 @@ its grain and how worn it looks.
 - **Only light glows.** A material that shines and is not `field_*` or `*_lit` (or water
   under the moon) fails the check.
 - A name that says nothing of what the thing is made of fails the check.
-- Skin's shadow is warm; everything else's is a cool grey-violet. Metal has a hard
-  highlight; cloth almost none.
+- Skin's shadow is warm; everything else's is near grey, a little cool (a blue coat in
+  moonlight in a blue shadow is how a quiet colour turns loud, so the shadow adds almost
+  no colour of its own). Metal has a hard highlight; cloth almost none.
 
 ### 4. Ink
 
@@ -131,7 +132,8 @@ Three lights tell every scene's story, and every place has a warm one and a cool
 | Field | the Shape's colour | the same, small | will, power, the genius |
 
 - **What a light throws is paler than its source.** A wall in moonlight is stone with a
-  cool cast, not blue paint. The moon's cast may be no more than 0.3 saturated.
+  cool cast, not blue paint. The moon's cast, and any zone's own moon, may be no more than
+  0.24 saturated.
 - A lit pane is the lamp's amber; the Library's stained glass is the Shapes' own colours,
   banked down (`lights.stain`).
 - **Kinds of place** (`lights.kinds`): a **hall** is keyed by lamps and filled by the night
@@ -180,7 +182,8 @@ soft blot of dust), the **flash** (a four-pointed star where a blow lands), the 
 - A telegraph is the telegraph's red and nothing else is.
 - What a partner makes is in their Shape's colour; a technique of another Shape in that
   Shape's.
-- A guard is the moon's pale; a parry and a stagger brass-lit; a hurt blood; dust dust.
+- A block and a parry are the moon's colour, lit; a break brass-lit; a blow landing a warm
+  spark; a hurt blood at the screen's edge; dust dust.
 
 ### 9. Type and the interface
 

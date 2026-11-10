@@ -57,27 +57,27 @@
       "lit": {"glows": true, "ramps": [], "bands": 1, "shadowTint": "#FFFFFF", "spec": [0.0, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
       "eye": {"ramps": [], "bands": 2, "shadowTint": "#A9A6B4", "spec": [0.8, 60.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
       "skin": {"ramps": [], "bands": 3, "shadowTint": "#B58F92", "spec": [0.1, 10.0], "grain": "skin", "grainScale": 5.0, "wear": 0.2},
-      "coat": {"ramps": ["rust", "ink", "umber", "leather", "earth", "ochre", "reed", "oxblood", "saffron", "slate", "iron", "steel", "stone", "bone", "moss", "verdigris", "water", "indigo", "plum"], "bands": 3, "shadowTint": "#9A93A6", "spec": [0.22, 14.0], "grain": "wool", "grainScale": 7.0, "wear": 0.4},
-      "cloth": {"ramps": ["bone", "stone", "slate", "ink", "iron", "oxblood", "ochre", "saffron", "moss", "verdigris", "indigo", "plum", "umber", "earth", "reed", "leather", "steel"], "bands": 3, "shadowTint": "#9690A8", "spec": [0.05, 8.0], "grain": "linen", "grainScale": 4.0, "wear": 0.25},
-      "leather": {"ramps": ["leather", "umber", "ink", "oxblood", "earth", "reed", "saffron"], "bands": 3, "shadowTint": "#958C9E", "spec": [0.2, 18.0], "grain": "leather", "grainScale": 4.0, "wear": 0.4},
-      "wood": {"ramps": ["umber", "earth", "ink", "stone", "leather"], "bands": 3, "shadowTint": "#928BA2", "spec": [0.1, 10.0], "grain": "wood", "grainScale": 1.5, "wear": 0.35},
-      "stone": {"ramps": ["stone", "slate", "bone", "ink", "earth"], "bands": 3, "shadowTint": "#8E8CA6", "spec": [0.08, 6.0], "grain": "stone", "grainScale": 0.7, "wear": 0.3},
-      "iron": {"ramps": ["iron", "steel", "slate", "ink"], "bands": 3, "shadowTint": "#8388A6", "spec": [0.55, 44.0], "grain": "bronze", "grainScale": 4.0, "wear": 0.3},
+      "coat": {"ramps": ["rust", "ink", "umber", "leather", "earth", "ochre", "reed", "oxblood", "saffron", "slate", "iron", "steel", "stone", "bone", "moss", "verdigris", "water", "indigo", "plum"], "bands": 3, "shadowTint": "#9A94A6", "spec": [0.22, 14.0], "grain": "wool", "grainScale": 7.0, "wear": 0.4},
+      "cloth": {"ramps": ["bone", "stone", "slate", "ink", "iron", "oxblood", "ochre", "saffron", "moss", "verdigris", "indigo", "plum", "umber", "earth", "reed", "leather", "steel"], "bands": 3, "shadowTint": "#9A96A8", "spec": [0.05, 8.0], "grain": "linen", "grainScale": 4.0, "wear": 0.25},
+      "leather": {"ramps": ["leather", "umber", "ink", "oxblood", "earth", "reed", "saffron"], "bands": 3, "shadowTint": "#958D9E", "spec": [0.2, 18.0], "grain": "leather", "grainScale": 4.0, "wear": 0.4},
+      "wood": {"ramps": ["umber", "earth", "ink", "stone", "leather"], "bands": 3, "shadowTint": "#9690A2", "spec": [0.1, 10.0], "grain": "wood", "grainScale": 1.5, "wear": 0.35},
+      "stone": {"ramps": ["stone", "slate", "bone", "ink", "earth"], "bands": 3, "shadowTint": "#9594A6", "spec": [0.08, 6.0], "grain": "stone", "grainScale": 0.7, "wear": 0.3},
+      "iron": {"ramps": ["iron", "steel", "slate", "ink"], "bands": 3, "shadowTint": "#9496A6", "spec": [0.55, 44.0], "grain": "bronze", "grainScale": 4.0, "wear": 0.3},
       "brass": {"ramps": ["brass", "ochre"], "bands": 3, "shadowTint": "#8C8494", "spec": [0.6, 48.0], "grain": "bronze", "grainScale": 4.0, "wear": 0.35},
       "bone": {"ramps": ["bone", "stone", "ink", "umber", "earth", "ochre"], "bands": 3, "shadowTint": "#A29BA8", "spec": [0.12, 12.0], "grain": "stone", "grainScale": 3.0, "wear": 0.25},
-      "glass": {"ramps": ["slate", "water", "steel", "verdigris"], "bands": 2, "shadowTint": "#8F96B8", "spec": [0.7, 56.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
-      "growth": {"ramps": ["moss", "reed", "verdigris", "earth"], "bands": 3, "shadowTint": "#8C92A8", "spec": [0.04, 8.0], "grain": "linen", "grainScale": 3.0, "wear": 0.2},
-      "earth": {"ramps": ["earth", "stone", "reed", "ink", "umber", "bone"], "bands": 3, "shadowTint": "#9089A2", "spec": [0.05, 6.0], "grain": "stone", "grainScale": 0.7, "wear": 0.3},
-      "water": {"glows": true, "ramps": ["water", "slate", "steel"], "bands": 2, "shadowTint": "#8A92B0", "spec": [0.5, 40.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
-      "ink": {"ramps": ["ink", "slate", "iron", "plum", "water"], "bands": 2, "shadowTint": "#8C8CA0", "spec": [0.0, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
-      "mixed": {"ramps": ["ink", "slate", "stone", "bone", "umber", "leather", "oxblood", "ochre", "saffron", "moss", "verdigris", "indigo", "plum", "earth", "reed", "water", "iron", "steel", "brass"], "bands": 3, "shadowTint": "#9690A8", "spec": [0.05, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0}
+      "glass": {"ramps": ["slate", "water", "steel", "verdigris"], "bands": 2, "shadowTint": "#A4A7B8", "spec": [0.7, 56.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
+      "growth": {"ramps": ["moss", "reed", "verdigris", "earth"], "bands": 3, "shadowTint": "#9699A8", "spec": [0.04, 8.0], "grain": "linen", "grainScale": 3.0, "wear": 0.2},
+      "earth": {"ramps": ["earth", "stone", "reed", "ink", "umber", "bone"], "bands": 3, "shadowTint": "#9590A2", "spec": [0.05, 6.0], "grain": "stone", "grainScale": 0.7, "wear": 0.3},
+      "water": {"glows": true, "ramps": ["water", "slate", "steel"], "bands": 2, "shadowTint": "#9DA1B0", "spec": [0.5, 40.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
+      "ink": {"ramps": ["ink", "slate", "iron", "plum", "water"], "bands": 2, "shadowTint": "#8E8EA0", "spec": [0.0, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
+      "mixed": {"ramps": ["ink", "slate", "stone", "bone", "umber", "leather", "oxblood", "ochre", "saffron", "moss", "verdigris", "indigo", "plum", "earth", "reed", "water", "iron", "steel", "brass"], "bands": 3, "shadowTint": "#9A96A8", "spec": [0.05, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0}
     }
   },
   "shading": {
     "$comment": "The cel look (the art bible, 11): light in bands with a tinted shadow side. rim is the light along a form's edge. occlusion scales the baked cavity darkening. smooth: the living are smooth-shaded and the made keep their cut edges (the kits read this).",
     "cel": true,
     "sky": true,
-    "rim": { "strength": 0.22, "color": "#D2D8EC", "power": 3.2 },
+    "rim": { "strength": 0.28, "color": "#D2D8EC", "power": 3.2 },
     "occlusion": 0.8,
     "smooth": { "living": true, "made": false }
   },
@@ -92,7 +92,7 @@
     "lamp": { "color": "#FF9A4D", "cast": "#FFB57A", "energy": 1.0 },
     "fire": { "color": "#FF8A3D", "cast": "#FFA763", "energy": 1.0 },
     "moon": { "color": "#8C9EF2", "cast": "#B3BDE6", "energy": 1.0 },
-    "window": { "color": "#FFB866", "energy": 1.0 },
+    "window": { "color": "#FFAE5C", "energy": 0.7 },
     "stain": { "cast": "#B9A6D9", "energy": 0.4, "darken": 0.38 },
     "kinds": {
       "hall": { "key": "lamp", "fill": "moon", "sky": "#040303", "ambient": "#A88A76", "ambientEnergy": 0.3, "fog": "#0D0907", "fogDensity": 0.016, "moon": 0.0 },
@@ -121,16 +121,14 @@
     "groundLight": 0.6
   },
   "effects": {
-    "$comment": "One family of shapes, in ink and light: the ring (thin, flat), the shard (a long splinter of light, laid along its travel), the puff (a soft blot of ink or dust), the slash (the blade's trail) and the word. colors: what each kind of event is drawn in; `shape` is the Shape's colour of whoever made it. Telegraphs are the telegraph red and nothing else is.",
+    "$comment": "One family of shapes, in ink and light: the ring (thin, flat), the shard (a long splinter of light, laid along its travel), the puff (a soft blot of ink or dust), the slash (the blade's trail) and the word. colors: what each kind of event is drawn in; `shape` is the Shape's colour of whoever made it. Telegraphs are the telegraph red and nothing else is. guard is a block and a parry (the moon's colour, lit); stagger a break; spark a blow landing; hurt the screen's edge when the partner is struck.",
     "colors": {
       "telegraph": "#FF3820",
       "hurt": "#C72B24",
-      "guard": "#BCC4E4",
-      "parry": "#FFD175",
+      "guard": "#A6B4F4",
       "stagger": "#FFD175",
       "spark": "#FFE0A8",
       "dust": "#786650",
-      "smoke": "#1C1815",
       "shot": "#FFE0A8",
       "text": "#F2E8D6",
       "dim": "#A89B8A"

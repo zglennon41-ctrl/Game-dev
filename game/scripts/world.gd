@@ -1597,7 +1597,7 @@ func feedback(f: Fight, events: Array) -> void:
 				floater(W + Vector3(randf_range(-0.3, 0.3), 0, 0), "%d" % int(e["damage"]), Color(1.0, 0.55, 0.2), 34, 0.6)
 			"second-heart":
 				floater(P + Vector3(0, 0.4, 0), "A SECOND HEART", Color(1.0, 0.4, 0.4), 72, 1.6)
-				flash_screen(Color(1.0, 0.2, 0.2), 0.6)
+				flash_screen(Style.fx("hurt"), 0.6)
 			"hesitates":
 				floater(W + Vector3(0, 0.8, 0), "IT HESITATES", C_TEXT, 56)
 			"quake":
@@ -1629,7 +1629,7 @@ func feedback(f: Fight, events: Array) -> void:
 				floater(P, "-%d" % int(e["damage"]), C_WINDUP, 80)
 				_player_flash = 1.0
 				_shake = float(feel["shakeOnHurt"])
-				flash_screen(Color(0.9, 0.08, 0.05), 0.55)
+				flash_screen(Style.fx("hurt"), 0.55)
 				hitstop(0.08)
 			"evade":
 				floater(P, "EVADED" if e["how"] == "dodged" else "MISSED", C_DIM, 44)
@@ -1734,11 +1734,11 @@ func feedback(f: Fight, events: Array) -> void:
 			"bar-warning":
 				floater(P + Vector3(0, 0.5, 0), String(e["bars"][0]).to_upper(), C_WINDUP, 60, 1.6)
 				floater(P, "press R again to break your Term", C_WINDUP, 40, 1.6)
-				flash_screen(Color(0.8, 0.1, 0.05), 0.25)
+				flash_screen(Style.fx("hurt"), 0.25)
 			"breach":
 				floater(P + Vector3(0, 0.8, 0), "TERM BROKEN", C_WINDUP, 110, 2.2)
 				floater(P + Vector3(0, 0.2, 0), "the Pattern is lost for good" if e["sworn"] else "the Pattern is lost for a season", C_WINDUP, 48, 2.2)
-				flash_screen(Color(0.6, 0.0, 0.0), 0.8)
+				flash_screen(Style.fx("hurt").darkened(0.25), 0.8)
 				_shake = 0.35
 			"turned":
 				floater(P, "TURNED ASIDE", C_GUARD, 56)

@@ -90,7 +90,7 @@ func check_data() -> void:
 	if not World.C_WINDUP.is_equal_approx(Style.telegraph()):
 		fail("the fight's wind-up colour is not the telegraph's")
 	# light: what the moon throws on a surface is pale; every kind of place has a warm and a cool
-	if Style.saturation(Style.light("moon")) > 0.3:
+	if Style.saturation(Style.light("moon")) > 0.24:
 		fail("the moon's cast is too blue (%.2f): a wall in moonlight would be blue paint" % Style.saturation(Style.light("moon")))
 	if not warm(Style.light("lamp")) or not warm(Style.light("fire")) or not cool(Style.light("moon")):
 		fail("the lamp and the fire must be warm and the moon cool")
@@ -129,7 +129,7 @@ func check_data() -> void:
 			continue
 		var amb := Color(zl["ambient"][0], zl["ambient"][1], zl["ambient"][2])
 		var moon := Color(zl["moonColor"][0], zl["moonColor"][1], zl["moonColor"][2]) if zl.has("moonColor") else Style.light("moon")
-		if cool(moon) and Style.saturation(moon) > 0.3:
+		if cool(moon) and Style.saturation(moon) > 0.24:
 			fail("zone %s: its moon is too blue (%.2f)" % [z["id"], Style.saturation(moon)])
 		if Style.saturation(amb) > 0.32:
 			fail("zone %s: its ambient is too coloured (%.2f)" % [z["id"], Style.saturation(amb)])
@@ -330,7 +330,7 @@ func check_places() -> void:
 			fail("%s: a place carries an ink line" % id)
 		var has_warm := false
 		var has_cool := world._moon.light_energy > 0.01 and cool(world._moon.light_color)
-		for l in world.find_children("*", "Light3D", true, false):
+		for l in world._place_root.find_children("*", "Light3D", true, false):
 			var light: Light3D = l
 			if light == world._moon or light.light_energy <= 0.01 or not light.is_visible_in_tree():
 				continue
