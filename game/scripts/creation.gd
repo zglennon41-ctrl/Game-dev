@@ -166,8 +166,7 @@ static func generate(answers: Array, blood_id := "", spark := 0) -> Dictionary:
 	return {
 		"name": "", "blood": blood_id, "shape": shape, "city": city, "discipline": discipline_of(best_w["city"] if any_city else city),
 		"weapon": best_w["id"], "seed": seed, "pattern": pattern, "body": "%s-%s" % [city, "m" if spark % 2 == 0 else "f"],
-		"look": { "headgear": true, "cape": true, "cape_color": "shape", "stature": 1.0, "hair": "crop", "beard": "none", "hair_color": "brown",
-			"sex": "m" if spark % 2 == 0 else "f", "skin": skin_of(city, spark), "build": 0.0 },
+		"look": look_of(city, spark),
 		"answers": answers.duplicate(), "spark": spark,
 		"why": { "shape": _unique(shape_why), "city": [city_why], "weapon": _unique(weapon_why.filter(func(x): return x != city_why)),
 			"form": t["why"]["effect"].get(effect, []), "trigger": t["lines"].get("trigger", ""),
@@ -178,6 +177,25 @@ static func generate(answers: Array, blood_id := "", spark := 0) -> Dictionary:
 static func skin_of(city: String, spark: int) -> String:
 	var palette: Array = Data.bodies.get(city, {}).get("palette", ["olive"])
 	return palette[(spark / 3) % palette.size()]
+
+## The look a life starts with, drawn by its spark (data/creation.json, look.start): every
+## character begins unlike the last, and all of it is the player's to change at the reveal.
+static func look_of(city: String, spark: int) -> Dictionary:
+	var st: Dictionary = Data.creation.get("look", {}).get("start", {})
+	var skin := skin_of(city, spark)
+	var hairs: Array = st.get("hair", ["crop"])
+	var cols: Array = (st.get("hairColors", ["brown"]) as Array).duplicate()
+	if (st.get("fairSkins", []) as Array).has(skin):
+		cols.append_array(st.get("fairHairColors", []))
+	var b: Array = st.get("build", [0.0, 0.0])
+	var h: Array = st.get("stature", [1.0, 1.0])
+	var rng := RandomNumberGenerator.new()
+	rng.seed = spark * 2654435761 + 97
+	return { "headgear": true, "cape": true, "cape_color": "shape", "beard": "none",
+		"sex": "m" if spark % 2 == 0 else "f", "skin": skin,
+		"hair": hairs[rng.randi() % hairs.size()], "hair_color": cols[rng.randi() % cols.size()],
+		"build": snappedf(rng.randf_range(float(b[0]), float(b[1])), 0.05),
+		"stature": snappedf(rng.randf_range(float(h[0]), float(h[1])), 0.01) }
 
 static func weapon(id: String) -> Dictionary:
 	return Data.by_id(Data.weapons, id)

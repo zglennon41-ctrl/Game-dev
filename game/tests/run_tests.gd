@@ -58,6 +58,7 @@ func _run() -> void:
 	test_look()
 	test_rest()
 	test_motion()
+	test_creator()
 	test_blood_marks()
 	test_life_features()
 	test_bots()
@@ -1690,3 +1691,123 @@ func test_motion() -> void:
 	check(lips.r < tone.r and lips.g < tone.g and lips.r > lips.g, "the lips are darker than the skin and warmer")
 	var dark := World.lip_color(Color(0.3, 0.2, 0.16))
 	check(dark.r > 0.2, "dark skin keeps lips that read")
+
+## The character creator: its stage is a place of data, a life starts with a look of its own,
+## the reveal's four leaves draw for every home, and changing the look dresses the standing
+## figure without building it again.
+func test_creator() -> void:
+	var st: Dictionary = Data.creation["stage"]
+	check(st["frames"].has("wide") and st["frames"].has("full") and st["frames"].has("half") and st["frames"].has("face"), "the stage has its four framings")
+	check(float(st["frames"]["face"]["dist"]) < float(st["frames"]["half"]["dist"]) and float(st["frames"]["half"]["dist"]) < float(st["frames"]["full"]["dist"]), "each framing stands closer than the last")
+	var L: Dictionary = Data.creation["look"]
+	var unlabelled: Array = []
+	for kind in ["hairColors", "skinTones", "builds", "statures", "sexes", "capeColors"]:
+		for id in L[kind]:
+			if not L["labels"].get(kind, {}).has(id):
+				unlabelled.append("%s/%s" % [kind, id])
+	for kind in ["hair", "beards"]:
+		for id in L[kind]:
+			if not L["labels"].get(kind, {}).has(id):
+				unlabelled.append("%s/%s" % [kind, id])
+	for home in Data.bodies:
+		var hg: Variant = Data.bodies[home].get("dress", {}).get("headgear", null)
+		if hg is Dictionary and not L["labels"].get("headgear", {}).has(String(hg.get("type", ""))):
+			unlabelled.append("headgear/%s" % String(hg.get("type", "")))
+	check(unlabelled.is_empty(), "every value of the look has a name to show (%s)" % ", ".join(unlabelled))
+	# a life starts with a look of its own, the same for the same spark
+	var a := Creation.look_of("columbia", 1234)
+	check(a == Creation.look_of("columbia", 1234), "the same spark starts with the same look")
+	var looks := {}
+	var in_data := true
+	for sp in range(1, 60):
+		var lk := Creation.look_of("lunden", sp * 7919)
+		looks["%s/%s/%.2f/%.2f" % [lk["hair"], lk["hair_color"], lk["build"], lk["stature"]]] = true
+		in_data = in_data and L["hair"].has(lk["hair"]) and L["hairColors"].has(lk["hair_color"]) and absf(float(lk["build"])) <= 1.0 and float(lk["stature"]) >= 0.9 and float(lk["stature"]) <= 1.15
+		in_data = in_data and (Data.bodies["lunden"]["palette"] as Array).has(lk["skin"])
+	check(looks.size() >= 30, "sixty sparks start with at least thirty different looks (%d)" % looks.size())
+	check(in_data, "every starting look is made of the data's values and the home's skins")
+	var dark := Creation.look_of("timbuktu", 4242)
+	check(not (L["start"]["fairHairColors"] as Array).has(dark["hair_color"]), "fair hair starts only on the fair skins")
+	# the stage
+	var w := World.new()
+	add_child(w)
+	w.set_place("stage")
+	check(w.place == "stage" and w._stage_light != null, "the creator's stage builds, with the field's light at the spot")
+	check(w.stage_spot().is_equal_approx(Vector2(st["spawn"][0], st["spawn"][1])), "the figure's spot is the data's")
+	var lights := 0
+	for c in w._place_root.get_children():
+		if c is SpotLight3D:
+			lights += 1
+	check(lights >= 2, "the stage has a key and a rim of its own (%d)" % lights)
+	# the reveal
+	var c := Creator.new()
+	add_child(c)
+	var got := { "changed": 0, "look": 0, "framed": "", "shift": 0.0, "turn": 0.0, "flare": 0.0, "cleared": 0 }
+	c.changed.connect(func(h): got["changed"] += 1; w.build_hero(h))
+	c.look_changed.connect(func(h): got["look"] += 1; w.redress(h))
+	c.framed.connect(func(k): got["framed"] = k)
+	c.shifted.connect(func(p): got["shift"] = p)
+	c.turned.connect(func(by): got["turn"] += by)
+	c.field.connect(func(_col, _k, flare): got["flare"] = maxf(got["flare"], flare))
+	c.cleared.connect(func(): got["cleared"] += 1)
+	c.begin()
+	check(got["framed"] == "wide" and got["shift"] > 0.3 and got["cleared"] == 1, "the questions stand to the right of an empty platform, framed wide")
+	c.answers = [0, 1, 2, 0, 1, 0, 1, 2, 0, 1]
+	c._reveal()
+	check(got["changed"] == 1 and got["framed"] == "full" and got["flare"] > 0.0, "the reveal builds the figure once, whole in frame, out of a flare of the field")
+	check(is_equal_approx(got["shift"], Creator.PANEL_W / 1600.0) or got["shift"] > 0.2, "the figure centres in what the panel leaves")
+	var body0: Node = w._player
+	c._look_set("hair", "braid")
+	c._look_set("skin", String(c._palette()[0]))
+	check(got["look"] == 2 and got["changed"] == 1 and w._player == body0, "a change of look dresses the standing figure; it is not built again")
+	var braid: Node3D = w._player.find_child("Hair_braid_*", true, false)
+	c.hero["look"]["headgear"] = false
+	w.redress(c.hero)
+	braid = w._player.find_child("Hair_braid_*", true, false)
+	check(braid != null and braid.visible, "the braid shows on the figure at once")
+	c.hero["look"]["cape"] = true
+	w.redress(c.hero)
+	w.redress(c.hero)
+	var skel: Skeleton3D = w._player.find_child("Skeleton3D", true, false)
+	var cloaks := 0
+	for ch in skel.get_children():
+		if String(ch.name).begins_with("feature_cape"):
+			cloaks += 1
+	check(cloaks == 1, "dressed twice, the figure still wears one cloak (%d)" % cloaks)
+	for leaf in ["body", "face", "dress", "reading"]:
+		c._set_tab(leaf)
+		check(got["framed"] == Creator.TAB_FRAMES[leaf], "the %s leaf frames the figure %s" % [leaf, Creator.TAB_FRAMES[leaf]])
+	c._set_frame("half")
+	check(got["framed"] == "half" and c.tab == "reading", "the view steps closer without turning the leaf")
+	# every home draws every leaf, hat or no hat
+	var drew := true
+	for home in Data.bodies:
+		c.hero["city"] = home
+		c.hero["look"]["skin"] = String(c._palette()[0])
+		for leaf in ["body", "face", "dress"]:
+			c.tab = leaf
+			c._draw_reveal()
+			drew = drew and c._root.get_child_count() >= 2
+	check(drew, "the leaves draw for all thirteen homes")
+	c.hero["city"] = "edo"
+	check(c._headgear_name() == "", "a home that wears nothing on the head offers no headgear")
+	c.hero["city"] = "columbia"
+	check(c._headgear_name() == "Hat", "Columbia's is named a hat")
+	# the camera's framing
+	w.portrait = true
+	w.portrait_frame = "face"
+	w.portrait_shift = 0.4
+	var f := Fight.new({ "hero": c.hero, "passive": true, "respawn": false })
+	f.p_pos = w.stage_spot()
+	for i in 90:
+		w.draw(f, 0.05, Vector2.ZERO, Vector2.ZERO)
+	var at := Vector3(f.p_pos.x, 0, f.p_pos.y)
+	check(w.camera.position.z - at.z < 1.3 and w.camera.position.y > 1.2 and w.camera.position.x > at.x, "the face framing stands close, at the head's height, the figure left of centre (%s)" % str(w.camera.position - at))
+	w.portrait_frame = "full"
+	for i in 90:
+		w.draw(f, 0.05, Vector2.ZERO, Vector2.ZERO)
+	check(w.camera.position.z - at.z > 3.0, "the whole framing stands back")
+	c._ask(0)
+	check(got["cleared"] >= 2 and got["framed"] == "wide", "answering again empties the platform")
+	c.queue_free()
+	w.queue_free()

@@ -267,3 +267,54 @@ the cohort (most bare-headed, so faces and hair show across the quad); instructo
 smith take one from their name. The hair takes the cel bands like everything else. Sheet:
 `python tools/blender/people_kit.py hair` renders every style on the Knight, bare and under
 the helm, with close-ups. Skin tone is still the texture's (one per body).
+
+## 12. The creator, restaged (2026-11-10)
+
+The character creator is the game's first screen of play, and it now stands in the same
+world, at the same level, as what follows it.
+
+**The stage.** A wayside platform on the line at night: flagstones, the line behind, a
+station wall with lit lancets and a clock, one lamp. It is built from the Academy's kit like
+any place (`data/creation.json`, `stage`: `style` and `furniture` as in `data/academy.json`),
+open on the side the camera stands. The old stage was the dungeon chamber of the Cut.
+
+**The light.** Three lights of the stage's own, placed from where the figure stands
+(`stage.lights`): a warm key from the lamp's side with a shadow, a faint cool fill, a cool
+rim from behind. They are low on purpose: the cel shader adds every light's shadow band, so
+three strong lights wash a coat to white. A face must read at the closest framing on every
+skin of every home; that is the check for any change to them.
+
+**The field.** While the questions are asked the platform is empty, and the field gathers
+where the figure will stand: a light and a soft glow in the colour of the Shapes the answers
+lean toward, stronger with each answer. At the reveal it flares and goes out, and the figure
+is standing there. (It must go out: left on, it floods the skin with the Shape's colour.)
+
+**The camera.** Four framings (`stage.frames`): wide for the questions, then whole, close
+(waist up) and face. The face framing finds the head bone, so it holds on a slight body and
+a towering one. The figure centres in whatever the words leave of the screen. The player
+turns the figure by dragging it, steps closer with the wheel, and has the same on buttons.
+The genius's mote waits out of frame at the face framing.
+
+**The words.** The questions stand in a column on the right; the platform shows on the left.
+The reveal is a panel of four leaves, a third narrower than before, with the name and the
+three ways out always in reach:
+
+| Leaf | What it holds | Framing |
+|---|---|---|
+| The Reading | blood (and the others it could be), Shape, home and weapon, technique and stance, the Seed, the Pattern, each with its "because" | whole |
+| Body | the home's cast of face (`data/bodies.json`, `brief`), masculine or feminine, build and stature on sliders, skin as swatches of the home's palette | whole |
+| Face and hair | hair style and its colour as swatches, the beard, and what the blood puts there that is not chosen | face |
+| Dress | the home's dress in a sentence (`dress.culture`), headgear and cloak on or off, the cloak's colour, the weapon in the hand | whole |
+
+Every value is shown by a name, never an id (`look.labels`). Build and stature are
+continuous between the least and greatest named values; the name beside the slider is the
+nearest. A change of look dresses the standing figure where it stands (`World.redress`);
+only a change of body, weapon or blood builds it again.
+
+**A life starts unlike the last.** The spark that picks the name now also picks the starting
+hair, its colour, the build and the stature (`look.start`), so "Another life, same answers"
+gives a different person to look at, and all of it is the player's to change.
+
+See it: `godot --path . -- --new`, or the screenshots of every leaf:
+`xvfb-run -a godot --path . -- --reveal=0,1,2,0,1,0,1,2,0,1 --shots=DIR --quit`
+(`--look=sex:f,hair:long,headgear:0` dresses the figure, `--turn=40` turns it).

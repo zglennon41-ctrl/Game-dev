@@ -945,7 +945,7 @@
     "edo-f"
   ],
   "look": {
-    "comment": "The look: what shows on the body and is chosen at creation. Hair styles and beards are pieces hung from the head bone of every body (tools/blender/people_kit.py); a cap hides under headgear, a fall hangs from under it. Colours are linear RGB. Bodies are <home>-<sex> (tools/blender/body_kit.py); build blends the lean and heavy shape keys; the skin tone tints the skin material.",
+    "comment": "The look: what shows on the body and is chosen at creation. Hair styles and beards are pieces hung from the head bone of every body (tools/blender/people_kit.py); a cap hides under headgear, a fall hangs from under it. Colours are linear RGB. Bodies are <home>-<sex> (tools/blender/body_kit.py); build blends the lean and heavy shape keys; the skin tone tints the skin material. Labels are what the creator shows for each id. Build and stature are set on a slider between the least and the greatest of the named values; the names mark where a value falls.",
     "hair": [
       "bare",
       "crop",
@@ -1055,6 +1055,102 @@
       "city": "your city's colour",
       "blood": "your blood's colour",
       "plain": "plain cloth"
+    },
+    "labels": {
+      "hair": {
+        "bare": "Shaved",
+        "crop": "Cropped",
+        "long": "Long",
+        "braid": "Braided",
+        "knot": "Knotted",
+        "tail": "Tied back"
+      },
+      "beards": {
+        "none": "None",
+        "short": "Short",
+        "full": "Full"
+      },
+      "hairColors": {
+        "black": "Black",
+        "brown": "Brown",
+        "chestnut": "Chestnut",
+        "fair": "Fair",
+        "red": "Red",
+        "grey": "Grey",
+        "white": "White"
+      },
+      "skinTones": {
+        "pale": "Pale",
+        "fair": "Fair",
+        "olive": "Olive",
+        "tan": "Tan",
+        "brown": "Brown",
+        "deep": "Deep",
+        "dark": "Dark"
+      },
+      "builds": {
+        "lean": "Lean",
+        "spare": "Spare",
+        "fit": "Fit",
+        "strong": "Strong",
+        "heavy": "Heavy"
+      },
+      "statures": {
+        "slight": "Slight",
+        "middling": "Middling",
+        "tall": "Tall",
+        "towering": "Towering"
+      },
+      "sexes": {
+        "m": "Masculine",
+        "f": "Feminine"
+      },
+      "capeColors": {
+        "shape": "Your Shape's",
+        "city": "Your home's",
+        "blood": "Your blood's",
+        "plain": "Plain cloth"
+      },
+      "headgear": {
+        "hat": "Hat",
+        "cap": "Cap",
+        "helm": "Helm",
+        "headband": "Headband",
+        "turban": "Turban",
+        "scholarcap": "Scholar's cap",
+        "furhat": "Fur hat"
+      }
+    },
+    "start": {
+      "comment": "What a new life starts with, drawn by its spark; all of it is the player's to change. Fair and red hair start only on the fair skins.",
+      "hair": [
+        "crop",
+        "long",
+        "braid",
+        "knot",
+        "tail"
+      ],
+      "hairColors": [
+        "black",
+        "brown",
+        "chestnut"
+      ],
+      "fairSkins": [
+        "pale",
+        "fair"
+      ],
+      "fairHairColors": [
+        "fair",
+        "red"
+      ],
+      "build": [
+        -0.4,
+        0.45
+      ],
+      "stature": [
+        0.96,
+        1.07
+      ]
     }
   },
   "names": {
@@ -1153,5 +1249,194 @@
   "spark": {
     "$comment": "Every new character gets a spark: a hidden random number that nudges the answers' leans, so the same answers can make a different person. jitter is how far each lean can move (0.25 = up to a quarter either way); 0 turns the spark off.",
     "jitter": 0.3
+  },
+  "stage": {
+    "comment": "Where the character creator is set: a wayside platform on the line at night, built from the Academy's kit like a place of data/academy.json (style, furniture). The south side is open: the camera stands there. spawn is where the figure stands, the line behind it. lights are placed from the spawn (from: x, height, z; aim: the height they point at): a warm key from the lamp's side, a cool fill, a cool rim from behind, so a face reads. frames are the camera's framings: dist from the figure, look (the height it looks at, per unit of stature; with head true, above the neck), rise (how far above that the camera sits, per unit of distance).",
+    "name": "A platform on the line",
+    "size": [
+      30,
+      14
+    ],
+    "doors": [],
+    "spawn": [
+      0,
+      3.3
+    ],
+    "style": {
+      "kind": "court",
+      "floor": "floor_platform",
+      "ambient": 0.22,
+      "lamps": 0.5,
+      "track": {
+        "through": true
+      },
+      "sides": {
+        "n": {
+          "bays": [
+            "station_wall",
+            "station_bench",
+            "station_wall",
+            "station_clock",
+            "station_wall",
+            "station_bench",
+            "station_wall",
+            "station_wall"
+          ]
+        },
+        "s": {
+          "open": true
+        },
+        "w": {
+          "bays": [
+            "station_wall"
+          ],
+          "features": [
+            {
+              "piece": "line_arch",
+              "at": 0
+            }
+          ]
+        },
+        "e": {
+          "bays": [
+            "station_wall"
+          ],
+          "features": [
+            {
+              "piece": "line_arch",
+              "at": 0
+            }
+          ]
+        }
+      },
+      "moon": 0.3
+    },
+    "furniture": [
+      {
+        "piece": "lamp_post",
+        "at": [
+          -3.3,
+          2.0
+        ]
+      },
+      {
+        "piece": "luggage",
+        "at": [
+          -5.4,
+          3.2
+        ],
+        "rot": 25
+      },
+      {
+        "piece": "signal_lamp",
+        "at": [
+          7.5,
+          -2.9
+        ],
+        "rot": 90
+      },
+      {
+        "piece": "lamp_post",
+        "at": [
+          6.0,
+          -5.9
+        ]
+      },
+      {
+        "piece": "lamp_post",
+        "at": [
+          -8.0,
+          -5.9
+        ]
+      },
+      {
+        "piece": "barrel",
+        "at": [
+          -9.5,
+          -6.6
+        ]
+      },
+      {
+        "piece": "luggage",
+        "at": [
+          9.0,
+          -6.3
+        ],
+        "rot": 200
+      }
+    ],
+    "lights": {
+      "key": {
+        "from": [
+          -1.9,
+          2.9,
+          2.6
+        ],
+        "aim": 1.45,
+        "color": [
+          1.0,
+          0.93,
+          0.82
+        ],
+        "energy": 0.42,
+        "angle": 30,
+        "range": 9,
+        "shadow": true
+      },
+      "fill": {
+        "from": [
+          2.4,
+          1.3,
+          2.8
+        ],
+        "color": [
+          0.5,
+          0.62,
+          0.95
+        ],
+        "energy": 0.08,
+        "range": 7,
+        "spot": false
+      },
+      "rim": {
+        "from": [
+          1.5,
+          2.7,
+          -2.6
+        ],
+        "aim": 1.5,
+        "color": [
+          0.62,
+          0.76,
+          1.0
+        ],
+        "energy": 0.5,
+        "angle": 32,
+        "range": 9
+      }
+    },
+    "frames": {
+      "wide": {
+        "dist": 6.6,
+        "look": 1.3,
+        "rise": 0.1
+      },
+      "full": {
+        "dist": 3.7,
+        "look": 0.97,
+        "rise": 0.06
+      },
+      "half": {
+        "dist": 2.2,
+        "look": 1.36,
+        "rise": 0.03
+      },
+      "face": {
+        "dist": 0.84,
+        "look": 0.125,
+        "rise": 0.0,
+        "head": true
+      }
+    }
   }
 }

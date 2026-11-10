@@ -264,3 +264,12 @@ played the arc); barks stay as floating text. Still to be played rather than dec
     (one bite in flight), bites for 0.6, and goes for whoever is nearest; elites are guarded
     (a third of damage lands) until broken; `npm run balance:game` prints the tables that
     set these. The Green's packs are two; Harper's Cut's and the river's up to three.
+71. **The creator's stage and what the look offers** (mine, 2026-11-10; `docs/art-bible.md`
+    §12): (a) the creator is set on a wayside platform on the line at night, not in a named
+    place of the story; should it be the character's own home (a stage per city) once the
+    cities have kits? (b) build and stature are sliders between the named ends, where they
+    were five and four steps; (c) a new life starts with hair, hair colour, build and
+    stature drawn by its spark (`data/creation.json`, `look.start`), fair and red hair only
+    on the fair skins to start with, anything by choice; (d) the face is still the home's
+    (one per home and sex): the creator says so on the Body leaf rather than offering faces
+    it does not have. Choosing among several faces per home is the next step if wanted.

@@ -24,6 +24,8 @@ var show_wolf := true
 var portrait := false   # the character creator: the camera faces the character
 var portrait_side := 1.25   # where the character stands in the portrait: + left of the screen, - right
 var portrait_dist := 3.6
+var portrait_frame := ""    # the creator's framing: wide, full, half or face (data/creation.json, stage.frames); "" is the title's
+var portrait_shift := 0.0   # the part of the screen's width a panel covers on the right: the figure centres in what is left
 var cine := false            # a scene holds the camera (the rite)
 var cine_pos := Vector3.ZERO
 var cine_look := Vector3.ZERO
@@ -504,6 +506,7 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 	if skel:
 		for a in skel.get_children():
 			if a is BoneAttachment3D and String(a.name).begins_with("feature_"):
+				skel.remove_child(a)
 				a.queue_free()
 		for fid in feats:
 			var f: Dictionary = Data.people_features.get(fid, {})
@@ -1701,6 +1704,7 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 	var tint := _vig_tint if _vig_tint.a > pulse else Color(0.8, 0.05, 0.05, pulse)
 	(_vignette.material as ShaderMaterial).set_shader_parameter("tint", tint)
 	_update_camera(dt, cam_input, f)
+	_update_stage(dt)
 	_update_genius(f, dt)
 	_update_figures(f, dt)
 	_update_allies(f, dt)
@@ -1720,6 +1724,23 @@ func _update_camera(dt: float, cam_input: Vector2, f: Fight) -> void:
 		var jit := Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)) * _shake
 		camera.position = _cam_pos + jit
 		camera.look_at(_cam_look + jit * 0.4, Vector3.UP)
+		return
+	if portrait and portrait_frame != "":
+		# The creator's stage: a framing by name, the figure centred in what the panel leaves.
+		var fr: Dictionary = Data.creation.get("stage", {}).get("frames", {}).get(portrait_frame, { "dist": 4.3, "look": 1.02, "rise": 0.1 })
+		var sc := _player.scale.y if _player else 1.0
+		var dist := float(fr["dist"])
+		var look_y := float(fr["look"]) * sc
+		if fr.get("head", false) and _p_skel != null and _head_bone >= 0 and _p_skel.is_inside_tree():
+			look_y = (_p_skel.global_transform * _p_skel.get_bone_global_pose(_head_bone).origin).y - p.y + float(fr["look"]) * sc
+		var vp := get_viewport().get_visible_rect().size
+		var side := portrait_shift * dist * tan(deg_to_rad(camera.fov) / 2.0) * (vp.x / maxf(1.0, vp.y))
+		var k3 := 1.0 - exp(-dt * 3.2)
+		var sway3 := Vector3(sin(_clock * 0.23) * 0.05, sin(_clock * 0.31) * 0.018, 0) * dist
+		_cam_pos = _cam_pos.lerp(p + Vector3(side, look_y + float(fr.get("rise", 0.0)) * dist, dist) + sway3, k3)
+		_cam_look = _cam_look.lerp(p + Vector3(side, look_y, 0), k3)
+		camera.position = _cam_pos
+		camera.look_at(_cam_look, Vector3.UP)
 		return
 	if portrait:
 		# Face the character; leave room on the right for the reveal.
@@ -2100,7 +2121,8 @@ func genius_react(kind: String) -> void:
 		"stance": _g_pulse = maxf(_g_pulse, 0.6)
 
 func _update_genius(f: Fight, dt: float) -> void:
-	var show := genius_visible and _player != null and _p_skel != null and _head_bone >= 0
+	# (in the creator's closest framing the mote would cross the face: it waits out of frame)
+	var show := genius_visible and _player != null and _p_skel != null and _head_bone >= 0 and not (portrait and portrait_frame == "face")
 	_genius.visible = show
 	_g_trail.emitting = show
 	if not show:
@@ -2189,10 +2211,112 @@ func set_place(id: String, spec: Dictionary = {}) -> void:
 		_env.ambient_light_color = Color(0.5, 0.44, 0.48)
 		_env.fog_density = 0.022
 		_moon.light_energy = 0.28
+	elif id == "stage":
+		_build_stage()
 	else:
 		_build_academy_place(spec if not spec.is_empty() else Data.academy["places"][id])
 	_motes.emission_box_extents = Vector3(arena.x / 2.0, 1.8, arena.y / 2.0)
 	_motes.restart()
+
+# --- The creator's stage: a platform on the line, at night (data/creation.json, stage) ------
+
+var _stage_light: OmniLight3D = null
+var _stage_glow: MeshInstance3D = null
+var _stage_k := 0.0
+var _stage_flare := 0.0
+
+## Where the figure stands on the stage.
+func stage_spot() -> Vector2:
+	var sp: Array = Data.creation.get("stage", {}).get("spawn", [0, 0])
+	return Vector2(float(sp[0]), float(sp[1]))
+
+## The stage of the character creator, built from the Academy's kit: a wayside platform under a
+## lamp, the line behind. Three lights of its own make a face read: a warm key from the lamp's
+## side, a cool fill, a cool rim from behind. The field gathers where the figure will stand.
+func _build_stage() -> void:
+	var spec: Dictionary = Data.creation["stage"]
+	_build_academy_place(spec)
+	var at := _v3(stage_spot())
+	var L: Dictionary = spec.get("lights", {})
+	for id in L:
+		var d: Dictionary = L[id]
+		var from := at + Vector3(d["from"][0], d["from"][1], d["from"][2])
+		var c: Array = d["color"]
+		var light: Light3D
+		if d.get("spot", true):
+			var sl := SpotLight3D.new()
+			sl.spot_range = float(d.get("range", 9.0))
+			sl.spot_angle = float(d.get("angle", 34.0))
+			sl.spot_attenuation = 0.8
+			sl.spot_angle_attenuation = 0.7
+			light = sl
+		else:
+			var ol := OmniLight3D.new()
+			ol.omni_range = float(d.get("range", 7.0))
+			light = ol
+		light.light_color = Color(c[0], c[1], c[2])
+		light.light_energy = float(d["energy"])
+		light.shadow_enabled = bool(d.get("shadow", false))
+		light.light_specular = 0.4
+		_place_root.add_child(light)
+		light.position = from
+		if light is SpotLight3D:
+			light.look_at(at + Vector3(0, float(d.get("aim", 1.3)), 0), Vector3.UP)
+	# the field: a light and a soft glow at the spot, in the colour the answers lean
+	_stage_light = OmniLight3D.new()
+	_stage_light.omni_range = 5.5
+	_stage_light.omni_attenuation = 1.3
+	_stage_light.light_energy = 0.0
+	_stage_light.position = at + Vector3(0, 0.9, 0)
+	_place_root.add_child(_stage_light)
+	_stage_glow = MeshInstance3D.new()
+	var q := QuadMesh.new()
+	q.size = Vector2(3.4, 3.4)
+	_stage_glow.mesh = q
+	var gm := _shader_mat(GLOW)
+	gm.set_shader_parameter("falloff", 2.6)
+	gm.set_shader_parameter("strength", 0.0)
+	_stage_glow.material_override = gm
+	_stage_glow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_stage_glow.position = at + Vector3(0, 1.0, 0)
+	_place_root.add_child(_stage_glow)
+	_stage_k = 0.0
+	_stage_flare = 0.0
+
+## The field at the spot: its colour, how far it has gathered (0 to 1), and a flare when the
+## figure steps out of it.
+func stage_field(col: Color, k: float, flare := 0.0) -> void:
+	if _stage_light == null or not is_instance_valid(_stage_light):
+		return
+	_stage_light.light_color = col
+	(_stage_glow.material_override as ShaderMaterial).set_shader_parameter("tint", col)
+	_stage_k = k
+	if flare > 0.0:
+		_stage_flare = flare
+		burst(_stage_light.global_position, col.lightened(0.3), 46, 3.4)
+
+func _update_stage(dt: float) -> void:
+	if place != "stage" or _stage_light == null or not is_instance_valid(_stage_light):
+		return
+	_stage_flare = maxf(0.0, _stage_flare - dt * 1.4)
+	var breathe := 0.9 + 0.1 * sin(_clock * 1.7)
+	var want := 2.2 * _stage_k * breathe + 5.0 * _stage_flare
+	_stage_light.light_energy = lerpf(_stage_light.light_energy, want, 1.0 - exp(-dt * 3.0))
+	var gm := _stage_glow.material_override as ShaderMaterial
+	var g: float = gm.get_shader_parameter("strength")
+	gm.set_shader_parameter("strength", lerpf(g, 0.55 * _stage_k * breathe + 0.6 * _stage_flare, 1.0 - exp(-dt * 3.0)))
+
+## The look changed and the body did not: dress the standing figure again.
+func redress(hero: Dictionary) -> void:
+	if _player:
+		dress(_player, hero.get("look", {}), hero)
+
+## Show or hide the standing figure and the mote of its genius (the stage waits empty while
+## the questions are asked).
+func show_figure(on: bool) -> void:
+	if _player:
+		_player.visible = on
+	genius_visible = on
 
 ## A place of the Academy: a floor, walls of the fortress with an arch at every door, torches,
 ## and the props that say what the place is for. Evening at the Thaw: a deep blue sky.
@@ -2423,6 +2547,8 @@ func _build_kit_place(spec: Dictionary) -> void:
 	var sides: Dictionary = style.get("sides", {})
 	for side in ["n", "s", "w", "e"]:
 		var ss: Dictionary = sides.get(side, {})
+		if ss.get("open", false):
+			continue   # no wall on this side: the creator's stage is seen from here
 		var along_x: bool = side in ["n", "s"]
 		var length := W if along_x else D
 		var fixed := (-D / 2.0 if side == "n" else D / 2.0) if along_x else (-W / 2.0 if side == "w" else W / 2.0)
@@ -2487,9 +2613,13 @@ func _build_kit_place(spec: Dictionary) -> void:
 			for sz in [-1, 1]:
 				_kit_piece("platform_edge", Vector3(tx, 0.06, sz * 1.9), 0.0 if sz > 0 else 180.0)
 			tx += 4.0
-		_rails(W / 2.0 + 1.0, from + 0.6)
-		_kit_piece("buffer_stop", Vector3(from + 0.4, 0, 0), 0.0)
-		obstacles.append(Vector3(from + 0.2, 0, 1.2))
+		if style["track"].get("through", false):
+			# the line runs on through both ends
+			_rails(W / 2.0 + 1.0)
+		else:
+			_rails(W / 2.0 + 1.0, from + 0.6)
+			_kit_piece("buffer_stop", Vector3(from + 0.4, 0, 0), 0.0)
+			obstacles.append(Vector3(from + 0.2, 0, 1.2))
 	# the furniture
 	for f in spec.get("furniture", []):
 		var at := Vector3(float(f["at"][0]), float(f.get("y", 0.0)), float(f["at"][1]))
@@ -2538,7 +2668,7 @@ func _build_kit_place(spec: Dictionary) -> void:
 		_env.ambient_light_energy = _ambient_lit
 		_env.fog_light_color = Color(0.05, 0.05, 0.085)
 		_env.fog_density = 0.006
-		_moon.light_energy = 0.5
+		_moon.light_energy = float(style.get("moon", 0.5))
 		_sky_dome = MeshInstance3D.new()
 		var sm := SphereMesh.new()
 		sm.radius = 260.0

@@ -64,6 +64,12 @@ func _ready() -> void:
 	add_child(page)
 	page.closed.connect(func(): if mode == "academy" and not _args.has("bot"): Input.mouse_mode = Input.MOUSE_MODE_CAPTURED)
 	creator.changed.connect(_preview_hero)
+	creator.look_changed.connect(func(h: Dictionary): world.redress(h))
+	creator.cleared.connect(func(): world.show_figure(false))
+	creator.framed.connect(func(kind: String): world.portrait_frame = kind)
+	creator.shifted.connect(func(part: float): world.portrait_shift = part)
+	creator.turned.connect(func(by: float): if preview: preview.p_facing += by)
+	creator.field.connect(func(col: Color, k: float, flare: float): world.stage_field(col, k, flare))
 	creator.finished.connect(_hero_made)
 	creator.cancelled.connect(func(): creator.visible = false; menu())
 	creator.clicked.connect(func(): sfx.play("ui-take", 1.0, -6.0))
@@ -108,16 +114,39 @@ func _ready() -> void:
 				elif parts.size() == 2:
 					creator.hero["look"][parts[0]] = (parts[1] == "1") if parts[0] in ["headgear", "cape"] else (float(parts[1]) if parts[0] in ["stature", "build"] else parts[1])
 			creator._reveal()
-		await get_tree().create_timer(1.2).timeout
-		_shot("reveal")
+			world.redress(creator.hero)
+		# --turn=DEGREES turns the figure; every leaf of the reveal is shot in its own framing.
+		if _args.has("turn"):
+			preview.p_facing += deg_to_rad(float(_args["turn"]))
+		await get_tree().create_timer(1.6).timeout
+		await _shot("reveal")
+		for leaf in ["body", "face", "dress"]:
+			creator._set_tab(leaf)
+			await get_tree().create_timer(1.3).timeout
+			await _shot("reveal-" + leaf)
+		creator._set_tab("reading")
+		creator._set_frame("half")
+		await get_tree().create_timer(1.3).timeout
+		await _shot("reveal-close")
+		if _args.has("leaves"):
+			get_tree().quit()
+			return
 		await get_tree().create_timer(0.3).timeout
 		creator._choose_blood()
 		await get_tree().create_timer(0.4).timeout
-		_shot("bloods")
+		await _shot("bloods")
 		await get_tree().create_timer(0.3).timeout
+		creator._intro()
+		await get_tree().create_timer(1.6).timeout
+		await _shot("intro")
+		creator.answers = ra.slice(0, 2)
 		creator._ask(2)
-		await get_tree().create_timer(0.4).timeout
-		_shot("question")
+		await get_tree().create_timer(1.4).timeout
+		await _shot("question")
+		creator.answers = ra.slice(0, 9)
+		creator._ask(9)
+		await get_tree().create_timer(1.4).timeout
+		await _shot("question-last")
 		await get_tree().create_timer(0.3).timeout
 		get_tree().quit()
 		return
@@ -308,6 +337,7 @@ func menu() -> void:
 	var saved := Settings.hero()
 	# The title stands over the chamber: the last hero made, in the moonlight, the genius circling.
 	var h: Dictionary = saved if not saved.is_empty() else Fight.default_hero()
+	world.portrait_frame = ""
 	_preview_hero(h)
 	world.portrait_side = -2.0
 	world.portrait_dist = 5.6
@@ -331,21 +361,29 @@ func new_character() -> void:
 	hud.hide_screen()
 	hud.play_ui.visible = false
 	sfx.start_ambience()
-	preview = null
+	# The creator's stage: a platform on the line at night, empty until the answers are read.
+	world.set_place("stage")
+	world.portrait_frame = "wide"
+	_preview_hero(Fight.default_hero())
+	world.show_figure(false)
+	world.snap_camera(preview)
 	creator.begin()
 
-## The reveal changed: dress the character standing in the chamber.
+## The reveal changed: build the character where it stands (the creator's stage, or the
+## chamber behind the title), keeping the way it was turned.
 func _preview_hero(h: Dictionary) -> void:
+	var facing := preview.p_facing if (preview and mode == "creator") else PI / 2.0
 	world.build_hero(h)
 	preview = Fight.new({ "hero": h, "passive": true, "respawn": false })
 	preview.w_state = "absent"
-	preview.p_pos = Vector2.ZERO
-	preview.p_facing = PI / 2.0
+	preview.p_pos = world.stage_spot() if world.place == "stage" else Vector2.ZERO
+	preview.p_facing = facing
+	preview.p_lock = false   # standing, not aiming: a gun or a crossbow rests in the hand
 	world.show_wolf = false
 	world.portrait = true
 	world.portrait_side = 1.25
 	world.portrait_dist = 4.4
-	world.genius_visible = true
+	world.show_figure(true)
 
 func _hero_made(h: Dictionary) -> void:
 	hero = h
@@ -373,6 +411,8 @@ func _card(lines: Array, next: Callable) -> void:
 		next.call_deferred()
 
 func _start_prologue() -> void:
+	world.set_place("cut")
+	world.portrait_frame = ""
 	fight = Fight.new({ "hero": hero, "beast": "cut-wolf", "seed": randi(), "respawn": false, "mercy": true,
 		"allow_breach": false, "beast_health": 220 })
 	world.portrait = false

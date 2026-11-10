@@ -405,6 +405,14 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   Design calls made on the way and left for the owner: the harrier, the stooping kith and
   the chord as drawn; the Academy's layout; whether the small kith should keep realistic
   faces.
+  Then (2026-11-10): "expand the genii possible forms and improve the potential for unique
+  customization; also review the character creator to reflect the new level and tone of
+  the design." The creator is restaged (`docs/art-bible.md` §12): a platform on the line
+  at night built from the Academy's kit, the field gathering where the figure will stand,
+  portrait lights and four framings down to the face, the figure turned by hand, and the
+  reveal as four leaves (the Reading, body, face and hair, dress) with swatches, sliders
+  and names for every value. A life now starts with a look drawn by its spark. Calls left
+  for the owner: `docs/decisions-needed.md` 71.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.

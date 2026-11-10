@@ -1,13 +1,23 @@
 ## The character creator: questions about the life before the field woke, then the reveal of
-## who those answers made. The blood is suggested and confirmed (or another is chosen); the
-## rest is read from the answers, each with its reason. Name and body are the player's.
+## who those answers made. It is set on a platform on the line at night (data/creation.json,
+## stage): the words stand on the right, the platform shows on the left, and the field gathers
+## there as the answers come. At the reveal the figure steps out of it, and the right is a
+## panel of four leaves: the Reading (blood, Shape, home, weapon, the Seed, the Pattern, each
+## with its reason), the body, the face and hair, and the dress. The blood is suggested and
+## confirmed (or another is chosen); the name and the look are the player's.
 class_name Creator
 extends CanvasLayer
 
 signal finished(hero: Dictionary)
 signal cancelled
-signal clicked                     # a button was pressed: a soft sound
-signal changed(hero: Dictionary)   # the reveal changed: the world redraws the character
+signal clicked                          # a button was pressed: a soft sound
+signal changed(hero: Dictionary)        # who the answers made changed: the world builds the character again
+signal look_changed(hero: Dictionary)   # only the look changed: the world dresses the standing figure again
+signal cleared                          # back to the questions: the platform stands empty
+signal framed(kind: String)             # the camera's framing: wide, full, half or face
+signal shifted(part: float)             # the part of the screen's width the words cover, on the right
+signal turned(by: float)                # the figure is turned, in radians
+signal field(col: Color, k: float, flare: float)   # the field at the spot: colour, how far gathered, a flare
 
 const BG := Color(0.03, 0.025, 0.025, 0.86)
 const PANEL := Color(0.06, 0.05, 0.045, 0.94)
@@ -15,16 +25,25 @@ const FG := Color(0.94, 0.9, 0.83)
 const DIM := Color(0.62, 0.58, 0.52)
 const GOLD := Color(1.0, 0.8, 0.35)
 const EDGE := Color(0.32, 0.27, 0.21)
+const PANEL_W := 640.0      # the reveal's panel
+const COL_W := 700.0        # the column of the questions
+const COL_MARGIN := 64.0
+const TABS := [["reading", "The Reading"], ["body", "Body"], ["face", "Face and hair"], ["dress", "Dress"]]
+const TAB_FRAMES := { "reading": "full", "body": "full", "face": "face", "dress": "full" }
+const FRAMES := [["full", "Whole"], ["half", "Close"], ["face", "Face"]]
 
 var answers: Array = []
 var hero: Dictionary = {}
 var spark := 1                # this character's spark: nudges the leans, picks the name
+var tab := "reading"          # the leaf of the reveal that is open
+var frame := "full"           # the camera's framing at the reveal
 var _field_col := Color(0.6, 0.9, 0.7)
 var _field_k := 0.0
 var blood_choice := ""
 var _q := 0
 var _root := Control.new()
 var _bg := ColorRect.new()
+var _scroll_keep := 0
 
 func _ready() -> void:
 	layer = 15
@@ -56,7 +75,7 @@ func _field_now() -> void:
 		total += w
 	if total > 0.0:
 		_field_col = Color(c.r / total, c.g / total, c.b / total)
-	_field_k = clampf(float(answers.size()) / float(Data.creation["questions"].size()), 0.0, 1.0)
+	_field_k = clampf(0.12 + 0.88 * float(answers.size()) / float(Data.creation["questions"].size()), 0.0, 1.0)
 
 func _clear() -> void:
 	for c in _root.get_children():
@@ -68,11 +87,14 @@ func _clear() -> void:
 func _intro() -> void:
 	_screen = "other"
 	_clear()
-	_backdrop()
-	var box := _centered(760)
+	_backdrop(COL_W + COL_MARGIN * 2.0)
+	_stage("wide", COL_W + COL_MARGIN * 2.0)
+	cleared.emit()
+	var box := _column(COL_W)
 	_text(box, "WILDLINE  ·  THE MAKING OF A LIFE", 14, Style.BRASS, "title_light")
 	_text(box, "Before the Field", 52, FG, "title")
 	box.add_child(Style.rule(420))
+	_text(box, "A platform on the line, at night. Nobody is standing on it yet.", 17, DIM)
 	_text(box, "Ten thousand years ago, the will of every living thing became a force in the world. It still wakes in every child, at the edge of growing up, and settles into a Shape.\n\nYours has not woken yet. Before it does, tell us who you were.", 19, FG)
 	_text(box, "There are no right answers. Your answers lean your blood, your Shape, your weapon, what will stand beside you, and the Terms you would accept for power. You will see all of it, and why, before anything is final.", 15, DIM)
 	_button(box, "Begin", func(): _ask(0), true)
@@ -86,10 +108,12 @@ func _ask(i: int, all_shown := false) -> void:
 	_screen = "other"
 	_q = i
 	_clear()
-	_backdrop()
+	_backdrop(COL_W + COL_MARGIN * 2.0)
+	_stage("wide", COL_W + COL_MARGIN * 2.0)
+	cleared.emit()
 	var qs: Array = Data.creation["questions"]
 	var q: Dictionary = qs[i]
-	var box := _centered(860)
+	var box := _column(COL_W)
 	box.add_child(_progress(i, qs.size()))
 	_text(box, q["ask"], 34, FG, "body")
 	box.add_child(Style.rule(300, Style.BRASS_DIM))
@@ -110,7 +134,16 @@ func _ask(i: int, all_shown := false) -> void:
 	var grid := GridContainer.new()
 	grid.columns = 1
 	grid.add_theme_constant_override("v_separation", 8)
-	box.add_child(grid)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if shown.size() > 6:
+		# every answer at once is more than the screen holds: they scroll
+		var sc := ScrollContainer.new()
+		sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		sc.custom_minimum_size = Vector2(0, 560)
+		box.add_child(sc)
+		sc.add_child(grid)
+	else:
+		box.add_child(grid)
 	var numerals := ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII"]
 	for n in shown.size():
 		var ai: int = shown[n]
@@ -266,7 +299,10 @@ var _screen := ""
 
 # --- The reveal --------------------------------------------------------------------
 
+## Read the answers into a character (keeping the name, the look and the weapon the player has
+## already set), stand it on the platform, and open the panel.
 func _reveal() -> void:
+	var first := _screen != "reveal"
 	var keep_name: String = hero.get("name", "")
 	var keep_body: String = hero.get("body_override", "")
 	var keep_weapon: String = hero.get("weapon_override", "")
@@ -284,13 +320,63 @@ func _reveal() -> void:
 	if keep_name == "":
 		keep_name = Creation.name_for(hero["city"], spark)
 	hero["name"] = keep_name
+	if not hero.has("look"):
+		hero["look"] = { "headgear": true, "cape": true, "cape_color": "shape" }
+	# a skin of another home's palette does not follow the character to a new home
+	var palette: Array = _palette()
+	if not palette.is_empty() and not palette.has(String(hero["look"].get("skin", ""))):
+		hero["look"]["skin"] = Creation.skin_of(hero["city"], spark)
 	changed.emit(hero)
+	if first and keep_look.is_empty():
+		tab = "reading"
+		frame = "full"
+	# the field settles into the Shape's colour; the figure steps out of it
+	_field_col = World.SHAPE_COLORS.get(hero["shape"], _field_col)
+	_field_k = 0.0
+	field.emit(_field_col, 0.0, 1.0 if first else 0.0)
+	_draw_reveal(first)
+
+## The home's skin tones (data/bodies.json); every tone if the home names none.
+func _palette() -> Array:
+	return Data.bodies.get(hero.get("city", ""), {}).get("palette", Data.creation.get("look", {}).get("skinTones", {}).keys())
+
+func _home() -> Dictionary:
+	return Data.bodies.get(hero.get("city", ""), {})
+
+## What the creator calls a value of the look (data/creation.json, look.labels).
+func _label(kind: String, id: String) -> String:
+	return String(Data.creation.get("look", {}).get("labels", {}).get(kind, {}).get(id, id.capitalize()))
+
+## The look changed: the standing figure is dressed again, and the panel drawn again.
+func _look_set(key: String, value: Variant) -> void:
+	hero["look"][key] = value
+	look_changed.emit(hero)
+	_draw_reveal()
+
+func _set_tab(id: String) -> void:
+	tab = id
+	frame = TAB_FRAMES.get(id, "full")
+	_scroll_keep = 0
+	_draw_reveal()
+
+func _set_frame(id: String) -> void:
+	frame = id
+	_draw_reveal()
+
+## The reveal, drawn: the figure on the left with the controls of the view, the panel on the right.
+func _draw_reveal(first := false) -> void:
+	for c in _root.get_children():
+		if c is PanelContainer:
+			var sc: ScrollContainer = c.find_child("Leaf", true, false)
+			if sc and not first:
+				_scroll_keep = sc.scroll_vertical
 	_clear()
-	# The left of the screen is the character, standing in the world; the reveal is on the right.
+	_stage(frame, PANEL_W)
+	_view_controls()
 	var panel := PanelContainer.new()
 	panel.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
-	panel.offset_left = -820
-	var ps := Style.plate(Color(0.04, 0.034, 0.03, 0.93), Style.BRASS_DIM, 1, 26, 0)
+	panel.offset_left = -PANEL_W
+	var ps := Style.plate(Color(0.04, 0.034, 0.03, 0.95), Style.BRASS_DIM, 1, 26, 0)
 	ps.border_width_top = 0
 	ps.border_width_bottom = 0
 	ps.border_width_right = 0
@@ -298,33 +384,157 @@ func _reveal() -> void:
 	ps.border_color = Style.BRASS
 	ps.shadow_size = 40
 	ps.shadow_color = Color(0, 0, 0, 0.6)
+	ps.content_margin_top = 22
+	ps.content_margin_bottom = 20
 	panel.add_theme_stylebox_override("panel", ps)
 	_root.add_child(panel)
-	var scroll := ScrollContainer.new()
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	panel.add_child(scroll)
-	var v := VBoxContainer.new()
-	v.custom_minimum_size = Vector2(780, 0)
-	v.add_theme_constant_override("separation", 6)
-	scroll.add_child(v)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 8)
+	panel.add_child(col)
 
-	_text(v, "WHO YOUR ANSWERS MADE", 14, Style.BRASS, "title_light")
-	var title := _text(v, hero["name"] if hero["name"] != "" else "Unnamed", 44, FG, "title")
-	v.add_child(Style.rule(380))
-	# Name.
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
-	v.add_child(row)
-	_text(row, "Name", 17, DIM)
+	# The head of the panel: whose it is.
+	_text(col, "WHO YOUR ANSWERS MADE", 13, Style.BRASS, "title_light")
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override("separation", 10)
+	col.add_child(name_row)
 	var name_edit := LineEdit.new()
 	name_edit.text = hero["name"]
-	name_edit.custom_minimum_size = Vector2(320, 0)
+	name_edit.placeholder_text = "Name"
 	name_edit.max_length = 24
-	name_edit.add_theme_font_size_override("font_size", 18)
+	name_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_edit.add_theme_font_override("font", Style.font("title"))
+	name_edit.add_theme_font_size_override("font_size", 38)
+	name_edit.add_theme_color_override("font_color", FG)
+	name_edit.add_theme_color_override("font_placeholder_color", Style.FAINT)
+	for st in [["normal", Style.BRASS_DIM], ["focus", Style.BRASS_HI]]:
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0, 0, 0, 0)
+		sb.border_width_bottom = 1
+		sb.border_color = st[1]
+		sb.content_margin_bottom = 4
+		sb.content_margin_left = 0
+		name_edit.add_theme_stylebox_override(st[0], sb)
 	name_edit.text_changed.connect(func(t): hero["name"] = t)
-	row.add_child(name_edit)
+	name_row.add_child(name_edit)
+	var another := _chip(name_row, "Another name", func():
+		hero["name"] = Creation.name_for(hero["city"], _new_spark())
+		_draw_reveal())
+	another.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var b := Creation.blood(hero["blood"])
+	var who := RichTextLabel.new()
+	who.bbcode_enabled = true
+	who.fit_content = true
+	who.scroll_active = false
+	Style.rich(who, 17, DIM, "body")
+	who.text = "[color=#%s]%s[/color]  ·  [color=#%s]%s[/color]  ·  [color=#%s]%s[/color]" % [
+		Style.BLOOD.lightened(0.35).to_html(false), b["name"],
+		(World.SHAPE_COLORS.get(hero["shape"], FG) as Color).to_html(false), String(hero["shape"]).capitalize(),
+		(World.CITY_COLORS.get(hero["city"], Style.BRASS) as Color).lightened(0.4).to_html(false), String(hero["city"]).capitalize()]
+	col.add_child(who)
 
-	# Blood.
+	# The leaves.
+	var tabs := HBoxContainer.new()
+	tabs.add_theme_constant_override("separation", 0)
+	col.add_child(tabs)
+	for t in TABS:
+		var id: String = t[0]
+		_tab_button(tabs, t[1], tab == id, func(): _set_tab(id))
+	var scroll := ScrollContainer.new()
+	scroll.name = "Leaf"
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	col.add_child(scroll)
+	var v := VBoxContainer.new()
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	v.add_theme_constant_override("separation", 6)
+	scroll.add_child(v)
+	match tab:
+		"body": _leaf_body(v)
+		"face": _leaf_face(v)
+		"dress": _leaf_dress(v)
+		_: _leaf_reading(v)
+	var foot_gap := Control.new()
+	foot_gap.custom_minimum_size = Vector2(0, 8)
+	v.add_child(foot_gap)
+
+	# The foot: always in reach.
+	col.add_child(Style.rule(300, Style.BRASS_DIM))
+	var done := _button(col, "This is me", func(): finished.emit(hero), true)
+	done.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var end := HBoxContainer.new()
+	end.add_theme_constant_override("separation", 8)
+	col.add_child(end)
+	for e in [["Answer again", func(): hero = {}; _ask(0)], ["Another life, same answers", func(): hero = {}; blood_choice = ""; spark = _new_spark(); _screen = "other"; _reveal()]]:
+		var eb := _button(end, e[0], e[1])
+		eb.autowrap_mode = TextServer.AUTOWRAP_OFF
+		eb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		eb.alignment = HORIZONTAL_ALIGNMENT_CENTER
+		eb.custom_minimum_size = Vector2(0, 42)
+		eb.add_theme_font_size_override("font_size", 16)
+		eb.add_theme_color_override("font_color", DIM)
+	if first:
+		_arrive(v)
+		panel.modulate.a = 0.0
+		panel.create_tween().tween_property(panel, "modulate:a", 1.0, 0.5).set_delay(0.35)
+	else:
+		var keep := _scroll_keep
+		scroll.ready.connect(func(): scroll.set_deferred("scroll_vertical", keep))
+	_screen = "reveal"
+
+## The left of the screen is the figure: drag to turn it, the wheel to step closer or back,
+## and the same on buttons along the foot.
+func _view_controls() -> void:
+	var area := Control.new()
+	area.set_anchors_preset(Control.PRESET_FULL_RECT)
+	area.offset_right = -PANEL_W
+	area.mouse_default_cursor_shape = Control.CURSOR_HSIZE
+	area.gui_input.connect(func(ev: InputEvent):
+		if ev is InputEventMouseMotion and (ev.button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
+			turned.emit(-ev.relative.x * 0.011)
+		elif ev is InputEventMouseButton and ev.pressed:
+			var at := 0
+			for k in FRAMES.size():
+				if FRAMES[k][0] == frame:
+					at = k
+			if ev.button_index == MOUSE_BUTTON_WHEEL_UP and at < FRAMES.size() - 1:
+				_set_frame(FRAMES[at + 1][0])
+			elif ev.button_index == MOUSE_BUTTON_WHEEL_DOWN and at > 0:
+				_set_frame(FRAMES[at - 1][0]))
+	_root.add_child(area)
+	var m := MarginContainer.new()
+	m.set_anchors_preset(Control.PRESET_FULL_RECT)
+	m.add_theme_constant_override("margin_left", 28)
+	m.add_theme_constant_override("margin_bottom", 22)
+	m.add_theme_constant_override("margin_right", 28)
+	m.mouse_filter = Control.MOUSE_FILTER_PASS
+	area.add_child(m)
+	var v := VBoxContainer.new()
+	v.alignment = BoxContainer.ALIGNMENT_END
+	v.add_theme_constant_override("separation", 6)
+	v.mouse_filter = Control.MOUSE_FILTER_PASS
+	m.add_child(v)
+	var hint := _text(v, "Drag to turn.  Scroll to step closer.", 14, DIM)
+	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
+	hint.add_theme_constant_override("outline_size", 4)
+	var bar := HBoxContainer.new()
+	bar.add_theme_constant_override("separation", 6)
+	bar.mouse_filter = Control.MOUSE_FILTER_PASS
+	v.add_child(bar)
+	for f in FRAMES:
+		var id: String = f[0]
+		_chip(bar, f[1], func(): _set_frame(id), frame == id)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(14, 0)
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.add_child(gap)
+	_chip(bar, "‹  Turn", func(): turned.emit(PI / 6.0))
+	_chip(bar, "Turn  ›", func(): turned.emit(-PI / 6.0))
+
+# --- The leaves of the reveal --------------------------------------------------------
+
+## The Reading: what the answers made, each with its reason.
+func _leaf_reading(v: VBoxContainer) -> void:
 	var b := Creation.blood(hero["blood"])
 	_section(v, "BLOOD", "%s  ·  %s" % [b["name"], String(b["tier"]).capitalize()])
 	_line(v, "Shows as %s. %s" % [b.get("shows", "nothing"), b["gift"] + "."])
@@ -335,49 +545,30 @@ func _reveal() -> void:
 			reasons = ", ".join(s["reasons"])
 	if reasons != "":
 		_line(v, "Because %s." % reasons, DIM)
-	var alt := HBoxContainer.new()
-	alt.add_theme_constant_override("separation", 8)
-	v.add_child(alt)
-	_text(alt, "Or:", 15, DIM)
+	var alt := _flow(v, "Or")
 	for s in Creation.suggest_bloods(Creation.tally_with(answers, spark)):
 		if s["id"] != hero["blood"]:
 			var id: String = s["id"]
 			_chip(alt, Creation.blood(id)["name"], func(): blood_choice = id; _reveal())
 	_chip(alt, "Choose another...", _choose_blood)
 
-	# Shape, city, weapon.
-	_section(v, "SHAPE", String(hero["shape"]).capitalize())
+	_section(v, "SHAPE", String(hero["shape"]).capitalize(), World.SHAPE_COLORS.get(hero["shape"], FG))
 	_line(v, Data.shape(hero["shape"])["field"] + ". " + _shape_line(hero["shape"]))
 	_line(v, "Because %s. (The rite at the Academy will read it, and may not agree.)" % ", ".join(hero["why"]["shape"]), DIM)
+
 	var w := Creation.weapon(hero["weapon"])
 	_section(v, "HOME AND WEAPON", "%s  ·  %s" % [String(hero["city"]).capitalize(), w["name"]])
 	var wtype: Dictionary = Data.room["styles"].get(w["style"], {})
 	_line(v, "%s %s The %s Discipline teaches it." % [w["text"], wtype.get("text", ""), String(hero["discipline"]).capitalize()])
 	_line(v, "Because %s." % ", ".join(hero["why"]["city"] + hero["why"]["weapon"]), DIM)
-	# The city's other weapons, in the hand at once.
-	var wrow := HBoxContainer.new()
-	wrow.add_theme_constant_override("separation", 8)
-	v.add_child(wrow)
-	_text(wrow, "Or carry:", 15, DIM)
-	# A home without a school of its own (Alexandria) carries the weapons of the school it took.
-	var school_city: String = hero["city"]
-	if Data.weapons.filter(func(cw): return cw["city"] == hero["city"]).is_empty():
-		for d in Data.disciplines:
-			if d["id"] == hero["discipline"]:
-				school_city = d["city"]
-	for cw in Data.weapons:
-		if cw["city"] != school_city:
-			continue
-		var wid: String = cw["id"]
-		_chip(wrow, cw["name"], func(): hero["weapon_override"] = wid; hero["weapon"] = wid; changed.emit(hero); _reveal(), hero["weapon"] == wid)
-	# Technique and stance.
+	_weapon_chips(v)
 	var kit: Dictionary = Data.kits[hero["shape"]]
 	_line(v, "Technique: [b]%s[/b]. %s" % [kit["technique"]["name"], kit["technique"]["text"]])
 	_line(v, "Stance: [b]%s[/b]: %s." % [kit["stance"]["name"], kit["stance"]["text"]])
-	# The Seed.
+
 	_section(v, "WHAT WILL STAND BESIDE YOU", _seed_text(hero["seed"]))
-	_line(v, "Your genius takes its First Form at the rite, read from this, your blood, and your Shape.", DIM)
-	# The Pattern.
+	_line(v, "Your genius takes its First Form at the rite, read from this, your blood, and your Shape. Until then it is the mote of light that keeps to your shoulder.", DIM)
+
 	var p: Dictionary = hero["pattern"]
 	_section(v, "YOUR PATTERN", "x%s  ·  chain of %d" % [str(snappedf(Fight.multiplier_of(p), 0.01)), Fight.chain_length(p)])
 	_line(v, Builder.sentence(p))
@@ -389,86 +580,141 @@ func _reveal() -> void:
 	if pw.size() > 0:
 		_line(v, "Because %s." % "; ".join(pw), DIM)
 	_line(v, "It is yours from the start. You will outgrow it.", DIM)
-	# The body: its sex, its build, its skin; then the look. It shows at once, on the left.
-	var look: Dictionary = hero.get("look", { "headgear": true, "cape": true, "cape_color": "shape" })
-	hero["look"] = look
+
+## The city's weapons, in the hand at once. A home without a school of its own (Alexandria)
+## carries the weapons of the school it took.
+func _weapon_chips(v: VBoxContainer) -> void:
+	var wrow := _flow(v, "Or carry")
+	var school_city: String = hero["city"]
+	if Data.weapons.filter(func(cw): return cw["city"] == hero["city"]).is_empty():
+		for d in Data.disciplines:
+			if d["id"] == hero["discipline"]:
+				school_city = d["city"]
+	for cw in Data.weapons:
+		if cw["city"] != school_city:
+			continue
+		var wid: String = cw["id"]
+		_chip(wrow, cw["name"], func(): hero["weapon_override"] = wid; hero["weapon"] = wid; changed.emit(hero); _draw_reveal(), hero["weapon"] == wid)
+
+## The body: the home's cast of face, then sex, build, stature and skin.
+func _leaf_body(v: VBoxContainer) -> void:
+	var look: Dictionary = hero["look"]
 	var L: Dictionary = Data.creation.get("look", {})
-	_section(v, "BODY", "")
-	var bodies := HBoxContainer.new()
-	bodies.add_theme_constant_override("separation", 8)
-	v.add_child(bodies)
+	var home := _home()
+	_section(v, "THE FACE OF %s" % String(hero["city"]).to_upper(), "")
+	if home.has("brief"):
+		_line(v, String(home["brief"]))
+	_line(v, "Your home gives the cast of the face and the frame. The rest is yours.", DIM)
+
+	_section(v, "FRAME", "")
+	var sexes := _flow(v, "")
 	for sx in L.get("sexes", {}):
 		var sid: String = sx
-		_chip(bodies, L["sexes"][sx], func(): look["sex"] = sid; hero["body"] = "%s-%s" % [hero["city"], sid]; changed.emit(hero); _reveal(), String(look.get("sex", "m")) == sid)
-	var brow0 := HBoxContainer.new()
-	brow0.add_theme_constant_override("separation", 8)
-	v.add_child(brow0)
-	_text(brow0, "Build:", 15, DIM)
-	for bd in L.get("builds", {}):
-		var bv: float = float(L["builds"][bd])
-		_chip(brow0, bd, func(): look["build"] = bv; changed.emit(hero); _reveal(), absf(float(look.get("build", 0.0)) - bv) < 0.001)
-	var srow0 := HBoxContainer.new()
-	srow0.add_theme_constant_override("separation", 8)
-	v.add_child(srow0)
-	_text(srow0, "Skin:", 15, DIM)
-	# The home's palette (data/bodies.json); every tone if the home has none.
-	var palette: Array = Data.bodies.get(hero["city"], {}).get("palette", L.get("skinTones", {}).keys())
-	for tn in palette:
+		_chip(sexes, _label("sexes", sid), func():
+			look["sex"] = sid
+			hero["body"] = "%s-%s" % [hero["city"], sid]
+			hero.erase("body_override")
+			changed.emit(hero)
+			_draw_reveal(), String(look.get("sex", "m")) == sid)
+	var builds: Dictionary = L.get("builds", { "fit": 0.0 })
+	_slider(v, "Build", "builds", builds, 0.05, float(look.get("build", 0.0)), func(x: float):
+		look["build"] = x
+		look_changed.emit(hero))
+	var sts: Dictionary = L.get("statures", { "middling": 1.0 })
+	_slider(v, "Stature", "statures", sts, 0.01, float(look.get("stature", 1.0)), func(x: float):
+		look["stature"] = x
+		look_changed.emit(hero))
+
+	var skin := String(look.get("skin", "olive"))
+	_section(v, "SKIN", _label("skinTones", skin))
+	var srow := _flow(v, "")
+	for tn in _palette():
 		var tid: String = tn
-		_chip(srow0, tid, func(): look["skin"] = tid; changed.emit(hero); _reveal(), String(look.get("skin", "olive")) == tid)
-	_section(v, "LOOK", "")
-	var lrow := HBoxContainer.new()
-	lrow.add_theme_constant_override("separation", 8)
-	v.add_child(lrow)
-	_chip(lrow, "Headgear on", func(): look["headgear"] = not look["headgear"]; changed.emit(hero); _reveal(), look["headgear"])
-	_chip(lrow, "Cape on", func(): look["cape"] = not look["cape"]; changed.emit(hero); _reveal(), look["cape"])
-	var hrow := HBoxContainer.new()
-	hrow.add_theme_constant_override("separation", 8)
-	v.add_child(hrow)
-	_text(hrow, "Hair:", 15, DIM)
+		var c: Array = L.get("skinTones", {}).get(tid, [0.6, 0.45, 0.33])
+		_swatch(srow, Color(c[0], c[1], c[2]), skin == tid, _label("skinTones", tid), func(): _look_set("skin", tid))
+	var b := Creation.blood(hero["blood"])
+	if String(b.get("shows", "")) != "":
+		_line(v, "Your blood shows as %s." % b["shows"], DIM)
+
+## The face and hair: the style, its colour, the beard.
+func _leaf_face(v: VBoxContainer) -> void:
+	var look: Dictionary = hero["look"]
+	var L: Dictionary = Data.creation.get("look", {})
+	var hair := String(look.get("hair", "crop"))
+	_section(v, "HAIR", _label("hair", hair))
+	var hrow := _flow(v, "")
 	for hs in L.get("hair", []):
 		var hid: String = hs
-		_chip(hrow, hid, func(): look["hair"] = hid; changed.emit(hero); _reveal(), String(look.get("hair", "crop")) == hid)
-	var brow := HBoxContainer.new()
-	brow.add_theme_constant_override("separation", 8)
-	v.add_child(brow)
-	_text(brow, "Beard:", 15, DIM)
-	for bs in L.get("beards", []):
-		var bid2: String = bs
-		_chip(brow, bid2, func(): look["beard"] = bid2; changed.emit(hero); _reveal(), String(look.get("beard", "none")) == bid2)
-	var hcrow := HBoxContainer.new()
-	hcrow.add_theme_constant_override("separation", 8)
-	v.add_child(hcrow)
-	_text(hcrow, "Colour:", 15, DIM)
+		_chip(hrow, _label("hair", hid), func(): _look_set("hair", hid), hair == hid)
+	var hc_now := String(look.get("hair_color", "brown"))
+	var hcrow := _flow(v, "")
 	for hc in L.get("hairColors", {}):
-		var cid0: String = hc
-		_chip(hcrow, cid0, func(): look["hair_color"] = cid0; changed.emit(hero); _reveal(), String(look.get("hair_color", "brown")) == cid0)
-	var srow := HBoxContainer.new()
-	srow.add_theme_constant_override("separation", 8)
-	v.add_child(srow)
-	_text(srow, "Stature:", 15, DIM)
-	for st in L.get("statures", {}):
-		var sv: float = float(L["statures"][st])
-		_chip(srow, st, func(): look["stature"] = sv; changed.emit(hero); _reveal(), absf(float(look.get("stature", 1.0)) - sv) < 0.001)
-	var crow := HBoxContainer.new()
-	crow.add_theme_constant_override("separation", 8)
-	v.add_child(crow)
-	_text(crow, "Cape:", 15, DIM)
-	for cc in L.get("capeColors", {}):
-		var cid: String = cc
-		_chip(crow, L["capeColors"][cc], func(): look["cape_color"] = cid; changed.emit(hero); _reveal(), look["cape_color"] == cid)
-	var end := HBoxContainer.new()
-	end.add_theme_constant_override("separation", 12)
-	v.add_child(end)
-	_button(end, "This is me", func(): finished.emit(hero), true)
-	_button(end, "Answer again", func(): hero = {}; _ask(0))
-	_button(end, "Another life, same answers", func(): hero = {}; blood_choice = ""; spark = _new_spark(); _reveal())
-	name_edit.text_changed.connect(func(t): title.text = t if t != "" else "Unnamed")
-	if _screen != "reveal":
-		_arrive(v)
-		panel.modulate.a = 0.0
-		panel.create_tween().tween_property(panel, "modulate:a", 1.0, 0.4)
-	_screen = "reveal"
+		var cid: String = hc
+		var c: Array = L["hairColors"][cid]
+		_swatch(hcrow, Color(c[0], c[1], c[2]), hc_now == cid, _label("hairColors", cid), func(): _look_set("hair_color", cid))
+	_line(v, "%s. The brows take the same colour." % _label("hairColors", hc_now), DIM)
+	if _headgear_name() != "" and look.get("headgear", true):
+		var cover := _flow(v, "")
+		_chip(cover, "Take off the %s" % _headgear_name().to_lower(), func(): _look_set("headgear", false))
+		_line(v, "It covers the crown; only the fall of the hair shows under it.", DIM)
+
+	var beard := String(look.get("beard", "none"))
+	_section(v, "BEARD", _label("beards", beard))
+	var brow := _flow(v, "")
+	for bs in L.get("beards", []):
+		var bid: String = bs
+		_chip(brow, _label("beards", bid), func(): _look_set("beard", bid), beard == bid)
+
+	var feats: Array = []
+	var b := Creation.blood(hero["blood"])
+	if String(b.get("shows", "")) != "":
+		feats.append("Your blood shows as %s." % b["shows"])
+	feats.append("The eyes, and whatever your blood puts in them, are not yours to choose.")
+	_section(v, "WHAT YOU DID NOT CHOOSE", "")
+	_line(v, " ".join(feats), DIM)
+
+## The dress: the home's own, what is worn on the head and the back, and what is in the hand.
+func _leaf_dress(v: VBoxContainer) -> void:
+	var look: Dictionary = hero["look"]
+	var L: Dictionary = Data.creation.get("look", {})
+	var home := _home()
+	_section(v, "THE DRESS OF %s" % String(hero["city"]).to_upper(), "")
+	_line(v, String(home.get("dress", {}).get("culture", "What your home wears.")))
+	var wear := _flow(v, "Wearing")
+	if _headgear_name() != "":
+		_chip(wear, _headgear_name(), func(): _look_set("headgear", not look.get("headgear", true)), look.get("headgear", true))
+	_chip(wear, "Cloak", func(): _look_set("cape", not look.get("cape", true)), look.get("cape", true))
+
+	if look.get("cape", true):
+		var cc_now := String(look.get("cape_color", "shape"))
+		_section(v, "THE CLOAK'S COLOUR", _label("capeColors", cc_now))
+		var crow := _flow(v, "")
+		for cc in L.get("capeColors", {}):
+			var cid: String = cc
+			_swatch(crow, _cape_color(cid), cc_now == cid, _label("capeColors", cid), func(): _look_set("cape_color", cid))
+
+	var w := Creation.weapon(hero["weapon"])
+	_section(v, "IN YOUR HAND", w["name"])
+	_line(v, String(w["text"]))
+	_weapon_chips(v)
+
+## What the home wears on the head, by name; "" where it wears nothing.
+func _headgear_name() -> String:
+	var hg: Variant = _home().get("dress", {}).get("headgear", null)
+	if not (hg is Dictionary):
+		return ""
+	return _label("headgear", String(hg.get("type", "hat")))
+
+## The cloak's colours as the world dyes them (World.cape_color_for).
+func _cape_color(which: String) -> Color:
+	match which:
+		"shape": return (World.SHAPE_COLORS.get(hero["shape"], Color(0.5, 0.42, 0.36)) as Color).darkened(0.25)
+		"city": return World.CITY_COLORS.get(hero["city"], Color(0.5, 0.42, 0.36))
+		"blood":
+			var b: Dictionary = Creation.blood(hero["blood"])
+			var lean: Dictionary = b.get("shapeLean", {})
+			return Color(0.25, 0.12, 0.14).lerp(World.SHAPE_COLORS.get(String(lean.keys()[0]) if not lean.is_empty() else "anchor", Color.WHITE), 0.5)
+	return Color(0.5, 0.42, 0.36)
 
 func _shape_line(shape: String) -> String:
 	match shape:
@@ -491,6 +737,7 @@ func _choose_blood() -> void:
 	_screen = "other"
 	_clear()
 	_backdrop()
+	_stage(frame, 0.0)
 	var scroll := ScrollContainer.new()
 	scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
 	scroll.offset_left = 60
@@ -506,7 +753,7 @@ func _choose_blood() -> void:
 	_text(v, "Choose Your Blood", 42, FG, "title")
 	v.add_child(Style.rule(380))
 	_text(v, "The peoples and bloodlines that came out of the Awakening, and the single Marks that come to anyone.", 15, DIM)
-	for tier in [["bloodline", "BLOODLINES  ·  strong blood, registered by the cities"], ["kindred", "KINDREDS  ·  peoples who carry it together"], ["mark", "MARKS  ·  one mutation, yours alone"]]:
+	for tier in [["bloodline", "BLOODLINES  ·  strong blood, registered by the cities", Style.BLOOD.lightened(0.35)], ["kindred", "KINDREDS  ·  peoples who carry it together", Style.GOLD], ["mark", "MARKS  ·  one mutation, yours alone", FG]]:
 		var gap := Control.new()
 		gap.custom_minimum_size = Vector2(0, 8)
 		v.add_child(gap)
@@ -522,22 +769,40 @@ func _choose_blood() -> void:
 				continue
 			var id: String = b["id"]
 			var btn := Button.new()
-			btn.text = "%s\n%s\nGap: %s" % [b["name"], b["gift"], b["gap"]]
-			btn.autowrap_mode = TextServer.AUTOWRAP_WORD
-			btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
-			btn.custom_minimum_size = Vector2(0, 96)
+			btn.custom_minimum_size = Vector2(0, 142)
 			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			btn.clip_contents = true
 			_style(btn, id == hero["blood"], 14, "ui")
-			btn.pressed.connect(func(): blood_choice = id; _reveal())
+			btn.pressed.connect(func(): _click(); blood_choice = id; _reveal())
 			grid.add_child(btn)
+			# the card: the blood's name, how it shows, what it gives, and its Gap
+			var box := VBoxContainer.new()
+			box.set_anchors_preset(Control.PRESET_FULL_RECT)
+			box.offset_left = 16
+			box.offset_right = -14
+			box.offset_top = 10
+			box.offset_bottom = -8
+			box.add_theme_constant_override("separation", 1)
+			box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			btn.add_child(box)
+			var lines: Array = [_text(box, String(b["name"]), 19, tier[2], "title")]
+			if String(b.get("shows", "")) != "":
+				lines.append(_text(box, "Shows as %s." % b["shows"], 14, DIM, "italic"))
+			lines.append(_text(box, String(b["gift"]) + ".", 15, FG, "ui"))
+			lines.append(_text(box, "The Gap: %s." % b["gap"], 14, Style.EMBER.lightened(0.25), "italic"))
+			for l in lines:
+				(l as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_button(v, "Back", _reveal)
 	_arrive(v)
 
 # --- Helpers ---------------------------------------------------------------------
 
-func _centered(width: float) -> VBoxContainer:
+## The column of words on the right of the stage, centred on its height.
+func _column(width: float) -> VBoxContainer:
 	var c := CenterContainer.new()
-	c.set_anchors_preset(Control.PRESET_FULL_RECT)
+	c.set_anchors_preset(Control.PRESET_RIGHT_WIDE)
+	c.offset_left = -(width + COL_MARGIN)
+	c.offset_right = -COL_MARGIN
 	_root.add_child(c)
 	var v := VBoxContainer.new()
 	v.custom_minimum_size = Vector2(width, 0)
@@ -545,11 +810,20 @@ func _centered(width: float) -> VBoxContainer:
 	c.add_child(v)
 	return v
 
+## Tell the stage how to frame itself: the camera's framing, and how much of the screen's
+## width the words cover on the right (the figure centres in what is left).
+func _stage(kind: String, covered: float) -> void:
+	var w := 1600.0
+	if is_inside_tree():
+		w = maxf(1.0, get_viewport().get_visible_rect().size.x)
+	framed.emit(kind)
+	shifted.emit(clampf(covered / w, 0.0, 0.8))
+
 func _text(parent: Control, t: String, size: int, color: Color, kind := "") -> Label:
 	var l := Label.new()
 	l.text = t
 	# Labels in a row size to their text; elsewhere they wrap.
-	if not (parent is HBoxContainer):
+	if not (parent is HBoxContainer or parent is FlowContainer):
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD
 	if kind == "":
 		kind = "title" if size >= 28 else ("italic" if color == DIM and size <= 16 else ("body" if size >= 17 else "ui"))
@@ -558,7 +832,7 @@ func _text(parent: Control, t: String, size: int, color: Color, kind := "") -> L
 	return l
 
 ## A section of the reveal: a small brass heading over its value.
-func _section(parent: Control, title: String, value: String) -> void:
+func _section(parent: Control, title: String, value: String, color := FG) -> void:
 	var gap := Control.new()
 	gap.custom_minimum_size = Vector2(0, 10)
 	parent.add_child(gap)
@@ -575,7 +849,7 @@ func _section(parent: Control, title: String, value: String) -> void:
 	h.add_child(r)
 	if value != "":
 		var l := Label.new()
-		Style.label(l, 25, FG, "body_bold")
+		Style.label(l, 23, color, "body_bold")
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD
 		l.text = value
 		parent.add_child(l)
@@ -605,10 +879,10 @@ func _button(parent: Control, t: String, cb: Callable, primary := false) -> Butt
 	b.pressed.connect(func(): _click(); cb.call())
 	parent.add_child(b)
 	if primary:
-		b.call_deferred("grab_focus")
+		(func(): if is_instance_valid(b) and b.is_inside_tree(): b.grab_focus()).call_deferred()
 	return b
 
-func _chip(parent: Control, t: String, cb: Callable, on := false) -> void:
+func _chip(parent: Control, t: String, cb: Callable, on := false) -> Button:
 	var b := Button.new()
 	b.text = t
 	_style(b, on, 15, "ui")
@@ -620,23 +894,156 @@ func _chip(parent: Control, t: String, cb: Callable, on := false) -> void:
 		sb.content_margin_bottom = 6
 	b.pressed.connect(func(): _click(); cb.call())
 	parent.add_child(b)
+	return b
+
+## A row that wraps: chips or swatches, with a small label before them.
+func _flow(parent: Control, label: String) -> HFlowContainer:
+	var f := HFlowContainer.new()
+	f.add_theme_constant_override("h_separation", 8)
+	f.add_theme_constant_override("v_separation", 8)
+	parent.add_child(f)
+	if label != "":
+		var l := _text(f, label + ":", 15, DIM)
+		l.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	return f
+
+## A leaf's tab: its name over a brass line when it is the open one.
+func _tab_button(parent: Control, t: String, on: bool, cb: Callable) -> void:
+	var b := Button.new()
+	b.text = t
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.custom_minimum_size = Vector2(0, 40)
+	b.focus_mode = Control.FOCUS_ALL
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	b.add_theme_font_override("font", Style.font("title"))
+	b.add_theme_font_size_override("font_size", 14)
+	b.add_theme_color_override("font_color", Style.BRASS_HI if on else DIM)
+	b.add_theme_color_override("font_hover_color", Style.BRASS_HI)
+	b.add_theme_color_override("font_focus_color", Style.BRASS_HI)
+	b.add_theme_color_override("font_pressed_color", Style.BRASS_HI)
+	for st in ["normal", "hover", "focus", "pressed", "hover_pressed"]:
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.27, 0.18, 0.07, 0.35) if (on or st != "normal") else Color(0, 0, 0, 0)
+		sb.border_width_bottom = 2 if on else 1
+		sb.border_color = Style.BRASS_HI if on else Style.BRASS_DIM
+		sb.content_margin_top = 8
+		sb.content_margin_bottom = 8
+		b.add_theme_stylebox_override(st, sb)
+	b.pressed.connect(func(): _click(); cb.call())
+	parent.add_child(b)
+
+## A colour to choose: a disc of it, ringed in brass when it is the one worn.
+func _swatch(parent: Control, col: Color, on: bool, tip: String, cb: Callable) -> void:
+	var b := Button.new()
+	b.custom_minimum_size = Vector2(46, 46)
+	b.tooltip_text = tip
+	b.focus_mode = Control.FOCUS_ALL
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	for st in ["normal", "hover", "focus", "pressed", "hover_pressed"]:
+		b.add_theme_stylebox_override(st, StyleBoxEmpty.new())
+	var shown := col
+	b.draw.connect(func():
+		var c := b.size / 2.0
+		b.draw_circle(c, 15.0, shown)
+		b.draw_arc(c, 15.0, 0.0, TAU, 40, Color(0, 0, 0, 0.55), 1.5, true)
+		if on:
+			b.draw_arc(c, 20.0, 0.0, TAU, 48, Style.BRASS_HI, 2.0, true)
+		elif b.is_hovered() or b.has_focus():
+			b.draw_arc(c, 20.0, 0.0, TAU, 48, Style.BRASS, 1.0, true))
+	for sig in [b.mouse_entered, b.mouse_exited, b.focus_entered, b.focus_exited]:
+		sig.connect(b.queue_redraw)
+	b.pressed.connect(func(): _click(); cb.call())
+	parent.add_child(b)
+
+## A measure set on a slider between the least and the greatest of its named values
+## (data/creation.json); the name it falls nearest shows beside it.
+func _slider(parent: Control, title: String, kind: String, named: Dictionary, step: float, value: float, on_change: Callable) -> void:
+	var lo := INF
+	var hi := -INF
+	for k in named:
+		lo = minf(lo, float(named[k]))
+		hi = maxf(hi, float(named[k]))
+	var nearest := func(x: float) -> String:
+		var best := ""
+		for k in named:
+			if best == "" or absf(float(named[k]) - x) < absf(float(named[best]) - x):
+				best = k
+		return _label(kind, best)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	parent.add_child(row)
+	var t := _text(row, title, 15, DIM)
+	t.custom_minimum_size.x = 70
+	var s := HSlider.new()
+	s.min_value = lo
+	s.max_value = hi
+	s.step = step
+	s.value = clampf(value, lo, hi)
+	s.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	s.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	s.custom_minimum_size = Vector2(240, 30)
+	s.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	s.add_theme_icon_override("grabber", _grabber(false))
+	s.add_theme_icon_override("grabber_highlight", _grabber(true))
+	var line := StyleBoxFlat.new()
+	line.bg_color = Style.BRASS_DIM.darkened(0.35)
+	line.content_margin_top = 2
+	line.content_margin_bottom = 2
+	s.add_theme_stylebox_override("slider", line)
+	for st in ["grabber_area", "grabber_area_highlight"]:
+		var fill := StyleBoxFlat.new()
+		fill.bg_color = Style.BRASS
+		fill.content_margin_top = 2
+		fill.content_margin_bottom = 2
+		s.add_theme_stylebox_override(st, fill)
+	row.add_child(s)
+	var val := _text(row, nearest.call(s.value), 16, FG, "body")
+	val.custom_minimum_size.x = 92
+	s.value_changed.connect(func(x: float):
+		val.text = nearest.call(x)
+		on_change.call(x))
+
+## The slider's handle: a brass lozenge.
+static var _grab: Array = [null, null]
+static func _grabber(lit: bool) -> ImageTexture:
+	var at := 1 if lit else 0
+	if _grab[at] != null:
+		return _grab[at]
+	var n := 24
+	var img := Image.create(n, n, false, Image.FORMAT_RGBA8)
+	for y in n:
+		for x in n:
+			var d := absf(x - n / 2.0 + 0.5) + absf(y - n / 2.0 + 0.5)
+			var a := clampf(n / 2.0 - 1.0 - d, 0.0, 1.0)
+			var c := (Style.BRASS_HI if lit else Style.GOLD) if d < n / 2.0 - 4.5 else Style.INK
+			img.set_pixel(x, y, Color(c, a))
+	_grab[at] = ImageTexture.create_from_image(img)
+	return _grab[at]
 
 ## The backdrop of the creator's screens: lamplight in the dark, with motes of field drifting.
-func _backdrop() -> void:
+func _backdrop(covered := -1.0) -> void:
 	var bg := ColorRect.new()
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var sh := Shader.new()
 	sh.code = BACKDROP
 	var sm := ShaderMaterial.new()
 	sm.shader = sh
 	bg.material = sm
 	_root.add_child(bg)
+	if covered >= 0.0:
+		var w := 1600.0
+		if is_inside_tree():
+			w = maxf(1.0, get_viewport().get_visible_rect().size.x)
+		sm.set_shader_parameter("open", clampf(1.0 - covered / w, 0.05, 1.0))
 	# The field: from where it was, to where the answers have taken it.
 	sm.set_shader_parameter("field_col", Vector3(_field_col.r, _field_col.g, _field_col.b))
 	sm.set_shader_parameter("field_k", _field_k)
 	var before := _field_col
 	var k0 := _field_k
 	_field_now()
+	if covered >= 0.0:
+		field.emit(_field_col, _field_k, 0.0)
 	var tw := bg.create_tween()
 	tw.tween_method(func(u: float):
 		var c := before.lerp(_field_col, u)
@@ -660,6 +1067,7 @@ const BACKDROP := """
 shader_type canvas_item;
 uniform vec3 field_col = vec3(0.6, 0.9, 0.7);
 uniform float field_k = 0.0;
+uniform float open = 0.0;   // the part of the width, from the left, where the stage shows through; 0: none
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 void fragment() {
 	vec2 uv = UV;
@@ -692,6 +1100,14 @@ void fragment() {
 	col += field_col * glow * (0.08 + 0.55 * field_k) * (0.9 + 0.1 * sin(TIME * 1.3));
 	float v = smoothstep(0.35, 1.0, length((uv - 0.5) * vec2(1.4, 1.0)));
 	col *= 1.0 - v * 0.75;
-	COLOR = vec4(col, 0.98);
+	float cover = 0.98;
+	if (open > 0.0) {
+		// the stage shows on the left; the dark gathers under the words, and at the screen's edges
+		cover = 0.95 * smoothstep(open - 0.2, open + 0.02, uv.x);
+		vec2 e = (uv - vec2(open * 0.5, 0.5)) * vec2(1.0 / open, 1.0);
+		cover = max(cover, 0.6 * smoothstep(0.42, 0.78, length(e * vec2(0.9, 1.25))) * (1.0 - smoothstep(open - 0.1, open, uv.x)));
+		cover = max(cover, m * 0.5);
+	}
+	COLOR = vec4(col, cover);
 }
 """
