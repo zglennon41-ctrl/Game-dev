@@ -5,3 +5,6 @@ dist/
 *.import
 build/
 __pycache__/
+
+# parallel working copies made by the tooling
+.claude/worktrees/
