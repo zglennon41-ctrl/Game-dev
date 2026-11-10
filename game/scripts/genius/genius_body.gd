@@ -42,9 +42,24 @@ shader_type spatial;
 render_mode blend_add, unshaded, cull_back, depth_draw_never;
 uniform vec4 glow : source_color = vec4(1.0, 0.7, 0.3, 1.0);
 uniform float strength = 1.0;
+uniform float molt = 0.0;      // 0 to 1: the molt lines, as a Reading nears
+uniform float molt_scale = 1.0;
+varying vec3 lp;
+void vertex() { lp = VERTEX * length(MODEL_MATRIX[0].xyz); }   // the body's own space, in metres
+// Thin seams of light across the body, where it will split: a folded field of sines, its
+// zero crossings drawn as lines that widen and brighten with the molt.
+float seams(vec3 p) {
+	float v = sin(p.x * 9.0 + sin(p.y * 7.0) * 1.7) + sin(p.y * 11.0 + sin(p.z * 6.0) * 1.3) + sin(p.z * 8.0 + sin(p.x * 5.0) * 1.9);
+	return smoothstep(0.08 + 0.2 * molt, 0.0, abs(v));
+}
 void fragment() {
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 2.6);
-	ALBEDO = glow.rgb * rim * 1.6 * strength;
+	vec3 col = glow.rgb * rim * 1.6 * strength;
+	if (molt > 0.0) {
+		float breathe = 0.75 + 0.25 * sin(TIME * 2.2 + lp.y * 5.0);
+		col += mix(glow.rgb, vec3(1.0), 0.3) * seams(lp * molt_scale) * molt * breathe * 3.2;
+	}
+	ALBEDO = col;
 }
 """
 static var _rim_shader: Shader
@@ -57,6 +72,9 @@ var anim: AnimationPlayer = null
 var anim_names: Dictionary = {}
 var sockets: Dictionary = {}       # name -> Node3D
 var uses_art := false              # the body came from an art file, not a placeholder
+var nearness := 0.0                # how near its next Reading is (Genius.readiness), 0 to 1
+var molt := 0.0                    # the molt lines showing for it, 0 to 1
+var stands := 0.6                  # how tall it stands now, in metres
 var parts_from_art: Array = []     # features whose parts came from art files
 var look: Dictionary = {}          # how this one looks, resolved (GeniusLook.resolve); {} for none
 var keepsake := ""                 # the keepsake it wears, if its body has a place for it
@@ -118,7 +136,14 @@ func _assemble(instar: int) -> void:
 		# against its instar's size (an otter stands half as tall as a wolf).
 		proportions = Vector3.ONE * float(spec.get("artSize", 1.0))
 	proportions *= _apply_proportions()
-	_fit_height(float(Data.genius()["size"].get(str(maxi(1, instar)), 0.6)), proportions)
+	# It grows between Readings: part of the way to the next instar's size as the Reading nears.
+	var prog: Dictionary = Data.genius().get("progression", {})
+	nearness = float(info["ready"]) if info.has("ready") else (Genius.from_dict(info).readiness() if info.has("history") and info.has("tally") else 0.0)
+	var sizes: Dictionary = Data.genius()["size"]
+	var h0 := float(sizes.get(str(maxi(1, instar)), 0.6))
+	var h1 := float(sizes.get(str(mini(6, maxi(1, instar) + 1)), h0))
+	stands = h0 + (h1 - h0) * float(prog.get("growth", 0.0)) * nearness
+	_fit_height(stands, proportions)
 	# Parts, on the sockets for their slots.
 	var feats: Array = info.get("features", [])
 	var slot_count := {}
@@ -152,6 +177,10 @@ func _assemble(instar: int) -> void:
 		else:
 			_placeholder_part(f, slot, socks)
 	_wear_keepsake()
+	# Near the Reading it molts: seams of light where the body will split.
+	var mfrom := float(prog.get("molt", {}).get("from", 0.55))
+	if nearness > mfrom:
+		set_molt((nearness - mfrom) / maxf(0.01, 1.0 - mfrom) * float(prog.get("molt", {}).get("strength", 1.0)))
 	if anim and anim_names.has("idle") and anim.has_animation(anim_names["idle"]):
 		for k in anim_names:
 			if anim.has_animation(anim_names[k]):
@@ -299,6 +328,14 @@ func move_at(speed: float) -> void:
 	var want: String = anim_names.get("run" if speed > 4.0 else ("walk" if speed > 0.4 else "idle"), "")
 	if want != "" and anim.has_animation(want) and anim.current_animation != want:
 		anim.play(want, 0.2)
+
+## The molt lines: seams of light along the body as its next Reading nears (0 none, 1 due).
+func set_molt(k: float) -> void:
+	molt = clampf(k, 0.0, 1.0)
+	for r in _rims:
+		(r as ShaderMaterial).set_shader_parameter("molt", molt)
+		# a few seams across the body, whatever its size
+		(r as ShaderMaterial).set_shader_parameter("molt_scale", 0.42 / maxf(0.2, stands))
 
 func set_strength(k: float) -> void:
 	_mat.set_shader_parameter("strength", k)

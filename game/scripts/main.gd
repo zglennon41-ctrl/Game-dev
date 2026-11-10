@@ -166,6 +166,9 @@ func _ready() -> void:
 			_shot("page")
 			get_tree().quit()
 		return
+	if _args.has("lineage"):
+		_lineage(str(_args["lineage"]))
+		return
 	if _args.has("gallery"):
 		# Every form in the lattice, assembled, in rows: a check of the genius bodies.
 		mode = "gallery"
@@ -465,6 +468,85 @@ func _academy_gate() -> void:
 		_shot.call_deferred("academy")
 		if _args.has("quit"):
 			get_tree().create_timer(1.0, true, false, true).timeout.connect(get_tree().quit)
+
+## --lineage: how a genius's progress shows (docs/genius-progression.md), on the creator's
+## platform. --lineage=life (or a list of form ids) stands one life in a row, a form for each
+## instar at that instar's size, the same coat, the Seed-mark and one part carried forward;
+## --lineage=molt stands one form through the days between two Readings: new, half grown,
+## the seams showing, the Reading due.
+func _lineage(what: String) -> void:
+	mode = "gallery"
+	hud.hide_screen()
+	hud.play_ui.visible = false
+	world.set_place("stage")
+	world.show_wolf = false
+	world.genius_visible = false
+	world._player.visible = false
+	var col: Color = World.SHAPE_COLORS["anchor"]
+	var look := GeniusLook.born(4711)
+	var forms: Array = Data.forms()
+	var by_id := func(id: String) -> Dictionary:
+		for f in forms:
+			if f["id"] == id:
+				return f
+		return {}
+	var stand: Array = []      # [info, label]
+	var names := ["First Form", "Second Form", "Third Form", "Fourth Form", "Fifth Form", "Apex"]
+	if what == "molt":
+		var f: Dictionary = by_id.call("field-wolf")
+		for st in [[0.0, "THE DAY OF THE RITE"], [0.5, "HALF THE DAYS LIVED\nit has grown"], [0.85, "NEAR\nthe seams show"], [1.0, "THE READING IS DUE\nit molts"]]:
+			stand.append([{ "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": f["features"], "instar": 1, "look": look, "ready": st[0] }, String(st[1])])
+	else:
+		var ids: Array = ["hawk", "harrier", "griffin", "relic-bastion", "closed-ledger"] if what in ["true", "", "life"] else Array(what.split(","))
+		var carried: Array = []
+		for i in ids.size():
+			var f: Dictionary = by_id.call(String(ids[i]))
+			if f.is_empty():
+				continue
+			var feats: Array = (f["features"] as Array).duplicate()
+			# heritage: one part of the form before, carried as the same part
+			for c in carried:
+				if not feats.has(c):
+					feats.append(c)
+			if i == 0:
+				feats.append("far-eyes")
+			carried = ["far-eyes", String(f["features"][0])]
+			stand.append([{ "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": feats, "instar": i + 1, "look": look, "ready": 0.0 },
+				"%s\n%s  ·  %.2f m" % [String(names[mini(i, 5)]).to_upper(), f["name"], float(Data.genius()["size"][str(i + 1)])]])
+	var spot := world.stage_spot()
+	var widths: Array = stand.map(func(sd): return 2.3 if what == "molt" else 1.0 + float(Data.genius()["size"][str(int(sd[0]["instar"]))]) * 0.9)
+	var wide := 0.0
+	for wv in widths:
+		wide += float(wv)
+	var x := -wide / 2.0
+	for k in stand.size():
+		var sdef: Array = stand[k]
+		x += float(widths[k]) / 2.0
+		var b := world.make_form(sdef[0], col)
+		world.add_child(b)
+		b.position = Vector3(spot.x + x, 0.35 if (b as GeniusBody).hover else 0.0, spot.y)
+		b.rotation.y = 0.55
+		var l := Label3D.new()
+		l.text = String(sdef[1])
+		l.font = Style.font("title")
+		l.font_size = 40
+		l.pixel_size = 0.0036
+		l.outline_size = 12
+		l.modulate = Style.BRASS_HI
+		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		l.no_depth_test = true
+		l.position = Vector3(spot.x + x, 0.16, spot.y + 1.1)
+		world.add_child(l)
+		x += float(widths[k]) / 2.0
+	world.cine = true
+	world.cine_pos = Vector3(spot.x + 0.4, 1.0 + wide * 0.05, spot.y + 1.2 + wide * (0.42 if what == "molt" else 0.5))
+	world.cine_look = Vector3(spot.x, 0.4 if what == "molt" else 0.6, spot.y)
+	world._cam_pos = world.cine_pos
+	world._cam_look = world.cine_look
+	if _args.has("shots"):
+		await get_tree().create_timer(1.6).timeout
+		await _shot("lineage-" + ("molt" if what == "molt" else "life"))
+		get_tree().quit()
 
 ## --tour (with --academy --gate --shots=DIR): walk the camera through every place of the
 ## Academy and save two pictures of each, for reviewing the architecture and its scale.

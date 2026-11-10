@@ -309,6 +309,18 @@ func reading_due(tier := 0) -> int:
 		return 0
 	return n if GeniusResonance.reading_due(n, day, milestones, tier) != "" else 0
 
+## How near the next Reading is, 0 to 1: the share of the minimum days lived since this
+## instar's, held just short of 1 until the milestone that unlocks the next is reached too.
+## The body shows it (data/genius.json, progression): it grows, and near the end it molts.
+func readiness(tier := 0) -> float:
+	if not is_born() or instar >= 6:
+		return 0.0
+	if reading_due(tier) > 0:
+		return 1.0
+	var d0 := float(GeniusResonance.instar_rule(instar).get("minDay", 0))
+	var d1 := float(GeniusResonance.instar_rule(instar + 1).get("minDay", d0 + 1.0))
+	return clampf((float(day) - d0) / maxf(1.0, d1 - d0), 0.0, 1.0) * 0.9
+
 ## Read the Tally for instar n: three candidates (or the First Form's, from Seed, blood, Shape).
 func read(n: int, noise := 0.0, noise_seed := 0) -> Dictionary:
 	var current := body if is_born() else {}

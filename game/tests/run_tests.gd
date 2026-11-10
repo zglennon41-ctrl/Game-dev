@@ -63,6 +63,7 @@ func _run() -> void:
 	test_motion()
 	test_creator()
 	test_guard()
+	test_progression()
 	test_blood_marks()
 	test_life_features()
 	test_bots()
@@ -2063,3 +2064,39 @@ func test_guard() -> void:
 		for a in eb["attacks"]:
 			worst = maxf(worst, float(a["damage"]))
 		check(worst * 3.0 < float(Data.room["player"]["health"]), "%s cannot fell a fresh hero in three blows (%d a blow)" % [eb["id"], int(worst)])
+
+## A genius's progress shows between Readings (docs/genius-progression.md): readiness runs
+## from 0 on the day of a Reading toward 1 as the next nears, it grows part of the way to its
+## next size, and near the end the molt seams show.
+func test_progression() -> void:
+	var g := _born_genius()
+	g.day = 0
+	check(is_zero_approx(g.readiness()), "on the day of the rite it is not near anything")
+	var need := int(GeniusResonance.instar_rule(2)["minDay"])
+	g.day = need / 2
+	var half := g.readiness()
+	check(half > 0.2 and half < 0.7, "half the days lived, it is part of the way (%.2f)" % half)
+	g.day = need
+	var waiting := g.readiness()
+	check(waiting >= half and waiting < 1.0, "its days lived and the milestone not reached, it holds short of ready (%.2f)" % waiting)
+	g.milestone("gate")
+	check(is_equal_approx(g.readiness(), 1.0), "with the Gate passed, the Reading is due")
+	var prog: Dictionary = Data.genius()["progression"]
+	var sizes: Dictionary = Data.genius()["size"]
+	var info := g.to_dict()
+	var due := GeniusBody.build(info, Color.ORANGE, 1)
+	add_child(due)
+	check(is_equal_approx(due.nearness, 1.0) and due.molt > 0.9, "the body knows the Reading is due, and molts")
+	var want: float = float(sizes["1"]) + (float(sizes["2"]) - float(sizes["1"])) * float(prog["growth"])
+	check(is_equal_approx(due.stands, want), "it has grown part of the way to the Second Form's size (%.2f m)" % due.stands)
+	g.milestones.erase("gate")
+	g.day = 0
+	var fresh := GeniusBody.build(g.to_dict(), Color.ORANGE, 1)
+	add_child(fresh)
+	check(is_equal_approx(fresh.stands, float(sizes["1"])) and is_zero_approx(fresh.molt), "new from the rite, it stands at the First Form's size and shows no seams")
+	var plain := GeniusBody.build({ "form": "field-wolf", "silhouette": "beast-runner", "expression": "beast", "features": [], "instar": 2 }, Color.ORANGE, 2)
+	add_child(plain)
+	check(is_equal_approx(plain.stands, float(sizes["2"])) and is_zero_approx(plain.molt), "a body shown without a life (a card, a candidate) stands at its instar's size")
+	due.queue_free()
+	fresh.queue_free()
+	plain.queue_free()

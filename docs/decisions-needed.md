@@ -299,3 +299,8 @@ played the arc); barks stay as floating text. Still to be played rather than dec
     a learning hand fells the Warden and the Ruin-stag and still loses to the other two.
     Yours to set: how hard each should be, and whether breaking a beast (three breaking
     blows, a long stagger) should stay the opposite Shape's alone.
+74. **How a genius's progress shows** (mine, 2026-11-10): the plan and its eight calls are
+    in `docs/genius-progression.md` ("Calls that are the owner's"): growth between Readings,
+    the molt as the ready signal, the coat carried across forms, grafts in the donor's
+    colour, Resonance as light and instar as body, the Reading as six beats, what each
+    instar adds, and whether a First Form at 0.6 m is too small.

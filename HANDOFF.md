@@ -419,6 +419,14 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   Pattern, spark and name (`data/genius-looks.json`), with the coat, the markings and a
   keepsake the partner's to choose on its page. The three scripted lives pick as before.
   Calls left for the owner: `docs/decisions-needed.md` 71 and 72.
+  Then (2026-11-10): "figure out how the visual process of genius progression is going
+  to work," and the owner was caught at a boss mission with the armoured wolf. The plan
+  for how progress shows is `docs/genius-progression.md` (four clocks: a fight, a day, a
+  season, a Reading; what stays and what changes; the Reading as six beats; a build
+  order), with a first proof in the game: readiness, growth between Readings, the molt
+  seams, and a lineage view. The elites were tuned against a bot that parries everything;
+  they are now measured against four hands and made fair (`docs/zones.md`, "Elites and
+  their guard"). Calls left for the owner: `docs/decisions-needed.md` 73 and 74.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.
