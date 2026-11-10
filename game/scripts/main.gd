@@ -513,6 +513,12 @@ func enter_academy() -> void:
 		pr["shade_visits"] = 3
 		pr["place"] = "quad"
 	academy.enter(hero)
+	if _args.has("posting"):
+		# --posting=deep-run:green takes that posting at once, whatever the day's board drew.
+		var want := String(_args["posting"]).split(":")
+		var forced := academy.make_posting(want[0], want[1] if want.size() > 1 else "green")
+		if not forced.is_empty():
+			academy._begin_quest(forced)
 	fight = academy.fight
 	if not _args.has("bot"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED

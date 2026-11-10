@@ -599,7 +599,7 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	target_bar.get_parent().visible = t_max < 50000
 	var stag := f.w_state == "stagger"
 	(target_bar.get_theme_stylebox("fill") as StyleBoxFlat).bg_color = Style.GOLD if stag else RED
-	target_pips.text = "STAGGERED" if stag else ((("BREAK  %d / %d" % [f.w_break, int(Data.room["break"]["needed"])]) if f.breaks_beast() else "") + ("   ·   GUARDED: break it" if f.beast.has("guard") else ""))
+	target_pips.text = "STAGGERED" if stag else ((("BREAK  %d / %d" % [f.w_break, int(Data.room["break"]["needed"])]) if f.breaks_beast() else "") + (("   ·   OPEN: strike now" if f.guard_open() and f.w_state not in ["down", "absent"] else "   ·   GUARDED: see its strike out, then answer") if f.beast.has("guard") else ""))
 	timer_label.text = timer_text
 	score_label.text = score_text
 	hint.modulate.a = clampf(1.0 - (_play_time - 14.0) / 3.0, 0.0, 1.0)

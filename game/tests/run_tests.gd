@@ -62,6 +62,7 @@ func _run() -> void:
 	test_rest()
 	test_motion()
 	test_creator()
+	test_guard()
 	test_blood_marks()
 	test_life_features()
 	test_bots()
@@ -2036,3 +2037,29 @@ func test_creator() -> void:
 	check(got["cleared"] >= 2 and got["framed"] == "wide", "answering again empties the platform")
 	c.queue_free()
 	w.queue_free()
+
+## An elite's guard: a blow out of turn lands for a fraction; in the beast's stagger and in the
+## recovery of its own strike the guard is down; a Pattern goes through; and every elite of the
+## zones is one a hand that guards can fell (npm run balance:game -- --elites has the table).
+func test_guard() -> void:
+	var f := Fight.new({ "hero": Fight.default_hero(), "beast": "green-warden", "seed": 3 })
+	check(f.beast.has("guard") and float(f.beast["guard"]) < 1.0, "the Warden is guarded")
+	f.w_state = "prowl"
+	check(not f.guard_open() and is_equal_approx(f._guarded(100.0), roundf(100.0 * float(f.beast["guard"]))), "out of turn, a blow lands for the guard's fraction")
+	check(is_equal_approx(f._guarded(100.0, true), 100.0), "a Pattern goes through")
+	for st in Data.room["guard"]["open"]:
+		f.w_state = String(st)
+		check(f.guard_open() and is_equal_approx(f._guarded(100.0), 100.0), "the guard is down while it is in %s" % st)
+	check((Data.room["guard"]["open"] as Array).has("recover"), "the guard drops after its own strike: an opening anyone can use")
+	f.w_state = "windup"
+	check(not f.guard_open(), "and is up while it gathers")
+	var plain := Fight.new({ "hero": Fight.default_hero(), "beast": "cut-wolf", "seed": 3 })
+	plain.w_state = "prowl"
+	check(plain.guard_open() and is_equal_approx(plain._guarded(100.0), 100.0), "a beast with no guard is always open")
+	# no elite fells a hero at full health in fewer than four blows
+	for z in Data.zones():
+		var eb: Dictionary = Data.beast(String(z["beasts"]["elite"]))
+		var worst := 0.0
+		for a in eb["attacks"]:
+			worst = maxf(worst, float(a["damage"]))
+		check(worst * 3.0 < float(Data.room["player"]["health"]), "%s cannot fell a fresh hero in three blows (%d a blow)" % [eb["id"], int(worst)])

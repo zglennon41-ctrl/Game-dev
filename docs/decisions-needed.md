@@ -286,3 +286,16 @@ played the arc); barks stay as floating text. Still to be played rather than dec
     what the partner chooses (which coat, each marking on or off, a keepsake of four in five
     colours); (f) four new features: a shell, a skin of rime, an eye that opens in it, a
     pulse in the leather.
+73. **The guarded elites, made fair** (mine, 2026-11-10, after the owner was caught at one):
+    the four elites were tuned against a bot that parries every bite. Measured with hands
+    that do not (`npm run balance:game -- --elites`: sure, steady, learning, new), a hero
+    who misses parries was down in ten to twenty seconds with the beast barely marked. Now:
+    (a) an elite's guard is down while it recovers from its own strike, not only while it
+    is staggered (`data/combat-room.json`, `guard.open`), so guarding a blow and answering
+    it works for every Shape, and the screen says GUARDED or OPEN; (b) the elites wait a
+    little longer between strikes, the Warden and the Ruin-stag bite a little less hard, and
+    the Post-breaker and the Barge-Heart have less health and no longer fell a fresh hero in
+    three blows (`data/beasts.json`). A hand that never guards still loses to every elite;
+    a learning hand fells the Warden and the Ruin-stag and still loses to the other two.
+    Yours to set: how hard each should be, and whether breaking a beast (three breaking
+    blows, a long stagger) should stay the opposite Shape's alone.

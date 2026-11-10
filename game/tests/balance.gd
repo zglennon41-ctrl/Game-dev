@@ -10,6 +10,10 @@ func _ready() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	if OS.get_cmdline_user_args().has("--elites"):
+		_elites()
+		get_tree().quit()
+		return
 	print("\n== WEAPON TYPES: a skilled bot, 120 s against cut-wolves that return (seed 5) ==")
 	print("%-12s %-14s %6s %7s %7s %7s %6s" % ["type", "weapon", "felled", "dealt", "bitten", "lasted", "shots"])
 	var rows := []
@@ -46,6 +50,7 @@ func _run() -> void:
 		for a in z["areas"]:
 			var r := _zone_run(z, a)
 			print("%-24s %-14s %5d %6d %7s %6d %7.0f %5d" % r)
+	_elites()
 	print("\n== TEMPERAMENTS: two classmates of one temperament, 90 s with the hero standing still, a pack of one beside the locked wolf ==")
 	print("%-10s %6s %7s %8s %6s %6s %6s %6s" % ["temper", "felled", "hits", "dealt", "techs", "parry", "retreat", "down"])
 	for tp in Data.academy["cohort"]["temperaments"]:
@@ -197,6 +202,123 @@ func _zone_run(z: Dictionary, a: Dictionary) -> Array:
 		if f.p_state == "down":
 			break
 	return ["%s/%s" % [z["id"], a["id"]], beast_id, pack.size(), f.stats["wolves_down"], elite_down, f.stats["hurts"], f.now, downs]
+
+## The guarded elites and the named beasts against three hands (npm run balance:game -- --elites
+## prints this table alone). The Academy's own elite, the Warden, is the one a learner must pass.
+func _elites() -> void:
+	print("\n== ELITES AND NAMED: four hands at the guarded beasts, a First Form genius on guard, %d fights of up to 240 s each ==" % ELITE_SEEDS)
+	print("   sure: parries every bite, strikes in the openings.  steady: raises the guard late two times in three, and so sometimes parries.")
+	print("   learning: raises it early one time in two (a block), strikes half the time out of turn.  new: no guard, strikes whenever in reach.")
+	print("%-14s %-7s %-9s %-6s %7s %7s %10s %12s %6s" % ["beast", "shape", "hand", "party", "felled", "in", "hero left", "if lost, at", "hurts"])
+	for z in Data.zones():
+		var eb: String = z["beasts"]["elite"]
+		var breaker := Data.opposite(String(Data.beast(eb)["shape"]))
+		for hand in ["sure", "steady", "learning", "new"]:
+			for who in [["anchor", false], ["anchor", true], [breaker, true]]:
+				if who[0] == "anchor" and breaker == "anchor" and who[1]:
+					continue
+				print("%-14s %-7s %-9s %-6s %7s %7s %10s %12s %6s" % _elite_row(eb, eb, 1.0, hand, who[0], who[1]))
+		for nb in z["beasts"].get("named", []):
+			for hand in ["steady", "learning", "new"]:
+				print("%-14s %-7s %-9s %-6s %7s %7s %10s %12s %6s" % _elite_row(String(nb["name"]), String(nb["beast"]), float(nb.get("health", 1.5)), hand, "anchor", true))
+
+const ELITE_SEEDS := 6
+
+## A row of the table: the same fight over several seeds. How many were won, the middle time
+## of the wins, the hero's health left in them, and where the beast stood in the losses.
+func _elite_row(label: String, beast_id: String, health: float, hand: String, shape: String, with_party: bool) -> Array:
+	var wins: Array = []
+	var left: Array = []
+	var lost_at: Array = []
+	var hurts := 0
+	for sd in ELITE_SEEDS:
+		var r := _elite_run(beast_id, health, hand, shape, with_party, 11 + sd * 17)
+		hurts += int(r["hurts"])
+		if OS.get_cmdline_user_args().has("--detail"):
+			print("      %s %s seed %d: %.0f s, dealt %d, hurts %d, blocks %d, parries %d, hero %d, beast %d%%" % [label, hand, sd, r["t"], r["dealt"], r["hurts"], r["blocks"], r["parries"], r["hero"], r["beast"]])
+		if r["felled"] >= 0.0:
+			wins.append(r["felled"])
+			left.append(r["hero"])
+		else:
+			lost_at.append(r["beast"])
+	wins.sort()
+	var mean := func(xs: Array) -> float:
+		var t := 0.0
+		for x in xs:
+			t += float(x)
+		return t / maxf(1.0, xs.size())
+	return [label, shape, hand, "three" if with_party else "alone", "%d/%d" % [wins.size(), ELITE_SEEDS],
+		("%.0f s" % wins[wins.size() / 2]) if not wins.is_empty() else "-", ("%.0f" % mean.call(left)) if not wins.is_empty() else "-",
+		("%.0f%%" % mean.call(lost_at)) if not lost_at.is_empty() else "-", "%.1f" % (hurts / float(ELITE_SEEDS))]
+
+## One beast, alone in its lair, against a hero of a given Shape and hand at Stage 3, with or
+## without two classmates. Returns the row: when it fell, and how the fight ended.
+func _elite_run(beast_id: String, health: float, hand: String, shape: String, with_party: bool, seed_value := 11, seconds := 240.0) -> Dictionary:
+	var h := Fight.default_hero()
+	h["stage"] = 3
+	h["projected"] = true
+	h["shape"] = shape
+	var cohort := Academy.make_cohort(42, h)
+	var opts := { "seed": seed_value, "hero": h, "beast": beast_id, "respawn": false, "arena": Vector2(20, 14), "allies": [cohort[0], cohort[1]] if with_party else [] }
+	var ff := Rite.first_form(h, shape, 11)
+	opts["genius"] = Rite.birth(h, ff["reading"], ff["name"])
+	if health != 1.0:
+		opts["beast_health"] = roundf(float(Data.beast(beast_id)["health"]) * health)
+	var f := Fight.new(opts)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value * 3 + 7
+	var guard_this := true
+	var rng_half := true
+	var was_windup := false
+	var felled := -1.0
+	for i in int(seconds / DT):
+		var to_w := f.w_pos - f.p_pos
+		var move := Vector2.ZERO
+		var windup := _any_windup(f)
+		if windup and not was_windup:
+			guard_this = rng.randf() < 0.67
+			rng_half = rng.randf() < 0.5
+		was_windup = windup
+		match hand:
+			"sure":
+				if _bite_coming(f):
+					f.input("block-down")
+				if f.p_block_held and not windup:
+					f.input("block-up")
+			"steady":
+				# late to the guard: it is up a quarter second into the wind-up, and stays up
+				if windup and guard_this and not f.p_block_held and f.w_timer > 0.25:
+					f.input("block-down")
+				if f.p_block_held and not windup and f.w_state != "strike":
+					f.input("block-up")
+			"learning":
+				# the guard goes up as soon as the beast gathers, half the time: too early to parry
+				if windup and rng_half and not f.p_block_held:
+					f.input("block-down")
+				if f.p_block_held and not windup and f.w_state != "strike":
+					f.input("block-up")
+		if f.pattern_ready():
+			f.input("pattern")
+		if f.p_state == "pattern" and not f.chain.is_empty():
+			var c: float = f.chain["cues"][f.chain["next"]]
+			if absf(f.now - c) < DT / 2.0:
+				f.input("attack")
+		elif to_w.length() < 2.4 and not f.p_block_held and f.w_state not in ["down", "absent"]:
+			var opening: bool = f.w_state in ["recover", "stagger", "flinch", "idle", "prowl"] and (f.w_state != "recover" or f.w_duration - f.w_timer > 0.45)
+			if opening or hand == "new" or (hand == "learning" and guard_this and not windup):
+				if hand in ["sure", "steady"] and f.p_will > 40 and f.now >= float(f.p_cooldowns.get(f.tech["id"], 0.0)):
+					f.input("technique")
+				else:
+					f.input("attack")
+		if to_w.length() > 2.0 and (f.w_state != "windup" or hand == "new") and f.w_state not in ["down", "absent"]:
+			move = to_w.normalized()
+		f.update(DT, move)
+		for e in f.drain():
+			if e["type"] == "wolf-down" and felled < 0.0:
+				felled = f.now
+		if f.p_state == "down" or felled >= 0.0:
+			break
+	return { "t": f.now, "dealt": f.stats["damage_dealt"], "felled": felled, "hero": f.p_hp, "beast": 100.0 * f.w_hp / float(f.beast["health"]), "hurts": f.stats["hurts"], "parries": f.stats["parries"], "blocks": f.stats["blocks"] }
 
 func _cohort(temper: String) -> Array:
 	var h := Fight.default_hero()

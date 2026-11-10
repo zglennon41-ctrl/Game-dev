@@ -97,6 +97,10 @@
     "willPerSecond": 2,
     "noFlinch": true
   },
+  "guard": {
+    "$comment": "An elite's guard (data/beasts.json, guard): a blow out of turn lands for that fraction. In these states of the beast the guard is down and a blow lands whole: while it is staggered, and while it recovers from a strike of its own. A Pattern always goes through. So the fight is to see the strike out (guard it, parry it, step out of it) and answer in the opening.",
+    "open": ["stagger", "recover"]
+  },
   "break": {
     "needed": 3,
     "staggerSeconds": 2.4,

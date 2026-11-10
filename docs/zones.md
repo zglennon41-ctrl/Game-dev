@@ -71,3 +71,17 @@ their foe is below half (your genius witnesses it), parries or blocks a bite aim
 by temperament (a parry staggers the beast), and falls back toward you when hurt past their
 nerve. Events: `ally-windup`, `ally-hit`, `ally-pattern`, `ally-parry`, `ally-block`,
 `ally-retreat`, `ally-shot`.
+
+## Elites and their guard (2026-11-10)
+
+An elite is guarded (`guard` in `data/beasts.json`): a blow out of turn lands for that
+fraction. The guard is down, and a blow lands whole, while the beast is staggered and while
+it recovers from a strike of its own (`data/combat-room.json`, `guard.open`); a Pattern
+always goes through. The target line reads GUARDED or OPEN. So the fight is: see the strike
+out (guard it, parry it, step out of it) and answer in the opening.
+
+The elites are tuned against four hands, not only the bot that parries everything:
+`npm run balance:game -- --elites` prints, for each elite and named beast, how many of six
+fights each hand wins, how long it takes, and what is left of the hero or the beast. The
+Green's Warden is the one a learner must pass (the Field Examination ends at its den), so a
+hand that guards half the blows and never parries should fell it every time.

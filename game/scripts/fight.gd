@@ -1051,11 +1051,17 @@ func _resolve_swing(damage: float, reach: float, arc: float, breaks: bool, knock
 			_emit({ "type": "stagger", "seconds": float(room["break"]["staggerSeconds"]), "cause": "break" })
 	return true
 
-## An elite's guard: until it is broken, blows land for a fraction; a Pattern goes through.
+## An elite's guard: a blow out of turn lands for a fraction. The guard is down while the beast
+## is staggered and while it recovers from its own strike (data/combat-room.json, guard.open),
+## and a Pattern goes through.
 func _guarded(dmg: float, from_pattern := false) -> float:
-	if from_pattern or w_state == "stagger" or not beast.has("guard"):
+	if from_pattern or not beast.has("guard") or guard_open():
 		return dmg
 	return roundf(dmg * float(beast["guard"]))
+
+## Is a guarded beast open now? (Always true of a beast with no guard.)
+func guard_open() -> bool:
+	return not beast.has("guard") or (room.get("guard", {}).get("open", ["stagger"]) as Array).has(w_state)
 
 func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
 	dmg = _guarded(dmg, from_pattern)

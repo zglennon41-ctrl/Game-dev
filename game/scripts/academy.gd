@@ -2446,6 +2446,27 @@ func postings_for_day(day: int) -> Array:
 				progress["quest_types_seen"].append(q2["type"])
 	return out
 
+## A posting of a given type in a given zone, whatever the day drew: for automated checks
+## (--posting=deep-run:green) and for anything that must send the hero to a named fight.
+func make_posting(tid: String, zone_id: String) -> Dictionary:
+	var t: Dictionary = Data.quests["types"].get(tid, {})
+	var zs: Array = Data.zones().filter(func(zz): return zz["id"] == zone_id)
+	if t.is_empty() or zs.is_empty():
+		return {}
+	var z: Dictionary = zs[0]
+	var named: Array = z["beasts"].get("named", [])
+	var p := { "id": "quest:%d:forced" % int(progress["day"]), "day": int(progress["day"]), "type": tid, "zone": z["id"], "colour": z["colour"],
+		"poster": "The board", "pay": int(t["pay"].get(z["colour"], 1)), "entry": "%s/%s" % [z["id"], z["areas"][0]["id"]], "post": "", "elite": "",
+		"named": named[0] if not named.is_empty() else {} }
+	for a in z["areas"]:
+		if a.has("post") and p["post"] == "":
+			p["post"] = "%s/%s" % [z["id"], a["id"]]
+		if a.get("beast", "") == "elite" and p["elite"] == "":
+			p["elite"] = "%s/%s" % [z["id"], a["id"]]
+	p["title"] = fill_quest(t["title"], p)
+	p["posting"] = fill_quest(t["posting"], p)
+	return p
+
 func weekday_of(day: int) -> String:
 	var days: Array = Data.academy.get("calendar", {}).get("weekdays", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
 	return days[(day - 1) % days.size()]
