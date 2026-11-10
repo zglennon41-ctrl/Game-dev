@@ -4,6 +4,7 @@
  "class": "monster",
  "expression": "daemon",
  "silhouette": "daemon-shadow",
+ "soul": "The soul of one who watches from the edge of the room, and would be mortified to be thanked.",
  "spark": "The mote is behind you. When you turn it is still behind you. Your classmates can see it; you have learned not to try.",
  "nature": {
   "ground": {
@@ -49,6 +50,8 @@
   "id": "lurker-small-shadow",
   "name": "Small Shadow",
   "text": "A shadow at your heel that is not yours and does not match the lamp. It has not done anything. It is very attentive.",
+  "sign": "A shadow at your heel that falls the wrong way for the lamp. It is a little darker where the eyes would be.",
+  "habit": "When you sit, it pools under the chair. When you look, it is behind the chair.",
   "features": [
    "shadow-cloak"
   ]
@@ -57,10 +60,16 @@
   {
    "id": "lurker-back-stander",
    "name": "Back-stander",
+   "of": "one who looks after people from where they cannot be thanked for it",
    "text": "It learned from you that the place behind someone is a place that needs filling.",
+   "sign": "Broad across the back and always a half step behind somebody. It turns away when looked at.",
+   "habit": "It stands behind whoever in the room is most tired.",
    "leans": {
     "orders": {
      "guard": 1.0
+    },
+    "bonds": {
+     "classmate": 0.7
     },
     "fights": {
      "blocks": 0.4
@@ -73,7 +82,10 @@
     {
      "id": "lurker-long-shadow",
      "name": "Long Shadow",
+     "of": "one who keeps a whole room in the corner of their eye",
      "text": "It lies across the whole party at dusk. Things that step on it are noticed.",
+     "sign": "It stretches long across the floor at dusk, and there are old, patient eyes in it somewhere.",
+     "habit": "At sunset it lies across every doorway at once.",
      "leans": {
       "company": {
        "party": 1.0
@@ -86,7 +98,10 @@
       {
        "id": "lurker-the-last-in-line",
        "name": "The Last in Line",
+       "of": "one who walks last so that nobody else is last",
        "text": "Count the party and there is one more than there should be, at the back. Nothing has ever taken the one in front of it.",
+       "sign": "Tall and thin at the very back of any file of people, where the lamp does not quite reach.",
+       "habit": "It lets everyone through a door before it, including people it does not know.",
        "leans": {
         "quests": {
          "escort": 1.0
@@ -99,7 +114,10 @@
       {
        "id": "lurker-shadow-of-the-cohort",
        "name": "Shadow of the Cohort",
+       "of": "one who has stood behind each friend once, on the day it mattered",
        "text": "Each of your classmates has caught it standing behind them once. None of them was hurt that day.",
+       "sign": "A single pale eye opens in it when one of the twelve is in the room.",
+       "habit": "It moves from behind one classmate to the next through the evening, and stays longest with the quiet one.",
        "leans": {
         "bonds": {
          "classmate": 1.0
@@ -114,7 +132,10 @@
     {
      "id": "lurker-blow-eater",
      "name": "Blow-eater",
+     "of": "one who takes what was meant for another and says nothing",
      "text": "What is aimed at your back goes into it and does not come out the other side.",
+     "sign": "There is a wide dark place in the middle of it, like a mouth, and no sound comes out.",
+     "habit": "It leans over your shoulder when voices are raised, between you and the voice.",
      "leans": {
       "fights": {
        "hurts": 1.0
@@ -127,7 +148,10 @@
       {
        "id": "lurker-the-hollow-behind",
        "name": "The Hollow Behind",
+       "of": "one who has taken so much for another that it has their shape",
        "text": "It has swallowed so many blows meant for you that it has a shape now. The shape is yours, turned round.",
+       "sign": "It has your outline, facing the other way, with a second faint face at the back of the head.",
+       "habit": "It stands back to back with you, and matches how you stand.",
        "leans": {
         "fights": {
          "hurts": 1.0
@@ -140,7 +164,10 @@
       {
        "id": "lurker-dark-parry",
        "name": "Dark Parry",
+       "of": "one who covers the side a friend forgot",
        "text": "Your guard goes up and its goes up behind you. A foe that circles finds the back is also a front.",
+       "sign": "A blank pale mask hangs in the dark of it, and lifts when your guard lifts.",
+       "habit": "It copies your guard while you practise, from behind you, facing the other way.",
        "leans": {
         "fights": {
          "parries": 1.0
@@ -155,7 +182,10 @@
     {
      "id": "lurker-door-shadow",
      "name": "Door-shadow",
+     "of": "one who closes a way by standing in it",
      "text": "Stand it in a doorway and the doorway is shut, though you can see straight through it.",
+     "sign": "It stands in a doorway in the shape of a door. You can see through it, and nobody walks through.",
+     "habit": "It stands in the dormitory door after lights-out until the last breath in the room slows.",
      "leans": {
       "orders": {
        "hold": 1.0
@@ -168,7 +198,10 @@
       {
        "id": "lurker-dark-threshold",
        "name": "Dark Threshold",
+       "of": "one past whom the trouble does not come",
        "text": "It keeps the door of every post you hold. The line's dark stops at it and waits.",
+       "sign": "The air in front of it stands thick and still, and lamp smoke bends away.",
+       "habit": "It keeps to the sill of whatever room you are in, on the inside.",
        "leans": {
         "orders": {
          "hold": 1.0
@@ -184,7 +217,10 @@
       {
        "id": "lurker-cellar-keeper",
        "name": "Cellar-keeper",
+       "of": "one who went down to look so that no one else had to",
        "text": "It knows what is under every ruin, because it went down and stood behind that too.",
+       "sign": "Its eyes are the black of a stair going down. There is brick dust on what would be its hands.",
+       "habit": "It goes down first into any cellar, and stands at the bottom until you have come.",
        "leans": {
         "ground": {
          "ruin": 1.0
@@ -199,159 +235,21 @@
    ]
   },
   {
-   "id": "lurker-night-stalker",
-   "name": "Night-stalker",
-   "text": "It learned from you to be where the foe is not looking. It was already good at that.",
+   "id": "lurker-the-one-who-sits-up",
+   "name": "The One Who Sits Up",
+   "of": "one who sits up with the sick and the dead and does not mention it",
+   "text": "It learned from you that somebody should be awake when the worst hour comes. It is there, in the chair, and has never said so.",
+   "sign": "It is the shape of someone sitting forward in a chair. When it speaks it is low, and only at night.",
+   "habit": "It keeps to the chair by your bed until the window goes grey.",
    "leans": {
+    "bonds": {
+     "shade": 1.0
+    },
     "ground": {
-     "night": 1.0
+     "night": 0.7
     },
-    "orders": {
-     "hunt": 0.7
-    }
-   },
-   "features": [
-    "fangs"
-   ],
-   "prongs": [
-    {
-     "id": "lurker-garrotter",
-     "name": "Garrotter",
-     "text": "It arrives with your blade, from the other side. The foe has to choose, and both answers are wrong.",
-     "leans": {
-      "range": {
-       "close": 1.0
-      }
-     },
-     "features": [
-      "chain"
-     ],
-     "finishes": [
-      {
-       "id": "lurker-second-assailant",
-       "name": "Second Assailant",
-       "text": "Your Pattern's chain has a hand in it that is not yours. The blows land in pairs.",
-       "leans": {
-        "pattern": {
-         "fires": 1.0
-        }
-       },
-       "features": [
-        "short-blade"
-       ]
-      },
-      {
-       "id": "lurker-the-thing-in-the-corner",
-       "name": "The Thing in the Corner",
-       "text": "When you work alone, the foe keeps glancing past you. It is right to.",
-       "leans": {
-        "company": {
-         "alone": 1.0
-        }
-       },
-       "features": [
-        "watching-eye"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "lurker-long-reaching-shadow",
-     "name": "Long-reaching Shadow",
-     "text": "Your shot casts a shadow as it flies, and the shadow has hands.",
-     "leans": {
-      "range": {
-       "far": 1.0
-      }
-     },
-     "features": [
-      "long-legged"
-     ],
-     "finishes": [
-      {
-       "id": "lurker-shot-shadow",
-       "name": "Shot-shadow",
-       "text": "It travels in the dark behind whatever you throw, arrives at the same moment, and stays.",
-       "leans": {
-        "shape": {
-         "cast": 1.0
-        }
-       },
-       "features": [
-        "talons"
-       ]
-      },
-      {
-       "id": "lurker-name-stalker",
-       "name": "Name-stalker",
-       "text": "It has stood behind every named beast you hunt, in its den, for nights, learning how it sleeps.",
-       "leans": {
-        "bonds": {
-         "named": 1.0
-        }
-       },
-       "features": [
-        "tunnel-ear"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "lurker-pack-thinner",
-     "name": "Pack-thinner",
-     "text": "It takes the one at the back of the pack. Then there is a new one at the back.",
-     "leans": {
-      "quests": {
-       "hunt": 1.0
-      }
-     },
-     "features": [
-      "long-legs"
-     ],
-     "finishes": [
-      {
-       "id": "lurker-the-count-one-short",
-       "name": "The Count One Short",
-       "text": "The green's packs have learned to count themselves. The count is always one short.",
-       "leans": {
-        "quests": {
-         "hunt": 1.0
-        },
-        "ground": {
-         "wild": 0.5
-        }
-       },
-       "features": [
-        "dark-eyed"
-       ]
-      },
-      {
-       "id": "lurker-the-dark-ahead",
-       "name": "The Dark Ahead",
-       "text": "In the deep places it goes ahead, which it does nowhere else. Follow the dark that moves.",
-       "leans": {
-        "quests": {
-         "deep-run": 1.0
-        }
-       },
-       "features": [
-        "cold-core"
-       ]
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "lurker-murmurer",
-   "name": "Murmurer",
-   "text": "It learned from you that a word at someone's ear does more than a hand on their arm.",
-   "leans": {
     "shape": {
-     "bind": 1.0
-    },
-    "orders": {
-     "free": 0.5
+     "bind": 0.5
     }
    },
    "features": [
@@ -359,9 +257,66 @@
    ],
    "prongs": [
     {
+     "id": "lurker-vigil-shadow",
+     "name": "Vigil Shadow",
+     "of": "one the dead find easier to talk to than the living",
+     "text": "It sits up with the dead of your hall at the lamp hour. They find it easier to talk to than you.",
+     "sign": "It holds a covered lamp in its lap and sits with its head bent, as if at a bedside.",
+     "habit": "At the lamp hour it sits at the hearth among the shades, and its lamp is the one they do not dim.",
+     "leans": {
+      "bonds": {
+       "shade": 1.0
+      }
+     },
+     "features": [
+      "lantern"
+     ],
+     "silhouette": "daemon-vigil",
+     "finishes": [
+      {
+       "id": "lurker-night-long-vigil",
+       "name": "Night-long Vigil",
+       "of": "one who has heard what the dying would not tell their own",
+       "text": "It has kept watch for every shade you spoke with. They have told it what they would not tell the living.",
+       "sign": "Its eyes are old and do not close. The lamp has burned down and it has not noticed.",
+       "habit": "It sits through until dawn without shifting, and goes out as the birds start.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      },
+      {
+       "id": "lurker-sickroom-shadow",
+       "name": "Sickroom Shadow",
+       "of": "one who is in the chair when you wake",
+       "text": "It is in the chair when you wake hurt at night. It has not slept either. It will not say so.",
+       "sign": "A faint warm light under what would be its hands, held where you can see it from the pillow.",
+       "habit": "When you wake hurt it looks away, as if it had only just sat down.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "fights": {
+         "hurts": 0.4
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      }
+     ]
+    },
+    {
      "id": "lurker-the-one-behind",
      "name": "The One Behind",
+     "of": "one who says the true thing quietly, at the ear",
      "text": "The foe hears its own name said softly at its shoulder, and turns. That is all you needed.",
+     "sign": "A second, smaller face rides at its shoulder and does the talking, very low.",
+     "habit": "It leans to the ear of whoever is speaking, and they lose the thread.",
      "leans": {
       "shape": {
        "bind": 1.0
@@ -375,7 +330,10 @@
       {
        "id": "lurker-oath-shadow",
        "name": "Oath-shadow",
+       "of": "one who heard you promise and has not forgotten a word",
        "text": "It was behind you when you swore and heard every word. It says them back if you start to break one.",
+       "sign": "It carries a thin dark book it never opens. Its lips shape your Terms when you hesitate.",
+       "habit": "It stands at the foot of the bed on the night of any day you nearly broke your word.",
        "leans": {
         "pattern": {
          "sworn": 1.0
@@ -388,7 +346,10 @@
       {
        "id": "lurker-the-voice-at-the-shoulder",
        "name": "The Voice at the Shoulder",
+       "of": "one who moves others with a word and stays out of sight",
        "text": "It tells the foe where to stand. The foe goes there, and afterwards does not know why.",
+       "sign": "A dim crown sits over the second face. The first has no mouth at all.",
+       "habit": "It murmurs to other genii in passing, and they go and sit somewhere else.",
        "leans": {
         "shape": {
          "bind": 1.0
@@ -404,56 +365,136 @@
      ]
     },
     {
-     "id": "lurker-vigil-shadow",
-     "name": "Vigil Shadow",
-     "text": "It sits up with the dead of your hall at the lamp hour. They find it easier to talk to than you.",
+     "id": "lurker-long-reaching-shadow",
+     "name": "Long-reaching Shadow",
+     "of": "one whose watch does not stop at the door",
+     "text": "Its watch does not stop at the door of the room. Your shot casts a shadow as it flies, and the shadow has hands.",
+     "sign": "Its arms are longer than it is tall, and it stands at the far wall of any room.",
+     "habit": "It reaches across the room for things without moving its feet.",
      "leans": {
-      "bonds": {
-       "shade": 1.0
+      "range": {
+       "far": 1.0
       }
      },
      "features": [
-      "lantern"
+      "long-legged"
      ],
-     "silhouette": "daemon-vigil",
      "finishes": [
       {
-       "id": "lurker-night-long-vigil",
-       "name": "Night-long Vigil",
-       "text": "It has kept watch for every shade you spoke with. They have told it what they would not tell the living.",
+       "id": "lurker-shot-shadow",
+       "name": "Shot-shadow",
+       "of": "one who goes along with what was sent, to see it arrive",
+       "text": "It travels in the dark behind whatever you throw, arrives at the same moment, and stays.",
+       "sign": "Hooked dark fingers, and a way of reaching the far end of things at the same time as the noise.",
+       "habit": "It follows a thrown ball and is standing over it when it stops.",
        "leans": {
-        "bonds": {
-         "shade": 1.0
+        "shape": {
+         "cast": 1.0
         }
        },
        "features": [
-        "old-eyes"
-       ],
-       "silhouette": "daemon-vigil"
+        "talons"
+       ]
       },
       {
-       "id": "lurker-sickroom-shadow",
-       "name": "Sickroom Shadow",
-       "text": "It is in the chair when you wake hurt at night. It has not slept either. It will not say so.",
+       "id": "lurker-name-stalker",
+       "name": "Name-stalker",
+       "of": "one who will sit outside a door for as long as it takes",
+       "text": "It has stood behind every named beast you hunt, in its den, for nights, learning how it sleeps.",
+       "sign": "One side of it is all ear, turned to a wall. It has been there since you came in.",
+       "habit": "It sits outside one door all night, listening to something breathe.",
        "leans": {
-        "ground": {
-         "night": 1.0
-        },
-        "fights": {
-         "hurts": 0.4
+        "bonds": {
+         "named": 1.0
         }
        },
        "features": [
-        "glow"
-       ],
-       "silhouette": "daemon-vigil"
+        "tunnel-ear"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "lurker-the-unremarked",
+   "name": "The Unremarked",
+   "of": "one who would rather not be looked at",
+   "text": "It learned from you to stand where eyes slide off. People count the room and get the right number with the two of you left out.",
+   "sign": "It stands with its collar up in the one part of the room the lamp misses. Eyes slide off it.",
+   "habit": "It leaves a room when it is mentioned.",
+   "leans": {
+    "company": {
+     "alone": 1.0
+    },
+    "shape": {
+     "read": 0.7
+    },
+    "ground": {
+     "night": 0.5
+    }
+   },
+   "features": [
+    "high-collar"
+   ],
+   "prongs": [
+    {
+     "id": "lurker-garrotter",
+     "name": "Garrotter",
+     "of": "one who does the hard thing from behind, where nobody need see",
+     "text": "It arrives with your blade, from the other side. The foe has to choose, and both answers are wrong.",
+     "sign": "A thin chain hangs between its two hands, and it holds them a little apart.",
+     "habit": "It winds the chain round its wrists and unwinds it, all evening.",
+     "leans": {
+      "range": {
+       "close": 1.0
+      }
+     },
+     "features": [
+      "chain"
+     ],
+     "finishes": [
+      {
+       "id": "lurker-second-assailant",
+       "name": "Second Assailant",
+       "of": "one who lends a hand nobody will ever credit",
+       "text": "Your Pattern's chain has a hand in it that is not yours. The blows land in pairs.",
+       "sign": "It has a short dark blade the same shape as yours, held in the other hand.",
+       "habit": "It goes through your drills beside you, a beat after, on the wall.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        }
+       },
+       "features": [
+        "short-blade"
+       ]
+      },
+      {
+       "id": "lurker-the-thing-in-the-corner",
+       "name": "The Thing in the Corner",
+       "of": "one who is most present when there is nobody else",
+       "text": "When you work alone, the foe keeps glancing past you. It is right to.",
+       "sign": "One pale eye, open, in the corner of the ceiling. It was not there when you had company.",
+       "habit": "It takes the corner behind the door, and comes out when the last visitor has gone.",
+       "leans": {
+        "company": {
+         "alone": 1.0
+        }
+       },
+       "features": [
+        "watching-eye"
+       ]
       }
      ]
     },
     {
      "id": "lurker-reader-over-the-shoulder",
      "name": "Reader-over-the-shoulder",
+     "of": "one who reads everything and is never seen reading",
      "text": "It reads the foe the way it reads your letters: from behind, and all of it.",
+     "sign": "Its eyes are set forward and wide, and you feel them on the page before you see them.",
+     "habit": "It reads your letters from behind you, and has finished before you have.",
      "leans": {
       "shape": {
        "read": 1.0
@@ -466,7 +507,10 @@
       {
        "id": "lurker-cold-premonition",
        "name": "Cold Premonition",
+       "of": "one whose only warning is a change in the air",
        "text": "A cold place at your back a breath before the strike. Guard when you feel it.",
+       "sign": "A patch of cold at your back the size of a hand. Your breath shows when it is near.",
+       "habit": "It stands close behind you in doorways for a moment before you go through.",
        "leans": {
         "fights": {
          "parries": 1.0
@@ -482,7 +526,10 @@
       {
        "id": "lurker-the-quiet-at-your-back",
        "name": "The Quiet at Your Back",
+       "of": "one who has made sure, without saying, that nothing follows",
        "text": "In the Quiet it is the only thing behind you, and it has made sure of that.",
+       "sign": "No sound comes from behind you at all: no step, no cloth, no breath. That is it.",
+       "habit": "It walks behind you on the way home, and the road behind is very quiet.",
        "leans": {
         "ground": {
          "quiet": 1.0
@@ -490,6 +537,59 @@
        },
        "features": [
         "quiet-place"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "lurker-pack-thinner",
+     "name": "Pack-thinner",
+     "of": "one who deals with a thing from the back, one piece at a time",
+     "text": "It takes the one at the back of the pack. Then there is a new one at the back.",
+     "sign": "Long thin legs that fold the wrong way. It is always at the rear of whatever it follows.",
+     "habit": "It takes one biscuit from the back of the tin. Then there is a new one at the back.",
+     "leans": {
+      "quests": {
+       "hunt": 1.0
+      }
+     },
+     "features": [
+      "long-legs"
+     ],
+     "finishes": [
+      {
+       "id": "lurker-the-count-one-short",
+       "name": "The Count One Short",
+       "of": "one who is noticed only by what is missing afterward",
+       "text": "The green's packs have learned to count themselves. The count is always one short.",
+       "sign": "Eyes like two holes in the hedge. You count the trees and there is one too many.",
+       "habit": "It stands among the coats on a rack and is not found until one is taken.",
+       "leans": {
+        "quests": {
+         "hunt": 1.0
+        },
+        "ground": {
+         "wild": 0.5
+        }
+       },
+       "features": [
+        "dark-eyed"
+       ]
+      },
+      {
+       "id": "lurker-the-dark-ahead",
+       "name": "The Dark Ahead",
+       "of": "one who goes first only where it is worst",
+       "text": "In the deep places it goes ahead, which it does nowhere else. Follow the dark that moves.",
+       "sign": "A cold dark shape a few paces in front of the lamp, where it has never stood before.",
+       "habit": "On an ordinary road it hangs back. On a bad one it is suddenly in front.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        }
+       },
+       "features": [
+        "cold-core"
        ]
       }
      ]

@@ -4,6 +4,7 @@
  "class": "animal",
  "expression": "beast",
  "silhouette": "beast-crowned",
+ "soul": "The soul of one who holds their head up in any company, and is easier under trees than under a roof.",
  "spark": "The mote stays at the edge of the lamplight and goes still when you look straight at it.",
  "nature": {
   "ground": {
@@ -48,6 +49,8 @@
   "id": "stag-fawn",
   "name": "Fawn",
   "text": "Legs it has not learned yet, and no crown. It startles at the bowl-fire and then stands in front of you as if it had not.",
+  "sign": "All leg, with two soft bumps where the crown will be. It stands very straight when it is frightened.",
+  "habit": "It freezes when a door opens, then steps in front of you as if that had been the plan.",
   "features": [
    "long-legs"
   ]
@@ -56,13 +59,19 @@
   {
    "id": "stag-tilter",
    "name": "Tilter",
-   "text": "It learned from you to lower its head and go straight at the thing.",
+   "of": "one who cannot back down once challenged",
+   "text": "It learned from you that once the head is down there is no dignified way to lift it. It goes straight at the thing.",
+   "sign": "It carries its head low and forward. The brow is thick, and scuffed from doors.",
+   "habit": "It squares up to anything that looks back at it: a gatepost, a statue, its own reflection.",
    "leans": {
     "range": {
      "close": 1.0
     },
     "fights": {
-     "hurts": 0.4
+     "hurts": 0.7
+    },
+    "pattern": {
+     "fires": 0.4
     }
    },
    "features": [
@@ -72,7 +81,10 @@
     {
      "id": "stag-locked-horn",
      "name": "Locked-horn",
+     "of": "one who holds an argument in place until a friend arrives",
      "text": "It takes the foe's blow on its tines and holds it there while you work.",
+     "sign": "A deep chest and a neck like a root. The tines are scored where others have locked on them.",
+     "habit": "It pushes, gently and for a long time, against any wall it stands beside.",
      "leans": {
       "fights": {
        "blocks": 1.0
@@ -85,7 +97,10 @@
       {
        "id": "stag-twelve-point",
        "name": "Twelve-point",
+       "of": "one whose every stand shows on them",
        "text": "Every season you stood your ground it grew a tine. Count them.",
+       "sign": "Twelve tines, evenly grown. People count them, and it holds still to be counted.",
+       "habit": "It stands on the highest ground in view with its head up, doing nothing at all.",
        "leans": {
         "shape": {
          "anchor": 1.0
@@ -101,7 +116,10 @@
       {
        "id": "stag-scarred-royal",
        "name": "Scarred Royal",
+       "of": "one who lost something to pride and kept the pride",
        "text": "The crown is chipped and one tine is gone. It lowers it just the same.",
+       "sign": "A chipped crown with one tine gone, and a hide gone dark and hard over old cuts.",
+       "habit": "It lowers its head to every newcomer, the broken side first.",
        "leans": {
         "fights": {
          "hurts": 1.0
@@ -116,7 +134,10 @@
     {
      "id": "stag-long-charge",
      "name": "Long Charge",
+     "of": "one who is across the room before thinking better of it",
      "text": "It crosses the ground before the foe has finished winding up.",
+     "sign": "Longer in the leg than a stag should be, and always gathered, as if on a slope.",
+     "habit": "It paces the longest straight line the room allows.",
      "leans": {
       "fights": {
        "dodges": 1.0
@@ -132,7 +153,10 @@
       {
        "id": "stag-break-line-stag",
        "name": "Break-line Stag",
+       "of": "one who goes through rather than round",
        "text": "It goes through a pack the way the car goes through a snowdrift.",
+       "sign": "Its hooves are broad and set square, and it leaves a straight track through anything.",
+       "habit": "It walks through gaps in hedges that were not gaps before.",
        "leans": {
         "quests": {
          "hunt": 1.0
@@ -145,7 +169,10 @@
       {
        "id": "stag-ghost-runner",
        "name": "Ghost-runner",
+       "of": "one who runs it off alone, at night",
        "text": "It runs with you alone at night, and is only ever seen where it has already been.",
+       "sign": "Grey at the edges in poor light. You see its breath before you see it.",
+       "habit": "It is gone at midnight and back by morning with wet legs.",
        "leans": {
         "ground": {
          "night": 1.0
@@ -163,7 +190,10 @@
     {
      "id": "stag-belling-stag",
      "name": "Belling Stag",
+     "of": "one who announces themselves before they arrive",
      "text": "It bells when your Pattern is ready, and the foe looks round.",
+     "sign": "A throat that swells before it calls. Heads turn a moment before the sound.",
+     "habit": "It bells once at first light, facing whatever is largest.",
      "leans": {
       "pattern": {
        "fires": 1.0
@@ -176,7 +206,10 @@
       {
        "id": "stag-oath-crowned",
        "name": "Oath-crowned",
+       "of": "one who wears their promises where all can read them",
        "text": "It carries your sworn Terms cut into its beam. It will not let you forget how many there are.",
+       "sign": "Lines of small writing are cut into the main beam of each antler.",
+       "habit": "It rubs its beam on the doorpost before you go out, and the cut letters show clean.",
        "leans": {
         "pattern": {
          "sworn": 1.0
@@ -189,7 +222,10 @@
       {
        "id": "stag-thunder-beller",
        "name": "Thunder-beller",
+       "of": "one whose voice lands like a blow",
        "text": "Its call lands on the Pattern's beat, and the chain is one blow longer for it.",
+       "sign": "The air rings round its head a breath after it has called.",
+       "habit": "It answers thunder, and waits to see if thunder has anything further.",
        "leans": {
         "pattern": {
          "fires": 1.0
@@ -207,44 +243,56 @@
    ]
   },
   {
-   "id": "stag-watch-hart",
-   "name": "Watch-hart",
-   "text": "It learned from you that the one who keeps watch does not get to graze.",
+   "id": "stag-wood-walker",
+   "name": "Wood-walker",
+   "of": "one who is easier under trees than under a roof",
+   "text": "It learned from you that some people are only themselves out of doors. Under trees it stops looking for the way out.",
+   "sign": "Moss on the brow-tines and leaf-mould to the hock. Indoors it stands by the window.",
+   "habit": "It walks out at dusk without asking and is found at the tree line, looking in.",
    "leans": {
+    "ground": {
+     "wild": 1.0
+    },
     "orders": {
-     "guard": 1.0
+     "free": 0.7
     },
     "company": {
-     "party": 0.5
+     "alone": 0.4
     }
    },
    "features": [
-    "tunnel-ear"
+    "roots"
    ],
    "prongs": [
     {
-     "id": "stag-herd-hart",
-     "name": "Herd-hart",
-     "text": "It walks at the back of the party and turns its head at every sound.",
+     "id": "stag-ward-hart",
+     "name": "Ward-hart",
+     "of": "one who tends a boundary because it is theirs",
+     "text": "It walks your wards as you lay them, and they hold a little better for it.",
+     "sign": "A pale ring hangs in its crown, and the grass is greener where it has stood.",
+     "habit": "It walks the same circle round your camp each evening, and the circle holds.",
      "leans": {
-      "company": {
-       "party": 1.0
-      },
-      "bonds": {
-       "classmate": 0.6
+      "shape": {
+       "make": 1.0
       }
      },
      "features": [
-      "old-eyes"
+      "ring"
      ],
      "finishes": [
       {
-       "id": "stag-hart-of-the-cohort",
-       "name": "Hart of the Cohort",
-       "text": "Your classmates touch its flank going out, for luck. It allows this.",
+       "id": "stag-garden-crowned",
+       "name": "Garden-crowned",
+       "of": "one in whose keeping things grow",
+       "text": "Its crown flowers in the Thaw. Wards you plant under it do not fail before morning.",
+       "sign": "Its crown buds in the Thaw and flowers by midsummer. Bees follow it.",
+       "habit": "It stands over anything newly planted until the first rain.",
        "leans": {
-        "bonds": {
-         "classmate": 1.0
+        "shape": {
+         "make": 1.0
+        },
+        "orders": {
+         "hold": 0.5
         }
        },
        "features": [
@@ -252,66 +300,75 @@
        ]
       },
       {
-       "id": "stag-fawn-minder",
-       "name": "Fawn-minder",
-       "text": "Whoever you are bringing home walks inside the reach of its crown.",
+       "id": "stag-bridge-hart",
+       "name": "Bridge-hart",
+       "of": "one who finds the way across and waits there",
+       "text": "It finds the ford. Where there is none, it stands in the current until there is.",
+       "sign": "Wet to the chest, with broad splayed hooves and river weed in its tines.",
+       "habit": "It wades into any water it meets and stands midstream, looking back.",
        "leans": {
-        "quests": {
-         "escort": 1.0
+        "ground": {
+         "water": 1.0
         }
        },
        "features": [
-        "broad-guard"
+        "webbed"
        ]
       }
      ]
     },
     {
-     "id": "stag-post-hart",
-     "name": "Post-hart",
-     "text": "It stands at a relit post until the flame takes, and has never once lain down there.",
+     "id": "stag-white-hart",
+     "name": "White Hart",
+     "of": "one who notices first and says least",
+     "text": "It is seen a moment before something happens. Follow where it looks.",
+     "sign": "Pale as milk, and always seen side-on, at a distance, looking somewhere else.",
+     "habit": "It lifts its head and looks one way for a long moment. Then something happens there.",
      "leans": {
-      "orders": {
-       "hold": 1.0
+      "shape": {
+       "read": 1.0
       },
-      "ground": {
-       "line": 0.6
+      "fights": {
+       "parries": 0.5
       }
      },
      "features": [
-      "lantern"
+      "far-eyes"
      ],
      "finishes": [
       {
-       "id": "stag-lamp-crowned",
-       "name": "Lamp-crowned",
-       "text": "It carries a post's flame in its tines from the car to the lamp, and has not dropped one.",
+       "id": "stag-hart-of-omens",
+       "name": "Hart of Omens",
+       "of": "one who will say plainly that today is not the day",
+       "text": "It stands at the mouth of the deep places and will not go in on a bad day. Go in anyway and see.",
+       "sign": "A pale mark like an eye on its brow, which seems to be looking when it is not.",
+       "habit": "It stops at thresholds and thinks about them.",
        "leans": {
-        "ground": {
-         "line": 1.0
-        },
         "quests": {
-         "linework": 0.7
+         "deep-run": 1.0
+        },
+        "shape": {
+         "read": 0.5
         }
        },
        "features": [
-        "ember"
+        "watching-eye"
        ]
       },
       {
-       "id": "stag-stone-hart",
-       "name": "Stone Hart",
-       "text": "It stood so long where you told it that moss tried it. It did not mind.",
+       "id": "stag-quiet-hart",
+       "name": "Quiet Hart",
+       "of": "one whose company is a place to rest",
+       "text": "In the Quiet it is the only thing that still looks alive. Stay beside it.",
+       "sign": "The air is still for a pace round it. Its breath shows and nothing else moves.",
+       "habit": "It lies down in the open, and things come and lie down near it.",
        "leans": {
-        "orders": {
-         "hold": 1.0
-        },
-        "shape": {
-         "anchor": 0.5
+        "ground": {
+         "quiet": 1.0
         }
        },
        "features": [
-        "stone-skin"
+        "quiet-place"
        ]
       }
      ]
@@ -319,7 +376,10 @@
     {
      "id": "stag-thorn-hide",
      "name": "Thorn-hide",
+     "of": "one who grew a rough coat because the soft one cost too much",
      "text": "It took what was meant for you until its coat grew to meet it.",
+     "sign": "Its hide stands in thick overlapping plates along the flank, like bark.",
+     "habit": "It scratches against thorn trees by choice, and is the calmer for it.",
      "leans": {
       "fights": {
        "hurts": 1.0
@@ -332,7 +392,10 @@
       {
        "id": "stag-bramble-king",
        "name": "Bramble King",
+       "of": "one who made a home in what keeps others out",
        "text": "Thorn and briar grow in its crown now. What strikes it bleeds for the trouble.",
+       "sign": "Briar grows through its crown and flowers there. Small birds nest in it.",
+       "habit": "It beds down in the middle of a thicket and comes out unmarked.",
        "leans": {
         "ground": {
          "wild": 1.0
@@ -342,13 +405,16 @@
         }
        },
        "features": [
-        "roots"
+        "crown"
        ]
       },
       {
        "id": "stag-winter-hart",
        "name": "Winter Hart",
+       "of": "one who is at their best when the year is at its worst",
        "text": "Your cold is in it. Its breath stands in the air after it has gone.",
+       "sign": "Frost on every tine, and breath that hangs behind it in the shape it had.",
+       "habit": "It stands out in the first snow with its eyes shut.",
        "leans": {
         "shape": {
          "turn": 1.0
@@ -366,44 +432,56 @@
    ]
   },
   {
-   "id": "stag-wood-walker",
-   "name": "Wood-walker",
-   "text": "It learned from you that the ground itself can be asked.",
+   "id": "stag-watch-hart",
+   "name": "Watch-hart",
+   "of": "one who walks at the back and sees everyone home",
+   "text": "It learned from you that the one who keeps watch does not get to graze.",
+   "sign": "One ear forward and one back, and its head is the last to go down at any stop.",
+   "habit": "It grazes only when someone else is standing, and then quickly.",
    "leans": {
-    "ground": {
-     "wild": 1.0
+    "quests": {
+     "escort": 1.0
     },
     "orders": {
-     "free": 0.5
+     "guard": 0.7
+    },
+    "company": {
+     "party": 0.5
     }
    },
    "features": [
-    "roots"
+    "tunnel-ear"
    ],
    "prongs": [
     {
-     "id": "stag-ward-hart",
-     "name": "Ward-hart",
-     "text": "It walks your wards as you lay them, and they hold a little better for it.",
+     "id": "stag-herd-hart",
+     "name": "Herd-hart",
+     "of": "one who keeps the stragglers in view",
+     "text": "It walks at the back of the party and turns its head at every sound.",
+     "sign": "It walks last, and its eyes rest longest on whoever is limping.",
+     "habit": "It nudges the slowest sleeper awake first, so that they are not last again.",
      "leans": {
-      "shape": {
-       "make": 1.0
+      "company": {
+       "party": 1.0
+      },
+      "bonds": {
+       "classmate": 0.6
       }
      },
      "features": [
-      "ring"
+      "old-eyes"
      ],
      "finishes": [
       {
-       "id": "stag-garden-crowned",
-       "name": "Garden-crowned",
-       "text": "Its crown flowers in the Thaw. Wards you plant under it do not fail before morning.",
+       "id": "stag-hart-of-the-cohort",
+       "name": "Hart of the Cohort",
+       "of": "one others touch for luck",
+       "text": "Your classmates touch its flank going out, for luck. It allows this.",
+       "sign": "One flank is worn smooth and faintly bright where twelve hands have touched it.",
+       "habit": "It stands at the gate at setting-out time and turns its flank to each who passes.",
        "leans": {
-        "shape": {
-         "make": 1.0
-        },
-        "orders": {
-         "hold": 0.5
+        "bonds": {
+         "classmate": 1.0
         }
        },
        "features": [
@@ -411,63 +489,78 @@
        ]
       },
       {
-       "id": "stag-bridge-hart",
-       "name": "Bridge-hart",
-       "text": "It finds the ford. Where there is none, it stands in the current until there is.",
+       "id": "stag-fawn-minder",
+       "name": "Fawn-minder",
+       "of": "one who cannot see a stranger go unsheltered",
+       "text": "Whoever you are bringing home walks inside the reach of its crown.",
+       "sign": "It carries its crown low and wide, and whoever is smallest is walking under it.",
+       "habit": "It stands over anyone asleep in the open.",
        "leans": {
-        "ground": {
-         "water": 1.0
+        "quests": {
+         "escort": 1.0
         }
        },
        "features": [
-        "webbed"
+        "broad-guard"
        ]
       }
      ]
     },
     {
-     "id": "stag-white-hart",
-     "name": "White Hart",
-     "text": "It is seen a moment before something happens. Follow where it looks.",
+     "id": "stag-post-hart",
+     "name": "Post-hart",
+     "of": "one who will not lie down until the job has taken",
+     "text": "It stands at a relit post until the flame takes, and has never once lain down there.",
+     "sign": "A lamp hangs from one brow-tine. Its knees are grey with standing.",
+     "habit": "It stands at the last lit place and watches the flame, not the dark.",
      "leans": {
-      "shape": {
-       "read": 1.0
+      "orders": {
+       "hold": 1.0
       },
-      "fights": {
-       "parries": 0.5
+      "ground": {
+       "line": 0.6
       }
      },
      "features": [
-      "far-eyes"
+      "lantern"
      ],
      "finishes": [
       {
-       "id": "stag-hart-of-omens",
-       "name": "Hart of Omens",
-       "text": "It stands at the mouth of the deep places and will not go in on a bad day. Go in anyway and see.",
+       "id": "stag-lamp-crowned",
+       "name": "Lamp-crowned",
+       "of": "one who carries the light from where it is to where it is needed",
+       "text": "It carries a post's flame in its tines from the car to the lamp, and has not dropped one.",
+       "sign": "A small flame sits in the fork of its crown and does not catch the velvet.",
+       "habit": "It walks with its head very level, even when there is nothing in its crown.",
        "leans": {
-        "quests": {
-         "deep-run": 1.0
+        "ground": {
+         "line": 1.0
         },
-        "shape": {
-         "read": 0.5
+        "quests": {
+         "linework": 0.7
         }
        },
        "features": [
-        "watching-eye"
+        "ember"
        ]
       },
       {
-       "id": "stag-quiet-hart",
-       "name": "Quiet Hart",
-       "text": "In the Quiet it is the only thing that still looks alive. Stay beside it.",
+       "id": "stag-stone-hart",
+       "name": "Stone Hart",
+       "of": "one who stays where they were asked, long after the asking",
+       "text": "It stood so long where you told it that moss tried it. It did not mind.",
+       "sign": "Moss on its back and lichen on its crown. It is the grey of the stone it stood beside.",
+       "habit": "It stands where you left it. It is there when you return.",
        "leans": {
-        "ground": {
-         "quiet": 1.0
+        "orders": {
+         "hold": 1.0
+        },
+        "shape": {
+         "anchor": 0.5
         }
        },
        "features": [
-        "quiet-place"
+        "stone-skin"
        ]
       }
      ]
@@ -475,7 +568,10 @@
     {
      "id": "stag-grave-hart",
      "name": "Grave Hart",
+     "of": "one who still sets a place for those who did not come home",
      "text": "It grazes where the hall's dead are named, and the shades ride it out at the lamp hour.",
+     "sign": "A cold light in the chest, and frost on the grass where it grazes.",
+     "habit": "It grazes among the name-stones at dusk and lifts its head at each.",
      "leans": {
       "bonds": {
        "shade": 1.0
@@ -488,7 +584,10 @@
       {
        "id": "stag-trophy-rack",
        "name": "Trophy-rack",
+       "of": "one who keeps a token of every hard thing done",
        "text": "It wears a token in its crown for every named beast you felled. They clatter when it runs.",
+       "sign": "Teeth, tags and bits of collar hang in its crown on wire. They clatter at a trot.",
+       "habit": "It shakes its head once at the gate, so that the hall hears who is home.",
        "leans": {
         "bonds": {
          "named": 1.0
@@ -501,7 +600,10 @@
       {
        "id": "stag-hearth-hart",
        "name": "Hearth Hart",
+       "of": "one the dead are glad to hear on the step",
        "text": "The shades know its step. When it comes in from the dark they stop talking and listen.",
+       "sign": "Its eyes are older than its crown, and its step in the hall is slow and known.",
+       "habit": "It comes in from the dark at the lamp hour and stands by the hearth until the talk begins again.",
        "leans": {
         "bonds": {
          "shade": 1.0

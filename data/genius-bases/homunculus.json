@@ -4,6 +4,7 @@
  "class": "creature",
  "expression": "kith",
  "silhouette": "kith-homunculus",
+ "soul": "The soul of one who was told what they were for, and has been deciding for themselves ever since.",
  "spark": "The mote copies you. A beat late and a little wrong, it does what your hands just did.",
  "nature": {
   "shape": {
@@ -49,6 +50,8 @@
   "id": "homunculus-unfinished-homunculus",
   "name": "Unfinished Homunculus",
   "text": "Clay to the knees and unfinished above, with your thumbprint still in its forehead. It watches your hands as if they were the only book.",
+  "sign": "Clay to the knees and rough above, with your thumbprint still in its forehead.",
+  "habit": "It copies whatever your hands do, a beat late, with nothing in its own.",
   "features": [
    "small-hands"
   ]
@@ -57,10 +60,19 @@
   {
    "id": "homunculus-clay-apprentice",
    "name": "Clay Apprentice",
-   "text": "It learned from you by doing what you do, until it could do the next thing before you did.",
+   "of": "one who cannot leave a thing half-made",
+   "text": "It learned from you that a thing left half-made nags. It does what you do, and then the next thing, before you have got to it.",
+   "sign": "Clay under its nails and a brush behind its ear. Its fingers are better finished than the rest of it.",
+   "habit": "It finishes things you put down: a knot, a sentence, the last of your tea.",
    "leans": {
     "shape": {
      "make": 1.0
+    },
+    "orders": {
+     "hold": 0.7
+    },
+    "quests": {
+     "salvage": 0.4
     }
    },
    "features": [
@@ -68,59 +80,12 @@
    ],
    "prongs": [
     {
-     "id": "homunculus-fitter",
-     "name": "Fitter",
-     "text": "It keeps the car's fittings and the post's lamp. It has a spanner your size and uses it one-handed.",
-     "leans": {
-      "ground": {
-       "line": 1.0
-      },
-      "quests": {
-       "linework": 0.6
-      }
-     },
-     "features": [
-      "gears"
-     ],
-     "silhouette": "kith-fitter",
-     "finishes": [
-      {
-       "id": "homunculus-master-fitter",
-       "name": "Master Fitter",
-       "text": "No post it put right has gone dark again. The Compact has tried twice to hire it away from you.",
-       "leans": {
-        "quests": {
-         "linework": 1.0
-        }
-       },
-       "features": [
-        "brass-plate"
-       ],
-       "silhouette": "kith-fitter"
-      },
-      {
-       "id": "homunculus-plate-layer",
-       "name": "Plate-layer",
-       "text": "It walks the rails ahead of the car tapping each with a hammer, and stops the car at the one that rings wrong.",
-       "leans": {
-        "ground": {
-         "line": 1.0
-        },
-        "orders": {
-         "hold": 0.4
-        }
-       },
-       "features": [
-        "set-feet"
-       ],
-       "silhouette": "kith-fitter"
-      }
-     ]
-    },
-    {
      "id": "homunculus-copy-clerk",
      "name": "Copy-clerk",
+     "of": "one who writes it all down, in a better hand than their teacher's",
      "text": "It keeps your notes, and has started keeping its own, in a hand much better than yours.",
+     "sign": "Ink to the wrists, a pen behind each ear, and a satchel of papers bigger than its chest.",
+     "habit": "It recopies your notes at night and leaves both versions out, side by side.",
      "leans": {
       "shape": {
        "read": 1.0
@@ -134,7 +99,10 @@
       {
        "id": "homunculus-examiners-clerk",
        "name": "Examiner's Clerk",
+       "of": "one who has read every clause and can find it again",
        "text": "It has read every writ and remembers every clause. Houses lower their voices when it is in the room.",
+       "sign": "A ledger chained to its belt, and a look over the top of spectacles it does not need.",
+       "habit": "It files things. It has filed your socks.",
        "leans": {
         "quests": {
          "writ": 1.0
@@ -142,13 +110,15 @@
        },
        "features": [
         "ledger"
-       ],
-       "silhouette": "kith-clerk"
+       ]
       },
       {
        "id": "homunculus-indexer",
        "name": "Indexer",
+       "of": "one who knows where everything is kept and what is missing",
        "text": "It knows what the Archive holds and where, and what is missing, and it suspects who.",
+       "sign": "A dial on its chest turns to point at shelves. Its fingers are tabbed with coloured thread.",
+       "habit": "It counts the spoons after every meal and looks at the door.",
        "leans": {
         "quests": {
          "salvage": 1.0
@@ -156,15 +126,17 @@
        },
        "features": [
         "dial"
-       ],
-       "silhouette": "kith-clerk"
+       ]
       }
      ]
     },
     {
      "id": "homunculus-ward-builder",
      "name": "Ward-builder",
+     "of": "one who stays behind to make it sound",
      "text": "It raises your wards where you point and stays inside them, patching, while you go on.",
+     "sign": "A ring of chalk and cord hangs at its hip, and its knees are white with kneeling.",
+     "habit": "It goes back to check the last thing it built, and then the one before.",
      "leans": {
       "orders": {
        "hold": 1.0
@@ -177,7 +149,10 @@
       {
        "id": "homunculus-mason-of-the-post",
        "name": "Mason of the Post",
+       "of": "one who leaves a place better walled than they found it",
        "text": "It has built a wall at every post you held. Some of them are still there. One has a door.",
+       "sign": "Its forearms are faced with flat stone, and it carries a trowel worn to half its width.",
+       "habit": "It restacks any loose stones it finds: a wall, a cairn, the rockery.",
        "leans": {
         "orders": {
          "hold": 1.0
@@ -193,7 +168,10 @@
       {
        "id": "homunculus-makers-maker",
        "name": "Maker's Maker",
+       "of": "one who was taught and now teaches",
        "text": "It has begun making small ones of its own. They carry its tools and look at it the way it looked at you.",
+       "sign": "Three little clay things on wheels follow it, carrying its tools and watching its hands.",
+       "habit": "It shows the small ones how to hold a brush, with the patience you showed it.",
        "leans": {
         "shape": {
          "make": 1.0
@@ -204,111 +182,14 @@
        ]
       }
      ]
-    }
-   ]
-  },
-  {
-   "id": "homunculus-clay-bearer",
-   "name": "Clay Bearer",
-   "text": "It learned from you that being made for a purpose is not the same as choosing one, and it chose yours.",
-   "leans": {
-    "orders": {
-     "guard": 1.0
-    },
-    "fights": {
-     "blocks": 0.5
-    }
-   },
-   "features": [
-    "broad-chest"
-   ],
-   "prongs": [
-    {
-     "id": "homunculus-clay-stand-in",
-     "name": "Clay Stand-in",
-     "text": "It steps into the blow because it can be mended and you cannot. It is right, and it is clay again by evening.",
-     "leans": {
-      "fights": {
-       "hurts": 1.0
-      }
-     },
-     "features": [
-      "stone-skin"
-     ],
-     "finishes": [
-      {
-       "id": "homunculus-thrice-mended",
-       "name": "Thrice-mended",
-       "text": "More patch than clay now. Every repair is your work, and it keeps each one where you can see it.",
-       "leans": {
-        "fights": {
-         "hurts": 1.0
-        }
-       },
-       "features": [
-        "iron-hide"
-       ]
-      },
-      {
-       "id": "homunculus-kiln-fired",
-       "name": "Kiln-fired",
-       "text": "Your fire went through it once by accident. It rang when it cooled, and nothing has cracked it since.",
-       "leans": {
-        "shape": {
-         "turn": 1.0
-        }
-       },
-       "features": [
-        "scorched"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "homunculus-pack-porter",
-     "name": "Pack-porter",
-     "text": "It carries what the party cannot. It has never asked what is in the packs.",
-     "leans": {
-      "company": {
-       "party": 1.0
-      }
-     },
-     "features": [
-      "plated"
-     ],
-     "finishes": [
-      {
-       "id": "homunculus-litter-bearer",
-       "name": "Litter-bearer",
-       "text": "When the passenger cannot walk it carries them, at a pace that would not spill a cup.",
-       "leans": {
-        "quests": {
-         "escort": 1.0
-        }
-       },
-       "features": [
-        "broad-guard"
-       ]
-      },
-      {
-       "id": "homunculus-cohorts-hand",
-       "name": "Cohort's Hand",
-       "text": "Every one of your classmates has been handed the right thing by it at the right moment, and not seen it arrive.",
-       "leans": {
-        "bonds": {
-         "classmate": 1.0
-        }
-       },
-       "features": [
-        "glow"
-       ]
-      }
-     ]
     },
     {
      "id": "homunculus-door-sitter",
      "name": "Door-sitter",
+     "of": "one who stays up until the work is put away",
      "text": "It does not sleep. It sits against the dormitory door with a lamp and counts the hours aloud, very quietly.",
+     "sign": "It sits against the door with a lamp between its feet and its hands folded, very upright.",
+     "habit": "It counts the hours aloud through the night, under its breath, and has not lost count.",
      "leans": {
       "ground": {
        "night": 1.0
@@ -321,7 +202,10 @@
       {
        "id": "homunculus-knocker-up",
        "name": "Knocker-up",
+       "of": "one who is awake first so that others are not caught asleep",
        "text": "It wakes the party before what is coming arrives. Nobody has worked out how it knows.",
+       "sign": "One ear is larger than the other and cupped toward the window. It carries a long pole for tapping.",
+       "habit": "It taps on each bedpost in turn a moment before the bell.",
        "leans": {
         "ground": {
          "night": 1.0
@@ -334,7 +218,10 @@
       {
        "id": "homunculus-halls-caretaker",
        "name": "Hall's Caretaker",
+       "of": "one who sweeps up after people who are no longer there",
        "text": "It sweeps the hearth where the shades sit and trims their lamp. They have told it how they were made.",
+       "sign": "A broom of its own making and old, mild eyes. It steps round places where nobody is standing.",
+       "habit": "It sweeps the hearth at the lamp hour and trims the wick the shades sit by.",
        "leans": {
         "bonds": {
          "shade": 1.0
@@ -351,10 +238,16 @@
   {
    "id": "homunculus-likeness",
    "name": "Likeness",
+   "of": "one who became themselves by copying someone they admired",
    "text": "It learned from you so closely that it began to fight like you, and then to look like you.",
+   "sign": "It stands as you stand and has your way of holding its head. The face is nearly yours and not finished.",
+   "habit": "It practises your signature on scraps, and your walk in the corridor.",
    "leans": {
-    "orders": {
-     "hunt": 1.0
+    "fights": {
+     "parries": 1.0
+    },
+    "pattern": {
+     "fires": 0.7
     },
     "range": {
      "close": 0.5
@@ -367,7 +260,10 @@
     {
      "id": "homunculus-sparring-doll",
      "name": "Sparring-doll",
+     "of": "one who learned by being on the other end of it",
      "text": "It took every drill you did on the pell from the other side, and learned the answer to each.",
+     "sign": "A smooth mask of a face, with dents where your practice blows fell.",
+     "habit": "It stands in front of the pell at night and takes its place for a while.",
      "leans": {
       "fights": {
        "parries": 1.0
@@ -380,7 +276,10 @@
       {
        "id": "homunculus-mirror-hand",
        "name": "Mirror-hand",
+       "of": "one who has your habits so exactly that they answer for you",
        "text": "It parries as you parry, a half-beat after, from the foe's other side. The foe has not found a third side.",
+       "sign": "Its guard hand is edged like yours and moves when yours does, as if on a string.",
+       "habit": "It reaches for the cup with the same hand you do, at the same time, from across the table.",
        "leans": {
         "fights": {
          "parries": 1.0
@@ -393,7 +292,10 @@
       {
        "id": "homunculus-pell-breaker",
        "name": "Pell-breaker",
+       "of": "one who was hit until they understood hitting",
        "text": "It hits the way the training post taught it to be hit. It was listening the whole time.",
+       "sign": "A thick ridge of fired clay over the brow, and knuckles like river stones.",
+       "habit": "It leans its forehead against the training post, gently, before each session.",
        "leans": {
         "range": {
          "close": 1.0
@@ -408,7 +310,10 @@
     {
      "id": "homunculus-clay-double",
      "name": "Clay Double",
+     "of": "one who does the great thing second, and nearly as well",
      "text": "When your Pattern fires, it fires too, in clay. The second chain is slower and hits just as hard.",
+     "sign": "A faint ring of your Pattern's light turns round its chest, a beat behind yours.",
+     "habit": "It traces the figure of your Pattern in the air when it thinks you are asleep.",
      "leans": {
       "pattern": {
        "fires": 1.0
@@ -421,7 +326,10 @@
       {
        "id": "homunculus-walking-likeness",
        "name": "Walking Likeness",
+       "of": "one who could pass for you and has never tried it on",
        "text": "At a distance your classmates cannot tell you apart. Nearer, it is the one not bleeding.",
+       "sign": "It wears your face over its own. Up close you can see the join.",
+       "habit": "It stands beside you at the mirror and corrects its expression to yours.",
        "leans": {
         "pattern": {
          "fires": 1.0
@@ -437,7 +345,10 @@
       {
        "id": "homunculus-sworn-likeness",
        "name": "Sworn Likeness",
+       "of": "one who took the same oath, on purpose, in their own voice",
        "text": "It took your oath beside you in its own voice. If you fall it will keep the Terms, and it has told you so.",
+       "sign": "Your Terms are pressed into its chest in its own neat hand, under the glaze.",
+       "habit": "It says the oath over each morning, and waits for you to say it too.",
        "leans": {
         "pattern": {
          "sworn": 1.0
@@ -452,7 +363,10 @@
     {
      "id": "homunculus-clay-loader",
      "name": "Clay Loader",
+     "of": "one who has the next thing ready before it is asked for",
      "text": "It hands you the next shot before you reach for it, and has started taking the odd one itself.",
+     "sign": "A lens set in one eye, and the next shot already in its open hand.",
+     "habit": "It hands you things a moment before you reach: a pen, a spoon, your other boot.",
      "leans": {
       "range": {
        "far": 1.0
@@ -465,7 +379,10 @@
       {
        "id": "homunculus-clay-sharpshooter",
        "name": "Clay Sharpshooter",
+       "of": "one who does not hurry and so does not miss",
        "text": "It never breathes, so it never has to hold a breath. It has not missed since it learned which end to point.",
+       "sign": "One forearm has been made into a barrel. It does not breathe, and nothing about it moves.",
+       "habit": "It sights along its arm at things across the yard and does not fire.",
        "leans": {
         "shape": {
          "cast": 1.0
@@ -478,7 +395,10 @@
       {
        "id": "homunculus-brush-beater",
        "name": "Brush-beater",
+       "of": "one who cannot be frightened off a job",
        "text": "It walks into the brush clapping two stones and drives what you hunt onto your line. It cannot be frightened off.",
+       "sign": "Long clay legs scratched to the hip by thorns, and a stone in each hand.",
+       "habit": "It claps two stones together as it walks, and looks about to see what moves.",
        "leans": {
         "quests": {
          "hunt": 1.0
@@ -489,6 +409,187 @@
        },
        "features": [
         "long-legs"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "homunculus-clay-bearer",
+   "name": "Clay Bearer",
+   "of": "one who needs to be of use",
+   "text": "It learned from you that being made for a purpose is not the same as choosing one, and it chose yours.",
+   "sign": "Broad in the chest and bowed a little, as if something were already on its back.",
+   "habit": "It stands where it can be asked, and looks up whenever anyone sighs.",
+   "leans": {
+    "quests": {
+     "linework": 1.0
+    },
+    "fights": {
+     "blocks": 0.7
+    },
+    "company": {
+     "party": 0.5
+    }
+   },
+   "features": [
+    "broad-chest"
+   ],
+   "prongs": [
+    {
+     "id": "homunculus-fitter",
+     "name": "Fitter",
+     "of": "one who cannot walk past a thing that is not working",
+     "text": "It keeps the car's fittings and the post's lamp. It has a spanner your size and uses it one-handed.",
+     "sign": "A spanner as long as your arm, carried one-handed. Small gears turn at its wrists.",
+     "habit": "It tightens things as it passes: hinges, taps, the leg of your chair.",
+     "leans": {
+      "ground": {
+       "line": 1.0
+      },
+      "quests": {
+       "linework": 0.6
+      }
+     },
+     "features": [
+      "gears"
+     ],
+     "silhouette": "kith-fitter",
+     "finishes": [
+      {
+       "id": "homunculus-master-fitter",
+       "name": "Master Fitter",
+       "of": "one whose work does not need doing twice",
+       "text": "No post it put right has gone dark again. The Compact has tried twice to hire it away from you.",
+       "sign": "A brass plate on its chest is stamped with every post it has put right. There is room for more.",
+       "habit": "It lays its tools out in order each evening and wipes each one.",
+       "leans": {
+        "quests": {
+         "linework": 1.0
+        }
+       },
+       "features": [
+        "brass-plate"
+       ]
+      },
+      {
+       "id": "homunculus-plate-layer",
+       "name": "Plate-layer",
+       "of": "one who checks the road before the others travel it",
+       "text": "It walks the rails ahead of the car tapping each with a hammer, and stops the car at the one that rings wrong.",
+       "sign": "It walks with its feet set wide, as on a rail, and carries a long-handled hammer.",
+       "habit": "It taps the flagstones along the corridor and stops on the loose one.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "orders": {
+         "hold": 0.4
+        }
+       },
+       "features": [
+        "set-feet"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "homunculus-clay-stand-in",
+     "name": "Clay Stand-in",
+     "of": "one who believes they are easier to mend than you are",
+     "text": "It steps into the blow because it can be mended and you cannot. It is right, and it is clay again by evening.",
+     "sign": "Fresh grey clay over the chest where the last patch went in, still drying.",
+     "habit": "It presses its own cracks shut with a thumb, and looks to see if you noticed.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      }
+     },
+     "features": [
+      "stone-skin"
+     ],
+     "finishes": [
+      {
+       "id": "homunculus-thrice-mended",
+       "name": "Thrice-mended",
+       "of": "one who is more repair than original, and proud of the repairs",
+       "text": "More patch than clay now. Every repair is your work, and it keeps each one where you can see it.",
+       "sign": "More rivet and patch than clay. Each mend is left unpainted, where it shows.",
+       "habit": "It runs a finger along its seams in the order they were made.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        }
+       },
+       "features": [
+        "iron-hide"
+       ]
+      },
+      {
+       "id": "homunculus-kiln-fired",
+       "name": "Kiln-fired",
+       "of": "one who went through the fire by accident and came out certain",
+       "text": "Your fire went through it once by accident. It rang when it cooled, and nothing has cracked it since.",
+       "sign": "Fired hard and dark, with a glaze crazed like old porcelain. It rings if you tap it.",
+       "habit": "It stands close to the stove, closer than anyone should, and is at ease there.",
+       "leans": {
+        "shape": {
+         "turn": 1.0
+        }
+       },
+       "features": [
+        "scorched"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "homunculus-pack-porter",
+     "name": "Pack-porter",
+     "of": "one who carries it and does not ask what it is",
+     "text": "It carries what the party cannot. It has never asked what is in the packs.",
+     "sign": "Strap-plates across both shoulders and a carrying-band worn into its brow.",
+     "habit": "It picks up whatever has been set down by the door and waits beside it.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      }
+     },
+     "features": [
+      "plated"
+     ],
+     "finishes": [
+      {
+       "id": "homunculus-litter-bearer",
+       "name": "Litter-bearer",
+       "of": "one who carries the one who cannot walk, and does not spill a cup",
+       "text": "When the passenger cannot walk it carries them, at a pace that would not spill a cup.",
+       "sign": "Arms made long and flat for carrying, held a little out from its sides.",
+       "habit": "It walks the corridor at night with a full cup, practising.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        }
+       },
+       "features": [
+        "broad-guard"
+       ]
+      },
+      {
+       "id": "homunculus-cohorts-hand",
+       "name": "Cohort's Hand",
+       "of": "one who is there with the right thing and gone before the thanks",
+       "text": "Every one of your classmates has been handed the right thing by it at the right moment, and not seen it arrive.",
+       "sign": "Its palms glow a little, and whatever you needed is already in them.",
+       "habit": "It leaves things at the foot of the right bed: a mended strap, a dry sock.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        }
+       },
+       "features": [
+        "glow"
        ]
       }
      ]

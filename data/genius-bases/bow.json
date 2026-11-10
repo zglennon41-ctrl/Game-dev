@@ -1,0 +1,663 @@
+{
+ "id": "bow",
+ "name": "Bow",
+ "class": "weapon",
+ "expression": "relic",
+ "silhouette": "relic-bow",
+ "soul": "The soul of someone who bends and does not break; who holds a tension a long time and lets it go all at once.",
+ "spark": "The mote stretches thin between two points when you hold your breath, and snaps back when you let it go.",
+ "nature": {
+  "range": {
+   "far": 0.7
+  },
+  "ground": {
+   "wild": 0.6,
+   "quiet": 0.4
+  },
+  "fights": {
+   "dodges": 0.4
+  }
+ },
+ "calls": {
+  "seed": {
+   "watches-from-above": 0.5,
+   "i-can-hold": 0.5,
+   "remembers": 0.2
+  },
+  "shape": {
+   "cast": 0.7,
+   "read": 0.4,
+   "bind": 0.3
+  },
+  "blood": {
+   "greenwood": 0.6,
+   "long-stride": 0.5,
+   "aerie-born": 0.4
+  }
+ },
+ "hybrid": {
+  "adj": "Fletched",
+  "gift": [
+   "far-eyes",
+   "fletching"
+  ],
+  "text": "It waits, bent, for the one moment, and then it is somewhere else."
+ },
+ "newFeatures": [
+  {
+   "id": "fletching",
+   "slot": "surface",
+   "label": "fletching of the field along its limbs"
+  },
+  {
+   "id": "bowstring-hum",
+   "slot": "voice",
+   "label": "a string that hums when something is about to matter"
+  }
+ ],
+ "settled": {
+  "id": "bow-childs-bow",
+  "name": "Child's bow",
+  "text": "A bent stick and a string, the kind every yard has. It has decided to be a real one and is practising its hum.",
+  "sign": "A bent stick, and a string that is never quite slack.",
+  "habit": "It hums one note, experimentally, and stops when you look.",
+  "features": [
+   "grip",
+   "bowstring-hum"
+  ]
+ },
+ "paths": [
+  {
+   "id": "bow-hunting",
+   "name": "Hunting Bow",
+   "of": "one who is most themselves where no one is watching",
+   "text": "It learned from you that the shot is the last and smallest part of a hunt.",
+   "sign": "Its limbs are scuffed with bark, and it smells of outdoors.",
+   "habit": "It leans toward any open door or window.",
+   "leans": {
+    "quests": {
+     "hunt": 1.0
+    },
+    "company": {
+     "alone": 0.7
+    }
+   },
+   "features": [
+    "far-eyes"
+   ],
+   "prongs": [
+    {
+     "id": "bow-stalker",
+     "name": "Stalker's Bow",
+     "of": "one who learned young to cross a house without being heard",
+     "text": "It makes no sound it does not mean to, and has begun to expect the same of you.",
+     "sign": "Its string is wrapped where it would otherwise slap.",
+     "habit": "It goes quiet when you do. It goes quiet a little before you do.",
+     "leans": {
+      "company": {
+       "alone": 1.0
+      },
+      "ground": {
+       "quiet": 0.6
+      }
+     },
+     "features": [
+      "quiet-place"
+     ],
+     "finishes": [
+      {
+       "id": "bow-held-breath",
+       "name": "The Held Breath",
+       "of": "one who can stay at full draw for as long as it takes",
+       "text": "At full draw the field goes still round it, and you with it, for as long as you can stand.",
+       "sign": "At rest it is still slightly drawn. It has been for a year.",
+       "habit": "The room goes a little stiller when it is in it. Clocks seem to notice.",
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        },
+        "company": {
+         "alone": 0.5
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      },
+      {
+       "id": "bow-lone-string",
+       "name": "Lone String",
+       "of": "one who does their best work with no one to see it",
+       "text": "It has only ever been drawn by one hand, at night, with no one to see the shot. It likes that.",
+       "sign": "A dark limb and a dark string, and the eye in its grip is closed.",
+       "habit": "It leaves by itself at night, and is back on its hook by morning with its string damp.",
+       "leans": {
+        "company": {
+         "alone": 1.0
+        },
+        "ground": {
+         "night": 0.6
+        }
+       },
+       "features": [
+        "dark-eyed"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "bow-tracker",
+     "name": "Tracker's Bow",
+     "of": "one who remembers everything they ever followed",
+     "text": "An arrow that has hit a thing remembers it. The bow keeps the arrows.",
+     "sign": "Old arrows bound along its back, each with a different fletching.",
+     "habit": "It turns, slowly, to keep pointing at something that left hours ago.",
+     "leans": {
+      "bonds": {
+       "named": 1.0
+      },
+      "quests": {
+       "hunt": 0.6
+      }
+     },
+     "features": [
+      "ledger"
+     ],
+     "finishes": [
+      {
+       "id": "bow-blood-trail",
+       "name": "Blood-trail",
+       "of": "one who cannot leave a trail half followed",
+       "text": "Its next arrow knows the way the last one's quarry went. You follow the bow now.",
+       "sign": "Its grip has an ear of its own, pressed toward the ground.",
+       "habit": "It pulls at your hand on any path where something has passed.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "ground": {
+         "wild": 0.4
+        }
+       },
+       "features": [
+        "tunnel-ear"
+       ]
+      },
+      {
+       "id": "bow-bowyers-pride",
+       "name": "Bowyer's Pride",
+       "of": "one who is made of everywhere they have been",
+       "text": "It has remade itself limb by limb on the long hunts, out of what the hunts gave it. There is horn in it now.",
+       "sign": "Horn at the tips and sinew on the back, none of it bought.",
+       "habit": "It looks over anything dead for what could be used, and is respectful about it.",
+       "leans": {
+        "shape": {
+         "make": 1.0
+        },
+        "quests": {
+         "hunt": 0.6
+        }
+       },
+       "features": [
+        "horn-brow"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "bow-fowler",
+     "name": "Fowler's Bow",
+     "of": "one who takes their chance on the wing",
+     "text": "It learned to take things out of the air, and then to do it while you ran.",
+     "sign": "Light limbs, and small vanes at the tips that turn in a breeze.",
+     "habit": "It follows birds across the sky from wherever it is hung.",
+     "leans": {
+      "range": {
+       "far": 1.0
+      },
+      "fights": {
+       "dodges": 0.6
+      }
+     },
+     "features": [
+      "wings"
+     ],
+     "finishes": [
+      {
+       "id": "bow-wing-shot",
+       "name": "Wing-shot",
+       "of": "one who decides while moving",
+       "text": "It looses while you are still moving. It prefers it; you have stopped planting your feet.",
+       "sign": "It is never still on its hook. It sways as if walking.",
+       "habit": "It looses a thread of light at falling leaves, and catches most.",
+       "leans": {
+        "fights": {
+         "dodges": 1.0
+        },
+        "range": {
+         "mid": 0.4
+        }
+       },
+       "features": [
+        "long-legs"
+       ]
+      },
+      {
+       "id": "bow-skyline",
+       "name": "Skyline",
+       "of": "one who notices whatever stands above the rest",
+       "text": "Anything that shows against the sky inside its reach is already falling.",
+       "sign": "Its arrow of light points up and a little out, always, at the horizon.",
+       "habit": "It sits facing the highest edge in view: a roof, a ridge, a wall.",
+       "leans": {
+        "range": {
+         "far": 1.0
+        },
+        "shape": {
+         "cast": 0.6
+        }
+       },
+       "features": [
+        "sight-glass"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bow-war",
+   "name": "War Bow",
+   "of": "one who looks after people from behind them, and would rather not be thanked",
+   "text": "It learned from you that an arrow is a way of being beside someone you cannot reach.",
+   "sign": "A heavy bow with broad shoulders, hung where it can see the whole room.",
+   "habit": "It keeps to the back of any gathering, facing the front.",
+   "leans": {
+    "shape": {
+     "cast": 1.0
+    },
+    "company": {
+     "party": 0.7
+    }
+   },
+   "features": [
+    "broad-chest"
+   ],
+   "prongs": [
+    {
+     "id": "bow-volley",
+     "name": "Volley-bow",
+     "of": "one who gives everything at once, to everyone",
+     "text": "It has stopped choosing a target and started choosing a piece of ground.",
+     "sign": "A fan of small bright fletchings along its upper limb.",
+     "habit": "On fine evenings it looses a handful of sparks straight up, for the look of it.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      },
+      "shape": {
+       "cast": 0.6
+      }
+     },
+     "features": [
+      "fletching"
+     ],
+     "finishes": [
+      {
+       "id": "bow-arrow-storm",
+       "name": "Arrow-storm",
+       "of": "one who has been saving it up",
+       "text": "On your chain's last beat it empties itself into the air. What comes down is the payout.",
+       "sign": "Its string trembles for a long time after anyone has touched it.",
+       "habit": "It holds very still all day, and you can feel it counting.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "company": {
+         "party": 0.4
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      },
+      {
+       "id": "bow-fire-arrow",
+       "name": "Fire-arrow",
+       "of": "one who leaves a mark where they stood",
+       "text": "Your element rides the shaft. Where the arrow stands, the ground is yours for a while.",
+       "sign": "The arrow of light on its string is the colour of your element.",
+       "habit": "It plants small lights in the ground round camp and watches them burn down.",
+       "leans": {
+        "shape": {
+         "turn": 1.0,
+         "cast": 0.5
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "bow-line-bow",
+     "name": "Line-bow",
+     "of": "one who keeps pace with what is following",
+     "text": "It shoots from the tender, down the rail, at the dark that is keeping pace.",
+     "sign": "Flat feet on its lower limb, set to brace against a moving floor.",
+     "habit": "It faces backward on any road, watching where you have been.",
+     "leans": {
+      "ground": {
+       "line": 1.0
+      },
+      "quests": {
+       "escort": 0.6
+      }
+     },
+     "features": [
+      "set-feet"
+     ],
+     "finishes": [
+      {
+       "id": "bow-tenders-bow",
+       "name": "Tender's Bow",
+       "of": "one who brings everyone home and counts their arrows after",
+       "text": "It has brought every passenger in with the same full quiver it left with, give or take what was needed.",
+       "sign": "A small lamp at the grip, and a quiver that always looks full.",
+       "habit": "It counts its arrows at each stop. It counts the passengers too.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "bonds": {
+         "classmate": 0.3
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      },
+      {
+       "id": "bow-wire-song",
+       "name": "Wire-song",
+       "of": "one who can hear when something along the line has gone wrong",
+       "text": "Its string hums in tune with the line's wires. A dark post makes it flat, and it tells you which one.",
+       "sign": "Its string hums with the line's wires, a fifth above.",
+       "habit": "It hums along to anything strung tight: fences, washing lines, a fiddle.",
+       "leans": {
+        "quests": {
+         "linework": 1.0
+        },
+        "ground": {
+         "line": 0.6
+        }
+       },
+       "features": [
+        "voice"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "bow-covering",
+     "name": "Covering Bow",
+     "of": "one whose friends have learned to trust what passes their ear",
+     "text": "It shoots past friends. They have had to learn to trust it and mostly have.",
+     "sign": "An eye in the riser that looks at your friends' backs, never their faces.",
+     "habit": "It turns to whichever classmate has just left the room, and stays turned.",
+     "leans": {
+      "bonds": {
+       "classmate": 1.0
+      },
+      "orders": {
+       "guard": 0.8
+      }
+     },
+     "features": [
+      "watching-eye"
+     ],
+     "finishes": [
+      {
+       "id": "bow-over-the-shoulder",
+       "name": "Over-the-shoulder",
+       "of": "one who helps from so close it is almost rude",
+       "text": "Its arrows go by a classmate's ear on the way to what was behind them. None of them flinch now.",
+       "sign": "It hangs just behind your shoulder, and a little behind your friends' too.",
+       "habit": "It reads over people's shoulders. It means well.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        },
+        "company": {
+         "party": 0.6
+        }
+       },
+       "features": [
+        "far-eyes"
+       ]
+      },
+      {
+       "id": "bow-pin-shot",
+       "name": "Pin-shot",
+       "of": "one who stops a quarrel by holding somebody's sleeve",
+       "text": "An arrow through the hem, the sleeve, the shadow. Whatever comes at you arrives late and annoyed.",
+       "sign": "Thin bright threads trail from its arrows, like sewing.",
+       "habit": "It pins things that are about to blow away: a map, a hat, a letter.",
+       "leans": {
+        "orders": {
+         "guard": 1.0
+        },
+        "shape": {
+         "bind": 0.6
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bow-singing",
+   "name": "Singing Bow",
+   "of": "one who feels a thing coming before it has a name",
+   "text": "It learned from you that a drawn string is a note, and that notes can be used.",
+   "sign": "Its string sounds, faintly, when nothing has touched it.",
+   "habit": "It hums before visitors arrive. A different note for each one.",
+   "leans": {
+    "ground": {
+     "quiet": 1.0
+    },
+    "shape": {
+     "read": 0.7
+    }
+   },
+   "features": [
+    "voice"
+   ],
+   "prongs": [
+    {
+     "id": "bow-humming",
+     "name": "Humming-bow",
+     "of": "one whose quiet makes others quiet",
+     "text": "It holds a draw without an arrow and lets the string speak. Things nearby slow to listen.",
+     "sign": "A soft ring of light round the middle of the string.",
+     "habit": "It holds one low note while you work. You work better.",
+     "leans": {
+      "shape": {
+       "bind": 1.0
+      },
+      "orders": {
+       "hold": 0.6
+      }
+     },
+     "features": [
+      "ring"
+     ],
+     "finishes": [
+      {
+       "id": "bow-snare-string",
+       "name": "Snare-string",
+       "of": "one whose patience is a trap",
+       "text": "The note it holds is a snare. What walks into the sound finds its feet have opinions.",
+       "sign": "Fine roots of light trail from its lower limb into the ground.",
+       "habit": "It hums at mice until they sit down.",
+       "leans": {
+        "shape": {
+         "bind": 1.0
+        },
+        "range": {
+         "mid": 0.4
+        }
+       },
+       "features": [
+        "roots"
+       ]
+      },
+      {
+       "id": "bow-vigil-note",
+       "name": "Vigil-note",
+       "of": "one who can keep the same watch from dusk to light",
+       "text": "One low note, held from dusk to light. Nothing has come inside the sound.",
+       "sign": "A steady glow in the string that does not flicker all night.",
+       "habit": "At dusk it starts one note, and you only notice when it stops at dawn.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "ground": {
+         "night": 0.5
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "bow-omen",
+     "name": "Omen-bow",
+     "of": "one who flinches before the blow and has learned to trust the flinch",
+     "text": "Its string moves before things happen. You have learned which movements mean what.",
+     "sign": "The eye in its grip is old, and looks a little past you.",
+     "habit": "Its string twitches at nothing. Later, something happens.",
+     "leans": {
+      "shape": {
+       "read": 1.0
+      },
+      "fights": {
+       "parries": 0.6
+      }
+     },
+     "features": [
+      "old-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "bow-twitch",
+       "name": "The Twitch",
+       "of": "one whose nerves are quicker than their thoughts",
+       "text": "The string twitches a breath before the strike. You guard on it without looking any more.",
+       "sign": "A string that is never quite still.",
+       "habit": "It startles at shadows, and is right about one in three.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "shape": {
+         "read": 0.4
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      },
+      {
+       "id": "bow-far-seers-bow",
+       "name": "Far-seer's Bow",
+       "of": "one who knows where the heart of a place is before going in",
+       "text": "Loosed straight up at the mouth of a deep run, its arrow comes down where the heart of the place is.",
+       "sign": "An eye at each tip as well as the grip, and the three do not agree.",
+       "habit": "At any threshold it looses one thread of light straight up and watches where it falls.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        },
+        "shape": {
+         "read": 0.6
+        }
+       },
+       "features": [
+        "watching-eye"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "bow-oath",
+     "name": "Oath-bow",
+     "of": "one held together by a gift they mean to deserve",
+     "text": "It is strung with something given, not made, and it shoots straighter for the giver.",
+     "sign": "Its string is not gut or wire. It looks like a hair, or a thread from a sleeve.",
+     "habit": "It will not be strung by anyone else. It goes slack in their hands.",
+     "leans": {
+      "pattern": {
+       "sworn": 1.0
+      },
+      "bonds": {
+       "shade": 0.8
+      }
+     },
+     "features": [
+      "crown"
+     ],
+     "finishes": [
+      {
+       "id": "bow-unstrung",
+       "name": "Unstrung",
+       "of": "one who no longer needs what used to hold them together",
+       "text": "It looses without a string now. The oath does the pulling.",
+       "sign": "No string at all. The limbs are bent anyway.",
+       "habit": "It draws and looses nothing, slowly, like someone going over an old conversation.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        },
+        "ground": {
+         "quiet": 0.3
+        }
+       },
+       "features": [
+        "quiet-place"
+       ]
+      },
+      {
+       "id": "bow-mourning-bow",
+       "name": "Mourning Bow",
+       "of": "one who shoots where someone else would have",
+       "text": "A shade strung it. It shoots where they would have, and they were better than you.",
+       "sign": "A dark wrap on the upper limb that it has never let you change.",
+       "habit": "On certain evenings it stands by the hearth, strung, and aims at a place by the door.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        },
+        "range": {
+         "far": 0.4
+        }
+       },
+       "features": [
+        "shadow-cloak"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

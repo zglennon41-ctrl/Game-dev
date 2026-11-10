@@ -1,0 +1,661 @@
+{
+ "id": "coat",
+ "name": "Coat",
+ "class": "armor",
+ "expression": "relic",
+ "silhouette": "relic-coat",
+ "soul": "The soul of someone who keeps themselves to themselves; who is always dressed to leave, and is warm to very few.",
+ "spark": "The mote gets inside your collar when it rains, and you are drier than you should be.",
+ "nature": {
+  "fights": {
+   "dodges": 0.8
+  },
+  "ground": {
+   "night": 0.5
+  },
+  "shape": {
+   "read": 0.5
+  }
+ },
+ "calls": {
+  "seed": {
+   "remembers": 0.5,
+   "i-can-hold": 0.5,
+   "stands-between": 0.3
+  },
+  "shape": {
+   "read": 0.5,
+   "bind": 0.4,
+   "turn": 0.3
+  },
+  "blood": {
+   "fogborn": 0.6,
+   "nightfolk": 0.5,
+   "hollowfolk": 0.5
+  }
+ },
+ "hybrid": {
+  "adj": "Cloaked",
+  "gift": [
+   "wing-cloak",
+   "shadow-cloak"
+  ],
+  "text": "It is around you before the weather is."
+ },
+ "newFeatures": [
+  {
+   "id": "pockets",
+   "slot": "surface",
+   "label": "more pockets than were sewn"
+  }
+ ],
+ "settled": {
+  "id": "coat-clasp",
+  "name": "Clasp",
+  "text": "A coat's clasp and the scrap of cloth it still holds, kept in a pocket. It is warm when you are not, and it remembers the rest of the coat.",
+  "sign": "A brass clasp holding a thumb's width of grey cloth, with one small eye in the metal.",
+  "habit": "It is warm in your pocket on cold days, and it closes itself when you button up.",
+  "features": [
+   "watching-eye",
+   "coat-weave"
+  ],
+  "silhouette": "relic-buckle"
+ },
+ "paths": [
+  {
+   "id": "coat-travelling",
+   "name": "Travelling Coat",
+   "of": "one who is happiest between places",
+   "text": "It learned from you that home is whatever you have on when the weather turns.",
+   "sign": "A long coat with a turned-up collar, and dust on the hem from somewhere else.",
+   "habit": "It hangs by the door, never in the wardrobe, with one sleeve already toward the latch.",
+   "leans": {
+    "orders": {
+     "free": 1.0
+    },
+    "quests": {
+     "deep-run": 0.7
+    }
+   },
+   "features": [
+    "high-collar"
+   ],
+   "prongs": [
+    {
+     "id": "coat-oilskin",
+     "name": "Oilskin",
+     "of": "one who goes whatever the weather and complains only afterwards",
+     "text": "It has gone slick and dark and sheds the river. It would like you to stop falling in all the same.",
+     "sign": "Slick and dark, and water stands on it in beads.",
+     "habit": "It shakes itself like a dog when it comes in, away from you.",
+     "leans": {
+      "ground": {
+       "water": 1.0
+      },
+      "quests": {
+       "escort": 0.5
+      }
+     },
+     "features": [
+      "sleek-coat"
+     ],
+     "finishes": [
+      {
+       "id": "coat-pilots-coat",
+       "name": "Pilot's Coat",
+       "of": "one who knows the deep water by the drag of it",
+       "text": "It knows the channel by how its hem drags, and pulls you toward the deep water or away from it, as needed.",
+       "sign": "A hem that moves as if there were a current in the room.",
+       "habit": "It leans toward the river from wherever it is hung.",
+       "leans": {
+        "ground": {
+         "water": 1.0
+        },
+        "shape": {
+         "read": 0.4
+        }
+       },
+       "features": [
+        "current"
+       ]
+      },
+      {
+       "id": "coat-lent-coat",
+       "name": "The Lent Coat",
+       "of": "one who gives away what they are wearing",
+       "text": "It goes round whoever you are bringing home and leaves you in your shirt. They arrive dry. You arrive.",
+       "sign": "It is on someone else's shoulders more often than yours.",
+       "habit": "It goes round whoever in the room is shivering, and comes back when they have stopped.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "company": {
+         "party": 0.6
+        }
+       },
+       "features": [
+        "wing-cloak"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "coat-road-coat",
+     "name": "Road-coat",
+     "of": "one who has stopped counting the miles",
+     "text": "It has taken the grey of line dust and stopped showing the miles.",
+     "sign": "The grey of line dust all over, and a long stride in the way it hangs.",
+     "habit": "It sways on its hook at the pace of walking.",
+     "leans": {
+      "ground": {
+       "line": 1.0
+      },
+      "quests": {
+       "linework": 0.6
+      }
+     },
+     "features": [
+      "long-legged"
+     ],
+     "finishes": [
+      {
+       "id": "coat-thousand-mile",
+       "name": "Thousand-mile Coat",
+       "of": "one whom every lineman on the road already knows",
+       "text": "It has walked the line end to end and its hem is all post-marks. Linemen nod to it before they nod to you.",
+       "sign": "A hem covered in post-marks, stamped one over another.",
+       "habit": "It nods its collar to anyone in line colours.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "quests": {
+         "linework": 0.5
+        }
+       },
+       "features": [
+        "ledger"
+       ]
+      },
+      {
+       "id": "coat-many-pockets",
+       "name": "Many Pockets",
+       "of": "one who never comes back from anywhere empty-handed",
+       "text": "It has a pocket for everything you pick up and several you did not sew. Things you lost last season turn up in them.",
+       "sign": "More pockets than you sewed, and some of them are occupied.",
+       "habit": "It produces things when needed: string, a candle end, a biscuit of uncertain age.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        },
+        "ground": {
+         "ruin": 0.4
+        }
+       },
+       "features": [
+        "pockets"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "coat-hide-coat",
+     "name": "Hide-coat",
+     "of": "one who has been out long enough to stop looking like the people at home",
+     "text": "Out past the posts it has grown a pelt, and smells of it.",
+     "sign": "A pelt has grown through the cloth at the shoulders.",
+     "habit": "Indoors it is restless and sheds. Outdoors it is neither.",
+     "leans": {
+      "ground": {
+       "wild": 1.0
+      },
+      "company": {
+       "alone": 0.6
+      }
+     },
+     "features": [
+      "ruff"
+     ],
+     "finishes": [
+      {
+       "id": "coat-winter-coat",
+       "name": "Winter Coat",
+       "of": "one who is their own shelter",
+       "text": "Alone in the cold it is tent and bed and the only company. It has kept you alive on nights that had other plans.",
+       "sign": "Frost on the collar that does not melt by the fire.",
+       "habit": "It wraps itself round you a little tighter each hour after midnight.",
+       "leans": {
+        "company": {
+         "alone": 1.0
+        },
+        "ground": {
+         "wild": 0.5
+        }
+       },
+       "features": [
+        "rime"
+       ]
+      },
+      {
+       "id": "coat-deep-coat",
+       "name": "Deep-coat",
+       "of": "one who holds their breath and goes further down",
+       "text": "Far under, it pads itself against stone and holds its breath where the air is bad, and you hold yours.",
+       "sign": "Padded at the elbows and shoulders with something like stone.",
+       "habit": "It goes stiff and still in close rooms, and you find you are breathing shallow too.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        },
+        "ground": {
+         "ruin": 0.6
+        }
+       },
+       "features": [
+        "stone-skin"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "coat-shadow",
+   "name": "Shadow-coat",
+   "of": "one who would rather not be noticed",
+   "text": "It learned from you that the best place for a blow to land is where you just were.",
+   "sign": "It is hard to say what colour it is. You notice the gap where it hangs first.",
+   "habit": "It hangs in the corner of the room that nobody looks at. Every room has one.",
+   "leans": {
+    "fights": {
+     "dodges": 1.0
+    },
+    "ground": {
+     "night": 0.7
+    }
+   },
+   "features": [
+    "shadow-cloak"
+   ],
+   "prongs": [
+    {
+     "id": "coat-slip-coat",
+     "name": "Slip-coat",
+     "of": "one who is never where the hand closes",
+     "text": "Hands close on it and find it empty. You are a step to the left, as usual.",
+     "sign": "Sleek and close-cut, with nothing to take hold of.",
+     "habit": "It slides off any hook but its own.",
+     "leans": {
+      "range": {
+       "close": 1.0
+      },
+      "fights": {
+       "dodges": 0.7
+      }
+     },
+     "features": [
+      "sleek-coat"
+     ],
+     "finishes": [
+      {
+       "id": "coat-empty-sleeve",
+       "name": "Empty Sleeve",
+       "of": "one who leaves a little of themselves behind in every argument",
+       "text": "It leaves a sleeve where you were, and the sleeve takes the blow. It grows another by morning.",
+       "sign": "One sleeve hangs flat, and it is not always the same one.",
+       "habit": "It leaves a sleeve over the back of your chair so that the chair looks taken.",
+       "leans": {
+        "fights": {
+         "dodges": 1.0
+        },
+        "company": {
+         "alone": 0.3
+        }
+       },
+       "features": [
+        "smoke"
+       ]
+      },
+      {
+       "id": "coat-knife-coat",
+       "name": "Knife-coat",
+       "of": "one who is quiet and should not be mistaken for harmless",
+       "text": "There is a blade in the lining now and the coat knows when you want it. It puts the hilt in your hand as you turn.",
+       "sign": "A hard straight line in the lining, a hand long.",
+       "habit": "It turns its lined side inward when friends are near, and outward otherwise.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "orders": {
+         "hunt": 0.7
+        }
+       },
+       "features": [
+        "short-blade"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "coat-night-coat",
+     "name": "Night-coat",
+     "of": "one who comes alive when everyone else has gone to bed",
+     "text": "After dark it takes the colour of whatever is behind you.",
+     "sign": "By day an ordinary grey. After dusk, the colour of whatever is behind you.",
+     "habit": "It is off its hook when you wake in the night, and back when you wake in the morning.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      },
+      "company": {
+       "alone": 0.6
+      }
+     },
+     "features": [
+      "dark-eyed"
+     ],
+     "finishes": [
+      {
+       "id": "coat-collar-up",
+       "name": "Collar-up",
+       "of": "one who can tell when they are being looked at",
+       "text": "It turns its collar up when something in the dark is looking at you. It has not once done it for the wind.",
+       "sign": "A collar that stands up by itself, sometimes.",
+       "habit": "It turns its collar up in certain company. It has never been wrong about the company.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "orders": {
+         "guard": 0.4
+        }
+       },
+       "features": [
+        "high-collar"
+       ]
+      },
+      {
+       "id": "coat-nobodys-coat",
+       "name": "Nobody's Coat",
+       "of": "one who crosses a room and leaves no account of themselves",
+       "text": "In it you are someone people remember meeting and cannot describe. Quiet places stay quiet when you cross them.",
+       "sign": "You have looked straight at it and could not say afterwards what it looked like.",
+       "habit": "It hangs among other coats, and you have to count to find it.",
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        },
+        "company": {
+         "alone": 0.6
+        }
+       },
+       "features": [
+        "quiet-place"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "coat-turncoat",
+     "name": "Turncoat",
+     "of": "one who shows a different side when hurt",
+     "text": "It wears your element on the inside and turns itself out when you are hit.",
+     "sign": "A plain outside, and a lining the colour of your element.",
+     "habit": "It turns itself inside out on the hook when you come home in a temper.",
+     "leans": {
+      "shape": {
+       "turn": 1.0
+      },
+      "fights": {
+       "hurts": 0.5
+      }
+     },
+     "features": [
+      "pulse"
+     ],
+     "finishes": [
+      {
+       "id": "coat-storm-lined",
+       "name": "Storm-lined",
+       "of": "one who holds weather inside and opens the coat rarely",
+       "text": "The lining is weather now. Opened on the last beat of your chain it lets all of it out at once.",
+       "sign": "The lining moves. Put your hand in and there is wind.",
+       "habit": "On still days it opens a finger's width and the curtains stir.",
+       "leans": {
+        "shape": {
+         "turn": 1.0
+        },
+        "pattern": {
+         "fires": 0.4
+        }
+       },
+       "features": [
+        "standing-air"
+       ]
+      },
+      {
+       "id": "coat-scorched-hem",
+       "name": "Scorched Hem",
+       "of": "one who has lost a little to every blow and is harder for it",
+       "text": "Every blow that reached you burned a little of it away. What is left is short, black, and very hard to hurt.",
+       "sign": "Short now, black at every edge, and stiff as hide.",
+       "habit": "It will not hang near the fire. It keeps to the cold end of the room.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "pattern": {
+         "fires": 0.4
+        }
+       },
+       "features": [
+        "scorched"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "coat-listening",
+   "name": "Listening Coat",
+   "of": "one who is told things, and keeps them",
+   "text": "It learned from you that a coat hangs in every room worth listening in.",
+   "sign": "A collar shaped like the rim of an ear.",
+   "habit": "It hangs nearest the door of whichever room has people talking in it.",
+   "leans": {
+    "quests": {
+     "writ": 1.0
+    },
+    "shape": {
+     "read": 0.5
+    },
+    "bonds": {
+     "classmate": 0.7
+    }
+   },
+   "features": [
+    "tunnel-ear"
+   ],
+   "prongs": [
+    {
+     "id": "coat-clerks-coat",
+     "name": "Clerk's Coat",
+     "of": "one who dresses for the office they mean to be given",
+     "text": "It has gone a respectable black and learned to stand where the Hall can see it.",
+     "sign": "A respectable black, with brass buttons it polishes itself.",
+     "habit": "It brushes itself down before anyone important arrives. It knows before you do.",
+     "leans": {
+      "quests": {
+       "writ": 1.0
+      },
+      "pattern": {
+       "sworn": 0.5
+      }
+     },
+     "features": [
+      "brass-plate"
+     ],
+     "finishes": [
+      {
+       "id": "coat-coat-of-offices",
+       "name": "Coat of Offices",
+       "of": "one whose record walks into the room ahead of them",
+       "text": "Every writ you served is a button on it. Doors open for the buttons before anyone has looked at your face.",
+       "sign": "A button for every writ served, in two long rows, each stamped differently.",
+       "habit": "It counts its buttons at night, top to bottom, and is content.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        },
+        "bonds": {
+         "classmate": 0.3
+        }
+       },
+       "features": [
+        "ledger"
+       ]
+      },
+      {
+       "id": "coat-sworn-cloth",
+       "name": "Sworn Cloth",
+       "of": "one who carries their promise where only they can read it",
+       "text": "Your oath is stitched in the lining where only you can read it. The coat reads it back to you when you waver.",
+       "sign": "Fine stitching inside the left breast that cannot be read from outside.",
+       "habit": "It lies across your knees when you are wavering, lining up.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        },
+        "orders": {
+         "guard": 0.5
+        }
+       },
+       "features": [
+        "pages"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "coat-whisper-collar",
+     "name": "Whisper-collar",
+     "of": "one who is always half listening to the next room",
+     "text": "Its collar sits against your ear and tells you things a moment before they matter.",
+     "sign": "Fine whiskers of thread along the collar's edge that stir at sounds.",
+     "habit": "It lifts its collar toward conversations in the next room.",
+     "leans": {
+      "shape": {
+       "read": 1.0
+      },
+      "fights": {
+       "parries": 0.6
+      }
+     },
+     "features": [
+      "whiskers"
+     ],
+     "finishes": [
+      {
+       "id": "coat-warning-tug",
+       "name": "The Warning Tug",
+       "of": "one who pulls a friend's sleeve at the right moment",
+       "text": "It pulls your sleeve the instant before a blow, and your arm is already where it should be. You have stopped thanking it.",
+       "sign": "One cuff is worn thin where it takes hold of your wrist.",
+       "habit": "It tugs when you are about to speak out of turn. You have learned to stop.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "shape": {
+         "read": 0.4
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      },
+      {
+       "id": "coat-eavesdropper",
+       "name": "Eavesdropper",
+       "of": "one who hears everything and decides what you need to know",
+       "text": "Left on a hook in another room it hears everything, and tells you later in the order it thinks you should know.",
+       "sign": "It hangs perfectly still, with its collar spread wide.",
+       "habit": "Left in a room, it is on a different hook when you return: the one nearer the talk.",
+       "leans": {
+        "orders": {
+         "free": 1.0
+        },
+        "shape": {
+         "read": 0.6
+        }
+       },
+       "features": [
+        "voice"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "coat-hand-me-down",
+     "name": "Hand-me-down",
+     "of": "one who is made of what other people left them",
+     "text": "It has started to fit other people, some of whom are not here any more.",
+     "sign": "Mended in four different hands. You can tell the stitches apart.",
+     "habit": "It smells, some days, of a house you have never lived in.",
+     "leans": {
+      "bonds": {
+       "shade": 1.0,
+       "classmate": 0.7
+      }
+     },
+     "features": [
+      "old-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "coat-inherited-coat",
+       "name": "Inherited Coat",
+       "of": "one who stands the way someone before them stood",
+       "text": "A shade wore it first, in a way. Some evenings it still stands as they stood, and you find yourself standing so too.",
+       "sign": "It hangs with the shoulders set as if someone taller were wearing it.",
+       "habit": "Some evenings it stands by the hearth by itself, the way they used to.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        },
+        "ground": {
+         "quiet": 0.4
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      },
+      {
+       "id": "coat-coat-of-the-cohort",
+       "name": "Coat of the Cohort",
+       "of": "one whom twelve people have borrowed from and none has forgotten",
+       "text": "Every classmate has borrowed it and it kept something of each. It fits all twelve, and it is warmest when you are together.",
+       "sign": "Twelve small marks inside the collar, one from each.",
+       "habit": "It goes from peg to peg along the hall through the night. Each of them wakes warm.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        },
+        "company": {
+         "party": 0.6
+        }
+       },
+       "features": [
+        "wing-cloak"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

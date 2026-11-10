@@ -4,6 +4,7 @@
  "class": "animal",
  "expression": "beast",
  "silhouette": "beast-runner",
+ "soul": "The soul of one who is not whole alone, and who has always known who is missing from a room before knowing who is in it.",
  "spark": "The mote keeps low and circles your heels; when you run, it is already ahead.",
  "nature": {
   "range": {
@@ -45,6 +46,8 @@
   "id": "wolf-pup",
   "name": "Wolf pup",
   "text": "All paws and ears. It follows you everywhere and has not yet learned it is not the same size as what it barks at.",
+  "sign": "One ear up and one still deciding. Its paws are already the size the rest of it will be.",
+  "habit": "It sleeps across your boots, so that you cannot leave without its knowing.",
   "features": [
    "fangs",
    "ruff"
@@ -52,28 +55,34 @@
  },
  "paths": [
   {
-   "id": "wolf-courser",
-   "name": "Courser",
-   "text": "It learned from you that the fight is won by getting there first.",
+   "id": "wolf-counting-wolf",
+   "name": "Counting Wolf",
+   "of": "one who counts everyone at the door",
+   "text": "It learned from you that nobody is left on the wrong side of a door. It knows how many you set out with.",
+   "sign": "Its head moves along a line of people one at a time, and stops on the gap.",
+   "habit": "It walks the room touching each of your friends once with its nose, then lies down facing the door.",
    "leans": {
+    "bonds": {
+     "classmate": 1.0
+    },
+    "company": {
+     "party": 0.7
+    },
     "orders": {
-     "hunt": 1.0
-    },
-    "range": {
-     "close": 0.7
-    },
-    "fights": {
-     "dodges": 0.4
+     "guard": 0.4
     }
    },
    "features": [
-    "long-legs"
+    "tunnel-ear"
    ],
    "prongs": [
     {
      "id": "wolf-pack-runner",
      "name": "Pack-runner",
+     "of": "one who is never the one out of step",
      "text": "It runs where the party runs and is never the one out of place.",
+     "sign": "It runs a half-length off your left knee and has never once been trodden on.",
+     "habit": "It matches its breathing to whoever in the room is nearest sleep.",
      "leans": {
       "company": {
        "party": 1.0
@@ -89,7 +98,10 @@
       {
        "id": "wolf-pack-mother",
        "name": "Pack-mother",
+       "of": "one the others fall in behind without being asked",
        "text": "The others' genii fall in behind it. Nobody told them to.",
+       "sign": "Smaller genii walk in its tracks. It does not look back to check.",
+       "habit": "It washes the ears of other people's genii, who put up with it.",
        "leans": {
         "bonds": {
          "classmate": 1.0
@@ -105,7 +117,10 @@
       {
        "id": "wolf-line-runner",
        "name": "Line-runner",
+       "of": "one who knows the way home from anywhere on the line",
        "text": "It has run every mile of the line you have, and knows the next post before you see its lamp.",
+       "sign": "Rail grease on all four feet, and its eyes fixed one post further on than yours.",
+       "habit": "It lies with its chin on the rail, feeling for the car.",
        "leans": {
         "ground": {
          "line": 1.0
@@ -122,134 +137,18 @@
      ]
     },
     {
-     "id": "wolf-throat-taker",
-     "name": "Throat-taker",
-     "text": "It waits for your Pattern the way a dog waits for a thrown stick.",
-     "leans": {
-      "pattern": {
-       "fires": 1.0
-      },
-      "range": {
-       "close": 0.6
-      }
-     },
-     "features": [
-      "maw"
-     ],
-     "finishes": [
-      {
-       "id": "wolf-red-maw",
-       "name": "Red Maw",
-       "text": "When you are hurt it stops being careful.",
-       "leans": {
-        "fights": {
-         "hurts": 1.0
-        },
-        "pattern": {
-         "fires": 0.5
-        }
-       },
-       "features": [
-        "ember"
-       ]
-      },
-      {
-       "id": "wolf-quiet-tooth",
-       "name": "Quiet Tooth",
-       "text": "You do not hear it go. You hear what it went for.",
-       "leans": {
-        "ground": {
-         "night": 1.0
-        },
-        "fights": {
-         "parries": 0.6
-        }
-       },
-       "features": [
-        "shadow-cloak"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "wolf-long-strider",
-     "name": "Long-strider",
-     "text": "It ranges out to where your shots land and holds what you hit until you come.",
-     "leans": {
-      "range": {
-       "far": 1.0
-      },
-      "shape": {
-       "cast": 0.6
-      }
-     },
-     "features": [
-      "tunnel-ear"
-     ],
-     "finishes": [
-      {
-       "id": "wolf-name-hunter",
-       "name": "Name-hunter",
-       "text": "It remembers every named beast that got away, and so does its nose.",
-       "leans": {
-        "bonds": {
-         "named": 1.0
-        },
-        "quests": {
-         "hunt": 0.8
-        }
-       },
-       "features": [
-        "old-eyes"
-       ]
-      },
-      {
-       "id": "wolf-far-courser",
-       "name": "Far Courser",
-       "text": "A grey line at the edge of your sight that is always where the foe is about to be.",
-       "leans": {
-        "shape": {
-         "cast": 1.0
-        },
-        "range": {
-         "far": 0.6
-        }
-       },
-       "features": [
-        "wings"
-       ]
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "wolf-warder",
-   "name": "Warder",
-   "text": "It learned from you that somebody has to stand in the door.",
-   "leans": {
-    "orders": {
-     "guard": 1.0
-    },
-    "fights": {
-     "hurts": 0.5,
-     "blocks": 0.5
-    }
-   },
-   "features": [
-    "broad-chest"
-   ],
-   "prongs": [
-    {
      "id": "wolf-hearth-wolf",
      "name": "Hearth-wolf",
-     "text": "It counts the party at every door and will not go through until the number is right.",
+     "of": "one who makes a home of wherever the others are",
+     "text": "It sleeps across the door of wherever the party sleeps. To leave in the night you must step over it, and it wakes.",
+     "sign": "Its coat holds a faint light, like a window seen from the road.",
+     "habit": "It turns three times and lies down where it can see every bed.",
      "leans": {
-      "company": {
-       "party": 0.8
+      "orders": {
+       "guard": 1.0
       },
-      "bonds": {
-       "classmate": 0.8
+      "company": {
+       "party": 0.6
       }
      },
      "features": [
@@ -259,7 +158,10 @@
       {
        "id": "wolf-den-keeper",
        "name": "Den-keeper",
+       "of": "one beside whom others can finally sleep",
        "text": "Where it lies down is the safest place in the zone, and the party knows it.",
+       "sign": "A lamp-glow rides at its collar. People sit down near it without noticing they have.",
+       "habit": "It stays awake until the last of the party is asleep, and only then puts its head down.",
        "leans": {
         "orders": {
          "hold": 0.8
@@ -275,7 +177,10 @@
       {
        "id": "wolf-shade-friend",
        "name": "Shade-friend",
+       "of": "one who still counts those who did not come back",
        "text": "The shades at the hearth speak to it before they speak to you.",
+       "sign": "Its eyes are older than the rest of it, and they follow things at the hearth you cannot see.",
+       "habit": "At the lamp hour it sits by the empty places at the table, one after another.",
        "leans": {
         "bonds": {
          "shade": 1.0
@@ -288,125 +193,12 @@
      ]
     },
     {
-     "id": "wolf-grey-shield",
-     "name": "Grey Shield",
-     "text": "It takes the blow you did not see, and then the one you did.",
-     "leans": {
-      "fights": {
-       "blocks": 1.0
-      },
-      "shape": {
-       "anchor": 0.7
-      }
-     },
-     "features": [
-      "stone-skin"
-     ],
-     "finishes": [
-      {
-       "id": "wolf-wall-wolf",
-       "name": "Wall-wolf",
-       "text": "It does not move back. Things that hit it learn something about walls.",
-       "leans": {
-        "shape": {
-         "anchor": 1.0
-        },
-        "orders": {
-         "hold": 0.5
-        }
-       },
-       "features": [
-        "wall-plate"
-       ]
-      },
-      {
-       "id": "wolf-scar-bearer",
-       "name": "Scar-bearer",
-       "text": "Every blow you took is on its coat as well. It wears them forward.",
-       "leans": {
-        "fights": {
-         "hurts": 1.0
-        }
-       },
-       "features": [
-        "iron-hide"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "wolf-night-watch",
-     "name": "Night-watch",
-     "text": "It sleeps in the day now, because you do not sleep at night.",
-     "leans": {
-      "ground": {
-       "night": 1.0
-      },
-      "orders": {
-       "hold": 0.6
-      }
-     },
-     "features": [
-      "dark-eyed"
-     ],
-     "finishes": [
-      {
-       "id": "wolf-post-wolf",
-       "name": "Post-wolf",
-       "text": "A post it has lain beside stays lit a little longer than it should.",
-       "leans": {
-        "ground": {
-         "line": 1.0
-        },
-        "orders": {
-         "hold": 1.0
-        }
-       },
-       "features": [
-        "lantern"
-       ]
-      },
-      {
-       "id": "wolf-lamp-eyed",
-       "name": "Lamp-eyed Wolf",
-       "text": "Its eyes show you what is winding up in the dark before the dark does.",
-       "leans": {
-        "shape": {
-         "read": 1.0
-        },
-        "fights": {
-         "parries": 0.6
-        }
-       },
-       "features": [
-        "far-eyes"
-       ]
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "wolf-howler",
-   "name": "Howler",
-   "text": "It learned from you that a voice carries further than teeth.",
-   "leans": {
-    "shape": {
-     "bind": 0.8,
-     "read": 0.5
-    },
-    "orders": {
-     "free": 0.8
-    }
-   },
-   "features": [
-    "voice"
-   ],
-   "prongs": [
-    {
      "id": "wolf-caller",
      "name": "Caller",
+     "of": "one who calls, and expects to be answered",
      "text": "What it howls at turns to look, and for that moment is not looking at you.",
+     "sign": "A pale ring of fur stands up round its head when it lifts its muzzle.",
+     "habit": "It howls once at dusk and waits, head tilted, until something answers.",
      "leans": {
       "shape": {
        "bind": 1.0
@@ -422,7 +214,10 @@
       {
        "id": "wolf-pack-voice",
        "name": "Voice of the Pack",
+       "of": "one whose word brings everyone",
        "text": "One howl, and every genius in earshot answers.",
+       "sign": "A length of chain at its throat rings on the low note.",
+       "habit": "It answers every dog on the line, in turn, and expects them to wait for it.",
        "leans": {
         "company": {
          "party": 1.0
@@ -438,7 +233,10 @@
       {
        "id": "wolf-oath-wolf",
        "name": "Oath-wolf",
+       "of": "one who holds a friend to their word",
        "text": "It was there when you swore, and it holds you to it harder than the Terms do.",
+       "sign": "A closed book hangs at its neck. Its eyes go to your hands whenever you promise anything.",
+       "habit": "It sits facing you with its head level and does not blink first.",
        "leans": {
         "pattern": {
          "sworn": 1.0
@@ -449,11 +247,298 @@
        ]
       }
      ]
+    }
+   ]
+  },
+  {
+   "id": "wolf-third-day-wolf",
+   "name": "Third-day Wolf",
+   "of": "one who cannot let a thing go",
+   "text": "It learned from you that a thing is not over because it got away. On the third day it is still on the trail.",
+   "sign": "Lean in the flank and long in the leg, with its nose a hand above the ground even indoors.",
+   "habit": "It goes back to the last place it lost a scent and stands there a while.",
+   "leans": {
+    "quests": {
+     "hunt": 1.0
+    },
+    "bonds": {
+     "named": 0.7
+    },
+    "range": {
+     "close": 0.4
+    }
+   },
+   "features": [
+    "long-legs"
+   ],
+   "prongs": [
+    {
+     "id": "wolf-long-strider",
+     "name": "Long-strider",
+     "of": "one who goes further out than anyone asked",
+     "text": "It ranges out to where your shots land and holds what you hit until you come.",
+     "sign": "One ear is always turned behind it, toward you, however far ahead it is.",
+     "habit": "It walks to the edge of earshot, sits, and looks back to see if you are coming.",
+     "leans": {
+      "range": {
+       "far": 1.0
+      },
+      "shape": {
+       "cast": 0.6
+      }
+     },
+     "features": [
+      "tunnel-ear"
+     ],
+     "finishes": [
+      {
+       "id": "wolf-name-hunter",
+       "name": "Name-hunter",
+       "of": "one who remembers everything that got away",
+       "text": "It remembers every named beast that got away, and so does its nose.",
+       "sign": "Grey at the muzzle, with a nose that works in its sleep.",
+       "habit": "It dreams with its legs running, and wakes facing the same way each time.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "quests": {
+         "hunt": 0.8
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      },
+      {
+       "id": "wolf-far-courser",
+       "name": "Far Courser",
+       "of": "one who is already where the trouble will be",
+       "text": "A grey line at the edge of your sight that is always where the foe is about to be.",
+       "sign": "Two long flags of grey fur stream from its shoulders at the run, like wings.",
+       "habit": "It watches the horizon rather than the room.",
+       "leans": {
+        "shape": {
+         "cast": 1.0
+        },
+        "range": {
+         "far": 0.6
+        }
+       },
+       "features": [
+        "wings"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "wolf-throat-taker",
+     "name": "Throat-taker",
+     "of": "one who waits for the word and then does not hesitate",
+     "text": "It waits for your Pattern the way a dog waits for a thrown stick.",
+     "sign": "Its jaw hangs a little open, and it watches your hands, not your face.",
+     "habit": "It lies coiled with its eyes on you, and is up when you draw breath to speak.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      },
+      "range": {
+       "close": 0.6
+      }
+     },
+     "features": [
+      "maw"
+     ],
+     "finishes": [
+      {
+       "id": "wolf-red-maw",
+       "name": "Red Maw",
+       "of": "one who stops being careful when a friend is hurt",
+       "text": "When you are hurt it stops being careful.",
+       "sign": "A red light at the back of its throat that brightens when you bleed.",
+       "habit": "It licks old wounds: yours first, then its own.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "pattern": {
+         "fires": 0.5
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      },
+      {
+       "id": "wolf-quiet-tooth",
+       "name": "Quiet Tooth",
+       "of": "one who settles a thing and tells nobody",
+       "text": "You do not hear it go. You hear what it went for.",
+       "sign": "Its outline is hard to keep hold of in poor light. Its feet make no sound on gravel.",
+       "habit": "It leaves the room and comes back. You only notice the second part.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "fights": {
+         "parries": 0.6
+        }
+       },
+       "features": [
+        "shadow-cloak"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "wolf-grey-shield",
+     "name": "Grey Shield",
+     "of": "one who would sooner be hit than give up a yard",
+     "text": "It takes the blow you did not see, and then the one you did.",
+     "sign": "The fur over its shoulders has gone grey and hard as slate.",
+     "habit": "It leans its whole weight against your leg, and does not shift when you do.",
+     "leans": {
+      "fights": {
+       "blocks": 1.0
+      },
+      "shape": {
+       "anchor": 0.7
+      }
+     },
+     "features": [
+      "stone-skin"
+     ],
+     "finishes": [
+      {
+       "id": "wolf-wall-wolf",
+       "name": "Wall-wolf",
+       "of": "one who has never taken a step back",
+       "text": "It does not move back. Things that hit it learn something about walls.",
+       "sign": "Flat plates across the chest and brow. It stands square, like a thing built there.",
+       "habit": "It picks the narrowest place in any room and lies across it.",
+       "leans": {
+        "shape": {
+         "anchor": 1.0
+        },
+        "orders": {
+         "hold": 0.5
+        }
+       },
+       "features": [
+        "wall-plate"
+       ]
+      },
+      {
+       "id": "wolf-scar-bearer",
+       "name": "Scar-bearer",
+       "of": "one who carries every hurt forward and hides none",
+       "text": "Every blow you took is on its coat as well. It wears them forward.",
+       "sign": "Its coat is a map of healed lines, each one matching a scar of yours.",
+       "habit": "It lies with its scarred side to the fire.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        }
+       },
+       "features": [
+        "iron-hide"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "wolf-night-watch",
+   "name": "Night-watch",
+   "of": "one who cannot sleep while the others do",
+   "text": "It sleeps in the day now, because you do not sleep at night.",
+   "sign": "Dark all round the eyes, as if it had not slept, which it has not.",
+   "habit": "It walks the edge of the lamplight all night and sleeps in the first sun.",
+   "leans": {
+    "ground": {
+     "night": 1.0
+    },
+    "orders": {
+     "hold": 0.7
+    },
+    "company": {
+     "alone": 0.4
+    }
+   },
+   "features": [
+    "dark-eyed"
+   ],
+   "prongs": [
+    {
+     "id": "wolf-perimeter-wolf",
+     "name": "Perimeter Wolf",
+     "of": "one who walks the bounds so that others need not think of them",
+     "text": "It walks the edge of whatever light you have, all night, at one pace. The dark has learned where the edge is.",
+     "sign": "A path is worn in a ring round wherever you camp. It is on it.",
+     "habit": "It paces the same circuit until dawn and steps in its own prints.",
+     "leans": {
+      "ground": {
+       "line": 1.0
+      },
+      "orders": {
+       "hold": 0.6
+      }
+     },
+     "features": [
+      "set-feet"
+     ],
+     "finishes": [
+      {
+       "id": "wolf-post-wolf",
+       "name": "Post-wolf",
+       "of": "one who stays at the post until relieved",
+       "text": "A post it has lain beside stays lit a little longer than it should.",
+       "sign": "A small lamp burns at its collar and does not gutter in wind.",
+       "habit": "It lies under the post lamp with its head up, facing down the line.",
+       "leans": {
+        "quests": {
+         "linework": 1.0
+        },
+        "ground": {
+         "line": 0.7
+        },
+        "orders": {
+         "hold": 0.5
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      },
+      {
+       "id": "wolf-lamp-eyed",
+       "name": "Lamp-eyed Wolf",
+       "of": "one who sees what is coming before the others wake",
+       "text": "Its eyes show you what is winding up in the dark before the dark does.",
+       "sign": "Its eyes give back the lamp from much further off than they should.",
+       "habit": "It stares at one patch of dark for a long time. It is usually right to.",
+       "leans": {
+        "shape": {
+         "read": 1.0
+        },
+        "fights": {
+         "parries": 0.6
+        }
+       },
+       "features": [
+        "far-eyes"
+       ]
+      }
+     ]
     },
     {
      "id": "wolf-moon-reader",
      "name": "Moon-reader",
+     "of": "one who feels a bad night coming",
      "text": "It lifts its head a breath before the strike comes. Watch its ears, not the foe.",
+     "sign": "Its ears lift a breath before anything happens.",
+     "habit": "It sits with its face to the sky and its ears moving, long after you have stopped listening.",
      "leans": {
       "shape": {
        "read": 1.0
@@ -469,7 +554,10 @@
       {
        "id": "wolf-omen-wolf",
        "name": "Omen-wolf",
+       "of": "one who knows a bad day by its morning",
        "text": "It howls once on the morning of a bad day. It has not been wrong.",
+       "sign": "A third eye-mark, pale, in the fur of its brow.",
+       "habit": "Some mornings it is at the door before you, and will not move from it.",
        "leans": {
         "quests": {
          "deep-run": 0.8
@@ -485,7 +573,10 @@
       {
        "id": "wolf-still-wolf",
        "name": "Still Wolf",
+       "of": "one who can be alone without being lonely",
        "text": "It can sit so quiet beside you that the field itself goes quiet round it.",
+       "sign": "No breath shows from it in the cold. The air round it is very quiet.",
+       "habit": "It sits so still that birds have landed on it.",
        "leans": {
         "ground": {
          "quiet": 1.0
@@ -503,7 +594,10 @@
     {
      "id": "wolf-storm-coat",
      "name": "Storm-coat",
+     "of": "one who is out in all weathers and does not mention it",
      "text": "Your element has got into its fur, and it shakes it off over whatever you point at.",
+     "sign": "Its fur smokes faintly with your weather: steam, or frost, or sparks.",
+     "habit": "It shakes itself in doorways, and the room gets some of the weather.",
      "leans": {
       "shape": {
        "turn": 1.0
@@ -519,14 +613,17 @@
       {
        "id": "wolf-frost-ruff",
        "name": "Frost-ruff",
+       "of": "one who takes the cold watch and keeps it",
        "text": "Where it has run, the ground remembers winter.",
+       "sign": "White rime stands on its ruff and does not melt indoors.",
+       "habit": "It sleeps outside the door, on the stone, by choice.",
        "leans": {
-        "shape": {
-         "turn": 0.8
-        },
         "ground": {
-         "water": 0.6,
+         "water": 1.0,
          "night": 0.4
+        },
+        "shape": {
+         "turn": 0.7
         }
        },
        "features": [
@@ -536,10 +633,13 @@
       {
        "id": "wolf-ember-ruff",
        "name": "Ember-ruff",
+       "of": "one who comes in from the dark still warm",
        "text": "Its ruff is banked coals. It lies down at the hearth and the hearth burns higher.",
+       "sign": "Its ruff glows dull red from underneath, like coals under ash.",
+       "habit": "It lies by the hearth and the fire leans toward it.",
        "leans": {
         "shape": {
-         "turn": 0.8
+         "turn": 1.0
         },
         "fights": {
          "hurts": 0.5

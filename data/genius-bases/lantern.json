@@ -1,0 +1,652 @@
+{
+ "id": "lantern",
+ "name": "Lantern",
+ "class": "item",
+ "expression": "engine",
+ "silhouette": "engine-lantern",
+ "soul": "The soul of someone who cannot leave another person in the dark. They go first, and hold the light still.",
+ "spark": "The mote burns steadier than a mote should, and drifts toward whichever corner of the room is darkest.",
+ "nature": {
+  "ground": {
+   "night": 0.8,
+   "line": 0.4
+  },
+  "shape": {
+   "read": 0.5
+  },
+  "orders": {
+   "guard": 0.5
+  }
+ },
+ "calls": {
+  "seed": {
+   "never-alive": 0.5,
+   "watches-from-above": 0.3,
+   "remembers": 0.3
+  },
+  "shape": {
+   "read": 0.6,
+   "make": 0.4,
+   "anchor": 0.2
+  },
+  "blood": {
+   "lamplighters": 0.9,
+   "nightfolk": 0.4,
+   "hearth-hears": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Lantern",
+  "gift": [
+   "lantern",
+   "glow"
+  ],
+  "text": "It goes first into the dark and holds still there."
+ },
+ "settled": {
+  "id": "lantern-little",
+  "name": "Little walking lantern",
+  "text": "A hand-lamp on three thin legs. It trots ahead and then waits, embarrassed, at every place its light does not reach.",
+  "sign": "Three thin legs, and a flame that leans toward whatever it is curious about.",
+  "habit": "It stands at the edge of its own light and looks at the dark, then at you, then at the dark.",
+  "features": [
+   "lantern",
+   "long-legs"
+  ]
+ },
+ "paths": [
+  {
+   "id": "lantern-wayfinder",
+   "name": "Wayfinder",
+   "of": "one who has to see what is at the bottom",
+   "text": "It learned from you that the dark is a place people have to get across.",
+   "sign": "Its shutter is always open on the side facing where you have not been.",
+   "habit": "It walks to the end of every corridor and back before it will settle.",
+   "leans": {
+    "quests": {
+     "deep-run": 1.0
+    },
+    "ground": {
+     "ruin": 0.7
+    }
+   },
+   "features": [
+    "far-eyes"
+   ],
+   "prongs": [
+    {
+     "id": "lantern-tunnel-lamp",
+     "name": "Tunnel-lamp",
+     "of": "one who goes down first so that nobody else has to",
+     "text": "It goes down first and calls the turnings back to you in flickers.",
+     "sign": "Its glass is scratched on every side from squeezing through.",
+     "habit": "It lowers itself into any hole it finds, as far as its legs allow, and reports.",
+     "leans": {
+      "ground": {
+       "ruin": 1.0
+      },
+      "quests": {
+       "salvage": 0.6
+      }
+     },
+     "features": [
+      "tunnel-ear"
+     ],
+     "finishes": [
+      {
+       "id": "lantern-deep-light",
+       "name": "Deep-light",
+       "of": "one who is calmest where there is no way back yet",
+       "text": "At the heart of a deep run it burns a colour the surface has no name for. You can find your way out by it from anywhere.",
+       "sign": "A flame of a colour you otherwise only see behind your eyelids.",
+       "habit": "It dims itself to almost nothing and waits, to see what the dark does when it thinks it is alone.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        },
+        "ground": {
+         "ruin": 0.5
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      },
+      {
+       "id": "lantern-finders-lamp",
+       "name": "Finder's Lamp",
+       "of": "one who knows at a glance what is worth keeping",
+       "text": "Its light falls differently on a thing worth carrying out. It has never wasted your time on brass.",
+       "sign": "A lens that swings out on an arm when something interests it.",
+       "habit": "It turns small objects over with one foot and shines on the underside.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        },
+        "company": {
+         "alone": 0.4
+        }
+       },
+       "features": [
+        "sight-glass"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "lantern-line-lamp",
+     "name": "Line-lamp",
+     "of": "one who walks ahead so the rest can follow",
+     "text": "It walks the rail ahead of the car with its shutter open, and the car follows it.",
+     "sign": "It keeps exactly four paces ahead of you, and corrects if you slow.",
+     "habit": "It walks any straight line it finds to the end: a rail, a seam in the floor, a crack.",
+     "leans": {
+      "ground": {
+       "line": 1.0
+      },
+      "quests": {
+       "linework": 0.7
+      }
+     },
+     "features": [
+      "set-feet"
+     ],
+     "finishes": [
+      {
+       "id": "lantern-post-flame",
+       "name": "Post-flame",
+       "of": "one who lends their own light and has never run short",
+       "text": "It has learned a post's own blue and can lend it. A dark post takes sooner with it standing by.",
+       "sign": "Its flame is post-blue at the root.",
+       "habit": "It leans close to anything unlit, a candle, a cold stove, as though it could be talked round.",
+       "leans": {
+        "quests": {
+         "linework": 1.0
+        },
+        "orders": {
+         "hold": 0.5
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      },
+      {
+       "id": "lantern-signal-lamp",
+       "name": "Signal-lamp",
+       "of": "one who can say stop and be obeyed",
+       "text": "Green for come on, red for stop. It has shown red to things with teeth, and they stopped.",
+       "sign": "Two glasses, one green and one red. It shows you the green.",
+       "habit": "It practises its red on the wall when it thinks you are asleep.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "ground": {
+         "line": 0.6
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "lantern-marsh-light",
+     "name": "Marsh-light",
+     "of": "one who trusts no ground they have not tested",
+     "text": "It has learned water: where the bank is, where it only looks as if it is.",
+     "sign": "Wide webbed feet, and it tries each step before putting weight on it.",
+     "habit": "It prods puddles to learn how deep they are. It has opinions about all of them.",
+     "leans": {
+      "ground": {
+       "water": 1.0,
+       "wild": 0.5
+      }
+     },
+     "features": [
+      "webbed"
+     ],
+     "silhouette": "engine-buoy",
+     "finishes": [
+      {
+       "id": "lantern-channel-lamp",
+       "name": "Channel-lamp",
+       "of": "one who stays where they are needed long after it stops being interesting",
+       "text": "It rides the current on a float and a chain, marking the one safe line across. Pilots tip their caps to it.",
+       "sign": "A float, a chain, and weed on the chain.",
+       "habit": "It bobs in place on dry land, by habit, keeping station.",
+       "leans": {
+        "ground": {
+         "water": 1.0
+        },
+        "quests": {
+         "escort": 0.4
+        }
+       },
+       "features": [
+        "chain"
+       ],
+       "silhouette": "engine-buoy"
+      },
+      {
+       "id": "lantern-will-o-the-line",
+       "name": "Will-o'-the-line",
+       "of": "one who knows the way so well they can afford to mislead",
+       "text": "It left its glass behind. Foes follow it off the path, and it has never yet led one back.",
+       "sign": "No lamp at all any more: a few small lights that keep changing which is the real one.",
+       "habit": "It drifts off a little way and waits to see whether you follow. You have learned not to.",
+       "leans": {
+        "ground": {
+         "wild": 1.0
+        },
+        "fights": {
+         "dodges": 0.6
+        }
+       },
+       "features": [
+        "mist"
+       ],
+       "silhouette": "aspect-wisps"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "lantern-watch",
+   "name": "Watch-lamp",
+   "of": "one who sits up so that others can sleep",
+   "text": "It learned from you that somebody has to be awake, and that it may as well be the two of you.",
+   "sign": "It burns low and steady, and turns itself down further when people nearby lie down.",
+   "habit": "It takes the place by the door without being asked.",
+   "leans": {
+    "ground": {
+     "night": 1.0
+    },
+    "company": {
+     "party": 0.7
+    }
+   },
+   "features": [
+    "watching-eye"
+   ],
+   "prongs": [
+    {
+     "id": "lantern-night-light",
+     "name": "Night-light",
+     "of": "one who counts heads",
+     "text": "It sits up when the party sleeps, turned low, and counts breathing.",
+     "sign": "A warm low flame the size of a thumbnail.",
+     "habit": "It moves from sleeper to sleeper through the night and stops a moment at each.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      },
+      "bonds": {
+       "classmate": 0.6
+      }
+     },
+     "features": [
+      "old-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "lantern-lit-circle",
+       "name": "The Lit Circle",
+       "of": "one around whom other people feel safe enough to sleep",
+       "text": "Everyone's genius beds down inside its ring of light. It does not sleep and has stopped expecting thanks.",
+       "sign": "Its light falls in a clean ring with an edge you could draw.",
+       "habit": "It nudges whatever belongs to the party back inside the ring: boots, packs, somebody's genius.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "bonds": {
+         "classmate": 0.6
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      },
+      {
+       "id": "lantern-dark-hour-lamp",
+       "name": "Dark-hour Lamp",
+       "of": "one who is at their best when things are worst",
+       "text": "In the worst hour of the night it burns brightest, on purpose, and things that were closing in reconsider.",
+       "sign": "It is dim at dusk and brightens as the night gets on.",
+       "habit": "It dozes through fine evenings and wakes at the hour when people start to doubt.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "ground": {
+         "night": 0.7
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "lantern-parry-light",
+     "name": "Parry-light",
+     "of": "one who watches the other person's hands",
+     "text": "It holds itself where the foe's shoulder shows, so you read the strike off the shadow.",
+     "sign": "It holds itself at shoulder height and a little to one side, never in your eyes.",
+     "habit": "It throws your shadow on the wall and studies it.",
+     "leans": {
+      "fights": {
+       "parries": 1.0
+      },
+      "range": {
+       "close": 0.5
+      }
+     },
+     "features": [
+      "lantern-jaw"
+     ],
+     "finishes": [
+      {
+       "id": "lantern-white-flare",
+       "name": "White Flare",
+       "of": "one who sees the moment and says so",
+       "text": "At the instant of the strike it burns white, and the strike is slow in it.",
+       "sign": "A flame that is ordinary until it is suddenly white.",
+       "habit": "It flickers at loud noises, then looks embarrassed.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "pattern": {
+         "fires": 0.3
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      },
+      {
+       "id": "lantern-duelists-lamp",
+       "name": "Duelist's Lamp",
+       "of": "one who arranges the room before the argument",
+       "text": "One light, two shadows. It sees to it that yours is the longer.",
+       "sign": "A hood on one side, so that its light falls only where it chooses.",
+       "habit": "It walks round a room once and stands where the light is worst for everyone else.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "company": {
+         "alone": 0.6
+        }
+       },
+       "features": [
+        "shadow-cloak"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "lantern-ward-lamp",
+     "name": "Ward-lamp",
+     "of": "one who makes a place safe before sitting down in it",
+     "text": "The ground its light falls on is easier to hold. It has noticed, and stands accordingly.",
+     "sign": "Flat wide feet. Once set down it does not rock.",
+     "habit": "It turns slowly on the spot until its light has reached every corner, then stops.",
+     "leans": {
+      "shape": {
+       "make": 1.0
+      },
+      "orders": {
+       "hold": 0.6
+      }
+     },
+     "features": [
+      "set-feet"
+     ],
+     "finishes": [
+      {
+       "id": "lantern-hearth-lamp",
+       "name": "Hearth-lamp",
+       "of": "one whose door people find without being told",
+       "text": "It has grown a belly and a door, and burns coal. People come and stand near it without knowing they have.",
+       "sign": "A round iron belly, a little door, and a chimney it is proud of.",
+       "habit": "It ticks as it cools. It opens its door a finger when someone cold comes in.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "ground": {
+         "quiet": 0.6
+        }
+       },
+       "features": [
+        "hall-fat"
+       ],
+       "silhouette": "engine-stove"
+      },
+      {
+       "id": "lantern-ward-glass",
+       "name": "Ward-glass",
+       "of": "one who keeps their own house in order first",
+       "text": "What you build inside its light stands longer. It keeps its glass very clean.",
+       "sign": "Its glass is spotless. There is a rag tucked under one foot.",
+       "habit": "It polishes its panes against your sleeve when you are not paying attention.",
+       "leans": {
+        "shape": {
+         "make": 1.0,
+         "anchor": 0.4
+        }
+       },
+       "features": [
+        "wall-plate"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "lantern-kept-flame",
+   "name": "Kept Flame",
+   "of": "one who keeps faith with those who lit the way",
+   "text": "It learned from you that a flame is a thing handed on, and that the dead can hand you one.",
+   "sign": "Its flame has never once been relit. It will tell you so, in its way.",
+   "habit": "It shelters its flame with its own body in any draught, though it has never needed to.",
+   "leans": {
+    "bonds": {
+     "shade": 1.0
+    },
+    "pattern": {
+     "sworn": 0.7
+    }
+   },
+   "features": [
+    "glow"
+   ],
+   "prongs": [
+    {
+     "id": "lantern-lamplighter",
+     "name": "Lamplighter",
+     "of": "one who would rather carry the light than be it",
+     "text": "It grew a keeper to carry it. The lamp is still the one in charge.",
+     "sign": "A small keeper in a long coat, holding the lamp out in front like something owed.",
+     "habit": "The keeper trims the wick with two fingers, and the lamp lets it, just.",
+     "leans": {
+      "bonds": {
+       "shade": 1.0,
+       "classmate": 0.8
+      }
+     },
+     "features": [
+      "small-hands"
+     ],
+     "silhouette": "kith-lamplighter",
+     "finishes": [
+      {
+       "id": "lantern-shade-lamp",
+       "name": "Shade-lamp",
+       "of": "one who makes sure the dead are still looked at",
+       "text": "The keeper holds it up at the hearth and the shades step into the light to be seen. Some had not been seen in years.",
+       "sign": "The keeper holds it high and a little behind, lighting faces and not the ground.",
+       "habit": "It stands by the hearth of an evening with the lamp raised, though nobody living asked for light.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        },
+        "ground": {
+         "night": 0.4
+        }
+       },
+       "features": [
+        "old-eyes"
+       ],
+       "silhouette": "kith-lamplighter"
+      },
+      {
+       "id": "lantern-shared-flame",
+       "name": "The Shared Flame",
+       "of": "one who gives their fire away and has more for it",
+       "text": "It lights the other genii's lights from its own. None of them has gone out while it stood.",
+       "sign": "The keeper carries a taper as well now, already lit.",
+       "habit": "It goes round the room lighting things: candles, pipes, other genii, whatever will take.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        },
+        "company": {
+         "party": 0.6
+        }
+       },
+       "features": [
+        "brush"
+       ],
+       "silhouette": "kith-lamplighter"
+      }
+     ]
+    },
+    {
+     "id": "lantern-oath-lamp",
+     "name": "Oath-lamp",
+     "of": "one who keeps their promises in front of their eyes",
+     "text": "It burns in the colour of what you swore, and it has started keeping time for you as well.",
+     "sign": "Its flame is not flame-coloured. It is the colour of your Terms.",
+     "habit": "It pulses faintly, on a count. If you know your Pattern you know the count.",
+     "leans": {
+      "pattern": {
+       "sworn": 1.0,
+       "fires": 0.5
+      }
+     },
+     "features": [
+      "pulse"
+     ],
+     "finishes": [
+      {
+       "id": "lantern-oath-flame",
+       "name": "Oath-flame",
+       "of": "one who changed their mind once, on seeing what it would cost",
+       "text": "It burns the colour of the Terms you swore. You have seen it gutter once, and changed your mind.",
+       "sign": "A crown of small steady points round the top of the glass.",
+       "habit": "It burns perfectly still. On the day you wavered it guttered, and you both remember.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        },
+        "shape": {
+         "read": 0.3
+        }
+       },
+       "features": [
+        "crown"
+       ]
+      },
+      {
+       "id": "lantern-beat-keeper",
+       "name": "Beat-keeper",
+       "of": "one who does the same thing well every time",
+       "text": "It pulses with your Pattern. You could keep the time by it with your eyes shut, and sometimes do.",
+       "sign": "A ring of light that tightens and opens like breathing.",
+       "habit": "It keeps time with anything regular: footsteps, a dripping tap, your pulse.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "fights": {
+         "dodges": 0.3
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "lantern-readers-lamp",
+     "name": "Reader's Lamp",
+     "of": "one who reads what was written down, all of it",
+     "text": "It leans over your shoulder at anything written, and turns itself up at the part that matters.",
+     "sign": "A long neck that bends over a page, and a shade it tilts to stop the glare.",
+     "habit": "It reads anything with writing on it: labels, gravestones, the inside of your collar.",
+     "leans": {
+      "quests": {
+       "writ": 1.0
+      },
+      "shape": {
+       "read": 0.5
+      }
+     },
+     "features": [
+      "pages"
+     ],
+     "finishes": [
+      {
+       "id": "lantern-clerks-flame",
+       "name": "Clerk's Flame",
+       "of": "one who cannot be shown a false paper",
+       "text": "A seal that is not what it claims goes dull in its light. Houses have changed their wax because of it.",
+       "sign": "Its light is white and flat, and wax looks grey in it.",
+       "habit": "It holds your letters up to itself one by one before you may open them.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        },
+        "shape": {
+         "bind": 0.4
+        }
+       },
+       "features": [
+        "ledger"
+       ]
+      },
+      {
+       "id": "lantern-truth-lamp",
+       "name": "Truth-lamp",
+       "of": "one in whose company people stop pretending",
+       "text": "Nothing false keeps its shape in this light for long. It makes for short conversations.",
+       "sign": "A plain clear flame. People do not like to stand in it long.",
+       "habit": "It looks at whoever is talking. Only that. It is surprisingly hard to bear.",
+       "leans": {
+        "shape": {
+         "read": 1.0
+        },
+        "company": {
+         "alone": 0.4
+        }
+       },
+       "features": [
+        "quiet-place"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

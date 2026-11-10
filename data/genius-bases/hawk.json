@@ -4,6 +4,7 @@
  "class": "animal",
  "expression": "beast",
  "silhouette": "beast-flier",
+ "soul": "The soul of one who sees a thing whole from a long way off, and has never found it easy to come down.",
  "spark": "The mote rides high, above your head and a little ahead, and drops to your shoulder only when you stop.",
  "nature": {
   "range": {
@@ -45,6 +46,8 @@
   "id": "hawk-fledgling-hawk",
   "name": "Fledgling hawk",
   "text": "Down still showing through the flight feathers. It falls off your shoulder twice a day and pretends it meant to.",
+  "sign": "Down still shows through the flight feathers, and it glares at everything as if it were already large.",
+  "habit": "It practises mantling: over crumbs, over scraps of paper, and once over your hand.",
   "features": [
    "wings",
    "beak"
@@ -52,121 +55,34 @@
  },
  "paths": [
   {
-   "id": "hawk-stooper",
-   "name": "Stooper",
-   "text": "It learned from you that the best blow is the one that arrives from somewhere else.",
+   "id": "hawk-high-circler",
+   "name": "High Circler",
+   "of": "one who keeps the world at a distance to see it whole",
+   "text": "It learned from you that a thing is clearest from far off. It comes down when it has seen the whole of it, and not before.",
+   "sign": "It sits higher than anything else in the room and looks at people with one eye, then the other.",
+   "habit": "It circles on the warm air over wherever you are, and comes down only when you stop.",
    "leans": {
     "range": {
      "far": 1.0
     },
-    "orders": {
-     "hunt": 0.7
+    "company": {
+     "alone": 0.7
+    },
+    "shape": {
+     "read": 0.5
     }
    },
    "features": [
-    "talons"
+    "far-eyes"
    ],
    "prongs": [
     {
-     "id": "hawk-harrier",
-     "name": "Harrier",
-     "text": "You fight at arm's length, so it came down out of the air to fight at the height of your knee.",
-     "leans": {
-      "range": {
-       "close": 1.0
-      },
-      "fights": {
-       "dodges": 0.5
-      }
-     },
-     "features": [
-      "ground-claws",
-      "crest"
-     ],
-     "silhouette": "beast-ground-hunter",
-     "finishes": [
-      {
-       "id": "hawk-heel-hawk",
-       "name": "Heel-hawk",
-       "text": "It goes for the back of the leg while your party has the front. Nothing it has hamstrung has thanked it.",
-       "leans": {
-        "company": {
-         "party": 1.0
-        },
-        "bonds": {
-         "classmate": 0.5
-        }
-       },
-       "features": [
-        "long-legs"
-       ]
-      },
-      {
-       "id": "hawk-bramble-harrier",
-       "name": "Bramble-harrier",
-       "text": "You go out alone into the green, and it has learned to flush what hides there onto your blade.",
-       "leans": {
-        "company": {
-         "alone": 1.0
-        },
-        "ground": {
-         "wild": 0.8
-        }
-       },
-       "features": [
-        "tunnel-ear"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "hawk-fist-falcon",
-     "name": "Fist-falcon",
-     "text": "It leaves your fist on the first beat of your Pattern and is back on it before the last.",
-     "leans": {
-      "pattern": {
-       "fires": 1.0
-      }
-     },
-     "features": [
-      "talon-grip"
-     ],
-     "finishes": [
-      {
-       "id": "hawk-thunder-stoop",
-       "name": "Thunder-stoop",
-       "text": "It falls with the Pattern's last beat. The sound arrives after it does.",
-       "leans": {
-        "pattern": {
-         "fires": 1.0
-        },
-        "shape": {
-         "cast": 0.6
-        }
-       },
-       "features": [
-        "ring"
-       ]
-      },
-      {
-       "id": "hawk-jessed-falcon",
-       "name": "Jessed Falcon",
-       "text": "It wears the jesses of your oath by choice. It could slip them. It has not.",
-       "leans": {
-        "pattern": {
-         "sworn": 1.0
-        }
-       },
-       "features": [
-        "chain"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "hawk-high-circler",
-     "name": "High Circler",
-     "text": "It hangs where your shots land and marks them for you with its shadow.",
+     "id": "hawk-wind-hover",
+     "name": "Wind-hover",
+     "of": "one who can hold still in the middle of everything moving",
+     "text": "It hangs in one place on a moving wind with its head perfectly still, over the ground where your shots will fall.",
+     "sign": "Its head stays fixed in the air while the rest of it works to keep it there.",
+     "habit": "It hovers outside the window on windy days, facing in.",
      "leans": {
       "shape": {
        "cast": 1.0
@@ -182,7 +98,10 @@
       {
        "id": "hawk-storm-kite",
        "name": "Storm-kite",
+       "of": "one who is at ease only in rough weather",
        "text": "It rides your weather in over the wild ground and comes down with it.",
+       "sign": "Smoke-grey and fork-tailed, with the smell of rain on it before the rain.",
+       "habit": "It goes up when the glass drops and comes home soaked and pleased.",
        "leans": {
         "ground": {
          "wild": 1.0
@@ -198,7 +117,10 @@
       {
        "id": "hawk-line-falcon",
        "name": "Line-falcon",
+       "of": "one who checks the road ahead for everyone else",
        "text": "It flies the line ahead of the car, post to post. You know a lamp is out before the walker does.",
+       "sign": "A point of lamplight rides under its breast, so the walkers can see it coming down the line.",
+       "habit": "It flies to the next post and back before breakfast.",
        "leans": {
         "ground": {
          "line": 1.0
@@ -212,29 +134,145 @@
        ]
       }
      ]
+    },
+    {
+     "id": "hawk-dusk-hawk",
+     "name": "Dusk-hawk",
+     "of": "one who keeps hours nobody else keeps",
+     "text": "You work at night, so it has learned the hours a hawk should not know.",
+     "sign": "The eyes are too dark and too large for a hawk's.",
+     "habit": "It sleeps through noon with one eye open and wakes at lamp-lighting.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      }
+     },
+     "features": [
+      "dark-eyed"
+     ],
+     "finishes": [
+      {
+       "id": "hawk-owl-eyed-hawk",
+       "name": "Owl-eyed Hawk",
+       "of": "one who watches a thing wind up and says nothing until it matters",
+       "text": "It turns its whole head to look, slowly. It sees the strike wind up in the dark before you hear it.",
+       "sign": "It turns its whole head to look at you, slowly, and the eyes do not move in it.",
+       "habit": "It sits facing the darkest corner of the room.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "ground": {
+         "night": 0.7
+        }
+       },
+       "features": [
+        "watching-eye"
+       ]
+      },
+      {
+       "id": "hawk-quiet-wing",
+       "name": "Quiet-wing",
+       "of": "one who can leave without the room noticing",
+       "text": "It flies where the field goes still, and makes no more sound than the Quiet does.",
+       "sign": "Its feathers are soft at the edge, and its shadow arrives without a sound.",
+       "habit": "It lands on your shoulder, and you find out when it shifts its weight.",
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        }
+       },
+       "features": [
+        "quiet-place"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "hawk-augurs-hawk",
+     "name": "Augur's Hawk",
+     "of": "one who looks a thing over before agreeing to it",
+     "text": "It flies a pattern over the ground before you walk it. Left is a warning.",
+     "sign": "Old eyes in a young bird, and a way of flying a slow square over new ground.",
+     "habit": "It will not come in at a strange door until it has seen the back of the house.",
+     "leans": {
+      "quests": {
+       "deep-run": 1.0
+      },
+      "shape": {
+       "read": 0.5
+      }
+     },
+     "features": [
+      "old-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "hawk-tiercel-of-the-deep-run",
+       "name": "Tiercel of the Deep Run",
+       "of": "one who has seen the worst of it and still counts heads",
+       "text": "It has been to the heart of every zone with you and came out counting the party.",
+       "sign": "A cold light under the breast feathers. Its glance goes to each of the party in turn.",
+       "habit": "It perches at the mouth of any dark place and looks in for a long time.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      },
+      {
+       "id": "hawk-salvage-kite",
+       "name": "Salvage Kite",
+       "of": "one who sees the worth in what was thrown away",
+       "text": "It finds the thing in the rubble before the archivist has finished describing it.",
+       "sign": "A faint glow on its talons, and usually something small and bright held in them.",
+       "habit": "It quarters the yard at dawn and brings one thing to your sill.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        },
+        "ground": {
+         "ruin": 0.4
+        }
+       },
+       "features": [
+        "glow"
+       ]
+      }
+     ]
     }
    ]
   },
   {
-   "id": "hawk-mantler",
-   "name": "Mantler",
-   "text": "A hawk spreads its wings over what is its own. It learned from you what that is.",
+   "id": "hawk-eyrie-holder",
+   "name": "Eyrie-holder",
+   "of": "one who takes the high seat and expects to keep it",
+   "text": "It learned from you that somebody has to hold the high place. Give it one and it keeps everything beneath.",
+   "sign": "Feet set wide on the highest thing in sight, and a look that asks what you are doing in its hall.",
+   "habit": "It finds the tallest perch in any new place within a minute. Whatever sat there before has to move.",
    "leans": {
-    "orders": {
-     "guard": 1.0
+    "ground": {
+     "ruin": 1.0
     },
-    "fights": {
-     "blocks": 0.5
+    "orders": {
+     "hold": 0.7,
+     "guard": 0.4
     }
    },
    "features": [
-    "wing-cloak"
+    "set-feet"
    ],
    "prongs": [
     {
-     "id": "hawk-eyrie-holder",
-     "name": "Eyrie-holder",
-     "text": "Give it a high place and it will keep everything beneath.",
+     "id": "hawk-mantler",
+     "name": "Mantler",
+     "of": "one who spreads themselves over what is theirs",
+     "text": "A hawk spreads its wings over what is its own. It learned from you what that is.",
+     "sign": "Its wings hang half open like a cloak, even at rest.",
+     "habit": "It mantles over your pack when strangers come near, and hisses at none of them in particular.",
      "leans": {
       "orders": {
        "hold": 1.0
@@ -244,13 +282,16 @@
       }
      },
      "features": [
-      "set-feet"
+      "wing-cloak"
      ],
      "finishes": [
       {
        "id": "hawk-post-eagle",
        "name": "Post-eagle",
+       "of": "one who holds the lit place and will not be relieved",
        "text": "It sits the lamp-iron of every post you light, and the dark does not come under it.",
+       "sign": "It sits the lamp-iron with the flame between its feet and is not singed.",
+       "habit": "It preens under the post lamp, and the light does not flicker for it.",
        "leans": {
         "ground": {
          "line": 1.0
@@ -266,7 +307,10 @@
       {
        "id": "hawk-lord-of-the-broken-tower",
        "name": "Lord of the Broken Tower",
+       "of": "one who made a kingdom of what nobody wanted",
        "text": "It has chosen the tallest broken thing in every ruin you have walked. From there it owns the floor.",
+       "sign": "Stone-grey and heavy in the shoulder, with mortar dust in its feathers.",
+       "habit": "It sits the highest broken thing for miles and looks down at the floor as if it owed rent.",
        "leans": {
         "ground": {
          "ruin": 1.0
@@ -281,7 +325,10 @@
     {
      "id": "hawk-wing-over",
      "name": "Wing-over",
+     "of": "one who puts themselves between and counts the cost afterward",
      "text": "It puts a wing between you and what is coming, and counts the feathers afterward.",
+     "sign": "The leading feathers are thick and overlapped like plates, and several are missing.",
+     "habit": "It counts its flight feathers after every fight, slowly, with its beak.",
      "leans": {
       "fights": {
        "hurts": 1.0
@@ -294,7 +341,10 @@
       {
        "id": "hawk-broken-pinion",
        "name": "Broken Pinion",
+       "of": "one whose pride took a hurt and went on anyway",
        "text": "One wing never set straight. It flies anyway, lower, and nearer you.",
+       "sign": "One wing sits wrong and is scorched at the tip. It flies low and close, never far.",
+       "habit": "It stretches the bad wing each morning and holds it out longer than the good one.",
        "leans": {
         "fights": {
          "hurts": 1.0
@@ -310,7 +360,10 @@
       {
        "id": "hawk-iron-feather",
        "name": "Iron-feather",
+       "of": "one who grew hard where they were struck",
        "text": "The feathers it lost for you grew back as something a blade turns on.",
+       "sign": "The feathers along its guard side are dull metal and ring when it shakes.",
+       "habit": "It whets its feathers on stone. You can hear it at night.",
        "leans": {
         "fights": {
          "blocks": 1.0
@@ -328,7 +381,10 @@
     {
      "id": "hawk-flock-leader",
      "name": "Flock-leader",
+     "of": "one others rise with, without knowing why",
      "text": "The party's genii take the air when it does and come down when it does.",
+     "sign": "Other genii look up when it calls. It has one call for up and one for down.",
+     "habit": "It will not settle until every bird in the yard has.",
      "leans": {
       "company": {
        "party": 1.0
@@ -344,7 +400,10 @@
       {
        "id": "hawk-passengers-hawk",
        "name": "Passenger's Hawk",
+       "of": "one who takes a stranger under their wing and keeps them there",
        "text": "It rides the shoulder of whoever you were set to bring home, and looks at you if they fall behind.",
+       "sign": "It rides a stranger's shoulder and watches you over the top of their head.",
+       "habit": "It walks the length of a sleeping guest, once, and returns to its post.",
        "leans": {
         "quests": {
          "escort": 1.0
@@ -357,7 +416,10 @@
       {
        "id": "hawk-cohort-eagle",
        "name": "Cohort Eagle",
+       "of": "one who remembers each of their own",
        "text": "Every one of your cohort has had it land on their arm once. It has not forgotten which arm.",
+       "sign": "A crest like a crown, and a different greeting for each of the twelve.",
+       "habit": "It lands on each classmate's arm in the same order every morning.",
        "leans": {
         "bonds": {
          "classmate": 1.0
@@ -375,108 +437,137 @@
    ]
   },
   {
-   "id": "hawk-keen-eye",
-   "name": "Keen-eye",
-   "text": "It learned from you that seeing first is worth more than striking first.",
+   "id": "hawk-stooper",
+   "name": "Stooper",
+   "of": "one who decides once and does not pull out of it",
+   "text": "It learned from you to choose once, from a long way up, and then not to pull out of it.",
+   "sign": "It folds to a point when it looks at something it wants. The talons are open before the wings close.",
+   "habit": "It picks one thing in the room and watches only that until it moves.",
    "leans": {
     "shape": {
-     "read": 1.0
+     "cast": 1.0
     },
-    "fights": {
-     "parries": 0.6
+    "pattern": {
+     "fires": 0.7
+    },
+    "range": {
+     "far": 0.5
     }
    },
    "features": [
-    "far-eyes"
+    "talons"
    ],
    "prongs": [
     {
-     "id": "hawk-dusk-hawk",
-     "name": "Dusk-hawk",
-     "text": "You work at night, so it has learned the hours a hawk should not know.",
+     "id": "hawk-fist-falcon",
+     "name": "Fist-falcon",
+     "of": "one who goes on the word and is back before it is finished",
+     "text": "It leaves your fist on the first beat of your Pattern and is back on it before the last.",
+     "sign": "It grips your fist hard enough to mark the glove, leaning forward.",
+     "habit": "It bates off the fist at any sudden sound, and returns looking as if it had not.",
      "leans": {
-      "ground": {
-       "night": 1.0
+      "pattern": {
+       "fires": 1.0
       }
      },
      "features": [
-      "dark-eyed"
+      "talon-grip"
      ],
      "finishes": [
       {
-       "id": "hawk-owl-eyed-hawk",
-       "name": "Owl-eyed Hawk",
-       "text": "It turns its whole head to look, slowly. It sees the strike wind up in the dark before you hear it.",
+       "id": "hawk-thunder-stoop",
+       "name": "Thunder-stoop",
+       "of": "one whose arrival is the whole argument",
+       "text": "It falls with the Pattern's last beat. The sound arrives after it does.",
+       "sign": "A pale ring opens in the air behind it when it falls.",
+       "habit": "It climbs until you lose it, and then you watch the ground.",
        "leans": {
-        "fights": {
-         "parries": 1.0
+        "pattern": {
+         "fires": 1.0
         },
-        "ground": {
-         "night": 0.7
+        "shape": {
+         "cast": 0.6
         }
        },
        "features": [
-        "watching-eye"
+        "ring"
        ]
       },
       {
-       "id": "hawk-quiet-wing",
-       "name": "Quiet-wing",
-       "text": "It flies where the field goes still, and makes no more sound than the Quiet does.",
+       "id": "hawk-jessed-falcon",
+       "name": "Jessed Falcon",
+       "of": "one who could leave and has chosen not to",
+       "text": "It wears the jesses of your oath by choice. It could slip them. It has not.",
+       "sign": "Fine chain jesses on both legs, unfastened. It carries them tucked up as it flies.",
+       "habit": "It draws the jesses through its beak, link by link, each night.",
        "leans": {
-        "ground": {
-         "quiet": 1.0
+        "pattern": {
+         "sworn": 1.0
         }
        },
        "features": [
-        "quiet-place"
+        "chain"
        ]
       }
      ]
     },
     {
-     "id": "hawk-augurs-hawk",
-     "name": "Augur's Hawk",
-     "text": "It flies a pattern over the ground before you walk it. Left is a warning.",
+     "id": "hawk-harrier",
+     "name": "Harrier",
+     "of": "one who came down to where the work is",
+     "text": "You fight at arm's length, so it came down out of the air to fight at the height of your knee.",
+     "sign": "Long bare legs and a crest. It runs more than it flies, low, with its wings half out for balance.",
+     "habit": "It stalks the dormitory floor on foot and looks under every bed.",
      "leans": {
-      "quests": {
-       "deep-run": 1.0
+      "range": {
+       "close": 1.0
       },
-      "shape": {
-       "read": 0.5
+      "fights": {
+       "dodges": 0.5
       }
      },
      "features": [
-      "old-eyes"
+      "ground-claws",
+      "crest"
      ],
+     "silhouette": "beast-ground-hunter",
      "finishes": [
       {
-       "id": "hawk-tiercel-of-the-deep-run",
-       "name": "Tiercel of the Deep Run",
-       "text": "It has been to the heart of every zone with you and came out counting the party.",
+       "id": "hawk-heel-hawk",
+       "name": "Heel-hawk",
+       "of": "one who takes the unglamorous part of the job",
+       "text": "It goes for the back of the leg while your party has the front. Nothing it has hamstrung has thanked it.",
+       "sign": "It carries its head at knee height and looks at ankles.",
+       "habit": "It walks behind your classmates and is trodden on by none of them.",
        "leans": {
-        "quests": {
-         "deep-run": 1.0
+        "company": {
+         "party": 1.0
+        },
+        "bonds": {
+         "classmate": 0.5
         }
        },
        "features": [
-        "cold-core"
+        "long-legs"
        ]
       },
       {
-       "id": "hawk-salvage-kite",
-       "name": "Salvage Kite",
-       "text": "It finds the thing in the rubble before the archivist has finished describing it.",
+       "id": "hawk-bramble-harrier",
+       "name": "Bramble-harrier",
+       "of": "one who goes into the thick of it alone",
+       "text": "You go out alone into the green, and it has learned to flush what hides there onto your blade.",
+       "sign": "Burrs in its breast feathers, and one ear-tuft always turned to the undergrowth.",
+       "habit": "It pushes into any hedge it passes and comes out the far side.",
        "leans": {
-        "quests": {
-         "salvage": 1.0
+        "company": {
+         "alone": 1.0
         },
         "ground": {
-         "ruin": 0.4
+         "wild": 0.8
         }
        },
        "features": [
-        "glow"
+        "tunnel-ear"
        ]
       }
      ]
@@ -484,7 +575,10 @@
     {
      "id": "hawk-message-hawk",
      "name": "Message-hawk",
+     "of": "one who can be trusted to carry a thing all the way",
      "text": "It carries what you bind, a word or a writ or a name, to whoever must have it.",
+     "sign": "A small case at its leg, and a way of landing on the right person in a crowded room.",
+     "habit": "It will not eat until what it carries has been taken from it.",
      "leans": {
       "shape": {
        "bind": 1.0
@@ -500,7 +594,10 @@
       {
        "id": "hawk-writ-falcon",
        "name": "Writ-falcon",
+       "of": "one who reads the seal before delivering the letter",
        "text": "It has delivered every writ you carried. It reads the seal before you do.",
+       "sign": "A brass plate on its breast with every house's seal stamped small upon it.",
+       "habit": "It turns each sealed thing over twice with its foot before it lets go.",
        "leans": {
         "quests": {
          "writ": 1.0
@@ -513,7 +610,10 @@
       {
        "id": "hawk-shades-falcon",
        "name": "Shade's Falcon",
+       "of": "one who carries word between those who cannot meet",
        "text": "The shades at the hearth send it out with words for the living. It comes back to you with the answers.",
+       "sign": "A cold light under one wing, and frost where it has perched.",
+       "habit": "At the lamp hour it sits on the back of an empty chair at the hearth, head cocked.",
        "leans": {
         "bonds": {
          "shade": 1.0

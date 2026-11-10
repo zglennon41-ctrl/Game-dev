@@ -4,6 +4,7 @@
  "class": "animal",
  "expression": "beast",
  "silhouette": "beast-shell",
+ "soul": "The soul of one who has never been hurried into anything, and remembers everyone who tried.",
  "spark": "The mote does not circle. It finds one place near you and stays there until you move, and then it is late.",
  "nature": {
   "orders": {
@@ -42,6 +43,8 @@
   "id": "tortoise-hatchling",
   "name": "Tortoise hatchling",
   "text": "A shell the size of your palm, with a head that comes out when it has decided to. It is in no hurry and never has been.",
+  "sign": "A shell the size of your palm. The head comes out a little at a time, to see if it was worth it.",
+  "habit": "It walks to the one warm flagstone in any room and stays there until carried.",
   "features": [
    "shell"
   ]
@@ -50,13 +53,17 @@
   {
    "id": "tortoise-stone-back",
    "name": "Stone-back",
-   "text": "It learned from you that a blow has to land on something. It volunteered.",
+   "of": "one who will not be moved once they have decided",
+   "text": "It learned from you that being moved is something a person agrees to, and that you have not yet agreed.",
+   "sign": "Its shell has gone the grey of fieldstone, and it sets its feet before it does anything.",
+   "habit": "It stops in doorways to think. People go round.",
    "leans": {
-    "fights": {
-     "blocks": 1.0
+    "shape": {
+     "anchor": 1.0
     },
-    "orders": {
-     "guard": 0.6
+    "fights": {
+     "parries": 0.7,
+     "hurts": 0.5
     }
    },
    "features": [
@@ -64,59 +71,12 @@
    ],
    "prongs": [
     {
-     "id": "tortoise-cairn-back",
-     "name": "Cairn-back",
-     "text": "Travellers stack a stone on it for luck at every post. It has stopped shaking them off.",
-     "leans": {
-      "orders": {
-       "hold": 1.0
-      },
-      "ground": {
-       "line": 0.5
-      }
-     },
-     "features": [
-      "set-feet"
-     ],
-     "finishes": [
-      {
-       "id": "tortoise-keystone-of-the-post",
-       "name": "Keystone of the Post",
-       "text": "It settles beside a post and the post's flame stops guttering. The Compact has asked to borrow it.",
-       "leans": {
-        "orders": {
-         "hold": 1.0
-        },
-        "shape": {
-         "anchor": 0.5
-        }
-       },
-       "features": [
-        "lantern"
-       ]
-      },
-      {
-       "id": "tortoise-old-milestone",
-       "name": "Old Milestone",
-       "text": "It has been at every post you relit. The walkers count the line by it now.",
-       "leans": {
-        "quests": {
-         "linework": 1.0
-        },
-        "ground": {
-         "line": 0.6
-        }
-       },
-       "features": [
-        "old-eyes"
-       ]
-      }
-     ]
-    },
-    {
      "id": "tortoise-ridge-shell",
      "name": "Ridge-shell",
+     "of": "one who is marked by every time they would not give way",
      "text": "Each blow it took for you raised a ridge on its shell. It is nearly all ridges.",
+     "sign": "A row of raised ridges runs down its shell, one for each blow it stood under.",
+     "habit": "It rubs its shell along the doorframe, ridge by ridge, as if counting.",
      "leans": {
       "fights": {
        "hurts": 1.0
@@ -129,7 +89,10 @@
       {
        "id": "tortoise-hundred-scar",
        "name": "Hundred-scar",
+       "of": "one who can show you the cost of every stand",
        "text": "You could read your whole first year off its shell, if you could bear to.",
+       "sign": "Its shell is dark iron crossed with pale lines, like a slate nobody has wiped.",
+       "habit": "It lies in the sun with the worst side up.",
        "leans": {
         "fights": {
          "hurts": 1.0
@@ -142,7 +105,10 @@
       {
        "id": "tortoise-anvil-back",
        "name": "Anvil-back",
+       "of": "one others break themselves on",
        "text": "What strikes it rings, and for a moment cannot lift its weapon again.",
+       "sign": "A flat bright plate on the crown of its shell, dented and ringing.",
+       "habit": "It lets the smith's apprentice practise on it and does not look round.",
        "leans": {
         "fights": {
          "blocks": 1.0
@@ -158,259 +124,12 @@
      ]
     },
     {
-     "id": "tortoise-house-carrier",
-     "name": "House-carrier",
-     "text": "The party's packs ride on its shell. So, on bad days, does the party.",
-     "leans": {
-      "company": {
-       "party": 1.0
-      }
-     },
-     "features": [
-      "broad-chest"
-     ],
-     "finishes": [
-      {
-       "id": "tortoise-wagon-tortoise",
-       "name": "Wagon-tortoise",
-       "text": "The passenger rides. It has never dropped one and never hurried one.",
-       "leans": {
-        "quests": {
-         "escort": 1.0
-        }
-       },
-       "features": [
-        "wheels"
-       ]
-      },
-      {
-       "id": "tortoise-hearth-on-its-back",
-       "name": "Hearth-on-its-back",
-       "text": "Your cohort built a fire-pan on its shell one cold night. It has kept the coals in ever since.",
-       "leans": {
-        "bonds": {
-         "classmate": 1.0
-        }
-       },
-       "features": [
-        "ember"
-       ]
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "tortoise-snapper",
-   "name": "Snapper",
-   "text": "It learned from you that patience is only the first half.",
-   "leans": {
-    "orders": {
-     "hunt": 1.0
-    },
-    "range": {
-     "close": 0.7
-    }
-   },
-   "features": [
-    "maw"
-   ],
-   "prongs": [
-    {
-     "id": "tortoise-mud-lier",
-     "name": "Mud-lier",
-     "text": "It lies in the shallows looking like the bank until something steps on the bank.",
-     "leans": {
-      "ground": {
-       "water": 1.0
-      }
-     },
-     "features": [
-      "webbed"
-     ],
-     "finishes": [
-      {
-       "id": "tortoise-river-jaw",
-       "name": "River-jaw",
-       "text": "The river towns name the things it has pulled under. The list is short and the things were large.",
-       "leans": {
-        "ground": {
-         "water": 1.0
-        },
-        "quests": {
-         "hunt": 0.5
-        }
-       },
-       "features": [
-        "fins"
-       ]
-      },
-      {
-       "id": "tortoise-bog-lure",
-       "name": "Bog-lure",
-       "text": "A light on its beak hangs over black water. What comes to the light does not see the rest of it.",
-       "leans": {
-        "ground": {
-         "night": 1.0
-        }
-       },
-       "features": [
-        "lantern-jaw"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "tortoise-counter-biter",
-     "name": "Counter-biter",
-     "text": "It waits in its shell through the strike and comes out on the foe's recovery, as you do.",
-     "leans": {
-      "fights": {
-       "parries": 1.0
-      }
-     },
-     "features": [
-      "fangs"
-     ],
-     "finishes": [
-      {
-       "id": "tortoise-second-beat-snapper",
-       "name": "Second-beat Snapper",
-       "text": "It bites on the beat after your Pattern ends, when the foe thinks it is over.",
-       "leans": {
-        "pattern": {
-         "fires": 1.0
-        }
-       },
-       "features": [
-        "ring"
-       ]
-      },
-      {
-       "id": "tortoise-patient-jaw",
-       "name": "Patient Jaw",
-       "text": "It has let go of nothing it ever took hold of. One of them is still attached.",
-       "leans": {
-        "fights": {
-         "parries": 1.0
-        },
-        "company": {
-         "alone": 0.5
-        }
-       },
-       "features": [
-        "chain"
-       ]
-      }
-     ]
-    },
-    {
-     "id": "tortoise-den-breaker",
-     "name": "Den-breaker",
-     "text": "It walks into a den the way it walks everywhere. The den's owner has to decide what to do about that.",
-     "leans": {
-      "quests": {
-       "hunt": 1.0
-      }
-     },
-     "features": [
-      "horn-brow"
-     ],
-     "finishes": [
-      {
-       "id": "tortoise-trophy-shell",
-       "name": "Trophy-shell",
-       "text": "A tooth from every named beast is set in its shell. It chose where each one goes.",
-       "leans": {
-        "bonds": {
-         "named": 1.0
-        }
-       },
-       "features": [
-        "crown"
-       ]
-      },
-      {
-       "id": "tortoise-the-unhurried",
-       "name": "The Unhurried",
-       "text": "It has never run. Everything it has hunted across the green was felled, eventually.",
-       "leans": {
-        "ground": {
-         "wild": 1.0
-        }
-       },
-       "features": [
-        "roots"
-       ]
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": "tortoise-old-shell",
-   "name": "Old-shell",
-   "text": "It learned from you that somebody should be keeping count.",
-   "leans": {
-    "shape": {
-     "read": 1.0
-    },
-    "orders": {
-     "free": 0.4
-    }
-   },
-   "features": [
-    "old-eyes"
-   ],
-   "prongs": [
-    {
-     "id": "tortoise-map-back",
-     "name": "Map-back",
-     "text": "The lines on its shell have begun to match the zones you have walked. The unwalked parts are filling in.",
-     "leans": {
-      "quests": {
-       "deep-run": 1.0
-      }
-     },
-     "features": [
-      "map-shell"
-     ],
-     "finishes": [
-      {
-       "id": "tortoise-chart-of-the-deep",
-       "name": "Chart of the Deep",
-       "text": "Its shell shows the heart of every zone and the one way out. Varga has copied it twice.",
-       "leans": {
-        "quests": {
-         "deep-run": 1.0
-        },
-        "ground": {
-         "ruin": 0.5
-        }
-       },
-       "features": [
-        "dial"
-       ]
-      },
-      {
-       "id": "tortoise-salvors-tortoise",
-       "name": "Salvor's Tortoise",
-       "text": "It sits down on the spot where the thing is buried, every time, and waits for you to notice.",
-       "leans": {
-        "quests": {
-         "salvage": 1.0
-        }
-       },
-       "features": [
-        "tunnel-ear"
-       ]
-      }
-     ]
-    },
-    {
      "id": "tortoise-ward-shell",
      "name": "Ward-shell",
+     "of": "one who carries their rules with them",
      "text": "Your wards are cut into its shell now, and it carries them where you cannot stay.",
+     "sign": "Ward-lines are cut round the rim of its shell and glow faintly when it stops.",
+     "habit": "Wherever it stops it turns once in place first, and then that is where it is.",
      "leans": {
       "shape": {
        "make": 1.0
@@ -423,7 +142,10 @@
       {
        "id": "tortoise-ward-on-four-legs",
        "name": "Ward on Four Legs",
+       "of": "one who is a safe place by standing still",
        "text": "Where it stops there is a post, whether the Compact built one or not.",
+       "sign": "The air over its shell stands like glass on a hot day, and dust does not cross it.",
+       "habit": "It settles in the middle of the camp, and the camp arranges itself round it.",
        "leans": {
         "shape": {
          "make": 1.0
@@ -439,7 +161,10 @@
       {
        "id": "tortoise-sworn-stone",
        "name": "Sworn Stone",
+       "of": "one who was there and will say what was said",
        "text": "Your Terms are carved on it. It was the witness, and stone does not forget its lines.",
+       "sign": "Your Terms are cut in the underside of its shell, small and deep. It shows them only when asked.",
+       "habit": "Once a season it rolls onto its back by the fire, slowly, and lets you read.",
        "leans": {
         "pattern": {
          "sworn": 1.0
@@ -452,9 +177,201 @@
      ]
     },
     {
+     "id": "tortoise-counter-biter",
+     "name": "Counter-biter",
+     "of": "one who waits out the shouting and then answers once",
+     "text": "It waits in its shell through the strike and comes out on the foe's recovery, as you do.",
+     "sign": "Its head is drawn half in, and the beak shows at the edge of the shell like a latch.",
+     "habit": "It watches a fly circle for an hour. There is then no fly.",
+     "leans": {
+      "fights": {
+       "parries": 1.0
+      },
+      "range": {
+       "close": 0.5
+      }
+     },
+     "features": [
+      "fangs"
+     ],
+     "finishes": [
+      {
+       "id": "tortoise-second-beat-snapper",
+       "name": "Second-beat Snapper",
+       "of": "one who has the last word, late",
+       "text": "It bites on the beat after your Pattern ends, when the foe thinks it is over.",
+       "sign": "A ring of pale light closes round its jaw a beat after you would expect.",
+       "habit": "It shuts its mouth a moment after everyone has stopped talking.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        }
+       },
+       "features": [
+        "ring"
+       ]
+      },
+      {
+       "id": "tortoise-patient-jaw",
+       "name": "Patient Jaw",
+       "of": "one who has never let go of anything",
+       "text": "It has let go of nothing it ever took hold of. One of them is still attached.",
+       "sign": "A length of chain trails from its beak. It has not opened its mouth to drop it.",
+       "habit": "It holds one end of a rope for you all day and does not ask why.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "company": {
+         "alone": 0.5
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tortoise-cairn-back",
+   "name": "Cairn-back",
+   "of": "one who is the same every day, and can be set a clock by",
+   "text": "It learned from you to be in the same place at the same hour. Travellers stack a stone on it at every post, and it has stopped shaking them off.",
+   "sign": "A small cairn of pebbles rides on its shell. None has fallen off.",
+   "habit": "It leaves at the same minute each morning, and the walkers check the post clock by it.",
+   "leans": {
+    "ground": {
+     "line": 1.0
+    },
+    "quests": {
+     "escort": 0.7
+    },
+    "orders": {
+     "hold": 0.5
+    }
+   },
+   "features": [
+    "set-feet"
+   ],
+   "prongs": [
+    {
+     "id": "tortoise-waymark-tortoise",
+     "name": "Waymark Tortoise",
+     "of": "one who keeps to the stopping places",
+     "text": "It stops at every post you have relit, for exactly as long as it did the last time. The walkers have begun to count from it.",
+     "sign": "The plates of its shell are worn like the face of a dial, and its shadow tells the hour.",
+     "habit": "It will not pass a post without stopping, even one that is dark.",
+     "leans": {
+      "orders": {
+       "hold": 1.0
+      },
+      "ground": {
+       "line": 0.5
+      }
+     },
+     "features": [
+      "dial"
+     ],
+     "finishes": [
+      {
+       "id": "tortoise-keystone-of-the-post",
+       "name": "Keystone of the Post",
+       "of": "one the whole arrangement turns out to rest on",
+       "text": "It settles beside a post and the post's flame stops guttering. The Compact has asked to borrow it.",
+       "sign": "A post lamp is bolted to its shell. The Compact did it, and it did not object.",
+       "habit": "It sleeps against the foot of the lamp-iron, and the flame stands straight.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "shape": {
+         "anchor": 0.5
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      },
+      {
+       "id": "tortoise-old-milestone",
+       "name": "Old Milestone",
+       "of": "one by whom others measure how far they have come",
+       "text": "It has been at every post you relit. The walkers count the line by it now.",
+       "sign": "A number is cut in its shell, and repainted each year by somebody.",
+       "habit": "Each evening it looks for a long time down the line, the way you came.",
+       "leans": {
+        "quests": {
+         "linework": 1.0
+        },
+        "ground": {
+         "line": 0.6
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tortoise-house-carrier",
+     "name": "House-carrier",
+     "of": "one who carries what the others set down",
+     "text": "The party's packs ride on its shell. So, on bad days, does the party.",
+     "sign": "Strap marks are worn across its shell, and it holds its back very level.",
+     "habit": "It stands still to be loaded, and waits to be asked before it moves.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      }
+     },
+     "features": [
+      "broad-chest"
+     ],
+     "finishes": [
+      {
+       "id": "tortoise-wagon-tortoise",
+       "name": "Wagon-tortoise",
+       "of": "one who gets everyone there at the same pace as yesterday",
+       "text": "The passenger rides. It has never dropped one and never hurried one.",
+       "sign": "Two small wheels are fitted under the hind edge of its shell. It ignores them and they work.",
+       "habit": "It stops for anyone who puts a hand out.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        }
+       },
+       "features": [
+        "wheels"
+       ]
+      },
+      {
+       "id": "tortoise-hearth-on-its-back",
+       "name": "Hearth-on-its-back",
+       "of": "one who became the place where the others gather",
+       "text": "Your cohort built a fire-pan on its shell one cold night. It has kept the coals in ever since.",
+       "sign": "An iron fire-pan is set in the hollow of its shell with coals in it. Its neck is sooty.",
+       "habit": "It walks to the middle of the room at dusk and stops, and people bring stools.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      }
+     ]
+    },
+    {
      "id": "tortoise-hearth-elder",
      "name": "Hearth-elder",
+     "of": "one who keeps the old hours for those who kept them first",
      "text": "The shades talk to it as to one of their own that has not died yet.",
+     "sign": "A cold light shows between its plates. The shades give it room, and it gives them time.",
+     "habit": "It nods, very slowly, at chairs with nobody in them.",
      "leans": {
       "bonds": {
        "shade": 1.0
@@ -467,7 +384,10 @@
       {
        "id": "tortoise-of-the-old-hall",
        "name": "Tortoise of the Old Hall",
+       "of": "one who remembers everyone by name",
        "text": "It knows the dead of your hall by name, and walks to each of their places at the lamp hour.",
+       "sign": "Names are scratched small along the rim of its shell, and a few of them are faintly lit.",
+       "habit": "At the lamp hour it walks to each of the old places in turn. It has not missed one.",
        "leans": {
         "bonds": {
          "shade": 1.0
@@ -480,7 +400,10 @@
       {
        "id": "tortoise-still-shell",
        "name": "Still Shell",
+       "of": "one who has a quiet they can lend",
        "text": "In the Quiet it draws in its head and the silence stops at its shell. Sit close.",
+       "sign": "With its head in it looks like a river stone. The air above it is very still.",
+       "habit": "It draws in its head when the talk gets loud, and the talk gets quieter.",
        "leans": {
         "ground": {
          "quiet": 1.0
@@ -488,6 +411,190 @@
        },
        "features": [
         "quiet-place"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "tortoise-the-unhurried",
+   "name": "The Unhurried",
+   "of": "one who loves the long way round and arrives anyway",
+   "text": "It learned from you that the long way round is still a way. It has never run, and it has not yet failed to arrive.",
+   "sign": "Its claws are worn short and its shell is travel-stained to the rim. It does not look tired.",
+   "habit": "Offered two roads it takes the longer, and looks at things on the way.",
+   "leans": {
+    "quests": {
+     "deep-run": 1.0,
+     "hunt": 0.7
+    },
+    "company": {
+     "alone": 0.4
+    }
+   },
+   "features": [
+    "old-eyes"
+   ],
+   "prongs": [
+    {
+     "id": "tortoise-map-back",
+     "name": "Map-back",
+     "of": "one who is making a record of everywhere they have been",
+     "text": "The lines on its shell have begun to match the zones you have walked. The unwalked parts are filling in.",
+     "sign": "The lines on its shell are a map. New country comes in at the leading edge.",
+     "habit": "It turns to face the way you came and holds still, as if copying.",
+     "leans": {
+      "quests": {
+       "deep-run": 1.0
+      }
+     },
+     "features": [
+      "map-shell"
+     ],
+     "finishes": [
+      {
+       "id": "tortoise-chart-of-the-deep",
+       "name": "Chart of the Deep",
+       "of": "one who knows the way out because they went all the way in",
+       "text": "Its shell shows the heart of every zone and the one way out. Varga has copied it twice.",
+       "sign": "A small brass dial is set in its shell, and the needle points at the way out.",
+       "habit": "At a fork it sits down, and after a while it is facing one branch.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        },
+        "ground": {
+         "ruin": 0.5
+        }
+       },
+       "features": [
+        "dial"
+       ]
+      },
+      {
+       "id": "tortoise-salvors-tortoise",
+       "name": "Salvor's Tortoise",
+       "of": "one who waits on the right spot until the others catch up",
+       "text": "It sits down on the spot where the thing is buried, every time, and waits for you to notice.",
+       "sign": "It tilts its head to the ground like someone listening at a door.",
+       "habit": "It sits down on the one loose flagstone in a yard and looks at you.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        }
+       },
+       "features": [
+        "tunnel-ear"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tortoise-den-breaker",
+     "name": "Den-breaker",
+     "of": "one who walks in at their own pace and lets the other decide",
+     "text": "It walks into a den the way it walks everywhere. The den's owner has to decide what to do about that.",
+     "sign": "A blunt horn of shell stands over its brow, and its front is scraped from doorways.",
+     "habit": "It walks into rooms it was not asked into, at the speed it does everything.",
+     "leans": {
+      "quests": {
+       "hunt": 1.0
+      },
+      "range": {
+       "close": 0.5
+      }
+     },
+     "features": [
+      "horn-brow"
+     ],
+     "finishes": [
+      {
+       "id": "tortoise-trophy-shell",
+       "name": "Trophy-shell",
+       "of": "one who decides for themselves what was worth keeping",
+       "text": "A tooth from every named beast is set in its shell. It chose where each one goes.",
+       "sign": "A ring of great teeth is set round the crown of its shell, each in a place it chose.",
+       "habit": "Some evenings it has you move one tooth to a new place, and considers the result.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        }
+       },
+       "features": [
+        "crown"
+       ]
+      },
+      {
+       "id": "tortoise-moss-back",
+       "name": "Moss-back",
+       "of": "one who has outlasted everything they ever followed",
+       "text": "It has crossed the green so slowly that the green came with it. What it follows grows tired of looking back.",
+       "sign": "Moss and small ferns grow on its shell, and a seedling has taken root at the back.",
+       "habit": "It stands out in the rain on purpose, for the garden's sake.",
+       "leans": {
+        "ground": {
+         "wild": 1.0
+        },
+        "company": {
+         "alone": 0.5
+        }
+       },
+       "features": [
+        "roots"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "tortoise-mud-lier",
+     "name": "Mud-lier",
+     "of": "one who can wait in plain sight",
+     "text": "It lies in the shallows looking like the bank until something steps on the bank.",
+     "sign": "Mud to the eyes, and webbed feet tucked under. Only the nostrils show it is not the bank.",
+     "habit": "It settles into any puddle and is mistaken for a stone by evening.",
+     "leans": {
+      "ground": {
+       "water": 1.0
+      }
+     },
+     "features": [
+      "webbed"
+     ],
+     "finishes": [
+      {
+       "id": "tortoise-river-jaw",
+       "name": "River-jaw",
+       "of": "one who is known along a whole river for one thing done well",
+       "text": "The river towns name the things it has pulled under. The list is short and the things were large.",
+       "sign": "A finned keel runs down its tail, and its beak is notched from large bones.",
+       "habit": "It floats with only its eyes out and drifts wherever the current is slowest.",
+       "leans": {
+        "ground": {
+         "water": 1.0
+        },
+        "quests": {
+         "hunt": 0.5
+        }
+       },
+       "features": [
+        "fins"
+       ]
+      },
+      {
+       "id": "tortoise-bog-lure",
+       "name": "Bog-lure",
+       "of": "one who lets the trouble come to them",
+       "text": "A light on its beak hangs over black water. What comes to the light does not see the rest of it.",
+       "sign": "A small light hangs from its lower jaw on a stalk. The rest is the colour of the water.",
+       "habit": "It lies at the edge of the lamplight with its mouth a little open.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        }
+       },
+       "features": [
+        "lantern-jaw"
        ]
       }
      ]

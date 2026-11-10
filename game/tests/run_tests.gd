@@ -882,6 +882,13 @@ func test_genius_art() -> void:
 	var forms := {}
 	for f in Data.forms():
 		forms[f["id"]] = true
+	# the bases of the genius tree (data/genius-bases) name bodies and cards too
+	for bf in DirAccess.get_files_at("res://data/genius-bases/"):
+		if not bf.ends_with(".json"):
+			continue
+		var base: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/genius-bases/" + bf))
+		sils[String(base["silhouette"])] = true
+		forms[String(base["settled"]["id"])] = true
 	var n := 0
 	var named := 0
 	for pair in [["bodies", sils, 8000], ["parts", feats, 1500]]:
