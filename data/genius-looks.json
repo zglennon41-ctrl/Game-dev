@@ -140,6 +140,108 @@
       { "id": "black", "name": "black ice", "main": "#3e4a52", "under": "#2c353c", "trim": "#7f9099", "mark": "#aebbc1" },
       { "id": "milk", "name": "milk ice", "main": "#d5d8d6", "under": "#aab2b3", "trim": "#eef0ee", "mark": "#7d8a8e" },
       { "id": "pond", "name": "pond ice", "main": "#8f9e93", "under": "#6a786f", "trim": "#c6d0c6", "mark": "#4d5a52" }
+    ],
+    "cat": [
+      { "id": "tabby", "name": "grey tabby", "main": "#6f6a62", "under": "#b8b0a2", "trim": "#4a4640", "mark": "#2f2c29" },
+      { "id": "ginger", "name": "ginger", "main": "#a8703f", "under": "#e0c9a4", "trim": "#7c4f2e", "mark": "#f0e6d2" },
+      { "id": "black", "name": "black", "main": "#2c2a2a", "under": "#4a4746", "trim": "#1f1e1e", "mark": "#e6e0d4" },
+      { "id": "smoke", "name": "smoke", "main": "#8b8c8e", "under": "#c8c8c6", "trim": "#5e5f62", "mark": "#2e2e30" },
+      { "id": "brown-tabby", "name": "brown tabby", "main": "#7a614a", "under": "#c9b596", "trim": "#55412f", "mark": "#2f2620" }
+    ],
+    "ringtail": [
+      { "id": "grey", "name": "grey", "main": "#77736c", "under": "#b9b3a6", "trim": "#4e4b46", "mark": "#262422" },
+      { "id": "brown", "name": "brown", "main": "#75604c", "under": "#bfae94", "trim": "#523f30", "mark": "#27201b" },
+      { "id": "dusk", "name": "dusk", "main": "#5f6068", "under": "#a6a6aa", "trim": "#404148", "mark": "#1f1f23" },
+      { "id": "rust", "name": "rust", "main": "#8a5a3c", "under": "#cdb594", "trim": "#5e3d29", "mark": "#2a1f19" }
+    ],
+    "fox": [
+      { "id": "red", "name": "red", "main": "#a8572e", "under": "#e6d9c4", "trim": "#6b3a22", "mark": "#2a2422" },
+      { "id": "cross", "name": "cross", "main": "#7a5a44", "under": "#c9bba6", "trim": "#3b3230", "mark": "#e9e2d4" },
+      { "id": "silver", "name": "silver", "main": "#4b4c50", "under": "#9c9c9e", "trim": "#2c2c30", "mark": "#e4e2dc" },
+      { "id": "sand", "name": "sand", "main": "#b89468", "under": "#ead9bd", "trim": "#8a6a48", "mark": "#3a2e26" }
+    ],
+    "bristle": [
+      { "id": "umber", "name": "umber", "main": "#5a4636", "under": "#8f7a64", "trim": "#3a2c22", "mark": "#c2b299" },
+      { "id": "grey", "name": "grey", "main": "#66635f", "under": "#9a968f", "trim": "#44423f", "mark": "#cfc8ba" },
+      { "id": "rust", "name": "rust", "main": "#7c5038", "under": "#b0896a", "trim": "#553626", "mark": "#d9c9ae" },
+      { "id": "black", "name": "black", "main": "#33302e", "under": "#5a5551", "trim": "#201e1d", "mark": "#b5aa9a" }
+    ],
+    "hound": [
+      { "id": "fawn", "name": "fawn", "main": "#b08f68", "under": "#d9c5a4", "trim": "#5a4636", "mark": "#2c2623" },
+      { "id": "brindle", "name": "brindle", "main": "#6a513c", "under": "#a08568", "trim": "#3d2f24", "mark": "#241d19" },
+      { "id": "blue", "name": "blue-grey", "main": "#6c7078", "under": "#a4a7ac", "trim": "#484b52", "mark": "#dcd9d0" },
+      { "id": "red", "name": "red", "main": "#8f5a3a", "under": "#c9a47e", "trim": "#5e3a26", "mark": "#2a201b" }
+    ],
+    "hide": [
+      { "id": "slate", "name": "slate", "main": "#6b6d72", "under": "#a6a09a", "trim": "#48494e", "mark": "#c9b8ac" },
+      { "id": "mud", "name": "mud", "main": "#6e5d4c", "under": "#a8947c", "trim": "#4a3e33", "mark": "#cdbda4" },
+      { "id": "rose", "name": "rose-grey", "main": "#8a7672", "under": "#c0a8a0", "trim": "#5e504d", "mark": "#d8c6bc" },
+      { "id": "umber", "name": "umber", "main": "#54463c", "under": "#8a7868", "trim": "#372e28", "mark": "#b8a694" }
+    ],
+    "sand": [
+      { "id": "sand", "name": "sand", "main": "#b99a6c", "under": "#ead9b8", "trim": "#8c7250", "mark": "#3f3228" },
+      { "id": "fawn", "name": "fawn", "main": "#a67c50", "under": "#e6d3b0", "trim": "#7a5a3a", "mark": "#f1e8d6" },
+      { "id": "umber", "name": "umber", "main": "#7a5c42", "under": "#c4ad8c", "trim": "#553f2e", "mark": "#e3d6bd" },
+      { "id": "pale", "name": "pale", "main": "#cdbb98", "under": "#efe6d2", "trim": "#a08d6c", "mark": "#5a4838" },
+      { "id": "rufous", "name": "rufous", "main": "#96603c", "under": "#dcc4a0", "trim": "#6a4329", "mark": "#2e2420" }
+    ],
+    "grizzle": [
+      { "id": "grey", "name": "grizzled grey", "main": "#7a776e", "under": "#b3ad9f", "trim": "#55524b", "mark": "#2a2825" },
+      { "id": "olive", "name": "olive-brown", "main": "#6e6448", "under": "#aa9f7e", "trim": "#4b4431", "mark": "#28241a" },
+      { "id": "ruddy", "name": "ruddy", "main": "#8c5f40", "under": "#c4a380", "trim": "#5f402c", "mark": "#2c211a" },
+      { "id": "dark", "name": "dark", "main": "#4a4540", "under": "#7f786f", "trim": "#32302c", "mark": "#b9b0a0" }
+    ],
+    "horse": [
+      { "id": "bay", "name": "bay", "main": "#7a4a2e", "under": "#a8744e", "trim": "#231f1e", "mark": "#e9e2d2" },
+      { "id": "dun", "name": "dun", "main": "#b3976a", "under": "#d8c59e", "trim": "#3a3029", "mark": "#2c2622" },
+      { "id": "chestnut", "name": "chestnut", "main": "#93552f", "under": "#c08a5c", "trim": "#6a3c22", "mark": "#efe6d4" },
+      { "id": "grey", "name": "grey", "main": "#9a9a98", "under": "#c9c9c4", "trim": "#5a5a5c", "mark": "#3a3a3c" },
+      { "id": "black", "name": "black", "main": "#2e2b2a", "under": "#4c4846", "trim": "#1c1a1a", "mark": "#e2dccf" }
+    ],
+    "carp": [
+      { "id": "gold", "name": "gold", "main": "#b9833a", "under": "#e6dcc4", "trim": "#8a5a2a", "mark": "#2f2a28" },
+      { "id": "pearl", "name": "pearl", "main": "#d8d3c6", "under": "#f0ece0", "trim": "#b0a898", "mark": "#a14a2c" },
+      { "id": "bronze", "name": "bronze", "main": "#7a6240", "under": "#c2b08c", "trim": "#55432c", "mark": "#d9c9a4" },
+      { "id": "slate", "name": "slate", "main": "#5c626a", "under": "#b4b6b4", "trim": "#3e4349", "mark": "#c98a3c" },
+      { "id": "rust", "name": "rust", "main": "#9a5234", "under": "#e2d2b8", "trim": "#6c3824", "mark": "#2c2826" }
+    ],
+    "crane": [
+      { "id": "white", "name": "white", "main": "#dedbd2", "under": "#b9b6ae", "trim": "#2a2a2d", "mark": "#8c3a2c" },
+      { "id": "grey", "name": "grey", "main": "#a3a5a6", "under": "#c9cac8", "trim": "#3a3b3f", "mark": "#7c382c" },
+      { "id": "dusk", "name": "dusk", "main": "#8f8a94", "under": "#bdb8c0", "trim": "#34323a", "mark": "#96503a" },
+      { "id": "sand", "name": "sand", "main": "#cdbf9f", "under": "#e3dac4", "trim": "#3a3430", "mark": "#8a4030" }
+    ],
+    "mist": [
+      { "id": "pearl", "name": "pearl", "main": "#b9bcba", "under": "#7f858a", "trim": "#dedfd9", "mark": "#5a6066" },
+      { "id": "smoke", "name": "smoke", "main": "#8d8f92", "under": "#5a5d62", "trim": "#bfc0c0", "mark": "#3d4045" },
+      { "id": "dusk", "name": "dusk", "main": "#8c8794", "under": "#5c5868", "trim": "#bdb9c2", "mark": "#403c4c" },
+      { "id": "river", "name": "river", "main": "#9aa39a", "under": "#687068", "trim": "#c6ccc2", "mark": "#465046" }
+    ],
+    "water": [
+      { "id": "silt", "name": "silt", "main": "#6e6250", "under": "#463e33", "trim": "#a3977e", "mark": "#55613a" },
+      { "id": "reed", "name": "reed-green", "main": "#57624e", "under": "#394233", "trim": "#93a084", "mark": "#6e7a3e" },
+      { "id": "slate", "name": "slate", "main": "#5a646c", "under": "#3a4249", "trim": "#97a2a8", "mark": "#5f6a42" },
+      { "id": "clay", "name": "clay", "main": "#8a6a52", "under": "#5c4638", "trim": "#bfa489", "mark": "#5a5c38" }
+    ],
+    "dust": [
+      { "id": "ochre", "name": "ochre", "main": "#b08c56", "under": "#73593a", "trim": "#d9c69a", "mark": "#6e7040" },
+      { "id": "grey", "name": "grey", "main": "#93908a", "under": "#5f5d59", "trim": "#c6c3bb", "mark": "#66683f" },
+      { "id": "red", "name": "red earth", "main": "#9a6244", "under": "#63402e", "trim": "#cba888", "mark": "#70683a" },
+      { "id": "chalk", "name": "chalk", "main": "#c9c2ae", "under": "#8b8576", "trim": "#e6e1d2", "mark": "#74763f" }
+    ],
+    "oak": [
+      { "id": "oak", "name": "oak", "main": "#8a6a48", "under": "#3a2c22", "trim": "#b9a47c", "mark": "#d8ccb2" },
+      { "id": "ash", "name": "ash", "main": "#b5a688", "under": "#4a4036", "trim": "#8a7a5e", "mark": "#3a302a" },
+      { "id": "walnut", "name": "walnut", "main": "#5e4433", "under": "#2a201b", "trim": "#a38c66", "mark": "#cdbfa4" },
+      { "id": "cherry", "name": "cherry", "main": "#8a4f3a", "under": "#35221c", "trim": "#c2a67e", "mark": "#e0d4bc" },
+      { "id": "bog", "name": "bog oak", "main": "#3a3531", "under": "#1f1c1a", "trim": "#8c8474", "mark": "#b9b09e" }
+    ],
+    "robe": [
+      { "id": "plum", "name": "plum", "main": "#5c3550", "under": "#e6e0d2", "trim": "#8a3a34", "mark": "#c9bfa8" },
+      { "id": "indigo", "name": "indigo", "main": "#34406a", "under": "#e2ddd0", "trim": "#a8843c", "mark": "#c4bca8" },
+      { "id": "moss", "name": "moss", "main": "#4e583c", "under": "#e0dccb", "trim": "#7c4a34", "mark": "#c0b9a2" },
+      { "id": "slate", "name": "slate", "main": "#4f555e", "under": "#dcd9cf", "trim": "#6a3a44", "mark": "#bdb7a8" },
+      { "id": "rust", "name": "rust", "main": "#7a4a36", "under": "#e6dfcd", "trim": "#3a4660", "mark": "#c8bea6" }
     ]
   },
   "bodies": {
@@ -192,7 +294,33 @@
     "relic-glove": { "coats": "leather", "roles": { "leather": "main", "leather_dark": "under", "metal_brass": "trim" }, "marks": { "stitch": { "name": "pale stitching", "on": "main" }, "cuff": { "name": "a turned cuff", "on": "under" } } },
     "relic-gauntlet": { "coats": "leather", "roles": { "leather": "main", "leather_dark": "under", "metal_brass": "trim" }, "marks": { "stitch": { "name": "pale stitching", "on": "main" }, "cuff": { "name": "a turned cuff", "on": "under" } } },
     "relic-shield": { "coats": "leather", "roles": { "leather": "main", "wood": "under", "metal_brass": "trim" }, "marks": { "blazon": { "name": "a blazon", "on": "under" }, "studs": { "name": "studs", "on": "under" } } },
-    "relic-coat": { "coats": "leather", "roles": { "leather": "main", "leather_dark": "under", "metal_brass": "trim" }, "marks": { "stitch": { "name": "pale stitching", "on": "main" }, "lining": { "name": "a bright lining", "on": "under" } } }
+    "relic-coat": { "coats": "leather", "roles": { "leather": "main", "leather_dark": "under", "metal_brass": "trim" }, "marks": { "stitch": { "name": "pale stitching", "on": "main" }, "lining": { "name": "a bright lining", "on": "under" } } },
+    "beast-cat": { "coats": "cat", "roles": { "fur_dark": "main", "fur_light": "under" }, "marks": { "socks": { "name": "socks", "on": "main" }, "mask": { "name": "a mask", "on": "main" }, "saddle": { "name": "a saddle", "on": "main" }, "tailtip": { "name": "a tipped tail", "on": "main" } }, "shapes": ["lean", "heavy", "long_tail"] },
+    "beast-ringtail": { "coats": "ringtail", "roles": { "fur_dark": "main", "fur_light": "under" }, "marks": { "socks": { "name": "socks", "on": "main" }, "mask": { "name": "a mask", "on": "main" }, "saddle": { "name": "a saddle", "on": "main" }, "rings": { "name": "a ringed tail", "on": "main" } }, "shapes": ["lean", "heavy", "long_tail"] },
+    "beast-paddle": { "coats": "pelt", "roles": { "fur_dark": "main", "fur_light": "under" }, "marks": { "socks": { "name": "socks", "on": "main" }, "mask": { "name": "a mask", "on": "main" }, "saddle": { "name": "a saddle", "on": "main" } }, "shapes": ["lean", "heavy", "long_tail"] },
+    "beast-fox": { "coats": "fox", "roles": { "fur_dark": "main", "fur_light": "under" }, "marks": { "socks": { "name": "socks", "on": "main" }, "mask": { "name": "a mask", "on": "main" }, "saddle": { "name": "a saddle", "on": "main" }, "tailtip": { "name": "a tipped tail", "on": "main" } }, "shapes": ["lean", "heavy", "long_tail"] },
+    "beast-boar": { "coats": "bristle", "roles": { "fur_dark": "main", "fur_light": "under", "fur_ruff": "trim" }, "marks": { "socks": { "name": "pale feet", "on": "main" }, "saddle": { "name": "a saddle", "on": "main" } }, "shapes": ["lean", "heavy"] },
+    "beast-mastiff": { "coats": "hound", "roles": { "fur_dark": "main", "fur_light": "under" }, "marks": { "socks": { "name": "socks", "on": "main" }, "mask": { "name": "a mask", "on": "main" }, "saddle": { "name": "a saddle", "on": "main" }, "tailtip": { "name": "a tipped tail", "on": "main" } }, "shapes": ["lean", "heavy", "long_tail"] },
+    "beast-riverhorse": { "coats": "hide", "roles": { "fur_dark": "main", "fur_light": "under" }, "marks": { "socks": { "name": "socks", "on": "main" }, "saddle": { "name": "a saddle", "on": "main" } }, "shapes": ["lean", "heavy"] },
+    "beast-gazelle": { "coats": "sand", "roles": { "fur_dark": "main", "fur_light": "under" }, "marks": { "socks": { "name": "socks", "on": "main" }, "mask": { "name": "a mask", "on": "main" }, "saddle": { "name": "a saddle", "on": "main" } }, "shapes": ["lean", "heavy"] },
+    "beast-mongoose": { "coats": "grizzle", "roles": { "fur_dark": "main", "fur_light": "under" }, "marks": { "socks": { "name": "socks", "on": "main" }, "saddle": { "name": "a saddle", "on": "main" }, "tailtip": { "name": "a tipped tail", "on": "main" } }, "shapes": ["lean", "heavy", "long_tail"] },
+    "beast-horse": { "coats": "horse", "roles": { "fur_dark": "main", "fur_light": "under", "fur_ruff": "trim" }, "marks": { "socks": { "name": "stockings", "on": "main" }, "mask": { "name": "a blaze", "on": "main" }, "saddle": { "name": "a dark back", "on": "main" } }, "shapes": ["lean", "heavy"] },
+    "beast-camel": { "coats": "sand", "roles": { "fur_dark": "main", "fur_light": "under", "fur_ruff": "trim" }, "marks": { "socks": { "name": "pale feet", "on": "main" }, "saddle": { "name": "a saddle", "on": "main" } }, "shapes": ["lean", "heavy"] },
+    "beast-carp": { "coats": "carp", "roles": { "scale": "main", "scale_pale": "under", "fin": "trim" }, "marks": { "patches": { "name": "patches", "on": "main" }, "tips": { "name": "a tipped fin", "on": "trim" } }, "shapes": ["heavy", "lean"] },
+    "beast-crane": { "coats": "crane", "roles": { "plume": "main", "plume_dark": "trim" }, "marks": { "crown": { "name": "a bare crown", "on": "main" }, "throat": { "name": "a dark throat", "on": "main" }, "tips": { "name": "pale wing-tips", "on": "trim" } } },
+    "engine-handcar": { "coats": "iron", "roles": { "metal_iron": "main", "metal_iron_light": "under", "metal_brass": "trim" }, "marks": { "band": { "name": "painted sides", "on": "under" } } },
+    "engine-buoy": { "coats": "iron", "roles": { "metal_iron": "main", "metal_iron_light": "under", "metal_brass": "trim" }, "marks": { "band": { "name": "a painted band", "on": "under" } } },
+    "engine-astrolabe": { "coats": "brass", "roles": { "metal_brass": "main", "metal_iron_light": "under", "metal_dark": "trim" }, "marks": { "enamel": { "name": "an enamelled rim", "on": "trim" } } },
+    "relic-star": { "coats": "brass", "roles": { "tin": "main", "metal_dark": "under", "metal_brass": "trim" }, "marks": { "ring": { "name": "a ring of another metal", "on": "main" } } },
+    "relic-horn": { "coats": "brass", "roles": { "metal_brass": "main", "metal_iron_light": "under", "wood": "trim" }, "marks": { "rim": { "name": "a bright rim", "on": "main" }, "bands": { "name": "bands", "on": "main" } } },
+    "relic-woodsword": { "coats": "oak", "roles": { "wood": "main", "leather_dark": "under" }, "marks": { "wrap": { "name": "a pale wrap", "on": "under" }, "tie": { "name": "a cloth tie", "on": "under" } } },
+    "aspect-fog": { "coats": "mist", "roles": { "mist": "main", "mist_dark": "under", "mist_pale": "trim" } },
+    "aspect-flood": { "coats": "water", "roles": { "water": "main", "water_dark": "under", "water_pale": "trim" }, "marks": { "reeds": { "name": "green reeds", "on": "under" } } },
+    "aspect-whirl": { "coats": "dust", "roles": { "dust": "main", "dust_dark": "under", "dust_pale": "trim" }, "marks": { "grass": { "name": "green grass in it", "on": "under" } } },
+    "kith-fitter": { "coats": "wool", "roles": { "cloth_wool": "main", "leather_dark": "under", "leather": "trim" } },
+    "kith-clerk": { "coats": "robe", "roles": { "cloth_dark": "main", "paper": "under", "cloth_rag": "trim" } },
+    "daemon-vigil": { "coats": "shade", "roles": { "shade": "main", "shade_edge": "under" }, "marks": { "hem": { "name": "a pale hem", "on": "under" } } },
+    "daemon-marginal": { "coats": "ink", "roles": { "ink": "main", "ink_edge": "under", "paper": "trim" }, "marks": { "cover": { "name": "a tooled cover", "on": "under" }, "drip": { "name": "a run of pale ink", "on": "main" } } }
   },
   "forms": {
     "storm-crow": { "coats": "corvid" },

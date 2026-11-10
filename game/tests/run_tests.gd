@@ -66,6 +66,7 @@ func _run() -> void:
 	test_progression()
 	test_ages()
 	test_kind()
+	test_home_kinds()
 	test_blood_marks()
 	test_life_features()
 	test_bots()
@@ -776,6 +777,12 @@ func test_genius_lattice() -> void:
 				for c in r["candidates"]:
 					seen[c["form"]] = true
 					check(c["features"].has(sd["seedMark"]), "every offer carries the Seed-mark (%s on %s)" % [sd["seedMark"], c["form"]]) if b == "" and sh == "anchor" else null
+	# a home's kinds are offered to the people of that home (data/forms.json, home)
+	for h in Data.bodies:
+		for sd in Data.seeds():
+			for sh in Creation.SHAPES:
+				for c in GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": sd["id"], "blood": "", "shape": sh, "home": h }, {})["candidates"]:
+					seen[c["form"]] = true
 	var unreachable: Array = Data.forms().filter(func(f): return int(f["instars"]["min"]) == 1 and not seen.has(f["id"])).map(func(f): return f["id"])
 	check(unreachable.is_empty(), "every First Form is offered to somebody (never offered: %s)" % str(unreachable))
 	check(trios.size() >= 60, "the bowl's three vary by Seed, blood and Shape (%d different offers)" % trios.size())
@@ -2246,3 +2253,84 @@ func test_kind() -> void:
 		if Vector3(oc.r - worn.r, oc.g - worn.g, oc.b - worn.b).length() + 0.0001 < Vector3(got.r - worn.r, got.g - worn.g, got.b - worn.b).length():
 			nearest = false
 	check(nearest, "in a new body it wears the coat nearest the one it wore")
+
+## The kinds of the thirteen homes (data/forms.json, home; docs/genius-forms.md): two First
+## Forms for each home, across all six Expressions, each with a body and coats of its own; a
+## home leans the bowl's second and third offers toward its kinds and never owns the bowl;
+## after the rite a home's kinds are kept, not read.
+func test_home_kinds() -> void:
+	var homes: Array = Data.bodies.keys()
+	var firsts := {}
+	var exprs := {}
+	var bad: Array = []
+	for f in Data.forms():
+		var h := String(f.get("home", ""))
+		if h == "":
+			continue
+		if not homes.has(h):
+			bad.append("%s: no home %s" % [f["id"], h])
+		if int(f["instars"]["min"]) == 1:
+			firsts[h] = firsts.get(h, []) + [f["id"]]
+			exprs[String(f["expression"])] = exprs.get(String(f["expression"]), 0) + 1
+		if not ResourceLoader.exists(GeniusBody.BODY_DIR % String(f["silhouette"])):
+			bad.append("%s: no body" % f["id"])
+		if not Data.genius_looks()["bodies"].has(String(f["silhouette"])):
+			bad.append("%s: no coats" % f["id"])
+		if not ResourceLoader.exists("res://game/assets/genius/cards/%s.png" % String(f["id"])):
+			bad.append("%s: no card" % f["id"])
+	check(bad.is_empty(), "every kind of a home has a home, a body, coats and a card (%s)" % "; ".join(bad))
+	var two := homes.filter(func(h): return (firsts.get(h, []) as Array).size() == 2)
+	check(two.size() == 13 and homes.size() == 13, "each of the thirteen homes has two First Forms of its own (%d of %d)" % [two.size(), homes.size()])
+	check(exprs.size() == 6 and int(exprs.get("beast", 0)) <= 14, "the homes' kinds are of all six Expressions (%s)" % str(exprs))
+	# the bowl: the best fit is the field's; one of the other two may be the home's
+	var cfg: Dictionary = Data.rules_reading()["home"]
+	var seeds: Array = Data.seeds().map(func(sd): return sd["id"])
+	var bowls := 0
+	var with_home := 0
+	var same_first := true
+	var never_more := true
+	var strangers := 0
+	for h in homes:
+		for sd in seeds:
+			for shp in ["anchor", "turn", "cast", "read", "bind", "make"]:
+				var here := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": sd, "blood": "", "shape": shp, "home": h }, {})
+				var nowhere := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": sd, "blood": "", "shape": shp }, {})
+				var own := 0
+				for c in here["candidates"]:
+					var fh := String(Genius.form_of(String(c["form"])).get("home", ""))
+					if fh == h:
+						own += 1
+					elif fh != "" and not (cfg["open"] as Array).has(fh):
+						strangers += 1
+				bowls += 1
+				with_home += 1 if own > 0 else 0
+				never_more = never_more and own <= int(cfg["most"])
+				# with no home at all, every home's kind counts as another's: the best fit may differ only by a home kind's own merit
+				var first_form := Genius.form_of(String(here["candidates"][0]["form"]))
+				if String(first_form.get("home", "")) == "":
+					same_first = same_first and String(here["candidates"][0]["form"]) == String(nowhere["candidates"][0]["form"])
+	check(with_home * 100 / bowls >= 60 and with_home < bowls, "a home's kind is usually among the bowl's three, not always (%d of %d)" % [with_home, bowls])
+	check(never_more, "never more of the three than the rule allows are of home")
+	check(same_first, "the bowl's best fit is read from Seed, blood and Shape: the home does not move it")
+	check(strangers * 20 < bowls, "another home's kind is rarely offered (%d times in %d bowls)" % [strangers, bowls])
+	var col := GeniusReading.read(1, GeniusReading.empty_tally(), { "seed": "watches-from-above", "blood": "long-stride", "shape": "cast", "home": "columbia" }, {})
+	var mine: Array = col["candidates"].filter(func(c): return String(Genius.form_of(String(c["form"])).get("home", "")) == "columbia")
+	check(String(col["candidates"][0]["form"]) == "hawk" and mine.size() == 1, "a Cast of Columbia who wants something that watches from above is still offered the hawk first, and one kind of Columbia (%s)" % ", ".join(col["candidates"].map(func(c): return c["form"])))
+	check(mine.size() == 1 and (mine[0]["reasons"] as Array).any(func(r): return r["line"] == "home" and r["key"] == "columbia"), "and the offer says it is for the home's sake")
+	# after the rite a home's kinds are not read: they are kept
+	var g := _born_genius()
+	g.origin["home"] = "columbia"
+	g.day = 7
+	g.milestone("gate")
+	var later := g.read(2)
+	check(not later["candidates"].any(func(c): return String(Genius.form_of(String(c["form"])).get("home", "")) != ""), "the Gate's Reading offers no home's kind")
+	var cat := Genius.new()
+	var cf := Genius.form_of("carp")
+	cat.instar = 2
+	cat.body = { "form": "carp", "expression": cf["expression"], "silhouette": cf["silhouette"], "own": cf["features"].duplicate(), "heritage": [], "seedMark": "far-eyes", "grafts": [], "adaptations": [] }
+	check(cat.kept_kind(3).get("form", "") == "gate-carp" and Genius.form_name_at("carp", 1) == "Carp fry", "a carp fry grows into a carp, and a carp that keeps its kind into a gate-carp")
+	# a body of a home's kind is its age and wears its coat
+	var foal := GeniusBody.build({ "form": "steppe-horse", "silhouette": "beast-horse", "expression": "beast", "features": ["long-legs", "mane", "tail"], "instar": 1, "look": GeniusLook.born(77) }, Color.ORANGE, 1)
+	add_child(foal)
+	check(foal.uses_art and foal.age == "young" and foal.painted > 0, "a steppe foal is young, and wears a coat of its own")
+	foal.queue_free()

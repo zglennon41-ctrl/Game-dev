@@ -68,5 +68,15 @@
   { "id": "shell", "slot": "body", "label": "a shell", "bonus": {} },
   { "id": "rime", "slot": "surface", "label": "a skin of rime", "bonus": {} },
   { "id": "watching-eye", "slot": "eyes", "label": "an eye that opens in it", "bonus": {} },
-  { "id": "pulse", "slot": "surface", "label": "a pulse in the leather", "bonus": {} }
+  { "id": "pulse", "slot": "surface", "label": "a pulse in the leather", "bonus": {} },
+  { "id": "whiskers", "slot": "surface", "label": "whiskers", "bonus": {} },
+  { "id": "paddle-tail", "slot": "surface", "label": "a paddle of a tail", "bonus": {} },
+  { "id": "mane", "slot": "surface", "label": "a mane", "bonus": {} },
+  { "id": "hump", "slot": "surface", "label": "a hump", "bonus": {} },
+  { "id": "wheels", "slot": "surface", "label": "wheels", "bonus": {} },
+  { "id": "bell", "slot": "surface", "label": "a bell", "bonus": {} },
+  { "id": "dial", "slot": "surface", "label": "a dial of figures", "bonus": {} },
+  { "id": "mist", "slot": "surface", "label": "a body of mist", "bonus": {} },
+  { "id": "current", "slot": "surface", "label": "a current in it", "bonus": {} },
+  { "id": "pages", "slot": "surface", "label": "pages", "bonus": {} }
 ]

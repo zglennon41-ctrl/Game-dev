@@ -32,6 +32,8 @@ export function validateData(dir = 'data'): Problem[] {
   for (const f of D('forms')) {
     for (const x of f.features) need('forms.json', features, x, `feature on ${f.id}`);
     if (f.instars.min > f.instars.max) problems.push({ file: 'forms.json', message: `${f.id}: instars.min > max` });
+    // A home's kind names a home of data/bodies.json.
+    if (f.home && !D('bodies').homes[f.home]) problems.push({ file: 'forms.json', message: `${f.id}: home "${f.home}" is not a home in bodies.json` });
     // The elder of its kind must be a form, of the same Expression, that it can grow into.
     if (f.growsInto) {
       const elder = D('forms').find((g: { id: string }) => g.id === f.growsInto);

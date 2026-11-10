@@ -4,7 +4,7 @@ import { writeFileSync } from 'node:fs';
 import { read, take, emptyTally, type Tally, type GeniusForm } from '../src/rules/reading';
 import { resonance, payingTier, verses, shadowCap, geniusWill, tierFor } from '../src/rules/resonance';
 
-const cases: Array<{ name: string; instar: number; origin: { seed: string; blood: string; shape: string }; tally: Tally; current: GeniusForm | null }> = [];
+const cases: Array<{ name: string; instar: number; origin: { seed: string; blood: string; shape: string; home?: string }; tally: Tally; current: GeniusForm | null }> = [];
 
 const first = (seed: string, blood: string, shape: string) => ({ name: `first ${seed} ${blood} ${shape}`, instar: 1, origin: { seed, blood, shape }, tally: emptyTally(), current: null });
 cases.push(first('watches-from-above', 'aerie-born', 'cast'));
@@ -13,6 +13,13 @@ cases.push(first('owes-me', 'demon-blooded', 'bind'));
 cases.push(first('that-burns', 'fogborn', 'turn'));
 cases.push(first('remembers', 'eyes-heat', 'read'));
 cases.push(first('never-alive', 'forgeborn', 'make'));
+// A home leans the bowl's second and third offers toward its own kinds.
+const atHome = (seed: string, blood: string, shape: string, home: string) => ({ name: `first ${seed} ${blood} ${shape} of ${home}`, instar: 1, origin: { seed, blood, shape, home }, tally: emptyTally(), current: null });
+cases.push(atHome('watches-from-above', 'long-stride', 'cast', 'columbia'));
+cases.push(atHome('never-alive', 'forgeborn', 'make', 'colonia'));
+cases.push(atHome('remembers', 'eyes-heat', 'read', 'jiangnan'));
+cases.push(atHome('i-can-hold', '', 'cast', 'edo'));
+cases.push(atHome('stands-between', 'ridgefolk', 'anchor', 'alexandria'));
 
 // The Guide's worked example: a hawk, fighting close with a saber, Hold and Guard orders.
 const hawkFirst = read({ instar: 1, tally: emptyTally(), origin: { seed: 'watches-from-above', blood: 'aerie-born', shape: 'cast' }, current: null });

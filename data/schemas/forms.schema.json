@@ -67,6 +67,11 @@
         "type": "string",
         "pattern": "^[a-z0-9-]+$",
         "description": "The elder of its kind: the form a genius that keeps its kind becomes once it has outgrown this one."
+      },
+      "home": {
+        "type": "string",
+        "pattern": "^[a-z]+$",
+        "description": "The home whose kind this is (a home of data/bodies.json): offered more often to a character who grew up there, and only at the rite."
       }
     },
     "required": [

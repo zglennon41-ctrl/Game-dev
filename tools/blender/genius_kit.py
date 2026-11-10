@@ -1980,6 +1980,8 @@ def _more():
     kit = sys.modules[__name__]
     genius_forms2.register(kit)
     genius_relics.register(kit)
+    import genius_homes
+    genius_homes.register(kit)
 
 
 KEEPSAKES = {}

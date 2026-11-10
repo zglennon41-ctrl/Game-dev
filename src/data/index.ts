@@ -32,7 +32,15 @@ export interface Seed { id: string; text: string; seedMark: string; leansToward:
 export interface Blood { id: string; tier: 'mark' | 'kindred' | 'bloodline'; name: string; gift: string; gap: string; house?: string; shapeLean?: Record<string, number>; graft?: string }
 export interface Feature { id: string; slot: string; label: string; bonus: Record<string, unknown>; fixable?: boolean; adaptation?: boolean; tags?: string[] }
 export interface Adaptation { id: string; metric: string; threshold: number }
-export interface Form { id: string; name: string; expression: Expression; silhouette: string; features: string[]; instars: { min: number; max: number } }
+export interface Form {
+  id: string; name: string; expression: Expression; silhouette: string; features: string[]; instars: { min: number; max: number };
+  /** The home whose kind this is: offered more often to a character who grew up there, and only at the rite. */
+  home?: string;
+  /** What the form is called while it is young, by instar. */
+  ages?: Record<string, string>;
+  /** The elder of its kind. */
+  growsInto?: string;
+}
 export type Requirement =
   | { kind: 'rank'; archetypeDiscipline: string; rank: 'adept' | 'master' }
   | { kind: 'expression'; in: Expression[] }
@@ -53,6 +61,8 @@ export interface ReadingConfig {
   diversity: { sameExpression: number };
   crossing: { linesAway: number; stayBonus: number };
   heritage: { sharedBonus: number; minScore: number };
+  /** How a character's home leans the bowl's second and third offers (data/reading.json, home). */
+  home: { bonus: number; floor: number; away: number; most: number; open: string[] };
   leans: Record<string, Record<string, Lean>>;
 }
 
