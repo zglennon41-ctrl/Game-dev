@@ -653,7 +653,7 @@ func _leaf_face(v: VBoxContainer) -> void:
 		var c: Array = L["hairColors"][cid]
 		_swatch(hcrow, Color(c[0], c[1], c[2]), hc_now == cid, _label("hairColors", cid), func(): _look_set("hair_color", cid))
 	_line(v, "%s. The brows take the same colour." % _label("hairColors", hc_now), DIM)
-	if _headgear_name() != "" and look.get("headgear", true):
+	if _headgear_name() != "" and look.get("headgear", true) and _headgear_covers():
 		var cover := _flow(v, "")
 		_chip(cover, "Take off the %s" % _headgear_name().to_lower(), func(): _look_set("headgear", false))
 		_line(v, "It covers the crown; only the fall of the hair shows under it.", DIM)
@@ -704,6 +704,11 @@ func _headgear_name() -> String:
 	if not (hg is Dictionary):
 		return ""
 	return _label("headgear", String(hg.get("type", "hat")))
+
+## Does the home's headgear cover the crown (a headband does not)?
+func _headgear_covers() -> bool:
+	var hg: Variant = _home().get("dress", {}).get("headgear", null)
+	return hg is Dictionary and not (Data.creation.get("look", {}).get("openHeadgear", []) as Array).has(String(hg.get("type", "")))
 
 ## The cloak's colours as the world dyes them (World.cape_color_for).
 func _cape_color(which: String) -> Color:

@@ -1525,7 +1525,9 @@ func test_look() -> void:
 		var hooded := String(body).contains("Hooded")
 		check(vis.get("Hair_long_fall", false) == (not hooded), "%s: the long fall hangs under the helmet, unless hooded" % body)
 		var has_gear: bool = w._player.find_child("*Helmet*", true, false) != null or w._player.find_child("*Hat*", true, false) != null or w._player.find_child("Headgear_*", true, false) != null
-		check(vis.get("Hair_long_cap", true) == (not has_gear), "%s: the cap hides under headgear, when the body has any" % body)
+		# a headband is headgear that leaves the crown bare (look.openHeadgear)
+		var open_gear: bool = w._player.find_child("Headgear_headband*", true, false) != null
+		check(vis.get("Hair_long_cap", true) == (not has_gear or open_gear), "%s: the cap hides under headgear that covers the crown, when the body has any" % body)
 		check(vis.get("Beard_full", false) and not vis.get("Beard_short", true), "%s: the full beard shows, the short one not" % body)
 		check(not vis.get("Hair_braid_fall", true) and not vis.get("Hair_knot_fall", true), "%s: no other style shows" % body)
 		check(absf(w._player.scale.x - 1.06) < 0.001, "%s stands tall" % body)
@@ -1793,6 +1795,24 @@ func test_creator() -> void:
 	check(c._headgear_name() == "", "a home that wears nothing on the head offers no headgear")
 	c.hero["city"] = "columbia"
 	check(c._headgear_name() == "Hat", "Columbia's is named a hat")
+	c.hero["city"] = "khemet"
+	check(c._headgear_name() == "Headband" and not c._headgear_covers(), "Khemet's headband leaves the crown bare")
+	var kh := Fight.default_hero()
+	kh["body"] = "khemet-f"
+	kh["look"] = { "headgear": true, "hair": "crop" }
+	w.build_hero(kh)
+	var cap: Node3D = null
+	for hn in w._player.find_children("Hair_crop_*", "BoneAttachment3D", true, false):
+		if not String(hn.name).ends_with("_fall"):
+			cap = hn
+	check(cap != null and cap.visible, "the hair shows under a headband")
+	kh["body"] = "columbia-m"
+	w.build_hero(kh)
+	cap = null
+	for hn in w._player.find_children("Hair_crop_*", "BoneAttachment3D", true, false):
+		if not String(hn.name).ends_with("_fall"):
+			cap = hn
+	check(cap != null and not cap.visible, "and hides under a hat")
 	# the camera's framing
 	w.portrait = true
 	w.portrait_frame = "face"

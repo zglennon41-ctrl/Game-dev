@@ -543,13 +543,24 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 	var hair := String(look.get("hair", "crop"))
 	var beard := String(look.get("beard", "none"))
 	var col := hair_color(String(look.get("hair_color", "brown")))
+	# A headband leaves the crown bare (data/creation.json, look.openHeadgear): the hair shows under it.
+	var covers := headgear
+	if headgear:
+		var open_kinds: Array = Data.creation.get("look", {}).get("openHeadgear", [])
+		var worn := node.find_children("Headgear_*", "", true, false)
+		if not worn.is_empty():
+			covers = false
+			for hg in worn:
+				var kind := String(hg.name).trim_prefix("Headgear_").get_slice("_", 0)
+				if not open_kinds.has(kind):
+					covers = true
 	node.scale = Vector3.ONE * clampf(float(look.get("stature", 1.0)), 0.85, 1.2)
 	for a in node.find_children("*", "BoneAttachment3D", true, false):
 		var n := String(a.name)
 		if n.begins_with("feature_") or n.begins_with("socket_"):
 			continue
 		if n.begins_with("Hair_"):
-			a.visible = n.begins_with("Hair_%s_" % hair) and not hooded and (n.ends_with("_fall") or not headgear)
+			a.visible = n.begins_with("Hair_%s_" % hair) and not hooded and (n.ends_with("_fall") or not covers)
 			if a.visible:
 				_recolor(a, col)
 		elif n.begins_with("Beard_"):

@@ -945,7 +945,7 @@
     "edo-f"
   ],
   "look": {
-    "comment": "The look: what shows on the body and is chosen at creation. Hair styles and beards are pieces hung from the head bone of every body (tools/blender/people_kit.py); a cap hides under headgear, a fall hangs from under it. Colours are linear RGB. Bodies are <home>-<sex> (tools/blender/body_kit.py); build blends the lean and heavy shape keys; the skin tone tints the skin material. Labels are what the creator shows for each id. Build and stature are set on a slider between the least and the greatest of the named values; the names mark where a value falls.",
+    "comment": "The look: what shows on the body and is chosen at creation. Hair styles and beards are pieces hung from the head bone of every body (tools/blender/people_kit.py); a cap hides under headgear, a fall hangs from under it. Colours are linear RGB. Bodies are <home>-<sex> (tools/blender/body_kit.py); build blends the lean and heavy shape keys; the skin tone tints the skin material. Labels are what the creator shows for each id. Build and stature are set on a slider between the least and the greatest of the named values; the names mark where a value falls. openHeadgear names the headgear that leaves the crown bare: the hair's cap shows under it.",
     "hair": [
       "bare",
       "crop",
@@ -1151,7 +1151,10 @@
         0.96,
         1.07
       ]
-    }
+    },
+    "openHeadgear": [
+      "headband"
+    ]
   },
   "names": {
     "columbia": [
