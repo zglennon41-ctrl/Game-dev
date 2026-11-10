@@ -1655,8 +1655,16 @@ func test_life_features() -> void:
 	var cm: MeshInstance3D = cms[0] if not cms.is_empty() else null
 	var cape_col: Color = (cm.get_active_material(0) as ShaderMaterial).get_shader_parameter("albedo") if cm else Color.BLACK
 	check(not cape_col.is_equal_approx(Color(0.5, 0.42, 0.36)) and cape_col.r > 0.6, "the genius's colour threads the plain cloak")
-	var iris: MeshInstance3D = w._player.find_child("Iris_l", true, false).find_children("*", "MeshInstance3D", true, false)[0]
-	check((iris.get_active_material(0) as ShaderMaterial).get_shader_parameter("albedo").is_equal_approx(World.SHAPE_COLORS["turn"]), "the eyes take the genius's light")
+	# the iris is a surface of the eyeball, by its material's name
+	var eye_at: Node = w._player.find_child("Eye_l", true, false)
+	var eye: MeshInstance3D = eye_at if eye_at is MeshInstance3D else (eye_at.find_children("*", "MeshInstance3D", true, false)[0] if eye_at else null)
+	var iris_mat: Material = null
+	if eye and eye.mesh:
+		for si in eye.mesh.get_surface_count():
+			var sm := eye.get_active_material(si)
+			if sm and String(sm.resource_name) == "iris":
+				iris_mat = sm
+	check(iris_mat is ShaderMaterial and (iris_mat as ShaderMaterial).get_shader_parameter("albedo").is_equal_approx(World.SHAPE_COLORS["turn"]), "the eyes take the genius's light")
 	var head: MeshInstance3D = w._player.find_child("Body", true, false)
 	check(float((head.get_active_material(0) as ShaderMaterial).get_shader_parameter("emission_energy")) > 0.0, "the field shows under the skin")
 	hero["look"]["cape"] = false
