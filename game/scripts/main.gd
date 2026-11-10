@@ -179,7 +179,7 @@ func _ready() -> void:
 		world._player.visible = false
 		var only: String = str(_args.get("gallery", ""))
 		var forms: Array = Data.forms().filter(func(f): return only == "true" or only == "" or int(f["instars"]["min"]) <= int(only))
-		var cols := 7 if forms.size() <= 35 else 9
+		var cols := 7 if forms.size() <= 35 else (9 if forms.size() <= 60 else 13)
 		var rows := ceili(forms.size() / float(cols))
 		for i in forms.size():
 			var f: Dictionary = forms[i]

@@ -309,3 +309,19 @@ played the arc); barks stay as floating text. Still to be played rather than dec
     offered at a Reading; which kinds have an elder; the names of the great; and the order
     of what to build next (it fights as what it is; the Reading as a ceremony; classmates'
     genii in the yard; the lineage on its page; what shows between Readings; bodies).
+76. **The kinds of the thirteen homes** (mine, 2026-11-10; `docs/genius-forms.md`, "The kinds
+    of the thirteen homes"): which two kinds each home has and their names (a station cat
+    and a handcar for Alexandria, a ring-tail and a marshal's star for Columbia, a crane and
+    a wooden sword for Edo, and so on); the names of their young and their great; which have
+    an elder; that a home's kinds are offered only at the rite; that the home never moves
+    the bowl's best fit and at most one of the three offers is of home; how strong the lean
+    is (about four bowls in five); ten new features and sixteen coat palettes.
+77. **How a genius fights** (mine, 2026-11-10; `docs/genius-combat.md`): the nine moves and
+    which bodies and features bring them; that the young only nip; that a genius has to be
+    there (a lantern is a poor hunter, a wolf a poor post-keeper); that on Hunt it does not
+    guard and on Guard it does not strike; where Hold stands; what Free judges by; one great
+    move a body; how much an Apex should do (now a fifth to a third of the damage against an
+    elite); that an elite's guard now stops a genius's blows as it does its partner's.
+78. **The home's hand and the cohort's genii** (mine, 2026-11-10; `docs/genius-signature.md`):
+    the thirteen pieces the homes put on their genii, and which Seed each temperament gives
+    a classmate.

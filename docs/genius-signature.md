@@ -31,8 +31,10 @@ Where a character grew up shows on their genius twice.
 
 - **The kinds of that home.** Each of the thirteen homes has kinds of its own, the young of
   something from its land, craft or working life, more likely to be offered at the rite to
-  a child of that home. (Being built; `docs/genius-forms.md`, "The kinds of the thirteen
-  homes".)
+  a child of that home (built: two kinds a home, twenty-six in all, across all six
+  Expressions; a kind of your home is among the three offers in about four bowls of five,
+  never more than one of the three; `docs/genius-forms.md`, "The kinds of the thirteen
+  homes").
 - **What the home puts on it** (built). Each home dresses the genii raised there with one
   small piece from its own dress, in its own colours (`data/bodies.json`, `dress.trapping`;
   `tools/blender/genius_trappings.py`): the Academy's brass tag, a marshal's star, a river sash,
@@ -78,7 +80,7 @@ State: **built** (in the game and tested), **part** (works, with a named gap), *
 |---|---|---|---|
 | The mote before the rite | The field has not taken a body yet | built | |
 | The Seed | A sentence about what you want beside you; it leaves one mark for life | built | The Seed-mark sits where each body has a place for it; three marks show as parts, the rest as eyes or light |
-| The First Form | Read from Seed, blood and Shape; three offered | built | Twenty-two First Forms; Wolf, Otter and Shadow are reached only through a blood (decision 72) |
+| The First Form | Read from Seed, blood, Shape and home; three offered | built | Forty-eight First Forms, twenty-six of them native to a home; Wolf, Otter and Shadow are reached only through a blood (decision 72) |
 | Its kind, and keeping it | **A genius may always keep its kind**: at every Reading, beside the three forms the Tally reads, it may grow into the next age of what it is, or the elder of its kind (a hawk into a griffin, a kept knife into a living blade) | built | Fourteen kinds name an elder; the rest grow great as themselves. Which is right for each kind is the owner's (below) |
 | Its age | Each instar is an age; the young of its kind first | built | Proportions on rigged bodies only; the others need a young body each |
 | Its name | The form's, or its young's, or the great of its kind | built | Names of the young and the great are drafts |
@@ -95,16 +97,16 @@ State: **built** (in the game and tested), **part** (works, with a named gap), *
 | Heritage | The same parts carried forward | built | Shown at the Reading only as words; the six-beat Reading shows it |
 | Adaptations | On loan from the Tally; fed or they fade | part | The rules run; nothing shows them growing in or greying out |
 | Grafts | From a shade, a named beast, kin; in the donor's colour | part | The rules run; the token and the donor's colour are not drawn |
-| Its temper | How it behaves at rest and on Free should be the partner's last thirty days of play | plan | Free exists as an order; its model of the partner is not built |
+| Its temper | On Free it should act as its partner has taught it | part | Free chooses among Guard, Hunt and Hold from the blows its partner takes and parries, their range, their health, the post and the pack, and says why. It does not yet know their Shape, Pattern or Discipline; at rest it has no temper |
 
 ### What it does
 
 | Aspect | The logic | State | What is left |
 |---|---|---|---|
-| Orders | Guard and Hunt from the First Form; Hold and Free from the Second; Shift, Duet later | part | Guard and Hunt fight; Hold, Free, Shift and Duet are named and locked. Each order needs a posture the player can read across a yard |
-| How it fights | By its Expression: a Beast flanks, an Engine holds a line, a Relic fights as part of you | part | The numbers differ by Expression; the *moves* do not. This is the largest gap between the design and the game |
-| Its form in the fight | A harrier should not fight like a hawk | plan | A move or two per silhouette, read from its features (talons stoop, a shell braces) |
-| Its age in the fight | A pup should not hit like an Apex; an Apex should change the fight | part | Will rises with Resonance; nothing a pup cannot do that a grown one can, except orders |
+| Orders | Guard and Hunt from the First Form; Hold and Free from the Second; Shift, Duet later | part | Guard, Hunt, Hold and Free all work, each with its own place to stand (`docs/genius-combat.md`); Shift and Duet are locked. Hold cannot be aimed |
+| How it fights | By what it is: a runner hamstrings, a flier stoops, a shelled one braces, a light-bearer lights the ground, a relic strikes with you, a daemon marks a debt, an Aspect lays itself down | built | Nine moves, by kind of body and by feature, never by form, so new forms get moves with no code. The body does not yet lunge or brace: a move shows as its name, a dart, a ring or a pool |
+| Its form in the fight | A harrier should not fight like a hawk | built | Up to three moves from its body and its features; it must reach the foe to strike, at its own speed |
+| Its age in the fight | A pup should not hit like an Apex; an Apex should change the fight | built | The young only nip; moves come with age; the great and the Apex have a move of their own. An Apex does a fifth to a third of the damage against an elite (the owner's to set) |
 | Witness and shadows | Ten witnessed uses of a Pattern make a shadow | part | The rules run; marks on the body and the after-image are not drawn |
 | Secondary forms | A fold of the same body for another job | plan | Rules in the simulator; nothing in the game |
 | Falling | It lies where it fell; three falls cost a form | part | It falls and recovers; no cracks, no season's count shown |
@@ -139,9 +141,8 @@ State: **built** (in the game and tested), **part** (works, with a named gap), *
 
 In order of how much each closes the gap between the design and what a player feels:
 
-1. **It fights as what it is.** A move or two per kind of body, a posture per order, and
-   an age that matters in the fight. Today every genius guards and hunts the same way. This
-   is where "a unique expression of play" is won or lost.
+1. *(Built: it fights as what it is. `docs/genius-combat.md`.)* Next here: the body acts
+   out its move, Hold can be aimed, Duet.
 2. **The Reading as a ceremony** (six beats; `docs/genius-progression.md`). The Reading is
    the moment the whole system exists for, and it is a flash.
 3. *(Built: classmates have genii you can see. See "The cohort's genii".)* Next: their
