@@ -48,8 +48,9 @@ project; the two CC0 licences cover the bases.
 
 ## Weapons (made for WILDLINE)
 
-`game/assets/weapons/` (thirty-three weapons: the cities' blades, guns, poles and bows, the
-Academy disciplines' needles, dividers, brushes, ledgers and astrolabes) is built by
-`tools/blender/weapon_kit.py` in Blender and owned by the project. Flat-shaded low poly, no
-textures, materials from a small named palette; hung from the KayKit hand slots on KayKit's
-axes and scale. Placeholder quality, as the wild kit.
+`game/assets/weapons/` (thirty-seven pieces: the cities' blades, guns, poles and bows, the
+Academy disciplines' needles, dividers, brushes, ledgers and astrolabes, two shields and two
+staves) is built by `tools/blender/weapon_kit.py` in Blender and owned by the project.
+Flat-shaded low poly, no textures, materials from a small named palette; sized for the human
+hand and hung from the hand slots on KayKit's axes. Nothing a person carries is KayKit's
+any more.

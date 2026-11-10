@@ -239,7 +239,8 @@ def pose_matrices(base, v, aim, roll=None, curl=0.0):
                     R = _rot_axis(aim[b], roll[b]) @ R
             if finger:
                 side = 1.0 if b.endswith("_l") else -1.0
-                R = _rot_axis((0, 1, 0), side * curl) @ R
+                angle = curl[b.split("_")[1]] if isinstance(curl, dict) else curl
+                R = _rot_axis((0, 1, 0), side * angle) @ R
             M = _about(h2, R) @ Ap
         A[b] = M
     return A
@@ -267,6 +268,8 @@ RIG_JOINTS = {
     "upperleg.l": ("joint-l-upper-leg",), "lowerleg.l": ("joint-l-knee",), "foot.l": ("joint-l-ankle",), "toes.l": ("joint-l-foot-1",),
     "upperleg.r": ("joint-r-upper-leg",), "lowerleg.r": ("joint-r-knee",), "foot.r": ("joint-r-ankle",), "toes.r": ("joint-r-foot-1",),
 }
+# How far each finger joint is closed in the rest pose (degrees: knuckle, middle, tip).
+GRIP = {"01": 58.0, "02": 78.0, "03": 48.0}
 TRUNK_BONES = ("pelvis", "spine_01", "spine_02", "spine_03", "neck_01", "head", "clavicle_l", "clavicle_r", "Root")
 
 
@@ -323,9 +326,15 @@ class Human:
             roll["lowerarm_" + s] = ang * 0.4
             roll["hand_" + s] = ang * 0.25
             # the fingers: together, a slight fan (the index to the front, the little finger back)
-            for f, fan in (("index", -0.05), ("middle", 0.0), ("ring", 0.05), ("pinky", 0.11)):
+            for f, fan in (("index", -0.04), ("middle", 0.0), ("ring", 0.04), ("pinky", 0.09)):
                 aim["%s_01_%s" % (f, s)] = (sg, fan, 0.0)
-        return pose_matrices(base, v, aim, roll, curl=math.radians(13))
+            # the thumb comes round under the grip to meet the fingers
+            aim["thumb_01_" + s] = (sg * 0.35, -0.25, -0.9)
+            aim["thumb_02_" + s] = (sg * 0.8, 0.0, -0.6)
+            aim["thumb_03_" + s] = (sg * 1.0, 0.1, -0.1)
+        # The hands are closed round a grip (GRIP): every person carries something, and the rig
+        # has no finger bones to close them with, so the hold is in the body itself.
+        return pose_matrices(base, v, aim, roll, curl={k: math.radians(a) for k, a in GRIP.items()})
 
     # --- reading it ---------------------------------------------------------------------
 
@@ -344,8 +353,12 @@ class Human:
             wrist = self.joint("joint-%s-hand" % s)
             knuckle = self.joint("joint-%s-finger-3-1" % s)
             out["hand." + s] = Vector(wrist + (knuckle - wrist) * 0.45)
-            # the grip: under the palm, between the wrist and the knuckles
-            out["handslot." + s] = Vector(wrist + (knuckle - wrist) * 0.8 + np.array([0.0, 0.0, -0.035]))
+            # the grip: in the hollow of the closed fist, just behind the knuckles and under
+            # the palm; its origin at the fist's thumb side (the front), where a guard sits
+            index = self.joint("joint-%s-finger-2-1" % s)
+            slot = wrist + (knuckle - wrist) * 0.72 + np.array([0.0, 0.0, -0.04 * self.height / 2.4])
+            slot[1] = index[1] - 0.018 * self.height / 2.4
+            out["handslot." + s] = Vector(slot)
         return out
 
     def body(self):

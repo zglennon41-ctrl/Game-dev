@@ -34,6 +34,17 @@ them back.
 **Classmates** carry any of the twelve (`cohort.fighting.weapons` in `data/academy.json`
 gives each type their reach and damage), and shoot with the ranged ones.
 
+**Forms (2026-11-10).** The kit was redrawn for the human bodies: every blade has a bright
+ground edge and, where it suits, a dark fuller; hilts have turned pommels, ferrules, shaped
+guards and wound grips; hafts are shod and bound; guns have stocks cut from a side profile,
+breeched barrels, flintlocks and trigger bows; bows have flat tapering limbs and a served
+string; the shields (a quartered round shield with a boss, the marshal's badge shield with
+its star) and the two staves are the kit's own. Everything is sized for a real hand (a grip
+0.054 across, about 0.23 long), the bodies' hands are closed round a grip, and the hand
+slot sits in the fist's hollow, so a guard rests on the fist. Sheets:
+`python tools/blender/weapon_kit.py --sheet <png> --hands <png>` (every weapon lit, then
+nine carried by a person, from afar and close on the hand).
+
 **Models.** A weapon's `model` is read from `game/assets/weapons/<model>.glb` (built by
 `tools/blender/weapon_kit.py`), else from KayKit's of that name. A material named `field…`
 on a model glows in the Shape's colour, brighter for every technique the hero has

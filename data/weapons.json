@@ -5,7 +5,7 @@
     "city": "columbia",
     "style": "blade",
     "model": "cutlass",
-    "offhand": "shield_round_color",
+    "offhand": "shield_round",
     "text": "A marshal's saber and a round shield."
   },
   {
@@ -45,7 +45,7 @@
     "name": "Oar-staff",
     "city": "cahokia",
     "style": "staff",
-    "model": "staff",
+    "model": "oar_staff",
     "text": "An ironwood oar-staff, heavy at both ends."
   },
   {
@@ -102,7 +102,7 @@
     "city": "tiber",
     "style": "blade",
     "model": "gladius",
-    "offhand": "shield_badge_color",
+    "offhand": "shield_badge",
     "text": "A legionary's short sword behind a tall shield."
   },
   {
