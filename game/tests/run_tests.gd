@@ -2603,7 +2603,7 @@ func test_refinement_and_turning() -> void:
 	var all_named := true
 	for f in Data.tree_of("trun"):
 		all_named = all_named and (int(f["level"]) == 1 or text.contains(String(f["name"])))
-	check(all_named and text.contains("(it is this)") and text.contains("(next: the Tally speaks for it"), "the tree names every form of its base, where it is, and what it may become next")
+	check(all_named and text.contains("(it is this)") and text.contains("(next: fits your play"), "the tree names every form of its base, where it is, and what it may become next")
 	check(text.contains("comes of sending it to Hunt") and text.contains("one who is like Test Runner Path B") and text.contains("WHOSE SOUL") and text.contains("ITS HABIT") and text.contains("ITS SIGN") and text.contains("THE PICTURE OF"), "each form says what play leads to it and what it is the picture of; the page says whose soul it is, its sign and its habit")
 	page.queue_free()
 	_all_bases()

@@ -2102,12 +2102,18 @@ func show_reading(reading: Dictionary, then: Callable, heading := "", subheading
 	v.add_child(row)
 	var look: Dictionary = genius.look if genius and not genius.look.is_empty() else Rite.born_look(hero)
 	var cands: Array = reading["candidates"]
+	# four cards on the screen (a turning beside the three paths) stand a little shorter
+	_reading_art = 170.0 if not (reading.get("turning", {}) as Dictionary).is_empty() else 0.0
 	for i in cands.size():
 		var c: Dictionary = cands[i]
 		var why := ""
 		var reasons: Array = c.get("reasons", [])
 		if rite:
 			why = "Called by %s." % GeniusReading.reason_words(reasons, true) if not reasons.is_empty() else "The bowl's own chance."
+			# whose soul settles as this
+			var whose := String(Data.base(String(c["base"])).get("soul", ""))
+			if whose != "":
+				why = "%s  %s" % [whose, why]
 		else:
 			why = "Because of %s." % _reason_shares(reasons) if not reasons.is_empty() else "Nothing in the Tally speaks for it yet."
 			why += "  It comes of %s." % GeniusReading.lean_words(Data.form(String(c["form"])).get("leans", {}))
@@ -2125,9 +2131,8 @@ func show_reading(reading: Dictionary, then: Callable, heading := "", subheading
 		var tc: Dictionary = turning["candidates"][0]
 		var second := Data.base(String(turning["second"]))
 		var gift: Array = second["hybrid"]["gift"].map(func(f): return Rite.feature_label(String(f)))
-		var twhy := "Since it settled you have fought like %s: %s. It may turn, and be %s: its own body with %s, in %s's coat. Of the hybrid's paths (%s) the Tally speaks best for this one." % [
-			_a(String(second["name"])), GeniusReading.reason_words(turning.get("reasons", [])), _a(String(turning["name"])), " and ".join(gift), _a(String(second["name"])),
-			", ".join((turning["candidates"] as Array).map(func(x): return String(x["name"])))]
+		var twhy := "Since it settled you have fought like %s: %s. It may turn, and be %s: its own body with %s, in %s's coat." % [
+			_a(String(second["name"])), GeniusReading.reason_words(turning.get("reasons", [])), _a(String(turning["name"])), " and ".join(gift), _a(String(second["name"]))]
 		_reading_card(row, tc, n, look, col, "THE TURNING  ·  %s" % String(turning["name"]).to_upper(), twhy, "Let it turn", false, func():
 			hide_reading()
 			then.call(Genius.TURN))
@@ -2146,6 +2151,8 @@ func show_reading(reading: Dictionary, then: Callable, heading := "", subheading
 		var hold := 14.0 if OS.get_cmdline_user_args().has("--slowchoice") else 1.5
 		get_tree().create_timer(hold).timeout.connect(func(): if _reading_box: hide_reading(); then.call(-1))
 
+var _reading_art := 0.0
+
 ## One card of the Reading: the form as this hero's genius would wear it (its own coat, its own
 ## markings), why it is offered, and a button.
 func _reading_card(row: Control, c: Dictionary, n: int, look: Dictionary, col: Color, title: String, why_text: String, button: String, first: bool, pressed: Callable) -> Button:
@@ -2155,7 +2162,7 @@ func _reading_card(row: Control, c: Dictionary, n: int, look: Dictionary, col: C
 	info["instar"] = maxi(1, n)
 	info["name"] = Genius.form_name_at(String(c["form"]), maxi(1, n))
 	info["look"] = look
-	col_v.add_child(GeniusCard.make(info, col, title, true))
+	col_v.add_child(GeniusCard.make(info, col, title, true, _reading_art))
 	var why := RichTextLabel.new()
 	why.bbcode_enabled = true
 	why.fit_content = true

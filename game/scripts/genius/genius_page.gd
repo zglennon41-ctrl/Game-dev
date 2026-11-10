@@ -305,7 +305,7 @@ func _tree_form(col: Control, f: Dictionary, depth: int, here: String, road: Arr
 	elif road.has(id):
 		tag = "  [color=#a8803f](its road)[/color]"
 	elif next.has(id):
-		tag = "  [color=#f2e9dc](next: the Tally speaks for it %d%%)[/color]" % roundi(float(GeniusReading.fit(f.get("leans", {}), play)["score"]) * 100.0)
+		tag = "  [color=#f2e9dc](next: fits your play %d%%)[/color]" % roundi(float(GeniusReading.fit(f.get("leans", {}), play)["score"]) * 100.0)
 	var r := RichTextLabel.new()
 	r.bbcode_enabled = true
 	r.fit_content = true

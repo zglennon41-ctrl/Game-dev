@@ -704,6 +704,18 @@ func enter_academy() -> void:
 		if not forced.is_empty():
 			academy._begin_quest(forced)
 	fight = academy.fight
+	if str(_args.get("reading", "")) == "rite":
+		# --reading=rite (with --academy --rite): the bowl's three offers at once, to look at them.
+		academy.auto = false
+		if _args.has("shots"):
+			await get_tree().create_timer(4.0).timeout   # the place's own title card has gone by then
+		academy.show_reading(Rite.first_form(hero, hero["shape"], int(_args.get("seed", "11")))["reading"], func(_i: int): pass, "The bowl offers three",
+			"Read from your Seed, your blood and your Shape. Whichever settles carries the Seed-mark, and grows by how you play.")
+		if _args.has("shots"):
+			await get_tree().create_timer(2.0).timeout
+			await _shot("rite-offer")
+			get_tree().quit()
+		return
 	if _args.has("reading") and academy.genius and academy.genius.is_born():
 		# --reading (with --academy --gate): open the Gate's Reading at once, to look at it.
 		var rg: Genius = academy.genius

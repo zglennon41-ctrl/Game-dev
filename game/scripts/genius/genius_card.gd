@@ -19,11 +19,14 @@ var _color := Color.WHITE
 var _t := 0.0
 
 ## info: a genius's to_dict() (or the Reading's candidate with a name), color: the Shape's.
-static func make(info: Dictionary, color: Color, title := "", compact := false) -> GeniusCard:
+## art_h: a shorter portrait, where four cards share a screen.
+static func make(info: Dictionary, color: Color, title := "", compact := false, art_h := 0.0) -> GeniusCard:
 	var c := GeniusCard.new()
 	if compact:
 		c.W = 300.0
 		c.ART_H = 250.0
+	if art_h > 0.0:
+		c.ART_H = art_h
 	c._build(info, color, title)
 	return c
 
@@ -61,9 +64,12 @@ func _build(info: Dictionary, color: Color, title: String) -> void:
 		art.add_child(_portrait(info, color))
 	# Name, form, and what it is.
 	var n := Label.new()
-	Style.label(n, 30, color.lightened(0.45), "title")
+	Style.label(n, 30 if W >= W_FULL else 25, color.lightened(0.45), "title")
 	n.text = String(info.get("name", "")) if String(info.get("name", "")) != "" else _form_name(form)
 	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# a long name takes a second line; it does not widen the card
+	n.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	n.custom_minimum_size = Vector2(W - 28, 0)
 	v.add_child(n)
 	# what in its partner it is the picture of, under its name
 	var pic := String(info.get("of", Data.form(form).get("of", "")))
@@ -95,7 +101,7 @@ func _build(info: Dictionary, color: Color, title: String) -> void:
 	Style.rich(txt, 15, Style.FG, "body")
 	var lines: Array = []
 	# a small card names its first parts; the page names them all
-	var named: Array = feats if W >= W_FULL else feats.slice(0, 6)
+	var named: Array = feats if W >= W_FULL else feats.slice(0, 5)
 	for f in named:
 		var slot := GeniusBody._slot_of(f)
 		var lbl := Rite.feature_label(f)
