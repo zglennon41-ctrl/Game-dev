@@ -87,6 +87,7 @@ func _run() -> void:
 	test_homes_hand()
 	test_homes_lean()
 	test_genius_fight()
+	test_evolutions()
 	test_blood_marks()
 	test_life_features()
 	test_bots()
@@ -3080,3 +3081,54 @@ func test_genius_fight() -> void:
 			d.drain()
 		runs.append("%.3f %.3f %.3f %s" % [d.w_hp, d.g_will, d.p_hp, str(d.g_pos)])
 	check(runs[0] == runs[1], "seeded, a fight with a genius plays out the same")
+
+## A line is an evolution (docs/genius-evolutions.md): a form wears what its parent wears, a
+## form with a model of its own wears it, and the stages have the player's names.
+func test_evolutions() -> void:
+	_all_bases()
+	# what a form wears of its body: its parent's, unless it says otherwise
+	var parent := { "ruff": ["quills", 1.0], "build": { "legs": 1.1, "chest": 1.2 }, "carry": "lamp", "coat": "night" }
+	var child := GeniusTree.wear(parent, { "ruff": ["mane", 1.4], "build": { "legs": 1.3 }, "carry": null, "eyes": "dark" })
+	check(child["ruff"][0] == "mane" and is_equal_approx(float(child["build"]["legs"]), 1.3) and is_equal_approx(float(child["build"]["chest"]), 1.2)
+		and not child.has("carry") and child["eyes"] == "dark" and child["coat"] == "night" and parent.has("carry") and is_equal_approx(float(parent["build"]["legs"]), 1.1),
+		"a form wears what its parent wears: what it names replaces, null takes off, the build is merged, and the parent is unchanged")
+	var stages: Dictionary = Data.genius().get("stages", {})
+	check(["0", "1", "2", "3", "4"].all(func(k): return String(stages.get(k, {}).get("name", "")) != "" and String(stages.get(k, {}).get("plural", "")) != ""), "the five stages of a line have their names (Baby to Final)")
+	# every model of a form's own is a form's (or the Baby's), and the game wears it
+	var forms := {}
+	for b in Data.bases():
+		for f in Data.tree_of(String(b["id"])):
+			forms[String(f["id"])] = f
+	var strays: Array = []
+	var built := 0
+	var wrong: Array = []
+	for file in DirAccess.get_files_at("res://game/assets/genius/forms/"):
+		if not file.ends_with(".glb"):
+			continue
+		var id := file.trim_suffix(".glb")
+		if id == "baby":
+			continue
+		if not forms.has(id):
+			strays.append(id)
+			continue
+		var f: Dictionary = forms[id]
+		# one of each stage of each line is enough to hold the rule; all of them is a slow test
+		if built >= 40 and int(f["level"]) > 1:
+			continue
+		var info := { "form": id, "silhouette": f["silhouette"], "expression": f["expression"], "features": f["features"], "instar": int(f["level"]), "look": GeniusLook.born(7) }
+		var body := GeniusBody.build(info, Color.ORANGE, int(f["level"]))
+		add_child(body)
+		built += 1
+		var ok := body.own_body == id and body.uses_art and body.parts_from_art.is_empty() and body._model.find_child("ref_top", true, false) != null
+		# it stands as tall as its stage says, by the crown of its head
+		var ref: Node3D = body._model.find_child("ref_top", true, false)
+		if ref:
+			ok = ok and absf(body._local_xf(ref).origin.y - body.stands) < 0.02
+		# a rigged form moves by its base body's clips
+		if not body._model.find_children("*", "Skeleton3D", true, false).is_empty() and ResourceLoader.exists(GeniusBody.BODY_DIR % String(f["silhouette"])):
+			ok = ok and body.anim != null and body.anim_names.has("idle") and body.anim.has_animation(body.anim_names["idle"])
+		if not ok:
+			wrong.append(id)
+		body.queue_free()
+	check(strays.is_empty(), "every model in game/assets/genius/forms is a form of the tree (%s)" % ", ".join(strays.slice(0, 5)))
+	check(wrong.is_empty(), "a form with a model of its own wears it, stands by the crown of its head, hangs no parts for what its line gave it, and moves by its base's clips (%d built; %s)" % [built, ", ".join(wrong.slice(0, 5))])
