@@ -66,8 +66,9 @@ Each rule says what holds it. "The check" is `npm run check:style`.
   edges and flat planes (`shading.smooth`; the kits read it through
   `tools/blender/style.py`).
 - **The cut corner and the pointed arch.** One family of corners everywhere: the
-  interface's plates are clipped at 45°, stone is chamfered, a blade's tip and a lancet
-  come to a point. Nothing is rounded like a toy.
+  interface's plates are clipped at 45°; stone and timber are cut square or chamfered; a
+  blade's tip and a lancet come to a point. Nothing is rounded like a toy (the borrowed
+  dungeon tiles of the Cut still are: see "Not done"). This one is held by eye.
 - **Worn and mended.** Nothing is new: every made thing carries its grain (`materials`,
   `wear`).
 
