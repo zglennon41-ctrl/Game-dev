@@ -141,7 +141,7 @@ bash tools/genius-tree-page.sh wolf                 # the page of the whole tree
 |---|---|
 | Wolf | all thirty-one (the proof) |
 | the other twenty-one | their base's body and parts, until built |
-| Baby | the orb it was; to be given a body |
+| Baby | built: a small round thing of pale matter with a face, the field in its eyes, its belly and the tip of its tail (`python tools/blender/genius_lines.py baby`); it rides where the orb did until the rite |
 
 ## Calls that are the owner's
 

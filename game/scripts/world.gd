@@ -2081,6 +2081,9 @@ var genius_visible := true
 var _genius := Node3D.new()
 var _g_core := MeshInstance3D.new()
 var _g_core_mat := StandardMaterial3D.new()
+var _g_baby: Node3D = null         # the Baby: the body it has before the rite (docs/genius-evolutions.md)
+var _g_baby_lit: Array = []        # its materials of the field, which take the partner's colour
+var _g_baby_was := Vector3.ZERO
 var _g_halo := MeshInstance3D.new()
 var _g_halo_mat: ShaderMaterial
 var _g_light := OmniLight3D.new()
@@ -2119,6 +2122,34 @@ func _build_genius() -> void:
 	_g_core.material_override = _g_core_mat
 	_g_core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_genius.add_child(_g_core)
+	# The Baby: before the rite the genius is the same small thing for everyone, a round body
+	# with a face and the field in its eyes, its belly and the tip of its tail. It rides where
+	# the orb did, and the orb's light is still round it.
+	const BABY := "res://game/assets/genius/forms/baby.glb"
+	if ResourceLoader.exists(BABY):
+		_g_baby = load(BABY).instantiate()
+		_g_core.mesh = null
+		_g_core.add_child(_g_baby)
+		_g_baby.scale = Vector3.ONE * (0.26 / 0.72)
+		_g_baby.position = Vector3(0, -0.13, 0)
+		var skins := _g_baby.find_children("*", "MeshInstance3D", true, false)
+		for m in skins:
+			var mi := m as MeshInstance3D
+			for i in mi.mesh.get_surface_count():
+				var born := mi.mesh.surface_get_material(i)
+				if born is StandardMaterial3D and String(born.resource_name).begins_with("field"):
+					var lit := (born as StandardMaterial3D).duplicate() as StandardMaterial3D
+					lit.emission_enabled = true
+					lit.emission_energy_multiplier = 2.2
+					mi.set_surface_override_material(i, lit)
+		toonify(_g_baby)
+		for m in skins:
+			var mi := m as MeshInstance3D
+			mi.material_overlay = _ink(1.2)
+			for i in mi.mesh.get_surface_count():
+				var am := mi.get_active_material(i)
+				if am and String(am.resource_name).begins_with("field"):
+					_g_baby_lit.append(am)
 	var q := QuadMesh.new()
 	q.size = Vector2(0.9, 0.9)
 	_g_halo.mesh = q
@@ -2162,6 +2193,11 @@ func _build_genius() -> void:
 func _tint_genius(c: Color) -> void:
 	_g_tint = c.lightened(0.25)
 	_g_core_mat.albedo_color = c.lightened(0.7)
+	for m in _g_baby_lit:
+		if m is ShaderMaterial:
+			(m as ShaderMaterial).set_shader_parameter("emission", _g_tint)
+		elif m is StandardMaterial3D:
+			(m as StandardMaterial3D).emission = _g_tint
 	_g_halo_mat.set_shader_parameter("tint", _g_tint)
 	_g_light.light_color = _g_tint
 	var ramp := Gradient.new()
@@ -2238,8 +2274,14 @@ func _update_genius(f: Fight, dt: float) -> void:
 		bright *= 0.35 + 0.65 * absf(sin(_clock * 40.0))
 	var s := (0.9 + 0.7 * _g_pulse + 0.06 * sin(_clock * 6.0)) * (0.3 + 0.7 * born_k)
 	_g_core.scale = Vector3.ONE * s
+	if _g_baby:
+		# it looks where it is going
+		var went := _g_pos - _g_baby_was
+		_g_baby_was = _g_pos
+		if Vector2(went.x, went.z).length() > 0.0004:
+			_g_baby.rotation.y = lerp_angle(_g_baby.rotation.y, atan2(went.x, went.z), 1.0 - exp(-dt * 9.0))
 	_g_halo.scale = Vector3.ONE * (0.8 + 1.4 * _g_pulse) * (0.3 + 0.7 * born_k)
-	_g_halo_mat.set_shader_parameter("strength", (0.7 + 0.9 * _g_pulse) * bright)
+	_g_halo_mat.set_shader_parameter("strength", (0.7 + 0.9 * _g_pulse) * bright * (0.42 if _g_baby else 1.0))
 	_g_light.light_energy = (0.55 + 1.6 * _g_pulse) * bright
 	_g_core_mat.albedo_color = _g_tint.lightened(0.55 + 0.4 * _g_pulse) * Color(1, 1, 1, 1)
 

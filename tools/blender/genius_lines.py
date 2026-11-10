@@ -53,6 +53,7 @@ PALETTE.update({
     "maw": ((0.13, 0.025, 0.025), 0.6, 0.0), "tongue": ((0.42, 0.12, 0.11), 0.5, 0.0),
     "slate": ((0.19, 0.2, 0.23), 0.85, 0.0), "slate_light": ((0.37, 0.38, 0.41), 0.85, 0.0),
     "smoke": ((0.1, 0.095, 0.11), 1.0, 0.0), "scar": ((0.6, 0.48, 0.44), 0.6, 0.0), "iron_bristle": ((0.15, 0.15, 0.17), 0.4, 0.8),
+    "baby_skin": ((0.5, 0.47, 0.42), 0.8, 0.0), "baby_dark": ((0.15, 0.135, 0.125), 0.8, 0.0),
     "star": ((0.8, 0.78, 0.7), 0.4, 0.0), "wool_stripe": ((0.34, 0.12, 0.08), 0.95, 0.0), "cloth_watch": ((0.17, 0.2, 0.3), 0.95, 0.0),
 })
 
@@ -965,6 +966,28 @@ def export_objects(objects, sockets, path, ref=STAND):
     return kit.Built(objects, sockets).export(path)
 
 
+def build_baby():
+    """The Baby: everyone's genius from the night the field wakes until the rite. A small round
+    thing of pale matter with a face, the field in its eyes, in its belly and at the tip of
+    its tail; it has not yet been born into a form. One model, for everyone."""
+    kit.reset()
+    skin, dark = mat("baby_skin"), mat("baby_dark")
+    R = STAND / 1.85
+    c = Vector((0, 0, R * 0.95))
+    items = [(g.ico(c, R, sub=2, scale=(1.0, 0.95, 0.9)), skin)]
+    items.append((g.ico(c + Vector((0, -R * 0.6, -R * 0.3)), R * 0.4, sub=1, scale=(1.0, 0.6, 0.9)), field("heart", 2.4)))
+    for sg in (1, -1):
+        items.append((g.ico(c + Vector((sg * R * 0.38, -R * 0.78, R * 0.22)), R * 0.2, sub=1, scale=(0.9, 0.55, 1.2)), field("eyes", 3.6)))
+        items.append((g.blade(c + Vector((sg * R * 0.42, 0.02, R * 0.66)), c + Vector((sg * R * 0.86, 0.12, R * 1.5)), R * 0.46, normal=Vector((0, -1, 0.2)), belly=0.42), skin))
+        items.append((g.ico(Vector((sg * R * 0.36, -R * 0.3, R * 0.12)), R * 0.2, sub=1, scale=(1.0, 1.35, 0.7)), dark))
+    t0 = c + Vector((0, R * 0.78, -R * 0.25))
+    pts = [t0, t0 + Vector((0, R * 0.55, R * 0.05)), t0 + Vector((0, R * 0.9, R * 0.55)), t0 + Vector((0, R * 0.62, R * 1.12))]
+    items.append((g.tongue(pts, [R * 0.44, R * 0.36, R * 0.24, R * 0.07], thick=0.75, normal=X), skin))
+    items.append((g.ico(pts[-1], R * 0.15, sub=1), field("tail", 3.0)))
+    ob = g.pieces("baby", items, smooth=True)
+    export_objects([ob], {}, os.path.join(OUT, "baby.glb"), ref=STAND)
+
+
 def build_wolf(form_id, level, spec, base):
     r, sockets = wolf_form(form_id, level, spec)
     export(r, sockets, os.path.join(OUT, form_id + ".glb"))
@@ -1028,7 +1051,10 @@ _families()
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    if not args or args[0] == "--all":
+    if args and args[0] == "baby":
+        build_baby()
+    elif not args or args[0] == "--all":
+        build_baby()
         for b in sorted(BUILDERS):
             build_base(b)
     else:

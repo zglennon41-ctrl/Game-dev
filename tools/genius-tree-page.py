@@ -102,6 +102,12 @@ def main():
     blood_name = {b['id']: b['name'] for b in load('data/bloods.json')}
     by_id = {b['id']: b for b in bases}
     cells, lives = pictures(args.shots, args.out, bases) if args.shots else ({}, {})
+    baby = False
+    if args.shots and os.path.exists(os.path.join(args.shots, 'sheet-baby', '01-sheet.png')):
+        from PIL import Image
+        im = Image.open(os.path.join(args.shots, 'sheet-baby', '01-sheet.png')).convert('RGB')
+        im.crop((0, 0, im.size[0] // 8, im.size[1] // 4)).resize((300, 338), Image.LANCZOS).save(os.path.join(args.out, 'img', 'baby.jpg'), quality=86, optimize=True)
+        baby = True
 
     def pic(base_id, fid, name):
         if base_id not in cells or fid not in cells[base_id]:
@@ -119,6 +125,28 @@ def main():
         words = ' '.join([n['name'], n.get('of', ''), n['text'], n['sign'], n['habit']]).lower()
         return ('<div class="form l%d" data-s="%s">%s<div class="txt"><%s class="fname">%s</%s>%s%s%s</div></div>'
                 % (level, e(words), pic(base_id, n['id'], n['name']), tag, e(n['name']), tag, of, ln, detail(n)))
+
+    def node(base_id, n, level, col, span, pos, kids):
+        cls = 'node n%d %s%s' % (level, pos, ' kids' if kids else '')
+        return ('<div class="%s" style="grid-column:%d/span %d;grid-row:%d">%s<span>%s</span>%s</div>'
+                % (cls, col + 1, span, level + 1, pic(base_id, n['id'], n['name']), e(n['name']), '<i></i>' if kids else ''))
+
+    def chart(b):
+        """The whole line at a glance, as an evolution chart: one column a Final."""
+        bid = b['id']
+        cells = ['<span class="lab" style="grid-row:%d">%s</span>' % (i + 1, t) for i, t in enumerate(('Baby', 'Starter', 'Paths', 'Advancements', 'Finals'))]
+        # everyone's is the same before the rite
+        babe = '<img src="img/baby.jpg" width="300" height="338" loading="lazy" alt="The Baby: a small round thing of light with a face">' if baby else '<b class="mote"></b>'
+        cells.append('<div class="node n0 only" style="grid-column:2/span 18;grid-row:1">%s<span>Baby</span><i></i></div>' % babe)
+        cells.append(node(bid, b['settled'], 1, 1, 18, 'solo', True))
+        where = ('first', 'mid', 'last')
+        for pi, p in enumerate(b['paths']):
+            cells.append(node(bid, p, 2, 1 + 6 * pi, 6, where[pi], True))
+            for qi, q in enumerate(p['prongs']):
+                cells.append(node(bid, q, 3, 1 + 6 * pi + 2 * qi, 2, where[qi], True))
+                for fi, f in enumerate(q['finishes']):
+                    cells.append(node(bid, f, 4, 1 + 6 * pi + 2 * qi + fi, 1, ('first', 'last')[fi], False))
+        return '<div class="chartwrap"><div class="chart" role="group" aria-label="The %s line, from its Starter to its Finals">%s</div></div>' % (e(b['name']), ''.join(cells))
 
     nav, out, css = [], [], []
     for cid, cname, one in CLASSES:
@@ -140,7 +168,7 @@ def main():
             sec = ['<section class="base" id="%s"><header class="bhead"><p class="eyebrow">%s</p><h2>%s</h2><p class="soul">%s</p>'
                    % (bid, e(one), e(b['name']), e(b['soul']))]
             sec.append('<div class="facts"><div><h3>The spark</h3><p>%s</p></div>' % e(b['spark']))
-            sec.append('<div><h3>Settles as</h3><div class="settled">%s<div class="txt"><p><strong>%s.</strong> %s</p><p class="sub"><em>Its sign.</em> %s</p><p class="sub"><em>Its habit.</em> %s</p></div></div></div>'
+            sec.append('<div><h3>Its Starter</h3><div class="settled">%s<div class="txt"><p><strong>%s.</strong> %s</p><p class="sub"><em>Its sign.</em> %s</p><p class="sub"><em>Its habit.</em> %s</p></div></div></div>'
                        % (pic(bid, s['id'], s['name']), e(s['name']), e(s['text']), e(s['sign']), e(s['habit'])))
             sec.append('<div><h3>Who it comes to</h3><p class="sub">Seeds: %s</p><p class="sub">Shapes: %s</p><p class="sub">Bloods: %s</p><p class="sub">Likelier for children of %s</p><p class="sub">In a hybrid it is the <strong>%s</strong> half: %s</p></div></div></header>'
                        % (seeds_line, e(shapes), bloods, e(homes_line), e(b['hybrid']['adj']), e(b['hybrid']['text'])))
@@ -151,6 +179,8 @@ def main():
                 w, h = lives[bid]
                 sec.append('<figure class="life"><img loading="lazy" src="img/%s-life.jpg" width="%d" height="%d" alt="Six ages of one %s, each beside its partner, from the %s to the %s at its apex."><figcaption>One life in the game, beside its partner, down the first road: %s, %s, %s, %s, then the %s grown great, and at its apex. The partner wears its echo.</figcaption></figure>'
                            % (bid, w, h, e(b['name']), e(s['name']), e(f0['name']), e(s['name']), e(p0['name']), e(q0['name']), e(f0['name']), e(f0['name'])))
+            if bid in cells:
+                sec.append(chart(b))
             sec.append('<div class="paths">')
             for p in b['paths']:
                 sec.append('<div class="path">' + form(bid, p, 2, 'h3'))

@@ -568,6 +568,8 @@ func _sheet(what: String) -> void:
 	world.genius_visible = false
 	world._player.visible = false
 	var tree := Data.tree_of(what)
+	if what == "baby":      # everyone's, before the rite: one body, and no tree
+		tree = [{ "id": "baby", "level": 1, "silhouette": "aspect-wisps", "expression": "aspect", "features": [] }]
 	if tree.is_empty():
 		push_error("no such base: " + what)
 		get_tree().quit(1)
@@ -582,8 +584,13 @@ func _sheet(what: String) -> void:
 	var key := DirectionalLight3D.new()
 	key.rotation_degrees = Vector3(-32, 28, 0)
 	key.light_color = Color(1.0, 0.93, 0.82)
-	key.light_energy = 0.3
+	key.light_energy = 0.36
 	world.add_child(key)
+	var cool := DirectionalLight3D.new()      # a faint cool light from the other side, to open the shadows
+	cool.rotation_degrees = Vector3(-12, -70, 0)
+	cool.light_color = Color(0.62, 0.7, 0.95)
+	cool.light_energy = 0.14
+	world.add_child(cool)
 	var ground := StandardMaterial3D.new()
 	ground.albedo_color = Color(0.2, 0.17, 0.14)
 	ground.roughness = 1.0
