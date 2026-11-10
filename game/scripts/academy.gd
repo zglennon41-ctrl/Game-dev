@@ -165,7 +165,11 @@ func _genius_look_changed(g: Genius) -> void:
 	if gp is GeniusPage:
 		(gp as GeniusPage).look_saved = true
 	save()
-	if world and world._g_form:
+	_reform_genius()
+
+## The genius walking beside the partner is built again from what it now is, where it stands.
+func _reform_genius() -> void:
+	if world and world._g_form and hero.has("genius"):
 		var at: Vector3 = world._g_form.global_position
 		var form := world.make_form(hero["genius"], World.SHAPE_COLORS[hero["shape"]].lightened(0.15))
 		form.position = at

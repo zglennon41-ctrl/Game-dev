@@ -176,14 +176,15 @@ func _ready() -> void:
 		world._player.visible = false
 		var only: String = str(_args.get("gallery", ""))
 		var forms: Array = Data.forms().filter(func(f): return only == "true" or only == "" or int(f["instars"]["min"]) <= int(only))
-		var cols := 7
+		var cols := 7 if forms.size() <= 35 else 9
+		var rows := ceili(forms.size() / float(cols))
 		for i in forms.size():
 			var f: Dictionary = forms[i]
 			var col: Color = World.SHAPE_COLORS.values()[i % 6]
 			var info := { "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": f["features"], "instar": 3 }
 			var b := world.make_form(info, col)
 			world.add_child(b)
-			b.position = Vector3((i % cols - cols / 2.0 + 0.5) * 2.4, 0, (i / cols) * 2.6 - 4.0)
+			b.position = Vector3((i % cols - cols / 2.0 + 0.5) * 2.4, 0, (i / cols - (rows - 1) / 2.0) * 2.6)
 			b.rotation.y = 0.5
 			var l := Label3D.new()
 			l.text = String(f["name"]).to_upper() + "\n" + String(f["silhouette"])
@@ -194,8 +195,9 @@ func _ready() -> void:
 			l.rotation.x = -0.6
 			world.add_child(l)
 		world.cine = true
-		world.cine_pos = Vector3(0, 7.5, 6.8)
-		world.cine_look = Vector3(0, 0.2, -0.6)
+		# the camera stands back far enough for every row
+		world.cine_pos = Vector3(0, 2.4 + rows * 1.35, rows * 1.3 + 2.6)
+		world.cine_look = Vector3(0, 0.2, 0.6)
 		world._cam_pos = world.cine_pos
 		world._cam_look = world.cine_look
 		if _args.has("shots"):

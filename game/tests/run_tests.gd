@@ -933,6 +933,26 @@ func test_genius_looks_on_the_body() -> void:
 	page._set_look("keepsake", "charm")
 	check(g.look["keepsake"] == "charm" and heard.size() == 1 and heard[0] == g, "choosing on the page changes the genius and says so")
 	page.queue_free()
+	# The genius walking beside its partner is built again to match, where it stands.
+	var wl := World.new()
+	add_child(wl)
+	var hl := Fight.default_hero()
+	g.save_to(hl)
+	var first := wl.make_form(hl["genius"], Color.ORANGE)
+	first.position = Vector3(2, 0, 3)
+	wl.set_form(hl["genius"], first)
+	var al := Academy.new()
+	al.hero = hl
+	al.world = wl
+	al.genius = g
+	g.look["keepsake"] = "bell"
+	g.save_to(hl)
+	al._reform_genius()
+	var now_form: Node3D = wl._g_form
+	check(now_form != first and now_form is GeniusBody and now_form.position.is_equal_approx(Vector3(2, 0, 3)), "a change of look builds the walking genius again where it stood")
+	check(String(wl._g_form_info.get("look", {}).get("keepsake", "")) == "bell", "and it wears what was chosen")
+	al.free()
+	wl.queue_free()
 
 ## Classmates as foes: a student beast from a classmate, and a spar the skilled bot can win.
 func test_sparring() -> void:

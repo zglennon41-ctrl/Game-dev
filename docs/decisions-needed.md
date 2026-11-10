@@ -273,3 +273,16 @@ played the arc); barks stay as floating text. Still to be played rather than dec
     on the fair skins to start with, anything by choice; (d) the face is still the home's
     (one per home and sex): the creator says so on the Body leaf rather than offering faces
     it does not have. Choosing among several faces per home is the next step if wanted.
+72. **More genii, and each its own** (mine, 2026-11-10; `docs/genius-forms.md`): (a) the
+    seventeen new forms' names and features (eleven First Forms: Hooded Crow, Cairn-tortoise,
+    Fledgling Kith, Clockwork Wren, Hearth-stove, Watch-buckle, Kept Knife, Worn Glove,
+    Wick-fiend, Whisperer, Rime; six Second Forms: Storm-crow, Weir-otter, Old Cairn-back,
+    Lamplighter, Brass Kite, Wisp-train); (b) the new First Forms are offered only at the
+    rite, as the Hawk is; (c) twenty-three bloods that had no lean in the Reading now have
+    one, so the three offers differ by blood; (d) with more First Forms, the Field-wolf, the
+    River-otter and the Shadow are offered at the rite only through a blood's lean, not by
+    Seed and Shape alone (`npx tsx tools/genius-offers.ts` prints the offers); (e) what a
+    genius is born with (build, the way its light burns, which three coats it may wear) and
+    what the partner chooses (which coat, each marking on or off, a keepsake of four in five
+    colours); (f) four new features: a shell, a skin of rime, an eye that opens in it, a
+    pulse in the leather.

@@ -411,8 +411,14 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   at night built from the Academy's kit, the field gathering where the figure will stand,
   portrait lights and four framings down to the face, the figure turned by hand, and the
   reveal as four leaves (the Reading, body, face and hair, dress) with swatches, sliders
-  and names for every value. A life now starts with a look drawn by its spark. Calls left
-  for the owner: `docs/decisions-needed.md` 71.
+  and names for every value. A life now starts with a look drawn by its spark. The genii
+  (`docs/genius-forms.md`, the last two sections): fifty-two forms where there were
+  thirty-five, twenty-two of them First Forms (the Relic can now be a first genius), every
+  form the Academy can reach with a body of its own; and every genius its own: born with
+  three coats, markings, a build and a way its light burns, drawn from its partner's Seed,
+  Pattern, spark and name (`data/genius-looks.json`), with the coat, the markings and a
+  keepsake the partner's to choose on its page. The three scripted lives pick as before.
+  Calls left for the owner: `docs/decisions-needed.md` 71 and 72.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.
