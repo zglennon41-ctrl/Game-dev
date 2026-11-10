@@ -1,0 +1,557 @@
+{
+ "id": "wolf",
+ "name": "Wolf",
+ "class": "animal",
+ "expression": "beast",
+ "silhouette": "beast-runner",
+ "spark": "The mote keeps low and circles your heels; when you run, it is already ahead.",
+ "nature": {
+  "range": {
+   "close": 1.0
+  },
+  "orders": {
+   "hunt": 0.8,
+   "guard": 0.4
+  },
+  "company": {
+   "party": 0.5
+  }
+ },
+ "calls": {
+  "seed": {
+   "stands-between": 0.6,
+   "remembers": 0.2
+  },
+  "shape": {
+   "anchor": 0.5,
+   "cast": 0.4,
+   "bind": 0.3
+  },
+  "blood": {
+   "fused": 0.6,
+   "long-stride": 0.4,
+   "greenwood": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Fanged",
+  "gift": [
+   "fangs",
+   "ruff"
+  ],
+  "text": "It runs down what it wants and does not let go."
+ },
+ "settled": {
+  "id": "wolf-pup",
+  "name": "Wolf pup",
+  "text": "All paws and ears. It follows you everywhere and has not yet learned it is not the same size as what it barks at.",
+  "features": [
+   "fangs",
+   "ruff"
+  ]
+ },
+ "paths": [
+  {
+   "id": "wolf-courser",
+   "name": "Courser",
+   "text": "It learned from you that the fight is won by getting there first.",
+   "leans": {
+    "orders": {
+     "hunt": 1.0
+    },
+    "range": {
+     "close": 0.7
+    },
+    "fights": {
+     "dodges": 0.4
+    }
+   },
+   "features": [
+    "long-legs"
+   ],
+   "prongs": [
+    {
+     "id": "wolf-pack-runner",
+     "name": "Pack-runner",
+     "text": "It runs where the party runs and is never the one out of place.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      },
+      "bonds": {
+       "classmate": 0.6
+      }
+     },
+     "features": [
+      "set-feet"
+     ],
+     "finishes": [
+      {
+       "id": "wolf-pack-mother",
+       "name": "Pack-mother",
+       "text": "The others' genii fall in behind it. Nobody told them to.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        },
+        "orders": {
+         "free": 0.5
+        }
+       },
+       "features": [
+        "voice"
+       ]
+      },
+      {
+       "id": "wolf-line-runner",
+       "name": "Line-runner",
+       "text": "It has run every mile of the line you have, and knows the next post before you see its lamp.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "quests": {
+         "linework": 0.8,
+         "escort": 0.4
+        }
+       },
+       "features": [
+        "far-eyes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "wolf-throat-taker",
+     "name": "Throat-taker",
+     "text": "It waits for your Pattern the way a dog waits for a thrown stick.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      },
+      "range": {
+       "close": 0.6
+      }
+     },
+     "features": [
+      "maw"
+     ],
+     "finishes": [
+      {
+       "id": "wolf-red-maw",
+       "name": "Red Maw",
+       "text": "When you are hurt it stops being careful.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "pattern": {
+         "fires": 0.5
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      },
+      {
+       "id": "wolf-quiet-tooth",
+       "name": "Quiet Tooth",
+       "text": "You do not hear it go. You hear what it went for.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "fights": {
+         "parries": 0.6
+        }
+       },
+       "features": [
+        "shadow-cloak"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "wolf-long-strider",
+     "name": "Long-strider",
+     "text": "It ranges out to where your shots land and holds what you hit until you come.",
+     "leans": {
+      "range": {
+       "far": 1.0
+      },
+      "shape": {
+       "cast": 0.6
+      }
+     },
+     "features": [
+      "tunnel-ear"
+     ],
+     "finishes": [
+      {
+       "id": "wolf-name-hunter",
+       "name": "Name-hunter",
+       "text": "It remembers every named beast that got away, and so does its nose.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "quests": {
+         "hunt": 0.8
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      },
+      {
+       "id": "wolf-far-courser",
+       "name": "Far Courser",
+       "text": "A grey line at the edge of your sight that is always where the foe is about to be.",
+       "leans": {
+        "shape": {
+         "cast": 1.0
+        },
+        "range": {
+         "far": 0.6
+        }
+       },
+       "features": [
+        "wings"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "wolf-warder",
+   "name": "Warder",
+   "text": "It learned from you that somebody has to stand in the door.",
+   "leans": {
+    "orders": {
+     "guard": 1.0
+    },
+    "fights": {
+     "hurts": 0.5,
+     "blocks": 0.5
+    }
+   },
+   "features": [
+    "broad-chest"
+   ],
+   "prongs": [
+    {
+     "id": "wolf-hearth-wolf",
+     "name": "Hearth-wolf",
+     "text": "It counts the party at every door and will not go through until the number is right.",
+     "leans": {
+      "company": {
+       "party": 0.8
+      },
+      "bonds": {
+       "classmate": 0.8
+      }
+     },
+     "features": [
+      "glow"
+     ],
+     "finishes": [
+      {
+       "id": "wolf-den-keeper",
+       "name": "Den-keeper",
+       "text": "Where it lies down is the safest place in the zone, and the party knows it.",
+       "leans": {
+        "orders": {
+         "hold": 0.8
+        },
+        "company": {
+         "party": 1.0
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      },
+      {
+       "id": "wolf-shade-friend",
+       "name": "Shade-friend",
+       "text": "The shades at the hearth speak to it before they speak to you.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "wolf-grey-shield",
+     "name": "Grey Shield",
+     "text": "It takes the blow you did not see, and then the one you did.",
+     "leans": {
+      "fights": {
+       "blocks": 1.0
+      },
+      "shape": {
+       "anchor": 0.7
+      }
+     },
+     "features": [
+      "stone-skin"
+     ],
+     "finishes": [
+      {
+       "id": "wolf-wall-wolf",
+       "name": "Wall-wolf",
+       "text": "It does not move back. Things that hit it learn something about walls.",
+       "leans": {
+        "shape": {
+         "anchor": 1.0
+        },
+        "orders": {
+         "hold": 0.5
+        }
+       },
+       "features": [
+        "wall-plate"
+       ]
+      },
+      {
+       "id": "wolf-scar-bearer",
+       "name": "Scar-bearer",
+       "text": "Every blow you took is on its coat as well. It wears them forward.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        }
+       },
+       "features": [
+        "iron-hide"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "wolf-night-watch",
+     "name": "Night-watch",
+     "text": "It sleeps in the day now, because you do not sleep at night.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      },
+      "orders": {
+       "hold": 0.6
+      }
+     },
+     "features": [
+      "dark-eyed"
+     ],
+     "finishes": [
+      {
+       "id": "wolf-post-wolf",
+       "name": "Post-wolf",
+       "text": "A post it has lain beside stays lit a little longer than it should.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "orders": {
+         "hold": 1.0
+        }
+       },
+       "features": [
+        "lantern"
+       ]
+      },
+      {
+       "id": "wolf-lamp-eyed",
+       "name": "Lamp-eyed Wolf",
+       "text": "Its eyes show you what is winding up in the dark before the dark does.",
+       "leans": {
+        "shape": {
+         "read": 1.0
+        },
+        "fights": {
+         "parries": 0.6
+        }
+       },
+       "features": [
+        "far-eyes"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "wolf-howler",
+   "name": "Howler",
+   "text": "It learned from you that a voice carries further than teeth.",
+   "leans": {
+    "shape": {
+     "bind": 0.8,
+     "read": 0.5
+    },
+    "orders": {
+     "free": 0.8
+    }
+   },
+   "features": [
+    "voice"
+   ],
+   "prongs": [
+    {
+     "id": "wolf-caller",
+     "name": "Caller",
+     "text": "What it howls at turns to look, and for that moment is not looking at you.",
+     "leans": {
+      "shape": {
+       "bind": 1.0
+      },
+      "orders": {
+       "free": 0.6
+      }
+     },
+     "features": [
+      "crown"
+     ],
+     "finishes": [
+      {
+       "id": "wolf-pack-voice",
+       "name": "Voice of the Pack",
+       "text": "One howl, and every genius in earshot answers.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "shape": {
+         "bind": 0.6
+        }
+       },
+       "features": [
+        "chain"
+       ]
+      },
+      {
+       "id": "wolf-oath-wolf",
+       "name": "Oath-wolf",
+       "text": "It was there when you swore, and it holds you to it harder than the Terms do.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        }
+       },
+       "features": [
+        "ledger"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "wolf-moon-reader",
+     "name": "Moon-reader",
+     "text": "It lifts its head a breath before the strike comes. Watch its ears, not the foe.",
+     "leans": {
+      "shape": {
+       "read": 1.0
+      },
+      "fights": {
+       "parries": 0.8
+      }
+     },
+     "features": [
+      "old-eyes"
+     ],
+     "finishes": [
+      {
+       "id": "wolf-omen-wolf",
+       "name": "Omen-wolf",
+       "text": "It howls once on the morning of a bad day. It has not been wrong.",
+       "leans": {
+        "quests": {
+         "deep-run": 0.8
+        },
+        "shape": {
+         "read": 0.8
+        }
+       },
+       "features": [
+        "watching-eye"
+       ]
+      },
+      {
+       "id": "wolf-still-wolf",
+       "name": "Still Wolf",
+       "text": "It can sit so quiet beside you that the field itself goes quiet round it.",
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        },
+        "company": {
+         "alone": 0.6
+        }
+       },
+       "features": [
+        "cold-core"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "wolf-storm-coat",
+     "name": "Storm-coat",
+     "text": "Your element has got into its fur, and it shakes it off over whatever you point at.",
+     "leans": {
+      "shape": {
+       "turn": 1.0
+      },
+      "ground": {
+       "wild": 0.5
+      }
+     },
+     "features": [
+      "smoke"
+     ],
+     "finishes": [
+      {
+       "id": "wolf-frost-ruff",
+       "name": "Frost-ruff",
+       "text": "Where it has run, the ground remembers winter.",
+       "leans": {
+        "shape": {
+         "turn": 0.8
+        },
+        "ground": {
+         "water": 0.6,
+         "night": 0.4
+        }
+       },
+       "features": [
+        "rime"
+       ]
+      },
+      {
+       "id": "wolf-ember-ruff",
+       "name": "Ember-ruff",
+       "text": "Its ruff is banked coals. It lies down at the hearth and the hearth burns higher.",
+       "leans": {
+        "shape": {
+         "turn": 0.8
+        },
+        "fights": {
+         "hurts": 0.5
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

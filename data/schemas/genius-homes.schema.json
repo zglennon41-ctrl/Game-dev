@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "genius-homes",
+  "type": "object",
+  "properties": {
+    "$comment": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": {
+    "type": "object",
+    "additionalProperties": {
+      "type": "number",
+      "minimum": 0.25,
+      "maximum": 3
+    },
+    "minProperties": 1
+  }
+}

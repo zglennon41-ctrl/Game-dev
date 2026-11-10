@@ -454,6 +454,16 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   kind and feature, four working orders and an age that matters (`docs/genius-combat.md`);
   the piece each home puts on its genii; and the cohort's twelve genii. Calls left for the
   owner: `docs/decisions-needed.md` 75 to 78.
+- **The genius tree** (owner, 2026-11-10, replacing the lattice and the home kinds): "I am
+  still unimpressed. I want each region to not have set forms but probabilistic increases
+  to certain forms... at least 20 base forms, with development paths that work as follows:
+  level 0 (spark), level 1 (settled), three paths for development, three prongs further
+  from the first, two finishing specialization evolutions. I also want hybrids that blend
+  the 20 base models that have their own similar development paths and represent
+  individuals who change their playtime after the genius settles but before the first
+  refinement." A good mix of animals, monsters, magical creatures, items of power, weapons
+  and armors. The specification is `docs/genius-tree.md`; a base is one file in
+  `data/genius-bases/`; a home's lean is `data/genius-homes.json`.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.
