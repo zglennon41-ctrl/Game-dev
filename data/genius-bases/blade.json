@@ -274,7 +274,10 @@
      "fires": 1.0
     },
     "fights": {
-     "hurts": 0.7
+     "hurts": 0.5
+    },
+    "range": {
+     "close": 0.7
     }
    },
    "features": [
@@ -472,7 +475,10 @@
      "named": 1.0
     },
     "quests": {
-     "hunt": 0.7
+     "hunt": 0.5
+    },
+    "fights": {
+     "hurts": 0.7
     }
    },
    "features": [

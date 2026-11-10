@@ -267,7 +267,10 @@
      "parries": 1.0
     },
     "pattern": {
-     "fires": 0.7
+     "fires": 0.5
+    },
+    "orders": {
+     "hold": 0.7
     }
    },
    "features": [
