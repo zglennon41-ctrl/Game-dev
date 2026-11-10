@@ -1982,6 +1982,8 @@ def _more():
     genius_relics.register(kit)
     import genius_homes
     genius_homes.register(kit)
+    import genius_tree
+    genius_tree.register(kit)
 
 
 KEEPSAKES = {}

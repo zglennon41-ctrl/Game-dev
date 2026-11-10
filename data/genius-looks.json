@@ -160,6 +160,14 @@
       { "id": "silver", "name": "silver", "main": "#4b4c50", "under": "#9c9c9e", "trim": "#2c2c30", "mark": "#e4e2dc" },
       { "id": "sand", "name": "sand", "main": "#b89468", "under": "#ead9bd", "trim": "#8a6a48", "mark": "#3a2e26" }
     ],
+    "drake": [
+      { "id": "verdigris", "name": "verdigris", "main": "#4f6a5a", "under": "#b9b08d", "trim": "#2f3f3a", "mark": "#d7cfae" },
+      { "id": "rust", "name": "rust", "main": "#7a4a2e", "under": "#c8a878", "trim": "#4a2c1e", "mark": "#e0c9a0" },
+      { "id": "slate", "name": "slate", "main": "#4a5560", "under": "#a7a99c", "trim": "#2b3138", "mark": "#cfd3cf" },
+      { "id": "soot", "name": "soot", "main": "#2e2c2e", "under": "#6f665e", "trim": "#1a191b", "mark": "#b65a2e" },
+      { "id": "sand", "name": "sand", "main": "#a58b5e", "under": "#d9cba6", "trim": "#6e5a3c", "mark": "#4b3d2c" },
+      { "id": "plum", "name": "plum", "main": "#5a3f52", "under": "#b79c9a", "trim": "#36263a", "mark": "#e2cfc0" }
+    ],
     "bristle": [
       { "id": "umber", "name": "umber", "main": "#5a4636", "under": "#8f7a64", "trim": "#3a2c22", "mark": "#c2b299" },
       { "id": "grey", "name": "grey", "main": "#66635f", "under": "#9a968f", "trim": "#44423f", "mark": "#cfc8ba" },
@@ -313,6 +321,8 @@
     "engine-astrolabe": { "coats": "brass", "roles": { "metal_brass": "main", "metal_iron_light": "under", "metal_dark": "trim" }, "marks": { "enamel": { "name": "an enamelled rim", "on": "trim" } } },
     "relic-star": { "coats": "brass", "roles": { "tin": "main", "metal_dark": "under", "metal_brass": "trim" }, "marks": { "ring": { "name": "a ring of another metal", "on": "main" } } },
     "relic-horn": { "coats": "brass", "roles": { "metal_brass": "main", "metal_iron_light": "under", "wood": "trim" }, "marks": { "rim": { "name": "a bright rim", "on": "main" }, "bands": { "name": "bands", "on": "main" } } },
+    "beast-drake": { "coats": "drake", "roles": { "fur_dark": "main", "fur_light": "under" }, "marks": { "socks": { "name": "socks", "on": "main" }, "mask": { "name": "a mask", "on": "main" }, "saddle": { "name": "a saddle", "on": "main" }, "ridge": { "name": "a pale ridge", "on": "trim" }, "wings": { "name": "pale wings", "on": "trim" }, "tailtip": { "name": "a tipped tail", "on": "trim" } }, "shapes": ["lean", "heavy", "long_tail"] },
+    "relic-bow": { "coats": "oak", "roles": { "wood": "main", "leather_dark": "under" }, "marks": { "wrap": { "name": "a pale wrap", "on": "under" }, "tips": { "name": "horn tips", "on": "under" } } },
     "relic-woodsword": { "coats": "oak", "roles": { "wood": "main", "leather_dark": "under" }, "marks": { "wrap": { "name": "a pale wrap", "on": "under" }, "tie": { "name": "a cloth tie", "on": "under" } } },
     "aspect-fog": { "coats": "mist", "roles": { "mist": "main", "mist_dark": "under", "mist_pale": "trim" } },
     "aspect-flood": { "coats": "water", "roles": { "water": "main", "water_dark": "under", "water_pale": "trim" }, "marks": { "reeds": { "name": "green reeds", "on": "under" } } },

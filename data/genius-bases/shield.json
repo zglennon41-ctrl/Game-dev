@@ -1,0 +1,655 @@
+{
+ "id": "shield",
+ "name": "Shield",
+ "class": "armor",
+ "expression": "relic",
+ "silhouette": "relic-shield",
+ "soul": "The soul of someone who steps in front. It is not courage. They simply cannot watch it land on someone else.",
+ "spark": "The mote keeps between you and the door. Whichever door.",
+ "nature": {
+  "fights": {
+   "blocks": 0.9
+  },
+  "orders": {
+   "guard": 0.7
+  },
+  "shape": {
+   "anchor": 0.6
+  }
+ },
+ "calls": {
+  "seed": {
+   "stands-between": 0.9,
+   "i-can-hold": 0.4,
+   "remembers": 0.1
+  },
+  "shape": {
+   "anchor": 0.8,
+   "make": 0.3,
+   "bind": 0.2
+  },
+  "blood": {
+   "ridgefolk": 0.6,
+   "ironblooded": 0.5,
+   "second-heart": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Shielded",
+  "gift": [
+   "broad-guard",
+   "shell"
+  ],
+  "text": "It is in the way before you have decided there is anything to be in the way of."
+ },
+ "newFeatures": [
+  {
+   "id": "spiked-boss",
+   "slot": "arms",
+   "label": "a point in the middle of the shield"
+  }
+ ],
+ "settled": {
+  "id": "shield-buckler",
+  "name": "Buckler",
+  "text": "A fist-sized buckler with a dent you did not put there. It gets between you and things, including, twice, your dinner.",
+  "sign": "A dented round of iron no bigger than a plate, with a grip worn bright.",
+  "habit": "It moves to whichever side of you the door is on.",
+  "features": [
+   "broad-guard",
+   "grip"
+  ]
+ },
+ "paths": [
+  {
+   "id": "shield-wall",
+   "name": "Wall-shield",
+   "of": "one who, having said no, has finished speaking",
+   "text": "It learned from you that the best place to be is the place that does not move.",
+   "sign": "It has grown as tall as your chin, and stands on its own rim.",
+   "habit": "It stands exactly where you put it down. You have tested this over a whole afternoon.",
+   "leans": {
+    "fights": {
+     "blocks": 1.0
+    },
+    "shape": {
+     "anchor": 0.7
+    }
+   },
+   "features": [
+    "tower-shield"
+   ],
+   "prongs": [
+    {
+     "id": "shield-battered",
+     "name": "Battered Shield",
+     "of": "one who takes every blow that got past as their own failing",
+     "text": "Some blows get past it and reach you. It has taken that personally.",
+     "sign": "Dents all over, each one hammered back out and still showing.",
+     "habit": "It turns its worst dent to the wall when visitors come.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      },
+      "range": {
+       "close": 0.4
+      }
+     },
+     "features": [
+      "iron-hide"
+     ],
+     "finishes": [
+      {
+       "id": "shield-shield-biter",
+       "name": "Shield-biter",
+       "of": "one who has started biting back",
+       "text": "Its rim has grown teeth. What hits you is held by the limb that did it, and you take your turn at leisure.",
+       "sign": "Its rim has grown teeth, and it holds them a little open.",
+       "habit": "It closes on anything pushed at it: a broom, a finger, an offered hand.",
+       "leans": {
+        "range": {
+         "close": 1.0
+        },
+        "fights": {
+         "hurts": 0.5
+        }
+       },
+       "features": [
+        "fangs"
+       ]
+      },
+      {
+       "id": "shield-lone-round",
+       "name": "Lone Round",
+       "of": "one who refuses help and has learned to manage",
+       "text": "A small round shield for one person a long way out. It is also the plate you eat off, and it does not mind.",
+       "sign": "Small again, and round, with a rim worn smooth by one hand.",
+       "habit": "At supper it lies flat and lets you eat off it. It keeps the grit out of the stew.",
+       "leans": {
+        "company": {
+         "alone": 1.0
+        },
+        "ground": {
+         "wild": 0.6
+        }
+       },
+       "features": [
+        "long-legs"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "shield-spiked-boss",
+     "name": "Spiked Boss",
+     "of": "one who, pushed, pushes back harder",
+     "text": "It has grown a point in the middle and puts it where your Pattern ends.",
+     "sign": "A point grown from the middle, a hand long, and bright at the tip.",
+     "habit": "It leans, very slightly, toward whoever is talking loudest.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      },
+      "orders": {
+       "hunt": 0.5
+      }
+     },
+     "features": [
+      "spiked-boss"
+     ],
+     "finishes": [
+      {
+       "id": "shield-rams-head",
+       "name": "Ram's Head",
+       "of": "one who goes through, not round",
+       "text": "At the end of your chain it goes through whatever is in front, door or beast. It prefers doors, which complain less.",
+       "sign": "Two curled horns have grown either side of the boss.",
+       "habit": "It rests its boss against closed doors and waits, with meaning.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "shape": {
+         "cast": 0.3
+        }
+       },
+       "features": [
+        "horns"
+       ]
+      },
+      {
+       "id": "shield-last-word",
+       "name": "The Last Word",
+       "of": "one who is still there when the other has tired",
+       "text": "It ends arguments by walking forward. Nothing has yet been stubborn enough to still be standing there.",
+       "sign": "Its face is worn flat and bright from being walked into things.",
+       "habit": "It moves forward a finger's width whenever nobody is looking. By evening it is across the room.",
+       "leans": {
+        "orders": {
+         "hunt": 1.0
+        },
+        "range": {
+         "close": 0.5
+        }
+       },
+       "features": [
+        "horn-brow"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "shield-mirror",
+     "name": "Mirror-shield",
+     "of": "one who shows people what they are doing",
+     "text": "Polished on the beat until it shows the blow coming. You have both got vain about it.",
+     "sign": "A face polished until it shows the room, a little bent.",
+     "habit": "It turns to show you yourself when you are about to say something you will regret.",
+     "leans": {
+      "fights": {
+       "parries": 1.0
+      },
+      "shape": {
+       "read": 0.6
+      }
+     },
+     "features": [
+      "glow"
+     ],
+     "finishes": [
+      {
+       "id": "shield-turned-blow",
+       "name": "The Turned Blow",
+       "of": "one who hands an insult back, improved",
+       "text": "What strikes it on the beat gets its own blow back, a little improved.",
+       "sign": "The polish has a ripple in it that moves when it is struck.",
+       "habit": "It catches thrown things, a ball, a crust, and sends them back harder.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "range": {
+         "close": 0.3
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      },
+      {
+       "id": "shield-scrying-face",
+       "name": "Scrying Face",
+       "of": "one who sees the quarrel a breath before it starts",
+       "text": "Its face shows what is about to happen in the room, a breath early and a little warped at the edges.",
+       "sign": "The room in its face is a moment ahead of the room.",
+       "habit": "It watches the door in its own reflection, and tilts when someone is about to come in.",
+       "leans": {
+        "shape": {
+         "read": 1.0
+        },
+        "range": {
+         "far": 0.4
+        }
+       },
+       "features": [
+        "sight-glass"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "shield-gate",
+   "name": "Gate-shield",
+   "of": "one who belongs to a place and will not see it fall",
+   "text": "It learned from you that some ground is home, that home has a door, and that somebody has to be the door.",
+   "sign": "It is door-shaped now, with a bar across its back.",
+   "habit": "It stands in the doorway of wherever you are staying, facing out.",
+   "leans": {
+    "ground": {
+     "line": 1.0
+    },
+    "orders": {
+     "hold": 0.7
+    }
+   },
+   "features": [
+    "door"
+   ],
+   "prongs": [
+    {
+     "id": "shield-tower",
+     "name": "Tower Shield",
+     "of": "one for whom an instruction is the end of the discussion",
+     "text": "It has grown taller than you are and has a foot to stand on. Told to hold, it considers the matter closed.",
+     "sign": "Taller than you, with a foot it stands on.",
+     "habit": "It takes the same spot every night, to the inch. There is a mark on the floor.",
+     "leans": {
+      "orders": {
+       "hold": 1.0
+      },
+      "quests": {
+       "linework": 0.6
+      }
+     },
+     "features": [
+      "set-feet"
+     ],
+     "finishes": [
+      {
+       "id": "shield-post-wall",
+       "name": "Post-wall",
+       "of": "one counted on the roster as part of the building",
+       "text": "At a post it sets itself in the gap of the palisade, and the roster counts it as a section of wall.",
+       "sign": "It is the grey of palisade timber and has a number painted on it.",
+       "habit": "It stands in gaps: between two chairs, in a missing fence board, in a queue.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "quests": {
+         "linework": 0.6
+        }
+       },
+       "features": [
+        "wall-plate"
+       ]
+      },
+      {
+       "id": "shield-gatehouse",
+       "name": "Gatehouse",
+       "of": "one whose loyalty has a door in it, and a short list",
+       "text": "The party fights from behind it and goes out through it. It opens for them and for no one else.",
+       "sign": "A small wicket in its face that it opens to look through.",
+       "habit": "It swings aside for people it knows before they have reached it.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "company": {
+         "party": 0.5
+        }
+       },
+       "features": [
+        "bastion"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "shield-ward-bearer",
+     "name": "Ward-bearer",
+     "of": "one who carries the rule of the house so that others have their hands free",
+     "text": "It carries your ward on its face so you have both hands free, and holds it straighter than you do.",
+     "sign": "Your ward's sign glows on its face like a house mark over a lintel.",
+     "habit": "It holds itself dead straight. If the ward on it tilts, it corrects.",
+     "leans": {
+      "shape": {
+       "make": 1.0
+      },
+      "orders": {
+       "guard": 0.6
+      }
+     },
+     "features": [
+      "ring"
+     ],
+     "finishes": [
+      {
+       "id": "shield-standing-ward",
+       "name": "Standing Ward",
+       "of": "one who can be left in charge",
+       "text": "Set down, it is a ward that needs no one to hold it. You left it guarding a door overnight and found the door still there.",
+       "sign": "The air a pace in front of it is slightly thick.",
+       "habit": "Left alone in a room it does not move. You have come back after a day to check.",
+       "leans": {
+        "shape": {
+         "make": 1.0,
+         "anchor": 0.5
+        }
+       },
+       "features": [
+        "standing-air"
+       ]
+      },
+      {
+       "id": "shield-sworn-shield",
+       "name": "Sworn Shield",
+       "of": "one who has not stepped aside for anything since a certain day",
+       "text": "It took your oath when you did and wears it across the face. It has not stepped aside for anything since.",
+       "sign": "A crest across its face that was not there before the oath.",
+       "habit": "For some part of every day it faces the direction you swore in.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        },
+        "orders": {
+         "guard": 0.6
+        }
+       },
+       "features": [
+        "crest"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "shield-grave-door",
+     "name": "Grave-door",
+     "of": "one who keeps the dead of the house inside the house",
+     "text": "It is the right size and shape to close a tomb, and has started to behave like it.",
+     "sign": "Stone-grey and cold to the touch, with a ring handle nobody uses.",
+     "habit": "In the evening it leans against the hearth wall, and something leans against the other side.",
+     "leans": {
+      "bonds": {
+       "shade": 1.0
+      },
+      "ground": {
+       "ruin": 0.7
+      }
+     },
+     "features": [
+      "stone-skin"
+     ],
+     "finishes": [
+      {
+       "id": "shield-hearth-board",
+       "name": "Hearth-board",
+       "of": "one who hangs over the family fire and listens",
+       "text": "It hangs over the hearth between outings and the shade there talks to it. It comes down knowing an older way to stand.",
+       "sign": "Smoke-darkened on one side from hanging over the hearth.",
+       "habit": "It hangs itself over the fire between outings. It comes down warm.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        },
+        "ground": {
+         "quiet": 0.4
+        }
+       },
+       "features": [
+        "ember"
+       ]
+      },
+      {
+       "id": "shield-night-gate",
+       "name": "Night-gate",
+       "of": "one who is the reason nothing came in last night",
+       "text": "In a ruin after dark it stands in the one way in. What comes to look at it goes away again.",
+       "sign": "It shows no edge against the dark, only a pair of eyes at head height.",
+       "habit": "After dark it goes to stand in the one way in, wherever that is.",
+       "leans": {
+        "ground": {
+         "night": 1.0,
+         "ruin": 0.6
+        }
+       },
+       "features": [
+        "dark-eyed"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "shield-shelter",
+   "name": "Shelter-shield",
+   "of": "one who cannot watch it land on someone else",
+   "text": "It learned from you to count heads, and to tilt toward the one who is not looking.",
+   "sign": "It is wider than it is tall, and curved like a hand held over something.",
+   "habit": "It hovers over whoever in the room is smallest or most tired.",
+   "leans": {
+    "quests": {
+     "escort": 1.0
+    },
+    "company": {
+     "party": 0.7
+    }
+   },
+   "features": [
+    "broad-chest"
+   ],
+   "prongs": [
+    {
+     "id": "shield-roof",
+     "name": "Roof-shield",
+     "of": "one who holds something over their friends and calls it nothing",
+     "text": "It has learned to lie flat overhead. There is room under it for more than you.",
+     "sign": "It rides above head height, face down, like a tray carried high.",
+     "habit": "In rain it goes to whoever has no hood.",
+     "leans": {
+      "bonds": {
+       "classmate": 1.0
+      },
+      "company": {
+       "party": 0.6
+      }
+     },
+     "features": [
+      "wing-cloak"
+     ],
+     "finishes": [
+      {
+       "id": "shield-roof-of-shields",
+       "name": "Roof of Shields",
+       "of": "one under whom a whole company can sit out a storm",
+       "text": "Over a classmate it spreads into a roof, plank by plank. The cohort has sat out two storms and one beast under it.",
+       "sign": "Overlapping plates, like tiles, that spread when they are needed.",
+       "habit": "It spreads a little whenever two or more of your friends sit down together.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "bonds": {
+         "classmate": 0.6
+        }
+       },
+       "features": [
+        "shell"
+       ]
+      },
+      {
+       "id": "shield-half-share",
+       "name": "Half-share",
+       "of": "one who takes half of whatever lands on a friend",
+       "text": "It cannot stop all that reaches your friends, so it takes half. Everyone aches in the morning and nobody mentions it.",
+       "sign": "It carries dents that match the bruises of people nearby.",
+       "habit": "It presses against whoever is hurting, and is a little duller afterwards.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "bonds": {
+         "classmate": 0.5
+        }
+       },
+       "features": [
+        "pulse"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "shield-road",
+     "name": "Road-shield",
+     "of": "one who gets other people across",
+     "text": "It rides on the outside of whoever you are bringing home, and has opinions about the route.",
+     "sign": "It keeps to the outer side of the road, whichever side that is.",
+     "habit": "It walks strangers to the gate and comes back.",
+     "leans": {
+      "quests": {
+       "escort": 1.0
+      },
+      "ground": {
+       "water": 0.5
+      }
+     },
+     "features": [
+      "watching-eye"
+     ],
+     "finishes": [
+      {
+       "id": "shield-passengers-door",
+       "name": "Passenger's Door",
+       "of": "one whose charges arrive without a mark on them",
+       "text": "It rides on the side of whoever you were paid to bring home. None of them has arrived with a mark on them.",
+       "sign": "A small eye in the boss that watches the passenger, not the road.",
+       "habit": "It checks on whoever is asleep in the room, each in turn, like a conductor.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "ground": {
+         "line": 0.4
+        }
+       },
+       "features": [
+        "far-eyes"
+       ]
+      },
+      {
+       "id": "shield-breakwater",
+       "name": "Breakwater",
+       "of": "one who stands in the flood so that others can cross behind",
+       "text": "It stands in a river in flood and the water goes around. People cross in the slack behind it.",
+       "sign": "A green line across its face at the height of the last high water.",
+       "habit": "It stands in gutters and streams, upstream of you, for no reason it will give.",
+       "leans": {
+        "ground": {
+         "water": 1.0
+        },
+        "fights": {
+         "blocks": 0.5
+        }
+       },
+       "features": [
+        "current"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "shield-hound",
+     "name": "Hound-shield",
+     "of": "one who draws the danger onto themselves on purpose",
+     "text": "On a hunt it goes in front and keeps the beast's attention, the way a good dog does and with about the same manners.",
+     "sign": "A ruff of bristle round the rim, and it goes ahead of you with its face low.",
+     "habit": "It rattles its boss at anything bigger than itself until the thing looks at it.",
+     "leans": {
+      "quests": {
+       "hunt": 1.0
+      },
+      "bonds": {
+       "named": 0.5
+      }
+     },
+     "features": [
+      "ruff"
+     ],
+     "finishes": [
+      {
+       "id": "shield-old-acquaintance",
+       "name": "Old Acquaintance",
+       "of": "one who knows each old enemy's first move",
+       "text": "It has stood in front of named beasts often enough to know each one's first move. It is in the way of that move, every time.",
+       "sign": "Its scars come in sets. Each set is from the same animal, years apart.",
+       "habit": "It shifts its guard in its sleep, the same few shifts, in the same order.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "quests": {
+         "hunt": 0.4
+        }
+       },
+       "features": [
+        "old-eyes"
+       ]
+      },
+      {
+       "id": "shield-beaters-shield",
+       "name": "Beater's Shield",
+       "of": "one who gets their way by being in everybody's way",
+       "text": "It drives a beast as beaters do, by being loud and wide and always on the wrong side. The beast ends up where you wanted.",
+       "sign": "It booms when struck, and has learned to strike itself.",
+       "habit": "It herds things toward you: chickens, children, a rolling apple.",
+       "leans": {
+        "quests": {
+         "hunt": 1.0
+        },
+        "shape": {
+         "bind": 0.6
+        }
+       },
+       "features": [
+        "voice"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
