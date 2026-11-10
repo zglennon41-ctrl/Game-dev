@@ -3130,5 +3130,15 @@ func test_evolutions() -> void:
 		if not ok:
 			wrong.append(id)
 		body.queue_free()
+	# a hybrid keeps its first base's body: each of its forms wears a form of the first, a form
+	# carried across from the second wearing the one it took the place of
+	var firsts := Data.tree_of("trun").map(func(f): return String(f["id"]))
+	var hy := Data.hybrid_forms("trun", "tedge")
+	var own_ids := hy.filter(func(f): return firsts.has(String(f["id"]).get_slice(":", 1)))
+	var across := hy.filter(func(f): return not firsts.has(String(f["id"]).get_slice(":", 1)))
+	check(not hy.is_empty() and not across.is_empty() and hy.all(func(f): return firsts.has(String(f["wears"])))
+		and own_ids.all(func(f): return String(f["wears"]) == String(f["id"]).get_slice(":", 1))
+		and across.all(func(f): return int(Data.form(String(f["wears"]))["level"]) == int(f["level"])),
+		"every form of a hybrid wears a form of its first base: its own, or the one a carried form took the place of, at the same stage (%d carried)" % across.size())
 	check(strays.is_empty(), "every model in game/assets/genius/forms is a form of the tree (%s)" % ", ".join(strays.slice(0, 5)))
 	check(wrong.is_empty(), "a form with a model of its own wears it, stands by the crown of its head, hangs no parts for what its line gave it, and moves by its base's clips (%d built; %s)" % [built, ", ".join(wrong.slice(0, 5))])

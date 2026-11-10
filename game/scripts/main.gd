@@ -604,6 +604,22 @@ func _sheet(what: String) -> void:
 			most = float(called[sh])
 			col = World.SHAPE_COLORS[sh]
 	var look := GeniusLook.born(4711 + what.hash() % 97)
+	# for a portrait, a coat of middling value: one near black hides what the body has grown
+	var sil0 := String(tree[0].get("silhouette", ""))
+	for k in 60:
+		var tryit := GeniusLook.born(4711 + what.hash() % 97 + k * 131)
+		var cols: Dictionary = GeniusLook.resolve(tryit, String(tree[0]["id"]), sil0, 3)["colors"]
+		var v := 0.0
+		var n := 0
+		for name in cols:
+			if name != "keepsake_tint" and not String(name).begins_with("mark_"):
+				v += (cols[name] as Color).v
+				n += 1
+		if n == 0:
+			break
+		if v / n > 0.3 and v / n < 0.55:
+			look = tryit
+			break
 	var ids: Array = []
 	var bodies: Array = []
 	for i in tree.size():

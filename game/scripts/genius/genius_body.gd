@@ -136,7 +136,7 @@ func _assemble(instar: int) -> void:
 	# A form with a body of its own wears it (a hybrid's form wears the body of the form it came
 	# from, first+second:<form>): its build, its great parts and its marks are in the model.
 	var fid := String(info.get("form", ""))
-	var src := fid.get_slice(":", 1) if fid.contains(":") else fid
+	var src := String(Data.form(fid).get("wears", fid.get_slice(":", 1) if fid.contains(":") else fid))
 	var carried: Array = []
 	if src != "" and ResourceLoader.exists(FORM_DIR % src):
 		own_body = src
