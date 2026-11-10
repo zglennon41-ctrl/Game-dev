@@ -85,7 +85,8 @@ func _init() -> void:
 					break
 			if dress.has("headgear") and inst.find_child("Headgear_*", true, false) == null:
 				missing.append("(headgear %s)" % dress["headgear"]["type"])
-		for fc in ["Nose", "Ear_l", "Eye_l", "Iris_r", "Mouth", "Brow_l", "Lid_r", "Head"]:
+		# the face: the eyes, the brows and the lashes hang from the head; the rest is the body's own
+		for fc in ["Eye_l", "Eye_r", "Brow_l", "Brow_r", "Lash_l", "Lash_r"]:
 			if inst.find_child(fc, true, false) == null:
 				missing.append(fc)
 		print(body, ": animations=", ap.get_animation_list().size() if ap else 0, " bones=", skel.get_bone_count() if skel else 0,

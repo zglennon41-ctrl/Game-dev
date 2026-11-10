@@ -40,10 +40,21 @@ def dress_pieces(body, objs, build, slot):
     mats = {}
     for cname, c in colors.items():
         mats[cname] = pk._material("dress_%s_%s" % (body.home, cname), tuple(c) + (1,), rough=0.9 if cname != "metal" else 0.45)
-    tr = body.scaled(bk.trunk_rings(sex, build))
-    ar = body.scaled(bk.arm_rings(sex, build))
-    lr = body.scaled(bk.leg_rings(sex, build))
+    tr = body.rings("trunk", build)
+    ar = body.rings("arm", build)
+    lr = body.rings("leg", build)
+    human = body.human if body.HUMAN else None
     z_arm = body.joint("upperarm.l", "z")
+    y_arm = body.joint("upperarm.l", "y") if human else 0.0
+    top_i = 9 if human else 8      # the human's garments close at the base of the neck
+
+    def fy(i):
+        """The front of trunk ring i."""
+        return tr[i][3] - tr[i][2]
+
+    def low(z):
+        """A height written for the old legs (a hem), on this body's."""
+        return human.map_z(z / body.k) if human else z
     x_leg = body.joint("upperleg.l", "x")
     k = body.k
     if not hasattr(body, "chains"):
@@ -52,12 +63,15 @@ def dress_pieces(body, objs, build, slot):
         body.dress_rigid = []
     n = 0
 
-    def put(name, ob, chain, cname, trim=None):
+    def put(name, ob, chain, cname, trim=None, fit=True):
         ob.data.materials.clear()
         ob.data.materials.append(mats.get(cname, body.mats["tunic"]))
         ob.data.materials.append(mats.get(trim, mats.get(cname, body.mats["tunic"])))
         objs[name] = ob
         body.chains[name] = chain
+        if human and fit:
+            human.refine(ob)
+            human.conform(ob, chain, build)
 
     def band_loft(name, rings, trim_rings=()):
         return bk.loft(name, rings, (lambda i: 1 if i in trim_rings else 0))
@@ -74,7 +88,7 @@ def dress_pieces(body, objs, build, slot):
             if banded:
                 x_end, hd_e, hz_e = rings[-1]
                 rings.append((x_end + 0.03, hd_e + 0.006, hz_e + 0.006))
-            ob = band_loft("Dress_%d_sleeve_%s" % (n, side), bk.rings_x(rings, z_arm, sign), (len(rings) - 2,) if banded else ())
+            ob = band_loft("Dress_%d_sleeve_%s" % (n, side), bk.rings_x(rings, z_arm, sign, y_arm), (len(rings) - 2,) if banded else ())
             put("Dress_%d_sleeve_%s" % (n, side), ob, "arm." + side, cname, cuffs or trim)
 
     def rigid(ob, bone, cname):
@@ -89,15 +103,15 @@ def dress_pieces(body, objs, build, slot):
         n += 1
         t, cname = piece["type"], piece["color"]
         trim = piece.get("trim")
-        hem = float(piece.get("hem", 0.5)) * k
+        hem = low(float(piece.get("hem", 0.5)) * k)
         if t in ("tunic", "vest"):
-            rings = bk.rings_z(bk._shell(tr, 0.024, 1, 8))
+            rings = bk.rings_z(bk._shell(tr, 0.024, 1, top_i))
             ob = band_loft("Dress_%d_%s" % (n, t), rings, (0,) if trim else ())
             put("Dress_%d_%s" % (n, t), ob, "trunk", cname, trim)
             if t == "tunic":
                 sleeves(int(piece.get("sleeves", 2)), cname, bool(piece.get("wide", False)), trim, piece.get("cuffs"))
         elif t in ("coat", "robe", "kaftan"):
-            top = bk._shell(tr, 0.026, 2, 8)
+            top = bk._shell(tr, 0.026, 2, top_i)
             z2, hw2, hd2, yo2 = top[0]
             flare = {"coat": 1.25, "robe": 1.15, "kaftan": 1.3}[t]
             skirt = bk._skirt(z2, hw2, hd2, yo2, hem, flare)
@@ -116,13 +130,13 @@ def dress_pieces(body, objs, build, slot):
                 ob = band_loft("Dress_%d_%s" % (n, t), bk.rings_z(rings), (0,) if trim else ())
                 put("Dress_%d_%s" % (n, t), ob, "trunk", cname, trim)
         elif t == "cuirass":
-            ob = band_loft("Dress_%d_cuirass" % n, bk.rings_z(bk._shell(tr, 0.03, 4, 8)), (0,) if trim else ())
+            ob = band_loft("Dress_%d_cuirass" % n, bk.rings_z(bk._shell(tr, 0.03, 4, top_i)), (0,) if trim else ())
             put("Dress_%d_cuirass" % n, ob, "trunk", cname, trim)
         elif t == "apron":
             z_hi = tr[6][0]
-            z_lo = 0.6 * k
+            z_lo = low(0.6 * k)
             w = tr[3][1] + 0.02
-            ob = pk._bm_object("Dress_%d_apron" % n, pk._box_bm(Vector((-w, -tr[3][2] - 0.035, z_lo)), Vector((w, -tr[3][2] + 0.0, z_hi)), taper=(1.1, 1.0)), body.mats["tunic"])
+            ob = pk._bm_object("Dress_%d_apron" % n, pk._box_bm(Vector((-w, fy(3) - 0.035, z_lo)), Vector((w, fy(3) + 0.0, z_hi)), taper=(1.1, 1.0)), body.mats["tunic"])
             put("Dress_%d_apron" % n, ob, "trunk", cname)
         elif t == "hakama":
             for side, sign in (("l", 1), ("r", -1)):
@@ -151,25 +165,41 @@ def dress_pieces(body, objs, build, slot):
             w = piece.get("wide", 1.0)
             wide = (1.8 if w else 1.0) if isinstance(w, bool) else float(w)
             g = 0.03 * wide
-            ob = bk.loft("Dress_%d_collar" % n, bk.rings_z([(z2 - 0.05 * wide, hw2 + g + 0.04 * (wide - 1), hd2 + g + 0.04 * (wide - 1), yo2), (z2 + 0.05, hw2 + 0.02, hd2 + 0.02, yo2)]))
-            put("Dress_%d_collar" % n, ob, "trunk", cname)
+            if human:
+                # cut from the body: a band at the neck's base, out over the shoulders when it is broad
+                z2, hw2 = body.rings("trunk", "fit")[9][:2]      # the cut is the fit body's, on every build
+                ob = human.shell("Dress_%d_collar" % n, human.neck_mask(z2 - 0.045 * wide * k, z2 + 0.03 * k, hw2 + 0.035 * k + 0.11 * (wide - 1) * k), build, 0.014 * k)
+                put("Dress_%d_collar" % n, ob, "trunk", cname, fit=False)
+            else:
+                ob = bk.loft("Dress_%d_collar" % n, bk.rings_z([(z2 - 0.05 * wide, hw2 + g + 0.04 * (wide - 1), hd2 + g + 0.04 * (wide - 1), yo2), (z2 + 0.05, hw2 + 0.02, hd2 + 0.02, yo2)]))
+                put("Dress_%d_collar" % n, ob, "trunk", cname)
         elif t == "scarf":
             z2, hw2, hd2, yo2 = tr[9]
-            ring = bk.loft("Dress_%d_scarf" % n, bk.rings_z([(z2 - 0.04, hw2 + 0.035, hd2 + 0.035, yo2), (z2 + 0.03, hw2 + 0.03, hd2 + 0.03, yo2)]))
-            put("Dress_%d_scarf" % n, ring, "trunk", cname)
-            tail = pk._bm_object("Dress_%d_scarf_tail" % n, pk._box_bm(Vector((0.02, -hd2 - 0.055, tr[5][0])), Vector((0.1, -hd2 - 0.03, z2 - 0.03)), taper=(1.2, 1.0)), body.mats["tunic"])
-            put("Dress_%d_scarf_tail" % n, tail, "trunk", cname)
+            if human:
+                zf, hwf = body.rings("trunk", "fit")[9][:2]
+                ring = human.shell("Dress_%d_scarf" % n, human.neck_mask(zf - 0.05 * k, zf + 0.035 * k, hwf + 0.05 * k), build, 0.024 * k)
+                put("Dress_%d_scarf" % n, ring, "trunk", cname, fit=False)
+            else:
+                ring = bk.loft("Dress_%d_scarf" % n, bk.rings_z([(z2 - 0.04, hw2 + 0.035, hd2 + 0.035, yo2), (z2 + 0.03, hw2 + 0.03, hd2 + 0.03, yo2)]))
+                put("Dress_%d_scarf" % n, ring, "trunk", cname)
+            tail = pk._bm_object("Dress_%d_scarf_tail" % n, pk._box_bm(Vector((0.02, fy(7) - 0.055, tr[5][0])), Vector((0.1, fy(7) - 0.03, z2 - 0.03)), taper=(1.2, 1.0)), body.mats["tunic"])
+            put("Dress_%d_scarf_tail" % n, tail, "trunk", cname, fit=False)
         elif t == "wrap":
             z_hi, z_lo = tr[8][0], tr[2][0]
-            pts = [Vector((0.14 * (1 - u) - 0.16 * u, -(tr[7][2] * (1 - u) + tr[2][2] * u) - 0.03, z_hi * (1 - u) + z_lo * u)) for u in (0.0, 0.25, 0.5, 0.75, 1.0)]
-            ob = pk._bm_object("Dress_%d_wrap" % n, pk._tube_bm(pts, [0.045] * 5, segments=8), body.mats["tunic"])
+            us = [i / 8.0 for i in range(9)] if human else (0.0, 0.25, 0.5, 0.75, 1.0)
+            pts = []
+            for u in us:
+                x, z = 0.14 * (1 - u) - 0.16 * u, z_hi * (1 - u) + z_lo * u
+                y = (human.front_y(x, z) - 0.012) if human else (fy(7) * (1 - u) + fy(2) * u) - 0.03
+                pts.append(Vector((x, y, z)))
+            ob = pk._bm_object("Dress_%d_wrap" % n, pk._tube_bm(pts, [0.04 if human else 0.045] * len(pts), segments=8), body.mats["tunic"])
             pk._smooth(ob)
-            put("Dress_%d_wrap" % n, ob, "trunk", cname)
+            put("Dress_%d_wrap" % n, ob, "trunk", cname, fit=False)
         elif t == "gloves":
             x_w = body.joint("wrist.l", "x")
             for side, sign in (("l", 1), ("r", -1)):
                 rings = [(x_w - 0.03, 0.045, 0.04), (x_w + 0.03, 0.05, 0.03), (x_w + 0.13, 0.055, 0.028), (x_w + 0.18, 0.035, 0.02)]
-                ob = bk.loft("Dress_%d_glove_%s" % (n, side), bk.rings_x(rings, z_arm, sign))
+                ob = bk.loft("Dress_%d_glove_%s" % (n, side), bk.rings_x(rings, z_arm, sign, y_arm))
                 put("Dress_%d_glove_%s" % (n, side), ob, "arm." + side, cname)
         # --- rigid pieces, hung from bones ---
         elif t == "buttons":
@@ -178,30 +208,31 @@ def dress_pieces(body, objs, build, slot):
             for i in range(count):
                 u = i / max(1, count - 1)
                 z = z_top * (1 - u) + z_bot * u
-                ring = tr[7] if u < 0.5 else tr[3]
-                ob = pk._bm_object("Dress_%d_button_%d" % (n, i), _sphere_bm(Vector((0.0, -(ring[2]) - 0.03, z)), 0.014), body.mats["tunic"])
+                front = (human.front_y(0.0, z) if human else fy(7 if u < 0.5 else 3))
+                ob = pk._bm_object("Dress_%d_button_%d" % (n, i), _sphere_bm(Vector((0.0, front - 0.03, z)), 0.014), body.mats["tunic"])
                 rigid(ob, "chest" if u < 0.5 else "spine", cname)
         elif t == "badge":
             z2 = tr[7][0]
             bm = bmesh.new()
             bmesh.ops.create_cone(bm, cap_ends=True, segments=12, radius1=0.025, radius2=0.025, depth=0.012)
             bmesh.ops.rotate(bm, cent=(0, 0, 0), matrix=Matrix.Rotation(math.pi / 2, 3, "X"), verts=bm.verts)
-            bmesh.ops.translate(bm, vec=Vector((0.09, -tr[7][2] - 0.032, z2)), verts=bm.verts)
+            z2 = tr[6][0] if human else z2
+            bmesh.ops.translate(bm, vec=Vector((0.09, (human.front_y(0.09, z2) if human else fy(7)) - 0.032, z2)), verts=bm.verts)
             ob = pk._bm_object("Dress_%d_badge" % n, bm, body.mats["tunic"])
             rigid(ob, "chest", cname)
         elif t == "sashknot":
             z2, hw2, hd2, yo2 = tr[3]
-            knot = pk._bm_object("Dress_%d_knot" % n, pk._box_bm(Vector((hw2 - 0.01, -0.03, z2 - 0.03)), Vector((hw2 + 0.06, 0.04, z2 + 0.04))), body.mats["tunic"])
+            knot = pk._bm_object("Dress_%d_knot" % n, pk._box_bm(Vector((hw2 - 0.01, yo2 - 0.03, z2 - 0.03)), Vector((hw2 + 0.06, yo2 + 0.04, z2 + 0.04))), body.mats["tunic"])
             rigid(knot, "spine", cname)
             for i, dx in enumerate((0.0, 0.035)):
-                tail = pk._bm_object("Dress_%d_tail_%d" % (n, i), pk._box_bm(Vector((hw2 + dx, -0.01, z2 - 0.3 - 0.06 * i)), Vector((hw2 + 0.03 + dx, 0.02, z2 - 0.02))), body.mats["tunic"])
+                tail = pk._bm_object("Dress_%d_tail_%d" % (n, i), pk._box_bm(Vector((hw2 + dx, yo2 - 0.01, z2 - 0.3 - 0.06 * i)), Vector((hw2 + 0.03 + dx, yo2 + 0.02, z2 - 0.02))), body.mats["tunic"])
                 rigid(tail, "spine", cname)
         elif t == "toolloop":
             z2, hw2, hd2, yo2 = tr[3]
             for i, (r, h) in enumerate(((0.012, 0.1), (0.009, 0.14))):
                 bm = bmesh.new()
                 bmesh.ops.create_cone(bm, cap_ends=True, segments=8, radius1=r, radius2=r, depth=h)
-                bmesh.ops.translate(bm, vec=Vector((-hw2 - 0.02 - 0.03 * i, 0.01, z2 - h / 2)), verts=bm.verts)
+                bmesh.ops.translate(bm, vec=Vector((-hw2 - 0.02 - 0.03 * i, yo2 + 0.01, z2 - h / 2)), verts=bm.verts)
                 ob = pk._bm_object("Dress_%d_tool_%d" % (n, i), bm, body.mats["tunic"])
                 rigid(ob, "spine", cname)
         elif t == "pauldrons":
@@ -211,7 +242,7 @@ def dress_pieces(body, objs, build, slot):
                 bmesh.ops.create_uvsphere(bm, u_segments=12, v_segments=6, radius=0.095)
                 bmesh.ops.scale(bm, vec=(1.0, 0.95, 0.7), verts=bm.verts)
                 bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], plane_co=(0, 0, -0.01), plane_no=(0, 0, 1), clear_inner=True)
-                bmesh.ops.translate(bm, vec=Vector((sign * (x_s + 0.06), 0.0, z_arm + 0.03)), verts=bm.verts)
+                bmesh.ops.translate(bm, vec=Vector((sign * (x_s + 0.06), y_arm, z_arm + 0.03)), verts=bm.verts)
                 ob = pk._bm_object("Dress_%d_pauldron_%s" % (n, side), bm, body.mats["tunic"])
                 pk._smooth(ob)
                 rigid(ob, "upperarm." + side, cname)
@@ -228,6 +259,13 @@ def dress_pieces(body, objs, build, slot):
                 strip.data.transform(strip.matrix_world)
                 strip.matrix_world = Matrix.Identity(4)
                 rigid(strip, "hips", cname)
+
+    # --- shoes: over the feet unless the home goes in sandals -----------------------
+    if human and not any(p.get("type") == "sandals" for p in D.get("pieces", [])):
+        cname = next((p["color"] for p in D.get("pieces", []) if p.get("type") in ("boots", "greaves")), None)
+        for name, ob in human.shoes(build, mats.get(cname, body.mats["boots"])).items():
+            objs[name] = ob
+            body.chains[name] = "leg." + name[-1]
 
 
 def headgear(body):

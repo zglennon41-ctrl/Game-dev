@@ -32,6 +32,7 @@ import people_kit as pk  # noqa: E402
 import anatomy as an  # noqa: E402
 import head as hd  # noqa: E402
 import wardrobe  # noqa: E402
+import human_kit as hk  # noqa: E402
 
 ROOT = pk.ROOT
 OUT = os.path.join(ROOT, "game", "assets", "people")
@@ -264,9 +265,9 @@ def rings_z(table):
     return out
 
 
-def rings_x(table, z, sign):
+def rings_x(table, z, sign, y=0.0):
     """Arm and hand tables: (x, half-depth y, half-height z) lofted along X at height z."""
-    return [(Vector((sign * x, 0, z)), Vector((0, hd, 0)), Vector((0, 0, hz))) for x, hd, hz in table]
+    return [(Vector((sign * x, y, z)), Vector((0, hd, 0)), Vector((0, 0, hz))) for x, hd, hz in table]
 
 
 def rings_y(table, x):
@@ -443,15 +444,25 @@ class Body:
         self.r.attached = []
         self.mats = {n: pk._material(n, c, rough=0.85) for n, c in
                      [("skin", SKIN), ("tunic", TUNIC), ("trousers", TROUSERS), ("boots", BOOTS), ("eye_white", EYE_WHITE), ("iris", IRIS),
-                      ("hair", HAIR), ("lips", LIPS), ("pupil", PUPIL)]}
+                      ("hair", HAIR), ("lips", LIPS), ("pupil", PUPIL), ("lash", (0.05, 0.04, 0.04, 1))]}
         self.parts = {}
+        # v3: the body is the human (human.py), and the rig moves onto its joints
+        self.human = hk.HumanBody(self) if self.HUMAN else None
 
     # --- the meshes ------------------------------------------------------------------
+
+    HUMAN = True     # v3: MakeHuman's base mesh and targets (human.py, human_kit.py)
 
     def joint(self, bone, axis):
         b = self.r.arm.data.bones[bone]
         p = self.r.MA @ b.head_local
-        return p.z if axis == "z" else abs(p.x)
+        return p.z if axis == "z" else (p.y if axis == "y" else abs(p.x))
+
+    def rings(self, kind, build):
+        """The ring table the garments are cut on: measured from the human, or the old tables."""
+        if self.HUMAN:
+            return self.human.rings(kind, build)
+        return self.scaled({"trunk": trunk_rings, "arm": arm_rings, "leg": leg_rings}[kind](self.sex, build))
 
     def fp(self, key):
         return float(self.face_p.get(key, 1.0))
@@ -492,6 +503,8 @@ class Body:
 
     def build_meshes(self, build):
         """The body's meshes for one build, all named; returns {name: object}."""
+        if self.HUMAN:
+            return self.build_human(build)
         if self.ANATOMY:
             return self.build_anatomy(build)
         sex = self.sex
@@ -522,6 +535,17 @@ class Body:
             foot = add(loft("Foot_" + side, rings_y(self.scaled(foot_rings(sex)), x_leg), lambda i: slot["boots"]))
             objs["Foot_" + side] = foot
         self.dress_pieces(objs, build, add, slot)
+        return objs
+
+    def build_human(self, build):
+        """The human of one build, painted, and the home's dress on it."""
+        names = ["skin", "tunic", "trousers", "boots", "lips"]
+        mats = [self.mats[n] for n in names]
+        slot = {n: i for i, n in enumerate(names)}
+        bare = any(p.get("type") == "sandals" for p in home_dress(self.home).get("pieces", []))
+        objs = {"Body": self.human.body_object(build, mats, slot, bare)}
+        self.head_box = self.human.head_box
+        self.dress_pieces(objs, build, None, slot)
         return objs
 
     def build_anatomy(self, build):
@@ -587,6 +611,8 @@ class Body:
 
     def head_extents(self):
         """The head's box: from the Head loft (v1) or the body above the neck (v2)."""
+        if self.HUMAN:
+            return self.human.head_box
         if self.ANATOMY:
             return self.head_box
         head = self.parts["Head"]
@@ -668,6 +694,15 @@ class Body:
 
     def weight(self, objs):
         r = self.r
+        if self.HUMAN:
+            for name, ob in objs.items():
+                if name == "Body":
+                    self.human.weight_body(ob)
+                else:
+                    self.human.weight_like_body(ob)
+                skin_to(ob, r.arm)
+                r.skinned.append(ob)
+            return
         if self.ANATOMY:
             self.weight_anatomy(objs["Body"])
             weight_all(objs["Head"], "head")
@@ -835,6 +870,19 @@ class Body:
                 displace_folds(ob, 0.006, 9.0, 14.0, float(hash(name) % 7))
             bake_cavity(ob)
         self.weight(self.parts)
+        if self.HUMAN:
+            self.hang([(e, "head") for e in self.human.head_pieces(self.mats)])
+            self.hang(list(getattr(self, "dress_rigid", [])))
+            self.hang([(h, "head") for h in self.headgear()])
+            self.hang(self.human.sockets())
+            self.r.head_box = self.head_extents()
+            pieces, self.head_centre = self.human.hair(self.mats["hair"])
+            self.hang([(h, "head") for h in pieces])
+            self.r.measured["hair"] = len(pieces)
+            self.r.measured["body"] = self.id
+            (_, _), (_, _), (hz0, hz1) = self.head_extents()
+            self.r.measured["heads_tall"] = round(self.r.extent([self.parts["Body"]])[1] / (hz1 - hz0), 2)
+            return self
         if self.ANATOMY:
             self.hang([(e, "head") for e in self.head_pieces])
             self.hang(list(getattr(self, "dress_rigid", [])))
@@ -1209,8 +1257,51 @@ def render_blood_sheet(home="alexandria", samples=24, res=(360, 560)):
     pk.tile(out, os.path.join(SCRATCH, "blood_sheet.png"), 6, res)
 
 
-def render_faces_sheet(samples=24, res=(300, 420)):
-    """Every home's two faces, close, bare-headed."""
+def _toned(home, which=0.5):
+    """An after-import hook that gives a card the home's skin (a tone from its palette) and
+    the lips the game would derive from it."""
+    import json
+    data = json.load(open(os.path.join(ROOT, "data", "bodies.json")))["homes"][home]
+    tones = json.load(open(os.path.join(ROOT, "data", "creation.json")))["look"]["skinTones"]
+    pal = data["palette"]
+    c = tones[pal[min(len(pal) - 1, int(which * len(pal)))]]
+
+    def hook(scene):
+        for m in bpy.data.materials:
+            base = m.name.split(".")[0]
+            col = None
+            if base == "skin":
+                col = (c[0], c[1], c[2], 1)
+            elif base == "lips":
+                d = [x * 0.82 for x in c]
+                col = (d[0] + (0.62 - d[0]) * 0.3, d[1] + (0.3 - d[1]) * 0.3, d[2] + (0.32 - d[2]) * 0.3, 1)
+            if col and m.node_tree:
+                # the importer multiplies the colour by the baked occlusion in a mix node: the
+                # colour is that node's free input (or the shader's own, when there is no mix)
+                for node in m.node_tree.nodes:
+                    if node.type in ("MIX", "MIX_RGB", "BSDF_PRINCIPLED"):
+                        for inp in node.inputs:
+                            if inp.type == "RGBA" and not inp.is_linked and inp.name in ("A", "B", "Color1", "Color2", "Base Color"):
+                                inp.default_value = col
+    return hook
+
+
+def render_faces_sheet(samples=24, res=(360, 460)):
+    """Every home's two faces, close, bare-headed, in the home's own tone."""
+    cards = os.path.join(SCRATCH, "face_cards")
+    out = []
+    styles = ["crop", "long", "knot", "tail", "braid"]
+    for hi, home in enumerate(HOMES):
+        for sex in SEXES:
+            glb = os.path.join(OUT, "%s-%s.glb" % (home, sex))
+            if not os.path.exists(glb):
+                continue
+            out.append(pk.render_card(glb, "%s %s" % (home, sex), os.path.join(cards, "%s_%s.png" % (home, sex)), anim="Idle", samples=samples, res=res,
+                                      hair=styles[(hi + (1 if sex == "f" else 0)) % len(styles)], headgear=False, focus=0.93, view=(0.3, -1.0, 0.08), lit=True, after_import=_toned(home)))
+    pk.tile(out, os.path.join(SCRATCH, "faces_sheet.png"), 6, res)
+
+
+def _render_faces_sheet_plain(samples=24, res=(300, 420)):
     cards = os.path.join(SCRATCH, "face_cards")
     out = []
     for home in HOMES:
@@ -1218,7 +1309,7 @@ def render_faces_sheet(samples=24, res=(300, 420)):
             glb = os.path.join(OUT, "%s-%s.glb" % (home, sex))
             if not os.path.exists(glb):
                 continue
-            out.append(pk.render_card(glb, "%s %s" % (home, sex), os.path.join(cards, "%s_%s.png" % (home, sex)), anim="Idle", samples=samples, res=res, hair="crop", headgear=False, focus=0.88, view=(0.45, -1.0, 0.2)))
+            out.append(pk.render_card(glb, "%s %s" % (home, sex), os.path.join(cards, "%s_%s.png" % (home, sex)), anim="Idle", samples=samples, res=res, hair="crop", headgear=False, focus=0.93, view=(0.3, -1.0, 0.08), lit=True))
     pk.tile(out, os.path.join(SCRATCH, "faces_sheet.png"), 8, res)
 
 

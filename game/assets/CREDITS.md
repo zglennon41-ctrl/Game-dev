@@ -29,12 +29,22 @@ is built by `tools/blender/beast_kit.py` from the CC0 Quaternius wolf above: its
 animations, reshaped and given new parts in Blender. Owned by the project; the wolf's CC0
 licence covers the base.
 
-## People (made for WILDLINE, on the KayKit rig)
+## People (made for WILDLINE: MakeHuman's body on the KayKit rig)
 
-`game/assets/people/` (Knight, Mage, Rogue, Rogue_Hooded, Barbarian) is built by
-`tools/blender/people_kit.py` from the CC0 KayKit Adventurers above: the same rig, animations,
-textures and accessories, the bodies reshaped in Blender from chibi to grounded proportions
-(about six and a half heads tall). Owned by the project; KayKit's CC0 licence covers the base.
+`game/assets/people/` (the twenty-six bodies of the thirteen homes) is built by
+`tools/blender/body_kit.py` from two CC0 sources:
+
+- **MakeHuman's base mesh, shape targets, game rig weights and UV masks**, by the MakeHuman
+  team and community, www.makehumancommunity.org, as bundled with **MPFB** (the MakeHuman
+  Plugin For Blender). The assets are CC0 1.0 (`tools/blender/makehuman/LICENSE.ASSETS.md`);
+  none of MPFB's GPL source code is used. The source data the kit reads is kept in
+  `tools/blender/makehuman/` (the base mesh, the macro and detail targets, the game rig and
+  its weights).
+- **KayKit's skeleton and seventy-six animations** (the Adventurers pack above), its bones
+  moved onto the human's joints.
+
+The dress, hair, headgear, eyes and brows are made for WILDLINE by the kit. Owned by the
+project; the two CC0 licences cover the bases.
 
 ## Weapons (made for WILDLINE)
 

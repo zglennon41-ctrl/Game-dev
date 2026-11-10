@@ -552,12 +552,20 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 			a.visible = n == "Beard_%s" % beard or n.begins_with("Beard_%s_" % beard)
 			if a.visible:
 				_recolor(a, col)
+		elif n.begins_with("Brow_"):
+			# the brows take the hair's colour, a little darker
+			_recolor(a, col.darkened(0.3))
 		else:
+			# Only headgear and a cape are the look's to show or hide: the eyes, the lashes and
+			# the dress's rigid pieces (a button, a pauldron) stay as the body has them.
 			var head := n.contains("Helmet") or n.contains("Hat") or n.contains("Hood") or n.begins_with("Headgear_")
 			var cape := n.contains("Cape")
-			a.visible = (head and headgear) or (cape and look.get("cape", true))
-			if cape and a.visible and not hero.is_empty():
-				_tint_cape(a, hero, String(look.get("cape_color", "shape")))
+			if head:
+				a.visible = headgear
+			elif cape:
+				a.visible = look.get("cape", true)
+				if a.visible and not hero.is_empty():
+					_tint_cape(a, hero, String(look.get("cape_color", "shape")))
 
 ## A skin tone by its name in data/creation.json.
 func skin_color(id: String) -> Color:

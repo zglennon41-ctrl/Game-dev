@@ -718,8 +718,8 @@ def render_card(glb, label, path, anim=None, at=0.0, weapon=None, samples=32, re
         bpy.context.collection.objects.link(lo_)
     if lit:
         # daylight: a warm key, a cool fill, so colours and cloth read as the game shows them
-        light("day_key", "AREA", centre + Vector((2.0, -3.0, 3.0)), (1.0, 0.96, 0.9), 900, 2.5)
-        light("day_fill", "AREA", centre + Vector((-3.0, -2.0, 1.5)), (0.8, 0.86, 1.0), 300, 3.0)
+        light("day_key", "AREA", centre + Vector((2.0, -3.0, 3.0)), (1.0, 0.96, 0.9), 420, 2.5)
+        light("day_fill", "AREA", centre + Vector((-3.0, -2.0, 1.5)), (0.8, 0.86, 1.0), 140, 3.0)
 
     light("moon", "SUN", centre + Vector((size * 0.5, size * 0.9, size * 1.2)), (0.55, 0.64, 1.0), 2.0)
     light("lamp", "AREA", centre + Vector((-size * 1.2, -size * 1.2, size * 0.7)), (1.0, 0.6, 0.35), 55 * size * size, size * 0.4)

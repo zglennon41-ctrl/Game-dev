@@ -48,6 +48,27 @@
             "type": "number",
             "exclusiveMinimum": 0
           }
+        },
+        "armsDown": {
+          "type": "object",
+          "required": [
+            "degrees",
+            "clips"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "degrees": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 60
+            },
+            "clips": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
         }
       }
     }

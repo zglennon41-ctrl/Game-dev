@@ -392,7 +392,11 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   grew up in; each home's dress is data (`data/bodies.json`) built by `wardrobe.py`. Then:
   compare the graphics with Dynasty Warriors and improve to compete; the comparison and the
   plan are `docs/graphics-comparison.md`, the first pass done (the second cel shader, detail
-  textures, sky ambient, baked occlusion, folds).
+  textures, sky ambient, baked occlusion, folds). Then (2026-11-10): "make the body and
+  head forms more realistic and distinct; they are horrifying right now." The generated
+  bodies are replaced by MakeHuman's CC0 human on the game's bones, each home's people
+  shaped by data (`data/bodies.json`, `form`); `docs/bodies-plan.md`, "The human base".
+  The ancestry mix and details of each home are a first draft for the owner to rewrite.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.

@@ -14,7 +14,7 @@
           "name",
           "brief",
           "palette",
-          "face"
+          "form"
         ],
         "properties": {
           "name": {
@@ -30,18 +30,63 @@
             },
             "minItems": 1
           },
-          "face": {
+          "form": {
             "type": "object",
             "required": [
-              "m",
-              "f"
+              "ancestry",
+              "details"
             ],
-            "additionalProperties": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "number",
-                "minimum": 0.5,
-                "maximum": 1.5
+            "additionalProperties": false,
+            "properties": {
+              "ancestry": {
+                "type": "object",
+                "required": [
+                  "african",
+                  "asian",
+                  "caucasian"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "african": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "asian": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "caucasian": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              },
+              "details": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": -1.5,
+                  "maximum": 1.5
+                }
+              },
+              "m": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": -1.5,
+                  "maximum": 1.5
+                }
+              },
+              "f": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": -1.5,
+                  "maximum": 1.5
+                }
               }
             }
           }

@@ -1522,6 +1522,10 @@ func test_look() -> void:
 		check(vis.get("Beard_full", false) and not vis.get("Beard_short", true), "%s: the full beard shows, the short one not" % body)
 		check(not vis.get("Hair_braid_fall", true) and not vis.get("Hair_knot_fall", true), "%s: no other style shows" % body)
 		check(absf(w._player.scale.x - 1.06) < 0.001, "%s stands tall" % body)
+		# The face is never the look's to hide: the eyes, the brows and the lashes stay on.
+		for piece in ["Eye_l", "Eye_r", "Brow_l", "Lash_r"]:
+			var fp: Node3D = w._player.find_child(piece, true, false)
+			check(fp != null and fp.visible, "%s: %s shows" % [body, piece])
 		hero["look"]["headgear"] = false
 		hero["look"]["hair"] = "knot"
 		hero["look"]["beard"] = "none"
@@ -1601,8 +1605,15 @@ func test_blood_marks() -> void:
 							var att: Node = skel.find_child("feature_%s_%s" % [fid, sock], false, false)
 							check(att != null and att.get_child_count() > 0, "%s on %s: %s hangs on %s" % [b["id"], body, fid, sock])
 					"eyes":
-						var iris: MeshInstance3D = w._player.find_child("Iris_l", true, false).find_child("*", true, false) if w._player.find_child("Iris_l", true, false) else null
-						var mat := iris.get_active_material(0) if iris else null
+						# the iris is a surface of the eyeball, by its material's name
+						var eye_at: Node = w._player.find_child("Eye_l", true, false)
+						var eye: MeshInstance3D = eye_at if eye_at is MeshInstance3D else (eye_at.find_child("*", true, false) if eye_at else null)
+						var mat: Material = null
+						if eye and eye.mesh:
+							for si in eye.mesh.get_surface_count():
+								var sm := eye.get_active_material(si)
+								if sm and String(sm.resource_name) == "iris":
+									mat = sm
 						var c: Array = f["iris"]
 						check(mat is ShaderMaterial and (mat as ShaderMaterial).get_shader_parameter("albedo").is_equal_approx(Color(c[0], c[1], c[2])), "%s on %s: the iris takes %s" % [b["id"], body, fid])
 					"tint", "glow":

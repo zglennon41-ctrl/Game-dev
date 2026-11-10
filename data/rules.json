@@ -328,7 +328,7 @@
     "sky": true
   },
   "motion": {
-    "$comment": "How the body moves over the ground. strides is each locomotion clip's own ground speed (units a second: how fast the feet cross the ground in the clip, measured in Blender from the KayKit rig at the game's scale); the game plays the clip at the body's speed divided by its stride so the feet plant instead of sliding, within rateLimits. runAbove is the ground speed where a walk becomes a run.",
+    "$comment": "How the body moves over the ground. strides is each locomotion clip's own ground speed (units a second: how fast the feet cross the ground in the clip, measured in Blender from the KayKit rig at the game's scale); the game plays the clip at the body's speed divided by its stride so the feet plant instead of sliding, within rateLimits. runAbove is the ground speed where a walk becomes a run. armsDown is read by the body kit when it builds the people: in the clips it names, the upper arms are turned this many degrees down toward the sides (the KayKit clips hold the arms out, as a round toy body needs; a human does not).",
     "runAbove": 2.6,
     "rateLimits": [
       0.6,
@@ -340,6 +340,29 @@
       "Walking_Backwards": 1.61,
       "Running_Strafe_Left": 8.28,
       "Running_Strafe_Right": 8.28
+    },
+    "armsDown": {
+      "degrees": 26,
+      "clips": [
+        "Idle",
+        "Unarmed_Idle",
+        "Walking_A",
+        "Walking_B",
+        "Walking_C",
+        "Walking_Backwards",
+        "Running_A",
+        "Running_B",
+        "Running_Strafe_Left",
+        "Running_Strafe_Right",
+        "Jump_Idle",
+        "Jump_Start",
+        "Jump_Land",
+        "Interact",
+        "PickUp",
+        "Use_Item",
+        "Hit_A",
+        "Hit_B"
+      ]
     }
   }
 }

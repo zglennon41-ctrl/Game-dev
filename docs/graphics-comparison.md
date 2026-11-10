@@ -75,6 +75,17 @@ Everything stays data: `data/rules.json`, `art` holds the shader's numbers.
 - Feet: every locomotion clip plays at the body's ground speed over the clip's stride, a
   walk below the run line (`data/rules.json`, `motion`), so the feet plant.
 
+## The third pass (the owner: "more realistic and distinct; they are horrifying")
+
+The characters row of the table changes: the bodies are now MakeHuman's sculpted human
+(CC0) on the game's bones, about 26,000 triangles with a real face, hands and feet, each
+home's people shaped from its own ancestry mix and face details, the rig moved onto real
+joints and the standing and moving clips' arms brought down to the sides
+(`docs/bodies-plan.md`, "The human base"). Still flat colour under the cel bands, by the
+look's decision. A bug found on the way: the game had been hiding the eyes, noses and
+lips of every kit body since they arrived (the look's show-and-hide loop treated them as
+headgear); that is fixed and tested.
+
 ## What it will not do
 
 It will not reach DW9's character fidelity: that is sculpted art and motion capture. What

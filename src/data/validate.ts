@@ -40,6 +40,20 @@ export function validateData(dir = 'data'): Problem[] {
   // Every home with a body has a palette of tones the creator knows, and every city answer a home.
   const tones = new Set(Object.keys(D('creation').look.skinTones));
   for (const [hid, h] of Object.entries<any>(D('bodies').homes)) for (const t of h.palette) need('bodies.json', tones, t, `tone of ${hid}`);
+  // Every detail of a home's form names a MakeHuman target the kit has, and the ancestry sums to one.
+  const targetDir = join(dir, '..', 'tools', 'blender', 'makehuman', 'targets');
+  if (existsSync(targetDir)) {
+    const stems = new Set<string>();
+    const walk = (d: string) => { for (const e of readdirSync(d, { withFileTypes: true })) { if (e.isDirectory()) walk(join(d, e.name)); else if (e.name.endsWith('.target.gz')) stems.add(e.name.slice(0, -'.target.gz'.length)); } };
+    walk(targetDir);
+    const ends = ['decr', 'incr', 'down', 'up', 'in', 'out', 'backward', 'forward', 'concave', 'convex', 'compress', 'uncompress'];
+    const known = (k: string) => [k, `l-${k}`].some((n) => stems.has(n) || ends.some((e) => stems.has(`${n}-${e}`)));
+    for (const [hid, h] of Object.entries<any>(D('bodies').homes)) {
+      const sum = Object.values<number>(h.form.ancestry).reduce((a, b) => a + b, 0);
+      if (Math.abs(sum - 1) > 0.02) problems.push({ file: 'bodies.json', message: `${hid}: the ancestry sums to ${sum.toFixed(2)}, not 1` });
+      for (const part of ['details', 'm', 'f']) for (const k of Object.keys(h.form[part] ?? {})) if (!known(k)) problems.push({ file: 'bodies.json', message: `${hid}: no MakeHuman target for the detail ${k}` });
+    }
+  }
   const homes = new Set(Object.keys(D('bodies').homes));
   for (const an of D('creation').questions[0].answers) if (an.city) need('creation.json', homes, an.city, 'home body');
   // Every mark a blood shows is a feature the body can take.

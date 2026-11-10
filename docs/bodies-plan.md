@@ -233,8 +233,57 @@ thighs, the arms and the neck; the feminine figure has her hips wider than her s
 the **elbow moved** out to 0.556 of the arm (`people_kit.py`, `elbow`), so the upper arm
 is the longer bone as on an adult; the garments cut on the same rings plus a margin, so
 they fit the wider body; the head's side silhouette narrowed, the eyes, nose, mouth and
-ears set to the adult places. The table is the acceptance test: `tools/blender/measure.py`
-prints it from a built body and marks what is more than a tenth off.
+ears set to the adult places. (Superseded on 2026-11-10 by the human base, below: the body is now a sculpted human
+with its own girths, and what was still wrong here was the rig, not the widths: the hips
+at 0.46 of the height where a hip joint is at 0.53, the knee at 0.24 for 0.29, and too
+much neck. `tools/blender/measure.py` now checks the rig's joints against an adult's.)
+
+## The human base (the owner, 2026-11-10: "more realistic and distinct; they are horrifying")
+
+Three generations of bodies made here (lofted rings, a grown skeleton graph, a carved
+sphere for a head) each improved on the last and none held a close-up: a face is the
+hardest form there is, and a procedure does not sculpt one. So the bodies are no longer
+generated. They are **MakeHuman's base mesh** (a sculpted adult, 13,380 vertices, with a
+real face, hands and feet) **and its library of shape targets**, both CC0
+(`tools/blender/makehuman/`, credited in `game/assets/CREDITS.md`; none of the plugin's GPL
+code is used). `tools/blender/human.py` and `human_kit.py` do the work:
+
+- **The form.** MakeHuman's macros give the sex, the age (young adult), muscle and weight
+  (the three builds, lean, fit and heavy, are three points on those two scales, blended by
+  the player's slider as before) and an **ancestry mix**; its detail targets shape the face
+  feature by feature. Each home's people are written in `data/bodies.json` as `form`: the
+  mix, and details by short name with a value from -1 to 1 (`nose-hump: 0.8`,
+  `ear-wing: 0.8`, `head-square: 0.7`), with `m` and `f` to differ by sex. The details
+  were written from each home's `brief`, the sentence that was already there ("a Roman
+  nose, a firm mouth, a round head held still"). All of it is the owner's to rewrite; the
+  validator checks every name against the targets the kit has.
+- **The pose.** MakeHuman's stance (arms down at an angle, feet apart) is turned into the
+  game rig's T-pose with MakeHuman's own game rig and weights, by forward kinematics and
+  skinning in numpy: arms level, palms down, fingers together and a little curled, legs
+  under the hips, soles flat.
+- **The rig moves to the body, not the body to the rig.** The earlier bodies were built
+  round the reshaped KayKit joints, and those joints were wrong for an adult: the hips at
+  0.46 of the height (a real hip joint is at 0.53), the knee at 0.24 (0.29), and a quarter
+  of a head too much neck. Now the game rig's bones are moved onto the human's own joints,
+  each keeping its direction so the seventy-six clips still mean what they meant, and the
+  baked translations scale with the legs and arms.
+- **The weights** are MakeHuman's: the limbs bone for bone, the trunk's share laid along
+  the game rig's three trunk bones, the neck shared between chest and head. The shoulders,
+  hips, elbows and knees bend as their authors made them bend.
+- **The head.** The face is the mesh's own: lids, nose, lips, ears. The kit adds the
+  eyeballs (white, iris, pupil), brows as ribbons laid on the brow's bone, MakeHuman's lash
+  strips, and cuts the hair and beards from the scalp as before. The lips are their own
+  material (from MakeHuman's lip mask), tinted from the skin tone in the game.
+- **The dress.** The garments are cut on rings measured from this body, then each vertex
+  is laid on the body's true surface at the distance its loft gave it, so a tunic follows
+  the chest and shoulders and a boot the calf; cloth that stands well off (a skirt's
+  flare) is left to hang. Garments take the weights of the body under them. Under the
+  dress the body is painted: an undershirt, trousers, and shoes over the feet unless the
+  home goes in sandals.
+
+What it does not do yet: expressions (MakeHuman has the targets for them), finger bones
+(the hand is one piece on the rig), per-character face variation inside a home, and
+garments sewn as cloth rather than shells.
 
 ## Dress as culture (the owner, 2026-11-07: the outfits mark the culture they grew up in)
 
@@ -273,7 +322,12 @@ Each step leaves the game playable and ends with a card sheet for the owner.
 
 ## Open to the owner
 
-- The faces' character per city (a sentence each would steer the carving).
+- **The ancestry mix and the details of each home's people** (`data/bodies.json`, `form`).
+  They were written from the briefs that were already there and from the cities' names;
+  ten thousand years on, who lives in Kazan or Cahokia is the owner's to say, and every
+  number is his to change.
+- Faces inside a home: today one face per home and sex. A second and third (as shape keys,
+  chosen at creation and drawn for the cohort) would make twelve classmates twelve people.
 - Which of the thirteen dresses to carve first after Alexandria's.
 - Whether build should change anything mechanical (it does not, by default: the line colour
   is the only difficulty, and build is a look).
