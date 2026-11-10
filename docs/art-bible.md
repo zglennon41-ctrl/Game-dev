@@ -4,6 +4,14 @@ Draft 0.1, 2026-11-05. The owner's decisions behind it: AI-assisted art, cleaned
 grounded proportions; a painted card for every genius form; Blender as the workbench.
 Every asset, whoever or whatever makes it, is judged against this file.
 
+**The style is held now (2026-11-10).** `docs/style.md` is this bible as rules a check can
+test, for everything the game draws and moves; its numbers are `data/style.json`; `npm run
+check:style` fails on what is off it. Where this file and that one differ, that one is
+what the game does: the palette there is in ramps with a cap on saturation, materials are
+of fixed classes told by their names, the three lights have a colour for their source and
+a paler one for what they throw, and "bright colour" (11, below) is settled against "one
+loud colour per frame" (rule 5) as bright in light, quiet in saturation.
+
 ## 1. The feeling: lamplight gothic
 
 Ten thousand years after the Awakening, Earth is rail and river and fog, and people live by
@@ -25,6 +33,8 @@ scene's story:
 4. **Ink on the living.** Characters, beasts and geniuses carry a 2-pixel warm-black ink line
    (the game draws it); places do not.
 5. **One loud colour per frame.** The scene is muted; the field's colour is the only saturated thing.
+   (Held by `data/style.json`: no unlit surface passes the cap; the Shapes' colours, the
+   telegraph's red and flame are the only things that may.)
 
 ## 2. Palette
 
@@ -253,8 +263,9 @@ Checks: `godot --headless --path . -s res://game/tests/check_beasts.gd` and
 The owner chose **cel-shaded stylized high detail** (Zelda, Genshin): clean shapes, light in
 bands, a tinted shadow side, bright colour, and the ink outlines kept. The game applies it
 in `World.toonify`: every standard material on people, beasts, weapons and places becomes a
-banded toon material that keeps its colour, texture and emission (`data/rules.json`, `art`:
-`cel`, `bands`, `shadowTint`, `outlines`). The kits made here are the first pass at the
+banded toon material of its class, its colour brought onto the palette's ramps
+(`data/style.json`, `materials` and `shading`; until 2026-11-10 this was `data/rules.json`,
+`art`, and the material kept whatever colour it came with). The kits made here are the first pass at the
 shapes; the next passes are higher detail on the same rigs (cloth, faces for creation),
 PBR-free, built for the bands.
 

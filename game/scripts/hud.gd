@@ -3,12 +3,12 @@
 class_name Hud
 extends CanvasLayer
 
-const FG := Style.FG
-const DIM := Style.DIM
-const ACCENT := Style.GOLD
-const RED := Style.BLOOD
-const BLUE := Style.WILL
-const GOLD := Style.GOLD
+static var FG: Color = Style.FG
+static var DIM: Color = Style.DIM
+static var ACCENT: Color = Style.GOLD
+static var RED: Color = Style.BLOOD
+static var BLUE: Color = Style.WILL
+static var GOLD: Color = Style.GOLD
 
 const SLOT_W := 72.0
 const SLOT_H := 62.0
@@ -484,11 +484,11 @@ func show_screen(title: String, subtitle: String, body: String, buttons: Array, 
 	screen.visible = true
 	play_ui.visible = false
 	_veil.modulate.a = 0.0
-	screen.create_tween().tween_property(_veil, "modulate:a", 1.0, 0.4)
+	screen.create_tween().tween_property(_veil, "modulate:a", 1.0, Style.t("arrive"))
 	for i in items.size():
 		var it: CanvasItem = items[i]
 		it.modulate.a = 0.0
-		it.create_tween().tween_property(it, "modulate:a", 1.0, 0.4).set_delay(0.06 * i).set_trans(Tween.TRANS_SINE)
+		Style.ease_ui(it.create_tween().tween_property(it, "modulate:a", 1.0, Style.t("arrive")).set_delay(Style.t("stagger") * i))
 	if first:
 		first.call_deferred("grab_focus")
 
@@ -528,7 +528,7 @@ func _toast(seconds: float) -> void:
 	_toast_until = Time.get_ticks_msec() / 1000.0 + seconds
 	if not prompt.visible and prompt.is_inside_tree():
 		prompt.modulate.a = 0.0
-		prompt.create_tween().tween_property(prompt, "modulate:a", 1.0, 0.25)
+		prompt.create_tween().tween_property(prompt, "modulate:a", 1.0, Style.t("quick"))
 	prompt.visible = true
 
 func update_play(f: Fight, timer_text: String, score_text: String, show_target: bool) -> void:

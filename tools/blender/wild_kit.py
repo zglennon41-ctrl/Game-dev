@@ -32,6 +32,9 @@ import bpy
 import bmesh
 from mathutils import Euler, Matrix, Vector
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import style  # noqa: E402  (the game's one style: data/style.json, docs/style.md)
+
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 OUT = os.path.join(ROOT, "game", "assets", "wild")
 
@@ -61,6 +64,7 @@ def material(name, color, rough=0.8, emission=None, strength=0.0):
     m = bpy.data.materials.get(name) or bpy.data.materials.new(name)
     m.use_nodes = True
     bsdf = m.node_tree.nodes.get("Principled BSDF")
+    color = style.conform(name, color)      # on the ramps of what its name says it is
     bsdf.inputs["Base Color"].default_value = color
     bsdf.inputs["Roughness"].default_value = rough
     if emission:

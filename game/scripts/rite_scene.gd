@@ -226,7 +226,7 @@ func _burst_form() -> void:
 	_form_node.global_position = World.BOWL + Vector3(0, 1.5, 0)
 	_form_node.scale = Vector3.ONE * 0.05
 	var tw := _form_node.create_tween()
-	tw.tween_property(_form_node, "scale", Vector3.ONE * 2.6, 0.9).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	Style.ease_settle(tw.tween_property(_form_node, "scale", Vector3.ONE * 2.6, Style.t("ceremony")))
 	world.light_pillar(0.0, col)
 	world.flash_screen(col, 1.0)
 	world._ring_wave(World.BOWL, col, 8.0)
@@ -256,7 +256,7 @@ func _named(n: String) -> void:
 	var g := gn.to_dict()
 	# It comes down to its partner, small, and stays.
 	var tw := _form_node.create_tween()
-	tw.tween_property(_form_node, "scale", Vector3.ONE, 0.8).set_trans(Tween.TRANS_SINE)
+	Style.ease_ui(tw.tween_property(_form_node, "scale", Vector3.ONE, Style.t("ceremony")))
 	world.set_form(g, _form_node)
 	world.genius_goal = Vector3.INF
 	world.genius_visible = true
