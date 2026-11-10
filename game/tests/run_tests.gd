@@ -66,6 +66,7 @@ func _run() -> void:
 	test_progression()
 	test_ages()
 	test_kind()
+	test_homes_hand()
 	test_blood_marks()
 	test_life_features()
 	test_bots()
@@ -2246,3 +2247,74 @@ func test_kind() -> void:
 		if Vector3(oc.r - worn.r, oc.g - worn.g, oc.b - worn.b).length() + 0.0001 < Vector3(got.r - worn.r, got.g - worn.g, got.b - worn.b).length():
 			nearest = false
 	check(nearest, "in a new body it wears the coat nearest the one it wore")
+
+## The home's hand, and the cohort's genii (owner, 2026-11-10: full variety, logically sound,
+## capturing the diversity of humanity): a genius wears what its partner's home puts on its
+## genii, and every classmate has a genius of their own, read by the hero's rules.
+func test_homes_hand() -> void:
+	var missing: Array = []
+	for home in Data.bodies:
+		var t: Dictionary = Data.bodies[home].get("dress", {}).get("trapping", {})
+		if String(t.get("name", "")) == "" or String(t.get("text", "")) == "" or not ResourceLoader.exists(GeniusBody.TRAP_DIR % home):
+			missing.append(home)
+	check(Data.bodies.size() == 13 and missing.is_empty(), "each of the thirteen homes has a piece it puts on its genii (%s)" % ", ".join(missing))
+	var wolf := { "form": "field-wolf", "silhouette": "beast-runner", "expression": "beast", "features": ["fangs"], "instar": 3, "look": GeniusLook.born(7), "home": "edo" }
+	var b := GeniusBody.build(wolf, Color.ORANGE, 3)
+	add_child(b)
+	check(b.trapping == "edo" and b.find_child("Trapping", true, false) != null and b.find_child("TrappingBand", true, false) != null, "a wolf raised in Edo wears Edo's cord, on a band at its neck")
+	var worn: MeshInstance3D = b.find_child("Trapping", true, false).find_children("*", "MeshInstance3D", true, false)[0]
+	var c0 := (worn.get_surface_override_material(0) as StandardMaterial3D).albedo_color
+	var wolf2 := wolf.duplicate(true)
+	wolf2["home"] = "khemet"
+	var b2 := GeniusBody.build(wolf2, Color.ORANGE, 3)
+	add_child(b2)
+	var worn2: MeshInstance3D = b2.find_child("Trapping", true, false).find_children("*", "MeshInstance3D", true, false)[0]
+	check(b2.trapping == "khemet" and not (worn2.get_surface_override_material(0) as StandardMaterial3D).albedo_color.is_equal_approx(c0), "one raised in Khemet wears Khemet's, in Khemet's colours")
+	var off := wolf.duplicate(true)
+	off["look"]["trapping"] = false
+	var b3 := GeniusBody.build(off, Color.ORANGE, 3)
+	add_child(b3)
+	check(b3.trapping == "" and b3.find_child("Trapping", true, false) == null, "its partner may take it off")
+	var kept := wolf.duplicate(true)
+	kept["look"]["keepsake"] = "collar"
+	var b4 := GeniusBody.build(kept, Color.ORANGE, 3)
+	add_child(b4)
+	check(b4.keepsake == "collar" and b4.trapping == "edo", "a keepsake and the home's piece are both worn, each in its own place")
+	var none := GeniusBody.build({ "form": "field-wolf", "silhouette": "beast-runner", "expression": "beast", "features": [], "instar": 1 }, Color.ORANGE, 1)
+	add_child(none)
+	check(none.trapping == "", "a genius with no partner's home wears nothing of one")
+	for x in [b, b2, b3, b4, none]:
+		x.queue_free()
+	var h := Fight.default_hero()
+	h["city"] = "timbuktu"
+	check(Genius.for_hero(h).origin.get("city", "") == "timbuktu", "a genius knows where its partner is from")
+	# the cohort's genii
+	var a := Academy.new()
+	a.hero = Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
+	a.cohort = Academy.make_cohort(42, a.hero)
+	a.progress = { "seed": 42, "done": ["hold"], "day": 2 }
+	check(a.classmate_genius(a.cohort[0]).is_empty() and a.classmate_partner(a.cohort[0]).is_empty(), "before the rite no classmate has a genius")
+	a.progress["done"].append("rite")
+	var kinds := {}
+	var expressions := {}
+	var whole := true
+	for c in a.cohort:
+		var g := a.classmate_genius(c)
+		whole = whole and not g.is_empty() and Genius.form_of(String(g["form"])).size() > 0 and String(g["home"]) == String(c["city"]) and int(g["instar"]) == 1 and not (g["look"] as Dictionary).is_empty()
+		kinds[g.get("form", "")] = true
+		expressions[g.get("expression", "")] = true
+	check(whole, "after it, each of the twelve has one, a First Form of a real kind, with a look of its own and its partner's home")
+	check(kinds.size() >= 6 and expressions.size() >= 3, "and the cohort's genii are of many kinds (%d kinds, %d Expressions)" % [kinds.size(), expressions.size()])
+	check(str(a.classmate_genius(a.cohort[3])) == str(a.classmate_genius(a.cohort[3])), "a classmate's genius is the same every time it is asked for")
+	var seeds := {}
+	for t in Data.academy["cohort"]["temperaments"]:
+		seeds[String(t.get("seed", ""))] = true
+	check(seeds.size() == Data.academy["cohort"]["temperaments"].size() and not seeds.has(""), "every temperament wants something different beside it")
+	var w := World.new()
+	add_child(w)
+	w.set_place("cut")
+	var c5: Dictionary = a.cohort[5]
+	var fig := w.add_figure(c5["body"], Vector2(2, 2), 0.0, c5["name"], "", c5["weapon"], Color(0, 0, 0, 0), c5.get("look", {}), a.classmate_partner(c5))
+	check((fig["node"] as Node3D).find_child("TheirGenius", false, false) is GeniusBody, "a classmate's genius stands by them")
+	a.free()
+	w.queue_free()

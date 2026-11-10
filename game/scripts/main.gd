@@ -492,11 +492,24 @@ func _lineage(what: String) -> void:
 		return {}
 	var stand: Array = []      # [info, label]
 	var names := ["First Form", "Second Form", "Third Form", "Fourth Form", "Fifth Form", "Apex"]
-	if what == "molt":
+	var homes_row: Array = []
+	if what.begins_with("homes"):
+		# --lineage=homes:0 (or :1): a grown genius of one kind beside a partner from each home,
+		# wearing what that home puts on its genii
+		var all_homes: Array = Data.bodies.keys()
+		var half := int(what.get_slice(":", 1)) if what.contains(":") else 0
+		homes_row = all_homes.slice(0, 7) if half == 0 else all_homes.slice(7)
+		if what.contains(":") and all_homes.has(what.get_slice(":", 1)):
+			homes_row = Array(what.get_slice(":", 1).split(","))      # --lineage=homes:edo, one home close
+		var hf: Dictionary = by_id.call("field-wolf")
+		for hid in homes_row:
+			stand.append([{ "form": hf["id"], "silhouette": hf["silhouette"], "expression": hf["expression"], "features": hf["features"], "instar": 3, "look": GeniusLook.born(4711 + String(hid).hash() % 977), "ready": 0.0, "home": hid },
+				"%s\n%s" % [String(hid).to_upper(), String(Data.bodies[hid]["dress"].get("trapping", {}).get("name", ""))]])
+	elif what == "molt":
 		var f: Dictionary = by_id.call("field-wolf")
 		for st in [[0.0, "THE DAY OF THE RITE"], [0.5, "HALF THE DAYS LIVED\nit has grown"], [0.85, "NEAR\nthe seams show"], [1.0, "THE READING IS DUE\nit molts"]]:
 			stand.append([{ "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": f["features"], "instar": 1, "look": look, "ready": st[0] }, String(st[1])])
-	else:
+	elif homes_row.is_empty():
 		# by default one kind through all its ages: a wolf, pup to Apex (the rules would read it into
 		# other forms on the way; this row is to see the ages)
 		var ids: Array = ["field-wolf", "field-wolf", "field-wolf", "field-wolf", "field-wolf", "field-wolf"] if what in ["true", "", "life"] else Array(what.split(","))
@@ -530,11 +543,14 @@ func _lineage(what: String) -> void:
 		b.rotation.y = 0.55
 		if what != "molt":
 			# its partner beside it, wearing the echo of that instar
-			var partner_hero := { "shape": "anchor", "blood": "", "city": "cahokia", "body": "cahokia-f", "genius": sdef[0] }
-			var pn: Node3D = load(world._person_model("cahokia-f")).instantiate()
+			var phome := String(sdef[0].get("home", "cahokia"))
+			var pbody := "%s-%s" % [phome, "f" if k % 2 == 0 else "m"]
+			var partner_hero := { "shape": "anchor", "blood": "", "city": phome, "body": pbody, "genius": sdef[0] }
+			var pn: Node3D = load(world._person_model(pbody)).instantiate()
 			world.add_child(pn)
 			world.toonify(pn)
-			world.dress(pn, { "headgear": false, "cape": true, "cape_color": "plain", "hair": "braid", "hair_color": "black", "skin": "tan" }, partner_hero)
+			var plook := { "headgear": not homes_row.is_empty(), "cape": true, "cape_color": "plain", "hair": "braid", "hair_color": "black", "skin": Creation.skin_of(phome, 5 + k) }
+			world.dress(pn, plook, partner_hero)
 			pn.position = Vector3(spot.x + x - 0.75 - float(Data.genius()["size"][str(int(sdef[0]["instar"]))]) * 0.3, 0, spot.y - 0.5)
 			pn.rotation.y = 0.35
 			var pa: AnimationPlayer = pn.find_child("AnimationPlayer", true, false)

@@ -442,6 +442,13 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   First consequence, built: a genius may always keep its kind at a Reading and grow (a pup
   into a wolf; a hawk into a griffin, the elder of its kind), and its coat goes with it
   into a new body.
+- **Full variety, logically sound, the diversity of humanity** (owner, 2026-11-10): "Build
+  the most complex and full variety version that is logically sound and clever while
+  capturing the diversity of humanity." Variety must come from somewhere a player can name:
+  the partner's home (kinds native to each of the thirteen homes, and a piece each home
+  puts on its genii), Seed, blood and Shape, its age, its born look, the partner's choices,
+  how the partner plays (it fights as what it is; Free follows the partner's play), and
+  what it has met. Every classmate has a genius of their own. `docs/genius-signature.md`.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.

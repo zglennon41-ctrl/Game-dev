@@ -398,7 +398,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 			var c: Dictionary = here[i]
 			var at := Vector2(spots[i][0], spots[i][1])
 			var fig := world.add_figure(c["body"], at, (Vector2.ZERO - at).angle() + randf_range(-0.6, 0.6), c["name"],
-				"%s · %s" % [c["blood_name"], String(c["shape"]).capitalize()], c["weapon"], Color(0, 0, 0, 0), c.get("look", {}))
+				"%s · %s" % [c["blood_name"], String(c["shape"]).capitalize()], c["weapon"], Color(0, 0, 0, 0), c.get("look", {}), classmate_partner(c))
 			_people.append({ "kind": "classmate", "id": c["id"], "name": c["name"], "pos": at, "c": c })
 	fight.obstacles = world.obstacles
 	hud.hide_screen()
@@ -2262,8 +2262,35 @@ func _ensure_poster_here() -> void:
 	var at := fight.p_pos + Vector2.from_angle(fight.p_facing) * 2.6
 	var spec: Dictionary = place_spec(progress["place"])
 	at = Vector2(clampf(at.x, -float(spec["size"][0]) / 2.0 + 1.5, float(spec["size"][0]) / 2.0 - 1.5), clampf(at.y, -float(spec["size"][1]) / 2.0 + 1.5, float(spec["size"][1]) / 2.0 - 1.5))
-	world.add_figure(c["body"], at, (fight.p_pos - at).angle(), c["name"], "%s · %s" % [c.get("blood_name", ""), String(c.get("shape", "")).capitalize()], c.get("weapon", ""), Color(0, 0, 0, 0), c.get("look", {}))
+	world.add_figure(c["body"], at, (fight.p_pos - at).angle(), c["name"], "%s · %s" % [c.get("blood_name", ""), String(c.get("shape", "")).capitalize()], c.get("weapon", ""), Color(0, 0, 0, 0), c.get("look", {}), classmate_partner(c))
 	_people.append({ "kind": "classmate", "id": c["id"], "name": c["name"], "pos": at, "c": c })
+
+## A classmate's genius: every one of the twelve has one after the rite, read by the same
+## rules as the hero's from that classmate's own Seed (their temperament's, data/academy.json),
+## blood, Shape and name. It is the same age as the hero's, and grows as the term does.
+var _cohort_genii: Dictionary = {}
+func classmate_genius(c: Dictionary) -> Dictionary:
+	if not progress.get("done", []).has("rite") or not c.has("id"):
+		return {}
+	var cid := String(c["id"])
+	if not _cohort_genii.has(cid):
+		var seed_id := ""
+		for t in Data.academy["cohort"]["temperaments"]:
+			if t["id"] == c.get("temperament", ""):
+				seed_id = String(t.get("seed", ""))
+		var like := { "seed": seed_id, "blood": c.get("blood", ""), "shape": c.get("shape", "anchor"), "city": c.get("city", ""), "name": c.get("name", ""), "spark": absi(String(c.get("name", cid)).hash()) }
+		var ff := Rite.first_form(like, String(like["shape"]), int(progress.get("seed", 1)) + absi(cid.hash()) % 997)
+		_cohort_genii[cid] = { "form": ff["form"], "silhouette": ff["silhouette"], "expression": ff["expression"], "features": ff["features"],
+			"seedMark": ff["seedMark"], "look": ff["look"], "home": like["city"], "name": ff["name"] }
+	var info: Dictionary = (_cohort_genii[cid] as Dictionary).duplicate()
+	info["instar"] = clampi(genius.instar if genius and genius.is_born() else 1, 1, 2)
+	info["ready"] = genius.readiness() if genius and genius.is_born() else 0.0
+	return info
+
+## What a classmate is beyond their look, for the world to draw: their echo and their genius.
+func classmate_partner(c: Dictionary) -> Dictionary:
+	var g := classmate_genius(c)
+	return {} if g.is_empty() else { "shape": c.get("shape", "anchor"), "blood": c.get("blood", ""), "city": c.get("city", ""), "genius": g }
 
 func _classmate(id: String) -> Dictionary:
 	for c in cohort:

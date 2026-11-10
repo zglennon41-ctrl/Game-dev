@@ -14,6 +14,7 @@ extends Node3D
 const BODY_DIR := "res://game/assets/genius/bodies/%s.glb"
 const PART_DIR := "res://game/assets/genius/parts/%s.glb"
 const KEEP_DIR := "res://game/assets/genius/keepsakes/%s.glb"
+const TRAP_DIR := "res://game/assets/genius/trappings/%s.glb"
 
 const SILHOUETTE := """
 shader_type spatial;
@@ -180,6 +181,7 @@ func _assemble(instar: int) -> void:
 		else:
 			_placeholder_part(f, slot, socks)
 	_wear_keepsake()
+	_wear_trapping()
 	# Its age shapes it: the young of its kind at the First Form, great at the Fifth.
 	age = String(prog.get("ages", {}).get(str(clampi(instar, 1, 6)), {}).get("id", "grown"))
 	_apply_age(cfg.get("ages", {}).get(kind, {}).get(age, {}))
@@ -289,6 +291,67 @@ func _wear_keepsake() -> void:
 			_adopt_art(art)
 			keepsake = String(k["id"])
 			return
+
+## The home's hand: what its partner's home puts on a genius raised there (data/bodies.json,
+## dress.trapping), in the home's own colours, hung at the collar or the throat beside any
+## keepsake. A partner may take it off (look.trapping false).
+var trapping := ""
+func _wear_trapping() -> void:
+	var home := String(info.get("home", (info.get("origin", {}) as Dictionary).get("city", "") if info.get("origin", {}) is Dictionary else ""))
+	var born: Dictionary = info.get("look", {}) if info.get("look", {}) is Dictionary else {}
+	if home == "" or not born.get("trapping", true) or not ResourceLoader.exists(TRAP_DIR % home):
+		return
+	var dress: Dictionary = Data.bodies.get(home, {}).get("dress", {})
+	var cols: Dictionary = dress.get("colors", {})
+	var lin := func(key: String, fallback: Color) -> Color:
+		if not cols.has(key):
+			return fallback
+		var c: Array = cols[key]
+		return Color(c[0], c[1], c[2]).linear_to_srgb()
+	var main: Color = lin.call("main", Color(0.4, 0.4, 0.45))
+	var second: Color = lin.call("second", main.lightened(0.4))
+	var third := second
+	for k in cols:
+		if k not in ["main", "second"]:
+			third = lin.call(String(k), second)
+			if k == "metal":
+				break
+	var paint := func(n: Node3D) -> void:
+		for m in n.find_children("*", "MeshInstance3D", true, false):
+			var mi := m as MeshInstance3D
+			for i in mi.mesh.get_surface_count():
+				var nm := String(mi.mesh.surface_get_material(i).resource_name) if mi.mesh.surface_get_material(i) else ""
+				var c: Color = main if nm == "home_main" else (second if nm == "home_second" else third)
+				var sm := StandardMaterial3D.new()
+				sm.albedo_color = c
+				sm.roughness = 0.5 if nm == "home_metal" else 0.85
+				sm.metallic = 0.5 if nm == "home_metal" and cols.has("metal") else 0.0
+				mi.set_surface_override_material(i, sm)
+	# a band first, where the body has a neck to put one on; then the piece on a free place
+	var taken := ""
+	for sn in ["socket_collar", "socket_keepsake", "socket_throat", "socket_body"]:
+		if not sockets.has(sn):
+			continue
+		var holds_keepsake := false
+		for ch in _socket(sn).get_children():
+			holds_keepsake = holds_keepsake or String(ch.name) == "Keepsake"
+		if holds_keepsake:
+			continue
+		if sn == "socket_collar" and ResourceLoader.exists(TRAP_DIR % "band"):
+			var b: Node3D = load(TRAP_DIR % "band").instantiate()
+			b.name = "TrappingBand"
+			_socket(sn).add_child(b)
+			paint.call(b)
+		var art: Node3D = load(TRAP_DIR % home).instantiate()
+		art.name = "Trapping"
+		_socket(sn).add_child(art)
+		if sn == "socket_collar":
+			art.position = Vector3(0, -0.105, 0)     # it hangs from the band's lowest point
+		paint.call(art)
+		taken = sn
+		break
+	if taken != "":
+		trapping = home
 
 ## An art body's sockets: nodes named socket_<name>, or, on a rigged body, bones of that name
 ## (an empty parented to a bone comes through the importer as a bone), each given a node to

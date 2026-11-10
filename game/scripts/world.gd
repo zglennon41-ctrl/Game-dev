@@ -2356,6 +2356,16 @@ func show_figure(on: bool) -> void:
 		_player.visible = on
 	genius_visible = on
 
+## Someone else's genius, standing by them: built as the hero's is, at their heel if it walks
+## and at their shoulder if it does not.
+func _figure_genius(person: Node3D, info: Dictionary, col: Color) -> GeniusBody:
+	var gb := make_form(info, col.lightened(0.15)) as GeniusBody
+	gb.name = "TheirGenius"
+	person.add_child(gb)
+	gb.position = Vector3(0.85, 0.0, -0.2) if gb.walks() else Vector3(0.7, 1.3, 0.1)
+	gb.rotation.y = 0.35
+	return gb
+
 ## A place of the Academy: a floor, walls of the fortress with an arch at every door, torches,
 ## and the props that say what the place is for. Evening at the Thaw: a deep blue sky.
 func _build_academy_place(spec: Dictionary) -> void:
@@ -3478,11 +3488,15 @@ func set_marker(at: Variant) -> void:
 	add_child(_marker)
 
 ## Someone standing in the place: a body, a weapon, their name and what they are over the head.
-func add_figure(body: String, at: Vector2, facing: float, title: String, sub: String, weapon := "", tint := Color(0, 0, 0, 0), look := {}) -> Dictionary:
+## `partner` is what a person is beyond their look, where they have a genius of their own: their
+## Shape, blood, city and genius, so they wear its echo and it stands by them.
+func add_figure(body: String, at: Vector2, facing: float, title: String, sub: String, weapon := "", tint := Color(0, 0, 0, 0), look := {}, partner := {}) -> Dictionary:
 	var n: Node3D = load(_person_model(body)).instantiate()
 	_place_root.add_child(n)
 	toonify(n)
-	dress(n, look if not look.is_empty() else look_for(title))
+	dress(n, look if not look.is_empty() else look_for(title), partner)
+	if partner.get("genius", {}) is Dictionary and not partner.get("genius", {}).is_empty():
+		_figure_genius(n, partner["genius"], _shape_color(String(partner.get("shape", "anchor"))))
 	var skel: Skeleton3D = n.find_child("Skeleton3D", true, false)
 	if weapon != "":
 		var w: Dictionary = Data.by_id(Data.weapons, weapon)

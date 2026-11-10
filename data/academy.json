@@ -1863,7 +1863,7 @@
     },
     "temperaments": [
       {
-        "id": "earnest",
+        "id": "earnest", "seed": "stands-between",
         "lines": {
           "greet": "I'm {my_name}. {my_city}, {my_blood}. I think I'm a {my_shape}, but the rite will say. I've read everything the Library lets first-years read. Twice.",
           "after:hold": "You did the Millstone drill already? What did he do on the fifth bite? I want to be ready.",
@@ -1875,7 +1875,7 @@
         }
       },
       {
-        "id": "wry",
+        "id": "wry", "seed": "with-a-voice",
         "lines": {
           "greet": "{my_name}. Pleasure. Don't tell anyone, but I woke up in a privy. The field does not choose its moments.",
           "after:hold": "You've got the yard look. Sort of a limp, but proud of it.",
@@ -1887,7 +1887,7 @@
         }
       },
       {
-        "id": "proud",
+        "id": "proud", "seed": "watches-from-above",
         "lines": {
           "greet": "{my_name} of {my_city}. My family has sent a child here every generation for three hundred years. You're the recruit Varga brought in herself? Hm.",
           "after:hold": "So you held. Everyone holds against a genius that's being kind to them.",
@@ -1899,7 +1899,7 @@
         }
       },
       {
-        "id": "scared",
+        "id": "scared", "seed": "i-can-hold",
         "lines": {
           "greet": "Oh. Hello. I'm {my_name}. Sorry. Everyone here already seems to know what they are. I'm {my_blood}, and that's about all I'm sure of.",
           "after:hold": "Does it hurt? The yard? Varga said the wards stop it hurting, but she says a lot of things kindly.",
@@ -1911,7 +1911,7 @@
         }
       },
       {
-        "id": "kind",
+        "id": "kind", "seed": "remembers",
         "lines": {
           "greet": "You're new off the line too? I'm {my_name}. If you need anything, the {my_shape} bunks are by the east wall and I don't sleep much.",
           "after:hold": "You look done in. There's bread in the dormitory; I saved you some.",
@@ -1923,7 +1923,7 @@
         }
       },
       {
-        "id": "sharp",
+        "id": "sharp", "seed": "owes-me",
         "lines": {
           "greet": "{my_name}. You're a {your_shape}, or you will be. It's in how you stand. Don't look so surprised; reading people is the first thing a field does.",
           "after:hold": "Your guard came up late on the left. Twice. You're welcome.",
@@ -1935,7 +1935,7 @@
         }
       },
       {
-        "id": "quiet",
+        "id": "quiet", "seed": "never-alive",
         "lines": {
           "greet": "...{my_name}.",
           "after:hold": "Good hold.",
@@ -1947,7 +1947,7 @@
         }
       },
       {
-        "id": "reckless",
+        "id": "reckless", "seed": "that-burns",
         "lines": {
           "greet": "{my_name}! {my_city}! Want to spar? Not now, the wards in the quad are thin. Later. Definitely later.",
           "after:hold": "I asked Bask if I could take Millstone without the guard. He said no. He said it in a way I've decided means yes.",

@@ -199,6 +199,13 @@ func _look_section(v: Control, g: Genius) -> void:
 				var m: Dictionary = g.look.get("marks", {}).duplicate()
 				m[r] = not bool(shown[r])
 				_set_look("marks", m))
+	# the home's hand: what its partner's home put on it, worn or put away
+	var home_id := String(g.origin.get("city", ""))
+	var trap: Dictionary = Data.bodies.get(home_id, {}).get("dress", {}).get("trapping", {})
+	if not trap.is_empty():
+		var trow := _choice_row(v, "From %s" % home_id.capitalize())
+		var trap_on := bool(g.look.get("trapping", true))
+		_choice(trow, String(trap["name"]).capitalize(), trap_on, func(): _set_look("trapping", not trap_on))
 	var can: Array = GeniusLook.keepsakes_for(_card.body.sockets.keys()) if _card and _card.body else Data.genius_looks()["keepsakes"]
 	var krow := _choice_row(v, "Keepsake")
 	var worn := String(g.look.get("keepsake", ""))

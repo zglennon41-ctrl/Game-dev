@@ -9,6 +9,52 @@ it logical, where it stands in the game today, and what is left. The rules are i
 `docs/systems-10-genius-shades.md`; how progress shows is in `docs/genius-progression.md`;
 the forms are in `docs/genius-forms.md`. This file is the list to work down.
 
+> "Build the most complex and full variety version that is logically sound and clever
+> while capturing the diversity of humanity." (owner, 2026-11-10)
+
+So variety has to come from somewhere a player can name. A genius is the product of these,
+each one a reason and each one seen:
+
+| It comes from | What it sets | How many |
+|---|---|---|
+| The partner's home | Which kinds are native to them; what the home puts on it | 13 homes |
+| The partner's Seed, blood and Shape | Its First Form | the lattice of forms |
+| Its age | Its body, its name, its presence | 6 |
+| The partner's Seed, Pattern, spark and name | Its coat, markings, build, light | thousands |
+| The partner's choices | Coat of three, markings, keepsake, the home's piece on or off | |
+| How the partner plays | Every Reading after the first; what it adapts; how it fights when Free | open-ended |
+| What it has met | Grafts, shadows | open-ended |
+
+## The home's hand
+
+Where a character grew up shows on their genius twice.
+
+- **The kinds of that home.** Each of the thirteen homes has kinds of its own, the young of
+  something from its land, craft or working life, more likely to be offered at the rite to
+  a child of that home. (Being built; `docs/genius-forms.md`, "The kinds of the thirteen
+  homes".)
+- **What the home puts on it** (built). Each home dresses the genii raised there with one
+  small piece from its own dress, in its own colours (`data/bodies.json`, `dress.trapping`;
+  `tools/blender/genius_homes.py`): the Academy's brass tag, a marshal's star, a river sash,
+  a docker's scarf, a works lens, a bronze disc, a growers' collar, a jewel on blue cloth,
+  a string of saffron beads, a jade ring, a tuft of fur on an ochre band, a satchel for one
+  page, a knotted cord. It hangs at the collar or the throat beside any keepsake, and the
+  partner may take it off on the genius's page. `godot --path . -- --lineage=homes:0` (and
+  `:1`, or `homes:edo`) stands a partner from each home beside a genius wearing it.
+
+The pieces are drawn from each home's dress as already written, from tools, cloth and
+ornament. None is a sacred object and none stands for a people's faith.
+
+## The cohort's genii
+
+Every classmate has a genius after the rite (built), read by the hero's own rules from that
+classmate's blood, Shape and name and from a Seed their temperament gives them (the scared
+want something to hold; the proud something that watches from above; `data/academy.json`,
+`cohort.temperaments`). It stands at their heel or their shoulder wherever they are, wears
+their home's piece, is the same age as the hero's and grows with it, and they wear its echo.
+Twelve classmates from twelve cities with twelve different things beside them is the
+plainest proof that no two are alike.
+
 ## The three tests
 
 Every part of the genius must pass all three. A part that fails one is not finished.
@@ -80,7 +126,7 @@ State: **built** (in the game and tested), **part** (works, with a named gap), *
 |---|---|---|---|
 | The echo on the body | Cloak, eyes, field, a piece of what it is | built | Markings, footfall and the shared mantle are proposed |
 | The echo in the fight | Resonance: its instars give the Pattern verses | part | Counted in the rules; the player is not told when the genius's growth lengthens their chain |
-| The echo in the hall | Others should know a partner by their genius | plan | Classmates' genii exist only as words |
+| The echo in the hall | Others should know a partner by their genius | built | Classmates have genii and wear their echo; their genii do not yet fight beside them on the line |
 
 ### After
 
@@ -98,9 +144,8 @@ In order of how much each closes the gap between the design and what a player fe
    is where "a unique expression of play" is won or lost.
 2. **The Reading as a ceremony** (six beats; `docs/genius-progression.md`). The Reading is
    the moment the whole system exists for, and it is a flash.
-3. **Classmates have genii you can see.** Twelve of them, each read from that classmate's
-   Shape, blood and temperament by the same rules, walking the quad. Nothing sells "no two
-   alike" like a yard full of them.
+3. *(Built: classmates have genii you can see. See "The cohort's genii".)* Next: their
+   genii fight beside them on the line.
 4. **The page tells its life**: the lineage, and where it is leaning.
 5. **What shows between Readings**: adaptations, shadows, grafts, falls, Resonance.
 6. **Bodies**: a young body for each kind with no rig, and bodies for the forms past the

@@ -1,5 +1,5 @@
 {
-  "comment": "The bodies of the thirteen homes (docs/bodies-plan.md): a carving brief for each face, the face parameters the body kit reads for the masculine and feminine body (multipliers on the base carving: brow ridge, nose length and width, lips, ears, jaw width, head length, cheekbones), and the skin palette offered at creation (tone ids from data/creation.json, look.skinTones). Every sentence is the owner's to rewrite. dress: the home's outfit as pieces the body kit builds as shells on the body's own rings (tunic, coat, robe, kilt, cuirass, apron, hakama, greaves, boots, belt, sash, collar) in named colours, and a headgear piece hung from the head (cap, hat, turban, furhat), which the look's headgear toggle shows or hides. culture: a line on the outfit, the owner's to rewrite. pieces may carry trim (a band colour at hem, cuff or collar), cuffs, stripes (alternate bands), wide, count; types: tunic, vest, coat, robe, kaftan, kilt, wrapskirt, cuirass, apron, hakama, greaves, boots, sandals, belt, sash, obi, collar, scarf, wrap, gloves, buttons, badge, sashknot, toolloop, pauldrons, pteruges. headgear: cap (peak, goggles), hat (trim band), turban (trim, jewel), furhat, scholarcap, hood, headband, helm (crest), with goggles on any. form is the human each home's people are built from (tools/blender/human.py, MakeHuman's CC0 base and targets): ancestry is the mix of MakeHuman's three ancestry forms (they sum to one), details are MakeHuman's detail targets by short name with a value from -1 to 1 (nose-hump 0.4 is nose-hump-incr at 0.4; a negative value is the opposite target; a name without l- or r- is both sides; head-oval and its like take 0 to 1), m and f add to or override the details for one sex. The brief is the sentence the details were written from.",
+  "comment": "The bodies of the thirteen homes (docs/bodies-plan.md): a carving brief for each face, the face parameters the body kit reads for the masculine and feminine body (multipliers on the base carving: brow ridge, nose length and width, lips, ears, jaw width, head length, cheekbones), and the skin palette offered at creation (tone ids from data/creation.json, look.skinTones). Every sentence is the owner's to rewrite. dress: the home's outfit as pieces the body kit builds as shells on the body's own rings (tunic, coat, robe, kilt, cuirass, apron, hakama, greaves, boots, belt, sash, collar) in named colours, and a headgear piece hung from the head (cap, hat, turban, furhat), which the look's headgear toggle shows or hides. culture: a line on the outfit, the owner's to rewrite. pieces may carry trim (a band colour at hem, cuff or collar), cuffs, stripes (alternate bands), wide, count; types: tunic, vest, coat, robe, kaftan, kilt, wrapskirt, cuirass, apron, hakama, greaves, boots, sandals, belt, sash, obi, collar, scarf, wrap, gloves, buttons, badge, sashknot, toolloop, pauldrons, pteruges. headgear: cap (peak, goggles), hat (trim band), turban (trim, jewel), furhat, scholarcap, hood, headband, helm (crest), with goggles on any. form is the human each home's people are built from (tools/blender/human.py, MakeHuman's CC0 base and targets): ancestry is the mix of MakeHuman's three ancestry forms (they sum to one), details are MakeHuman's detail targets by short name with a value from -1 to 1 (nose-hump 0.4 is nose-hump-incr at 0.4; a negative value is the opposite target; a name without l- or r- is both sides; head-oval and its like take 0 to 1), m and f add to or override the details for one sex. The brief is the sentence the details were written from. dress.trapping: what the home puts on a genius raised there (game/assets/genius/trappings/<home>.glb, tools/blender/genius_homes.py), by name and in a sentence.",
   "homes": {
     "alexandria": {
       "name": "Alexandria",
@@ -60,7 +60,11 @@
             "color": "second",
             "cuffs": "main"
           }
-        ]
+        ],
+        "trapping": {
+          "name": "the Academy's brass tag",
+          "text": "A brass tag on a grey loop, the cohort's number stamped in it: the same on every genius the Academy has raised."
+        }
       }
     },
     "columbia": {
@@ -155,6 +159,10 @@
           "type": "hat",
           "color": "main",
           "trim": "second"
+        },
+        "trapping": {
+          "name": "a marshal's star",
+          "text": "A brass star on a blue rosette. In Columbia what stands beside you is sworn in with you."
         }
       }
     },
@@ -232,6 +240,10 @@
         "headgear": {
           "type": "cap",
           "color": "red"
+        },
+        "trapping": {
+          "name": "a river sash",
+          "text": "The pilots' woven sash in ochre and red, knotted and left long, so it can be seen from the far bank."
         }
       }
     },
@@ -316,6 +328,10 @@
           "trim": "leather",
           "peak": true,
           "goggles": true
+        },
+        "trapping": {
+          "name": "a docker's scarf",
+          "text": "A red scarf knotted at the throat against the fog."
         }
       }
     },
@@ -402,6 +418,10 @@
           "color": "leather",
           "trim": "metal",
           "goggles": true
+        },
+        "trapping": {
+          "name": "a works lens",
+          "text": "A lens from the engine-works on a leather tab. Everything in Colonia is looked at closely."
         }
       }
     },
@@ -488,6 +508,10 @@
           "color": "metal",
           "trim": "main",
           "crest": true
+        },
+        "trapping": {
+          "name": "a bronze disc",
+          "text": "A bronze disc on a red cord: what a child of the old walls is given, and gives."
         }
       }
     },
@@ -566,6 +590,10 @@
         "headgear": {
           "type": "headband",
           "color": "metal"
+        },
+        "trapping": {
+          "name": "a growers' collar",
+          "text": "A broad collar in bands of gold and green, as the growers of the black fields wear."
         }
       }
     },
@@ -637,6 +665,10 @@
           "color": "second",
           "trim": "main",
           "jewel": true
+        },
+        "trapping": {
+          "name": "a jewel on blue cloth",
+          "text": "A drop of gold on a fold of blue cloth, from the house of figures."
         }
       }
     },
@@ -702,6 +734,10 @@
         "headgear": {
           "type": "headband",
           "color": "main"
+        },
+        "trapping": {
+          "name": "a string of saffron beads",
+          "text": "Saffron beads from the steps, strung by hand, one larger than the rest."
         }
       }
     },
@@ -772,6 +808,10 @@
           "type": "scholarcap",
           "color": "main",
           "trim": "main"
+        },
+        "trapping": {
+          "name": "a jade ring",
+          "text": "A jade ring on a plum cord with a tassel, as a scholar hangs at the belt."
         }
       }
     },
@@ -852,6 +892,10 @@
           "type": "furhat",
           "color": "fur",
           "trim": "second"
+        },
+        "trapping": {
+          "name": "a tuft of fur on an ochre band",
+          "text": "Fur from the first winter under an ochre band: the steppe's way of saying this one rides with us."
         }
       }
     },
@@ -930,6 +974,10 @@
         "headgear": {
           "type": "cap",
           "color": "second"
+        },
+        "trapping": {
+          "name": "a satchel for one page",
+          "text": "A leather satchel no bigger than a hand on an indigo strap, to carry one page in."
         }
       }
     },
@@ -1000,7 +1048,11 @@
             "type": "sashknot",
             "color": "obi"
           }
-        ]
+        ],
+        "trapping": {
+          "name": "a knotted cord",
+          "text": "A cord knotted in two loops with two white tails, tied the way the sword schools tie a hip."
+        }
       }
     }
   }

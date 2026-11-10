@@ -63,7 +63,7 @@ func to_dict() -> Dictionary:
 
 static func for_hero(hero: Dictionary) -> Genius:
 	var g := Genius.from_dict(hero.get("genius", {}))
-	g.origin = { "seed": hero.get("seed", ""), "blood": hero.get("blood", ""), "shape": hero.get("shape", "") }
+	g.origin = { "seed": hero.get("seed", ""), "blood": hero.get("blood", ""), "shape": hero.get("shape", ""), "city": hero.get("city", "") }
 	if g.tally.get("intention") == null and hero.has("pattern"):
 		g.tally["intention"] = { "form": hero["pattern"]["form"], "terms": hero["pattern"]["terms"], "fires": 0 }
 	# A genius born before looks existed gets the one it would have been born with.
