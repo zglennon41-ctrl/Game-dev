@@ -176,7 +176,8 @@ def main():
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'genius-tree-page.html')) as f:
         page = f.read()
-    seen = ('Each picture is the form as the game draws it today, at the size of its age; tap one to look closer. '
+    seen = ('Each picture is the form as the game draws it today, brought up close; tap one to look closer. '
+            'The row under each base shows one life at its true sizes. '
             'Most forms still wear their base\'s body with the parts their features give them.') if cells else ''
     page = (page.replace('__NAV__', ''.join(nav)).replace('__BODY__', '\n'.join(out) + hybrids).replace('__SPRITES__', ''.join(css))
             .replace('__SEEN__', seen).replace('__TOTAL__', str(31 * len(bases))).replace('__NBASE__', str(len(bases))))
