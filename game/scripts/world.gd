@@ -1495,12 +1495,37 @@ func feedback(f: Fight, events: Array) -> void:
 			"stance-locked":
 				floater(P, "no stance this season (your Toll)", C_DIM, 40)
 			"genius-hunt":
-				_g_dart_at = _v3(f.w_pos, 1.0)
-				_g_dart_until = _clock + 0.28
-				impact(_v3(f.w_pos, 1.0), _g_tint, 0.6)
-				burst(_v3(f.w_pos, 1.0), _g_tint, 10, 4.0)
-				floater(W + Vector3(0.4, 0.4, 0), "%d" % int(e["damage"]), _g_tint.lightened(0.3), 46, 0.8)
-				_wolf_flash = maxf(_wolf_flash, 0.5)
+				# its own blow darts in; what it laid on the ground, or added to its partner's swing, only counts
+				var gm := String(e.get("move", "strike"))
+				if gm not in ["lay", "with", "double", "debt"]:
+					_g_dart_at = _v3(f.w_pos, 1.0)
+					_g_dart_until = _clock + 0.28
+					impact(_v3(f.w_pos, 1.0), _g_tint, 0.6 if gm == "strike" else 1.0)
+					burst(_v3(f.w_pos, 1.0), _g_tint, 10, 4.0)
+				floater(W + Vector3(0.4, 0.4, 0), "%d" % int(e["damage"]), _g_tint.lightened(0.3), 46 if gm != "lay" else 34, 0.8)
+				_wolf_flash = maxf(_wolf_flash, 0.5 if gm != "lay" else 0.2)
+			"genius-move":
+				_genius_move_shown(f, e, P, W)
+			"genius-great":
+				floater(W + Vector3(0, 1.0, 0), String(e["name"]).to_upper(), _g_tint.lightened(0.45), 64, 1.8)
+				flash_screen(_g_tint, 0.35)
+				_ring_wave(_v3(f.w_pos), _g_tint, 5.0)
+				burst(_v3(f.w_pos, 1.0), _g_tint.lightened(0.3), 60, 6.0)
+				impact(_v3(f.w_pos, 1.0), _g_tint, 2.0)
+				genius_react("parry")
+			"genius-called":
+				_g_dart_at = _v3(f.g_pos.lerp(f.w_pos, 0.4), 1.0)
+				_g_dart_until = _clock + 0.3
+				impact(_v3(f.g_pos, 1.0), _g_tint, 1.0)
+				floater(_v3(f.g_pos, 1.6), "IT TAKES THE BLOW", _g_tint.lightened(0.3), 48, 1.0)
+			"genius-ward":
+				_ring_wave(_v3(f.p_pos), _g_tint, 2.2)
+				floater(P, "TURNED", _g_tint.lightened(0.3), 52, 1.0)
+			"genius-hold":
+				_ring_wave(_v3(f.g_hold_at), _g_tint, float(f._order("hold")["hold"]["radius"]))
+			"free":
+				floater(_v3(f.g_pos, 1.9), "%s: %s" % [String(e["order"]).to_upper(), String(e["why"])], _g_tint.lightened(0.3), 40, 1.6)
+				genius_react("cue")
 			"genius-guard":
 				var mid := _v3(f.p_pos.lerp(f.w_pos, 0.35), 1.2)
 				_g_dart_at = mid
@@ -3779,13 +3804,115 @@ func clear_form() -> void:
 	_g_form_anim = null
 	_g_body = null
 
-## The First Form follows: fliers and fey and flames at the shoulder, walkers at the heel.
+## A move of the genius's, shown: its name over where it lands, and a mark of what it does.
+func _genius_move_shown(f: Fight, e: Dictionary, P: Vector3, W: Vector3) -> void:
+	var at := _v3(e.get("at", f.w_pos), 0.0)
+	var hi := _g_tint.lightened(0.35)
+	floater(at + Vector3(0, 1.7, 0), String(e["name"]).to_upper(), hi, 44, 1.2)
+	match String(e["move"]):
+		"hamstring":
+			burst(at + Vector3(0, 0.3, 0), hi, 18, 3.0)
+			_g_dart_at = at + Vector3(0, 0.3, 0)
+			_g_dart_until = _clock + 0.35
+		"stoop":
+			# from above, hard
+			_g_form_pos = at + Vector3(0, 4.5, 0)
+			_g_dart_at = at + Vector3(0, 0.8, 0)
+			_g_dart_until = _clock + 0.4
+			impact(at + Vector3(0, 1.0, 0), _g_tint, 1.6)
+			_ring_wave(at, _g_tint, 2.2)
+		"shot":
+			burst(_v3(e.get("from", f.g_pos), 1.0), hi, 8, 6.0)
+			impact(at + Vector3(0, 1.0, 0), _g_tint, 1.0)
+		"debt":
+			_ring_wave(at, Color(0.8, 0.25, 0.3), 1.4)
+			burst(at + Vector3(0, 1.8, 0), Color(0.9, 0.3, 0.35), 14, 2.0)
+		"debt-paid":
+			impact(at + Vector3(0, 1.0, 0), Color(0.9, 0.3, 0.35), 1.6)
+			_ring_wave(at, Color(0.9, 0.3, 0.35), 2.6)
+		"lay":
+			_ring_wave(at, _g_tint, float(e.get("radius", 2.6)))
+		"light":
+			_ring_wave(_v3(f.p_pos), Color(1.0, 0.9, 0.6), 4.0)
+			genius_react("stance")
+		"call":
+			_ring_wave(_v3(f.g_pos), hi, 1.6)
+			genius_react("cue")
+		"nip":
+			burst(at + Vector3(0, 0.4, 0), hi, 6, 2.0)
+
+var _g_hold_ring: MeshInstance3D = null
+var _g_zone_disc: MeshInstance3D = null
+var _g_lit_light: OmniLight3D = null
+
+## What the genius has put on the ground, drawn: a ring round the ground it holds, a pool
+## where it has laid itself down, and a light over its partner while the ground is lit.
+func _genius_ground(f: Fight) -> void:
+	var up := f.genius != null and not f.genius.fallen
+	var holding := up and f.g_order == "hold" and f.g_hold_at != Vector2.INF
+	if holding and _g_hold_ring == null:
+		_g_hold_ring = MeshInstance3D.new()
+		var tm := TorusMesh.new()
+		var hr := float(f._order("hold")["hold"]["radius"])
+		tm.inner_radius = hr - 0.07
+		tm.outer_radius = hr
+		tm.rings = 64
+		tm.ring_segments = 6
+		_g_hold_ring.mesh = tm
+		_g_hold_ring.material_override = _mat(_g_tint, 1.6, true, 0.55)
+		_g_hold_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(_g_hold_ring)
+	if _g_hold_ring:
+		_g_hold_ring.visible = holding
+		if holding:
+			_g_hold_ring.position = _v3(f.g_hold_at, 0.07)
+			_g_hold_ring.scale = Vector3.ONE * (1.0 + 0.015 * sin(_clock * 2.0))
+	var zoned := up and not f.g_zone.is_empty()
+	if zoned and _g_zone_disc == null:
+		_g_zone_disc = MeshInstance3D.new()
+		var pm := PlaneMesh.new()
+		pm.size = Vector2(2.0, 2.0)
+		_g_zone_disc.mesh = pm
+		var gm := _shader_mat(GLOW)
+		gm.set_shader_parameter("billboard", false)
+		gm.set_shader_parameter("falloff", 1.1)
+		_g_zone_disc.material_override = gm
+		_g_zone_disc.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(_g_zone_disc)
+	if _g_zone_disc:
+		_g_zone_disc.visible = zoned
+		if zoned:
+			var zr := minf(float(f.g_zone["radius"]), 14.0)
+			var zc: Color = { "burn": Color(1.0, 0.45, 0.15), "chill": Color(0.6, 0.85, 1.0), "dark": Color(0.35, 0.2, 0.55) }.get(String(f.g_zone["effect"]), _g_tint)
+			_g_zone_disc.position = _v3(f.g_zone["at"], 0.09)
+			_g_zone_disc.scale = Vector3(zr, 1, zr)
+			var zm := _g_zone_disc.material_override as ShaderMaterial
+			zm.set_shader_parameter("tint", zc)
+			zm.set_shader_parameter("strength", 0.55 + 0.12 * sin(_clock * 5.0))
+	var lit := up and f.now < f.g_lit_until
+	if lit and _g_lit_light == null:
+		_g_lit_light = OmniLight3D.new()
+		_g_lit_light.light_color = Color(1.0, 0.9, 0.65)
+		_g_lit_light.omni_range = 9.0
+		_g_lit_light.omni_attenuation = 1.2
+		add_child(_g_lit_light)
+	if _g_lit_light:
+		_g_lit_light.light_energy = 1.8 if lit else 0.0
+		_g_lit_light.position = _v3(f.p_pos, 2.6)
+
+## The First Form follows: fliers and fey and flames at the shoulder, walkers at the heel. On
+## Hunt it is at the foe; on Hold it stands on its ground; a flier that has stooped climbs.
 func _update_form(f: Fight, dt: float) -> void:
 	_genius.visible = false
 	_g_trail.emitting = false
+	_genius_ground(f)
 	var walker := _g_body != null and _g_body.walks()
 	var side := Vector2.from_angle(f.p_facing + (2.2 if walker else 1.9))
 	var want := _v3(f.p_pos + side * (1.1 if walker else 0.8), 0.0 if walker else 1.5 + 0.08 * sin(_clock * 2.4))
+	var posted := f.genius != null and not genius_down and f.g_order in ["hunt", "hold"] and f.g_kind != "object" and f.w_state != "absent"
+	if posted:
+		var lift := 0.0 if walker else (3.4 if f.now < f.g_climb_until else 1.3 + 0.08 * sin(_clock * 2.4))
+		want = _v3(f.g_pos, lift)
 	if genius_goal != Vector3.INF:
 		want = genius_goal
 	if _clock < _g_dart_until:
@@ -3797,6 +3924,9 @@ func _update_form(f: Fight, dt: float) -> void:
 	var flat := Vector2(vel.x, vel.z)
 	if flat.length() > 0.3:
 		_g_form_facing = lerp_angle(_g_form_facing, flat.angle(), 1.0 - exp(-dt * 8.0))
+	elif posted and f.w_state not in ["down", "absent"]:
+		# at its post or on the foe, it faces what it watches
+		_g_form_facing = lerp_angle(_g_form_facing, (f.w_pos - f.g_pos).angle(), 1.0 - exp(-dt * 5.0))
 	else:
 		_g_form_facing = lerp_angle(_g_form_facing, f.p_facing, 1.0 - exp(-dt * 3.0))
 	_g_form.rotation.y = _yaw(_g_form_facing)

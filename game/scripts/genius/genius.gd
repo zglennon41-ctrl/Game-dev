@@ -187,7 +187,7 @@ func orders_available() -> Array:
 	return Data.genius()["orders"].filter(func(o): return int(o["fromInstar"]) <= maxi(1, instar))
 
 func next_order() -> String:
-	var combat := orders_available().filter(func(o): return o.has("guard") or o.has("hunt"))
+	var combat := orders_available().filter(func(o): return o.has("guard") or o.has("hunt") or o.has("hold") or o.has("free"))
 	var ids: Array = combat.map(func(o): return o["id"])
 	if ids.is_empty():
 		return order

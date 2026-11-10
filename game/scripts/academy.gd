@@ -298,6 +298,8 @@ func go(place_id: String, quiet := false, from := "") -> void:
 			opts["respawn"] = false
 	if genius and genius.is_born():
 		opts["genius"] = genius
+	if not _post.is_empty():
+		opts["post"] = Vector2(_post["at"][0], _post["at"][1])   # the ground a genius on Hold keeps
 	fight = Fight.new(opts)
 	if not named.is_empty():
 		var escaped := named_escapes(String(named["id"]))

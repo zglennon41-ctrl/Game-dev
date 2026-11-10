@@ -27,13 +27,57 @@
       "id": "hold",
       "name": "Hold",
       "fromInstar": 2,
-      "text": "Takes a position or a post and keeps it."
+      "text": "Takes a place and keeps it: what comes onto its ground is struck and slowed, and you are guarded while you stand there.",
+      "hold": {
+        "radius": 4.5,
+        "interval": 1.8,
+        "damage": 4,
+        "slow": 0.6,
+        "slowSeconds": 1.6,
+        "willCost": 2,
+        "guardInside": true
+      }
     },
     {
       "id": "free",
       "name": "Free",
       "fromInstar": 2,
-      "text": "Its own judgment: what it has learned from your last thirty days."
+      "text": "Its own judgment: it guards, hunts or holds as it has learned you fight.",
+      "free": {
+        "$comment": "Free chooses among the other orders every `think` seconds, by a score for each: its base, plus each weight times what it measures (0 to 1). hurtShare, parryShare: of the blows that came at its partner over their life together and in this fight, the share taken and the share parried. lowHealth: how far its partner is below half health. close, far: the share of its partner's hits landed close and far (the Tally's range line). open: the foe's guard is down. post: the fight has a post. pack: more than one foe stands. It changes its mind only for a score better by `margin`. why: what it says when it chooses, by the weight that decided it.",
+        "think": 2.5,
+        "margin": 0.25,
+        "weights": {
+          "guard": {
+            "base": 1.0,
+            "hurtShare": 2.2,
+            "lowHealth": 2.5
+          },
+          "hunt": {
+            "base": 1.0,
+            "parryShare": 2.2,
+            "close": 0.8,
+            "open": 1.2
+          },
+          "hold": {
+            "base": 0.3,
+            "far": 2.4,
+            "post": 3.0,
+            "pack": 0.5
+          }
+        },
+        "why": {
+          "base": "as it was",
+          "hurtShare": "you take blows",
+          "lowHealth": "you are hurt",
+          "parryShare": "you turn blows yourself",
+          "close": "you fight close",
+          "open": "the foe is open",
+          "far": "you fight from far",
+          "post": "there is a post to keep",
+          "pack": "they are many"
+        }
+      }
     },
     {
       "id": "shift",
@@ -223,6 +267,395 @@
       "4": 1.4,
       "5": 1.9,
       "6": 2.6
+    }
+  },
+  "fight": {
+    "$comment": "The genius fights as what it is (docs/genius-combat.md). Its moves come from the kind of body it has (data/genius-bodies.json, kind), its Expression and the features it carries, never from its form's name, so a new form gets moves by what it is made of. Its age (progression.ages) says how much of that it can do yet. Its order says where it stands and what it attends to. Damage numbers are multiples of the Hunt order's damage.",
+    "speed": {
+      "$comment": "How fast it crosses the ground, metres a second. An object is worn or carried: it is where its partner is.",
+      "quadruped": 7.5,
+      "flier": 9.5,
+      "humanoid": 5.2,
+      "construct": 3.4,
+      "object": 0,
+      "aspect": 6.0
+    },
+    "strikeRange": 1.9,
+    "wornReach": 3.4,
+    "guardReach": 3.0,
+    "strike": {
+      "$comment": "What its plain blow is called, by kind.",
+      "quadruped": "a bite",
+      "flier": "a rake",
+      "humanoid": "a cut",
+      "construct": "a blow",
+      "object": "a strike",
+      "aspect": "a lick of it"
+    },
+    "movesMax": 3,
+    "moves": {
+      "$comment": "when: hunt (on the foe it hunts, or the foe on the ground it holds), guard (while it guards), any. passive: always so, no wait. wait: seconds before it can again. will: what it costs it.",
+      "hamstring": {
+        "name": "Hamstring",
+        "text": "It comes in low at the foe's legs: a blow, and the foe is slowed.",
+        "when": "hunt",
+        "wait": 9,
+        "will": 5,
+        "damage": 1.6,
+        "slow": 0.55,
+        "slowSeconds": 3.0
+      },
+      "stoop": {
+        "name": "Stoop",
+        "text": "It climbs and comes down on the foe: one heavy blow, and then it must climb again.",
+        "when": "hunt",
+        "wait": 10,
+        "will": 6,
+        "damage": 3.4,
+        "climb": 2.6,
+        "reach": 9.0
+      },
+      "shot": {
+        "name": "A shot",
+        "text": "It fires from where it stands.",
+        "when": "hunt",
+        "wait": 6,
+        "will": 4,
+        "damage": 2.2,
+        "reach": 14.0
+      },
+      "debt": {
+        "name": "Mark a debt",
+        "text": "It writes the foe a debt. If the foe strikes its partner while it stands, the foe pays.",
+        "when": "hunt",
+        "wait": 12,
+        "will": 6,
+        "seconds": 8,
+        "paid": 3.0,
+        "share": 0.6,
+        "reach": 8.0
+      },
+      "lay": {
+        "name": "Lay itself down",
+        "text": "It lays itself on the ground under the foe: what stands there burns, slows or strikes weakly, by what it is made of.",
+        "when": "hunt",
+        "wait": 12,
+        "will": 7,
+        "seconds": 5,
+        "radius": 2.6,
+        "reach": 8.0
+      },
+      "light": {
+        "name": "Light the ground",
+        "text": "It lights the ground: its partner reads every wind-up sooner, and the moment to parry is longer.",
+        "when": "any",
+        "wait": 14,
+        "will": 6,
+        "seconds": 5,
+        "parryWindow": 1.5
+      },
+      "call": {
+        "name": "Call it",
+        "text": "It calls the foe's next strike onto itself and takes it out of its own Will.",
+        "when": "guard",
+        "wait": 11,
+        "will": 4,
+        "seconds": 3.0,
+        "takes": 0.5
+      },
+      "brace": {
+        "name": "Brace",
+        "text": "It sets itself: guarding costs it less, it is ready again sooner, and a blow it guards cannot fell it.",
+        "when": "guard",
+        "passive": true,
+        "guardCost": 0.55,
+        "guardCooldown": 0.7,
+        "takes": 0.6
+      },
+      "with": {
+        "name": "Strike with you",
+        "text": "It is in your hand or on your back: every third blow of yours it adds one of its own.",
+        "when": "any",
+        "passive": true,
+        "every": 3,
+        "damage": 1.1
+      }
+    },
+    "byKind": {
+      "quadruped": [
+        "hamstring"
+      ],
+      "flier": [
+        "stoop"
+      ],
+      "humanoid": [
+        "call"
+      ],
+      "construct": [
+        "brace"
+      ],
+      "object": [
+        "with"
+      ],
+      "aspect": [
+        "lay"
+      ]
+    },
+    "byExpression": {
+      "daemon": [
+        "debt"
+      ]
+    },
+    "byFeature": {
+      "long-legs": [
+        "hamstring"
+      ],
+      "ground-claws": [
+        "hamstring"
+      ],
+      "fangs": [
+        "hamstring"
+      ],
+      "long-legged": [
+        "hamstring"
+      ],
+      "fins": [
+        "hamstring"
+      ],
+      "wings": [
+        "stoop"
+      ],
+      "talons": [
+        "stoop"
+      ],
+      "wing-cloak": [
+        "stoop"
+      ],
+      "barrel": [
+        "shot"
+      ],
+      "sight-glass": [
+        "shot"
+      ],
+      "chain": [
+        "debt"
+      ],
+      "ledger": [
+        "debt"
+      ],
+      "ledger-closed": [
+        "debt"
+      ],
+      "maw": [
+        "debt"
+      ],
+      "ember": [
+        "lay"
+      ],
+      "cold-core": [
+        "lay"
+      ],
+      "rime": [
+        "lay"
+      ],
+      "smoke": [
+        "lay"
+      ],
+      "shadow-cloak": [
+        "lay"
+      ],
+      "standing-air": [
+        "lay"
+      ],
+      "scorched": [
+        "lay"
+      ],
+      "lantern": [
+        "light"
+      ],
+      "glow": [
+        "light"
+      ],
+      "ring": [
+        "light"
+      ],
+      "lantern-jaw": [
+        "light"
+      ],
+      "far-eyes": [
+        "light"
+      ],
+      "watching-eye": [
+        "light"
+      ],
+      "voice": [
+        "call"
+      ],
+      "second-face": [
+        "call"
+      ],
+      "mask": [
+        "call"
+      ],
+      "crown": [
+        "call"
+      ],
+      "antlers": [
+        "call"
+      ],
+      "shell": [
+        "brace"
+      ],
+      "broad-chest": [
+        "brace"
+      ],
+      "broad-guard": [
+        "brace"
+      ],
+      "stone-skin": [
+        "brace"
+      ],
+      "iron-hide": [
+        "brace"
+      ],
+      "tower-shield": [
+        "brace"
+      ],
+      "bastion": [
+        "brace"
+      ],
+      "wall-plate": [
+        "brace"
+      ],
+      "plated": [
+        "brace"
+      ],
+      "shield-face": [
+        "brace"
+      ],
+      "door": [
+        "brace"
+      ],
+      "set-feet": [
+        "brace"
+      ],
+      "horn-brow": [
+        "brace"
+      ]
+    },
+    "lays": {
+      "$comment": "What laying itself down does, by the first of its features that says (layBy), burning if none does. burn: damage a second (a multiple of the Hunt's). chill: the foe's time runs at this. dark: the foe's blows from inside it land for this.",
+      "burn": {
+        "perSecond": 0.9
+      },
+      "chill": {
+        "slow": 0.6
+      },
+      "dark": {
+        "weaken": 0.65
+      }
+    },
+    "layBy": {
+      "ember": "burn",
+      "scorched": "burn",
+      "cold-core": "chill",
+      "rime": "chill",
+      "standing-air": "chill",
+      "smoke": "dark",
+      "shadow-cloak": "dark"
+    },
+    "ages": {
+      "$comment": "What its age lets it do. strike: its plain blow, as a multiple (a young one's is a nip). nip: every so many nips the foe flinches, for this long. moves: how many of its moves it has yet. wait: its waits are this much longer or shorter. power: its moves are this strong. great: it has the move only the great have, at this strength.",
+      "young": {
+        "strike": 0.4,
+        "nip": {
+          "every": 3,
+          "flinch": 0.45
+        },
+        "moves": 0,
+        "wait": 1.0,
+        "power": 1.0
+      },
+      "half-grown": {
+        "strike": 0.9,
+        "moves": 1,
+        "wait": 1.15,
+        "power": 0.9
+      },
+      "grown": {
+        "strike": 1.3,
+        "moves": 2,
+        "wait": 1.0,
+        "power": 1.25
+      },
+      "prime": {
+        "strike": 1.35,
+        "moves": 3,
+        "wait": 0.9,
+        "power": 1.25
+      },
+      "great": {
+        "strike": 1.35,
+        "moves": 3,
+        "wait": 0.8,
+        "power": 1.3,
+        "great": 0.6
+      },
+      "apex": {
+        "strike": 1.4,
+        "moves": 3,
+        "wait": 0.75,
+        "power": 1.35,
+        "great": 1.0
+      }
+    },
+    "great": {
+      "$comment": "The move only the great and the Apex have, on a long wait: one that changes the fight when it lands. By kind, or by Expression where the Expression says more. stagger: the foe is thrown down (its guard with it) and struck. ward: the next blows at its partner are turned. double: for a while every blow of its partner's lands twice. flood: it lays itself over the whole ground. reckon: the foe is struck and written a debt at once.",
+      "wait": 38,
+      "will": 18,
+      "reach": 9.0,
+      "byKind": {
+        "quadruped": {
+          "name": "Pull it down",
+          "effect": "stagger",
+          "seconds": 2.4,
+          "damage": 4.0
+        },
+        "flier": {
+          "name": "The long stoop",
+          "effect": "stagger",
+          "seconds": 2.0,
+          "damage": 6.0
+        },
+        "humanoid": {
+          "name": "The word",
+          "effect": "ward",
+          "blows": 2
+        },
+        "construct": {
+          "name": "The wall",
+          "effect": "ward",
+          "blows": 3
+        },
+        "object": {
+          "name": "The second hand",
+          "effect": "double",
+          "seconds": 6.0,
+          "share": 0.6
+        },
+        "aspect": {
+          "name": "The weather",
+          "effect": "flood",
+          "seconds": 7.0
+        }
+      },
+      "byExpression": {
+        "daemon": {
+          "name": "The reckoning",
+          "effect": "reckon",
+          "damage": 5.5
+        }
+      }
     }
   }
 }

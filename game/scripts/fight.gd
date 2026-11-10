@@ -16,7 +16,8 @@ var rng := RandomNumberGenerator.new()
 var now := 0.0
 var events: Array = []
 var stats := { "attacks": 0, "hits": 0, "damage_dealt": 0, "parries": 0, "blocks": 0, "hurts": 0, "evades": 0,
-	"staggers": 0, "breaks": 0, "wolves_down": 0, "patterns": 0, "pattern_fizzles": 0, "longest_combo": 0 }
+	"staggers": 0, "breaks": 0, "wolves_down": 0, "patterns": 0, "pattern_fizzles": 0, "longest_combo": 0,
+	"g_damage": 0.0, "g_guards": 0, "g_will_spent": 0.0, "g_moves": 0, "g_great": 0, "g_falls": 0 }
 
 # --- The Anchor ---
 var p_pos := Vector2.ZERO
@@ -187,6 +188,9 @@ func _init(opts: Dictionary = {}) -> void:
 		g_will = 0.0 if genius.fallen else g_will_max
 		if genius.fallen:
 			g_up_at = float(Data.genius()["fall"]["roomRecoverSeconds"])
+		if opts.get("post", null) is Vector2:
+			g_post = opts["post"]
+		_genius_setup()
 	_spawn_wolf()
 	for bid in opts.get("pack", []):
 		spawn_foe(bid, w_pos + Vector2.from_angle(rng.randf() * TAU) * 2.5, float(opts.get("pack_scale", 1.0)))
@@ -203,25 +207,355 @@ func drain() -> Array:
 	return e
 
 # ===================================================================== the genius
+# It fights as what it is (data/genius.json, fight; docs/genius-combat.md). Its moves come from
+# the kind of body it has and the features it carries; what it can do yet, from its age; where
+# it stands and what it attends to, from its order; and on Free, what it chooses, from how its
+# partner has played.
+
+var g_pos := Vector2.ZERO        # where it is
+var g_order := "guard"           # the order it is carrying out (Free chooses one of the others)
+var g_free_why := ""             # why Free chose it, in a few words
+var g_kind := "quadruped"        # its body's kind: quadruped, flier, humanoid, construct, object, aspect
+var g_age: Dictionary = {}       # what its age lets it do (fight.ages)
+var g_moves: Array = []          # the moves it has yet: [{ id, name, when, ... }]
+var g_great: Dictionary = {}     # the move only the great have, if it is great
+var g_wait: Dictionary = {}      # move id -> when it can again
+var g_move_now := ""             # the move it last made, by name (the HUD shows it a moment)
+var g_move_until := -9.0
+var g_hold_at := Vector2.INF     # the ground it holds
+var g_post := Vector2.INF        # the fight's post, where it has one
+var g_nips := 0
+var g_with := 0
+var g_climb_until := -9.0
+var g_lit_until := -9.0
+var g_lit := 1.0
+var g_debt_until := -9.0
+var g_debt: Dictionary = {}
+var g_called_until := -9.0
+var g_called: Dictionary = {}
+var g_zone: Dictionary = {}      # { at, until, radius, effect, power, tick }
+var g_ward_blows := 0
+var g_double_until := -9.0
+var g_double := 0.0
+var g_think_at := 0.0
+var g_great_at := 0.0
+
+## The moves a genius has, from what it is: its kind's, its Expression's, then one for each
+## feature that brings one, in that order, no move twice, no more than `count` (and never more
+## than fight.movesMax). Pure: the same body always has the same moves.
+static func genius_moves(kind: String, expression: String, features: Array, count: int) -> Array:
+	var F: Dictionary = Data.genius().get("fight", {})
+	var ids: Array = []
+	for id in F.get("byKind", {}).get(kind, []) + F.get("byExpression", {}).get(expression, []):
+		if not ids.has(id):
+			ids.append(id)
+	for f in features:
+		for id in F.get("byFeature", {}).get(String(f), []):
+			if not ids.has(id):
+				ids.append(id)
+	var out: Array = []
+	for id in ids.slice(0, mini(count, int(F.get("movesMax", 3)))):
+		var m: Dictionary = (F.get("moves", {}).get(id, {}) as Dictionary).duplicate()
+		if m.is_empty():
+			continue
+		m["id"] = id
+		if id == "lay":
+			m["effect"] = "burn"
+			for f in features:
+				if F.get("layBy", {}).has(String(f)):
+					m["effect"] = String(F["layBy"][String(f)])
+					break
+		out.append(m)
+	return out
+
+## The move only the great have, for a body of this kind and Expression ({} if none).
+static func genius_great(kind: String, expression: String) -> Dictionary:
+	var G: Dictionary = Data.genius().get("fight", {}).get("great", {})
+	var m: Dictionary = G.get("byExpression", {}).get(expression, G.get("byKind", {}).get(kind, {}))
+	return m.duplicate()
+
+func _genius_setup() -> void:
+	var F: Dictionary = Data.genius().get("fight", {})
+	g_kind = String(Data.genius_bodies()["silhouettes"].get(String(genius.body.get("silhouette", "")), {}).get("kind", "quadruped"))
+	g_age = F.get("ages", {}).get(String(genius.age().get("id", "grown")), { "strike": 1.0, "moves": 2, "wait": 1.0, "power": 1.0 })
+	g_moves = Fight.genius_moves(g_kind, String(genius.body.get("expression", "")), genius.features(), int(g_age.get("moves", 2)))
+	g_great = Fight.genius_great(g_kind, String(genius.body.get("expression", ""))) if float(g_age.get("great", 0.0)) > 0.0 else {}
+	g_pos = p_pos + Vector2(-1.0, 0.8)
+	g_order = genius.order if genius.order != "free" else "guard"
+	g_great_at = float(F.get("great", {}).get("wait", 38.0)) * 0.4
+
+func _genius_has(id: String) -> Dictionary:
+	for m in g_moves:
+		if m["id"] == id:
+			return m
+	return {}
+
+## Its plain blow's worth: the Hunt's damage, by Expression and Resonance.
+func _genius_base() -> float:
+	var ex: Dictionary = Data.genius()["byExpression"].get(genius.body.get("expression", ""), { "damage": 1.0, "interval": 1.0 })
+	return float(_order("hunt")["hunt"]["damage"]) * float(ex["damage"]) * float(Data.genius()["byResonance"][str(genius.resonance())])
+
+## Is it where it can guard its partner: beside them, or on the ground it holds with them on it?
+func _genius_covers() -> bool:
+	if g_order == "guard":
+		return g_kind == "object" or g_pos.distance_to(p_pos) <= float(Data.genius()["fight"]["guardReach"])
+	if g_order == "hold" and g_hold_at != Vector2.INF:
+		var H: Dictionary = _order("hold")["hold"]
+		return H.get("guardInside", false) and g_pos.distance_to(g_hold_at) <= 1.2 and p_pos.distance_to(g_hold_at) <= float(H["radius"])
+	return false
 
 ## Guard: it takes the hit you did not see, out of its own Will.
 func _genius_guards(dmg: float) -> bool:
-	if not genius or genius.fallen or genius.order != "guard" or now < g_guard_ready_at:
+	if not genius or genius.fallen or now < g_guard_ready_at or not _genius_covers():
 		return false
 	var o := _order("guard")
-	var cost := float(o["guard"]["willCost"])
-	# It guards with whatever Will it has left; emptied by the blow, it falls.
+	var brace := _genius_has("brace")
+	var cost := float(o["guard"]["willCost"]) * float(brace.get("guardCost", 1.0))
+	# It guards with whatever Will it has left; emptied by the blow, it falls (braced, it does not).
 	if g_will <= 0.0:
 		return false
-	g_will = maxf(0.0, g_will - cost - dmg * 0.5)
-	g_guard_ready_at = now + float(o["guard"]["cooldown"])
+	var spent := cost + dmg * 0.5 * float(brace.get("takes", 1.0))
+	g_will = maxf(1.0 if not brace.is_empty() else 0.0, g_will - spent)
+	stats["g_will_spent"] += spent
+	stats["g_guards"] += 1
+	g_guard_ready_at = now + float(o["guard"]["cooldown"]) * float(brace.get("guardCooldown", 1.0))
 	g_regen_from = now + float(Data.genius()["will"]["regenDelayAfterHit"])
-	_emit({ "type": "genius-guard", "damage": dmg })
+	_emit({ "type": "genius-guard", "damage": dmg, "braced": not brace.is_empty() })
 	if g_will <= 0.0:
 		_genius_fall()
 	return true
 
-## Hunt: every so often it strikes the foe you are locked on to, if the foe is near.
+## A blow at its partner that the genius turns or takes before anything else is asked: the
+## wall of a great one, or a strike it called onto itself. True if the partner is untouched.
+func _genius_turns(dmg: float, idx: int) -> bool:
+	if not genius or genius.fallen:
+		return false
+	if g_ward_blows > 0:
+		g_ward_blows -= 1
+		stats["g_guards"] += 1
+		_emit({ "type": "genius-ward", "left": g_ward_blows })
+		_emit({ "type": "turned" })
+		return true
+	if idx < 0 and now < g_called_until:
+		g_called_until = -9.0
+		var spent := dmg * float(g_called.get("takes", 0.5))
+		g_will = maxf(0.0, g_will - spent)
+		stats["g_will_spent"] += spent
+		stats["g_guards"] += 1
+		g_regen_from = now + float(Data.genius()["will"]["regenDelayAfterHit"])
+		_emit({ "type": "genius-called", "damage": dmg })
+		if g_will <= 0.0:
+			_genius_fall()
+		return true
+	return false
+
+## What a blow at its partner is worth after the genius's ground has had its say (a dark
+## place weakens what strikes from inside it), and what the foe owes for landing it.
+func _genius_on_struck(dmg: float, from_pos: Vector2, idx: int) -> float:
+	if not genius or genius.fallen:
+		return dmg
+	if not g_zone.is_empty() and now < float(g_zone["until"]) and g_zone["effect"] == "dark" and from_pos.distance_to(g_zone["at"]) <= float(g_zone["radius"]):
+		dmg *= float(Data.genius()["fight"]["lays"]["dark"]["weaken"])
+	return dmg
+
+func _genius_debt_paid(dmg: float, idx: int) -> void:
+	if not genius or genius.fallen or idx >= 0 or now >= g_debt_until or w_state in ["down", "absent"]:
+		return
+	g_debt_until = -9.0
+	var owed := roundf(_genius_base() * float(g_debt.get("paid", 3.0)) * float(g_age.get("power", 1.0)) + dmg * float(g_debt.get("share", 0.5)))
+	_emit({ "type": "genius-move", "move": "debt-paid", "name": "The debt is paid", "at": w_pos })
+	_genius_hits(owed, "debt", true)
+
+## Its damage lands on the locked foe: guarded like any blow out of turn, whole in an opening.
+func _genius_hits(dmg: float, what: String, through := false) -> void:
+	if w_state in ["down", "absent"]:
+		return
+	dmg = roundf(dmg if through else _guarded(dmg))
+	if w_state == "stagger":
+		dmg = roundf(dmg * float(room["break"]["staggerDamageFactor"]))
+	dmg = maxf(1.0, dmg)
+	w_hp = maxf(w_floor, w_hp - dmg)
+	stats["damage_dealt"] += dmg
+	stats["g_damage"] += dmg
+	_emit({ "type": "genius-hunt", "damage": dmg, "at": w_pos, "move": what })
+	if w_hp == 0.0:
+		stats["wolves_down"] += 1
+		_wolf_set("down", float(beast["respawnSeconds"]))
+		_emit({ "type": "wolf-down" })
+		_emit({ "type": "anim", "who": "wolf", "name": "Death", "speed": 1.0 })
+
+## Its damage on one of the pack.
+func _genius_hits_other(i: int, dmg: float) -> void:
+	var fo: Foe = foes[i]
+	if not fo.alive():
+		return
+	dmg = maxf(1.0, roundf(dmg))
+	fo.hp = maxf(0.0, fo.hp - dmg)
+	stats["damage_dealt"] += dmg
+	stats["g_damage"] += dmg
+	_emit({ "type": "foe-hit", "foe": i, "damage": dmg, "heavy": false, "dist": fo.pos.distance_to(p_pos), "genius": true })
+	if fo.hp == 0.0:
+		stats["wolves_down"] += 1
+		fo.set_state("down", 99.0)
+		_emit({ "type": "foe-down", "foe": i, "name": fo.beast["name"] })
+
+func _genius_spend(m: Dictionary, wait_key: String) -> void:
+	var cost := float(m.get("will", 0.0))
+	g_will = maxf(0.0, g_will - cost)
+	stats["g_will_spent"] += cost
+	stats["g_moves"] += 1
+	g_wait[wait_key] = now + float(m.get("wait", 0.0)) * float(g_age.get("wait", 1.0))
+	g_move_now = String(m.get("name", wait_key))
+	g_move_until = now + 1.6
+
+## One of its moves, made on the foe at `at`. False if it could not be made now.
+func _genius_move(m: Dictionary) -> bool:
+	var power := float(g_age.get("power", 1.0))
+	var base := _genius_base()
+	match String(m["id"]):
+		"hamstring":
+			_genius_spend(m, "hamstring")
+			_emit({ "type": "genius-move", "move": "hamstring", "name": m["name"], "at": w_pos })
+			_genius_hits(base * float(m["damage"]) * power, "hamstring")
+			w_slow_until = now + float(m["slowSeconds"])
+			w_slow = float(m["slow"])
+		"stoop":
+			_genius_spend(m, "stoop")
+			_emit({ "type": "genius-move", "move": "stoop", "name": m["name"], "at": w_pos })
+			_genius_hits(base * float(m["damage"]) * power, "stoop")
+			g_climb_until = now + float(m["climb"])
+			g_pos = w_pos
+		"shot":
+			_genius_spend(m, "shot")
+			_emit({ "type": "genius-move", "move": "shot", "name": m["name"], "at": w_pos, "from": g_pos })
+			_genius_hits(base * float(m["damage"]) * power, "shot")
+		"debt":
+			if now < g_debt_until:
+				return false
+			_genius_spend(m, "debt")
+			g_debt_until = now + float(m["seconds"])
+			g_debt = m
+			_emit({ "type": "genius-move", "move": "debt", "name": m["name"], "at": w_pos, "seconds": float(m["seconds"]) })
+		"lay":
+			_genius_spend(m, "lay")
+			g_zone = { "at": w_pos, "until": now + float(m["seconds"]), "radius": float(m["radius"]), "effect": String(m.get("effect", "burn")), "power": power, "tick": now }
+			_emit({ "type": "genius-move", "move": "lay", "name": m["name"], "at": w_pos, "effect": g_zone["effect"], "radius": g_zone["radius"], "seconds": float(m["seconds"]) })
+		"light":
+			_genius_spend(m, "light")
+			g_lit_until = now + float(m["seconds"])
+			g_lit = float(m["parryWindow"])
+			_emit({ "type": "genius-move", "move": "light", "name": m["name"], "at": p_pos, "seconds": float(m["seconds"]) })
+		"call":
+			_genius_spend(m, "call")
+			g_called_until = now + float(m["seconds"])
+			g_called = m
+			_emit({ "type": "genius-move", "move": "call", "name": m["name"], "at": g_pos })
+		_:
+			return false
+	return true
+
+## The move only the great have.
+func _genius_great_move() -> void:
+	var G: Dictionary = Data.genius()["fight"]["great"]
+	var strength := float(g_age.get("great", 0.0))
+	var cost := float(G.get("will", 18.0))
+	g_will = maxf(0.0, g_will - cost)
+	stats["g_will_spent"] += cost
+	stats["g_moves"] += 1
+	stats["g_great"] += 1
+	g_great_at = now + float(G.get("wait", 38.0)) * float(g_age.get("wait", 1.0)) / maxf(0.5, strength)
+	g_move_now = String(g_great.get("name", "its great move"))
+	g_move_until = now + 2.4
+	_emit({ "type": "genius-great", "name": g_move_now, "effect": g_great.get("effect", ""), "at": w_pos })
+	var base := _genius_base()
+	match String(g_great.get("effect", "")):
+		"stagger":
+			if w_state not in ["down", "absent"]:
+				_wolf_set("stagger", float(g_great["seconds"]) * strength)
+				_emit({ "type": "stagger", "seconds": float(g_great["seconds"]) * strength, "cause": "genius" })
+				_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 0.7 })
+				_genius_hits(base * float(g_great["damage"]) * strength, "great")
+		"ward":
+			g_ward_blows = maxi(g_ward_blows, maxi(1, roundi(float(g_great["blows"]) * strength)))
+		"double":
+			g_double_until = now + float(g_great["seconds"]) * strength
+			g_double = float(g_great.get("share", 0.6))
+		"flood":
+			var lay := _genius_has("lay")
+			g_zone = { "at": Vector2.ZERO, "until": now + float(g_great["seconds"]) * strength, "radius": maxf(arena.x, arena.y), "effect": String(lay.get("effect", "burn")), "power": float(g_age.get("power", 1.0)) * 1.3, "tick": now }
+		"reckon":
+			_genius_hits(base * float(g_great["damage"]) * strength, "great", true)
+			g_debt_until = now + 8.0
+			g_debt = _genius_has("debt") if not _genius_has("debt").is_empty() else { "paid": 3.0, "share": 0.6 }
+
+## After a blow of its partner's lands: a worn genius adds its own every so many, and for a
+## while after the second hand every blow lands twice.
+func _genius_after_hit(dmg: float, from_pattern: bool) -> void:
+	if not genius or genius.fallen or from_pattern or w_state in ["down", "absent"]:
+		return
+	var w := _genius_has("with")
+	if not w.is_empty():
+		g_with += 1
+		if g_with % maxi(1, int(w.get("every", 3))) == 0:
+			g_move_now = String(w["name"])
+			g_move_until = now + 1.0
+			stats["g_moves"] += 1
+			_genius_hits(_genius_base() * float(w["damage"]) * float(g_age.get("power", 1.0)), "with")
+	if now < g_double_until and w_state not in ["down", "absent"]:
+		_genius_hits(dmg * g_double, "double", true)
+
+## Free: it chooses among the other orders from how its partner fights, and says why.
+func _genius_thinks() -> void:
+	var fr: Dictionary = _order("free").get("free", {})
+	g_think_at = now + float(fr.get("think", 2.5))
+	var lt: Dictionary = genius.lifetime
+	var hurts := float(lt.get("fights.hurts", 0.0)) + float(stats["hurts"])
+	var parries := float(lt.get("fights.parries", 0.0)) + float(stats["parries"])
+	var blocks := float(lt.get("fights.blocks", 0.0)) + float(stats["blocks"])
+	var came := hurts + parries + blocks + 1.0
+	var rng_line: Dictionary = genius.tally.get("range", {}) if genius.tally.get("range", {}) is Dictionary else {}
+	var landed := float(rng_line.get("close", 0.0)) + float(rng_line.get("mid", 0.0)) + float(rng_line.get("far", 0.0)) + 1.0
+	var hp_max := float(room["player"]["health"])
+	var seen := {
+		"base": 1.0, "hurtShare": hurts / came, "parryShare": parries / came,
+		"lowHealth": clampf((0.5 - p_hp / hp_max) / 0.5, 0.0, 1.0),
+		"close": float(rng_line.get("close", 0.0)) / landed, "far": float(rng_line.get("far", 0.0)) / landed,
+		"open": 1.0 if (w_state not in ["down", "absent"] and beast.has("guard") and guard_open()) or w_state == "stagger" else 0.0,
+		"post": 1.0 if g_post != Vector2.INF else 0.0, "pack": 1.0 if foes_alive() > 0 else 0.0 }
+	var can: Array = genius.orders_available().map(func(o): return o["id"])
+	var best := ""
+	var best_s := -INF
+	var best_why := "base"
+	var now_s := -INF
+	for id in ["guard", "hunt", "hold"]:
+		if not can.has(id) or not fr.get("weights", {}).has(id):
+			continue
+		var s := 0.0
+		var top := "base"
+		var top_v := 0.0
+		for k in fr["weights"][id]:
+			var v := float(fr["weights"][id][k]) * float(seen.get(k, 0.0))
+			s += v
+			if k != "base" and v > top_v:
+				top_v = v
+				top = k
+		if id == g_order:
+			now_s = s
+		if s > best_s:
+			best_s = s
+			best = id
+			best_why = top
+	if best == "" or best == g_order or best_s < now_s + float(fr.get("margin", 0.25)):
+		if g_free_why == "":
+			g_free_why = String(fr.get("why", {}).get("base", ""))
+		return
+	g_order = best
+	g_free_why = String(fr.get("why", {}).get(best_why, ""))
+	if best == "hold":
+		g_hold_at = g_post if g_post != Vector2.INF else p_pos
+	_emit({ "type": "free", "order": best, "why": g_free_why })
+
+## The genius's turn: it gets to where its order puts it, and does what it is.
 func _update_genius(dt: float) -> void:
 	if not genius:
 		return
@@ -234,29 +568,163 @@ func _update_genius(dt: float) -> void:
 		return
 	if now >= g_regen_from:
 		g_will = minf(g_will_max, g_will + float(Data.genius()["will"]["regenPerSecond"]) * dt)
-	if genius.order != "hunt" or w_state in ["down", "absent"] or not p_lock:
+	var F: Dictionary = Data.genius()["fight"]
+	# its order: what it was told, or on Free what it judges
+	if genius.order == "free":
+		if now >= g_think_at:
+			_genius_thinks()
+	elif g_order != genius.order:
+		g_order = genius.order
+		g_free_why = ""
+	if g_order == "hold" and g_hold_at == Vector2.INF:
+		g_hold_at = g_post if g_post != Vector2.INF else p_pos
+	if g_order != "hold":
+		g_hold_at = Vector2.INF
+	var foe_up := w_state not in ["down", "absent"]
+	var hunting: bool = g_order == "hunt" and foe_up and p_lock and dist() <= float(_order("hunt")["hunt"]["reach"])
+	# where it goes
+	var side := p_pos + Vector2.from_angle(p_facing + 2.2) * 1.1
+	var want := side
+	if g_order == "hold":
+		want = g_hold_at
+	elif hunting:
+		# a runner comes round behind the foe; the rest come at it from where they are
+		var away := (w_pos - p_pos).normalized() if g_kind == "quadruped" else (g_pos - w_pos).normalized()
+		if away.length() < 0.5:
+			away = Vector2.RIGHT
+		want = w_pos + away * (float(beast["radius"]) + 0.9)
+	var speed := float(F.get("speed", {}).get(g_kind, 6.0))
+	if g_kind == "object" or speed <= 0.0:
+		g_pos = p_pos
+	else:
+		var to := want - g_pos
+		g_pos = want if to.length() <= speed * dt else g_pos + to.normalized() * speed * dt
+	# what it has laid on the ground
+	if not g_zone.is_empty():
+		if now >= float(g_zone["until"]):
+			g_zone = {}
+			_emit({ "type": "genius-zone-end" })
+		else:
+			_genius_zone()
+	# the moves it makes whatever its order: light on the ground when a foe is near
+	if foe_up and dist() <= 9.0:
+		for m in g_moves:
+			if String(m.get("when", "")) == "any" and not m.get("passive", false) and now >= float(g_wait.get(m["id"], 0.0)) and g_will >= float(m.get("will", 0.0)) and now >= g_lit_until:
+				_genius_move(m)
+				break
+	# the move only the great have
+	if not g_great.is_empty() and now >= g_great_at and foe_up and g_will >= float(F["great"].get("will", 18.0)) and dist() <= float(F["great"].get("reach", 9.0)):
+		# at its partner's side it keeps to what shields them; hunting or holding, it uses what it has
+		if g_order != "guard" or String(g_great.get("effect", "")) in ["ward", "double"]:
+			_genius_great_move()
+	match g_order:
+		"guard":
+			# while it guards: a strike wound up at its partner, it may call onto itself
+			var call := _genius_has("call")
+			if not call.is_empty() and w_state == "windup" and w_target == -1 and now >= float(g_wait.get("call", 0.0)) and now >= g_called_until and g_will >= float(call.get("will", 0.0)) and _genius_covers():
+				_genius_move(call)
+		"hunt":
+			if hunting:
+				_genius_hunts(_order("hunt")["hunt"], g_pos)
+		"hold":
+			_genius_holds(_order("hold")["hold"])
+
+## Hunt: its moves when they are ready, its plain blow between them.
+func _genius_hunts(h: Dictionary, from: Vector2) -> void:
+	if now < g_climb_until:
 		return
-	var o := _order("hunt")
-	var h: Dictionary = o["hunt"]
+	var F: Dictionary = Data.genius()["fight"]
 	var ex: Dictionary = Data.genius()["byExpression"].get(genius.body.get("expression", ""), { "damage": 1.0, "interval": 1.0 })
-	if now < g_hunt_at or dist() > float(h["reach"]) or g_will < float(h["willCost"]):
+	var gap := from.distance_to(w_pos) - float(beast["radius"])
+	var near := (dist() <= float(F.get("wornReach", 3.4))) if g_kind == "object" else gap <= float(F.get("strikeRange", 1.9))
+	for m in g_moves:
+		if String(m.get("when", "")) != "hunt" or m.get("passive", false) or now < float(g_wait.get(m["id"], 0.0)) or g_will < float(m.get("will", 0.0)):
+			continue
+		if near or (m.has("reach") and gap <= float(m["reach"])):
+			if _genius_move(m):
+				g_hunt_at = maxf(g_hunt_at, now + 0.8)
+				return
+	if not near or now < g_hunt_at or g_will < float(h["willCost"]):
 		return
-	g_hunt_at = now + float(h["interval"]) * float(ex["interval"])
+	g_hunt_at = now + float(h["interval"]) * float(ex["interval"]) * float(g_age.get("wait", 1.0))
 	g_will -= float(h["willCost"])
-	var dmg := roundf(float(h["damage"]) * float(ex["damage"]) * float(Data.genius()["byResonance"][str(genius.resonance())]))
-	if w_state == "stagger":
-		dmg = roundf(dmg * float(room["break"]["staggerDamageFactor"]))
-	w_hp = maxf(w_floor, w_hp - dmg)
-	stats["damage_dealt"] += dmg
-	_emit({ "type": "genius-hunt", "damage": dmg, "at": w_pos })
-	if w_hp == 0.0:
-		stats["wolves_down"] += 1
-		_wolf_set("down", float(beast["respawnSeconds"]))
-		_emit({ "type": "wolf-down" })
-		_emit({ "type": "anim", "who": "wolf", "name": "Death", "speed": 1.0 })
+	stats["g_will_spent"] += float(h["willCost"])
+	_genius_hits(_genius_base() * float(g_age.get("strike", 1.0)), "strike")
+	# a young one's blow is a nip: now and then the foe flinches from it
+	var nip: Dictionary = g_age.get("nip", {})
+	if not nip.is_empty():
+		g_nips += 1
+		if g_nips % maxi(1, int(nip.get("every", 3))) == 0 and w_state in ["prowl", "approach", "recover", "idle"]:
+			_wolf_set("flinch", float(nip.get("flinch", 0.4)))
+			_emit({ "type": "genius-move", "move": "nip", "name": "A nip", "at": w_pos })
+			_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 1.2 })
+
+## Hold: it stays on its ground; what comes onto it is struck and slowed.
+func _genius_holds(H: Dictionary) -> void:
+	if g_hold_at == Vector2.INF or g_pos.distance_to(g_hold_at) > 1.2:
+		return
+	var r := float(H["radius"])
+	var wolf_in := w_state not in ["down", "absent"] and w_pos.distance_to(g_hold_at) <= r + float(beast["radius"])
+	# its own moves, on the locked foe when it is on the ground
+	if wolf_in and now >= g_climb_until:
+		for m in g_moves:
+			if String(m.get("when", "")) == "hunt" and not m.get("passive", false) and now >= float(g_wait.get(m["id"], 0.0)) and g_will >= float(m.get("will", 0.0)):
+				if _genius_move(m):
+					g_hunt_at = maxf(g_hunt_at, now + 0.8)
+					return
+	if now < g_hunt_at or g_will < float(H["willCost"]):
+		return
+	# the nearest thing on its ground
+	var best := -2
+	var best_d := INF
+	if wolf_in:
+		best = -1
+		best_d = w_pos.distance_to(g_hold_at)
+	for i in foes.size():
+		var fo: Foe = foes[i]
+		if fo.alive() and fo.pos.distance_to(g_hold_at) <= r and fo.pos.distance_to(g_hold_at) < best_d:
+			best = i
+			best_d = fo.pos.distance_to(g_hold_at)
+	if best == -2:
+		return
+	g_hunt_at = now + float(H["interval"]) * float(g_age.get("wait", 1.0))
+	g_will -= float(H["willCost"])
+	stats["g_will_spent"] += float(H["willCost"])
+	var ex: Dictionary = Data.genius()["byExpression"].get(genius.body.get("expression", ""), { "damage": 1.0, "interval": 1.0 })
+	var dmg := float(H["damage"]) * float(ex["damage"]) * float(Data.genius()["byResonance"][str(genius.resonance())]) * maxf(0.4, float(g_age.get("strike", 1.0)))
+	_emit({ "type": "genius-hold", "at": g_hold_at, "foe": best })
+	if best == -1:
+		_genius_hits(dmg, "hold")
+		w_slow_until = maxf(w_slow_until, now + float(H["slowSeconds"]))
+		w_slow = float(H["slow"])
+	else:
+		_genius_hits_other(best, dmg)
+
+## What it has laid on the ground does its work on what stands there.
+func _genius_zone() -> void:
+	var L: Dictionary = Data.genius()["fight"]["lays"]
+	var at: Vector2 = g_zone["at"]
+	var r := float(g_zone["radius"])
+	var wolf_in := w_state not in ["down", "absent"] and w_pos.distance_to(at) <= r + float(beast["radius"])
+	match String(g_zone["effect"]):
+		"burn":
+			if now - float(g_zone["tick"]) >= 0.5:
+				g_zone["tick"] = now
+				var d := _genius_base() * float(L["burn"]["perSecond"]) * 0.5 * float(g_zone["power"])
+				if wolf_in:
+					_genius_hits(d, "lay")
+				for i in foes.size():
+					if (foes[i] as Foe).alive() and (foes[i] as Foe).pos.distance_to(at) <= r:
+						_genius_hits_other(i, d)
+		"chill":
+			if wolf_in:
+				w_slow_until = maxf(w_slow_until, now + 0.3)
+				w_slow = float(L["chill"]["slow"])
 
 func _genius_fall() -> void:
 	genius.fall()
+	stats["g_falls"] += 1
+	g_called_until = -9.0
 	g_will = 0.0
 	g_up_at = now + float(Data.genius()["fall"]["roomRecoverSeconds"]) if respawn else -1.0
 	_emit({ "type": "genius-fall" })
@@ -285,7 +753,15 @@ func _record(evs: Array) -> void:
 				if not made.is_empty():
 					_emit({ "type": "shadow-made", "name": e["name"] })
 			"genius-guard": genius.gave_order("guard")
-			"genius-hunt": genius.gave_order("hunt")
+			"genius-hunt":
+				if String(e.get("move", "")) in ["strike", "hamstring", "stoop", "shot"]:
+					genius.gave_order("hunt")
+			"genius-hold": genius.gave_order("hold")
+			"free": genius.gave_order("free")
+			# how its partner meets a blow: what Free judges by
+			"parry": genius.counter("fights.parries")
+			"hurt": genius.counter("fights.hurts")
+			"block": genius.counter("fights.blocks")
 
 func dist() -> float:
 	return p_pos.distance_to(w_pos)
@@ -365,6 +841,11 @@ func input(action: String) -> void:
 	if action == "order":
 		if genius:
 			genius.order = genius.next_order()
+			if genius.order == "hold":
+				g_hold_at = g_post if g_post != Vector2.INF else p_pos
+			if genius.order == "free":
+				g_think_at = now
+				g_free_why = ""
 			_emit({ "type": "order", "order": genius.order })
 		return
 	# Pressed a little early (mid-swing, mid-dodge, mid-flinch): remember it briefly and fire
@@ -399,7 +880,8 @@ func input(action: String) -> void:
 			if p_state in ["reload", "draw"]:
 				p_state = "free"
 			if p_state == "free" and not p_fainted:
-				p_parry_until = now + float(room["parry"]["window"]) * float(style.get("guard", 1.0))
+				# on ground its genius has lit, a wind-up is read sooner: the moment is longer
+				p_parry_until = now + float(room["parry"]["window"]) * float(style.get("guard", 1.0)) * (g_lit if now < g_lit_until else 1.0)
 		"block-up":
 			p_block_held = false
 		"stance":
@@ -1080,6 +1562,7 @@ func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
 	p_combo_count += 1
 	stats["longest_combo"] = maxi(stats["longest_combo"], p_combo_count)
 	_emit({ "type": "hit", "damage": dmg, "pattern": from_pattern, "heavy": heavy, "staggered": w_state == "stagger", "combo": p_combo, "crit": crit, "dist": dist(), "technique": p_state == "technique" })
+	_genius_after_hit(dmg, from_pattern)
 	if gear_trait.has("willOnHit"):
 		p_will = minf(float(rules["field"]["willMax"]), p_will + float(gear_trait["willOnHit"]))
 	if w_hp == 0.0:
@@ -1607,9 +2090,12 @@ func _resolve_bite_from(a: Dictionary, from_pos: Vector2, idx: int) -> void:
 		_emit({ "type": "parry", "foe": idx })
 		_emit({ "type": "anim", "who": "player", "name": "Block_Hit", "speed": 1.3 })
 		return
-	var dmg := float(a["damage"]) * _b("damageTaken", 1.0)
+	var dmg := _genius_on_struck(float(a["damage"]) * _b("damageTaken", 1.0), from_pos, idx)
+	if _genius_turns(dmg, idx):
+		return
 	if not (_blocking() and facing_wolf) and _genius_guards(dmg):
 		return
+	_genius_debt_paid(dmg, idx)
 	if _blocking() and facing_wolf:
 		dmg *= float(room["block"]["damageFactor"])
 		p_will = maxf(0.0, p_will - float(room["block"]["willPerBlockedHit"]))

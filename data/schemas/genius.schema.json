@@ -2,8 +2,93 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "genius",
   "type": "object",
-  "required": ["orders", "byResonance", "byExpression", "will", "fall", "witness", "tally", "size"],
+  "required": [
+    "orders",
+    "byResonance",
+    "byExpression",
+    "will",
+    "fall",
+    "witness",
+    "tally",
+    "size",
+    "fight"
+  ],
   "properties": {
-    "orders": { "type": "array", "items": { "type": "object", "required": ["id", "name", "fromInstar", "text"] } }
+    "orders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "fromInstar",
+          "text"
+        ]
+      }
+    },
+    "fight": {
+      "type": "object",
+      "description": "How a genius fights as what it is (docs/genius-combat.md).",
+      "required": [
+        "speed",
+        "moves",
+        "byKind",
+        "byExpression",
+        "byFeature",
+        "ages",
+        "great"
+      ],
+      "properties": {
+        "moves": {
+          "type": "object"
+        },
+        "byKind": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "byExpression": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "byFeature": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "ages": {
+          "type": "object",
+          "required": [
+            "young",
+            "half-grown",
+            "grown",
+            "prime",
+            "great",
+            "apex"
+          ]
+        },
+        "great": {
+          "type": "object",
+          "required": [
+            "wait",
+            "will",
+            "byKind"
+          ]
+        }
+      }
+    }
   }
 }
