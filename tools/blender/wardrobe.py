@@ -28,6 +28,38 @@ def _ring_bm(c, r, thick, n=16):
     return pk._tube_bm(pts, [thick] * (n + 1), segments=6)
 
 
+def _front_panel(name, rings, waist_i, segments, half=1.2, bib=0.6, thick=0.014):
+    """The front arc of a loft through `rings` (centre, u, v), as a sheet with a thickness:
+    an apron. Rings above `waist_i` narrow to a bib."""
+    ks = [k for k in range(segments) if abs(2 * math.pi * k / segments - 1.5 * math.pi) <= half + 1e-6]
+    bm = bmesh.new()
+    loops = []
+    for i, (c, u, v) in enumerate(rings):
+        t = min(1.0, max(0.0, (i - waist_i) / 2.0))     # 0 at the waist, 1 two rings up
+        narrow = 1.0 + (bib - 1.0) * t
+        row = []
+        for k in ks:
+            a = 2 * math.pi * k / segments
+            p = c + u * math.cos(a) * narrow + v * math.sin(a)
+            row.append(bm.verts.new(p))
+        loops.append(row)
+    for a, b in zip(loops, loops[1:]):
+        for j in range(len(ks) - 1):
+            bm.faces.new((a[j], a[j + 1], b[j + 1], b[j]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    if sum(f.normal.y for f in bm.faces) > 0:           # the sheet faces the front
+        bmesh.ops.reverse_faces(bm, faces=bm.faces[:])
+    bmesh.ops.solidify(bm, geom=bm.faces[:], thickness=thick)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.collection.objects.link(ob)
+    for poly in me.polygons:
+        poly.use_smooth = True
+    return ob
+
+
 def dress_pieces(body, objs, build, slot):
     """The garments for one build into objs (named Dress_<n>_<type>), their chains into
     body.chains, the rigid pieces into body.dress_rigid (fit build only)."""
@@ -133,10 +165,12 @@ def dress_pieces(body, objs, build, slot):
             ob = band_loft("Dress_%d_cuirass" % n, bk.rings_z(bk._shell(tr, 0.03, 4, top_i)), (0,) if trim else ())
             put("Dress_%d_cuirass" % n, ob, "trunk", cname, trim)
         elif t == "apron":
-            z_hi = tr[6][0]
-            z_lo = low(0.6 * k)
-            w = tr[3][1] + 0.02
-            ob = pk._bm_object("Dress_%d_apron" % n, pk._box_bm(Vector((-w, fy(3) - 0.035, z_lo)), Vector((w, fy(3) + 0.0, z_hi)), taper=(1.1, 1.0)), body.mats["tunic"])
+            # A bib over the chest and a skirt to the shin: the front of a coat's shell, cut at
+            # the sides, so it lies on the body like leather instead of hanging like a board.
+            top = bk._shell(tr, 0.036, 2, 6)
+            z2, hw2, hd2, yo2 = top[0]
+            skirt = bk._skirt(z2, hw2, hd2, yo2, low(0.6 * k), 1.08)
+            ob = _front_panel("Dress_%d_apron" % n, bk.rings_z(skirt[::-1][:-1] + top), len(skirt) - 1, bk.SEGMENTS)
             put("Dress_%d_apron" % n, ob, "trunk", cname)
         elif t == "hakama":
             for side, sign in (("l", 1), ("r", -1)):
