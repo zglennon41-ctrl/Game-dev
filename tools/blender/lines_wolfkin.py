@@ -1732,7 +1732,7 @@ def _drake_body(r, A):
     _S["ysh"], _S["yhip"] = ysh, yhip
     ys = [ysh - 0.08, ysh + 0.34, (ysh + yhip) / 2 + 0.08, yhip - 0.26, yhip + 0.06]
     zts = [wolf.top(y, window=0.22) + 0.03 for y in (ys[1], ys[1], ys[2], ys[3], ys[4])]
-    zk = min(p.z for p in wolf.v if abs(p.x) < 0.15 and ysh - 0.3 < p.y < ysh + 0.5) - 0.04
+    zk = _S["brisket"] - 0.04
     zbs = [zk + 0.07, zk, zk + 0.06, zk + 0.13, zk + 0.2]
     aa = [wolf.side(y, zt - 0.4) * k for y, zt, k in zip(ys, zts, (1.16, 1.3, 1.52, 1.56, 1.5))]
     trunk = [(Vector((0, y, (zt + zb) / 2)), a, (zt - zb) / 2) for y, zt, zb, a in zip(ys, zts, zbs, aa)]
@@ -2102,6 +2102,10 @@ def drake_measure(r, A):
     wolf's place: where its eyes, its snout and the crown of its head are)."""
     _measure(r, A)
     _S["S"] = (r.bone("Ear1.L") - r.bone("Ear1.R")).length / _S["ear0"] * 1.16
+    # the wolf's brisket (the lowest of its chest, between the legs): the keel of the drake's is cut to it
+    wl = r._weights([b for b in r.legs() if "Shoulder" not in b])
+    ysh = r.bone("FrontUpperLeg.L").y
+    _S["brisket"] = min([p.z for p, k in zip(r.world_verts(), wl) if k < 0.2 and ysh - 0.3 < p.y < ysh + 0.5] or [r.bone("FrontUpperLeg.L").z - 0.25])
     _strip_wolf(r)
     _drake_body(r, A)
     _drake_head(r, A)
@@ -2200,6 +2204,16 @@ def _lie(r, name, geo, ws, material, smooth=False):
         n0 = _faces(r)
         _add(r, name, geo, ws, material, smooth=smooth)
         _face_out(r, n0, _inside)
+
+
+def _smoke(p0, h, drift, k=1.0, n=4):
+    """A thread of smoke going up from a point: puffs, each larger than the one under it."""
+    geo = None
+    for i in range(n):
+        f = i / (n - 1.0)
+        c = V(p0) + Z * (h * (0.1 + 0.9 * f)) + V(drift) * f + X * (0.07 * k * math.sin(i * 2.1 + h))
+        geo = g.merge(geo, g.ico(c, (0.06 + 0.12 * f) * k, sub=1, scale=(1.0, 1.0, 0.86)))
+    return geo
 
 
 def _drake_horns(style):
@@ -2441,7 +2455,7 @@ def _drake_ridge(style):
                 band = g.lathe([(0.165, h * 0.84), (0.165, h)], n=8, centre=c, caps=False)
                 _add(r, "pot_band_%d" % i, band, [w] * len(band[0]), mat("accent") if acc else mat("clay"), smooth=True)
                 p0 = c + Z * h
-                sm = g.tongue([p0, p0 + Vector((0.05, 0.14, 0.3)), p0 + Vector((-0.08, 0.4, 0.62)), p0 + Vector((0.04, 0.7, 0.9))], [0.18, 0.26, 0.22, 0.03], thick=0.6, normal=X)
+                sm = _smoke(p0, 0.8 * size, Vector((0, 0.5, 0)), 1.25, n=3)
                 _piece("sway", "potsmoke" + "abc"[i], [(sm, mat("smoke_pale"), True)], p0, _bone_of(w))
         elif style == "crumbled":     # a ridge burned down to stubs
             plates(lambda z, t, i: (0.06 + 0.1 * math.sin(i * 2.7) ** 2) * size, mat("ash_fall"), "ridge_ash", lean=0.1, wide=0.7)
@@ -2479,7 +2493,7 @@ def _drake_ridge(style):
 WINGS = {
     "nubs": dict(arm=[(0.12, 0.14, 0.14), (0.17, 0.36, 0.2)], fingers=[(0.07, 0.28, 0.1), (0.05, 0.36, -0.05), (0.02, 0.26, -0.18)], inner=(0.02, 0.4, -0.05), move=None),
     "half": dict(arm=[(0.34, 0.12, 0.7), (0.56, 0.42, 1.25)], fingers=[(0.62, 0.25, 0.9), (0.56, 1.05, 0.5), (0.34, 1.45, -0.1), (0.1, 1.45, -0.6)], inner=(0.05, 1.1, -0.2), move="glide"),
-    "glide": dict(arm=[(0.95, -0.1, 0.4), (2.0, 0.1, 0.56)], fingers=[(1.7, 0.1, 0.16), (1.35, 0.85, 0.0), (0.72, 1.25, -0.08), (0.2, 1.35, -0.1)], inner=(0.1, 1.2, -0.05), move="glide"),
+    "glide": dict(arm=[(0.85, -0.1, 0.62), (1.75, 0.05, 1.1)], fingers=[(1.45, 0.1, 0.62), (1.25, 0.85, 0.3), (0.72, 1.25, -0.02), (0.2, 1.35, -0.4)], inner=(0.1, 1.2, -0.05), move="glide"),
     "mantle": dict(arm=[(0.5, 0.0, 1.0), (0.95, 0.15, 1.9)], fingers=[(0.72, -0.05, 1.1), (1.0, 0.7, 0.8), (0.85, 1.25, 0.2), (0.4, 1.45, -0.5)], inner=(0.1, 1.2, -0.3), move="beat"),
     "stoop": dict(arm=[(0.4, 0.3, 0.45), (0.62, 1.0, 0.76)], fingers=[(0.34, 1.5, 0.45), (0.17, 1.7, 0.1), (0.0, 1.35, -0.3)], inner=(0.05, 1.0, -0.1), move="glide"),
     "shadow": dict(arm=[(1.0, -0.4, 0.8), (2.1, -0.6, 1.35)], fingers=[(1.6, -0.6, 0.6), (1.7, 0.3, 0.1), (1.15, 1.25, -0.3), (0.5, 1.75, -0.6), (0.1, 1.85, -0.7)], inner=(0.1, 1.5, -0.4), move="glide"),
@@ -2679,10 +2693,11 @@ def _drake_tailend(style):
             _add(r, "rudder", fin, "Tail8", mat("accent") if acc else mat("fur_light"), smooth=False)
             _add(r, "rudder_rib", g.tube([tip - d * 0.6, tip + d * 0.55 * size], [0.035, 0.008], n=4), "Tail8", horn, smooth=True)
         elif style == "banner":       # a long pennant
-            up = v
-            p1, p2, p3 = tip + d * 0.5 * size + up * 0.1, tip + d * 1.1 * size - up * 0.05, tip + d * 1.7 * size + up * 0.12
-            pen = g.tongue([tip, p1, p2, p3], [0.3 * size, 0.38 * size, 0.3 * size, 0.04], thick=0.08, normal=u)
-            _piece("sway", "pennant", [(pen, mat("accent") if acc else mat("fur_light"), False)], tip, "Tail8")
+            tip, d, u, v = _S["tail"][-4][:4]
+            tip = tip + v * 0.02
+            p1, p2, p3 = tip + (d * 0.6 - v * 0.5) * size, tip + (d * 0.5 - v * 1.2) * size, tip + (d * 0.9 - v * 1.9) * size
+            pen = g.tongue([tip, p1, p2, p3], [0.45 * size, 0.6 * size, 0.5 * size, 0.06], thick=0.06, normal=u)
+            _piece("sway", "pennant", [(pen, mat("accent") if acc else mat("fur_light"), False)], tip, _bone_of(_S["tail"][-4][6]))
         elif style == "lamp":         # a lamp held in the loop of its tail
             top = tip + Vector((0, 0, 0.46 * size))
             _add(r, "taillamp_hook", g.tube([tip - d * 0.1, top], [0.035, 0.022], n=4), "Tail8", horn, smooth=True)
@@ -2697,7 +2712,7 @@ def drake_shell(r, A, size):
     c = s[0] + Z * (s[5] * 0.2)
     iron, brass = mat("metal_iron"), mat("metal_brass")
     acc = bool(_S["spec"].get("accent"))
-    a, b = s[4] * 1.12 * size, s[5] * 1.5 * size
+    a, b = s[4] * 1.2 * size, s[5] * 2.1 * size
     Ly = (back[-1][0].y - back[0][0].y) * 0.56 * size
     r.shell("vault", c, (a, Ly, b), "Torso2", mat("slate_light"), segments=12, rings=5)
     for k, dy in enumerate((-0.55, 0.0, 0.55)):
@@ -2851,8 +2866,7 @@ def _drake_nostrils(style):
         for sg, tag in ((1, "l"), (-1, "r")):
             p0 = P(sg * 0.08, H["yn"] + 0.005, 0.12)
             if style == "smoke":      # a thread of smoke from each nostril, constant
-                pts = [p0, p0 + Vector((sg * 0.05, -0.05, 0.36)) * size, p0 + Vector((sg * -0.04, 0.2, 0.86)) * size, p0 + Vector((sg * 0.08, 0.6, 1.4)) * size, p0 + Vector((sg * 0.0, 1.1, 1.9)) * size]
-                sm = g.tongue(pts, [0.06, 0.13, 0.19, 0.22, 0.03], thick=0.6, normal=X)
+                sm = _smoke(p0, 1.1 * size, Vector((sg * 0.12, 0.7 * size, 0)), 0.9 * size)
                 _piece("sway", "smoke", [(sm, mat("smoke_pale"), True)], p0, "Head", side=tag)
             elif style == "heat":     # a shimmer of heat over its nostrils
                 ht = g.tongue([p0, p0 + Vector((0, -0.03, 0.16 * size)), p0 + Vector((0, 0.0, 0.34 * size))], [0.07, 0.065, 0.01], thick=0.8, normal=Y)
@@ -2935,7 +2949,7 @@ def drake_smokeback(r, A, size):
     for k, q in enumerate(back[2::3][:4]):
         pt, d, up, w = q[:4]
         h = (0.7 + 0.2 * math.sin(k * 2.3)) * size
-        sm = g.tongue([pt, pt + up * h * 0.4 + d * 0.1, pt + up * h * 0.8 + d * 0.35 + X * 0.08, pt + up * h * 1.15 + d * 0.7 - X * 0.05], [0.2, 0.3, 0.26, 0.04], thick=0.5, normal=d.cross(up))
+        sm = _smoke(pt, h, d * 0.5, 1.3, n=3)
         _piece("sway", "backsmoke" + "abcd"[k], [(sm, mat("smoke_pale"), True)], pt, _bone_of(w))
 
 
