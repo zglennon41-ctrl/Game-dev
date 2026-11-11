@@ -144,7 +144,7 @@ WINGS = {
 HOLDS = {
     "v": dict(sf=-8, sh=4, df=26, dh=20, droop=0.04), "flat": dict(sf=-14, sh=0, df=6, dh=4, droop=0.07),
     "spread": dict(sf=-2, sh=0, df=2, dh=2, droop=0.02), "cross": dict(sf=-34, sh=42, df=6, dh=4, droop=0.04),
-    "tent": dict(sf=62, sh=58, df=-34, dh=-30, droop=0.1), "shut": dict(sf=64, sh=36, df=-18, dh=-10, droop=0.06),
+    "tent": dict(sf=62, sh=58, df=-34, dh=-30, droop=0.1), "shut": dict(sf=58, sh=30, df=-44, dh=-24, droop=0.06),
     "cape": dict(sf=72, sh=62, df=-26, dh=-20, droop=0.12), "back": dict(sf=58, sh=50, df=-12, dh=-10, droop=0.05),
     "high": dict(sf=-6, sh=6, df=58, dh=50, droop=0.0), "flash": dict(sf=-44, sh=8, df=32, dh=6, droop=0.04),
     "press": dict(sf=0, sh=0, df=0, dh=0, droop=0.0), "offer": dict(sf=-22, sh=0, df=12, dh=8, droop=0.05, lift_l=36),
@@ -169,6 +169,36 @@ class Wing:
         self.cells = {(i, j): None for i in range(self.ns) for j in range(self.nt)}
         self.rims = {}          # (i, j) -> what the cut edge of that cell is made of, where it is not the cell's own
         self.decals = []        # (points in the wing's plane, material, layer)
+        self.moved = {}         # (i, j) -> where that corner of the grid is, when it is not where the grid puts it
+
+    def point(self, i, j):
+        return self.moved[(i, j)] if (i, j) in self.moved else self.at(i / self.ns, j / self.nt)
+
+    def bite(self, s, t, r):
+        """Cut a round bite out of it about (s, t): the cells in it go, and the corners of the
+        cells left on its edge are drawn onto the round. Returns the edge, as points in order."""
+        c = self.at(s, t)
+        mid = lambda cell: (self.at(cell[0] / self.ns, cell[1] / self.nt) + self.at((cell[0] + 1) / self.ns, (cell[1] + 1) / self.nt)) / 2
+        gone = [cell for cell in self.cells if (mid(cell) - c).length < r]
+        for cell in gone:
+            del self.cells[cell]
+        corners = lambda cell: [(cell[0], cell[1]), (cell[0] + 1, cell[1]), (cell[0] + 1, cell[1] + 1), (cell[0], cell[1] + 1)]
+        lost = {k for cell in gone for k in corners(cell)}
+        kept = {k for cell in self.cells for k in corners(cell)}
+        edge = []
+        for k in lost & kept:
+            d = self.point(*k) - c
+            self.moved[k] = c + d.normalized() * r if d.length > 1e-6 else self.point(*k)
+            edge.append(self.moved[k])
+        edge.sort(key=lambda q: math.atan2((q - c).y, (q - c).x))
+        # the edge is an arc, not a ring: begin it after its widest gap
+        if len(edge) > 2:
+            ang = [math.atan2((q - c).y, (q - c).x) for q in edge]
+            gaps = [((ang[(i + 1) % len(ang)] - ang[i]) % (2 * math.pi), i) for i in range(len(ang))]
+            start = (max(gaps)[1] + 1) % len(edge)
+            edge = edge[start:] + edge[:start]
+        near = [cell for cell in self.cells if any(k in lost for k in corners(cell))]
+        return c, edge, near
 
     def raw(self, s, t):
         a, b = cr(self.lead, s), cr(self.trail, s)
@@ -204,16 +234,16 @@ class Wing:
             pts.append(c + Vector((x * math.cos(turn) - y * math.sin(turn), x * math.sin(turn) + y * math.cos(turn))))
         self.decals.append((pts, material, layer))
 
-    def eye(self, s, t, r, rings, glint=True):
+    def eye(self, s, t, r, rings, glint="scale_white"):
         """An eye-spot: rings from the outside in, [(share of r, material), ...], and a point of light in it."""
         for k, (share, material) in enumerate(rings):
             self.disc(s, t, r * share, material, layer=1 + k)
         if glint:
-            self.disc(s, t, r * 0.13, "scale_white", layer=2 + len(rings), n=6, off=(-r * 0.16, r * 0.2))
+            self.disc(s, t, r * 0.14, glint, layer=2 + len(rings), n=6, off=(-r * 0.16, r * 0.2))
 
-    def stroke(self, st, width, material, layer=1):
-        """A line drawn on it through points given as (s, t)."""
-        pts = [self.at(s, t) for s, t in st]
+    def stroke(self, st, width, material, layer=1, flat=False):
+        """A line drawn on it through points given as (s, t) (flat: as points of its plane)."""
+        pts = [Vector(q) for q in st] if flat else [self.at(s, t) for s, t in st]
         left, right = [], []
         for k, p in enumerate(pts):
             d = (pts[min(k + 1, len(pts) - 1)] - pts[max(k - 1, 0)]).normalized()
@@ -405,11 +435,11 @@ class Moth:
         self.kh = self.k ** 0.5 * age["head"] * float(b.get("head", 1.0))
         self.L = 0.38 * float(b.get("span", 1.0)) * age["wing"]
         self.pitch = math.radians(float(spec.get("pitch", 40)))
-        self.C = Vector((0, 0, 0.5))
+        self.C = Vector((0, 0, 0.34))
         self.M = Matrix.Translation(self.C) @ Matrix.Rotation(-self.pitch, 4, "X")
         # the head keeps its eyes forward whatever the body does: it follows the body a third of the way
         self.nod = max(math.radians(-22), min(math.radians(26), self.pitch * 0.3))
-        self.yaw = math.radians({"back": 128, "left": 30, "down": 0}.get(spec.get("look", ""), 0))
+        self.yaw = math.radians({"back": -98, "left": 30, "down": 0}.get(spec.get("look", ""), 0))
         self.H = self.M @ Vector((0, -0.118 * self.k, 0.014 * self.k)) + Vector((0, -0.012, 0.012)) * math.sin(max(0.0, self.pitch))
         self.MH = Matrix.Translation(self.H) @ Matrix.Rotation(self.yaw, 4, "Z") @ Matrix.Rotation(-self.nod, 4, "X")
         self.objects = []
@@ -464,8 +494,8 @@ class Moth:
                 continue
             fr = self.wing_frame(which, side)
             lower = 0.0 if which == "fore" else -TH * 0.9       # the hindwing lies under the forewing
-            top = [[flip(self.M @ self.W(fr, w.at(i / w.ns, j / w.nt), TH / 2 + lower)) for j in range(w.nt + 1)] for i in range(w.ns + 1)]
-            bot = [[flip(self.M @ self.W(fr, w.at(i / w.ns, j / w.nt), -TH / 2 + lower)) for j in range(w.nt + 1)] for i in range(w.ns + 1)]
+            top = [[flip(self.M @ self.W(fr, w.point(i, j), TH / 2 + lower)) for j in range(w.nt + 1)] for i in range(w.ns + 1)]
+            bot = [[flip(self.M @ self.W(fr, w.point(i, j), -TH / 2 + lower)) for j in range(w.nt + 1)] for i in range(w.ns + 1)]
             up = flip((self.M.to_3x3() @ fr[3]).normalized())
             cells = {c: (m or ("fur_dark" if which == "fore" else "fur_light")) for c, m in w.cells.items()}
             raw.sheet(top, bot, cells, w.rims, up)
@@ -624,6 +654,8 @@ class Moth:
             y = (-0.02 + 0.04 * i) * k
             tufts = g.merge(tufts, g.blade((0, y, 0.062 * k), (0, y + 0.06 * k, 0.1 * k - 0.012 * i * k), 0.05 * k, normal=Z, belly=0.4))
         it.append((self.B(tufts), coat))
+        if fur in ("ermine", "ghost") and self.accent_ok:        # a band of its Path's colour at the throat, where white would hide it
+            it.append((self.B(f2.band((0, -0.084 * k, 0.004 * k), 0.05 * k, 0.05 * k, 0.012 * k, n=12, u=X, v=Z, sides=4)), "accent"))
         if fur == "ermine":     # a judge's fur: the black tips of the tails sewn into it
             spots = None
             for i in range(7):
@@ -681,10 +713,10 @@ class Moth:
     def make_abdomen(self):
         style_, size = opt(self.spec.get("abdomen", "stout"), 1.0)
         k = self.k
-        prof = {"stout": [(0.0, 0.05), (0.2, 0.064), (0.5, 0.06), (0.8, 0.04), (1.0, 0.01)],
+        prof = {"stout": [(0.0, 0.052), (0.2, 0.068), (0.5, 0.066), (0.8, 0.046), (1.0, 0.012)],
                 "slim": [(0.0, 0.036), (0.25, 0.044), (0.6, 0.038), (0.85, 0.026), (1.0, 0.007)],
                 "bee": [(0.0, 0.05), (0.2, 0.074), (0.5, 0.08), (0.8, 0.056), (1.0, 0.012)]}.get(style_ if style_ in ("slim", "bee") else "stout")
-        length = {"slim": 0.27, "bee": 0.25}.get(style_, 0.24) * k * (size if style_ != "bee" else size ** 0.6)
+        length = {"slim": 0.26, "bee": 0.25}.get(style_, 0.21) * k * (size if style_ != "bee" else size ** 0.6)
         fat = size ** 0.5 if style_ != "slim" else 1.0
         droop = 0.22
         w0 = Vector((0, 0.066 * k, -0.004 * k))
@@ -706,7 +738,7 @@ class Moth:
         rings, mats = [], []
         for i in range(nseg):
             t0, t1 = i / nseg, (i + 1) / nseg
-            tm = t0 + (t1 - t0) * (0.62 if style_ not in ("bee", "banded") else 0.5)
+            tm = t0 + (t1 - t0) * (0.72 if style_ not in ("bee", "banded") else 0.5)
             rings += [[self.M @ p for p in ring_at(t0)], [self.M @ p for p in ring_at(tm)]]
             mats += [ma, mb]
         rings.append([self.M @ p for p in ring_at(1.0)])
@@ -767,7 +799,7 @@ class Moth:
         # the eyes: dark and deep, a point of the field in each; they shut
         c = Vector((ex, ey, ez))
         look = Vector((0.16, -0.97, 0.1)).normalized()
-        ei = [(self.Hd(g.ico(c, re, sub=2)), "eye_dark"), (self.Hd(g.ico(c + look * re * 0.9, 1.0, sub=1, scale=(re * 0.44, re * 0.17, re * 0.44))), "field_eyes")]
+        ei = [(self.Hd(g.ico(c, re, sub=2)), "eye_dark"), (self.Hd(g.ico(c + look * re * 0.9, 1.0, sub=1, scale=(re * 0.36, re * 0.17, re * 0.36))), "field_eyes")]
         if eyes == "far":       # a ring round it, as round a glass
             ei.append((self.Hd(f2.band(c + look * re * 0.55, re * 0.78, re * 0.78, re * 0.09, n=10, u=Vector((0.92, 0.3, 0)), v=Z, sides=3)), "metal_brass"))
         left = piece("blink", "eye", ei, self.MH @ c, side="l", parent=self.head)
@@ -825,15 +857,15 @@ class Moth:
         if style_ == "out":         # half unrolled: it reaches for the next thing
             pts = [Vector((0, -0.05 * kh, -0.026 * kh)), Vector((0, -0.1 * kh, -0.04 * kh)) * 1.0, Vector((0, -0.2 * kh * size, -0.06 * kh)), Vector((0, -0.27 * kh * size, -0.045 * kh))]
             pts = [cr(pts, i / 8) for i in range(9)] + g.spiral(Vector((0, -0.27 * kh * size, -0.062 * kh)), 0.017 * kh, 0.005 * kh, 1.3, 0.0, n=10, axis=X, start=math.pi / 2)
-            geo = g.tube(pts, [0.0048 * kh] * len(pts), n=4)
+            geo = g.tube(pts, [0.0066 * kh] * len(pts), n=5)
             self.objects.append(piece("sway", "tongue", [(self.Hd(geo), "tongue_dark")], self.MH @ Vector((0, -0.05 * kh, -0.026 * kh)), parent=self.head))
         elif style_ == "deep":      # three times its own length, carried like a watch-spring
             R = 0.085 * kh * size
             cc = Vector((0, -0.05 * kh - R * 0.55, -0.03 * kh - R * 0.9))
             pts = g.spiral(cc, R, 0.012 * kh, 3.1, 0.0, n=46, axis=X, start=math.pi * 0.35)
             geo = g.tube(pts, [0.0062 * kh * (1 - 0.5 * i / 46) for i in range(47)], n=5)
-            hub = g.ico(cc, 0.012 * kh, sub=1)
-            self.objects.append(piece("sway", "tongue", [(self.Hd(geo), "tongue_dark"), (self.Hd(hub), self.ac("accent", "fur_ruff"))], self.MH @ Vector((0, -0.05 * kh, -0.026 * kh)), parent=self.head))
+            hub = g.ico(cc, 0.014 * kh, sub=1)
+            self.objects.append(piece("sway", "tongue", [(self.Hd(geo), "tongue_dark"), (self.Hd(hub), "field_spring")], self.MH @ Vector((0, -0.05 * kh, -0.026 * kh)), parent=self.head))
 
     # --- what is about it ----------------------------------------------------------------
     def make_aura(self):
@@ -856,8 +888,8 @@ class Moth:
                 self.objects.append(piece("bob", "dust", items, self.C + Vector((sx * 0.2, 0.1, -0.2)), side=side, parent=self.root))
         elif style_ == "rings":       # the shape it leaves on the eye
             items = []
-            for i, r in enumerate((0.75, 1.0)):
-                items.append((f2.band(self.C + Vector((0, 0.03, -0.02)), L * 1.15 * r, L * 0.95 * r, 0.006, n=22, u=X, v=Z, sides=3), "field_ring"))
+            for i, r in enumerate((0.62, 0.9)):
+                items.append((f2.band(self.C + Vector((0, 0.03, -0.02)), L * 1.05 * r, L * 0.9 * r, 0.0065, n=22, u=X, v=Z, sides=3), "field_ring"))
             self.objects.append(piece("pulse", "rings", items, self.C + Vector((0, 0.03, 0)), parent=self.root))
         elif style_ == "halo":
             top = self.H + Vector((0, 0.01, 0.15 * self.kh))
@@ -905,7 +937,7 @@ class Moth:
             self.body_items += items
         elif style_ == "comb":      # a piece of someone else's comb
             c = hand + Vector((0, -0.02, -0.03 * k))
-            cells, dark = None, None
+            cells, dark, lit = None, None, None
             for i, (x, z) in enumerate(((-0.036, 0.0), (0.0, 0.0), (0.036, 0.0), (-0.018, -0.031), (0.018, -0.031), (-0.018, 0.031), (0.018, 0.031))):
                 p = c + Vector((x, 0, z)) * k
                 hexa = g.lathe([(0.02 * k, -0.012 * k), (0.02 * k, 0.012 * k)], n=6, phase=math.pi / 6)
@@ -913,8 +945,11 @@ class Moth:
                 cells = g.merge(cells, hexa)
                 inner = g.lathe([(0.013 * k, 0.0), (0.011 * k, 0.004 * k)], n=6, phase=math.pi / 6)
                 inner = ([Vector((v_.x, -v_.z - 0.0125 * k, v_.y)) + p for v_ in inner[0]], inner[1])
-                dark = g.merge(dark, inner)
-            self.body_items += [(cells, "wax_comb"), (dark, "wax_comb_dark")]
+                if i in (1, 5):
+                    lit = g.merge(lit, inner)
+                else:
+                    dark = g.merge(dark, inner)
+            self.body_items += [(cells, "wax_comb"), (dark, "wax_comb_dark"), (lit, "field_honey")]
         elif style_ == "star":      # a point of steady light above its head, like a star on a stick
             top = self.H + Vector((0, -0.01, 0.2 * self.kh))
             self.body_items.append((g.tube([self.H + Vector((0, 0, 0.04 * self.kh)), top], [0.0035, 0.002], n=3), "bone"))
@@ -947,22 +982,22 @@ class Moth:
             return
         k = self.k
         foot = self.M @ Vector((0, 0.0, -0.118 * k))
-        if style_ == "lamp":        # the lamp it keeps: it sits on the cap, and the wick is its own business
-            top = foot + Vector((0, 0.0, 0.0))
-            r = 0.085 * k
-            items = [(g.lathe([(r * 0.3, 0.0), (r * 0.95, -0.02), (r * 1.08, -0.045), (r * 1.0, -0.055)], n=8, centre=top), "metal_brass"),
-                     (g.lathe([(r * 0.82, -0.055), (r * 0.9, -0.14), (r * 0.82, -0.225)], n=8, centre=top), "glass"),
-                     (g.lathe([(r * 1.0, -0.225), (r * 1.08, -0.24), (r * 0.7, -0.275), (r * 0.3, -0.285)], n=8, centre=top), "metal_brass"),
-                     (g.lathe([(r * 0.22, -0.225), (r * 0.2, -0.17)], n=6, centre=top), "wax")]
-            posts = None
-            for i in range(4):
-                a = math.pi / 4 + i * math.pi / 2
-                p = top + Vector((math.cos(a) * r * 0.95, math.sin(a) * r * 0.95, 0))
-                posts = g.merge(posts, g.tube([p + Z * -0.05, p + Z * -0.23], 0.0045, n=3))
-            items.append((posts, "metal_iron"))
+        if style_ == "lamp":        # the light it keeps: a candle in a dish; it sits over the flame, and the wick is its own business
+            base = self.C + Vector((0, -0.115 * k, -0.3 * k))
+            r = 0.078 * k
+            items = [(g.lathe([(r * 0.3, 0.0), (r * 1.0, 0.005), (r * 1.3, 0.03), (r * 1.22, 0.038), (r * 0.9, 0.016), (r * 0.02, 0.014)], n=10, centre=base), "metal_brass"),
+                     (f2.band(base + Vector((0, r * 1.5, 0.03)), r * 0.34, r * 0.34, 0.0085 * k, n=10, u=Y, v=Z, sides=4), "metal_brass"),
+                     (g.lathe([(r * 0.46, 0.012), (r * 0.44, 0.15 * k), (r * 0.3, 0.166 * k), (r * 0.02, 0.166 * k)], n=8, centre=base), "wax")]
+            drips = None
+            for a_, h_ in ((0.4, 0.11), (2.3, 0.13), (4.1, 0.09)):
+                d_ = Vector((math.cos(a_), math.sin(a_), 0)) * (r * 0.45)
+                drips = g.merge(drips, g.tube([base + d_ + Z * (0.158 * k), base + d_ * 1.06 + Z * (h_ * k)], [0.008 * k, 0.011 * k], n=4))
+            items.append((drips, "wax"))
+            t = base + Z * (0.166 * k)
+            items.append((g.tube([t, t + Z * 0.016 * k], 0.002 * k, n=3), "scale_black"))
             self.body_items += items
-            t = top + Vector((0, 0, -0.168))
-            fl = g.tongue([t, t + Vector((0.005, 0, 0.02)), t + Vector((0, 0, 0.05))], [0.018, 0.026, 0.002], thick=0.8, normal=Y)
+            t = t + Z * 0.01 * k
+            fl = g.tongue([t, t + Vector((0.008, 0, 0.03)) * k, t + Vector((0, 0, 0.088 * k))], [0.022 * k, 0.036 * k, 0.003], thick=0.8, normal=Y)
             self.objects.append(piece("flick", "flame", [(fl, "field_flame")], t, parent=self.root))
         elif style_ == "log":       # a twig it has made its own
             a, b = foot + Vector((-0.2 * k, 0.03, -0.012)), foot + Vector((0.21 * k, -0.02, 0.0))
@@ -1006,6 +1041,7 @@ def paint_wings(m, side):
     A = m.ac
     pats = names(m.spec.get("pattern"))
     black, white, cream = "scale_black", "scale_white", "scale_cream"
+    glint = "field_glint" if m.level >= 3 else white        # an eye-spot's point of light is the field's, once it is grown
     # every wing is furred where it leaves the body
     for w in (fore, hind):
         if w is not None:
@@ -1063,18 +1099,18 @@ def paint_wings(m, side):
             if hind:
                 hind.paint(lambda s, t, i, j, w=hind: A("accent_pale", "fur_light") if i >= w.ns - 1 else (A("accent_dark", "fur_ruff") if i == w.ns - 3 else None))
         elif p == "eyes":
-            fore.eye(0.5, 0.5, 0.15, ((1.0, A("accent_pale", "fur_light")), (0.8, black), (0.6, A("accent")), (0.36, black)))
+            fore.eye(0.5, 0.5, 0.15, ((1.0, A("accent_pale", "fur_light")), (0.8, black), (0.6, A("accent")), (0.36, black)), glint)
         elif p == "owl":
             fore.paint(lambda s, t, i, j: black if (j <= 1 and 0.25 < s < 0.9) else (cream if (j == 2 and 0.3 < s < 0.85) else None))
             fore.paint(lambda s, t, i, j, w=fore: A("accent_dark", "fur_ruff") if i >= w.ns - 1 else None)
             if hind:
                 hind.paint(lambda s, t, i, j, w=hind: A("accent_dark", "fur_ruff") if i >= w.ns - 1 else None)
-                hind.eye(0.52, 0.5, 0.22, ((1.0, cream), (0.82, A("accent")), (0.6, black), (0.3, A("accent_light", "fur_light"))))
+                hind.eye(0.52, 0.5, 0.22, ((1.0, cream), (0.82, A("accent")), (0.6, black), (0.3, A("accent_light", "fur_light"))), glint)
         elif p == "eyes4":
             rings = ((1.0, A("accent_pale", "fur_light")), (0.8, black), (0.6, A("accent")), (0.34, black))
-            fore.eye(0.6, 0.5, 0.17, rings)
+            fore.eye(0.6, 0.5, 0.17, rings, glint)
             if hind:
-                hind.eye(0.6, 0.5, 0.17, rings)
+                hind.eye(0.6, 0.5, 0.17, rings, glint)
             for w in (fore, hind):
                 if w:
                     w.paint(lambda s, t, i, j, w=w: A("accent_dark", "fur_ruff") if i >= w.ns - 1 else None)
@@ -1083,7 +1119,7 @@ def paint_wings(m, side):
             fore.paint(lambda s, t, i, j: "wood_bark" if (i % 4 == 3 and j in (1, 2)) else None)
             if hind:
                 hind.paint(lambda s, t, i, j, w=hind: A("accent_dark", "fur_ruff") if i >= w.ns - 1 else None)
-                hind.eye(0.5, 0.45, 0.17, ((1.0, A("accent_pale", "fur_light")), (0.8, black), (0.6, A("accent")), (0.34, black)))
+                hind.eye(0.5, 0.45, 0.17, ((1.0, A("accent_pale", "fur_light")), (0.8, black), (0.6, A("accent")), (0.34, black)), glint)
         elif p == "bark":
             fore.paint(lambda s, t, i, j: "wood_bark" if ((i * 3 + j * 5) % 7 in (0, 3) and i > 0) else None)
             fore.paint(lambda s, t, i, j: "scale_grey" if ((i * 5 + j * 3) % 11 == 2 and i > 1) else None)
@@ -1102,7 +1138,7 @@ def paint_wings(m, side):
                         for band in range(3):
                             s_ = ss - (0.16 if band % 2 else 0.0)
                             w.stroke([(s_, band * 2 / w.nt + 0.02), (s_, min(1.0, (band + 1) * 2 / w.nt) - 0.02)], 0.022, "stone_mortar")
-            fore.stroke([(0.34, 0.1), (0.46, 0.4), (0.4, 0.62), (0.52, 0.95)], 0.016, black, layer=2)
+            fore.stroke([(0.34, 0.1), (0.46, 0.4), (0.4, 0.62), (0.52, 0.95)], 0.02, "field_crack", layer=2)
             fore.paint(lambda s, t, i, j, w=fore: A("accent_dark", "fur_ruff") if (i >= w.ns - 1) else None)
             if hind:
                 hind.paint(lambda s, t, i, j, w=hind: A("accent_dark", "fur_ruff") if (i >= w.ns - 1 or j >= w.nt - 1) else None)
@@ -1116,16 +1152,18 @@ def paint_wings(m, side):
             fore.paint(lambda s, t, i, j: False if (i in (5, 6) and j in (2, 3)) else (A("accent_light", "fur_light") if (4 <= i <= 7 and 1 <= j <= 4) else None))
             if hind:
                 hind.paint(lambda s, t, i, j: False if (i in (4, 5) and j in (2, 3)) else (A("accent_light", "fur_light") if (3 <= i <= 6 and 1 <= j <= 4) else None))
-        elif p == "worn":
+        elif p == "worn":         # worn thin enough to read through: pale, veined, gone in places
             for w in (fore, hind):
                 if w:
-                    w.paint(lambda s, t, i, j, w=w: "fur_light" if s > 0.62 else None)
-                    w.paint(lambda s, t, i, j, w=w: False if (i * 7 + j * 3) % 13 == 5 and i > 3 else None)
+                    w.paint(lambda s, t, i, j, w=w: "fur_light" if i > 0 else None)
+                    w.paint(lambda s, t, i, j, w=w: False if ((i * 7 + j * 3) % 13 == 5 and i > 3) else None)
+                    for tt in (0.2, 0.5, 0.8):
+                        w.stroke([(0.1, tt), (0.4, tt), (0.7, tt), (0.92, tt)], 0.018, A("accent_light", "fur_ruff"))
         elif p == "moon":
             for w in (fore, hind):
                 if w:
                     w.paint(lambda s, t, i, j, w=w: (A("accent_light", "fur_light") if s < 0.62 else None) if i > 0 else None)
-                    w.eye(0.56 if w is fore else 0.5, 0.52, 0.06, ((1.0, A("accent_dark", "fur_dark")), (0.66, cream), (0.34, black)), glint=False)
+                    w.eye(0.56 if w is fore else 0.5, 0.52, 0.06, ((1.0, A("accent_dark", "fur_dark")), (0.66, cream), (0.34, black)), glint=None)
         elif p == "costa":
             fore.paint(lambda s, t, i, j: A("accent_dark", "fur_dark") if j == 0 else None)
         elif p == "white":
@@ -1139,15 +1177,16 @@ def paint_wings(m, side):
                         if c[0] == w.ns - 1:
                             w.rims[c] = "field_edge"
                     w.paint(lambda s, t, i, j, w=w: A("accent_light", "fur_light") if i == w.ns - 1 else None)
-        elif p == "frame":
+        elif p == "frame":        # nearly clear: a frame and its veins, and nothing between them
             for w in (fore, hind):
                 if w:
-                    keep = lambda i, j, w=w: i <= 1 or i >= w.ns - 1 or j == 0 or j == w.nt - 1 or j == w.nt // 2 or i in (w.ns // 3 + 1, 2 * w.ns // 3 + 1)
+                    veins = (4, 8) if w is fore else (w.ns // 2,)
+                    keep = lambda i, j, w=w, veins=veins: i <= 1 or i >= w.ns - 1 or j == 0 or j == w.nt - 1 or j == w.nt // 2 or i in veins
                     w.paint(lambda s, t, i, j, w=w, keep=keep: (A("accent_light", "fur_light") if (j == 0 or i >= w.ns - 1) else white) if keep(i, j) else False)
-        elif p == "likeness":       # two eyes and a mouth in the largest pane: nobody's face in particular, and yours
-            for q, (s, t) in enumerate(((0.52, 0.2), (0.52, 0.34))):
-                fore.disc(s, t, 0.03, A("accent_dark", "fur_dark"), n=7)
-            fore.stroke([(0.72, 0.16), (0.78, 0.27), (0.72, 0.38)], 0.02, A("accent_dark", "fur_dark"))
+        elif p == "likeness":       # two eyes and a mouth in the widest pane: nobody's face in particular, and yours
+            for s_ in (0.49, 0.59):
+                fore.disc(s_, 0.26, 0.034, A("accent_pale", "fur_light"), n=8)
+            fore.stroke([(0.485, 0.4), (0.54, 0.44), (0.595, 0.4)], 0.024, A("accent_pale", "fur_light"))
         elif p == "streak":
             fore.paint(lambda s, t, i, j, w=fore: A("accent_pale", "fur_light") if j == w.nt // 2 and i > 1 else None)
         elif p == "compass":
@@ -1166,14 +1205,12 @@ def paint_wings(m, side):
     # a bite burned out of one forewing, its edge still alight
     burn, bsize = opt(m.spec.get("burn"), 1.0)
     if burn == side and fore is not None:
-        c = fore.at(0.86, 0.72)
-        gone = [cell for cell in fore.cells if (fore.at((cell[0] + 0.5) / fore.ns, (cell[1] + 0.5) / fore.nt) - c).length < 0.22 * bsize]
-        for cell in gone:
-            del fore.cells[cell]
-        for (i, j) in list(fore.cells):
-            if any((i + di, j + dj) in gone for di, dj in ((1, 0), (-1, 0), (0, 1), (0, -1))):
-                fore.cells[(i, j)] = black
-                fore.rims[(i, j)] = "field_edge"
+        c, edge, near = fore.bite(0.97, 0.62, 0.3 * bsize)
+        for cell in near:
+            fore.cells[cell] = black
+            fore.rims[cell] = "field_edge"
+        if len(edge) > 2:
+            fore.stroke([c + (q - c) * 1.045 for q in edge], 0.03, "field_edge", layer=1, flat=True)
 
 
 def roll(m, side):
@@ -1191,65 +1228,85 @@ def roll(m, side):
 # ======================================================================================
 
 def build_grub(form_id, level, spec, path=None):
-    """The Case-grub: a grub in a case it has spun of whatever was nearest, hanging by one thread
-    from a point of the field. Its head and six feet come out of the top; the whole of it sways."""
+    """The Case-grub: a grub in a case it has spun of whatever was nearest (twigs, a page corner,
+    thread, lamp-soot), hanging by one thread from a point of the field. Its head and six feet
+    come out of the mouth of the case and it looks at you; the whole of it sways."""
     kit.reset()
-    T = Vector((0, 0.02, 0.7))
-    case, csize = opt(spec.get("case", "scraps"), 1.0)
-    top, tip = Vector((0, -0.005, 0.43)), Vector((0, 0.075, 0.13))
-    ax = (tip - top)
-    rings = []
-    for t, r in ((0.0, 0.05), (0.06, 0.06), (0.25, 0.074), (0.5, 0.076), (0.74, 0.058), (0.9, 0.032), (1.0, 0.008)):
-        rings.append(g.ring(top + ax * t, r * csize, r * csize, n=9, u=X, v=Vector((0, 1, 0.26)).normalized()))
-    items = [(g.loft(rings, caps=True), "fur_light")]
-    # the thread it is wound with, a page corner, a twig, a band of lamp-soot
+    case, cs = opt(spec.get("case", "scraps"), 1.0)
+    T = Vector((0, 0.07, 0.7))                          # the point of the field its thread hangs from
+    O = Vector((0, -0.01, 0.42))                        # the middle of the case's mouth
+    ax = Vector((0, 0.3, -1.0)).normalized()            # the way the case hangs from its mouth
+    fw = ax.cross(X).normalized()                       # the front of it
+    ln = 0.34 * cs
+    rad = lambda a: X * math.cos(a) + fw * math.sin(a)
+    prof = [(-0.035, 0.074), (0.0, 0.083), (0.16, 0.092), (0.42, 0.084), (0.7, 0.06), (0.9, 0.031), (1.0, 0.008)]
+
+    def r_at(t):
+        for (t0, r0), (t1, r1) in zip(prof, prof[1:]):
+            if t0 <= t <= t1:
+                return (r0 + (r1 - r0) * (t - t0) / (t1 - t0)) * cs
+        return prof[-1][1] * cs
+    items = [(g.loft([g.ring(O + ax * (t * ln), r * cs, r * cs, n=10, u=X, v=fw) for t, r in prof], caps=True), "fur_light")]
+    # what it is made of: twigs laid along it, thread wound round it, a band of lamp-soot, a page corner
+    twigs = None
+    for i, (a, t0, t1, tw) in enumerate(((1.25, 0.06, 0.8, 0.25), (2.3, 0.02, 0.62, -0.2), (0.3, 0.1, 0.94, 0.2), (3.5, 0.05, 0.7, 0.3), (-0.7, 0.0, 0.76, -0.25), (4.6, 0.12, 0.9, 0.1))):
+        p0 = O + ax * (t0 * ln) + rad(a) * (r_at(t0) + 0.007)
+        p1 = O + ax * (t1 * ln) + rad(a + tw) * (r_at(t1) + 0.012)
+        twigs = g.merge(twigs, g.tube([p0 - ax * 0.012, (p0 + p1) / 2 + rad(a + tw / 2) * 0.004, p1 + ax * 0.02], [0.0085, 0.0095, 0.006], n=5))
+    items.append((twigs, "wood_twig"))
     wraps = None
-    for t, r in ((0.2, 0.073), (0.31, 0.078), (0.62, 0.071)):
-        wraps = g.merge(wraps, f2.band(top + ax * t, r * csize, r * csize, 0.0065, n=12, u=X, v=Vector((0, 1, 0.26)).normalized(), sides=4))
+    for t in (0.24, 0.56):
+        wraps = g.merge(wraps, f2.band(O + ax * (t * ln), r_at(t) + 0.004, r_at(t) + 0.004, 0.007, n=12, u=X, v=fw, sides=4))
     items.append((wraps, "fur_dark"))
-    items.append((f2.band(top + ax * 0.46, 0.079 * csize, 0.079 * csize, 0.011, n=12, u=X, v=Vector((0, 1, 0.26)).normalized(), sides=4, flat=0.5), "scale_black"))
-    pc = top + ax * 0.4 + Vector((0.07, -0.02, 0.0))
-    items.append((g.tongue([pc + Vector((-0.02, 0.0, 0.05)), pc, pc + Vector((0.055, -0.01, -0.03))], [0.05, 0.07, 0.004], thick=0.08, normal=(0.3, -1, 0.2)), "paper"))
-    items.append((g.tube([top + ax * 0.55 + Vector((-0.07, 0.0, 0.03)), top + ax * 0.8 + Vector((-0.062, 0.01, -0.03))], [0.009, 0.006], n=5), "wood_twig"))
-    items.append((g.tube([T, top + Vector((0, 0.045, 0.0))], 0.0024, n=3), "thread_silk"))
-    items.append((g.ico(T, 0.012, sub=1), "field_thread"))
-    # the grub: two rings of it out of the case, and six feet on the rim
-    items.append((g.ico(top + Vector((0, -0.012, 0.012)), 1.0, sub=2, scale=(0.05, 0.05, 0.05)), "fur_dark"))
+    items.append((f2.band(O + ax * (0.4 * ln), r_at(0.4) + 0.003, r_at(0.4) + 0.003, 0.012, n=12, u=X, v=fw, sides=4, flat=0.45), "scale_black"))
+    pc = O + ax * (0.3 * ln) + rad(1.9) * (r_at(0.3) + 0.004)
+    items.append((g.tongue([pc - ax * 0.05 + rad(1.9) * 0.004, pc + rad(2.4) * 0.012, pc + ax * 0.085 + rad(1.5) * 0.03], [0.05, 0.085, 0.004], thick=0.07, normal=rad(1.9)), "paper"))
+    items.append((g.tube([T, O - fw * 0.07 + Vector((0, 0, 0.008))], 0.0026, n=3), "thread_silk"))
+    items.append((g.ico(T, 0.013, sub=1), "field_thread"))
+    # the grub: a ring of it in the mouth of the case, and six feet over the lip
+    items.append((g.ico(O + Vector((0, -0.004, 0.012)), 1.0, sub=2, scale=(0.068, 0.066, 0.05)), "fur_dark"))
     feet = None
     for sx in (1, -1):
         for n in range(3):
-            p = top + Vector((sx * (0.026 + 0.012 * n), -0.046 + 0.022 * n, 0.012))
-            feet = g.merge(feet, g.tube([p + Vector((0, 0.01, 0.014)), p + Vector((sx * 0.006, -0.008, -0.004)), p + Vector((sx * 0.004, -0.012, -0.022))], [0.008, 0.0065, 0.003], n=4))
+            p0 = O + Vector((sx * (0.026 + 0.016 * n), -0.05 + 0.014 * n, 0.03))
+            p1 = p0 + Vector((sx * 0.012, -0.03, 0.002))
+            p2 = p1 + Vector((sx * 0.004, -0.012, -0.034))
+            feet = g.merge(feet, g.tube([p0, p1, p2], [0.011, 0.0095, 0.0045], n=5))
     items.append((feet, "bristle_leg"))
     root = piece("sway", "grub", items, T)
     objects = [root]
-    Hc = top + Vector((0, -0.04, 0.062))
-    hi = [(g.ico(Hc, 1.0, sub=2, scale=(0.054, 0.05, 0.05)), "fur_ruff")]
-    lids = None
-    re = 0.021 * opt(spec.get("eyes", "big"))[1]
+    # its head: all face
+    Hc = O + Vector((0, -0.04, 0.078))
+    es = opt(spec.get("eyes", "big"))[1]
+    re = 0.027 * es
+    hi = [(g.ico(Hc, 1.0, sub=3, scale=(0.068, 0.063, 0.061)), "fur_light"),
+          (g.ico(Hc + Vector((0, 0.016, 0.018)), 1.0, sub=2, scale=(0.061, 0.056, 0.052)), "fur_ruff")]
+    lids, jaws, cheeks = None, None, None
+    ex, ey, ez = 0.037, -0.04, 0.006
     for sx in (1, -1):
-        lids = g.merge(lids, g.ico(Hc + Vector((sx * 0.027, -0.034, 0.008)), re * 0.93, sub=1))
-        lids = g.merge(lids, g.tongue([Hc + Vector((sx * 0.006, -0.046, 0.03)), Hc + Vector((sx * 0.028, -0.05, 0.036)), Hc + Vector((sx * 0.05, -0.03, 0.03))], [0.012, 0.016, 0.01], thick=0.5, normal=(0, -0.4, 1)))
-    hi.append((lids, "fur_dark"))
-    jaws = None
-    for sx in (1, -1):
-        jaws = g.merge(jaws, g.cone(Hc + Vector((sx * 0.012, -0.046, -0.02)), Hc + Vector((sx * 0.003, -0.056, -0.034)), 0.006, n=4))
-    hi.append((jaws, "claw"))
+        lids = g.merge(lids, g.ico(Hc + Vector((sx * ex, ey + 0.004, ez)), re * 0.93, sub=1))
+        lids = g.merge(lids, g.tongue([Hc + Vector((sx * (ex - re * 0.95), ey - re * 0.5, ez + re * 0.72)), Hc + Vector((sx * ex, ey - re * 0.9, ez + re * 1.12)),
+                                       Hc + Vector((sx * (ex + re * 0.98), ey - re * 0.3, ez + re * 0.74))], [0.013, 0.018, 0.01], thick=0.55, normal=(0, -0.4, 1)))
+        jaws = g.merge(jaws, g.cone(Hc + Vector((sx * 0.014, -0.054, -0.026)), Hc + Vector((sx * 0.003, -0.066, -0.04)), 0.0075, n=4))
+        cheeks = g.merge(cheeks, g.ico(Hc + Vector((sx * 0.03, -0.04, -0.024)), 1.0, sub=1, scale=(0.02, 0.016, 0.015)))
+    hi += [(lids, "fur_dark"), (jaws, "claw"), (cheeks, "fur_light")]
     head = piece("turn", "head", hi, Hc, parent=root)
     objects.append(head)
-    for sx, side in ((1, "l"), (-1, "r")):
-        c = Hc + Vector((sx * 0.027, -0.037, 0.008))
-        look = Vector((sx * 0.25, -0.95, 0.1)).normalized()
-        objects.append(piece("blink", "eye", [(g.ico(c, re, sub=2), "eye_dark"), (g.ico(c + look * re * 0.72, re * 0.38, sub=1), "field_eyes")], c, side=side, parent=head))
-        b0 = Hc + Vector((sx * 0.018, -0.022, 0.044))
-        fe = [(g.tube([b0, b0 + Vector((sx * 0.012, -0.012, 0.026)), b0 + Vector((sx * 0.03, -0.02, 0.04))], [0.005, 0.004, 0.002], n=4), "bristle_leg"),
-              (g.ico(b0 + Vector((sx * 0.03, -0.02, 0.04)), 0.006, sub=0), "fur_light")]
-        objects.append(piece("sway", "feeler", fe, b0, side=side, parent=head))
+    c = Hc + Vector((ex, ey, ez))
+    look = Vector((0.14, -0.98, 0.12)).normalized()
+    eye = piece("blink", "eye", [(g.ico(c, re, sub=2), "eye_dark"), (g.ico(c + look * re * 0.9, 1.0, sub=1, scale=(re * 0.38, re * 0.17, re * 0.38)), "field_eyes")], c, side="l", parent=head)
+    objects += [eye, twin(eye, "blink", "eye", side="r", parent=head)]
+    b0 = Hc + Vector((0.022, -0.02, 0.05))
+    fe = [(g.tube([b0, b0 + Vector((0.012, -0.014, 0.03)), b0 + Vector((0.034, -0.024, 0.046))], [0.0055, 0.0045, 0.0025], n=4), "bristle_leg"),
+          (g.ico(b0 + Vector((0.034, -0.024, 0.046)), 0.0075, sub=1), "fur_light")]
+    feeler = piece("sway", "feeler", fe, b0, side="l", parent=head)
+    objects += [feeler, twin(feeler, "sway", "feeler", side="r", parent=head)]
     bpy.context.view_layer.update()
-    socks = gh._table(Hc.z + 0.05, -0.09, 0.4, 0.08, {
-        "socket_head": [tuple(Hc + Vector((0, 0, 0.05)))], "socket_eyes": [tuple(Hc + Vector((0, -0.05, 0.008)))], "socket_mouth": [tuple(Hc + Vector((0, -0.052, -0.022)))],
-        "socket_back": [(0, 0.09, 0.36)], "socket_tail": [tuple(tip)], "socket_light": [(0, 0.03, 0.3)], "socket_body": [(0, -0.05, 0.3)],
-        "socket_collar": f2.collar_at((0, -0.012, 0.44), 0.05, 0.05, tilt=0.26)})
+    tip = O + ax * ln
+    socks = gh._table(Hc.z + 0.06, -0.1, 0.4, 0.09, {
+        "socket_head": [tuple(Hc + Vector((0, 0, 0.06)))], "socket_eyes": [tuple(Hc + Vector((0, -0.062, 0.008)))], "socket_mouth": [tuple(Hc + Vector((0, -0.066, -0.03)))],
+        "socket_back": [tuple(O + ax * (0.3 * ln) - fw * 0.1)], "socket_tail": [tuple(tip)], "socket_light": [tuple(O + ax * (0.4 * ln))], "socket_body": [tuple(O + ax * (0.4 * ln) + fw * 0.1)],
+        "socket_keepsake": [tuple(O + ax * (0.12 * ln) + fw * 0.1)], "socket_collar": f2.collar_at(tuple(O + ax * (0.05 * ln)), 0.088, 0.088, tilt=0.29)})
     path = path or os.path.join(GL.OUT, form_id + ".glb")
     tris = GL.export_objects(objects, socks, path, ref=STAND)
     log(form_id, "%d triangles, %d KB, %d pieces" % (tris, os.path.getsize(path) // 1024, len(objects)))
@@ -1331,7 +1388,7 @@ def gift_dust_wings():
     in the colour of the Path it is on. They beat."""
     L = 0.4
     out = []
-    for side, sgn in (("l", 1), ("r", -1)):
+    for side, sgn in (("l", 1),):
         fore, hind = Wing(WINGS["broad"][0], -12), Wing(WINGS["broad"][1], 0)
         for w in (fore, hind):
             w.paint(lambda s, t, i, j, w=w: "accent_pale" if i >= w.ns - 1 else ("accent_dark" if i == w.ns - 3 else ("fur_ruff" if i == 0 else None)))
@@ -1351,7 +1408,8 @@ def gift_dust_wings():
             for pts, material, layer in w.decals:
                 raw.plate([W(p, TH / 2 + lower + layer * EPS) for p in pts], [W(p, -TH / 2 + lower - layer * EPS) for p in pts], flip(en), material)
         raws, items = [raw.object("wings_" + side)], []
-        out.append(piece("beat", "wing", items, Vector((sgn * root.x, root.y, root.z)), side=side, raws=raws))
+        out.append(piece("beat", "wing", items, root, n=0, raws=raws))
+        out.append(twin(out[0], "beat", "wing", n=1))
     return out
 
 
@@ -1360,7 +1418,7 @@ def gift_antennae():
     read the air. They sway."""
     out = []
     s = 2.1
-    for sx, side in ((1, "l"), (-1, "r")):
+    for sx, side in ((1, "l"),):
         b0 = Vector((sx * 0.035, -0.02, 0.0))
         path = [b0, b0 + Vector((sx * 0.026, -0.03, 0.07)) * s, b0 + Vector((sx * 0.07, -0.06, 0.125)) * s, b0 + Vector((sx * 0.12, -0.072, 0.152)) * s, b0 + Vector((sx * 0.162, -0.058, 0.148)) * s]
         pts = [cr(path, i / 8) for i in range(9)]
@@ -1380,6 +1438,7 @@ def gift_antennae():
                     teeth = g.merge(teeth, bl)
         items += [(teeth, "accent_light"), (teeth2, "accent")]
         out.append(piece("sway", "feeler", items, b0, side=side))
+        out.append(twin(out[0], "sway", "feeler", side="r"))
     return out
 
 

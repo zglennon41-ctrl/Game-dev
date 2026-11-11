@@ -151,7 +151,7 @@
      },
      "body": {
       "burn": [
-       "l",
+       "r",
        1.0
       ],
       "pitch": 44,
@@ -730,7 +730,7 @@
        0.9
       ],
       "build": {
-       "span": 1.0,
+       "span": 1.15,
        "body": 1.0
       }
      },
@@ -900,8 +900,8 @@
         "flap": "still",
         "pitch": 86,
         "pattern": [
-         "rings",
-         "worn"
+         "worn",
+         "rings"
         ],
         "fur": [
          "mane",
@@ -1098,6 +1098,8 @@
         "pitch": 40,
         "pattern": [
          "white",
+         "costa",
+         "hem",
          "edge"
         ],
         "carry": [
@@ -1130,10 +1132,10 @@
      },
      "body": {
       "hold": "swept",
-      "pitch": 22,
+      "pitch": 30,
       "tails": [
        "stream",
-       3.4
+       2.8
       ],
       "build": {
        "span": 1.0,
