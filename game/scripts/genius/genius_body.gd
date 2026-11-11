@@ -412,6 +412,10 @@ func set_worn(on: bool) -> void:
 		if c is Node3D and c != worn_piece:
 			(c as Node3D).visible = not on
 	worn_piece.visible = on
+	# The blades of light of a great one stand behind the piece that is worn (behind its
+	# wearer's head, from the nape), not where its own floating body's head was.
+	if mantle:
+		mantle.position = _local_xf(worn_piece).origin + Vector3(0, 0, -0.16) if on else (mantle.get_meta("rest") as Vector3)
 
 ## Its partner's coat, as this form wears it (data/genius-looks.json, shifts): a form may wear
 ## the coat darker, paler, greyer or warmer than it was born, and it is still that coat.

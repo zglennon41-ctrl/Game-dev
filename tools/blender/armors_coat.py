@@ -347,12 +347,12 @@ class Coat(Piece):
                 pts = [self.at(d, s * (PI - self.gap(d) - 0.012), 0.012) for d in ds]
                 self.round(g.tube(pts, 0.013, n=4), self.acc_l)
         if "yoke" in tr:             # a yoke across the shoulders
-            rings, m = [], 15
-            for d, out in ((-0.03, 0.01), (0.05, 0.02), (0.16, 0.024), (0.24, 0.024)):
-                phi = 0.22
-                rings.append([self.at(d, -(PI - phi) + 2 * (PI - phi) * i / (m - 1), out) for i in range(m)])
+            rings, m = [], 21
+            for d in (-0.045, 0.0, 0.09, 0.2, 0.26):
+                phi = self.gap(d)
+                rings.append([self.at(d, -(PI - phi) + 2 * (PI - phi) * i / (m - 1), 0.009) for i in range(m)])
             self.sheet(g.loft(rings, caps=False, closed=False), broad)
-            self.band_on([p + Vector((0, 0, 0.004)) for p in rings[-1]], 0.02, line)
+            self.band_on([p + Vector((0, 0, 0.004)) + self.normal(0.26, -(PI - self.gap(0.26)) + 2 * (PI - self.gap(0.26)) * i / (m - 1)) * 0.003 for i, p in enumerate(rings[-1])], 0.02, line)
         if "stripe" in tr:           # a stripe down each side seam
             for s in (1, -1):
                 pts = [self.at(d, s * 0.5 * PI, 0.009) for d in ds]
@@ -1065,22 +1065,23 @@ def _clasp_alone(C, spec):
 # ======================================================================================
 # The worn piece: a mantle
 # ======================================================================================
-# The game's people, standing at the origin and facing -Y. Measured on alexandria-m (the men are
-# all within a finger of him; the women's shoulders are a finger lower against the chest bone
-# and their necks are slimmer, so on them the piece rides a little high and never cuts in):
-# the top of the shoulders, the middle of the trunk front to back, the nape of the neck (where
-# the empty `worn` stands), and the chest bone that carries the piece.
+# The game's people, standing at the origin and facing -Y, as alexandria-m stands: the top of
+# the shoulders, the middle of the trunk front to back, the nape of the neck (where the empty
+# `worn` stands), and the chest bone that carries the piece.
 SHOULDER_Z = 2.0
 TRUNK_Y = -0.045
 NAPE = Vector((0.0, 0.079, 1.987))
 CHEST = Vector((0.0, 0.029, 1.587))
 
 # Its section at each distance below the top of the shoulders: (how far down, half its width,
-# how far it stands behind the middle of the trunk, how far in front). Two fingers off the body
-# all the way: up the slope of the neck, flat across the shoulders, round the point of the
-# shoulder, and down the blades and the breast.
-MANTLE_ROWS = ((-0.05, 0.125, 0.1, 0.105), (-0.012, 0.21, 0.118, 0.108), (0.0, 0.3, 0.128, 0.11), (0.012, 0.35, 0.134, 0.113),
-               (0.05, 0.4, 0.142, 0.126), (0.1, 0.414, 0.152, 0.15), (0.17, 0.42, 0.16, 0.173), (0.25, 0.424, 0.17, 0.187), (0.34, 0.428, 0.18, 0.193))
+# how far it stands behind the middle of the trunk, how far in front). One piece is worn by
+# all twenty-six of the game's people, each brought to it by the chest bone, so this is the
+# least that clears every one of them in the tunic they wear: up the slope of the neck, flat
+# across the shoulders, round the point of the shoulder, down the blades and the breast. The
+# women's backs and napes stand furthest behind the bone (alexandria-f, edo-f) and set the
+# back; the men's chests set the front; on a man it stands three fingers off the back.
+MANTLE_ROWS = ((-0.05, 0.158, 0.162, 0.125), (-0.012, 0.235, 0.178, 0.125), (0.0, 0.3, 0.188, 0.125), (0.012, 0.35, 0.198, 0.126),
+               (0.05, 0.4, 0.218, 0.134), (0.1, 0.414, 0.224, 0.158), (0.17, 0.42, 0.226, 0.2), (0.25, 0.424, 0.227, 0.208), (0.34, 0.428, 0.228, 0.21))
 # What a Path's mantle is cut like (docs/genius-lines.md, "A worn piece"): how far it falls down
 # the back, over the arms and down the breast; how it parts in front; its folds; its edge.
 CUTS = {
@@ -1160,7 +1161,7 @@ class Mantle(Coat):
                     rx, rb, rf = x0 + (x1 - x0) * q, b0 + (b1 - b0) * q, f0 + (f1 - f0) * q
                     break
         k = self.flare * max(0.0, d - 0.04) ** 2 / max(0.05, self.L)       # it kicks out toward its hem
-        return rx + 0.4 * k, rb + 1.2 * k, rf + 0.5 * k
+        return rx + 0.4 * k, rb + 0.5 * k, rf + 0.5 * k
 
     def section(self, d):
         rx, rb, rf = self.radii(d)
@@ -1251,11 +1252,13 @@ class Mantle(Coat):
                     pts.append(self.at(tt * self.fall(a), a, 0.008, tt))
                 self.band_on(pts, 0.06, broad, up=X, face=(0, -1, 0))
         if "yoke" in tr:             # a yoke: the top of it, close round the neck
-            rings, m = [], 21
-            for d, out in ((-0.045, 0.006), (-0.012, 0.009), (0.0, 0.01), (0.014, 0.011), (0.05, 0.011)):
-                rings.append([self.at(d, -(PI - 0.2) + 2 * (PI - 0.2) * i / (m - 1), out, 0.0) for i in range(m)])
+            rings, m = [], 33
+            angles = [(-1.0 + 2.0 * i / (m - 1)) * (PI - self.open) for i in range(m)]
+            for d in (-0.046, -0.012, 0.0):
+                rings.append([self.at(d, a, 0.007, 0.0) for a in angles])
+            rings.append([self.at(0.1 * self.fall(a), a, 0.007, 0.1) for a in angles])      # (half way to the shell's next ring: on its line)
             self.sheet(g.loft(rings, caps=False, closed=False), broad)
-            self.band_on([p + Vector((0, 0, 0.003)) + self.normal(0.05, -(PI - 0.2) + 2 * (PI - 0.2) * i / (m - 1)) * 0.002 for i, p in enumerate(rings[-1])], 0.012, line)
+            self.band_on([p + Vector((0, 0, 0.002)) + self.normal(0.02, a) * 0.003 for p, a in zip(rings[-1], angles)], 0.011, line)
         if "points" in tr:           # a point of its colour down the middle of the back
             top, tip = self.at(0.02, 0.0, 0.009, 0.0), self.at(self.back * 0.8, 0.0, 0.009, 0.8)
             self.sheet(([top + Vector((-0.1, -0.01, 0)), top + Vector((0.1, -0.01, 0)), tip], [(1, 0, 2)]), broad)

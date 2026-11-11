@@ -64,7 +64,8 @@
    "stands": 0.75,
    "worn": {
     "cut": "scarf"
-   }
+   },
+   "brow": -4
   },
   "silhouette": "relic-buckle"
  },
@@ -119,7 +120,8 @@
     "accent": "marigold",
     "worn": {
      "cut": "capelet"
-    }
+    },
+    "brow": 6
    },
    "prongs": [
     {
@@ -174,7 +176,8 @@
         "hem2",
         "piping"
        ]
-      }
+      },
+      "brow": 12
      },
      "finishes": [
       {
@@ -229,7 +232,8 @@
          "hem2",
          "cuffs",
          "stripe"
-        ]
+        ],
+        "brow": 10
        }
       },
       {
@@ -285,7 +289,8 @@
           "hem",
           "facing"
          ]
-        }
+        },
+        "brow": -8
        }
       }
      ]
@@ -345,7 +350,8 @@
        ],
        "points": 9,
        "dag": 0.16
-      }
+      },
+      "brow": 4
      },
      "finishes": [
       {
@@ -403,7 +409,8 @@
          "grown": [
           "pack"
          ]
-        }
+        },
+        "brow": 0
        }
       },
       {
@@ -455,7 +462,8 @@
         "trim": [
          "hem2",
          "cuffs"
-        ]
+        ],
+        "brow": -6
        }
       }
      ]
@@ -516,7 +524,8 @@
         "hem",
         "yoke"
        ]
-      }
+      },
+      "brow": 14
      },
      "finishes": [
       {
@@ -566,7 +575,8 @@
          "hem",
          "cuffs"
         ],
-        "tone": "pale"
+        "tone": "pale",
+        "brow": 6
        }
       },
       {
@@ -626,7 +636,8 @@
          "grown": [
           "lamp"
          ]
-        }
+        },
+        "brow": 12
        }
       }
      ]
@@ -686,7 +697,8 @@
     "accent": "amethyst",
     "worn": {
      "cut": "cowl"
-    }
+    },
+    "brow": 16
    },
    "prongs": [
     {
@@ -736,7 +748,8 @@
       "tone": "light",
       "worn": {
        "cut": "yoke"
-      }
+      },
+      "brow": 18
      },
      "finishes": [
       {
@@ -777,7 +790,8 @@
           "smoke",
           0.5
          ]
-        ]
+        ],
+        "brow": 10
        }
       },
       {
@@ -839,7 +853,8 @@
          "cut": "cowl",
          "points": 5,
          "dag": 0.4
-        }
+        },
+        "brow": 22
        }
       }
      ]
@@ -901,7 +916,8 @@
         "piping",
         "hem2"
        ]
-      }
+      },
+      "brow": 12
      },
      "finishes": [
       {
@@ -950,7 +966,8 @@
         "trim": [
          "piping",
          "collar"
-        ]
+        ],
+        "brow": 20
        }
       },
       {
@@ -1010,7 +1027,8 @@
          "trim": [
           "piping"
          ]
-        }
+        },
+        "brow": 0
        }
       }
      ]
@@ -1075,7 +1093,8 @@
         "piping",
         "facing"
        ]
-      }
+      },
+      "brow": 16
      },
      "finishes": [
       {
@@ -1124,7 +1143,8 @@
         ],
         "trim": [
          "piping"
-        ]
+        ],
+        "brow": 14
        }
       },
       {
@@ -1172,7 +1192,8 @@
          "dag": 0.45,
          "back": 0.22,
          "front": 0.2
-        }
+        },
+        "brow": 20
        }
       }
      ]
@@ -1229,7 +1250,8 @@
     "accent": "peacock",
     "worn": {
      "cut": "tippet"
-    }
+    },
+    "brow": 2
    },
    "prongs": [
     {
@@ -1281,7 +1303,8 @@
        "collar",
        "yoke"
       ],
-      "tone": "dark"
+      "tone": "dark",
+      "brow": 10
      },
      "finishes": [
       {
@@ -1336,7 +1359,8 @@
          "facing",
          "cuffs",
          "collar"
-        ]
+        ],
+        "brow": 6
        }
       },
       {
@@ -1384,7 +1408,8 @@
          "cuffs",
          "collar"
         ],
-        "tone": "light"
+        "tone": "light",
+        "brow": 0
        }
       }
      ]
@@ -1440,7 +1465,8 @@
        "collar",
        "bands"
       ],
-      "tone": "light"
+      "tone": "light",
+      "brow": -4
      },
      "finishes": [
       {
@@ -1488,7 +1514,8 @@
          "buttons",
          "whiskers",
          "tug"
-        ]
+        ],
+        "brow": -8
        }
       },
       {
@@ -1541,7 +1568,8 @@
          "collar",
          "stripe"
         ],
-        "tone": "pale"
+        "tone": "pale",
+        "brow": 4
        }
       }
      ]
@@ -1595,7 +1623,8 @@
        "cuffs",
        "collar",
        "hem2"
-      ]
+      ],
+      "brow": -6
      },
      "finishes": [
       {
@@ -1654,7 +1683,8 @@
          "collar",
          "yoke"
         ],
-        "tone": "light"
+        "tone": "light",
+        "brow": 8
        }
       },
       {
@@ -1703,7 +1733,8 @@
          "collar",
          "dags"
         ],
-        "tone": "pale"
+        "tone": "pale",
+        "brow": -10
        }
       }
      ]
