@@ -65,10 +65,6 @@
     "nubs",
     1.0
    ],
-   "belly": [
-    "plates",
-    1.0
-   ],
    "throat": [
     "ember",
     0.8
@@ -80,6 +76,10 @@
    "head": [
     "eggshell",
     1.0
+   ],
+   "pose": [
+    "tilt",
+    0.5
    ]
   }
  },
@@ -103,6 +103,20 @@
     "plated"
    ],
    "body": {
+    "accent": "gold",
+    "coat": "brass",
+    "head": null,
+    "throat": null,
+    "build": {
+     "legs": 0.74,
+     "body": 1.12,
+     "girth": 1.12,
+     "chest": 1.12,
+     "waist": 1.14,
+     "stance": 0.06,
+     "brush": 1.2,
+     "nape": 1.15
+    },
     "horns": [
      "broad",
      1.0
@@ -112,28 +126,22 @@
      1.0
     ],
     "belly": [
-     "brass",
+     "pale",
      1.0
     ],
-    "head": null,
-    "build": {
-     "body": 1.12,
-     "legs": 0.8,
-     "girth": 1.15,
-     "chest": 1.12,
-     "waist": 1.1,
-     "stance": 0.1,
-     "tail": 1.1
-    },
+    "eye": [
+     "counting",
+     1.0
+    ],
+    "crane": [
+     "low",
+     1.0
+    ],
     "tail": [
-     "low",
-     1.2
+     "drag",
+     1.0
     ],
-    "pose": [
-     "low",
-     0.5
-    ],
-    "accent": "gold"
+    "pose": null
    },
    "prongs": [
     {
@@ -156,7 +164,7 @@
      ],
      "body": {
       "tail": [
-       "loop",
+       "coil",
        1.0
       ],
       "tailend": [
@@ -164,11 +172,19 @@
        1.0
       ],
       "build": {
-       "tail": 1.35
+       "tail": 1.3
       },
+      "belly": [
+       "banded",
+       1.0
+      ],
+      "crane": [
+       "swan",
+       1.0
+      ],
       "pose": [
-       "high",
-       0.3
+       "back",
+       0.9
       ]
      },
      "finishes": [
@@ -196,15 +212,19 @@
          1.0
         ],
         "throat": [
-         "blue",
+         "lamp",
          1.0
         ],
         "build": {
-         "chest": 1.25,
-         "girth": 1.2,
-         "tail": 1.35
+         "chest": 1.22,
+         "girth": 1.18,
+         "neck": 1.15
         },
-        "coat": "night"
+        "crane": [
+         "reared",
+         0.8
+        ],
+        "pose": null
        }
       },
       {
@@ -230,33 +250,40 @@
          "gate",
          1.0
         ],
-        "eye": [
+        "lid": [
          "shutter",
+         1.0
+        ],
+        "eye": [
+         "glare",
          1.0
         ],
         "build": {
          "body": 1.3,
-         "chest": 1.45,
-         "girth": 1.35,
-         "nape": 1.4,
+         "chest": 1.4,
+         "girth": 1.3,
+         "nape": 1.5,
          "head": 1.15,
-         "legs": 0.78,
-         "stance": 0.14,
-         "tail": 1.2
+         "legs": 0.56,
+         "stance": 0.12,
+         "tail": 1.0
         },
         "tailend": [
          "spade",
-         1.4
-        ],
-        "tail": [
-         "low",
          1.5
         ],
-        "pose": [
-         "low",
-         0.9
+        "tail": [
+         "drag",
+         1.0
         ],
-        "coat": "iron"
+        "crane": [
+         "ground",
+         1.0
+        ],
+        "pose": [
+         "aside",
+         0.5
+        ]
        }
       }
      ]
@@ -280,30 +307,33 @@
       "dark-eyed"
      ],
      "body": {
-      "coat": "ash",
-      "eyes": [
-       "dark",
-       0.55
-      ],
-      "back": [
+      "lies": [
        "rubble",
        1.0
       ],
+      "eye": [
+       "shut",
+       1.0
+      ],
+      "belly": [
+       "dark",
+       1.0
+      ],
       "build": {
-       "body": 1.22,
-       "legs": 0.72,
-       "girth": 1.2,
+       "body": 1.2,
+       "legs": 0.66,
+       "girth": 1.18,
        "chest": 1.15,
-       "waist": 1.15,
-       "stance": 0.14
+       "waist": 1.18,
+       "stance": 0.1
       },
       "tail": [
-       "low",
-       1.6
+       "sweep",
+       1.0
       ],
-      "pose": [
-       "low",
-       0.9
+      "crane": [
+       "down",
+       1.0
       ]
      },
      "finishes": [
@@ -330,16 +360,36 @@
          "vault",
          1.0
         ],
-        "back": null,
+        "lies": null,
         "ridge": null,
+        "eye": [
+         "counting",
+         1.0
+        ],
         "build": {
-         "legs": 0.72,
-         "girth": 1.5,
-         "chest": 1.4,
-         "waist": 1.35,
-         "stance": 0.18
+         "legs": 0.7,
+         "girth": 1.45,
+         "chest": 1.36,
+         "waist": 1.32,
+         "stance": 0.2,
+         "body": 1.1
         },
-        "coat": "slate"
+        "crane": [
+         "low",
+         0.8
+        ],
+        "pose": [
+         "nod",
+         0.5
+        ],
+        "tail": [
+         "drag",
+         1.0
+        ],
+        "tailend": [
+         "club",
+         1.0
+        ]
        }
       },
       {
@@ -363,24 +413,39 @@
          "coins",
          1.0
         ],
-        "back": null,
-        "coat": "brass",
+        "lies": null,
+        "scales": [
+         "coin",
+         1.25
+        ],
         "horns": [
          "crown",
          0.8
         ],
+        "eye": [
+         "old",
+         1.0
+        ],
         "build": {
-         "legs": 0.85,
-         "girth": 1.3,
-         "chest": 1.3
+         "legs": 0.72,
+         "girth": 1.28,
+         "chest": 1.28
         },
         "tailend": [
          "spade",
          1.3
         ],
-        "eyes": [
-         "old",
-         0.9
+        "tail": [
+         "coil",
+         1.4
+        ],
+        "crane": [
+         "ground",
+         0.8
+        ],
+        "pose": [
+         "back",
+         0.5
         ]
        }
       }
@@ -413,22 +478,27 @@
        "beads",
        1.0
       ],
-      "carry": [
-       "book",
-       0.9
+      "neck": [
+       "ledger",
+       1.0
       ],
+      "belly": null,
       "build": {
-       "neck": 1.1,
-       "legs": 0.95,
-       "girth": 1.1
+       "neck": 1.12,
+       "legs": 0.9,
+       "girth": 1.08
       },
       "tail": [
-       "low",
-       0.6
+       "level",
+       1.0
+      ],
+      "crane": [
+       "proud",
+       0.8
       ],
       "pose": [
-       "high",
-       0.5
+       "tilt",
+       0.4
       ]
      },
      "finishes": [
@@ -451,7 +521,7 @@
         "chain"
        ],
        "body": {
-        "maw": [
+        "gape": [
          "open",
          1.0
         ],
@@ -460,22 +530,35 @@
          1.0
         ],
         "neck": [
-         "chains",
+         [
+          "ledger",
+          1.0
+         ],
+         [
+          "chains",
+          1.0
+         ]
+        ],
+        "feet": [
+         "ink",
          1.0
         ],
-        "paws": [
-         "grease",
-         0.9
-        ],
         "build": {
-         "body": 1.2,
-         "neck": 1.15,
+         "body": 1.18,
+         "neck": 1.25,
          "tail": 1.2
         },
-        "coat": "night",
+        "crane": [
+         "hook",
+         1.0
+        ],
         "pose": [
-         "low",
+         "aside",
          0.5
+        ],
+        "tail": [
+         "sweep",
+         1.0
         ]
        }
       },
@@ -499,8 +582,14 @@
        ],
        "body": {
         "horns": [
-         "crown",
-         1.2
+         [
+          "crown",
+          1.2
+         ],
+         [
+          "ring",
+          1.0
+         ]
         ],
         "frill": [
          "crown",
@@ -510,19 +599,29 @@
          "plates",
          1.6
         ],
+        "neck": null,
+        "eye": [
+         "glare",
+         1.0
+        ],
         "build": {
          "chest": 1.35,
          "neck": 1.15,
-         "girth": 1.2
+         "girth": 1.18
         },
         "tailend": [
          "spade",
          1.5
         ],
-        "pose": [
-         "high",
-         0.9
-        ]
+        "tail": [
+         "coil",
+         1.2
+        ],
+        "crane": [
+         "proud",
+         1.0
+        ],
+        "pose": null
        }
       }
      ]
@@ -548,29 +647,47 @@
     "ember"
    ],
    "body": {
+    "accent": "madder",
+    "coat": "blood",
+    "head": null,
+    "build": {
+     "girth": 0.94,
+     "waist": 0.9,
+     "neck": 1.06
+    },
     "throat": [
      "banked",
      1.0
     ],
     "ridge": [
      "flame",
-     0.8
+     0.9
     ],
     "nostrils": [
      "heat",
      1.0
     ],
-    "coat": "blood",
-    "head": null,
     "horns": [
-     "swept",
+     "lyre",
      1.0
     ],
     "wings": [
      "folded",
-     0.8
+     0.9
     ],
-    "accent": "madder"
+    "eye": [
+     "glare",
+     1.0
+    ],
+    "tail": [
+     "lash",
+     1.0
+    ],
+    "crane": [
+     "strike",
+     0.35
+    ],
+    "pose": null
    },
    "prongs": [
     {
@@ -592,26 +709,34 @@
       "maw"
      ],
      "body": {
-      "maw": [
+      "gape": [
        "glow",
-       1.2
+       1.0
       ],
       "jaw": [
        "glaze",
        1.0
       ],
+      "nostrils": null,
+      "belly": [
+       "pale",
+       1.0
+      ],
       "build": {
-       "nape": 1.35,
+       "nape": 1.3,
        "jaw": 1.3,
        "head": 1.12,
        "chest": 1.2,
-       "legs": 0.92,
-       "girth": 1.2
+       "legs": 0.9,
+       "girth": 1.15
       },
-      "nostrils": null,
-      "pose": [
+      "crane": [
        "low",
-       0.5
+       0.85
+      ],
+      "tail": [
+       "level",
+       1.0
       ]
      },
      "finishes": [
@@ -644,14 +769,7 @@
           1.2
          ]
         ],
-        "build": {
-         "jaw": 1.6,
-         "head": 1.25,
-         "nape": 1.5,
-         "chest": 1.4,
-         "girth": 1.35
-        },
-        "armor": [
+        "hide": [
          "scars",
          1.2
         ],
@@ -659,11 +777,34 @@
          "flame",
          1.3
         ],
-        "paws": [
-         "grease",
+        "gape": [
+         "open",
+         0.8
+        ],
+        "build": {
+         "jaw": 1.7,
+         "head": 1.3,
+         "nape": 1.5,
+         "chest": 1.4,
+         "girth": 1.3,
+         "legs": 1.0
+        },
+        "tailend": [
+         "club",
+         1.3
+        ],
+        "tail": [
+         "hook",
          1.0
         ],
-        "coat": "ember"
+        "crane": [
+         "proud",
+         0.7
+        ],
+        "pose": [
+         "tilt",
+         0.5
+        ]
        }
       },
       {
@@ -685,14 +826,13 @@
         "iron-hide"
        ],
        "body": {
-        "coat": "iron",
         "breath": [
          "jet",
          1.0
         ],
-        "armor": [
-         "brow",
-         1.1
+        "head": [
+         "browplate",
+         1.0
         ],
         "tailend": [
          "hammer",
@@ -702,15 +842,28 @@
          "plates",
          1.3
         ],
+        "jaw": null,
+        "gape": [
+         "speak",
+         0.7
+        ],
         "build": {
          "chest": 1.4,
          "nape": 1.3,
          "girth": 1.3,
-         "jaw": 1.2
+         "jaw": 1.15,
+         "legs": 0.95
         },
-        "jaw": null,
+        "crane": [
+         "level",
+         1.0
+        ],
+        "tail": [
+         "level",
+         1.0
+        ],
         "throat": [
-         "blue",
+         "lamp",
          0.8
         ]
        }
@@ -737,26 +890,37 @@
      ],
      "body": {
       "build": {
-       "neck": 1.45,
+       "neck": 1.5,
        "nape": 0.85,
-       "legs": 1.05,
-       "girth": 0.92,
-       "waist": 0.85,
-       "tail": 1.25,
-       "muzzle": 1.15
+       "muzzle": 1.2,
+       "waist": 0.84,
+       "tail": 1.2,
+       "girth": 0.9
       },
       "throat": [
        "bulges",
        1.0
       ],
-      "eyes": [
+      "horns": [
+       "sights",
+       1.0
+      ],
+      "eye": [
        "far",
-       1.1
+       1.0
       ],
       "nostrils": null,
-      "pose": [
-       "low",
-       0.45
+      "belly": [
+       "banded",
+       1.0
+      ],
+      "crane": [
+       "level",
+       1.0
+      ],
+      "tail": [
+       "level",
+       1.0
       ]
      },
      "finishes": [
@@ -779,9 +943,9 @@
         "lantern"
        ],
        "body": {
-        "maw": [
-         "open",
-         1.1
+        "gape": [
+         "yawn",
+         1.0
         ],
         "breath": [
          "beacon",
@@ -791,16 +955,20 @@
          "bands",
          1.0
         ],
+        "throat": null,
         "build": {
-         "neck": 1.6,
-         "nape": 1.0,
-         "legs": 1.1
+         "neck": 1.7,
+         "nape": 0.95,
+         "legs": 1.08
         },
-        "pose": [
-         "high",
-         1.2
+        "crane": [
+         "up",
+         0.75
         ],
-        "throat": null
+        "tail": [
+         "hook",
+         1.0
+        ]
        }
       },
       {
@@ -830,25 +998,6 @@
          "cinders",
          1.0
         ],
-        "coat": "ash",
-        "spine": [
-         "smoke",
-         0.9
-        ],
-        "build": {
-         "neck": 1.4,
-         "chest": 1.15
-        },
-        "pose": [
-         [
-          "high",
-          1.0
-         ],
-         [
-          "nod",
-          -1.2
-         ]
-        ],
         "ridge": [
          "crumbled",
          1.0
@@ -856,6 +1005,26 @@
         "throat": [
          "banked",
          0.8
+        ],
+        "lies": [
+         "ash",
+         1.0
+        ],
+        "build": {
+         "neck": 1.4,
+         "chest": 1.15
+        },
+        "crane": [
+         "sky",
+         1.0
+        ],
+        "pose": [
+         "aside",
+         0.4
+        ],
+        "tail": [
+         "lash",
+         1.0
         ]
        }
       }
@@ -886,19 +1055,35 @@
       ],
       "throat": null,
       "ridge": null,
-      "spine": [
+      "lies": [
        "smoke",
        1.0
       ],
-      "coat": "night",
-      "eyes": [
-       "far",
-       0.8
+      "eye": [
+       "sly",
+       1.0
+      ],
+      "belly": [
+       "dark",
+       1.0
+      ],
+      "membrane": [
+       "dark",
+       1.0
       ],
       "build": {
-       "girth": 1.05,
-       "waist": 0.9
-      }
+       "girth": 1.0,
+       "waist": 0.9,
+       "legs": 0.9
+      },
+      "crane": [
+       "low",
+       0.6
+      ],
+      "tail": [
+       "drag",
+       1.0
+      ]
      },
      "finishes": [
       {
@@ -924,25 +1109,28 @@
          "pots",
          1.0
         ],
-        "spine": null,
-        "back": [
+        "lies": [
          "soot",
-         1.6
-        ],
-        "build": {
-         "body": 1.35,
-         "neck": 1.2,
-         "tail": 1.3,
-         "legs": 0.85,
-         "girth": 1.15
-        },
-        "tail": [
-         "loop",
          1.0
         ],
         "nostrils": [
          "smoke",
          1.3
+        ],
+        "build": {
+         "body": 1.35,
+         "neck": 1.2,
+         "tail": 1.3,
+         "legs": 0.82,
+         "girth": 1.12
+        },
+        "tail": [
+         "coil",
+         1.2
+        ],
+        "crane": [
+         "proud",
+         0.5
         ]
        }
       },
@@ -965,34 +1153,40 @@
         "cold-core"
        ],
        "body": {
-        "coat": "ash",
+        "feet": [
+         "ash",
+         1.0
+        ],
         "ridge": [
          "crumbled",
          1.0
         ],
-        "spine": null,
+        "lies": [
+         "ash",
+         1.3
+        ],
         "nostrils": null,
-        "aura": [
-         "cold",
-         1.0
-        ],
-        "paws": [
-         "frost",
-         1.0
-        ],
-        "armor": [
+        "hide": [
          "scars",
          1.0
         ],
         "build": {
-         "girth": 0.85,
+         "girth": 0.84,
          "waist": 0.78,
          "chest": 0.95,
-         "legs": 1.1
+         "legs": 1.14
         },
-        "breath": [
-         "cinders",
-         0.7
+        "crane": [
+         "swan",
+         1.0
+        ],
+        "pose": [
+         "back",
+         1.0
+        ],
+        "tail": [
+         "drag",
+         1.0
         ]
        }
       }
@@ -1019,30 +1213,47 @@
     "wings"
    ],
    "body": {
+    "accent": "lapis",
+    "coat": "moon",
+    "head": null,
+    "throat": null,
+    "build": {
+     "legs": 1.12,
+     "girth": 0.85,
+     "chest": 1.08,
+     "waist": 0.8,
+     "neck": 1.05,
+     "brush": 0.8,
+     "tail": 1.1
+    },
     "wings": [
      "half",
      1.0
     ],
-    "head": null,
     "horns": [
      "swept",
      1.0
     ],
     "ridge": [
-     "plates",
+     "spines",
      1.0
     ],
-    "build": {
-     "legs": 1.15,
-     "girth": 0.9,
-     "chest": 1.05,
-     "waist": 0.85
-    },
-    "pose": [
-     "high",
+    "eye": [
+     "keen",
+     1.0
+    ],
+    "tail": [
+     "level",
+     1.0
+    ],
+    "crane": [
+     "proud",
      0.4
     ],
-    "accent": "lapis"
+    "pose": [
+     "nod",
+     0.4
+    ]
    },
    "prongs": [
     {
@@ -1068,17 +1279,33 @@
        "glide",
        1.0
       ],
+      "membrane": [
+       "burn",
+       1.0
+      ],
       "tailend": [
        "rudder",
        1.0
       ],
+      "eye": [
+       "shut",
+       1.0
+      ],
+      "belly": [
+       "pale",
+       1.0
+      ],
       "build": {
-       "legs": 1.3,
-       "girth": 0.82,
-       "waist": 0.78,
+       "legs": 1.22,
+       "girth": 0.8,
+       "waist": 0.76,
        "tail": 1.25
       },
-      "coat": "moon"
+      "crane": [
+       "up",
+       0.45
+      ],
+      "pose": null
      },
      "finishes": [
       {
@@ -1104,29 +1331,40 @@
          "mantle",
          1.0
         ],
+        "membrane": [
+         "edge",
+         1.0
+        ],
         "horns": [
          "brow",
          1.2
         ],
         "ridge": [
          "plates",
-         1.8
+         1.6
         ],
         "frill": [
          "crown",
          1.0
         ],
+        "eye": [
+         "glare",
+         1.0
+        ],
         "build": {
          "chest": 1.4,
-         "nape": 1.2,
+         "nape": 1.25,
          "legs": 1.1,
-         "girth": 1.1
+         "girth": 1.05
         },
-        "pose": [
-         "high",
-         1.1
+        "crane": [
+         "proud",
+         1.0
         ],
-        "coat": "hearth"
+        "tail": [
+         "hook",
+         1.0
+        ]
        }
       },
       {
@@ -1152,6 +1390,10 @@
          "half",
          1.2
         ],
+        "membrane": [
+         "ragged",
+         1.0
+        ],
         "ridge": [
          "sail",
          1.0
@@ -1160,14 +1402,21 @@
          "rudder",
          1.3
         ],
-        "coat": "slate",
+        "gape": [
+         "taste",
+         1.0
+        ],
+        "eye": [
+         "far",
+         1.0
+        ],
         "build": {
-         "legs": 1.2,
+         "legs": 1.15,
          "chest": 1.1
         },
-        "eyes": [
-         "far",
-         0.9
+        "crane": [
+         "level",
+         0.7
         ]
        }
       }
@@ -1196,6 +1445,10 @@
        "stoop",
        1.0
       ],
+      "membrane": [
+       "dark",
+       1.0
+      ],
       "horns": [
        "flat",
        1.0
@@ -1204,15 +1457,28 @@
        "talons",
        1.0
       ],
+      "eye": [
+       "glare",
+       1.0
+      ],
+      "belly": [
+       "dark",
+       1.0
+      ],
       "build": {
        "legs": 1.1,
        "chest": 1.2,
        "waist": 0.8,
-       "neck": 0.9
+       "neck": 0.92
       },
-      "pose": [
-       "low",
-       0.7
+      "crane": [
+       "strike",
+       1.0
+      ],
+      "pose": null,
+      "tail": [
+       "high",
+       1.0
       ]
      },
      "finishes": [
@@ -1239,11 +1505,11 @@
          "teeth",
          1.2
         ],
-        "maw": [
-         "fangs",
+        "fangs": [
+         "long",
          1.6
         ],
-        "armor": [
+        "hide": [
          "scars",
          1.0
         ],
@@ -1251,18 +1517,30 @@
          "talons",
          1.3
         ],
+        "wings": [
+         "brake",
+         1.0
+        ],
+        "membrane": [
+         "barred",
+         1.0
+        ],
         "build": {
          "chest": 1.35,
          "nape": 1.2,
          "girth": 1.1
         },
-        "wings": [
-         "stoop",
-         1.2
+        "crane": [
+         "proud",
+         0.8
         ],
-        "pose": [
-         "high",
-         0.4
+        "tail": [
+         "lash",
+         1.0
+        ],
+        "tailend": [
+         "club",
+         1.0
         ]
        }
       },
@@ -1289,9 +1567,8 @@
          "shadow",
          1.0
         ],
-        "coat": "night",
-        "eyes": [
-         "dark",
+        "membrane": [
+         "shadow",
          1.0
         ],
         "claws": [
@@ -1303,9 +1580,13 @@
          "waist": 0.75,
          "chest": 1.05
         },
-        "pose": [
+        "crane": [
          "low",
-         0.5
+         0.7
+        ],
+        "tail": [
+         "level",
+         1.0
         ]
        }
       }
@@ -1331,25 +1612,30 @@
      ],
      "body": {
       "wings": [
-       "half",
-       1.1
+       "brake",
+       1.0
+      ],
+      "membrane": [
+       "barred",
+       1.0
       ],
       "frill": [
        "herald",
        1.0
       ],
-      "maw": [
-       "open",
-       0.9
+      "gape": [
+       "speak",
+       1.0
       ],
       "build": {
        "neck": 1.2,
        "chest": 1.1
       },
-      "pose": [
-       "low",
-       0.6
-      ]
+      "crane": [
+       "level",
+       0.8
+      ],
+      "pose": null
      },
      "finishes": [
       {
@@ -1375,6 +1661,10 @@
          "banner",
          1.0
         ],
+        "membrane": [
+         "eyes",
+         1.0
+        ],
         "frill": [
          "crest",
          1.0
@@ -1383,16 +1673,20 @@
          "banner",
          1.0
         ],
+        "gape": null,
         "build": {
          "neck": 1.25,
          "chest": 1.2,
          "tail": 1.2
         },
-        "pose": [
-         "high",
-         0.6
+        "crane": [
+         "proud",
+         0.7
         ],
-        "maw": null
+        "tail": [
+         "high",
+         1.0
+        ]
        }
       },
       {
@@ -1418,6 +1712,10 @@
          "cloak",
          1.0
         ],
+        "membrane": [
+         "pale",
+         1.0
+        ],
         "frill": [
          "beard",
          1.0
@@ -1426,28 +1724,33 @@
          "droop",
          1.2
         ],
-        "eyes": [
+        "eye": [
          "old",
-         1.2
+         1.1
         ],
-        "coat": "ash",
+        "jaw": [
+         "grey",
+         1.0
+        ],
+        "gape": null,
         "build": {
          "neck": 1.2,
          "nape": 1.15,
          "chest": 1.15,
-         "girth": 1.1
+         "girth": 1.08
         },
-        "pose": [
-         [
-          "high",
-          0.5
-         ],
-         [
-          "nod",
-          0.8
-         ]
+        "crane": [
+         "hook",
+         0.7
         ],
-        "maw": null
+        "pose": [
+         "tilt",
+         0.4
+        ],
+        "tail": [
+         "drag",
+         1.0
+        ]
        }
       }
      ]

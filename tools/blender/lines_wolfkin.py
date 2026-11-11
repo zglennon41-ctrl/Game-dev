@@ -1355,616 +1355,1629 @@ def _stag_styles():
 # ======================================================================================
 # The Drake
 # ======================================================================================
+#
+# A true drake on the wolf's bones (docs/genius-lines.md, "The second pass", rule 5). Of the
+# wolf it keeps the skeleton, the clips and the skin of its legs. Everything else is its own:
+# one skin from the back of its skull to the end of its tail, laid along the wolf's bones (a
+# long neck, a barrel of a body deep in the chest, a tail as thick as its loins where it
+# leaves them); a wedge of a head with a brow, a jaw that is a piece of its own, nostrils and
+# teeth; elbows and knees out from the body where a wolf stands square, and a heel on the
+# ground; plates lapped under it from the chin to the tail; scales in rows along its back;
+# three clawed toes and a spur on every foot. It has six limbs, and that is the choice made:
+# its wings are a third pair, rooted above the shoulder, each an arm, a wrist and fingers
+# with the skin between, and they ride the chest's bone as pieces of their own that the game
+# moves.
+
+PALETTE.update({
+    "hide_wing": ((0.16, 0.2, 0.19), 0.6, 0.0), "drake_horn": ((0.72, 0.66, 0.5), 0.45, 0.0), "drake_claw": ((0.8, 0.75, 0.62), 0.35, 0.0),
+    "drake_tooth": ((0.86, 0.82, 0.72), 0.35, 0.0), "eye_slit": ((0.012, 0.012, 0.016), 0.25, 0.0), "eye_socket": ((0.03, 0.028, 0.034), 0.5, 0.0),
+    "stone_dust": ((0.56, 0.54, 0.5), 1.0, 0.0), "brass_coin": ((0.66, 0.5, 0.2), 0.35, 0.85), "iron_gate": ((0.2, 0.2, 0.23), 0.5, 0.75),
+    "smoke_pale": ((0.34, 0.33, 0.36), 1.0, 0.0), "paper_ledger": ((0.76, 0.7, 0.56), 0.8, 0.0), "leather_book": ((0.24, 0.12, 0.07), 0.7, 0.0),
+    "glaze_kiln": ((0.72, 0.74, 0.7), 0.15, 0.0), "slag_crust": ((0.07, 0.06, 0.062), 0.6, 0.0), "ash_fall": ((0.55, 0.54, 0.52), 1.0, 0.0),
+})
+
+D_NECK = ("Torso3", "Neck1", "Neck2", "Neck3", "Head")
+D_TAIL = ("Back",) + tuple("Tail%d" % i for i in range(1, 9))
+# how a drake carries its neck: how steeply each of its three lengths rises, and its head
+# (degrees above the level; the head's is its snout's). The first is how it is made.
+CRANES = {
+    "swan": (62, 56, 28, 0), "low": (8, -6, -4, 2), "level": (24, 20, 14, 2), "reared": (86, 82, 58, 6), "hook": (96, 66, 4, -34),
+    "down": (44, 8, -44, -62), "up": (66, 74, 84, 62), "ground": (-22, -10, 4, 6), "strike": (74, 40, -8, -14), "proud": (80, 84, 44, -6),
+    "sky": (80, 88, 92, 84),
+}
+
+
+def _cr(pts, n=3):
+    """A smooth line through points (Catmull-Rom), n steps to a span (or a list: steps for each)."""
+    pts = [V(p) for p in pts]
+    P = [pts[0] * 2 - pts[1]] + pts + [pts[-1] * 2 - pts[-2]]
+    out = []
+    for i in range(1, len(P) - 2):
+        p0, p1, p2, p3 = P[i - 1], P[i], P[i + 1], P[i + 2]
+        steps = n if isinstance(n, int) else n[i - 1]
+        for k in range(steps):
+            t = k / steps
+            out.append(0.5 * ((2 * p1) + (p2 - p0) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (3 * p1 - p0 - 3 * p2 + p3) * t * t * t))
+    out.append(pts[-1].copy())
+    return out
+
+
+def _frames(line):
+    """[(point, the way it runs, its left, its top)] along a line, the frame carried from each
+    point to the next without a twist (a tail may curl right round)."""
+    out, prev = [], None
+    n = len(line)
+    for i, p in enumerate(line):
+        d = line[min(i + 1, n - 1)] - line[max(i - 1, 0)]
+        d = d.normalized() if d.length > 1e-7 else (prev[0].copy() if prev else Y.copy())
+        if prev is None:
+            u, v = _perp(d)
+        else:
+            q = prev[0].rotation_difference(d)
+            u = q @ prev[1]
+            u = (u - d * u.dot(d)).normalized()
+            v = q @ prev[2]
+            v = (v - d * v.dot(d) - u * v.dot(u)).normalized()
+        prev = (d, u, v)
+        out.append((V(p), d, u, v))
+    return out
+
+
+def _chain_w(names, joints, p):
+    """Which bones of a chain carry a point: names[i] runs from joints[i] to joints[i + 1].
+    A point is its own bone's at the middle of that bone, and half its neighbour's at a joint."""
+    best, s = 1e9, 0.0
+    for i in range(len(joints) - 1):
+        a, ab = joints[i], joints[i + 1] - joints[i]
+        f = max(0.0, min(1.0, (p - a).dot(ab) / max(1e-9, ab.length_squared)))
+        dist = (p - (a + ab * f)).length
+        if dist < best - 1e-7:
+            best, s = dist, i + f
+    ws = [(nm, max(0.0, 1.0 - abs(s - (j + 0.5)))) for j, nm in enumerate(names)]
+    tot = sum(w for _, w in ws)
+    if tot < 1e-6:
+        return [(names[0] if s < 1 else names[-1], 1.0)]
+    return [(nm, w / tot) for nm, w in ws if w > 1e-4]
+
+
+def _ring(c, u, v, a, b, m=12, crest=0.0, keel=0.0):
+    """Points round a section, from its left over its top: a across, b up and down; crest
+    draws its top to a ridge and keel its underside."""
+    out = []
+    for j in range(m):
+        th = 2 * math.pi * j / m
+        cs, sn = math.cos(th), math.sin(th)
+        up, dn = max(0.0, sn), max(0.0, -sn)
+        k = 1.0 + crest * up ** 6 + keel * dn ** 6
+        out.append(c + u * (a * cs * (1.0 - 0.25 * crest * up ** 2 - 0.3 * keel * dn ** 2)) + v * (b * sn * k))
+    return out
+
+
+def _added(r, n0, pick, material):
+    """Of the faces added since there were n0, those that pass pick(centre, normal) take a material."""
+    me = r.mesh.data
+    if material.name not in [m.name for m in me.materials]:
+        me.materials.append(material)
+    slot = [m.name for m in me.materials].index(material.name)
+    R = r.M.to_3x3()
+    for p in list(me.polygons)[n0:]:
+        if pick(r.M @ p.center, (R @ p.normal).normalized()):
+            p.material_index = slot
+
+
+def _face_out(r, n0, inside):
+    """Faces added since there were n0 that lie on the body (a scale, a plate: not closed
+    shapes) are turned to face away from it: inside(centre) is a point within the body there."""
+    me = r.mesh.data
+    R = r.M.to_3x3()
+    for p in list(me.polygons)[n0:]:
+        c = r.M @ p.center
+        if (R @ p.normal).dot(c - inside(c)) < 0.0:
+            p.flip()
+    me.update()
+
+
+def _faces(r):
+    return len(r.mesh.data.polygons)
+
+
+def _drake_legs(r, splay=1.0):
+    """A drake's legs of a wolf's. Before: the upper bone twice as long and slanting out from
+    the body to an elbow that stands clear of it, a short forearm under that. Behind: the knee
+    out, and the hock brought down to the ground for a heel, so that it stands on the flat of
+    a long foot. (The bones go with the flesh, so the clips still fit.)"""
+    for tag in ("fl", "fr", "bl", "br"):
+        sg = 1 if tag.endswith("l") else -1
+        side = ".L" if sg > 0 else ".R"
+        if tag[0] == "f":
+            z = [r.bone("FrontUpperLeg" + side).z, r.bone("FrontLowerLeg" + side).z, 0.0]
+            to = [z[0], z[0] * 0.52, 0.0]
+            out = 0.42 * splay
+        else:
+            z = [r.bone("BackLeg" + side).z, r.bone("BackUpperLeg" + side).z, r.bone("BackLowerLeg" + side).z, 0.0]
+            to = [z[0], z[0] * 0.6, z[0] * 0.26, 0.0]
+            out = 0.34 * splay
+
+        def T(p, z=z, to=to, out=out, sg=sg):
+            if p.z >= z[0]:
+                return p
+            nz = p.z
+            for i in range(len(z) - 1):
+                if p.z >= z[i + 1]:
+                    nz = to[i] + (to[i + 1] - to[i]) * (z[i] - p.z) / max(1e-6, z[i] - z[i + 1])
+                    break
+            t = max(0.0, min(1.0, (to[0] - nz) / max(1e-6, to[0] - to[1])))
+            return Vector((p.x + sg * out * t, p.y, nz))
+        r.deform(r.legs(tag), T)
+        for low, k in ((("FrontLowerLeg" if tag[0] == "f" else "BackLowerLeg") + side, (1.24, 1.14, 1.0)), (("FrontLowerLeg" if tag[0] == "f" else "BackUpperLeg") + side, (1.1, 1.06, 1.0))):
+            c = r.bone(low)
+            r.scale([low], (c.x, c.y, 0), k)
+
+
+def _crane(r, pitches, k=1.0):
+    """Carry the neck so: each of its three lengths at its pitch, then the head (see CRANES).
+    Everything on the neck and head goes with them. k: how far from where it is to there."""
+    head = _head(r)
+    carried = 0.0
+    for i in range(3):
+        a, b = r.bone(D_NECK[i + 1]), r.bone(D_NECK[i + 2])
+        now = math.degrees(math.atan2(b.z - a.z, a.y - b.y))
+        turn = (pitches[i] - now) * k
+        if abs(turn) > 0.01:
+            r.rotate(list(NECK[i:]) + head, a, X, -math.radians(turn))
+        carried += turn
+    turn = (pitches[3] - _S.get("head_pitch", 0.0)) * k - carried
+    if abs(turn) > 0.01:
+        r.rotate(head, r.bone("Head"), X, -math.radians(turn))
+    _S["head_pitch"] = _S.get("head_pitch", 0.0) + carried + turn
+
+
+def _trail(r, falls, floor=0.2, yaw=()):
+    """Carry the tail so: each joint after the first as high as falls says, between the ground
+    (0) and the root of the tail (1); then round to one side, joint by joint (yaw, degrees)."""
+    root = r.bone("Tail1").z
+    for i in range(7):
+        a, b = r.bone("Tail%d" % (i + 1)), r.bone("Tail%d" % (i + 2))
+        L = (b - a).length
+        if L < 1e-5:
+            continue
+        want = floor + (root - floor) * falls[min(i, len(falls) - 1)]
+        now = math.asin(max(-1.0, min(1.0, (b.z - a.z) / L)))
+        to = math.asin(max(-0.97, min(0.97, (want - a.z) / L)))
+        if abs(to - now) > 1e-4:
+            r.rotate(r.family("Tail%d" % (i + 1)), a, X, to - now)
+    for i, a in enumerate(yaw):
+        if abs(a) > 1e-4:
+            r.rotate(r.family("Tail%d" % (i + 1)), r.bone("Tail%d" % (i + 1)), Z, math.radians(a))
+
+
+def _neck_curve(r):
+    """The line of its neck as it lies: from within its chest, through the joints, and on."""
+    J = [r.bone(nm) for nm in D_NECK[1:]]
+    return _frames(_cr([_S["neck_base"]] + J + [J[3] + (J[3] - J[2]) * 0.5], 4))
+
+
+def _recrane(r, pitches, k=1.0):
+    """Carry the neck another way once it is made. Every point of the neck keeps its place
+    along the neck's own line and across it, and the line is bent: so a long neck stays round
+    however it is carried (turned bone by bone it would crease at each joint)."""
+    wN = r._weights(list(NECK))
+    was = r.world_verts()
+    old = _neck_curve(r)
+    _crane(r, pitches, k)
+    new = _neck_curve(r)
+    me = r.mesh.data
+
+    def at(line, j, f):
+        (p0, d0, u0, v0), (p1, d1, u1, v1) = line[j], line[j + 1]
+        return p0.lerp(p1, f), d0.lerp(d1, f).normalized(), u0.lerp(u1, f).normalized(), v0.lerp(v1, f).normalized()
+    for i, vert in enumerate(me.vertices):
+        w = wN[i]
+        if w < 0.02:
+            continue
+        p = was[i]
+        best, bj, bf = 1e18, 0, 0.0
+        for j in range(len(old) - 1):
+            a, ab = old[j][0], old[j + 1][0] - old[j][0]
+            f = max(0.0, min(1.0, (p - a).dot(ab) / max(1e-12, ab.length_squared)))
+            dd = (p - (a + ab * f)).length_squared
+            if dd < best:
+                best, bj, bf = dd, j, f
+        c0, d0, u0, v0 = at(old, bj, bf)
+        c1, d1, u1, v1 = at(new, bj, bf)
+        off = p - c0
+        q = c1 + d1 * off.dot(d0) + u1 * off.dot(u0) + v1 * off.dot(v0)
+        vert.co = r.Minv @ (r.M @ vert.co).lerp(q, min(1.0, w))
+    me.update()
+
 
 def drake_species(r):
-    """Long in the neck and longer in the tail, low on thick legs, a wedge of a head."""
+    """The wolf made a drake's frame: see the note above. What is laid over it is drake_measure's."""
     head = _head(r)
-    r.scale(bk.TORSO, (0, 0, r.top(r.bone("Torso2").y)), (0.9, 1.0, 0.9))
-    r.stretch_y(-0.6, 0.4, 1.12)
-    r.leg_length(0.36)
-    r.leg_girth(1.18)
-    r.lengthen_chain(list(NECK), head, 1.9)
-    r.scale(list(NECK), r.bone("Neck1"), (0.8, 1.0, 0.8))
-    r.rotate(list(NECK) + head, r.bone("Neck1"), X, math.radians(-52))
-    r.rotate(head, r.bone("Neck3"), X, math.radians(50))
-    r.scale_along(head, r.bone("Neck3"), r.bone("Head") - r.bone("Neck3"), 1.3)
-    r.scale(head, r.bone("Neck3"), (1.04, 1.0, 0.72))
-    _ears(r, 0.3, 0.08)
-    e = kit._eye(r)
-    lid = e.z + 0.05
+    top = r.top(r.bone("Torso2").y)
+    # the trunk: longer than a wolf's and broader, and less deep
+    r.scale(bk.TORSO, (0, 0, top), (1.12, 1.0, 0.86))
+    r.stretch_y(-0.6, 0.4, 1.28)
+    # the legs: short and thick, the elbows and the knees out, a heel on the ground
+    r.leg_length(0.6)
+    _drake_legs(r)
+    r.leg_girth(1.5)
+    gl._feet(r, 1.12)
+    # the neck and the tail are drawn out, and carried as a drake carries them (its own flesh
+    # is laid along them when they have their shape: _drake_body)
+    _S["ear0"] = (r.bone("Ear1.L") - r.bone("Ear1.R")).length
+    r.lengthen_chain(list(NECK), head, 2.7)
+    _S["head_pitch"] = 0.0
+    _crane(r, CRANES["swan"])
+    tb = _tailbones(r)
 
-    def flat(p):
-        q = p.copy()
-        if q.z > lid:                 # the dome of a dog's skull comes down to a flat crown
-            q.z = lid + (q.z - lid) * 0.62
-        t = min(1.0, max(0.0, (q.y - (e.y + 0.1)) / 0.3))
-        q.x *= 1.0 - 0.14 * t * t * (3 - 2 * t)      # and the ruff at its cheeks goes
-        return q
-    r.deform(head, flat)
-    r.lengthen_chain(_tail(r), [], 1.6)
-    _tail_girth(r, (1.35, 1.0, 1.35))
-    r.scale(r.family("Tail5"), r.bone("Tail5"), (0.5, 1.0, 0.5))
-    r.rotate(_tail(r), r.bone("Tail1"), X, math.radians(16))
+    def thin(p):
+        best, q = 1e9, tb[0]
+        for a, b in zip(tb, tb[1:]):
+            ab = b - a
+            f = max(0.0, min(1.0, (p - a).dot(ab) / max(1e-9, ab.length_squared)))
+            c = a + ab * f
+            if (p - c).length < best:
+                best, q = (p - c).length, c
+        return q + (p - q) * 0.15
+    r.deform(_tail(r), thin)
+    r.lengthen_chain(_tail(r), [], 2.1)
+    _trail(r, (0.84, 0.66, 0.5, 0.38, 0.3, 0.26, 0.3))
 
 
 def drake_ages(r, level):
     head, hb = _head(r), r.bone("Head")
     top = r.top(r.bone("Torso2").y)
-    if level <= 1:                  # the hatchling: a head and a ridge it has not grown into
-        r.scale(head, hb, 1.34)
-        r.lengthen_chain(list(NECK), head, 0.6)
-        r.leg_length(0.2)
-        r.leg_girth(1.2)
-        r.stretch_y(r.bone("Torso3").y, r.bone("Back").y, 0.78)
-        zc = (r.top(r.bone("Torso2").y) + r.bottom(r.bone("Torso2").y, half_width=0.1)) / 2
-        r.scale(bk.TORSO, (0, 0, zc), (1.14, 1.0, 1.1))
-        r.lengthen_chain(_tail(r), [], 0.62)
-        gl._feet(r, 1.35)
-        _young_eyes(r, 0.115)
-    elif level == 2:
-        r.scale(head, hb, 1.1)
-        r.lengthen_chain(list(NECK), head, 0.88)
-    elif level >= 4:
-        r.scale(["Torso3", "Torso2"], (0, 0, top), (1.12, 1.0, 1.1))
+    _S["age"] = {}
+    if level <= 1:                  # the hatchling: a head, feet and eyes it has not grown into
+        r.scale(head, hb, 1.5)
+        r.lengthen_chain(list(NECK), head, 0.46)
+        r.leg_length(0.08)
         r.leg_girth(1.1)
+        r.stretch_y(r.bone("Torso3").y, r.bone("Back").y, 0.72)
+        zc = (r.top(r.bone("Torso2").y) + r.bottom(r.bone("Torso2").y, half_width=0.1)) / 2
+        r.scale(bk.TORSO, (0, 0, zc), (1.1, 1.0, 1.08))
+        r.lengthen_chain(_tail(r), [], 0.5)
+        gl._feet(r, 1.3)
+        _S["age"] = {"muzzle": 0.66, "eye": 1.5, "brow": 0.0, "teeth": 0.0, "neck": 1.15, "claw": 0.7}
+    elif level == 2:                # half-grown: leggy, the head still a size large
+        r.scale(head, hb, 1.14)
+        r.lengthen_chain(list(NECK), head, 0.84)
+        r.lengthen_chain(_tail(r), [], 0.88)
+        _S["age"] = {"muzzle": 0.9, "eye": 1.15, "brow": 0.75, "teeth": 0.8, "claw": 0.9}
+    elif level >= 4:                # in its prime: heavier before, longer behind
+        r.scale(["Torso3", "Torso2"], (0, 0, top), (1.08, 1.0, 1.07))
+        r.leg_girth(1.07)
         r.lengthen_chain(_tail(r), [], 1.1)
+        _S["age"] = {"brow": 1.2, "teeth": 1.1}
 
 
 def _horn_mat():
     return kit.mark("ridge", mat("drake_horn"))
 
 
-def drake_measure(r, A):
-    """A drake's face is no dog's: no button of a nose; the pale of its underside kept to the
-    lower jaw; its mask a stripe back from the eye along the side of the head; and a brow
-    over each eye, heavier as it ages."""
-    _measure(r, A)
+def _hide2():
+    """The second value of its hide (the coat's trim: its scales and the plates of its back)."""
+    return kit.mark("ridge", mat("drake_horn"))
+
+
+# --- pieces that ride a bone and are moved by the game (rule 6) ------------------------------
+
+def _piece(kind, what, items, pivot, bone, side="", n=None):
+    """A piece of this form that the game moves by its name, riding a bone: kept until the
+    body has its size, then made (_ride). items: [(geometry, material, shaded round?)]."""
+    items = [(geo, m, sm) for geo, m, sm in items if geo and geo[0]]
+    if items:
+        _S.setdefault("pieces", []).append(dict(kind=kind, what=what, items=items, pivot=V(pivot).copy(), bone=bone, side=side, n=n))
+
+
+def _ride(r, sockets, k):
+    """Make the pieces, at the body's size, each a mesh of its own parented to its bone with
+    its origin at its pivot: the game finds it under the bone's attachment and moves it."""
+    S = Matrix.Scale(k, 4)
+    for pc in _S.get("pieces", []):
+        name = "%s_%s%s%s" % (pc["kind"], pc["what"], "_" + pc["side"] if pc["side"] else "", "_%d" % pc["n"] if pc["n"] is not None else "")
+        ob = g.join(name, [g.to_object("%s_%d" % (name, i), g.moved(geo, S), m, sm) for i, (geo, m, sm) in enumerate(pc["items"])])
+        at = pc["pivot"] * k
+        ob.data.transform(Matrix.Translation(-at))
+        ob.parent = r.arm
+        ob.parent_type = "BONE"
+        ob.parent_bone = pc["bone"]
+        bpy.context.view_layer.update()
+        ob.matrix_world = Matrix.Translation(at)
+        sockets[name] = ob
+
+
+# --- the drake's own flesh, laid over the wolf's frame ----------------------------------------
+
+def _strip_wolf(r):
+    """Take the wolf's own trunk, neck, head and tail away (the drake's are laid in their
+    place): only its legs are kept, open at the top inside the drake's body."""
+    import bmesh
     me = r.mesh.data
-    names = [m.name for m in me.materials]
-    slot = lambda nm: names.index(nm) if nm in names else -1  # noqa: E731
-    dark, light, nose, mask = slot("fur_dark"), slot("fur_light"), slot("nose"), slot("mark_mask")
-    wh = r._weights(_head(r))
-    R = r.M.to_3x3()
-    e, n = A.eye, A.nose
-    lip = n.z - 0.07
-    for p in me.polygons:
-        if sum(wh[i] for i in p.vertices) / len(p.vertices) < 0.55:
-            continue
-        c, up = r.M @ p.center, (R @ p.normal).normalized().z
-        was = p.material_index
-        stripe = mask >= 0 and up <= 0.5 and e.y - 0.12 < c.y < e.y + 0.45 and e.z - 0.13 < c.z < e.z + 0.05
-        if was == nose:
-            p.material_index = dark
-        elif was in (dark, light, mask):
-            if stripe and (was != light or c.z > lip):
-                p.material_index = mask
-            elif was == mask or (was == light and c.z > lip and c.y < e.y + 0.3):
-                p.material_index = dark
-    level = _S.get("level", 3)
-    if level >= 2:
-        k = 0.8 if level == 2 else 1.0
-        geo = None
+    legs = {r.mesh.vertex_groups[b].index for b in r.legs() if b in r.mesh.vertex_groups and "Shoulder" not in b}
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    dl = bm.verts.layers.deform.verify()
+    gone = [f for f in bm.faces if min(sum(w for gi, w in v[dl].items() if gi in legs) for v in f.verts) < 0.12]
+    bmesh.ops.delete(bm, geom=gone, context="FACES")
+    bm.to_mesh(me)
+    bm.free()
+    me.update()
+
+
+def _on(s, deg, lift=0.0):
+    """A point on its skin at one place along it (s, of _S["body"]), deg round from its left
+    over its top (90 its back, 270 its belly), and the way the skin faces there."""
+    p, d, u, v, a, b = s[:6]
+    th = math.radians(deg)
+    cs, sn = math.cos(th), math.sin(th)
+    n = (u * (cs / max(1e-6, a)) + v * (sn / max(1e-6, b))).normalized()
+    return p + u * (a * cs) + v * (b * sn) + n * lift, n
+
+
+def _drake_body(r, A):
+    """One skin from the back of its skull to the end of its tail: a neck as deep as its chest
+    where it leaves it and slender under the skull; a barrel, keeled before; a tail as thick
+    as its loins where it leaves them and a whip at its end."""
+    wolf = _skin()                 # the wolf's own trunk, as the frame was shaped: the drake's is cut to it
+    spec, age = _S["spec"], _S["age"]
+    bd = spec.get("build", {})
+    S = _S["S"]
+    nape = float(bd.get("nape", 1.0)) * age.get("neck", 1.0)
+    girth = float(bd.get("brush", 1.0))
+    # the trunk: five places along it, from the shoulder to the hip (the wolf's own back gives
+    # its top, the wolf's brisket the keel of its chest, the wolf's ribs its breadth, made a barrel's)
+    ysh, yhip = r.bone("FrontUpperLeg.L").y, r.bone("BackLeg.L").y
+    _S["ysh"], _S["yhip"] = ysh, yhip
+    ys = [ysh - 0.08, ysh + 0.34, (ysh + yhip) / 2 + 0.08, yhip - 0.26, yhip + 0.06]
+    zts = [wolf.top(y, window=0.22) + 0.03 for y in (ys[1], ys[1], ys[2], ys[3], ys[4])]
+    zk = min(p.z for p in wolf.v if abs(p.x) < 0.15 and ysh - 0.3 < p.y < ysh + 0.5) - 0.04
+    zbs = [zk + 0.07, zk, zk + 0.06, zk + 0.13, zk + 0.2]
+    aa = [wolf.side(y, zt - 0.4) * k for y, zt, k in zip(ys, zts, (1.16, 1.3, 1.52, 1.56, 1.5))]
+    trunk = [(Vector((0, y, (zt + zb) / 2)), a, (zt - zb) / 2) for y, zt, zb, a in zip(ys, zts, zbs, aa)]
+    # the neck: its joints, from the head down
+    J = [r.bone(nm) for nm in D_NECK[1:]]
+    L = sum((J[i + 1] - J[i]).length for i in range(3))
+    aB, bB = trunk[0][1] * 0.72, trunk[0][2] * 0.66
+    aH, bH = 0.2 * S * nape, 0.205 * S * nape
+    fj = _frames(J)
+    neck, acc = [], 0.0
+    for i, (p, d, u, v) in enumerate(fj):
+        if i:
+            acc += (J[i] - J[i - 1]).length
+        t = min(1.0, acc / L)
+        e = (1.0 - t) ** 1.7
+        a, b = aH + (aB * nape - aH) * e, bH + (bB * nape - bH) * e
+        neck.append((p - v * (0.42 * b * (1.0 - 0.5 * t)), a, b))
+    # the tail: its joints, to a point beyond the last
+    tb = _tailbones(r)
+    tip = tb[7] + (tb[7] - tb[6]) * 1.15
+    aT, bT = trunk[4][1] * 0.84, trunk[4][2] * 0.8
+    Lt = sum((tb[i + 1] - tb[i]).length for i in range(7)) + (tip - tb[7]).length
+    tail, acc = [], 0.0
+    for i, p in enumerate(tb + [tip]):
+        if i:
+            acc += (p - (tb + [tip])[i - 1]).length
+        t = min(1.0, (acc + 0.06 * Lt) / (1.06 * Lt))
+        k = (1.0 - t) ** 0.9 * (0.78 + 0.22 * (1.0 - t)) * girth + 0.012
+        a, b = aT * k, bT * k
+        c = p - Z * (b * 0.85 * max(0.0, 1.0 - t * 2.2))
+        if c.z < b:                                    # it lies on the ground: never in it
+            c = Vector((c.x, c.y, b))
+        tail.append((c, a, b))
+    ctrl = list(reversed(neck)) + trunk + tail
+    steps = [3] * 3 + [2] + [2] * 4 + [2] + [2] * 8
+    line = _cr([c for c, _, _ in ctrl], steps)
+    size = _cr([Vector((a, b, 0)) for _, a, b in ctrl], steps)
+    zone = []
+    for i, n in enumerate(steps):
+        zone.extend(["neck" if i < 4 else "back" if i < 8 else "tail"] * n)
+    zone.append("tail")
+    base = trunk[0][0]
+    hipc = trunk[4][0]
+    nj = [base] + J + [J[3] + (J[3] - J[2]) * 0.4]
+    tj = [hipc] + tb + [tip]
+    _S["neck_base"] = base.copy()
+    fr = _frames(line)
+    rings, ws, body = [], [], []
+    m = 12
+    nn = zone.count("neck")
+    nt = zone.count("tail")
+    for i, (p, d, u, v) in enumerate(fr):
+        a, b = max(0.01, size[i].x), max(0.01, size[i].y)
+        z = zone[i]
+        if z == "neck":
+            w = _chain_w(D_NECK, nj, p)
+            t = 1.0 - i / max(1, nn)
+            crest, keel = 0.1, 0.0
+        elif z == "tail":
+            w = _chain_w(D_TAIL, tj, p)
+            t = (i - (len(fr) - nt)) / max(1, nt - 1)
+            crest, keel = 0.16, 0.0
+        else:
+            w = r.spine_weights(p.y)
+            t = (i - nn) / max(1, len(fr) - nn - nt)
+            crest, keel = 0.06, 0.14 * max(0.0, 1.0 - abs(p.y - ys[1]) / 0.9)
+        if p.z - b * (1.0 + keel) < 0.0 and z == "tail":
+            p = Vector((p.x, p.y, b))
+        rings.append(_ring(p, u, v, a, b, m=m, crest=crest, keel=keel))
+        ws.extend([w] * m)
+        body.append((p, d, u, v, a, b, w, z, t))
+    n0 = _faces(r)
+    _add(r, "drake_body", g.loft(rings, caps=True), ws, mat("fur_dark"), smooth=True)
+
+    def near(c):
+        return min(body, key=lambda s: (s[0] - c).length_squared)
+    _added(r, n0, lambda c, nm: nm.dot(near(c)[3]) < -0.5, mat("fur_light"))
+    _added(r, n0, lambda c, nm: near(c)[7] == "back" and nm.z > 0.5, kit.mark("saddle", mat("fur_dark")))
+    _S["body"] = body
+    _S["neckline"] = [s for s in body if s[7] == "neck"]
+    _S["tail"] = [s for s in body if s[7] == "tail"]
+    # its skin, as everything grown on it will ask for it
+    sk = Skin.__new__(Skin)
+    sk.v = [q for ring in rings for q in ring]
+    sk.torso = [q for ring, s in zip(rings, body) if s[7] == "back" for q in ring]
+    _S["skin"] = sk
+    A.withers, A.belly = sk.top(A.t3.y), sk.bottom(A.t2.y, half_width=0.1)
+    A._tops = [sk.top(y) for y in A._ys]
+    A._sides = [sk.side(y, t - 0.42) for y, t in zip(A._ys, A._tops)]
+
+
+def _lerp_table(table, y):
+    """A row of a table of (y, ...) rows at y (rows run from the back of the head forward)."""
+    if y >= table[0][0]:
+        return table[0]
+    for a, b in zip(table, table[1:]):
+        if b[0] <= y <= a[0]:
+            t = (a[0] - y) / max(1e-9, a[0] - b[0])
+            return tuple(a[i] + (b[i] - a[i]) * t for i in range(len(a)))
+    return table[-1]
+
+
+# How its eyes are set: (size, how far the lid comes down, the slit's width, the brow's weight, its slant)
+D_EYES = {
+    "young": (1.0, 0.0, 0.5, 0.0, 0.0),
+    "keen": (1.0, 0.12, 0.24, 1.0, 0.0),
+    "counting": (0.95, 0.46, 0.3, 1.15, -0.3),     # half shut, one brow up: it is adding something
+    "glare": (0.95, 0.24, 0.14, 1.35, 0.7),        # the brow drawn down toward the snout
+    "far": (1.18, 0.0, 0.4, 0.85, -0.5),           # wide, round in the slit: it is looking a long way off
+    "old": (0.9, 0.36, 0.22, 1.5, -0.6),
+    "shut": (0.9, 0.86, 0.2, 1.1, -0.2),           # all but closed: it is listening
+    "sly": (0.95, 0.5, 0.18, 1.0, 0.25),
+}
+
+
+def _drake_head(r, A):
+    """Its head, in place of the wolf's: a long flat wedge, widest behind the eyes, a brow over
+    each, a lower jaw of its own (so that it can hang open), nostrils on top of the snout's end,
+    teeth along the lip, and eyes with lids and a slit that the game blinks."""
+    spec, level, age = _S["spec"], _S["level"], _S["age"]
+    b = spec.get("build", {})
+    hb = r.bone("Head")
+    S = _S["S"]
+    mz = float(b.get("muzzle", 1.0)) * age.get("muzzle", 1.0)
+    jw = float(b.get("jaw", 1.0))
+    gape_style, gape_size = gl.opt(spec.get("gape"))
+    gape = {None: 0.0, "open": 0.42, "glow": 0.5, "yawn": 0.78, "speak": 0.3, "taste": 0.24}[gape_style] * (gape_size or 1.0)
+
+    def P(x, y, z):
+        return hb + Vector((x, y, z)) * S
+    ys = -0.42
+    yn, yt = ys - 0.56 * mz, ys - 0.66 * mz
+    # the skull and upper jaw, from the back forward: (y, top, half-width, lip)
+    SK = [(0.16, 0.09, 0.15, -0.01), (0.06, 0.2, 0.275, -0.05), (-0.24, 0.225, 0.25, -0.055), (ys, 0.165, 0.2, -0.055),
+          ((ys + yn) / 2, 0.118, 0.158, -0.05), (yn, 0.108, 0.14, -0.044), (yt, 0.045, 0.09, -0.02)]
+    rings = []
+    for y, zt, w, zl in SK:
+        zm = zl + 0.42 * (zt - zl)
+        half = [(0.0, zt), (0.6 * w, zt - 0.012), (w, zm), (0.9 * w, zl)]
+        rings.append([P(x, y, z) for x, z in half] + [P(0, y, zl + 0.015)] + [P(-x, y, z) for x, z in reversed(half[1:])])
+    n0 = _faces(r)
+    _add(r, "drake_skull", g.loft(rings, caps=True), "Head", mat("fur_dark"), smooth=True)
+    if gape > 0.05:
+        _added(r, n0, lambda c, nm: nm.z < -0.6 and c.y < hb.y, mat("hide_maw"))
+    # the lower jaw, hung from its hinge
+    hinge = Vector((0, 0.05, -0.05))
+    Rg = Matrix.Rotation(gape, 3, X)
+
+    def Jp(x, y, z):
+        return hb + (hinge + Rg @ (Vector((x, y, z)) - hinge)) * S
+    JW = [(0.12, -0.02, -0.15 * jw, 0.22), (-0.05, -0.058, -0.24 * jw, 0.252), (-0.3, -0.062, -0.19 * jw, 0.215),
+          ((ys + yn) / 2, -0.06, -0.14 * jw, 0.142), (yn + 0.04, -0.054, -0.1 * jw, 0.112), (yt + 0.05, -0.05, -0.066, 0.062)]
+    rings = []
+    for y, zt, zb, w in JW:
+        zm = zb + 0.4 * (zt - zb)
+        rings.append([Jp(0, y, zt - 0.012), Jp(w, y, zt), Jp(w * 0.82, y, zm), Jp(0, y, zb), Jp(-w * 0.82, y, zm), Jp(-w, y, zt)])
+    n0 = _faces(r)
+    _add(r, "drake_jaw", g.loft(rings, caps=True), "Head", mat("fur_light"), smooth=True)
+    jaw_up = Rg @ Z
+    if gape > 0.05:
+        _added(r, n0, lambda c, nm: nm.dot(jaw_up) > 0.6, mat("hide_maw"))
+        t0, t1, t2 = Jp(0, -0.02, -0.04), Jp(0, (ys + yn) / 2, -0.035), Jp(0, yn + 0.1, -0.03)
+        _add(r, "tongue", g.tongue([t0, t1, t2], [0.2 * S, 0.17 * S, 0.07 * S], thick=0.3, normal=jaw_up), "Head", mat("hide_tongue"), smooth=True)
+        if gape_style == "glow":
+            _piece("pulse", "gullet", [(g.ico(P(0, 0.0, -0.07), 0.13 * S, sub=1, scale=(1.0, 1.2, 0.8)), field("throat", 3.6), True)], P(0, 0.0, -0.07), "Head")
+    # teeth: along the upper lip, two of them fangs; and the lower jaw's when it is open
+    kt = age.get("teeth", 1.0)
+    fangs = gl.opt(spec.get("fangs"))[1] if spec.get("fangs") else 0.0
+    if kt > 0.0:
+        teeth = None
+        for i in range(7):
+            y = yt + 0.07 + (ys + 0.02 - yt - 0.07) * i / 6.0
+            _, _, w, zl = _lerp_table(SK, y)
+            Lt = (0.05 + 0.02 * math.sin(i * 2.1)) * kt
+            if i == 1:
+                Lt = (0.105 + 0.11 * fangs) * kt
+            for sg in (1, -1):
+                teeth = g.merge(teeth, g.cone(P(sg * 0.88 * w, y, zl + 0.012), P(sg * 0.9 * w, y - 0.012, zl - Lt), 0.017 * S * (1.5 if i == 1 else 1.0), n=4))
+        if gape > 0.05:
+            for i in range(5):
+                y = yt + 0.12 + (ys - yt - 0.1) * i / 4.0
+                w = _lerp_table([(q[0], q[3]) for q in JW], y)[1]
+                Lt = (0.05 if i != 1 else 0.085) * kt
+                for sg in (1, -1):
+                    teeth = g.merge(teeth, g.cone(Jp(sg * 0.86 * w, y, -0.06), Jp(sg * 0.86 * w, y, -0.06 + Lt), 0.015 * S, n=4))
+        _add(r, "teeth", teeth, "Head", mat("drake_tooth"), smooth=True)
+    # nostrils: two dark slits on the top of the snout's end, each under a small hood
+    for sg in (1, -1):
+        c = P(sg * 0.068, yn + 0.015, 0.112)
+        _add(r, "nostril_%d" % sg, g.ico(c + Vector((sg * 0.012, -0.012, 0.004)) * S, 0.03 * S, sub=1, scale=(0.7, 1.5, 0.6)), "Head", mat("nose"), smooth=True)
+        _add(r, "nostril_hood_%d" % sg, g.ico(c + Vector((0, 0.03, 0.0)) * S, 0.048 * S, sub=1, scale=(0.85, 1.2, 0.62)), "Head", mat("fur_dark"), smooth=True)
+    # the eyes: a socket, the eye with its slit (which the game blinks), a lid, a brow
+    style, size = gl.opt(spec.get("eye"))
+    style = style if style in D_EYES else ("young" if level <= 1 else "keen")
+    ks, lidk, slit, brow, slant = D_EYES[style]
+    ks *= (size or 1.0) * age.get("eye", 1.0)
+    brow *= age.get("brow", 1.0)
+    Re = 0.066 * S * ks
+    one = gl.opt(spec.get("lid"))[0]
+    for sg, side in ((1, "l"), (-1, "r")):
+        c = P(sg * 0.202, -0.245, 0.118)
+        out = Vector((sg * 0.86, -0.12, 0.42)).normalized()
+        _add(r, "socket_%s" % side, g.ico(c - out * Re * 0.3, Re * 1.24, sub=1, scale=(0.5, 1.2, 1.0)), "Head", mat("eye_socket"), smooth=True)
+        ball = g.ico(c, Re, sub=2, scale=(0.55, 1.15, 0.95))
+        pup = g.ico(c + out * Re * 0.42, Re * 0.74, sub=1, scale=(0.3, slit, 1.0))
+        _piece("blink", "eye", [(ball, field("eyes", 3.4), True), (pup, mat("eye_slit"), True)], c, "Head", side=side)
+        lk = lidk
+        if one == "shutter" and sg < 0:          # one eye never fully closes: the lid on that side gone thick as a shutter
+            lk = 0.5
+            sl = None
+            for dz in (0.5, 0.05):
+                sl = g.merge(sl, g.box(c + out * Re * 0.72 + Z * Re * dz, (0.022 * S, Re * 3.0, Re * 0.26), rot=(0.0, sg * 0.3, 0.0)))
+            _add(r, "shutter_slats", sl, "Head", mat("metal_iron"))
+            _add(r, "shutter", g.box(c + out * Re * 0.5 + Z * Re * 0.55, (0.05 * S, Re * 2.7, Re * 1.3), rot=(0.0, sg * 0.3, 0.0)), "Head", mat("slate"))
+        if lk > 0.0:
+            _add(r, "lid_%s" % side, g.ico(c + out * Re * 0.16 + Z * (Re * (1.02 - lk)), Re * 1.12, sub=1, scale=(0.6, 1.24, 0.62)), "Head", mat("fur_dark"), smooth=True)
+        if brow > 0.0:
+            up = (0.05 if sg > 0 else -0.01) * max(0.0, -slant)       # one brow a little higher: it is thinking
+            pts = [P(sg * 0.125, ys - 0.03, 0.15 - 0.03 * max(0.0, slant)), P(sg * 0.2, -0.33, 0.212 + up * 0.5 - 0.02 * max(0.0, slant)),
+                   P(sg * 0.238, -0.14, 0.246 + up), P(sg * 0.262, 0.06, 0.205 + up * 0.4)]
+            _add(r, "brow_%s" % side, g.tube(pts, [0.02 * S * brow, 0.045 * S * brow, 0.05 * S * brow, 0.026 * S], n=6), "Head", mat("fur_dark"), smooth=True)
+    # what the rest is built to
+    _S["head"] = dict(hb=hb.copy(), S=S, P=P, J=Jp, ys=ys, yn=yn, yt=yt, SK=SK, JW=JW, gape=gape, jaw_up=jaw_up, eye=Vector((0.202, -0.245, 0.118)), Re=Re, jw=jw)
+    A.eye = P(0.202, -0.245, 0.118)
+    A.nose = P(0, yt, 0.07)
+    A.skull = P(0, 0, 0.225).z
+
+
+def _drake_feet(r, A):
+    """Three clawed toes before and a spur behind on every foot; a point at each elbow."""
+    kc = _S["age"].get("claw", 1.0) * (gl.opt(_S["spec"].get("claws"))[1] if _S["spec"].get("claws") else 1.0)
+    big = gl.opt(_S["spec"].get("claws"))[0] == "talons"
+    socks = kit.mark("socks", mat("fur_dark"))
+    for tag, foot, bone in gl.FEET:
+        f = r.bone(foot)
+        sg = 1 if f.x > 0 else -1
+        turn = math.radians(26 if tag[0] == "f" else 14) * sg
+        toes, claws = None, None
+        for k, deg in enumerate((-30, 0, 30)):
+            a = math.radians(deg) + turn
+            d = Vector((math.sin(a), -math.cos(a), 0.0))
+            b0 = Vector((f.x, f.y + 0.04, 0.1)) + d * 0.1
+            Lt = (0.3 if k == 1 else 0.25) * (0.9 + 0.1 * kc)
+            kn, tp = b0 + d * Lt * 0.55 + Z * 0.035, b0 + d * Lt - Z * 0.04
+            toes = g.merge(toes, g.tube([b0, kn, tp], [0.085, 0.075, 0.05], n=6))
+            Lc = (0.2 if not big else 0.34) * kc
+            claws = g.merge(claws, g.tube([tp + Z * 0.02, tp + d * Lc * 0.55 + Z * (0.05 if not big else 0.1), tp + d * Lc - Z * 0.045], [0.042 * kc, 0.032 * kc, 0.004], n=5))
+        d = Vector((sg * 0.35, 1.0, 0.0)).normalized()
+        b0 = Vector((f.x, f.y + 0.16, 0.1))
+        toes = g.merge(toes, g.tube([b0, b0 + d * 0.14 - Z * 0.03], [0.07, 0.045], n=6))
+        claws = g.merge(claws, g.tube([b0 + d * 0.14 - Z * 0.02, b0 + d * (0.14 + 0.14 * kc) - Z * 0.06], [0.036 * kc, 0.004], n=5))
+        _add(r, "toes_" + tag, toes, bone, socks, smooth=True)
+        _add(r, "claws_" + tag, claws, bone, mat("drake_claw"), smooth=True)
+        j = r.bone(bone)
+        if tag[0] == "f":           # the point of the elbow, out and back
+            _add(r, "elbow_" + tag, g.cone(j + Vector((sg * 0.04, 0.05, 0.0)), j + Vector((sg * 0.15, 0.3, 0.1)), 0.08, n=5), bone, _horn_mat(), smooth=True)
+
+
+def _drake_under(r, A):
+    """Its underside: broad plates lapped one on the next, from under the jaw down the throat,
+    over the keel of the chest and along the belly to a third of the way down the tail. They
+    are the Path's colour where it has one."""
+    spec = _S["spec"]
+    style, size = gl.opt(spec.get("belly"))
+    if spec.get("accent"):
+        m1, m2 = mat("accent"), mat("accent_light")
+        if style == "dark":
+            m1, m2 = mat("accent_dark"), mat("accent")
+        elif style == "pale":
+            m1, m2 = mat("accent_light"), mat("accent_pale")
+        elif style == "banded":
+            m1, m2 = mat("accent_dark"), mat("accent_pale")
+    else:
+        m1, m2 = mat("fur_light"), mat("fur_light")
+    body = _S["body"]
+    nt = len(_S["tail"])
+    use = body[1:len(body) - nt + max(3, int(nt * 0.42))]
+    wide = 80.0
+
+    def arc(s, k, back=0.0, m=5):
+        p, d, u, v, a, b = s[:6]
+        pts = []
+        for j in range(m):
+            th = math.radians(270.0 - wide + 2 * wide * j / (m - 1))
+            pts.append(p - d * back + u * (a * math.cos(th) * k) + v * (b * math.sin(th) * k))
+        return pts
+    g1, g2, w1, w2 = None, None, [], []
+    for i in range(len(use) - 1):
+        s0, s1 = use[i], use[i + 1]
+        gap = (s1[0] - s0[0]).length
+        front, back = arc(s0, 1.015), arc(s1, 1.075, back=gap * 0.1)
+        plate = g.loft([front, back], caps=False, closed=False)
+        ww = [s0[6]] * len(front) + [s1[6]] * len(back)
+        if i % 2:
+            g2, w2 = g.merge(g2, plate), w2 + ww
+        else:
+            g1, w1 = g.merge(g1, plate), w1 + ww
+
+    def inside(c):
+        return min(body, key=lambda s: (s[0] - c).length_squared)[0]
+    for nm, geo, ws, m in (("scutes", g1, w1, m1), ("scutes_b", g2, w2, m2)):
+        n0 = _faces(r)
+        _add(r, nm, geo, ws, m, smooth=True)
+        _face_out(r, n0, inside)
+
+
+def _dorsal(r):
+    """The line of its back, from behind the skull to the end of its tail:
+    [(point on the skin, the way the line runs toward the tail, up from the skin, weights, where: neck/back/tail, how far along that)]"""
+    if "dorsal" not in _S:
+        _S["dorsal"] = [(s[0] + s[3] * s[5] * 1.04, s[1], s[3], s[6], s[7], s[8]) for s in _S["body"][1:]]
+    return _S["dorsal"]
+
+
+def _drake_scales(r, A):
+    """Scales where the precision allows: two rows of them lapped along each side of its back
+    from the nape to the tail, in the second value of its hide; and a row low on the flank in
+    its Path's colour."""
+    spec, level = _S["spec"], _S["level"]
+    style, size = gl.opt(spec.get("scales"))
+    if level <= 1 or style == "none":
+        return
+    size = size or 1.0
+    body = _S["body"]
+    geo, geo2, ws, ws2 = None, None, [], []
+
+    def kite(s, deg, k, lift=0.045):
+        """One scale: its point to the tail, its back edge standing off the skin."""
+        p, n = _on(s, deg)
+        d = s[1]
+        fwd = (d - n * d.dot(n)).normalized()
+        side = fwd.cross(n).normalized()
+        w = k * 0.36
+        return ([p - fwd * k * 0.5 + n * 0.012, p + side * w + n * (0.012 + lift * 0.4), p + fwd * k * 0.62 + n * (0.012 + lift), p - side * w + n * (0.012 + lift * 0.4)], [(0, 1, 2, 3)])
+    for i, s in enumerate(body[2:-3]):
+        a, b, z = s[4], s[5], s[7]
+        k = max(0.07, min(0.34, a * 0.7)) * size
         for sg in (1, -1):
-            pts = [Vector((sg * (e.x - 0.08), e.y - 0.24, e.z)), Vector((sg * e.x, e.y - 0.04, e.z + 0.075)),
-                   Vector((sg * (e.x + 0.05), e.y + 0.18, e.z + 0.1)), Vector((sg * (e.x + 0.06), e.y + 0.36, e.z + 0.07))]
-            geo = g.merge(geo, g.tube(pts, [0.02 * k, 0.055 * k, 0.05 * k, 0.015], n=4))
-        _add(r, "brows", geo, "Head", mat("fur_dark"), smooth=True)
+            rows = ((90 - sg * 34, 1.0), (90 - sg * 64, 0.9)) if z == "back" else ((90 - sg * 40, 1.0),)
+            for ri, (deg, kk) in enumerate(rows):
+                if (i + ri) % 2 and z == "back":
+                    continue
+                if (i + ri) % 4 < 2:
+                    geo = g.merge(geo, kite(s, deg, k * kk))
+                    ws.extend([s[6]] * 4)
+                else:
+                    geo2 = g.merge(geo2, kite(s, deg, k * kk))
+                    ws2.extend([s[6]] * 4)
+
+    def inside(c):
+        return min(body, key=lambda s: (s[0] - c).length_squared)[0]
+    coin = style == "coin" and spec.get("accent")
+    for nm, gg, ww, m in (("scales", geo, ws, mat("accent") if coin else _hide2()), ("scales_b", geo2, ws2, mat("accent_light") if coin else _hide2())):
+        if gg:
+            n0 = _faces(r)
+            _add(r, nm, gg, ww, m, smooth=False)
+            _face_out(r, n0, inside)
+
+
+def drake_measure(r, A):
+    """The drake itself, laid over the frame once the frame has its shape (and read in the
+    wolf's place: where its eyes, its snout and the crown of its head are)."""
+    _measure(r, A)
+    _S["S"] = (r.bone("Ear1.L") - r.bone("Ear1.R")).length / _S["ear0"] * 1.16
+    _strip_wolf(r)
+    _drake_body(r, A)
+    _drake_head(r, A)
+    _drake_feet(r, A)
+    _drake_under(r, A)
+    _drake_scales(r, A)
+
+
+def _drake_round(r):
+    """Flesh, horn and bone are shaded round; plates and scales keep their planes (they were
+    made so)."""
+    me = r.mesh.data
+    soft = {i for i, m in enumerate(me.materials) if m.name.startswith(ROUND) and not m.name.startswith(("mark_ridge", "mark_wings", "mark_tailtip", "drake_horn"))}
+    for p in me.polygons:
+        if p.material_index in soft:
+            p.use_smooth = True
+
+
+def _drake_pose(r, spec):
+    """How it carries itself, put on last (everything on its neck and head goes with them):
+    its crane, then the looks every one of the wolf's kin has; and its head never under the ground."""
+    for style, size in gl.each(spec.get("crane")):
+        if style in CRANES:
+            _recrane(r, CRANES[style], size)
+    _pose(r, spec)
+    wh = r._weights(["Head"])
+    for _ in range(12):
+        low = min([p.z for p, k in zip(r.world_verts(), wh) if k > 0.5] or [1.0])
+        if low > 0.012:
+            break
+        r.rotate(list(NECK) + _head(r), r.bone("Neck1"), X, -0.05)
+
+
+def drake_build(form_id, level, spec, base):
+    _S.clear()
+    _S["level"] = level
+    spec = _ordered(spec)
+    _S["spec"] = spec
+    r, sockets = gl.wolf_form(form_id, level, spec, species=drake_species, coat=("fur_dark", "fur_light"), marks=("socks",),
+                              ages=drake_ages, measure=drake_measure)
+    _recoat(r, {"fur_ruff": "fur_dark"})
+    _drake_round(r)
+    _S["k"] = STAND / _S["A"].skull
+    _S["neck_base"] = _S["neck_base"] * _S["k"]
+    _ride(r, sockets, _S["k"])
+    _drake_pose(r, spec)
+    gl.export(r, sockets, os.path.join(gl.OUT, form_id + ".glb"))
+
+
+# --- what a drake grows (its slots, in data/genius-bases/drake.json) ---------------------------
+
+def _horn(points, r0, n=6, steps=2, r1=0.004):
+    """A horn through points: round, drawn to a point."""
+    line = _cr(points, steps)
+    m = len(line)
+    return g.tube(line, [r0 + (r1 - r0) * (i / (m - 1)) ** 0.8 for i in range(m)], n=n)
+
+
+def _bone_of(w):
+    """The bone that has most of a point (a piece rides one bone)."""
+    return w if isinstance(w, str) else max(w, key=lambda bw: bw[1])[0]
+
+
+def _at_y(y):
+    """Its body at y along its back (between two of the places it was made at)."""
+    body = [s for s in _S["body"] if s[7] == "back"]
+    if y <= body[0][0].y:
+        return body[0]
+    for s0, s1 in zip(body, body[1:]):
+        if s0[0].y <= y <= s1[0].y:
+            t = (y - s0[0].y) / max(1e-6, s1[0].y - s0[0].y)
+            return (s0[0].lerp(s1[0], t), s0[1].lerp(s1[1], t).normalized(), s0[2].lerp(s1[2], t).normalized(), s0[3].lerp(s1[3], t).normalized(),
+                    s0[4] + (s1[4] - s0[4]) * t, s0[5] + (s1[5] - s0[5]) * t, s0[6] if t < 0.5 else s1[6], "back", s0[8] + (s1[8] - s0[8]) * t)
+    return body[-1]
+
+
+def _inside(c):
+    return min(_S["body"], key=lambda s: (s[0] - c).length_squared)[0]
+
+
+def _slab(pts, n, up, dn):
+    """A thin flat piece through points, seen from both sides: from up above them along n to dn below."""
+    pts = [V(p) for p in pts]
+    k = len(pts)
+    verts = [p + n * up for p in pts] + [p - n * dn for p in pts]
+    faces = [tuple(range(k)), tuple(range(2 * k - 1, k - 1, -1))]
+    for i in range(k):
+        j = (i + 1) % k
+        faces.append((i, i + k, j + k, j))
+    return verts, faces
+
+
+def _lie(r, name, geo, ws, material, smooth=False):
+    """Add what lies on its skin (open shapes), turned to face away from it."""
+    if geo and geo[0]:
+        n0 = _faces(r)
+        _add(r, name, geo, ws, material, smooth=smooth)
+        _face_out(r, n0, _inside)
 
 
 def _drake_horns(style):
     def fn(r, A, size):
-        hb = A.head
-        crown = _skin().top(hb.y + 0.06, half_width=0.2, window=0.12)
+        H = _S["head"]
+        P, S = H["P"], H["S"]
         geo, dark = None, None
 
-        def curve(sg, pts, rad, off=(0.0, 0.0, 0.0), k=1.0):
-            base = Vector((sg * (0.1 + off[0]), hb.y + 0.1 + off[1], crown - 0.05 + off[2]))
-            P = [base] + [base + Vector((sg * x, y, z)) * (size * k) for x, y, z in pts]
-            return g.tube(P, [rad * 1.25 * (0.7 + 0.3 * size) * (1 - 0.86 * i / (len(P) - 1)) for i in range(len(P))], n=5), P
-
-        swept = [(0.05, 0.24, 0.2), (0.07, 0.56, 0.32)]
+        def curve(sg, pts, rad, at=(0.165, 0.03, 0.2), k=1.0):
+            base = P(sg * at[0], at[1], at[2])
+            Q = [base] + [base + Vector((sg * x, y, z)) * (S * size * k) for x, y, z in pts]
+            return _horn(Q, rad * S * (0.75 + 0.25 * size)), Q
+        swept = [(0.04, 0.2, 0.14), (0.07, 0.48, 0.22), (0.08, 0.74, 0.2)]
         for sg in (1, -1):
             if style == "nubs":
-                geo = g.merge(geo, curve(sg, [(0.02, 0.07, 0.07)], 0.05)[0])
+                geo = g.merge(geo, curve(sg, [(0.02, 0.07, 0.08)], 0.05)[0])
             elif style == "swept":
-                geo = g.merge(geo, curve(sg, swept, 0.055)[0])
-            elif style == "broad":      # heavy, out to the sides and back, like a bull's
-                geo = g.merge(geo, curve(sg, [(0.14, 0.12, 0.1), (0.32, 0.34, 0.12), (0.4, 0.6, 0.02)], 0.1)[0])
+                geo = g.merge(geo, curve(sg, swept, 0.058)[0])
+            elif style == "broad":      # heavy, out to the sides and round to the front, like a bull's
+                geo = g.merge(geo, curve(sg, [(0.16, 0.08, 0.06), (0.36, 0.12, 0.12), (0.46, -0.04, 0.26), (0.42, -0.2, 0.4)], 0.09)[0])
             elif style == "long":       # one grown long, and nicked down its length
                 if sg > 0:
-                    geo = g.merge(geo, curve(sg, swept, 0.055)[0])
+                    geo = g.merge(geo, curve(sg, swept, 0.058)[0])
                 else:
-                    ge, P = curve(sg, [(0.05, 0.3, 0.25), (0.08, 0.7, 0.5), (0.1, 1.1, 0.62)], 0.075)
+                    ge, Q = curve(sg, [(0.05, 0.28, 0.2), (0.09, 0.66, 0.42), (0.11, 1.02, 0.52), (0.1, 1.34, 0.48)], 0.075)
                     geo = g.merge(geo, ge)
-                    for t in (0.2, 0.35, 0.5, 0.65, 0.8):
-                        c = _along(P, t)
-                        dark = g.merge(dark, _hoop(c, _along(P, t + 0.02) - c, 0.075 * (1 - 0.8 * t) + 0.012, 0.014, n=6, sides=3))
+                    for t in (0.22, 0.36, 0.5, 0.64, 0.78):
+                        c = _along(Q, t)
+                        dark = g.merge(dark, _hoop(c, _along(Q, t + 0.02) - c, (0.075 * (1 - 0.8 * t) + 0.014) * S, 0.014 * S, n=6, sides=3))
             elif style == "crown":      # a crown of them
-                geo = g.merge(geo, curve(sg, [(0.05, 0.3, 0.3), (0.08, 0.68, 0.58)], 0.065)[0])
-                geo = g.merge(geo, curve(sg, [(0.14, 0.2, 0.12), (0.26, 0.48, 0.22)], 0.05, off=(0.06, 0.02, -0.05))[0])
-                geo = g.merge(geo, curve(sg, [(0.14, 0.06, -0.02), (0.32, 0.22, -0.04)], 0.045, off=(0.1, -0.02, -0.12))[0])
+                geo = g.merge(geo, curve(sg, [(0.04, 0.26, 0.26), (0.07, 0.6, 0.52)], 0.065)[0])
+                geo = g.merge(geo, curve(sg, [(0.14, 0.18, 0.1), (0.26, 0.42, 0.2)], 0.05, at=(0.22, 0.03, 0.16))[0])
+                geo = g.merge(geo, curve(sg, [(0.14, 0.06, -0.02), (0.3, 0.2, -0.04)], 0.045, at=(0.262, 0.02, 0.07))[0])
             elif style == "brow":       # horns over the brow as well, forward
-                geo = g.merge(geo, curve(sg, [(0.06, 0.24, 0.24), (0.08, 0.56, 0.4)], 0.07)[0])
-                geo = g.merge(geo, curve(sg, [(0.06, -0.2, 0.14), (0.1, -0.48, 0.32)], 0.055, off=(0.02, -0.22, -0.03))[0])
+                geo = g.merge(geo, curve(sg, [(0.05, 0.22, 0.22), (0.08, 0.52, 0.4)], 0.07)[0])
+                geo = g.merge(geo, curve(sg, [(0.05, -0.18, 0.12), (0.09, -0.42, 0.32)], 0.05, at=(0.2, -0.3, 0.215))[0])
             elif style == "flat":       # laid flat for the fall
-                geo = g.merge(geo, curve(sg, [(0.03, 0.34, 0.03), (0.04, 0.7, 0.02)], 0.055)[0])
+                geo = g.merge(geo, curve(sg, [(0.02, 0.3, 0.02), (0.03, 0.62, 0.0), (0.03, 0.92, -0.04)], 0.052)[0])
             elif style == "droop":      # heavy and gone down with age
-                geo = g.merge(geo, curve(sg, [(0.1, 0.2, 0.1), (0.2, 0.46, -0.05), (0.24, 0.6, -0.32)], 0.075)[0])
-            if style != "nubs":         # two shorter spines behind each cheek
-                for k, (dz, ln) in enumerate(((-0.1, 0.24), (-0.2, 0.18))):
-                    b0 = Vector((sg * 0.15, hb.y + 0.06, crown + dz))
-                    geo = g.merge(geo, g.cone(b0, b0 + Vector((sg * 0.1, ln, 0.02 - 0.03 * k)) * size, 0.035, n=4))
+                geo = g.merge(geo, curve(sg, [(0.1, 0.18, 0.08), (0.2, 0.42, -0.06), (0.24, 0.54, -0.3), (0.2, 0.5, -0.5)], 0.078)[0])
+            elif style == "lyre":       # rising and turning in, like the horns of a flame
+                geo = g.merge(geo, curve(sg, [(0.1, 0.1, 0.2), (0.15, 0.2, 0.46), (0.07, 0.28, 0.72)], 0.06)[0])
+            elif style == "sights":     # two short behind and one on the end of its snout: it sights along them
+                geo = g.merge(geo, curve(sg, [(0.0, 0.06, 0.14), (0.0, 0.1, 0.24)], 0.045, at=(0.08, 0.02, 0.2))[0])
+            if style not in ("nubs", "ring"):  # two shorter spines at the corner of each jaw
+                for k, ln in enumerate((0.22, 0.16)):
+                    b0 = P(sg * 0.262, 0.07, 0.1 - 0.085 * k)
+                    geo = g.merge(geo, g.cone(b0, b0 + Vector((sg * 0.11, ln, 0.03 - 0.04 * k)) * (S * size), 0.034 * S, n=5))
+        if style == "ring":       # a pale band round the base of one horn, worn like a ring
+            c = P(0.175, 0.07, 0.25)
+            _add(r, "horn_ring", _hoop(c, Vector((0.12, 0.7, 0.7)), 0.07 * S, 0.022 * S, n=8, sides=4), "Head", mat("glaze_kiln"), smooth=True)
+            return
+        if style == "sights":
+            b0 = P(0, H["yn"] + 0.08, 0.1)
+            geo = g.merge(geo, g.cone(b0, b0 + Vector((0, 0.03, 0.2)) * (S * size), 0.04 * S, n=5))
         _add(r, "horns", geo, "Head", _horn_mat(), smooth=True)
-        _add(r, "horn_nicks", dark, "Head", mat("coal"))
+        _add(r, "horn_nicks", dark, "Head", mat("coal"), smooth=True)
     return fn
 
 
 def _drake_frill(style):
     def fn(r, A, size):
+        H = _S["head"]
+        P, S = H["P"], H["S"]
+        spec = _S["spec"]
+        acc = bool(spec.get("accent"))
         if style == "gate":           # bars round its neck, like the teeth of a gate
-            _neck_band(r, "gate_bar", 0.86, mat("metal_iron"), wide=0.05, off=0.03)
-            _neck_blades(r, "gate_teeth", 0.86, 13, 0.52 * size, 0.1, mat("metal_iron"), a0=-0.35, a1=1.35, sweep=0.45, out=0.9, belly=0.15)
-        elif style == "herald":       # a frill that opens when it speaks
-            _neck_blades(r, "frill", 0.9, 11, 0.7 * size, 0.42, mat("fur_light"), a0=-0.3, a1=1.3, sweep=0.15, out=1.0, belly=0.6)
-            _neck_blades(r, "frill_ribs", 0.9, 11, 0.74 * size, 0.06, _horn_mat(), a0=-0.3, a1=1.3, sweep=0.15, out=1.0, belly=0.3, grow=0.9)
-        elif style == "crown":        # spines standing round the back of its head
-            _neck_blades(r, "crownfrill", 0.93, 9, 0.56 * size, 0.1, _horn_mat(), a0=0.0, a1=1.0, sweep=0.3, out=0.95, belly=0.2)
-        elif style == "crest":        # a crest that lifts and spreads
-            nk = _neck(r)
-            skin, ribs, lit = None, None, None
+            _neck_band(r, "gate_bar", 0.84, mat("iron_gate"), wide=0.05, off=0.03)
+            _neck_blades(r, "gate_teeth", 0.84, 13, 0.5 * size, 0.1, mat("iron_gate"), a0=-0.35, a1=1.35, sweep=0.45, out=0.9, belly=0.15)
+        elif style in ("herald", "ruff"):   # a frill round the back of its head that opens when it speaks
+            n = 9
+            ribs, skin, edge = None, None, None
             prev = None
-            for i in range(7):
-                t = 1.0 - 0.1 * i
-                p, d, _ = nk.at(t)
-                u, v = _perp(d)
-                b0 = nk.nape(t) - v * 0.03
-                L = (1.0 + 0.5 * math.sin(math.pi * (i + 0.6) / 7.2)) * size
-                tip = b0 + v * L - d * (0.25 * L * (i - 2) / 3)
-                ribs = g.merge(ribs, g.tube([b0, tip], [0.035, 0.01], n=4))
-                lit = g.merge(lit, g.ico(tip, 0.045, sub=0))
+            for i in range(n):
+                a = math.radians(-112 + 224 * i / (n - 1))          # round the back of the skull, over the top
+                d = Vector((math.sin(a), 0.0, math.cos(a)))
+                b0 = P(d.x * 0.2, 0.1, 0.08 + d.z * 0.12)
+                L = (0.62 + 0.2 * math.cos(a) + (0.06 if i % 2 else 0.0)) * S * size
+                tip = b0 + (d + Vector((0, 0.55 if style == "herald" else 1.1, 0))).normalized() * L
+                ribs = g.merge(ribs, g.tube([b0, tip], [0.028 * S, 0.008 * S], n=4))
                 if prev is not None:
-                    skin = g.merge(skin, _panel([prev[0], prev[1].lerp(prev[0], 0.08), tip.lerp(b0, 0.08), b0], 0.012))
+                    mid = (prev[1] + tip) / 2
+                    hub = (prev[0] + b0) / 2
+                    skin = g.merge(skin, _panel([prev[0], prev[1], mid.lerp(hub, 0.14), tip, b0], 0.012 * S))
+                    e0, e1 = prev[1].lerp(prev[0], 0.26), tip.lerp(b0, 0.26)
+                    edge = g.merge(edge, _panel([e0 + Y * 0.012 * S, prev[1].lerp(prev[0], 0.1) + Y * 0.012 * S, tip.lerp(b0, 0.1) + Y * 0.012 * S, e1 + Y * 0.012 * S], 0.03 * S))
                 prev = (b0, tip)
-            _add(r, "crest_skin", skin, "Neck3", mat("fur_light"), smooth=False)
-            _add(r, "crest_ribs", ribs, "Neck3", _horn_mat())
+            _add(r, "frill_skin", skin, "Head", mat("accent") if acc else mat("fur_light"), smooth=False)
+            _add(r, "frill_edge", edge, "Head", mat("accent_pale") if acc else mat("fur_light"), smooth=False)
+            _add(r, "frill_ribs", ribs, "Head", _horn_mat(), smooth=True)
+        elif style == "crown":        # spines standing round the back of its head
+            geo = None
+            for i in range(7):
+                a = math.radians(-90 + 180 * i / 6)
+                d = Vector((math.sin(a), 0.0, math.cos(a)))
+                b0 = P(d.x * 0.22, 0.1, 0.08 + d.z * 0.13)
+                L = (0.4 + 0.16 * math.cos(a)) * S * size
+                geo = g.merge(geo, _horn([b0, b0 + (d + Y * 0.5).normalized() * L * 0.6, b0 + (d * 0.8 + Y * 0.9).normalized() * L], 0.04 * S, n=5))
+            _add(r, "crownfrill", geo, "Head", _horn_mat(), smooth=True)
+        elif style == "crest":        # a crest that lifts and spreads, from its brow down its nape
+            D = [q for q in _dorsal(r) if q[4] == "neck"]
+            skin, ribs, lit, ws, wr = None, None, None, [], []
+            prev = None
+            for i, (pt, d, up, w, z, t) in enumerate(D):
+                L = (0.5 + 0.55 * math.sin(math.pi * min(1.0, (i + 1.2) / (len(D) * 0.9)))) * size
+                b0, tip = pt - up * 0.04, pt + up * L + d * L * 0.3
+                rib = g.tube([b0, tip], [0.03, 0.009], n=4)
+                ribs = g.merge(ribs, rib)
+                wr.extend([w] * len(rib[0]))
+                if i % 2 == 0:
+                    lit = g.merge(lit, g.ico(tip, 0.04, sub=0))
+                if prev is not None:
+                    pn = _panel([prev[0], prev[1].lerp(prev[0], 0.06), ((prev[1] + tip) / 2).lerp((prev[0] + b0) / 2, 0.16), tip.lerp(b0, 0.06), b0], 0.012)
+                    skin = g.merge(skin, pn)
+                    ws.extend([w] * len(pn[0]))
+                prev = (b0, tip)
+            _add(r, "crest_skin", skin, ws, mat("accent") if acc else mat("fur_light"), smooth=False)
+            _add(r, "crest_ribs", ribs, wr, _horn_mat(), smooth=True)
             _add(r, "crest_tips", lit, "Neck3", field("crest", 3.0))
         elif style == "beard":        # long whiskers and a beard, grey
-            n = A.nose
             geo = None
             for sg in (1, -1):
-                b0 = Vector((sg * 0.16, n.y + 0.22, n.z - 0.02))
-                geo = g.merge(geo, g.tube([b0, b0 + Vector((sg * 0.34, 0.1, -0.1)) * size, b0 + Vector((sg * 0.5, 0.5, -0.5)) * size, b0 + Vector((sg * 0.4, 0.9, -1.0)) * size], [0.035, 0.03, 0.02, 0.006], n=4))
-            zb, _ = gl._jaw_line(r, A)
+                b0 = P(sg * 0.13, H["yn"] + 0.1, 0.02)
+                geo = g.merge(geo, _horn([b0, b0 + Vector((sg * 0.3, 0.08, -0.08)) * S * size, b0 + Vector((sg * 0.44, 0.4, -0.4)) * S * size, b0 + Vector((sg * 0.36, 0.7, -0.8)) * S * size], 0.03 * S, n=4))
+            _add(r, "whiskers", geo, "Head", mat("fur_grey"), smooth=True)
+            J = H["J"]
+            tuft = None
             for k in range(5):
-                b0 = Vector((0.07 * (k - 2), n.y + 0.34 + 0.05 * abs(k - 2), zb + 0.03))
-                geo = g.merge(geo, g.blade(b0, b0 + Vector((0.03 * (k - 2), 0.14, -(0.5 - 0.08 * abs(k - 2)) * size)), 0.11, normal=Y, belly=0.35))
-            _add(r, "beard", geo, "Head", mat("fur_pale"))
+                b0 = J(0.05 * (k - 2), H["ys"] - 0.3 + 0.05 * abs(k - 2), -0.12 * H["jw"])
+                tuft = g.merge(tuft, g.blade(b0, b0 + Vector((0.03 * (k - 2), 0.12, -(0.5 - 0.08 * abs(k - 2)))) * S * size, 0.1 * S, normal=Y, belly=0.35))
+            piv = J(0, H["ys"] - 0.26, -0.12 * H["jw"])
+            _piece("sway", "beard", [(tuft, mat("fur_grey"), True)], piv, "Head")
     return fn
 
 
 def _drake_ridge(style):
     def fn(r, A, size):
         m = _horn_mat()
-        y0, y1 = r.bone("Neck3").y, r.bone("Tail1").y
-        tb = _tailbones(r)
-        if style in ("plates", "young"):
-            k = 1.9 if style == "young" else 1.0
-            r.fin("ridge", y0, y1, lambda t: (0.1 + 0.08 * math.sin(t * math.pi)) * size * k, m, thickness=0.07, steps=24 if style == "plates" else 12, sink=0.05, serrate=True)
-            r.fin("tail_ridge", y1 + 0.05, tb[4].y, lambda t: 0.1 * (1.0 - t) * size, m, thickness=0.05, steps=12, sink=0.04, serrate=True)
-        elif style == "flame":        # a ridge like a row of flames
-            geo, lit, ws, wl = None, None, [], []
-            for i in range(15):
-                t = i / 14
-                y = y0 + (y1 - y0) * t
-                L = (0.3 + 0.22 * math.sin(t * math.pi)) * size * (1.0 + 0.2 * math.sin(i * 2.2))
-                b0 = Vector((0, y, _skin().top(y, half_width=0.12) - 0.05))
-                bl = g.blade(b0, b0 + Vector((0, L * 0.55, L)), 0.26, normal=X, belly=0.3, curl=0.0)
-                geo = g.merge(geo, bl)
-                ws.extend([r.spine_weights(y)] * len(bl[0]))
-                if i % 2 == 0:
-                    b2 = g.blade(b0 + Vector((0, 0.04, 0.02)), b0 + Vector((0, L * 0.3, L * 0.6)), 0.13, thick=0.1, normal=X, belly=0.3)
-                    lit = g.merge(lit, b2)
-                    wl.extend([r.spine_weights(y)] * len(b2[0]))
-            _add(r, "ridge_flame", geo, ws, m, smooth=False)
-            _add(r, "ridge_lit", lit, wl, field("ember", 2.4))
+        spec = _S["spec"]
+        acc = bool(spec.get("accent"))
+        D = _dorsal(r)
+        back = [q for q in D if q[4] == "back"]
+
+        def gap(i):
+            return (D[min(i + 1, len(D) - 1)][0] - D[max(i - 1, 0)][0]).length / 2
+
+        def plates(height, material, name, every=1, lean=0.38, wide=1.0, zones=("neck", "back", "tail"), tail_to=0.62, alt=None):
+            geo, geo2, ws, ws2 = None, None, [], []
+            for i, (pt, d, up, w, z, t) in enumerate(D):
+                if z not in zones or (z == "tail" and t > tail_to) or i % every:
+                    continue
+                h = height(z, t, i)
+                if h <= 0.0:
+                    continue
+                u = d.cross(up).normalized()
+                bl = g.blade(pt - up * 0.05, pt + up * h + d * (h * lean), gap(i) * 1.5 * every * wide, normal=u, belly=0.34, thick=0.035)
+                if alt is not None and (i // every) % 2:
+                    geo2, ws2 = g.merge(geo2, bl), ws2 + [w] * 6
+                else:
+                    geo, ws = g.merge(geo, bl), ws + [w] * 6
+            _add(r, name, geo, ws, material, smooth=False)
+            if geo2:
+                _add(r, name + "_b", geo2, ws2, alt, smooth=False)
+
+        def std(z, t, i):
+            return {"neck": 0.1 + 0.14 * (1.0 - t), "back": 0.24 + 0.1 * math.sin(t * math.pi), "tail": 0.26 * (1.0 - t / 0.62) + 0.04}[z] * size
+        if style == "plates":
+            plates(std, m, "ridge")
+        elif style == "young":        # a ridge it has not grown into: a few plates, too big for it
+            plates(lambda z, t, i: (0.3 + 0.16 * math.sin(t * math.pi)) * size, m, "ridge", every=2, zones=("back",), lean=0.2, wide=0.8)
+            plates(lambda z, t, i: 0.16 * size * (1.0 - t), m, "ridge_tail", every=2, zones=("tail",), tail_to=0.5)
+        elif style == "spines":       # fine and swept: nothing to catch the wind
+            geo, ws = None, []
+            for i, (pt, d, up, w, z, t) in enumerate(D):
+                if z == "tail" and t > 0.5:
+                    continue
+                h = (0.2 + 0.08 * math.sin(i * 1.7)) * size * (0.7 if z == "neck" else 1.0)
+                sp = g.cone(pt - up * 0.03, pt + up * h * 0.7 + d * h * 0.9, 0.035, n=4)
+                geo, ws = g.merge(geo, sp), ws + [w] * len(sp[0])
+            _add(r, "ridge_spines", geo, ws, m, smooth=True)
+        elif style == "flame":        # a ridge like a row of flames, in its Path's colour; here and there one is lit
+            a1, a2 = (mat("accent"), mat("accent_light")) if acc else (m, m)
+            plates(lambda z, t, i: ({"neck": 0.16 + 0.2 * (1.0 - t), "back": 0.4 + 0.16 * math.sin(t * math.pi), "tail": 0.34 * (1.0 - t / 0.62) + 0.05}[z]) * size * (1.0 + 0.22 * math.sin(i * 2.2)),
+                   a1, "ridge_flame", lean=0.55, wide=0.9, alt=a2)
+            for k, q in enumerate(back[1::3][:3]):
+                pt, d, up, w = q[:4]
+                u = d.cross(up).normalized()
+                h = 0.62 * size
+                outer = g.blade(pt - up * 0.04, pt + up * h + d * h * 0.3, 0.3, normal=u, belly=0.3, thick=0.05)
+                core = g.blade(pt + up * 0.02, pt + up * h * 0.6 + d * h * 0.12, 0.15, normal=u, belly=0.3, thick=0.075)
+                _piece("flick", "flame" + "abc"[k], [(outer, a2 if acc else m, False), (core, field("ember", 2.4), False)], pt, _bone_of(w))
         elif style == "sail":         # a ridge gone finned and ragged
-            r.fin("sail", y0 + 0.1, y1, lambda t: (0.3 + 0.62 * math.sin(t * math.pi)) * size * (0.82 + 0.18 * math.sin(t * 41.0)), mat("fur_light"), thickness=0.035, steps=26, sink=0.05)
-            r.fin("tail_fin", y1 + 0.05, tb[5].y, lambda t: 0.32 * (1.0 - t) * size, mat("fur_light"), thickness=0.03, steps=12, sink=0.04)
-        elif style == "beads":        # a row of beads on a wire, to count on
-            geo, beads, bright, ws, wb, wc = None, None, None, [], [], []
-            pts = []
-            for i in range(13):
-                t = i / 12
-                y = y0 + 0.3 + (y1 - y0 - 0.3) * t
-                pts.append(Vector((0, y, _skin().top(y, half_width=0.12) + 0.2 * size)))
-            wire = g.tube(pts, [0.014] * len(pts), n=3, caps=False)
-            _add(r, "bead_wire", wire, [r.spine_weights(p.y) for p in wire[0]], mat("metal_iron"))
-            for i, p in enumerate(pts):
+            skin, ribs, ws, wr = None, None, [], []
+            prev = None
+            for i, (pt, d, up, w, z, t) in enumerate(D):
+                if z == "tail" and t > 0.55:
+                    break
+                h = {"neck": 0.2 + 0.3 * (1.0 - t), "back": 0.5 + 0.4 * math.sin(t * math.pi), "tail": 0.42 * (1.0 - t / 0.55)}[z] * size * (0.82 + 0.18 * math.sin(i * 4.1))
+                b0, tip = pt - up * 0.04, pt + up * h + d * h * 0.22
                 if i % 2 == 0:
-                    post = g.tube([p, Vector((0, p.y, p.z - 0.24 * size))], [0.02, 0.03], n=4)
-                    geo = g.merge(geo, post)
-                    ws.extend([r.spine_weights(p.y)] * len(post[0]))
+                    rib = g.tube([b0, tip], [0.028, 0.008], n=4)
+                    ribs, wr = g.merge(ribs, rib), wr + [w] * len(rib[0])
+                if prev is not None:
+                    pn = _panel([prev[0], prev[1], tip, b0], 0.014)
+                    skin, ws = g.merge(skin, pn), ws + [w] * len(pn[0])
+                prev = (b0, tip)
+            _add(r, "sail", skin, ws, mat("accent_light") if acc else mat("fur_light"), smooth=False)
+            _add(r, "sail_ribs", ribs, wr, m, smooth=True)
+        elif style == "beads":        # a row of beads on a wire, to count on
+            pts, wts = [], []
+            for (pt, d, up, w, z, t) in back:
+                pts.append(pt + up * 0.2 * size)
+                wts.append(w)
+            line = _cr(pts, 2)
+            wire = g.tube(line, [0.014] * len(line), n=3, caps=False)
+            _add(r, "bead_wire", wire, [r.spine_weights(p.y) for p in wire[0]], mat("metal_iron"), smooth=True)
+            posts, beads, bright, wp, wb, wc = None, None, None, [], [], []
+            for i, p in enumerate(line):
+                w = r.spine_weights(p.y)
+                if i % 4 == 0:
+                    post = g.tube([p, p - Z * 0.26 * size], [0.02, 0.03], n=4)
+                    posts, wp = g.merge(posts, post), wp + [w] * len(post[0])
                 if i % 4 != 3:
                     b = g.ico(p, 0.085 * size, sub=1, scale=(1.0, 0.7, 1.0))
                     if i % 4 == 1:
-                        bright = g.merge(bright, b)
-                        wc.extend([r.spine_weights(p.y)] * len(b[0]))
+                        bright, wc = g.merge(bright, b), wc + [w] * len(b[0])
                     else:
-                        beads = g.merge(beads, b)
-                        wb.extend([r.spine_weights(p.y)] * len(b[0]))
-            _add(r, "bead_posts", geo, ws, m)
-            _add(r, "beads", beads, wb, mat("wood"), smooth=True)
-            _add(r, "beads_b", bright, wc, mat("metal_brass"), smooth=True)
+                        beads, wb = g.merge(beads, b), wb + [w] * len(b[0])
+            _add(r, "bead_posts", posts, wp, m, smooth=True)
+            _add(r, "beads", beads, wb, mat("accent_dark") if acc else mat("wood"), smooth=True)
+            _add(r, "beads_b", bright, wc, mat("accent_light") if acc else mat("metal_brass"), smooth=True)
         elif style == "pots":         # a row of chimney pots, smoking
-            for i, t in enumerate((0.3, 0.52, 0.74)):
-                y = y0 + (y1 - y0) * t
-                c = Vector((0, y, _skin().top(y, half_width=0.12) - 0.06))
-                h = (0.42 - 0.06 * i) * size
-                pot = g.lathe([(0.15, 0.0), (0.12, h * 0.8), (0.15, h * 0.84), (0.15, h), (0.09, h)], n=8, centre=c)
-                _add(r, "pot_%d" % i, pot, [r.spine_weights(y)] * len(pot[0]), mat("clay_dark"))
-                p0 = c + Vector((0, 0, h))
-                sm = g.tongue([p0, p0 + Vector((0.05, 0.14, 0.3)), p0 + Vector((-0.08, 0.4, 0.62)), p0 + Vector((0.04, 0.7, 0.9))], [0.18, 0.24, 0.2, 0.03], thick=0.6, normal=X)
-                _add(r, "pot_smoke_%d" % i, sm, [r.spine_weights(y)] * len(sm[0]), mat("smoke"))
+            for i, q in enumerate(back[1::3][:3]):
+                pt, d, up, w = q[:4]
+                c = pt - Z * 0.08
+                h = (0.46 - 0.06 * i) * size
+                pot = g.lathe([(0.16, 0.0), (0.125, h * 0.8), (0.16, h * 0.84), (0.16, h), (0.09, h)], n=8, centre=c)
+                _add(r, "pot_%d" % i, pot, [w] * len(pot[0]), mat("clay_dark"), smooth=True)
+                band = g.lathe([(0.165, h * 0.84), (0.165, h)], n=8, centre=c, caps=False)
+                _add(r, "pot_band_%d" % i, band, [w] * len(band[0]), mat("accent") if acc else mat("clay"), smooth=True)
+                p0 = c + Z * h
+                sm = g.tongue([p0, p0 + Vector((0.05, 0.14, 0.3)), p0 + Vector((-0.08, 0.4, 0.62)), p0 + Vector((0.04, 0.7, 0.9))], [0.18, 0.26, 0.22, 0.03], thick=0.6, normal=X)
+                _piece("sway", "potsmoke" + "abc"[i], [(sm, mat("smoke_pale"), True)], p0, _bone_of(w))
         elif style == "crumbled":     # a ridge burned down to stubs
-            geo, ws = None, []
-            for i in range(11):
-                t = i / 10
-                y = y0 + (y1 - y0) * t
-                L = (0.08 + 0.1 * math.sin(i * 2.7) ** 2) * size
-                b0 = Vector((0, y, _skin().top(y, half_width=0.12) - 0.04))
-                bl = g.blade(b0, b0 + Vector((0, 0.04, L)), 0.16, normal=X, belly=0.5)
-                geo = g.merge(geo, bl)
-                ws.extend([r.spine_weights(y)] * len(bl[0]))
-            _add(r, "ridge_ash", geo, ws, mat("ash"), smooth=False)
+            plates(lambda z, t, i: (0.06 + 0.1 * math.sin(i * 2.7) ** 2) * size, mat("ash_fall"), "ridge_ash", lean=0.1, wide=0.7)
         elif style == "lamps":        # every lamp it has kept, hung along its back
-            r.fin("ridge", y0, y1, lambda t: (0.1 + 0.08 * math.sin(t * math.pi)) * size, m, thickness=0.07, steps=24, sink=0.05, serrate=True)
-            for i, t in enumerate((0.32, 0.58, 0.82)):
-                y = y0 + (y1 - y0) * t
-                b0 = Vector((0, y, _skin().top(y, half_width=0.12) - 0.04))
-                topp = b0 + Vector((0, 0.1, (0.62 - 0.06 * i) * size))
-                arm = topp + Vector((0.26 * (1 if i % 2 else -1), 0.0, 0.06))
-                bone = max(r.spine_weights(y), key=lambda bw: bw[1])[0]
-                _add(r, "lamppost_%d" % i, g.tube([b0, topp, arm], [0.04, 0.035, 0.025], n=5), bone, m)
-                gl._add_items(r, "ridgelamp_%d" % i, gl._lantern(arm, 0.17 * size, "lamp", 3.4), bone)
-        elif style == "coins":        # scales like old coin, standing on edge down its back and lying on its flanks
-            sk = _skin()
-            brass = mat("brass_old")
-            geo, ws = None, []
-            for i in range(10):
-                t = i / 9
-                y = y0 + (y1 - y0) * t
-                rad = (0.15 + 0.08 * math.sin(t * math.pi)) * size
-                c = Vector((0, y, sk.top(y, half_width=0.12) + rad * 0.5))
-                coin = g.tube([c - X * 0.025, c + X * 0.025], [rad, rad], n=8)
-                geo = g.merge(geo, coin)
-                ws.extend([r.spine_weights(y)] * len(coin[0]))
-            zmid = (A.withers + A.belly) / 2
-            for row, dz in enumerate((0.22, -0.12)):
-                for i in range(5):
-                    y = A.t3.y + 0.42 * i + 0.2 * (row % 2)
-                    for sg in (1, -1):
-                        z = zmid + dz
-                        c = Vector((sg * (sk.side(y, z) + 0.01), y, z))
-                        coin = g.tube([c, c + Vector((sg * 0.04, 0, 0.0))], [0.2 * size, 0.2 * size], n=8)
-                        geo = g.merge(geo, coin)
-                        ws.extend([r.spine_weights(y)] * len(coin[0]))
-            _add(r, "coins", geo, ws, brass, smooth=False)
+            plates(std, m, "ridge")
+            for i, q in enumerate(back[1::3][:3]):
+                pt, d, up, w = q[:4]
+                sd = 1 if i % 2 else -1
+                top = pt + Vector((0, 0.08, (0.66 - 0.06 * i) * size))
+                arm = top + Vector((0.3 * sd, 0.0, 0.05))
+                post = g.tube([pt - Z * 0.05, top, arm], [0.04, 0.035, 0.025], n=5)
+                _add(r, "lamppost_%d" % i, post, [w] * len(post[0]), m, smooth=True)
+                _piece("sway", "lamp" + "abc"[i], [(geo, mt, not mt.name.startswith("metal")) for geo, mt in gl._lantern(arm, 0.18 * size, "lamp", 3.4)], arm, _bone_of(w))
+        elif style == "coins":        # scales like old coin, standing on edge down its back
+            geo, geo2, ws, ws2 = None, None, [], []
+            for i, (pt, d, up, w, z, t) in enumerate(D):
+                if z == "tail" and t > 0.5:
+                    continue
+                rad = {"neck": 0.1, "back": 0.17 + 0.07 * math.sin(t * math.pi), "tail": 0.15 * (1.0 - t)}[z] * size
+                u = d.cross(up).normalized()
+                c = pt + up * rad * 0.55
+                coin = g.tube([c - u * 0.022, c + u * 0.022], [rad, rad], n=8)
+                if i % 2:
+                    geo2, ws2 = g.merge(geo2, coin), ws2 + [w] * len(coin[0])
+                else:
+                    geo, ws = g.merge(geo, coin), ws + [w] * len(coin[0])
+            _add(r, "coins", geo, ws, mat("accent_light") if acc else mat("brass_coin"), smooth=False)
+            _add(r, "coins_b", geo2, ws2, mat("accent") if acc else mat("brass_coin"), smooth=False)
     return fn
 
 
-# The shapes its wings may take: arm (shoulder to elbow to wrist) and fingers from the wrist,
-# each point (out, back, up) from the one before it for the arm and from the wrist for the
-# fingers; inner is where the skin meets the body, from the shoulder.
+# The shapes its wings may take. From the root at its shoulder: the arm's elbow and wrist; then
+# where each finger ends, from the wrist; and where the skin's inner edge meets its flank,
+# from the root. Each is (out from the body, back along it, up). move: how the game moves it.
 WINGS = {
-    "nubs": dict(arm=[(0.1, 0.12, 0.18), (0.14, 0.34, 0.24)], fingers=[(0.06, 0.26, 0.1), (0.05, 0.36, -0.06), (0.02, 0.26, -0.2)], inner=(0.02, 0.4, -0.05)),
-    "folded": dict(arm=[(0.12, -0.2, 0.42)], fingers=[(0.09, 1.5, -0.08), (0.06, 1.38, -0.32), (0.03, 1.12, -0.56), (0.0, 0.8, -0.72)], inner=(0.0, 0.5, -0.3)),
-    "half": dict(arm=[(0.35, 0.1, 0.75), (0.55, 0.5, 1.25)], fingers=[(0.55, 0.3, 0.95), (0.5, 1.05, 0.5), (0.32, 1.45, -0.1), (0.1, 1.45, -0.62)], inner=(0.05, 1.1, -0.2)),
-    "glide": dict(arm=[(0.95, -0.1, 0.5), (2.0, 0.1, 0.72)], fingers=[(1.7, 0.1, 0.26), (1.35, 0.85, 0.05), (0.72, 1.25, -0.05), (0.2, 1.35, -0.1)], inner=(0.1, 1.2, -0.05)),
-    "mantle": dict(arm=[(0.5, 0.0, 1.05), (0.95, 0.2, 2.0)], fingers=[(0.65, 0.0, 1.15), (0.95, 0.72, 0.82), (0.82, 1.25, 0.2), (0.4, 1.45, -0.5)], inner=(0.1, 1.2, -0.3)),
-    "stoop": dict(arm=[(0.4, 0.3, 0.5), (0.6, 1.05, 0.82)], fingers=[(0.3, 1.5, 0.5), (0.15, 1.7, 0.1), (0.0, 1.35, -0.3)], inner=(0.05, 1.0, -0.1)),
-    "shadow": dict(arm=[(1.0, -0.4, 0.9), (2.1, -0.6, 1.55)], fingers=[(1.6, -0.6, 0.62), (1.7, 0.3, 0.1), (1.15, 1.25, -0.3), (0.5, 1.75, -0.6), (0.1, 1.85, -0.7)], inner=(0.1, 1.5, -0.4)),
-    "banner": dict(arm=[(0.6, 0.1, 0.9), (1.1, 0.4, 1.65)], fingers=[(0.5, 0.4, 1.05), (0.6, 1.5, 0.95), (0.5, 2.6, 0.3), (0.2, 1.6, -0.3)], inner=(0.05, 1.2, -0.2)),
-    "cloak": dict(arm=[(0.3, 0.05, 0.5), (0.46, 0.35, 0.56)], fingers=[(0.26, 0.3, -0.52), (0.2, 0.85, -0.95), (0.1, 1.45, -1.05), (0.0, 1.95, -0.85)], inner=(0.0, 1.6, -0.2)),
+    "nubs": dict(arm=[(0.12, 0.14, 0.14), (0.17, 0.36, 0.2)], fingers=[(0.07, 0.28, 0.1), (0.05, 0.36, -0.05), (0.02, 0.26, -0.18)], inner=(0.02, 0.4, -0.05), move=None),
+    "half": dict(arm=[(0.34, 0.12, 0.7), (0.56, 0.42, 1.25)], fingers=[(0.62, 0.25, 0.9), (0.56, 1.05, 0.5), (0.34, 1.45, -0.1), (0.1, 1.45, -0.6)], inner=(0.05, 1.1, -0.2), move="glide"),
+    "glide": dict(arm=[(0.95, -0.1, 0.4), (2.0, 0.1, 0.56)], fingers=[(1.7, 0.1, 0.16), (1.35, 0.85, 0.0), (0.72, 1.25, -0.08), (0.2, 1.35, -0.1)], inner=(0.1, 1.2, -0.05), move="glide"),
+    "mantle": dict(arm=[(0.5, 0.0, 1.0), (0.95, 0.15, 1.9)], fingers=[(0.72, -0.05, 1.1), (1.0, 0.7, 0.8), (0.85, 1.25, 0.2), (0.4, 1.45, -0.5)], inner=(0.1, 1.2, -0.3), move="beat"),
+    "stoop": dict(arm=[(0.4, 0.3, 0.45), (0.62, 1.0, 0.76)], fingers=[(0.34, 1.5, 0.45), (0.17, 1.7, 0.1), (0.0, 1.35, -0.3)], inner=(0.05, 1.0, -0.1), move="glide"),
+    "shadow": dict(arm=[(1.0, -0.4, 0.8), (2.1, -0.6, 1.35)], fingers=[(1.6, -0.6, 0.6), (1.7, 0.3, 0.1), (1.15, 1.25, -0.3), (0.5, 1.75, -0.6), (0.1, 1.85, -0.7)], inner=(0.1, 1.5, -0.4), move="glide"),
+    "banner": dict(arm=[(0.6, 0.1, 0.9), (1.1, 0.4, 1.6)], fingers=[(0.5, 0.4, 1.0), (0.6, 1.5, 0.9), (0.5, 2.5, 0.3), (0.2, 1.6, -0.3)], inner=(0.05, 1.2, -0.2), move="beat"),
+    "cloak": dict(arm=[(0.3, 0.05, 0.46), (0.48, 0.35, 0.52)], fingers=[(0.28, 0.3, -0.5), (0.22, 0.85, -0.92), (0.1, 1.45, -1.02), (0.0, 1.95, -0.84)], inner=(0.0, 1.6, -0.2), move="sway"),
+    "brake": dict(arm=[(0.45, 0.25, 0.9), (0.85, 0.1, 1.7)], fingers=[(0.8, 0.2, 0.9), (0.75, 0.9, 0.35), (0.5, 1.25, -0.3), (0.16, 1.25, -0.72)], inner=(0.05, 1.1, -0.2), move="beat"),
 }
 
 
-def _wing(sg, root, P, size):
-    """One wing from its shoulder: (its bones, its skin, its leading edge)."""
+def _wing_root(sg):
+    y = _S["ysh"] + 0.12
+    s = _at_y(y)
+    return _on(s, 90 - sg * 36)[0]
+
+
+def _wing(sg, root, W, size, skin):
+    """One wing from its shoulder: [(geometry, material, shaded round?)]: the arm, the wrist's
+    claw, the fingers, and the skin between them (and from the last of them to the flank)."""
+    acc = bool(_S["spec"].get("accent"))
+    bone_m = kit.mark("wings", mat("hide_wing"))
     arm = [V(root)]
-    for x, y, z in P["arm"]:
+    for x, y, z in W["arm"]:
         arm.append(arm[0] + Vector((sg * x, y, z)) * size)
     wrist = arm[-1]
-    tips = [wrist + Vector((sg * x, y, z)) * size for x, y, z in P["fingers"]]
-    bones = g.tube(arm, [0.075, 0.058, 0.042][:len(arm)], n=5)
+    tips = [wrist + Vector((sg * x, y, z)) * size for x, y, z in W["fingers"]]
+    inner = arm[0] + Vector((sg * W["inner"][0], W["inner"][1], W["inner"][2])) * size
+    bones = g.tube(arm, [0.085, 0.066, 0.05][:len(arm)], n=6)
     for t in tips:
-        bones = g.merge(bones, g.tube([wrist, t], [0.034, 0.008], n=4))
-    bones = g.merge(bones, g.cone(wrist, wrist + Vector((sg * 0.03, -0.12, 0.12)) * size, 0.03, n=4))
-    edge = tips + [arm[0] + Vector((sg * P["inner"][0], P["inner"][1], P["inner"][2])) * size]
-    skin = None
-    for a, b in zip(edge, edge[1:]):
-        skin = g.merge(skin, _panel([wrist, a, wrist.lerp((a + b) / 2, 0.84), b], 0.012))
-    if len(arm) > 2:
-        skin = g.merge(skin, _panel([arm[0], arm[1], wrist, edge[-1]], 0.012))
-    return bones, skin, arm
+        mid = wrist.lerp(t, 0.5) + (Z * 0.04 if abs(t.z - wrist.z) < 0.6 * size else Vector((sg * 0.04, 0, 0))) * size
+        bones = g.merge(bones, g.tube([wrist, mid, t], [0.036, 0.026, 0.007], n=5))
+    claw = g.tube([wrist, wrist + Vector((sg * 0.04, -0.12, 0.1)) * size, wrist + Vector((sg * 0.02, -0.24, 0.04)) * size], [0.04, 0.03, 0.004], n=5)
+    edge = tips + [inner]
+    base, band, vein = None, None, None
+    ragged = skin == "ragged"
+
+    def web(pts):
+        n = (pts[1] - pts[0]).cross(pts[-1] - pts[0])
+        n = n.normalized() if n.length > 1e-8 else Z.copy()
+        return _slab(pts, n, 0.0, 0.014), n
+    for k, (a, b) in enumerate(zip(edge, edge[1:])):
+        pull = 0.82 if not ragged else (0.58 + 0.22 * (k % 2))
+        m1, m2 = a.lerp(b, 0.33), a.lerp(b, 0.67)
+        last = k == len(edge) - 2
+        hub = arm[1] if last else wrist                 # the last web hangs from the elbow to the flank
+        s1, s2 = hub.lerp(m1, pull), hub.lerp(m2, pull)
+        sl, nrm = web([hub, a, s1, s2, b])
+        base = g.merge(base, sl)
+        if last:
+            base = g.merge(base, web([arm[1], wrist, a])[0], web([arm[0], arm[1], b])[0])
+        if skin in ("barred", "edge", "burn", "shadow"):          # a band across each web, part of the way out
+            f0, f1 = (0.5, 0.66) if skin == "barred" else (0.8, 0.94)
+            q = [hub.lerp(a, f0), hub.lerp(a, f1), hub.lerp(s1, f1), hub.lerp(s2, f1), hub.lerp(b, f1), hub.lerp(b, f0), hub.lerp(s2, f0), hub.lerp(s1, f0)]
+            band = g.merge(band, _slab(q, nrm, 0.012, 0.026))
+        elif skin == "eyes" and k < 2:                  # an eye on each of the outer webs
+            c = hub.lerp((a + b) / 2, 0.56)
+            ux = (a - b).normalized()
+            uy = nrm.cross(ux).normalized()
+            for rad, lift, which in ((0.26, 0.012, 0), (0.12, 0.022, 1)):
+                disc = _slab([c + (ux * math.cos(2 * math.pi * j / 8) + uy * math.sin(2 * math.pi * j / 8)) * rad * size for j in range(8)], nrm, lift, lift + 0.014)
+                if which:
+                    vein = g.merge(vein, disc)
+                else:
+                    band = g.merge(band, disc)
+    # and the web before the arm, from the shoulder to the wrist
+    base = g.merge(base, web([arm[0], arm[0].lerp(wrist, 0.5) + Vector((0, -0.16, 0.0)) * size, wrist, arm[1]])[0])
+    if acc:
+        mb = {"dark": "accent_dark", "shadow": "accent_dark", "edge": "accent_dark", "pale": "accent_light"}.get(skin, "accent")
+        m_base, m_band, m_vein = mat(mb), mat("accent_pale"), mat("accent_deep")
+    else:
+        m_base, m_band, m_vein = mat("fur_light"), mat("fur_light"), mat("fur_dark")
+    items = [(bones, bone_m, True), (claw, mat("drake_claw"), True), (base, m_base, False), (band, m_band, False), (vein, m_vein, False)]
+    if skin == "burn":          # wind-burn along the leading edge
+        items.append((g.tube([p + Vector((0, -0.03, 0.03)) for p in arm] + [tips[0] + Vector((0, -0.03, 0.03))], [0.06] * (len(arm) + 1), n=4), mat("accent_pale") if acc else mat("fur_pale"), True))
+    if skin == "shadow":        # a thread of light along the edge, so that the shadow has a shape
+        items.append((g.tube([p + Vector((0, -0.05, 0.02)) for p in arm] + [tips[0] + Vector((0, -0.05, 0.02))], [0.024] * (len(arm) + 1), n=3, caps=False), field("edge", 2.0), True))
+    return items
+
+
+def _wing_folded(r, size, skin):
+    """Wings shut along the flank: the wrist at the shoulder, the arm doubled back under it,
+    the fingers laid together down the side with the skin pleated between them."""
+    acc = bool(_S["spec"].get("accent"))
+    bone_m = kit.mark("wings", mat("hide_wing"))
+    y0 = _S["ysh"] - 0.1
+    L = (_S["yhip"] - _S["ysh"]) * size
+    for sg, tag in ((1, "l"), (-1, "r")):
+        def at(y, deg, lift, sg=sg):
+            return _on(_at_y(y), 90 - sg * deg, lift)[0]
+        wrist = at(y0, 30, 0.1)
+        elbow = at(y0 + 0.5 * L, 44, 0.08)
+        bones = g.merge(g.tube([at(y0 + 0.2, 36, 0.05), elbow, wrist], [0.075, 0.06, 0.055], n=5),
+                        g.tube([wrist, wrist + Vector((sg * 0.03, -0.14, 0.08)), wrist + Vector((sg * 0.02, -0.26, 0.0))], [0.04, 0.03, 0.004], n=5))
+        webs, wsw, wsb = None, [], []
+        wsb = [r.spine_weights(p.y) for p in bones[0]]
+        lines = []
+        for k, (deg1, reach) in enumerate(((34, 1.18), (54, 1.12), (74, 1.0), (92, 0.82))):
+            pts = [wrist]
+            for j in range(1, 5):
+                f = j / 4.0
+                pts.append(at(y0 + reach * L * f, 30 + (deg1 - 30) * f ** 0.7 + 8 * f, 0.05 + 0.03 * math.sin(f * math.pi)))
+            lines.append(pts)
+            fin = g.tube(pts, [0.036, 0.032, 0.026, 0.018, 0.006], n=4)
+            bones = g.merge(bones, fin)
+            wsb.extend([r.spine_weights(p.y) for p in fin[0]])
+        for la, lb in zip(lines, lines[1:]):
+            web = g.loft([[p - (p - _inside(p)).normalized() * 0.022 for p in la], [p - (p - _inside(p)).normalized() * 0.022 for p in lb]], caps=False, closed=False)
+            webs = g.merge(webs, web)
+            wsw.extend([r.spine_weights(p.y) for p in web[0]])
+        _add(r, "wingfold_" + tag, bones, wsb, bone_m, smooth=True)
+        mb = {"dark": "accent_dark", "shadow": "accent_deep", "pale": "accent_light"}.get(skin, "accent") if acc else "fur_light"
+        _lie(r, "wingweb_" + tag, webs, wsw, mat(mb), smooth=False)
 
 
 def _drake_wings(style):
     def fn(r, A, size):
-        sh = A.sh
-        y0 = sh.y + 0.02
-        z0 = _skin().top(y0) - 0.1
-        bones, skin, pale = None, None, None
-        for sg in (1, -1):
-            root = Vector((sg * (_skin().side(y0, z0) + 0.01), y0, z0))
-            b, s, arm = _wing(sg, root, WINGS[style], size)
-            bones, skin = g.merge(bones, b), g.merge(skin, s)
-            if style == "glide":      # wind-burn along the leading edge
-                pale = g.merge(pale, g.tube([p + Vector((0, -0.03, 0.03)) for p in arm], [0.05] * len(arm), n=4))
-        membrane = mat("shade") if style == "shadow" else mat("fur_light")
-        _add(r, "wing_bones", bones, "Torso3", kit.mark("wings", mat("wing")), smooth=True)
-        _add(r, "wing_skin", skin, "Torso3", membrane, smooth=False)
-        _add(r, "wing_burn", pale, "Torso3", mat("fur_pale"))
-        if style == "shadow":         # a thread of light along the edge, so the shadow has a shape
-            lit = None
-            for sg in (1, -1):
-                root = Vector((sg * (_skin().side(y0, z0) + 0.01), y0, z0))
-                _, _, arm = _wing(sg, root, WINGS[style], size)
-                lit = g.merge(lit, g.tube([p + Vector((0, -0.04, 0.02)) for p in arm], [0.022] * len(arm), n=3, caps=False))
-            _add(r, "wing_edge", lit, "Torso3", field("edge", 2.0))
-    return fn
-
-
-def _drake_belly(style):
-    def fn(r, A, size):
-        fy, by = r.bone("FrontUpperLeg.L").y, r.bone("BackUpperLeg.L").y
-        if style == "plates":
-            r.fin("belly", fy + (by - fy) * 0.24, fy + (by - fy) * 0.74, 0.03, mat("fur_light"), thickness=0.34, steps=10, sink=0.06, under=True)
-        else:                         # belly plates scuffed flat and bright, like the brass of a door
-            sk = _skin()
-            brass = mat("metal_brass")
-            geo, ws = None, []
-            for i in range(5):
-                y = fy + 0.05 + (by - fy - 0.1) * i / 4
-                zb = sk.bottom(y, half_width=0.1)
-                w = sk.side(y, zb + 0.25)
-                pl = g.box((0, y, zb + 0.01), (w * 1.5 * size, 0.42, 0.07), rot=(0.1, 0, 0))
-                geo = g.merge(geo, pl)
-                ws.extend([r.spine_weights(y)] * 8)
-                for sg in (1, -1):
-                    sp = g.box((sg * (w * 0.9 + 0.02), y, zb + 0.2), (0.06, 0.42, 0.4 * size), rot=(0.0, sg * 0.5, 0))
-                    geo = g.merge(geo, sp)
-                    ws.extend([r.spine_weights(y)] * 8)
-            _add(r, "bellyplates", geo, ws, brass)
-            # and up the front of the chest and throat
-            nk = _neck(r)
-            for k, t in enumerate((0.0, 0.25, 0.5)):
-                c = nk.throat(t, 0.03)
-                p, d, bone = nk.at(t)
-                u, v = _perp(d)
-                rot = Matrix((u, d, v)).transposed()
-                _add(r, "throatplate_%d" % k, g.box(c, (0.36 * size * (1 - 0.15 * k), 0.36, 0.06), rot=rot), bone, brass)
+        skin = gl.opt(_S["spec"].get("membrane"))[0] or "plain"
+        if style == "folded":
+            _wing_folded(r, size, skin)
+            return
+        W = WINGS[style]
+        move = gl.opt(_S["spec"].get("flight"))[0] or W["move"]
+        for sg, tag in ((1, "l"), (-1, "r")):
+            root = _wing_root(sg)
+            items = _wing(sg, root, W, size, skin)
+            if move in ("beat", "glide", "sway"):
+                _piece(move, "wing", items, root, "Torso3", side=tag)
+            else:
+                for i, (geo, m, sm) in enumerate(items):
+                    if geo and geo[0]:
+                        _add(r, "wing_%s_%d" % (tag, i), geo, "Torso3", m, smooth=sm)
     return fn
 
 
 def _drake_throat(style):
     def fn(r, A, size):
-        nk = _neck(r)
-        if style in ("ember", "banked"):
-            c = nk.throat(0.82, 0.0)
-            _add(r, "throat", g.ico(c, (0.07 if style == "ember" else 0.12) * size, sub=1, scale=(0.9, 1.0, 1.0)), "Neck3", field("ember", 2.4 if style == "ember" else 3.0))
-            if style == "banked":     # the fire kept in: it shows down the front of the neck
-                geo = None
-                for t in (0.2, 0.36, 0.52, 0.68):
-                    a, b = nk.throat(t, 0.012), nk.throat(t + 0.1, 0.012)
-                    geo = g.merge(geo, g.blade(a, b, 0.2 * size, thick=0.03, normal=(a - nk.at(t)[0]).normalized(), belly=0.5))
-                _add(r, "throat_seams", geo, "Neck2", field("ember", 2.2))
-        elif style == "blue":         # a dull shine under its throat, the colour of a post-flame
-            c = nk.throat(0.1, 0.02)
-            _add(r, "chest_glow", g.ico(c + Vector((0, 0, -0.1)), 0.24 * size, sub=1, scale=(1.0, 0.5, 1.3)), "Torso3", field("lamp", 3.0))
-            geo = None
-            for t in (0.25, 0.45, 0.65, 0.85):
-                geo = g.merge(geo, g.ico(nk.throat(t, 0.0), 0.1 * size, sub=1, scale=(1.0, 0.6, 1.0)))
-            _add(r, "throat_glow", geo, "Neck2", field("lamp", 2.6))
+        nl = _S["neckline"]          # from the head down
+
+        def under(i, lift=0.0):
+            return _on(nl[i], 270, lift)[0]
+        if style == "ember":          # a coal under its jaw
+            c = under(1, -0.03)
+            _piece("pulse", "throat", [(g.ico(c, 0.09 * size, sub=1, scale=(1.0, 1.1, 0.8)), field("ember", 2.4), True)], c, "Neck3")
+        elif style == "banked":       # the fire kept in: it shows between the plates down the front of its neck
+            geo, ws = None, []
+            for i in range(2, min(len(nl) - 2, 9)):
+                s = nl[i]
+                p, d, u, v, a, b = s[:6]
+                arc = []
+                for j in range(5):
+                    th = math.radians(270 - 50 + 100 * j / 4)
+                    arc.append(p + u * (a * math.cos(th) * 1.06) + v * (b * math.sin(th) * 1.06))
+                seam = g.tube(arc, [0.02 * size] * 5, n=3, caps=False)
+                geo, ws = g.merge(geo, seam), ws + [s[6]] * len(seam[0])
+            _add(r, "throat_seams", geo, ws, field("ember", 2.2), smooth=True)
+            c = under(1, -0.02)
+            _piece("pulse", "throat", [(g.ico(c, 0.12 * size, sub=1, scale=(1.0, 1.2, 0.8)), field("ember", 3.0), True)], c, "Neck3")
+        elif style == "lamp":         # a dull shine low on its throat, the colour of a post-flame
+            i = len(nl) - 3
+            c = under(i, 0.0)
+            _piece("pulse", "throat", [(g.ico(c, 0.2 * size, sub=1, scale=(1.0, 0.7, 1.1)), field("lamp", 3.0), True)], c, _bone_of(nl[i][6]))
         elif style == "bulges":       # what it will spit, coming up its throat
-            for k, t in enumerate((0.25, 0.5, 0.75)):
-                p, d, bone = nk.at(t)
-                _add(r, "bulge_%d" % k, g.loft([nk.ring(t, 0.02, along=-0.1), nk.ring(t, 0.09, along=0.0), nk.ring(t, 0.02, along=0.1)], caps=False), bone, mat("fur_light"), smooth=True)
-                _add(r, "bulge_lit_%d" % k, g.ico(nk.throat(t, 0.08), 0.07 * size, sub=1), bone, field("ember", 2.6))
+            for k, i in enumerate((2, 5, 8)):
+                if i >= len(nl) - 1:
+                    break
+                s = nl[i]
+                p, d, u, v, a, b = s[:6]
+                rings = [_ring(p - d * 0.12, u, v, a * 1.02, b * 1.02, m=10), _ring(p, u, v, a * 1.26, b * 1.3, m=10), _ring(p + d * 0.12, u, v, a * 1.02, b * 1.02, m=10)]
+                bulge = g.loft(rings, caps=False)
+                _add(r, "bulge_%d" % k, bulge, [s[6]] * len(bulge[0]), mat("accent_light") if _S["spec"].get("accent") else mat("fur_light"), smooth=True)
+                c = _on(s, 270, 0.1 * b)[0]
+                _add(r, "bulge_lit_%d" % k, g.ico(c, 0.07 * size, sub=1), [s[6]] * 12, field("ember", 2.6), smooth=True)
     return fn
 
 
 def _drake_tailend(style):
     def fn(r, A, size):
-        tip, d = _tail_tip(r)
+        p, d, u, v = _S["tail"][-1][:4]
+        tip = p
         horn = kit.mark("tailtip", mat("drake_horn"))
-        up = Z - d * Z.dot(d)
-        up = up.normalized() if up.length > 0.1 else X.copy()
+        acc = bool(_S["spec"].get("accent"))
         if style == "spade":
-            _add(r, "spade", g.blade(tip - d * 0.05, tip + d * 0.3 * size, 0.24 * size, normal=up, belly=0.45, thick=0.03), "Tail8", horn)
+            _add(r, "spade", g.blade(tip - d * 0.08, tip + d * 0.42 * size, 0.34 * size, normal=u, belly=0.42, thick=0.035), "Tail8", horn, smooth=False)
+        elif style == "club":         # a knot of bone, for knocking
+            _add(r, "club", g.ico(tip + d * 0.06, 0.2 * size, sub=1, scale=(0.9, 1.25, 0.9)), "Tail8", horn, smooth=True)
+            geo = None
+            for k in range(4):
+                a = math.pi / 4 + k * math.pi / 2
+                dd = u * math.cos(a) + v * math.sin(a)
+                geo = g.merge(geo, g.cone(tip + d * 0.06 + dd * 0.12 * size, tip + d * 0.1 + dd * 0.36 * size, 0.05 * size, n=4))
+            _add(r, "club_spikes", geo, "Tail8", horn, smooth=True)
         elif style == "hammer":       # a head to it, like a smith's
-            c = tip + d * 0.14
-            _add(r, "tail_hammer", g.box(c, (0.5 * size, 0.24 * size, 0.24 * size)), "Tail8", mat("metal_iron"))
-            _add(r, "tail_hammer_band", g.box(c, (0.14, 0.27 * size, 0.27 * size)), "Tail8", mat("metal_brass"))
+            c = tip + d * 0.16
+            _add(r, "tail_hammer", g.box(c, (0.52 * size, 0.26 * size, 0.26 * size)), "Tail8", mat("metal_iron"))
+            _add(r, "tail_hammer_band", g.box(c, (0.15, 0.29 * size, 0.29 * size)), "Tail8", mat("metal_brass"))
         elif style == "rudder":       # a broad fin to steer by
-            _add(r, "rudder", g.blade(tip - d * 0.5, tip + d * 0.5 * size, 0.62 * size, normal=X, belly=0.55, thick=0.03), "Tail8", kit.mark("wings", mat("wing")))
-            _add(r, "rudder_rib", g.tube([tip - d * 0.5, tip + d * 0.5 * size], [0.03, 0.008], n=4), "Tail8", horn)
+            fin = g.blade(tip - d * 0.6, tip + d * 0.55 * size, 0.7 * size, normal=u, belly=0.55, thick=0.03)
+            _add(r, "rudder", fin, "Tail8", mat("accent") if acc else mat("fur_light"), smooth=False)
+            _add(r, "rudder_rib", g.tube([tip - d * 0.6, tip + d * 0.55 * size], [0.035, 0.008], n=4), "Tail8", horn, smooth=True)
         elif style == "banner":       # a long pennant
+            up = v
             p1, p2, p3 = tip + d * 0.5 * size + up * 0.1, tip + d * 1.1 * size - up * 0.05, tip + d * 1.7 * size + up * 0.12
-            _add(r, "pennant", g.tongue([tip, p1, p2, p3], [0.3 * size, 0.36 * size, 0.28 * size, 0.04], thick=0.08, normal=X), "Tail8", kit.mark("wings", mat("wing")))
+            pen = g.tongue([tip, p1, p2, p3], [0.3 * size, 0.38 * size, 0.3 * size, 0.04], thick=0.08, normal=u)
+            _piece("sway", "pennant", [(pen, mat("accent") if acc else mat("fur_light"), False)], tip, "Tail8")
         elif style == "lamp":         # a lamp held in the loop of its tail
-            gl._add_items(r, "taillamp", gl._lantern(tip + Vector((0, 0, 0.5 * size)), 0.2 * size, "lamp", 3.6), "Tail8")
-            _add(r, "taillamp_hook", g.tube([tip, tip + Vector((0, 0, 0.5 * size))], [0.03, 0.02], n=4), "Tail8", horn)
+            top = tip + Vector((0, 0, 0.46 * size))
+            _add(r, "taillamp_hook", g.tube([tip - d * 0.1, top], [0.035, 0.022], n=4), "Tail8", horn, smooth=True)
+            _piece("sway", "taillamp", [(geo, mt, not mt.name.startswith("metal")) for geo, mt in gl._lantern(top, 0.2 * size, "lamp", 3.6)], top, "Tail8")
     return fn
 
 
 def drake_shell(r, A, size):
     """A back like a strong-room, with its wheel."""
-    y = (A.t3.y + A.back.y) / 2 + 0.1
-    top = _skin().top(y)
-    c = Vector((0, y, top - 0.42))
+    back = [s for s in _S["body"] if s[7] == "back"]
+    s = back[len(back) // 2]
+    c = s[0] + Z * (s[5] * 0.2)
     iron, brass = mat("metal_iron"), mat("metal_brass")
-    r.shell("vault", c, (0.7 * size, 1.15 * size, 0.74 * size), "Torso2", mat("slate_light"), segments=10, rings=4)
-    for k, dy in enumerate((-0.6, 0.0, 0.6)):
-        band = g.loft([g.ring(c + Vector((0, dy * size - 0.04, 0)), 0.68 * size, 0.68 * size * math.sqrt(max(0.05, 1 - (dy / 1.15) ** 2)), n=12, u=X, v=Z),
-                       g.ring(c + Vector((0, dy * size + 0.04, 0)), 0.68 * size, 0.68 * size * math.sqrt(max(0.05, 1 - (dy / 1.15) ** 2)), n=12, u=X, v=Z)], caps=False)
-        _add(r, "vault_band_%d" % k, band, "Torso2", brass)
-    for sg in (1, -1):
-        hub = c + Vector((sg * 0.6 * size, 0.0, 0.26 * size))
-        nrm = Vector((sg * 0.9, 0, 0.42)).normalized()
-        wheel = _hoop(hub + nrm * 0.07, nrm, 0.26 * size, 0.03, n=14)
-        u, v = _perp(nrm)
-        for a in range(4):
-            dirv = u * math.cos(a * math.pi / 4) + v * math.sin(a * math.pi / 4)
-            wheel = g.merge(wheel, g.tube([hub + nrm * 0.07 - dirv * 0.26 * size, hub + nrm * 0.07 + dirv * 0.26 * size], [0.02, 0.02], n=4))
-        _add(r, "vault_wheel_%d" % sg, wheel, "Torso2", brass)
-        _add(r, "vault_hub_%d" % sg, g.ico(hub + nrm * 0.08, 0.07 * size, sub=1), "Torso2", field("seal", 2.0))
+    acc = bool(_S["spec"].get("accent"))
+    a, b = s[4] * 1.12 * size, s[5] * 1.5 * size
+    Ly = (back[-1][0].y - back[0][0].y) * 0.56 * size
+    r.shell("vault", c, (a, Ly, b), "Torso2", mat("slate_light"), segments=12, rings=5)
+    for k, dy in enumerate((-0.55, 0.0, 0.55)):
+        kk = math.sqrt(max(0.05, 1 - dy * dy))
+        band = g.loft([g.ring(c + Vector((0, dy * Ly - 0.05, 0)), a * kk * 1.02, b * kk * 1.02, n=12, u=X, v=Z), g.ring(c + Vector((0, dy * Ly + 0.05, 0)), a * kk * 1.02, b * kk * 1.02, n=12, u=X, v=Z)], caps=False)
+        _add(r, "vault_band_%d" % k, band, "Torso2", mat("accent") if acc else brass, smooth=False)
+    hub = c + Z * (b * 1.0)
+    wheel = _hoop(hub + Z * 0.1, Z, 0.3 * size, 0.035, n=14)
+    for k in range(3):
+        dv = X * math.cos(k * math.pi / 3) + Y * math.sin(k * math.pi / 3)
+        wheel = g.merge(wheel, g.tube([hub + Z * 0.1 - dv * 0.3 * size, hub + Z * 0.1 + dv * 0.3 * size], [0.024, 0.024], n=4))
+    _piece("spin", "wheel", [(wheel, mat("accent_light") if acc else brass, True), (g.tube([hub - Z * 0.05, hub + Z * 0.14], [0.06, 0.05], n=6), iron, True)], hub, "Torso2")
+    _add(r, "vault_seal", g.ico(hub + Z * 0.16, 0.06 * size, sub=1), "Torso2", field("seal", 2.0), smooth=True)
 
 
 def drake_rubble(r, A, size):
-    """What has settled on something that sleeps in old places."""
-    spots = ((0.1, A.t3.y + 0.1, 0.3), (-0.14, A.t3.y + 0.6, 0.36), (0.05, A.t2.y + 0.5, 0.28), (-0.06, A.back.y, 0.24))
-    for i, (x, y, s) in enumerate(spots):
-        c = Vector((x, y, _skin().top(y, half_width=0.2) + 0.05))
-        _add(r, "rubble_%d" % i, g.box(c, (s * 1.3 * size, s * size, s * 0.6 * size), rot=(0.2 * i, 0.3 - 0.2 * i, 0.5 * i)), [r.spine_weights(y)] * 8, mat("slate" if i % 2 else "slate_light"))
+    """What has settled on something that sleeps in old places: stone, dust, and ivy."""
+    back = [s for s in _S["body"] if s[7] == "back"]
+    for i, (k, deg, sz) in enumerate(((1, 96, 0.3), (3, 74, 0.38), (5, 104, 0.3), (6, 80, 0.26))):
+        s = back[min(k, len(back) - 1)]
+        c = _on(s, deg, 0.06)[0]
+        _add(r, "rubble_%d" % i, g.box(c, (sz * 1.3 * size, sz * size, sz * 0.6 * size), rot=(0.2 * i, 0.3 - 0.2 * i, 0.5 * i)), [s[6]] * 8, mat("slate" if i % 2 else "slate_light"))
+    dust, ivy, wd, wi = None, None, [], []
+    for i, s in enumerate(_S["body"][3:-6]):
+        for sg in (1, -1):
+            p, n = _on(s, 90 - sg * (22 + 14 * math.sin(i * 1.3)), 0.03)
+            d = s[1]
+            fl = g.ico(p, 0.15 * size * (0.8 + 0.3 * math.sin(i * 2.1 + sg)), sub=0, scale=(1.0, 1.3, 0.3))
+            dust, wd = g.merge(dust, fl), wd + [s[6]] * len(fl[0])
+        if i % 2 == 0 and s[7] == "back":
+            sg = 1 if i % 4 else -1
+            p, n = _on(s, 90 - sg * 60, 0.02)
+            lf = g.blade(p, p + n * 0.1 - Z * 0.4 * size + s[1] * 0.1, 0.22, normal=n, belly=0.45)
+            ivy, wi = g.merge(ivy, lf), wi + [s[6]] * 6
+    _add(r, "dust", dust, wd, mat("stone_dust"), smooth=True)
+    _add(r, "rubble_ivy", ivy, wi, mat("leaf"), smooth=False)
+
+
+def drake_ashback(r, A, size):
+    """Ash lying along its back and its tail, as it lies on a cold hearth."""
+    dust, wd = None, []
+    for i, s in enumerate(_S["body"][2:-4]):
+        for sg in (1, -1):
+            p, n = _on(s, 90 - sg * (20 + 16 * math.sin(i * 1.3) + (24 if i % 2 else 0)), 0.02)
+            fl = g.ico(p, max(0.08, s[4] * 0.42) * size * (0.8 + 0.3 * math.sin(i * 2.1 + sg)), sub=0, scale=(1.0, 1.4, 0.28))
+            dust, wd = g.merge(dust, fl), wd + [s[6]] * len(fl[0])
+    _add(r, "ashback", dust, wd, mat("ash_fall"), smooth=True)
+
+
+def drake_soot(r, A, size):
+    """Soot-black along its spine, as if it had been up a flue."""
     geo, ws = None, []
-    for i in range(10):
-        y = A.t3.y - 0.1 + 0.26 * i
-        sg = 1 if i % 2 else -1
-        z = _skin().top(y, half_width=0.3) - 0.15
-        b0 = Vector((sg * _skin().side(y, z) * 0.9, y, z))
-        bl = g.blade(b0, b0 + Vector((sg * 0.12, 0.1, -0.36 * size)), 0.2, normal=Vector((sg, 0, 0.3)), belly=0.45)
-        geo = g.merge(geo, bl)
-        ws.extend([r.spine_weights(y)] * len(bl[0]))
-    _add(r, "rubble_ivy", geo, ws, mat("leaf"))
+    body = _S["body"]
+    for s0, s1 in zip(body[2:-4], body[3:-3]):
+        a0 = [_on(s0, deg, 0.016)[0] for deg in (50, 70, 90, 110, 130)]
+        a1 = [_on(s1, deg, 0.016)[0] for deg in (50, 70, 90, 110, 130)]
+        st = g.loft([a0, a1], caps=False, closed=False)
+        geo, ws = g.merge(geo, st), ws + [s0[6]] * 5 + [s1[6]] * 5
+    _lie(r, "soot", geo, ws, mat("soot"), smooth=True)
+
+
+def drake_scars(r, A, size):
+    """Healed lines across its hide, paler than the rest of it."""
+    geo, ws = None, []
+    back = [s for s in _S["body"] if s[7] == "back"]
+    for i, (k, deg, L) in enumerate(((1, 40, 0.6), (2, 150, 0.5), (4, 30, 0.7), (5, 140, 0.45), (3, 60, 0.4))):
+        s = back[min(k, len(back) - 1)]
+        p, n = _on(s, deg, 0.012)
+        d = (s[1] + Z * (0.5 if i % 2 else -0.4)).normalized()
+        d = (d - n * d.dot(n)).normalized()
+        bl = g.blade(p - d * L * size * 0.5, p + d * L * size * 0.5, 0.07, normal=n, belly=0.5, thick=0.014)
+        geo, ws = g.merge(geo, bl), ws + [s[6]] * 6
+    _add(r, "scars", geo, ws, mat("hide_scar"), smooth=False)
 
 
 def _drake_jaw(style):
     def fn(r, A, size):
-        n = A.nose
-        zb, zt = gl._jaw_line(r, A)
+        H = _S["head"]
+        P, J, S = H["P"], H["J"], H["S"]
         if style == "drips":          # something bright drips from the corner of its jaw
-            geo = None
-            for sg, L in ((1, 0.5), (-1, 0.72), (-1, 0.36)):
-                b0 = Vector((sg * 0.14, n.y + 0.34 + 0.1 * L, zb + 0.06))
-                geo = g.merge(geo, g.tube([b0, b0 + Vector((0, 0.0, -L * 0.6 * size)), b0 + Vector((0, 0, -L * size))], [0.05, 0.03, 0.045], n=5))
-            _add(r, "drips", geo, "Head", field("ember", 3.4))
+            for k, (sg, L, y) in enumerate(((1, 0.5, -0.5), (-1, 0.72, -0.4), (-1, 0.36, -0.62))):
+                b0 = J(sg * 0.15, y, -0.07)
+                drip = g.tube([b0, b0 - Z * L * 0.6 * S * size, b0 - Z * L * S * size], [0.03 * S, 0.02 * S, 0.034 * S], n=5)
+                _piece("flick", "drip" + "abc"[k], [(drip, field("ember", 3.4), True)], b0, "Head")
             slag = None
             for k in range(4):
-                c = Vector((0.1 * (k - 1.5), n.y + 0.3 + 0.08 * k, zb - 0.02))
-                slag = g.merge(slag, g.ico(c, 0.1 * size, sub=0, scale=(1.2, 1.0, 0.7)))
-            _add(r, "slag", slag, "Head", mat("slag"))
-        elif style == "tongue":       # a tongue stained black to the root
-            t0 = Vector((0, n.y + 0.36, zb + 0.1))
-            pts = [t0, t0 + Vector((0, -0.34, -0.06)), t0 + Vector((0.03, -0.6, -0.36 * size)), t0 + Vector((0.0, -0.62, -0.8 * size))]
-            _add(r, "ink_tongue", g.tongue(pts, [0.2, 0.18, 0.14, 0.05], thick=0.3, normal=Z), "Head", mat("tongue_ink"), smooth=True)
-            fork = None
+                slag = g.merge(slag, g.ico(J(0.06 * (k - 1.5), H["yt"] + 0.14 + 0.1 * k, -0.1 - 0.02 * (k % 2)), 0.07 * S * size, sub=0, scale=(1.2, 1.0, 0.7)))
+            _add(r, "slag", slag, "Head", mat("slag_crust"), smooth=False)
+        elif style == "tongue":       # a tongue stained black to the root, like a clerk's finger
+            t0 = J(0, H["yt"] + 0.2, -0.045)
+            pts = [t0, t0 + Vector((0, -0.2, -0.04)) * S, t0 + Vector((0.03, -0.36, -0.3 * size)) * S, t0 + Vector((0.0, -0.36, -0.72 * size)) * S]
+            geo = g.tongue(pts, [0.17 * S, 0.16 * S, 0.13 * S, 0.06 * S], thick=0.3, normal=Y)
             for sg in (1, -1):
-                fork = g.merge(fork, g.cone(pts[-1], pts[-1] + Vector((sg * 0.1, -0.03, -0.2 * size)), 0.03, n=4))
-            _add(r, "ink_fork", fork, "Head", mat("tongue_ink"))
-        elif style == "glaze":        # the scales round its mouth cracked and glazed like a kiln's lip
-            geo = None
-            for sg in (1, -1):
-                for k in range(4):
-                    y = n.y + 0.08 + 0.16 * k
-                    c = Vector((sg * (0.12 + 0.03 * k), y, (zb + zt) / 2 + 0.02))
-                    geo = g.merge(geo, g.ico(c, 0.1 * size, sub=0, scale=(0.5, 1.0, 1.0)))
-            geo = g.merge(geo, g.ico(Vector((0, n.y + 0.06, zt - 0.02)), 0.13 * size, sub=0, scale=(1.2, 1.0, 0.5)))
-            _add(r, "glaze", geo, "Head", mat("glaze"))
+                geo = g.merge(geo, g.cone(pts[-1], pts[-1] + Vector((sg * 0.09, -0.02, -0.2 * size)) * S, 0.03 * S, n=4))
+            _piece("sway", "tongue", [(geo, mat("tongue_ink"), True)], t0, "Head")
+        elif style in ("glaze", "grey"):   # the scales round its mouth cracked and glazed, like the lip of a kiln: a cap of it over the snout (grey: a muzzle gone grey)
+            SK, JW = H["SK"], H["JW"]
+            ys, yt = H["ys"], H["yt"]
+            rings = []
+            for y in (ys + 0.04, (ys + H["yn"]) / 2, H["yn"], yt - 0.004):
+                _, zt, w, zl = _lerp_table(SK, y)
+                k = 1.07
+                zm = zl + 0.42 * (zt - zl)
+                rings.append([P(-0.9 * w * k, y, zl - 0.004), P(-w * k, y, zm), P(-0.6 * w * k, y, zt * k + 0.002), P(0, y, zt * k + 0.008), P(0.6 * w * k, y, zt * k + 0.002), P(w * k, y, zm), P(0.9 * w * k, y, zl - 0.004)])
+            cap = g.loft(rings, caps=False, closed=False)
+            n0 = _faces(r)
+            _add(r, "glaze", cap, "Head", mat("glaze_kiln") if style == "glaze" else mat("fur_grey"), smooth=style == "grey")
+            hb = H["hb"]
+            _face_out(r, n0, lambda c: Vector((0, c.y, hb.z)))
+            if style == "grey":
+                return
+            cracks = None
+            for k, (y, x0, x1) in enumerate(((ys - 0.05, -0.12, 0.05), (ys - 0.2, 0.02, 0.13), (H["yn"] + 0.1, -0.1, -0.01), (ys - 0.33, -0.05, 0.1))):
+                _, zt, w, zl = _lerp_table(SK, y)
+                cracks = g.merge(cracks, g.tube([P(x0, y, zt * 1.07 + 0.012), P((x0 + x1) / 2, y - 0.05, zt * 1.07 + 0.014), P(x1, y + 0.02, zt * 1.07 + 0.012)], [0.008 * S] * 3, n=3, caps=False))
+            _add(r, "glaze_cracks", cracks, "Head", mat("coal"), smooth=True)
     return fn
 
 
 def _drake_breath(style):
     def fn(r, A, size):
-        n = A.nose
-        zb, zt = gl._jaw_line(r, A)
-        m0 = Vector((0, n.y + 0.1, (zb + zt) / 2 - 0.02))
-        if style == "jet":            # narrow and blue, the way a smith wants it
-            _add(r, "jet", g.tongue([m0, m0 + Vector((0, -0.5, -0.02)) * size, m0 + Vector((0, -1.3, -0.05)) * size, m0 + Vector((0, -1.9, -0.06)) * size], [0.1, 0.16, 0.1, 0.01], thick=0.8, normal=Z), "Head", field("jet", 3.8))
+        H = _S["head"]
+        P, J, S = H["P"], H["J"], H["S"]
+        m0 = P(0, H["yt"] + 0.04, -0.03)
+        if style == "jet":            # narrow and bright, the way a smith wants it
+            jet = g.tongue([m0, m0 + Vector((0, -0.5, -0.04)) * S * size, m0 + Vector((0, -1.3, -0.1)) * S * size, m0 + Vector((0, -1.9, -0.12)) * S * size], [0.09 * S, 0.14 * S, 0.09 * S, 0.01], thick=0.8, normal=Z)
+            _piece("pulse", "jet", [(jet, field("jet", 3.8), True)], m0, "Head")
         elif style == "beacon":       # a steady flame at the back of its open mouth, in a cage
-            c = m0 + Vector((0, -0.16, 0.0))
-            _add(r, "beacon", g.ico(c, 0.2 * size, sub=1, scale=(1.0, 1.0, 1.2)), "Head", field("flame", 4.0))
-            cage = g.merge(_hoop(c, X, 0.3 * size, 0.022, n=12), _hoop(c, Y, 0.3 * size, 0.022, n=12), _hoop(c, Z, 0.3 * size, 0.022, n=12))
-            _add(r, "beacon_cage", cage, "Head", mat("metal_iron"))
+            c = (P(0, -0.3, -0.06) + J(0, -0.3, -0.06)) / 2
+            _piece("pulse", "beacon", [(g.ico(c, 0.14 * S * size, sub=1, scale=(1.0, 1.0, 1.2)), field("flame", 4.0), True)], c, "Head")
+            cage = g.merge(_hoop(c, X, 0.19 * S * size, 0.016 * S, n=10), _hoop(c, Y, 0.19 * S * size, 0.016 * S, n=10))
+            _add(r, "beacon_cage", cage, "Head", mat("metal_iron"), smooth=True)
         elif style == "cinders":      # it breathes upward and lets the weather do the rest
-            geo, grey = None, None
+            top = _S["A"].skull
+            sparks, grey = None, None
             for i in range(14):
-                c = Vector((0.5 * math.sin(i * 2.3), A.t3.y - 0.4 + 0.3 * i + 0.2 * math.sin(i * 1.3), A.skull + 0.25 + 0.5 * math.sin(i * 1.7) ** 2))
+                c = Vector((0.5 * math.sin(i * 2.3), A.t3.y - 0.6 + 0.3 * i + 0.2 * math.sin(i * 1.3), top + 0.2 + 0.5 * math.sin(i * 1.7) ** 2))
                 if i % 3:
-                    geo = g.merge(geo, g.ico(c, 0.05 * size, sub=0))
+                    sparks = g.merge(sparks, g.ico(c, 0.05 * size, sub=0))
                 else:
                     grey = g.merge(grey, g.blade(c, c + Vector((0.05, 0.08, -0.16)), 0.1, normal=X, belly=0.5))
-            _add(r, "cinders", geo, "Torso3", field("ember", 3.0))
-            _add(r, "ashfall", grey, "Torso3", mat("ash"))
+            piv = Vector((0, A.t3.y, top + 0.3))
+            _piece("bob", "cinders", [(sparks, field("ember", 3.0), False), (grey, mat("ash_fall"), False)], piv, "Torso3")
     return fn
 
 
 def _drake_nostrils(style):
     def fn(r, A, size):
-        n = A.nose
-        for sg in (1, -1):
-            p0 = Vector((sg * 0.09, n.y + 0.06, n.z + 0.04))
-            if style == "smoke":      # a thread of dark smoke from each nostril, constant
+        H = _S["head"]
+        P, S = H["P"], H["S"]
+        for sg, tag in ((1, "l"), (-1, "r")):
+            p0 = P(sg * 0.08, H["yn"] + 0.005, 0.12)
+            if style == "smoke":      # a thread of smoke from each nostril, constant
                 pts = [p0, p0 + Vector((sg * 0.05, -0.05, 0.36)) * size, p0 + Vector((sg * -0.04, 0.2, 0.86)) * size, p0 + Vector((sg * 0.08, 0.6, 1.4)) * size, p0 + Vector((sg * 0.0, 1.1, 1.9)) * size]
-                _add(r, "nose_smoke_%d" % sg, g.tongue(pts, [0.06, 0.12, 0.17, 0.2, 0.03], thick=0.6, normal=X), "Head", mat("smoke"), smooth=True)
+                sm = g.tongue(pts, [0.06, 0.13, 0.19, 0.22, 0.03], thick=0.6, normal=X)
+                _piece("sway", "smoke", [(sm, mat("smoke_pale"), True)], p0, "Head", side=tag)
             elif style == "heat":     # a shimmer of heat over its nostrils
-                _add(r, "nose_heat_%d" % sg, g.tongue([p0, p0 + Vector((0, -0.03, 0.14 * size)), p0 + Vector((0, 0.0, 0.3 * size))], [0.08, 0.07, 0.01], thick=0.8, normal=Y), "Head", field("ember", 2.6))
+                ht = g.tongue([p0, p0 + Vector((0, -0.03, 0.16 * size)), p0 + Vector((0, 0.0, 0.34 * size))], [0.07, 0.065, 0.01], thick=0.8, normal=Y)
+                _piece("flick", "heat", [(ht, field("ember", 2.6), True)], p0, "Head", side=tag)
     return fn
-
-
-def drake_talons(r, A, size):
-    """Talons out of proportion to the rest of it, and kept very clean."""
-    for tag, foot, bone in gl.FEET:
-        f = r.bone(foot)
-        cl = None
-        for dx in (-0.12, 0.0, 0.12):
-            b0 = Vector((f.x + dx, f.y - 0.02, 0.16))
-            cl = g.merge(cl, g.tube([b0, b0 + Vector((dx * 0.3, -0.24 * size, 0.02)), b0 + Vector((dx * 0.4, -0.42 * size, -0.16))], [0.06, 0.05, 0.008], n=5))
-        cl = g.merge(cl, g.tube([Vector((f.x, f.y + 0.2, 0.16)), Vector((f.x, f.y + 0.34 * size, 0.1)), Vector((f.x, f.y + 0.42 * size, -0.02))], [0.05, 0.04, 0.008], n=5))
-        _add(r, "talons_" + tag, cl, bone, mat("bone"))
-
-
-def drake_shutter(r, A, size):
-    """One eye never fully closes: the lid on that side has gone thick as a shutter."""
-    e = A.eye
-    c = Vector((-(e.x + 0.03), e.y - 0.01, e.z + 0.05))
-    _add(r, "shutter", g.box(c, (0.07, 0.34 * size, 0.2 * size), rot=(0.0, 0.25, 0.0)), "Head", mat("slate"))
-    _add(r, "shutter_slats", g.merge(g.box(c + Vector((-0.03, 0, 0.04)), (0.03, 0.36 * size, 0.03)), g.box(c + Vector((-0.03, 0, -0.03)), (0.03, 0.36 * size, 0.03))), "Head", mat("metal_iron"))
 
 
 def drake_eggshell(r, A, size):
     """Still wearing a piece of the shell nobody found."""
-    c = Vector((0, A.head.y + 0.05, A.skull + 0.02))
-    cap = g.lathe([(0.02, 0.2), (0.16, 0.16), (0.26, 0.05), (0.27, -0.03), (0.2, -0.01), (0.14, 0.1)], n=7, centre=c)
-    _add(r, "eggshell", cap, "Head", mat("eggshell"))
+    H = _S["head"]
+    S = H["S"]
+    c = H["P"](0, -0.08, 0.2)
+    cap = g.lathe([(0.02 * S, 0.22 * S), (0.17 * S, 0.17 * S), (0.27 * S, 0.06 * S), (0.285 * S, -0.03 * S), (0.21 * S, -0.012 * S), (0.15 * S, 0.1 * S)], n=7, centre=c)
+    _add(r, "eggshell", cap, "Head", mat("eggshell"), smooth=False)
+
+
+def drake_browplate(r, A, size):
+    """A plate across its brow, like a smith's shade."""
+    H = _S["head"]
+    P, S = H["P"], H["S"]
+    geo = g.loft([[P(-0.27, -0.44, 0.19), P(-0.2, -0.46, 0.25), P(0.2, -0.46, 0.25), P(0.27, -0.44, 0.19)],
+                  [P(-0.3, -0.1, 0.22), P(-0.2, -0.12, 0.29), P(0.2, -0.12, 0.29), P(0.3, -0.1, 0.22)]], caps=False, closed=False)
+    n0 = _faces(r)
+    _add(r, "browplate", geo, "Head", mat("metal_iron"), smooth=False)
+    hb = H["hb"]
+    _face_out(r, n0, lambda c: Vector((0, c.y, hb.z)))
+    rv = None
+    for sg in (1, -1):
+        rv = g.merge(rv, g.ico(P(sg * 0.24, -0.28, 0.255), 0.022 * S, sub=0))
+    _add(r, "browplate_rivets", rv, "Head", mat("metal_brass"), smooth=True)
+
+
+def neck_ledger(r, A, size):
+    """The book it keeps, hung under its throat on a strap."""
+    nk = _neck(r)
+    bone = _neck_band(r, "ledgerstrap", 0.22, mat("leather"))
+    c = nk.throat(0.22, 0.02)
+    book = g.box(c + Vector((0, -0.02, -0.26 * size)), (0.36 * size, 0.1 * size, 0.42 * size))
+    pages = g.box(c + Vector((0, -0.02, -0.26 * size)), (0.31 * size, 0.07 * size, 0.44 * size))
+    clasp = g.box(c + Vector((0, -0.075 * size, -0.26 * size)), (0.1 * size, 0.03, 0.08 * size))
+    _piece("sway", "ledger", [(book, mat("leather_book"), False), (pages, mat("paper_ledger"), False), (clasp, mat("metal_brass"), False),
+                              (g.tube([c, c + Vector((0, -0.02, -0.06 * size))], [0.02, 0.02], n=4), mat("leather"), True)], c, bone)
+
+
+def drake_ashfeet(r, A, size):
+    """Grey to the knee, as if it had walked through a cold hearth."""
+    me = r.mesh.data
+    names = [m.name for m in me.materials]
+    ash = mat("ash_fall")
+    if ash.name not in names:
+        me.materials.append(ash)
+        names.append(ash.name)
+    slot = names.index(ash.name)
+    skin = {i for i, nm in enumerate(names) if nm.startswith(("fur_", "mark_socks"))}
+    wl = r._weights([b for leg in kit.LOWER_LEGS for b in r.family(leg)])
+    for p in me.polygons:
+        if p.material_index in skin and sum(wl[i] for i in p.vertices) / len(p.vertices) > 0.55:
+            p.material_index = slot
+
+
+def drake_inkfeet(r, A, size):
+    """Ink to the wrist, like a clerk's cuffs."""
+    me = r.mesh.data
+    names = [m.name for m in me.materials]
+    ink = mat("tongue_ink")
+    if ink.name not in names:
+        me.materials.append(ink)
+        names.append(ink.name)
+    slot = names.index(ink.name)
+    skin = {i for i, nm in enumerate(names) if nm.startswith(("fur_", "mark_socks"))}
+    wl = r._weights([b for leg in kit.LOWER_LEGS[:2] for b in r.family(leg)])
+    for p in me.polygons:
+        if p.material_index in skin and sum(wl[i] for i in p.vertices) / len(p.vertices) > 0.55 and (r.M @ p.center).z < 0.3:
+            p.material_index = slot
+
+
+def drake_smokeback(r, A, size):
+    """Smoke standing off its back, where another would carry a ridge."""
+    back = [q for q in _dorsal(r) if q[4] in ("back", "neck")]
+    for k, q in enumerate(back[2::3][:4]):
+        pt, d, up, w = q[:4]
+        h = (0.7 + 0.2 * math.sin(k * 2.3)) * size
+        sm = g.tongue([pt, pt + up * h * 0.4 + d * 0.1, pt + up * h * 0.8 + d * 0.35 + X * 0.08, pt + up * h * 1.15 + d * 0.7 - X * 0.05], [0.2, 0.3, 0.26, 0.04], thick=0.5, normal=d.cross(up))
+        _piece("sway", "backsmoke" + "abcd"[k], [(sm, mat("smoke_pale"), True)], pt, _bone_of(w))
+
+
+def _drake_tail_shapes():
+    S = gl.SHAPES
+    # how it carries its tail (the shapes every one of the wolf's kin has work on it too)
+    S[("tail", "drag")] = lambda r, s: _trail(r, (0.4, 0.08, 0.0, 0.0, 0.0, 0.0, 0.02))
+    S[("tail", "sweep")] = lambda r, s: _trail(r, (0.4, 0.08, 0.0, 0.0, 0.0, 0.0, 0.0), yaw=[0, 10 * s, 20 * s, 26 * s, 30 * s, 30 * s, 28 * s, 24 * s])
+    S[("tail", "coil")] = lambda r, s: _trail(r, (0.5, 0.2, 0.06, 0.0, 0.0, 0.0, 0.0), yaw=[0, 24 * s, 40 * s, 46 * s, 50 * s, 52 * s, 54 * s, 54 * s])
+    S[("tail", "level")] = lambda r, s: _trail(r, (0.96, 0.92, 0.9, 0.9, 0.92, 0.96, 1.02))
+    S[("tail", "high")] = lambda r, s: _trail(r, (1.2, 1.45, 1.7, 1.9, 2.05, 2.15, 2.2))
+    S[("tail", "hook")] = lambda r, s: _trail(r, (1.1, 1.3, 1.6, 2.0, 2.4, 2.6, 2.5))
+    S[("tail", "lash")] = lambda r, s: _trail(r, (0.84, 0.66, 0.5, 0.38, 0.3, 0.26, 0.3), yaw=[0, -8 * s, -14 * s, -18 * s, 10 * s, 26 * s, 34 * s, 30 * s])
 
 
 def _drake_styles():
     G = gl.GROWS
-    for st in ("nubs", "swept", "broad", "long", "crown", "brow", "flat", "droop"):
+    for st in ("nubs", "swept", "broad", "long", "crown", "brow", "flat", "droop", "lyre", "sights", "ring"):
         G[("horns", st)] = _drake_horns(st)
-    for st in ("gate", "herald", "crown", "crest", "beard"):
+    for st in ("gate", "herald", "ruff", "crown", "crest", "beard"):
         G[("frill", st)] = _drake_frill(st)
-    for st in ("plates", "young", "flame", "sail", "beads", "pots", "crumbled", "lamps", "coins"):
+    for st in ("plates", "young", "spines", "flame", "sail", "beads", "pots", "crumbled", "lamps", "coins"):
         G[("ridge", st)] = _drake_ridge(st)
-    for st in WINGS:
+    for st in list(WINGS) + ["folded"]:
         G[("wings", st)] = _drake_wings(st)
-    for st in ("plates", "brass"):
-        G[("belly", st)] = _drake_belly(st)
-    for st in ("ember", "banked", "blue", "bulges"):
+    for st in ("ember", "banked", "lamp", "bulges"):
         G[("throat", st)] = _drake_throat(st)
-    for st in ("spade", "hammer", "rudder", "banner", "lamp"):
+    for st in ("spade", "club", "hammer", "rudder", "banner", "lamp"):
         G[("tailend", st)] = _drake_tailend(st)
     G[("shell", "vault")] = drake_shell
-    G[("back", "rubble")] = drake_rubble
-    for st in ("drips", "tongue", "glaze"):
+    G[("lies", "rubble")] = drake_rubble
+    G[("lies", "soot")] = drake_soot
+    G[("lies", "smoke")] = drake_smokeback
+    G[("lies", "ash")] = drake_ashback
+    G[("hide", "scars")] = drake_scars
+    for st in ("drips", "tongue", "glaze", "grey"):
         G[("jaw", st)] = _drake_jaw(st)
     for st in ("jet", "beacon", "cinders"):
         G[("breath", st)] = _drake_breath(st)
     for st in ("smoke", "heat"):
         G[("nostrils", st)] = _drake_nostrils(st)
-    G[("claws", "talons")] = drake_talons
-    G[("eye", "shutter")] = drake_shutter
     G[("head", "eggshell")] = drake_eggshell
+    G[("head", "browplate")] = drake_browplate
+    G[("neck", "ledger")] = neck_ledger
+    G[("feet", "ash")] = drake_ashfeet
+    G[("feet", "ink")] = drake_inkfeet
+    _drake_tail_shapes()
 
 
 # ======================================================================================
@@ -1989,7 +3002,7 @@ def register(builders):
     # a stag's head stands a fifth under the height it is stood to: its crown is above that
     builders["stag"] = _builder(stag_species, stag_ages, ("hide_red", "fur_cream"), ("socks", "mask", "saddle", "tailtip"),
                                 {"fur_dark": "hide_red", "fur_light": "fur_cream", "fur_ruff": "hide_red"}, ref_k=1.2)
-    builders["drake"] = _builder(drake_species, drake_ages, ("fur_dark", "fur_light"), ("socks", "mask", "saddle"), {"fur_ruff": "fur_dark"}, measure=drake_measure)
+    builders["drake"] = drake_build
 
 
 # ======================================================================================
