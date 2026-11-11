@@ -221,7 +221,7 @@
        "name": "Wick-trimmer",
        "of": "one who tends the flame that burned them",
        "text": "It keeps your lamp now: trims the wick, turns it down at night, and will not let anyone else touch it.",
-       "sign": "It carries snuffers the size of a seed, and its wing-edges are trimmed neat where the fire left them ragged.",
+       "sign": "It sits over a candle of its own with snuffers the size of a seed, and its wing-edges are trimmed neat where the fire left them ragged.",
        "habit": "It trims every wick in the room to the same height, and yours a little higher.",
        "features": [
         "small-hands"
@@ -265,7 +265,7 @@
      "name": "Ermine",
      "of": "one who is always found beside whoever the room is listening to",
      "text": "It took to sitting on the shoulder of whoever is being listened to. It is usually your shoulder now, and it dresses for it.",
-     "sign": "White wings spotted black like a judge's fur, and a thick white ruff. It sits very upright.",
+     "sign": "White wings spotted black like a judge's fur, a thick white ruff, and a collar the colour of a lamp flame. It sits very upright.",
      "habit": "It grooms its ruff before anyone important comes in, and it knows before you do that they are coming.",
      "features": [
       "ruff"
@@ -434,7 +434,7 @@
        "name": "Honey-thief",
        "of": "one who walks in as if they belonged there, and is given a plate",
        "text": "It goes into any hall by the front door, smelling of whoever lives there, and comes out fed. The mark on its back is a joke.",
-       "sign": "A pale mark like a skull on its back, a body banded like a bee's, and a squeak when it is touched.",
+       "sign": "A pale mark like a skull on its back, a body banded like a bee's, a piece of someone else's comb in its feet, and a squeak when it is touched.",
        "habit": "It is found in the larder, and it is never the one who is blamed.",
        "features": [
         "death-mark"
@@ -658,7 +658,7 @@
        "name": "Lintel-moth",
        "of": "one who sits over the door, so that what comes in comes in under their eye",
        "text": "It sits over the door of wherever you sleep, wings spread, and what comes in comes in under its eye or not at all.",
-       "sign": "It is found flat above the lintel, wings spread as wide as the door. Its wing-eyes follow whoever passes under.",
+       "sign": "Its forewings have set into one beam of old oak as wide as a door. Its hindwings hang under it like a curtain, an eye in each, and the eyes follow whoever passes under.",
        "habit": "It takes the place over every door you go through, and is the last to leave it.",
        "features": [
         "ward-eyes"
@@ -995,7 +995,7 @@
      "name": "Ghost-moth",
      "of": "one who is at ease with the dead, and says so",
      "text": "At dusk it hangs in one place in the air, white as a shirt, and sways. The shades you speak with come to it first, as to a lamp.",
-     "sign": "White all over, without a mark. It hangs in one place at dusk and sways like a lamp on a chain.",
+     "sign": "White, without a mark but a thread of green at the hem and the throat. It hangs in one place at dusk and sways like a lamp on a chain.",
      "habit": "It keeps the hour between day and night in the same spot of air, and is not to be spoken to during it.",
      "features": [
       "cold-core"

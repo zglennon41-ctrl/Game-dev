@@ -237,6 +237,7 @@ told apart at the size of a thumbnail before their shapes can.
 | Imp | Debt-collector `madder` · Stickler `lapis` · Surety `gold` |
 | Lantern | Wayfinder `peacock` · Watch-lamp `marigold` · Kept Flame `amethyst` |
 | Lurker | Back-stander `amethyst` · The One Who Sits Up `gold` · The Unremarked `lapis` |
+| Moth | Candle-moth `marigold` · Emperor `amethyst` · Moon-moth `jade` |
 | Shield | Wall-shield `lapis` · Gate-shield `madder` · Shelter-shield `jade` |
 | Sprite | Hob `marigold` · Lore-sprite `lapis` · Pixy `jade` |
 | Stag | Tilter `madder` · Wood-walker `jade` · Watch-hart `gold` |
@@ -888,3 +889,89 @@ page.
 - **Light.** The game shows every lit surface at one brightness, so a large lit area glares;
   light is kept to edges and small things except where a form is all light on purpose.
 
+
+## The Moth (`tools/blender/lines_moth.py`)
+
+In Greek one word, *psyche*, is the soul and the moth. A genius is its partner's soul standing
+outside the body, and the game is lamplit: the Moth is the plainest picture of that there is.
+Class `creature`, role Lookout, silhouette `beast-moth` (it floats).
+
+**Its anatomy is a moth's, and sound**: a head with two great eyes, a coiled tongue between
+two palps and two feelers; a furred thorax that bears six legs and two pairs of wings; an
+abdomen in rings. **One thing is a magical choice, made on purpose**: it is the size of an
+owl and it floats in the field as a lamp does, so it need not beat its wings to stay up. That
+is leaned into: most forms hold the body upright and the wings spread to be read (a wing is
+its canvas), a form at rest rests on the air, and the Ghost-moth and the Starter hang by a
+thread from a point of the field. The Starter is not a moth yet: a grub in a case of scraps.
+The change at the Gate is its coming out.
+
+| Path | Colour | What it keeps down the Path |
+|---|---|---|
+| **Candle-moth** | `marigold`, no coat shift | small plain wings **barred** the colour of a lamp flame and singed dark at the edge; comb feelers; always a fire near it (a burn alight, a candle, a taper, cracks that light). Its Advancements leave the shape three ways: the Singed Moth (a bite burned out of one wing), the Ermine (white, spotted, a cape and a ruff), the Hover-moth (narrow wings, a tongue out, a fan to steer by) |
+| **Emperor** | `amethyst`, coat `slate` | broad round wings with **eye-spots** ringed violet, and great feathered feelers. The Owl-wing (the wings are a face), the Underwing (grey as bark and shut, the violet hidden), the Serpent-wing (hooked tips that are two snakes' heads) |
+| **Moon-moth** | `jade`, coat `moon` | pale wings washed green from the body out, a dark green leading edge, long **tails** on the hindwings. The Ghost-moth (white, tailless, hanging), the Long-tail (tails streaming behind), the Plume-moth (wings come apart into quills) |
+
+On every Path the colour is in the same three places: the pattern of the wings, the vanes of
+the feelers and the rings of the abdomen.
+
+A `body` on the Moth's line:
+
+| Key | What it is | Styles |
+|---|---|---|
+| `kind` | | `grub` (the Starter: `case`, `eyes`) · `moth` |
+| `build` | against its stage's own | `span` (the wings) `body` `head` |
+| `pitch` | degrees the body is raised from level: 0 flies flat, 90 stands upright with its wings spread to be read | |
+| `wings` | their shape, `[shape, size]` | `delta` `ragged` `tiger` `swept` · `broad` `owl` `four` `lintel` `under` `wall` `atlas` `long` · `tailed` `narrow` `psyche` `chart` · `quills` `fans` (made of plumes) |
+| `hold` | how they are held | `v` `flat` `spread` `cross` `tent` `shut` `cape` `back` `high` `flash` `press` `offer` (one held up) `droop` `hang` `swept` `dart` `tee` `fan` |
+| `flap` | | `beat` `glide` `still` |
+| `pattern` | what is painted on them, a list, laid in order | `bars` `singe` `neat` `hem` `ash` `cracks` `holes` `ermine` `tiger` `skull` (on its back) · `rings` `eyes` `owl` `eyes4` `ward` `bark` `peek` `flash` `wall` `snake` `windows` `worn` · `moon` `costa` `white` `edge` `frame` `likeness` `streak` `compass` `ink` `ruled` `chart` |
+| `burn` | a bite burned out of a forewing, `[side, size]` | `l` `r` |
+| `tails` | of the hindwings, `[style, length]` | `twist` `stream` `burn` |
+| `feelers` | | `comb` `feather` `thread` `club` |
+| `eyes` | | `big` `small` `far` (ringed in brass) |
+| `brow` | how it looks at you | `keen` `stern` `calm` `wide` |
+| `look` | where its head is turned | `back` (over its shoulder) |
+| `fur` | the thorax | `plain` `mane` `ermine` `ghost` `ash` |
+| `abdomen` | | `stout` `slim` `banded` `bee` `fan` |
+| `tongue` | | (coiled) `out` `deep` (a watch-spring) |
+| `legs` | | `long` |
+| `carry` | | `taper` `snuffers` `comb` `dividers` `star` `train` |
+| `perch` | what it sits over, and brings with it | `lamp` (a candle in a dish) `log` (a twig) |
+| `aura` | | `dust` `embers` `rings` `halo` `sway` (the whole of it hangs by a thread) |
+| `accent`, `coat` | its Path's colour; how it wears its partner's coat | |
+
+**How it is built.** No rig. A wing is a sheet in a grid of cells (along it and across it),
+each cell a material, so a bar follows the wing's own curve, a margin is the last row and a
+hole or a window is cells left out; an eye-spot is a stack of discs laid on the sheet, seen
+from both faces. The partner's coat is the look's three roles: `fur_dark` (forewings),
+`fur_light` (hindwings, face, abdomen), `fur_ruff` (thorax, crown, wing roots); the look's two
+marks are `collar` and `bands`. A model carries **one** wing, one feeler, one eye and one tail:
+the other of each pair is the same mesh on a mirrored piece (`twin`), which halves a model
+(60 to 100 KB a form).
+
+**What moves.** Every form: the head turns (`turn_head`, and what is on it turns with it), the
+eyes blink (`blink_eye_l`, `_r`), the feelers sway (`sway_feeler_l`, `_r`), the abdomen
+breathes (`pulse_abdomen`). Wings `beat` or `glide` about their roots unless the form holds
+them still. Tails and the Lych-moth's train are chains that `wave`; a tongue held out sways;
+a flame `flick`s; dust and a halo `bob`; the Lodestar's star and the Flash-wing's rings
+`pulse`; the Starter and the Ghost-moth sway whole from the top of their thread
+(`sway_grub`, `sway_hang`). A pair of wings is named by number, `beat_wing_0` and
+`beat_wing_1`, not by side: the second is a mirrored twin, the game gives both the same turn,
+and the mirror makes it the other side's. Where the two sides differ (a burn, a wing held up)
+both are made, and named `_l` and `_r`.
+
+**Its gifts** (`python tools/blender/lines_moth.py gifts`): `moth-dust-wings`, two broad
+wings held up from the back with an eye on each, which beat; and `moth-antennae`, two great
+feathered feelers on the head, which sway. Both take the colour of the Path of whatever wears
+them. `python tools/blender/lines_moth.py body` makes `bodies/beast-moth.glb`, the moth with
+no Path's colour on it.
+
+**What is still weak.** The Starter is small and its case reads as a banded cocoon before it
+reads as scraps. The Honey-thief's skull is on its back and is not in its portrait. A form
+that flies level (the Hover-moth, the Long-tail, the Comet-moth) shows its wings edge-on from
+in front and is small in its cell for its tails. The Underwing's bark is seen from behind and
+above, not from in front. Cells are a tenth of a wing across, so a pattern finer than that
+(the Chart-moth's coast, the Bark-sitter's bricks) is drawn in lines laid on the sheet, and a
+hole is square-cornered. Wings that are held upright and `beat` turn in their own plane
+(the game beats a wing about the way the body faces): it reads as a slow fanning, and a true
+flap about the body's own length would want a kind of its own.

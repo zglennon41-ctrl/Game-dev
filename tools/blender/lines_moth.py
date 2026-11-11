@@ -858,14 +858,14 @@ class Moth:
             pts = [Vector((0, -0.05 * kh, -0.026 * kh)), Vector((0, -0.1 * kh, -0.04 * kh)) * 1.0, Vector((0, -0.2 * kh * size, -0.06 * kh)), Vector((0, -0.27 * kh * size, -0.045 * kh))]
             pts = [cr(pts, i / 8) for i in range(9)] + g.spiral(Vector((0, -0.27 * kh * size, -0.062 * kh)), 0.017 * kh, 0.005 * kh, 1.3, 0.0, n=10, axis=X, start=math.pi / 2)
             geo = g.tube(pts, [0.0066 * kh] * len(pts), n=5)
-            self.objects.append(piece("sway", "tongue", [(self.Hd(geo), "tongue_dark")], self.MH @ Vector((0, -0.05 * kh, -0.026 * kh)), parent=self.head))
+            self.objects.append(piece("sway", "tongue", [(self.Hd(geo), self.ac("accent_light", "tongue_dark"))], self.MH @ Vector((0, -0.05 * kh, -0.026 * kh)), parent=self.head))
         elif style_ == "deep":      # three times its own length, carried like a watch-spring
             R = 0.085 * kh * size
             cc = Vector((0, -0.05 * kh - R * 0.55, -0.03 * kh - R * 0.9))
             pts = g.spiral(cc, R, 0.012 * kh, 3.1, 0.0, n=46, axis=X, start=math.pi * 0.35)
             geo = g.tube(pts, [0.0062 * kh * (1 - 0.5 * i / 46) for i in range(47)], n=5)
             hub = g.ico(cc, 0.014 * kh, sub=1)
-            self.objects.append(piece("sway", "tongue", [(self.Hd(geo), "tongue_dark"), (self.Hd(hub), "field_spring")], self.MH @ Vector((0, -0.05 * kh, -0.026 * kh)), parent=self.head))
+            self.objects.append(piece("sway", "tongue", [(self.Hd(geo), self.ac("accent", "tongue_dark")), (self.Hd(hub), "field_spring")], self.MH @ Vector((0, -0.05 * kh, -0.026 * kh)), parent=self.head))
 
     # --- what is about it ----------------------------------------------------------------
     def make_aura(self):
@@ -1233,7 +1233,7 @@ def build_grub(form_id, level, spec, path=None):
     come out of the mouth of the case and it looks at you; the whole of it sways."""
     kit.reset()
     case, cs = opt(spec.get("case", "scraps"), 1.0)
-    T = Vector((0, 0.07, 0.7))                          # the point of the field its thread hangs from
+    T = Vector((0, 0.07, 0.62))                         # the point of the field its thread hangs from
     O = Vector((0, -0.01, 0.42))                        # the middle of the case's mouth
     ax = Vector((0, 0.3, -1.0)).normalized()            # the way the case hangs from its mouth
     fw = ax.cross(X).normalized()                       # the front of it
@@ -1250,9 +1250,9 @@ def build_grub(form_id, level, spec, path=None):
     # what it is made of: twigs laid along it, thread wound round it, a band of lamp-soot, a page corner
     twigs = None
     for i, (a, t0, t1, tw) in enumerate(((1.25, 0.06, 0.8, 0.25), (2.3, 0.02, 0.62, -0.2), (0.3, 0.1, 0.94, 0.2), (3.5, 0.05, 0.7, 0.3), (-0.7, 0.0, 0.76, -0.25), (4.6, 0.12, 0.9, 0.1))):
-        p0 = O + ax * (t0 * ln) + rad(a) * (r_at(t0) + 0.007)
-        p1 = O + ax * (t1 * ln) + rad(a + tw) * (r_at(t1) + 0.012)
-        twigs = g.merge(twigs, g.tube([p0 - ax * 0.012, (p0 + p1) / 2 + rad(a + tw / 2) * 0.004, p1 + ax * 0.02], [0.0085, 0.0095, 0.006], n=5))
+        p0 = O + ax * (t0 * ln) + rad(a) * (r_at(t0) + 0.01)
+        p1 = O + ax * (t1 * ln) + rad(a + tw) * (r_at(t1) + 0.022)
+        twigs = g.merge(twigs, g.tube([p0 - ax * 0.012, (p0 + p1) / 2 + rad(a + tw / 2) * 0.004, p1 + ax * 0.02], [0.012, 0.013, 0.008], n=5))
     items.append((twigs, "wood_twig"))
     wraps = None
     for t in (0.24, 0.56):
