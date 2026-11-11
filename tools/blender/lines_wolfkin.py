@@ -2146,6 +2146,14 @@ def drake_measure(r, A):
     ysh = r.bone("FrontUpperLeg.L").y
     _S["brisket"] = min([p.z for p, k in zip(r.world_verts(), wl) if k < 0.2 and ysh - 0.3 < p.y < ysh + 0.5] or [r.bone("FrontUpperLeg.L").z - 0.25])
     _strip_wolf(r)
+    # what is left of the wolf is its legs: one hide all the way down (a wolf's pale inner leg
+    # and its socks are a wolf's; the drake's toes carry its socks)
+    me = r.mesh.data
+    names = [m.name for m in me.materials]
+    if "fur_dark" in names:
+        slot = names.index("fur_dark")
+        for p in me.polygons:
+            p.material_index = slot
     _drake_body(r, A)
     _drake_head(r, A)
     _drake_feet(r, A)
@@ -2418,8 +2426,8 @@ def _drake_ridge(style):
         if style == "plates":
             plates(std, m, "ridge")
         elif style == "hoard":        # broad plates, two sizes turn about, in its Path's colour: a back like a row of shields
-            a1, a2 = (mat("accent"), mat("accent_deep")) if acc else (m, m)
-            plates(lambda z, t, i: ({"neck": 0.2 + 0.2 * (1.0 - t), "back": 0.46 + 0.22 * math.sin(t * math.pi), "tail": 0.4 * (1.0 - t / 0.7) + 0.06}[z]) * size * (1.0 if i % 2 else 0.72),
+            a1, a2 = (mat("accent_light"), mat("accent")) if acc else (m, m)
+            plates(lambda z, t, i: ({"neck": 0.24 + 0.24 * (1.0 - t), "back": 0.56 + 0.3 * math.sin(t * math.pi), "tail": 0.5 * (1.0 - t / 0.7) + 0.08}[z]) * size * (1.0 if i % 2 else 0.72),
                    a1, "ridge_hoard", lean=0.16, wide=1.25, alt=a2, tail_to=0.7)
         elif style == "young":        # a ridge it has not grown into: a few plates, too big for it
             plates(lambda z, t, i: (0.3 + 0.16 * math.sin(t * math.pi)) * size, m, "ridge", every=2, zones=("back",), lean=0.2, wide=0.8)
@@ -3000,7 +3008,7 @@ def drake_smokeback(r, A, size):
 def drake_armor(r, A, size):
     """Plates lapped down each shoulder and haunch, cut flat: it is armoured where it is struck."""
     acc = bool(_S["spec"].get("accent"))
-    m1, m2 = (mat("accent_deep"), mat("accent")) if acc else (_horn_mat(), _horn_mat())
+    m1, m2 = (mat("accent"), mat("accent_light")) if acc else (_horn_mat(), _horn_mat())
     g1, g2 = None, None
     for tag, foot, bone in gl.FEET:
         sg = 1 if r.bone(foot).x > 0 else -1
