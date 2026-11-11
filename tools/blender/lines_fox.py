@@ -856,9 +856,11 @@ def grow_tip(r, A, style, size):
                      (g.tongue([c + Vector((0, 0, -0.1)), c + Vector((0.04, 0, -0.22)), c + Vector((-0.02, 0, -0.34))], [0.11, 0.07, 0.01], thick=0.6, normal=Y), field("foxfire_tail", 2.2))]
             gl._later(r, "bob", "wisp", items, c, bone, n=i)
         elif style == "lantern":  # a small lamp hung from the end of it
-            hook = p + d * 0.05
-            _add(r, "tiphook_%d" % i, g.tube([p - d * 0.1, hook, hook + Vector((0, 0, -0.06))], [0.014, 0.014, 0.01], n=4), bone, mat("metal_brass"))
-            gl._later(r, "sway", "tiplamp", gl._lantern(hook + Vector((0, 0, -0.08)), 0.15 * size, "lamp", 3.6), hook, bone, n=i, hang=True)
+            away = Vector((d.x, d.y, 0.0))
+            away = away.normalized() if away.length > 0.3 else Y.copy()
+            hook = p + d * 0.08 + away * 0.14 + Z * 0.1
+            _add(r, "tiphook_%d" % i, g.tube([p - d * 0.14, p + d * 0.06 + Z * 0.06, hook], [0.026, 0.024, 0.02], n=4), bone, mat("metal_brass"))
+            gl._later(r, "sway", "tiplamp", gl._lantern(hook + Vector((0, 0, -0.06)), 0.3 * size, "lamp", 3.6), hook, bone, n=i, hang=True)
         else:
             log("NO SUCH TIP:", style)
 
@@ -1015,18 +1017,18 @@ def grow_ruff(r, A, style, size):
             t = s[8]
             if not 0.06 < t < 0.9 or i % 2:
                 continue
-            for k, deg in enumerate((196, 216, 236, 254, 270, 286, 304, 324, 344)):
-                p, n = _on(s, deg + 6 * math.sin(i * 1.3), -0.012)
-                L = 0.3 * size * (0.7 + 0.6 * (1.0 - t)) * (1.0 + 0.3 * math.sin(i * 2.3 + k * 1.9))
-                mid = p + n * (0.3 * L) - Z * (0.3 * L) + s[1] * (0.35 * L)
-                tip = p + n * (0.26 * L) - Z * (0.62 * L) + s[1] * (0.8 * L)
-                lk = g.tongue([p, mid, tip], [0.085 * (0.7 + 0.3 * size), 0.075 * (0.7 + 0.3 * size), 0.012], thick=0.45, normal=n)
+            for k, deg in enumerate((202, 230, 256, 284, 310, 338)):
+                p, n = _on(s, deg + 6 * math.sin(i * 1.3), -0.01)
+                L = 0.3 * size * (0.7 + 0.6 * (1.0 - t)) * (1.0 + 0.25 * math.sin(i * 2.3 + k * 1.9))
+                mid = p + n * (0.42 * L) - Z * (0.3 * L) + s[1] * (0.3 * L)
+                tip = p + n * (0.46 * L) - Z * (0.75 * L) + s[1] * (0.6 * L)
+                lk = g.tongue([p, mid, tip], [0.15 * (0.7 + 0.3 * size), 0.13 * (0.7 + 0.3 * size), 0.015], thick=0.3, normal=n)
                 if (i // 2 + k) % 2:
                     g2, w2 = g.merge(g2, lk), w2 + [s[6]] * len(lk[0])
                 else:
                     g1, w1 = g.merge(g1, lk), w1 + [s[6]] * len(lk[0])
         _add(r, "ruff", g1, w1, mat("fur_light"), smooth=True)
-        _add(r, "ruff_b", g2, w2, mat("fur_pale"), smooth=True)
+        _add(r, "ruff_b", g2, w2, mat("fur_light"), smooth=True)
     elif style == "crown":        # a crest of fur standing between its ears and down its nape
         geo, ws = None, []
         P, S, up, f = _S["P"], _S["HS"], _S["hup"], _S["hf"]
@@ -1165,12 +1167,12 @@ def grow_mask(r, A, style, size):
     slits, marks, ears, cord, sparks = None, None, None, None, None
     for sg in ((-1,) if half else (1, -1)):
         nx = (X * sg * 0.8 + upm * 0.6).normalized()
-        e0, e1 = Q(sg * 0.215, a0 - 0.07, 0.115), Q(sg * 0.13, a0 + 0.1, 0.12)
-        slits = g.merge(slits, g.blade(e0 + nx * 0.02, e1 + nx * 0.02, 0.07 * S, normal=nx, belly=0.5))
-        sparks = g.merge(sparks, g.ico(e0.lerp(e1, 0.5) + nx * 0.024, 0.018 * S, sub=0))
-        marks = g.merge(marks, g.blade(Q(sg * 0.235, a0 - 0.02, 0.03) + nx * 0.02, Q(sg * 0.15, a0 + 0.16, 0.02) + nx * 0.02, 0.05 * S, normal=nx, belly=0.5))
-        marks = g.merge(marks, g.blade(Q(sg * 0.09, m(0.7), 0.1), Q(sg * 0.07, m(0.9), 0.075), 0.035 * S, normal=upm, belly=0.5))
-        marks = g.merge(marks, g.blade(Q(sg * 0.12, 0.2, 0.235), Q(sg * 0.15, 0.06, 0.23), 0.06 * S, normal=upm, belly=0.5))
+        e0, e1 = Q(sg * 0.235, a0 - 0.12, 0.13), Q(sg * 0.12, a0 + 0.13, 0.125)
+        slits = g.merge(slits, g.blade(e0 + nx * 0.035, e1 + nx * 0.035, 0.12 * S, thick=0.03, normal=nx, belly=0.5))
+        sparks = g.merge(sparks, g.ico(e0.lerp(e1, 0.5) + nx * 0.05, 0.028 * S, sub=0))
+        marks = g.merge(marks, g.blade(Q(sg * 0.25, a0 - 0.06, 0.03) + nx * 0.035, Q(sg * 0.14, a0 + 0.2, 0.0) + nx * 0.035, 0.09 * S, thick=0.03, normal=nx, belly=0.5))
+        marks = g.merge(marks, g.blade(Q(sg * 0.1, m(0.62), 0.11), Q(sg * 0.07, m(0.92), 0.08), 0.06 * S, thick=0.03, normal=upm, belly=0.5))
+        marks = g.merge(marks, g.blade(Q(sg * 0.12, 0.22, 0.25), Q(sg * 0.16, 0.04, 0.24), 0.1 * S, thick=0.03, normal=upm, belly=0.5))
         # the mask has ears of its own, a little wrong for the ears beneath
         ears = g.merge(ears, g.blade(Q(sg * 0.14, 0.12, 0.2), Q(sg * 0.24, 0.02, 0.44), 0.16 * S, normal=fw, belly=0.3))
         if style != "raised":     # and a red cord ties it on
