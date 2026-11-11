@@ -1462,7 +1462,9 @@ func _next_step() -> void:
 			world.build_hero(hero)
 			_drill_fight()
 			_choice_done = true)
-	hud.set_prompt("%d/%d · %s" % [_step + 1, steps.size(), fill(s["title"])], fill(String(s.get("text", ""))))
+	# (a trouble's words name the classmate whose trouble it is)
+	var about: Dictionary = _lesson.get("poster", {})
+	hud.set_prompt("%d/%d · %s" % [_step + 1, steps.size(), fill(s["title"], about)], fill(String(s.get("text", "")), about))
 	hud.set_prompt_status("", _progress_text(s))
 
 func _progress_text(s: Dictionary) -> String:
@@ -1915,7 +1917,11 @@ func choose(title: String, options: Array, then: Callable) -> void:
 		for i in options.size():
 			if auto_want != "" and String(options[i]["id"]) == auto_want:
 				pick = list.get_child(i)
-		get_tree().create_timer(1.0).timeout.connect(func(): if _choice_box == veil and is_instance_valid(pick): pick.pressed.emit())
+		var veil_id := veil.get_instance_id()
+		var pick_id := pick.get_instance_id()
+		get_tree().create_timer(1.0).timeout.connect(func():
+			if _choice_box and _choice_box.get_instance_id() == veil_id and is_instance_id_valid(pick_id):
+				(instance_from_id(pick_id) as Button).pressed.emit())
 
 # --- The line: zones, the post, extraction, the rescue team --------------------------------
 
