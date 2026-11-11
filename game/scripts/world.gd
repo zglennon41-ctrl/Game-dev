@@ -4186,6 +4186,20 @@ func _genius_ground(f: Fight) -> void:
 
 ## The First Form follows: fliers and fey and flames at the shoulder, walkers at the heel. On
 ## Hunt it is at the foe; on Hold it stands on its ground; a flier that has stooped climbs.
+## Where a genius's own model says it is taken hold of (grip), worn (wear) or carried (carry):
+## an empty of that name in its model, found once for each body.
+var _held_body: GeniusBody = null
+var _held_nodes := {}
+func _held_at(what: String) -> Node3D:
+	if _g_body == null or not is_instance_valid(_g_body) or _g_body._model == null:
+		return null
+	if _held_body != _g_body:
+		_held_body = _g_body
+		_held_nodes = {}
+	if not _held_nodes.has(what):
+		_held_nodes[what] = _g_body._model.find_child(what, true, false)
+	return _held_nodes[what] as Node3D
+
 func _update_form(f: Fight, dt: float) -> void:
 	_genius.visible = false
 	_g_trail.emitting = false
@@ -4211,6 +4225,13 @@ func _update_form(f: Fight, dt: float) -> void:
 			hb = slot * Basis(Vector3.RIGHT, PI)
 			at = _sword.global_position + slot.y * long * float(held.get("grip", 0.0))
 		_g_form.global_transform = Transform3D(hb * Basis.from_scale(Vector3.ONE * k), at)
+		# A weapon with a model of its own says where the hand closes on it (an empty named
+		# grip, turned as a weapon is turned in the hand): it is seated there, whatever its form.
+		var grip := _held_at("grip")
+		if grip:
+			var g := _g_body._local_xf(grip)
+			var fb := slot * g.basis.orthonormalized().inverse() * Basis.from_scale(Vector3.ONE * k)
+			_g_form.global_transform = Transform3D(fb, _sword.global_position - fb * g.origin)
 		_g_form_pos = _sword.global_position
 		if _g_body:
 			_g_body.move_at(0.0)
