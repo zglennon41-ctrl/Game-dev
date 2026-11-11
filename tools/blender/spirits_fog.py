@@ -385,10 +385,11 @@ def plan_mask(B):
     # the face: a pale blank, no mouth, two slits with the field behind them
     B.add(g.ico(f + Vector((0, -0.012, 0)), 0.072 * k, sub=2, scale=(0.84, 0.3, 1.2)), "mask_pale", True)
     e = f + Vector((0, -0.05, 0.03))
-    slits = None
+    slits, lit = None, None
     for s in (1, -1):
-        slits = g.merge(slits, g.tongue([e + Vector((s * 0.018, 0, 0.0)), e + Vector((s * 0.045, -0.004, -0.004)), e + Vector((s * 0.072, 0.008, 0.004))], [0.006, 0.02, 0.006], thick=0.5, normal=(0, -1, 0.2)))
-    B.move("blink", "eyes", [(slits, field("eyes", 2.6), True)], e)
+        slits = g.merge(slits, g.tongue([e + Vector((s * 0.014, 0, 0.0)), e + Vector((s * 0.045, -0.004, -0.004)), e + Vector((s * 0.078, 0.008, 0.006))], [0.008, 0.028, 0.008], thick=0.4, normal=(0, -1, 0.2)))
+        lit = g.merge(lit, g.tongue([e + Vector((s * 0.024, -0.005, 0.0)), e + Vector((s * 0.045, -0.009, -0.004)), e + Vector((s * 0.066, 0.002, 0.004))], [0.004, 0.012, 0.004], thick=0.5, normal=(0, -1, 0.2)))
+    B.move("blink", "eyes", [(slits, "void", True), (lit, field("eyes", 3.0), True)], e)
     # what it is covering for: a lantern shuttered to a slit, held out on an arm of it, and the nose of a boat
     chain(B, [(0.18, -0.02, 0.5), (0.25, -0.1, 0.52), (0.3, -0.14, 0.5)], 0.07, 0.045, (1, 1, 0.9), ("main", "trim"))
     at = Vector((0.3, -0.15, 0.47))

@@ -862,9 +862,9 @@ def plan_corner(B, spec):
     # the eye: pale, ringed in its Path's colour, lit at the middle; it looks about, and it blinks
     eye = c + Vector((0, -0.17, -0.01))
     ball = B.move("turn", "eye", [(g.ico(eye, 0.115, sub=2, scale=(1.3, 0.42, 0.86)), "mask_pale", True),
-                                  (g.ico(eye + Vector((0, -0.022, 0.0)), 0.072, sub=2, scale=(1.0, 0.4, 1.0)), "accent", True)], c)
+                                  (g.ico(eye + Vector((0, -0.022, 0.0)), 0.072, sub=2, scale=(1.0, 0.4, 1.0)), "accent", True),
+                                  (sk.arc(eye + Vector((0, -0.012, 0.0)), 0.155, 0.105, 0.12, math.pi - 0.12, 0.02, n=10, u=X, v=Z, sides=5), main, True)], c)
     B.move("blink", "pupil", [(g.ico(eye + Vector((0, -0.04, 0.0)), 0.04, sub=2, scale=(1.0, 0.5, 1.0)), field("eyes", 4.2), True)], eye + Vector((0, -0.04, 0)), parent=ball)
-    B.add(sk.arc(eye + Vector((0, -0.012, 0.0)), 0.155, 0.105, 0.12, math.pi - 0.12, 0.02, n=10, u=X, v=Z, sides=5), main, True)
     hang = [[None, None], [None, None]]
     tips = []
     for i, (x, L) in enumerate(((-0.2, 0.42), (-0.12, 0.6), (-0.04, 0.5), (0.05, 0.66), (0.13, 0.46), (0.21, 0.56))):
