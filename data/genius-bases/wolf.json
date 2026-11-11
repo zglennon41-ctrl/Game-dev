@@ -207,7 +207,7 @@
        1.0
       ],
       "spine": [
-       "ridge",
+       "crest",
        0.9
       ],
       "marks": [
@@ -263,7 +263,7 @@
          "chest": 1.22,
          "neck": 1.12,
          "legs": 1.08,
-         "tail": 1.25,
+         "tail": 1.1,
          "brush": 1.25,
          "head": 1.04,
          "waist": 1.0,
@@ -619,15 +619,19 @@
         "carry": null,
         "marks": [
          [
-          "blanket:pale",
+          "blanket:light",
           1.0
          ],
          [
-          "ears:pale",
+          "ears",
           1.0
          ],
          [
           "mask:pale",
+          1.0
+         ],
+         [
+          "tailtip:light",
           1.0
          ]
         ],
@@ -769,7 +773,7 @@
          0.9
         ],
         "spine": [
-         "ridge",
+         "crest",
          1.2
         ],
         "marks": [
@@ -935,7 +939,7 @@
      0.8
     ],
     "spine": [
-     "ridge",
+     "crest",
      0.7
     ],
     "maw": [
@@ -1017,7 +1021,7 @@
        1.2
       ],
       "spine": [
-       "ridge",
+       "crest",
        0.8
       ],
       "marks": [
@@ -1093,7 +1097,7 @@
          0.7
         ],
         "spine": [
-         "ridge",
+         "crest",
          0.8
         ],
         "marks": [
