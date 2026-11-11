@@ -149,6 +149,30 @@ a place of its own under `<base>-<feature>` (the Lurker's cloak down the back, w
 Coat's is on the head). A form carried into a hybrid's line from its second base wears the
 first base's body in its place (`wears`), and a body never wears its own base's gift.
 
+**A gift made again for one base.** Where a giver's part sits badly on one kind of body it
+makes it again for that base: `gifts/<giver>-<feature>-on-<first base>.glb`
+(`python tools/blender/gifts_on.py`), hung in place of its usual part on that base's bodies
+and nowhere else, at the socket `featureSockets` gives under `<giver>-<feature>-on-<base>`.
+Such a part may be several pieces, each under an empty named `at_<socket>`: the game hangs
+each on that socket of the body, so one part fits a body of any width and height. And a
+piece under an empty named `aloft` shows only while the genius goes free, one under `furled`
+only while it is worn or held.
+
+The first is **the Hawk on a Shield** (the Winged Shield; the owner, 2026-11-12: "The winged
+shield is goofy"; it was a bird's two wings edge-on from a plate, and two small feet under
+it). The shield is now the breast of an eagle displayed, in the shield's own metal: a wing
+of cut steel plate rises from behind each side of its rim (`socket_arm_l`, `socket_arm_r`),
+the longest feathers straight up and the last out and down, brass along the arm, the field
+at the tips of the longest; a raptor's head of iron and brass stands on a mantle of hackles
+over the top edge (`socket_head`) and looks about (`turn_head`); two legs in trousers of
+plate hang from behind its foot (`socket_tail`), brass feet open, black claws as long as the
+toes. The wings move as a wing held out does (`glide_wing_l`, `glide_wing_r`). On an arm the
+wings are shut down the rim like tassets and the feet are drawn up and clenched, so that it
+is a shield with a beaked head at the fist's end. Still weak: every form of the line wears
+the same eagle at the same size (the gift is one part, not thirty-one); on the three forms
+that lie flat (the table, the bench, the roof of shields) the wings stand at the ends of a
+board, further apart than a bird's; the Hawk's wings on every other base are as they were.
+
 ## Looking at a line
 
 ```
@@ -165,7 +189,7 @@ bash tools/genius-tree-page.sh wolf                 # the page of the whole tree
 | Line | Bodies |
 |---|---|
 | All twenty-eight | all thirty-one each: 868 models, one a form (the Moth, the Carp, the Octopus, the Angel, the Demon and the Elemental joined on 2026-11-11) |
-| Hybrids | each wears its first base's bodies and its second's gift (43 gift parts, two a base bar the Lantern, whose glow is the shared one) |
+| Hybrids | each wears its first base's bodies and its second's gift (43 gift parts, two a base bar the Lantern, whose glow is the shared one; and the Hawk's two made again for the Shield) |
 | Baby | built: a small round thing of pale matter with a face, the field in its eyes, its belly and the tip of its tail (`python tools/blender/genius_lines.py baby`); it rides where the orb did until the rite |
 
 ## Calls that are the owner's

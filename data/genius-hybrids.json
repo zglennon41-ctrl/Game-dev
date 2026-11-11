@@ -65,21 +65,24 @@
    "name": "Winged Shield",
    "nodes": {
     "shield-wall": {
-     "of": "one who, having said no, has finished speaking, and now says it from above"
+     "of": "one who, having said no, has finished speaking, and now says it from above",
+     "sign": "It has grown as tall as your chin, and an eagle has grown out of it: wings of cut steel from behind its rim, a hooked head over its top edge that turns to look at whoever comes."
     },
     "shield-gate": {
-     "of": "one who belongs to a place, and watches every road into it"
+     "of": "one who belongs to a place, and watches every road into it",
+     "sign": "It is door-shaped now, with a bar across its back, and the door has an eagle's head for a lintel and a steel wing up either jamb."
     },
     "shield-shelter": {
-     "of": "one who cannot watch it land on someone else, and gets there first"
+     "of": "one who cannot watch it land on someone else, and gets there first",
+     "sign": "It is wider than it is tall, and curved like a hand held over something; the wings at its two ends are open, and the talons under it are too."
     },
     "hawk-wind-hover": {
      "name": "Hovering Shield",
-     "sign": "It hangs a hand above the ground on two short wings and does not drift, whatever the wind is doing."
+     "sign": "It hangs a hand above the ground with its steel wings spread and still, and does not drift, whatever the wind is doing. On your arm it shuts them down its rim."
     },
     "hawk-storm-kite": {
      "name": "Storm-shield",
-     "sign": "Its rim hums in rough weather, and its wings open wider the harder it blows."
+     "sign": "Its rim hums in rough weather, and the plates of its wings open wider the harder it blows."
     },
     "hawk-line-falcon": {
      "name": "Outrider Shield",
@@ -87,11 +90,11 @@
     },
     "hawk-mantler": {
      "name": "Mantling Shield",
-     "sign": "Its wings come round whatever it is set over, feathers to the ground, like a tent."
+     "sign": "Its wings come round whatever it is set over, steel feathers to the ground, like a tent, and the head on its top edge looks out over them."
     },
     "hawk-post-eagle": {
      "name": "Post-shield",
-     "sign": "It perches on the lamp post by its talons, boss outward, and has worn the iron bright."
+     "sign": "It perches on the lamp post by its brass talons, boss outward, head turning, and has worn the iron bright."
     },
     "hawk-lord-of-the-broken-tower": {
      "name": "Shield of the Broken Tower",
