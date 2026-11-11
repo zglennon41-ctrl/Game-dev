@@ -274,12 +274,12 @@ def main():
     types = ('<section class="base types" id="types"><header class="bhead"><p class="eyebrow">What it does beside you</p><h2>Three types of genius</h2>'
              '<p class="soul">One key means a different thing for each: G takes a weapon in hand, uses an item, gives a companion its order.</p></header><div class="kinds">%s%s%s%s</div></section>'
              % (kind('weapon', 'Weapon', e(T['weapon']['says']),
-                     [shot(b['id'], 'A %s in the hand' % b['name']) for b in weapons],
+                     [shot(b['id'], 'The %s in the hand' % b['name']) for b in weapons],
                      [('<a href="#%s">%s</a>' % (b['id'], e(b['name'])), e(W[b['id']]['inHand'])) for b in weapons]),
                 kind('defense', 'Defensive item', e(T['defense']['says']),
-                     [shot(b['id'], 'A %s, worn' % b['name']) for b in defs], [item_row(b) for b in defs]),
+                     [shot(b['id'], 'The %s, worn' % b['name']) for b in defs], [item_row(b) for b in defs]),
                 kind('ritual', 'Ritual item', e(T['ritual']['says']),
-                     [shot(b['id'], 'A %s, carried' % b['name']) for b in rits], [item_row(b) for b in rits]),
+                     [shot(b['id'], 'The %s, carried' % b['name']) for b in rits], [item_row(b) for b in rits]),
                 kind('companion', 'Companion', e(T['companion']['says']),
                      [shot('companion', 'A companion at its post')],
                      [role_row(rid) for rid in R if isinstance(R[rid], dict) and 'name' in R[rid]])))

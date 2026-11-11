@@ -44,7 +44,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .bhead .eyebrow { font-family: var(--ui); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--brass); margin: 0 }
 .bhead h2 { font-family: var(--display); font-weight: 700; font-size: clamp(26px, 4vw, 38px); letter-spacing: .05em; margin: 2px 0 6px; color: var(--brass-hi) }
 .soul { font-style: italic; font-size: 19px; max-width: 70ch; margin: 0 0 14px }
-.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px 28px; border-top: 1px solid var(--rule); padding-top: 12px }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 14px 28px; border-top: 1px solid var(--rule); padding-top: 12px }
 .facts > div { min-width: 0 }
 .facts h3 { font-family: var(--ui); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin: 0 0 4px; font-weight: 700 }
 .facts p { margin: 0 0 4px }
@@ -79,7 +79,7 @@ __SPRITES__
 .life img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 3px; background: var(--shot) }
 .life figcaption { font-family: var(--ui); font-size: 14px; color: var(--dim); margin-top: 6px; max-width: 90ch }
 .life + .life { margin-top: 26px }
-.paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-top: 20px; align-items: start }
+.paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 18px; margin-top: 20px; align-items: start }
 .path { min-width: 0; background: var(--plate); border: 1px solid var(--rule); border-top: 3px solid var(--brass); padding: 14px 14px 6px; display: flex; flex-direction: column; gap: 10px }
 .form { display: flex; gap: 12px; align-items: flex-start }
 .l2 > .pic { width: 112px }
@@ -102,7 +102,7 @@ __SPRITES__
 .fight { margin: 4px 0 0; font-size: 15.5px; color: var(--dim) }
 .fight b { font-family: var(--ui); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--brass); font-weight: 700; margin-right: 4px }
 /* the three types: four plates, each with what it looks like beside its partner and what each base of it does */
-.kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; align-items: start }
+.kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 18px; align-items: start }
 .kind { min-width: 0; background: var(--plate); border: 1px solid var(--rule); border-top: 3px solid var(--brass); padding: 14px }
 .kind h3 { font-family: var(--display); font-size: 21px; letter-spacing: .04em; color: var(--brass-hi); margin: 0 0 4px }
 .kind > p { margin: 0 0 10px }
