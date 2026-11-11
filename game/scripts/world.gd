@@ -129,7 +129,7 @@ func _piece(name: String, pos: Vector3, rot_deg := 0.0, scale := 1.0) -> Node3D:
 	n.rotation_degrees.y = rot_deg
 	n.scale = Vector3.ONE * scale
 	_place_root.add_child(n)
-	toonify(n)
+	toonify(n, true)
 	return n
 
 func _build_environment() -> void:
@@ -892,9 +892,20 @@ const TOON := """
 shader_type spatial;
 // Cel shading, second pass (docs/graphics-comparison.md): light in bands with a tinted
 // shadow side; a sky-lit ambient wrap; a two-band specular by surface; a rim light; a
-// tileable detail texture laid on by world-space triplanar projection, so no UVs are needed;
-// and the baked cavity occlusion in the vertex colour. The ink lines are the overlay's next
-// pass as before.
+// tileable detail texture laid on by triplanar projection, so no UVs are needed; and the
+// baked cavity occlusion in the vertex colour. The ink lines are the overlay's next pass as
+// before.
+// The grain is laid in the world's space on a place, so that neighbouring tiles of a floor
+// match; on whatever moves it is laid in the body's own space (detail_local), so that a wolf
+// does not walk through its fur, and where the body has bones from where its vertices lie at
+// rest (rest_tex: the engine hands this shader a mesh already moved by its bones, and a grain
+// laid on that would slide along a limb as it swings). detail_basis turns the mesh's own space
+// to the body's and gives it the body's size, so that a grain is so many repeats to a metre
+// and runs the same way on every body however its mesh was made: down the picture is toward
+// the tail along a body's sides and back, and toward the ground on its front.
+// A body's grain is in its highlight as well as its colour: the edge of the shine follows the
+// dimples and the creases. A fragment reads the grain three times (once from each side) and a
+// painted texture once; a vertex of a body with bones reads where it rests twice.
 render_mode cull_back;
 uniform vec4 albedo : source_color = vec4(1.0);
 uniform sampler2D albedo_tex : source_color, filter_linear_mipmap;
@@ -910,6 +921,13 @@ uniform float emission_energy = 0.0;
 uniform sampler2D detail_tex : hint_default_white, filter_linear_mipmap, repeat_enable;
 uniform float detail_scale = 6.0;
 uniform float detail_strength = 0.0;
+uniform bool detail_local = false;      // lay the grain in the body's own space, not the world's
+uniform mat3 detail_basis = mat3(1.0);  // from the mesh's own space to the body's, at the body's size
+uniform float detail_sharp = 1.0;       // how sharply the three projections give way to one another
+uniform bool use_rest = false;          // a mesh with bones: its vertices as they lie at rest
+uniform sampler2D rest_tex : filter_nearest, repeat_disable;      // their places, then their normals, by vertex index
+uniform int rest_width = 1;
+uniform int rest_rows = 1;
 uniform float spec_strength = 0.05;
 uniform float spec_gloss = 8.0;
 uniform float rim_strength = 0.35;
@@ -920,13 +938,26 @@ uniform bool use_ao = false;
 varying vec3 world_pos;
 varying vec3 world_nrm;
 varying float ao;
+varying float grain;      // what a body's grain makes of this fragment (1.0: nothing), for its highlight
 void vertex() {
-	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	world_nrm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
+	if (detail_local) {
+		vec3 p = VERTEX;
+		vec3 n = NORMAL;
+		if (use_rest) {
+			ivec2 at = ivec2(VERTEX_ID % rest_width, VERTEX_ID / rest_width);
+			p = texelFetch(rest_tex, at, 0).rgb;
+			n = texelFetch(rest_tex, at + ivec2(0, rest_rows), 0).rgb;
+		}
+		world_pos = detail_basis * p;
+		world_nrm = normalize(detail_basis * n);
+	} else {
+		world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		world_nrm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
+	}
 	ao = use_ao ? COLOR.r : 1.0;
 }
 float triplanar(vec3 p, vec3 n) {
-	vec3 w = abs(n);
+	vec3 w = pow(abs(n), vec3(detail_sharp));
 	w = w / max(w.x + w.y + w.z, 0.001);
 	float x = texture(detail_tex, p.yz * detail_scale).r;
 	float y = texture(detail_tex, p.xz * detail_scale).r;
@@ -949,9 +980,14 @@ void fragment() {
 		vec3 painted = texture(albedo_tex, UV).rgb;
 		col *= use_lut ? on_ramps(painted) : painted;
 	}
+	grain = 1.0;
 	if (detail_strength > 0.0) {
 		float d = triplanar(world_pos, world_nrm);
-		col *= mix(1.0, d * 2.0, detail_strength);
+		float g = mix(1.0, d * 2.0, detail_strength);
+		col *= g;
+		// on a body the grain is in the highlight too (hammered iron and worn leather are seen
+		// by their shine, and a coat near black by nothing else); a place's highlight is as it was
+		grain = detail_local ? g : 1.0;
 	}
 	float occ = mix(1.0, ao, ao_strength);
 	ALBEDO = col * occ;
@@ -968,14 +1004,19 @@ void light() {
 	vec3 lit = mix(ALBEDO * shadow_tint.rgb, ALBEDO, stepped);
 	DIFFUSE_LIGHT += lit * LIGHT_COLOR * ATTENUATION;
 	vec3 h = normalize(LIGHT + VIEW);
-	float s = pow(max(dot(NORMAL, h), 0.0), spec_gloss);
+	float s = pow(max(dot(NORMAL, h), 0.0), spec_gloss) * grain * grain;
 	float sb = s > 0.5 ? 1.0 : (s > 0.2 ? 0.4 : 0.0);
-	SPECULAR_LIGHT += sb * spec_strength * LIGHT_COLOR * ATTENUATION * (stepped > 0.0 ? 1.0 : 0.3);
+	SPECULAR_LIGHT += sb * grain * spec_strength * LIGHT_COLOR * ATTENUATION * (stepped > 0.0 ? 1.0 : 0.3);
 }
 """
 
+## A body's grain is laid with down the picture toward its tail and toward the ground: a body
+## faces +z and stands on +y, and a picture's rows run the other way.
+const GRAIN_DOWN := Basis(Vector3(1, 0, 0), Vector3(0, -1, 0), Vector3(0, 0, -1))
+
 var _toon_shader: Shader = null
 var _detail_cache: Dictionary = {}
+var _grain_as := ""       # -- --grain=world or none (toonify)
 
 ## Which class a material is, by its name (data/style.json, materials): skin, coat, cloth,
 ## leather, wood, stone, iron, brass, bone, glass, growth, earth, water, eye, ink, the field's
@@ -986,7 +1027,10 @@ static func surface_of(name: String, color := Color(-1, -1, -1)) -> String:
 
 ## The class's look on a toon material: its bands, its shadow's tint, its highlight, its grain
 ## and wear, the rim light, and the occlusion baked in the vertex colour.
-func _surface_look(t: ShaderMaterial, cls: String, mi: MeshInstance3D) -> void:
+## `body` is what a BODY's surface is covered in (Style.grain_for; {} for nothing), and its
+## grain is laid in the body's own space; null for a place, which takes its class's grain in
+## the world's space as it always has.
+func _surface_look(t: ShaderMaterial, cls: String, mi: MeshInstance3D, body = null, surface := 0) -> void:
 	var spec: Dictionary = Style.class_spec(cls)
 	var sh: Dictionary = Style.data()["shading"]
 	t.set_shader_parameter("bands", float(spec.get("bands", 3)))
@@ -998,36 +1042,228 @@ func _surface_look(t: ShaderMaterial, cls: String, mi: MeshInstance3D) -> void:
 	t.set_shader_parameter("rim_strength", float(rim.get("strength", 0.22)))
 	t.set_shader_parameter("rim_power", float(rim.get("power", 3.0)))
 	t.set_shader_parameter("rim_color", Color(String(rim.get("color", "#D2D8EC"))))
-	var grain := String(spec.get("grain", ""))
-	if grain != "" and float(spec.get("wear", 0.0)) > 0.0:
-		var path := "res://game/assets/textures/detail/%s.png" % grain
-		if not _detail_cache.has(path):
-			_detail_cache[path] = load(path) if ResourceLoader.exists(path) else null
-		if _detail_cache[path] != null:
-			t.set_shader_parameter("detail_tex", _detail_cache[path])
-			t.set_shader_parameter("detail_scale", float(spec.get("grainScale", 4.0)))
-			t.set_shader_parameter("detail_strength", float(spec["wear"]))
+	if body is Dictionary:
+		var b: Dictionary = body
+		var tex := _detail(String(b.get("grain", "")), true)
+		if tex != null and float(b.get("strength", 0.0)) > 0.0:
+			t.set_shader_parameter("detail_tex", tex)
+			t.set_shader_parameter("detail_scale", float(b.get("scale", 4.0)))
+			t.set_shader_parameter("detail_strength", float(b["strength"]))
+			t.set_shader_parameter("detail_local", true)
+			t.set_shader_parameter("detail_basis", b.get("lay", GRAIN_DOWN))
+			t.set_shader_parameter("detail_sharp", float(Style.data()["materials"].get("grainFit", {}).get("sharp", 4.0)))
+			var rest := _rest_of(mi, surface)
+			if not rest.is_empty():
+				t.set_shader_parameter("use_rest", true)
+				t.set_shader_parameter("rest_tex", rest["tex"])
+				t.set_shader_parameter("rest_width", int(rest["width"]))
+				t.set_shader_parameter("rest_rows", int(rest["rows"]))
+	else:
+		var grain := String(spec.get("grain", ""))
+		if grain != "" and grain != "none" and float(spec.get("wear", 0.0)) > 0.0:
+			var tex := _detail(grain, false)
+			if tex != null:
+				t.set_shader_parameter("detail_tex", tex)
+				t.set_shader_parameter("detail_scale", float(spec.get("grainScale", 4.0)))
+				t.set_shader_parameter("detail_strength", float(spec["wear"]))
 	t.set_shader_parameter("ao_strength", float(sh.get("occlusion", 0.8)))
 	var has_color := mi.mesh != null and mi.mesh is ArrayMesh and (mi.mesh as ArrayMesh).surface_get_format(0) & Mesh.ARRAY_FORMAT_COLOR
 	t.set_shader_parameter("use_ao", bool(has_color))
+
+## A grain's texture (game/assets/textures/detail/<name>.png). For a body it is given its
+## smaller copies, so that at a fight's distance a pattern fades to its mid-grey and does not
+## sparkle; a place's is as it was imported.
+func _detail(grain: String, for_body: bool) -> Texture2D:
+	if grain == "" or grain == "none":
+		return null
+	var key := grain + ("|body" if for_body else "")
+	if not _detail_cache.has(key):
+		var path := "res://game/assets/textures/detail/%s.png" % grain
+		var tex: Texture2D = load(path) if ResourceLoader.exists(path) else null
+		if tex != null and for_body:
+			var img := tex.get_image()
+			if img != null and not img.is_empty():
+				if img.is_compressed():
+					img.decompress()
+				img.generate_mipmaps()
+				tex = ImageTexture.create_from_image(img)
+		_detail_cache[key] = tex
+	return _detail_cache[key] as Texture2D
+
+## Where a mesh with bones has its vertices at rest, for the grain: the surface's own places
+## and then its normals, as a texture the shader reads by vertex index. {} for a mesh with no
+## bones (its vertices are where they were made already) or one that cannot be read. It is
+## made once for a mesh and kept on the mesh, so it goes when the mesh does.
+func _rest_of(mi: MeshInstance3D, surface: int) -> Dictionary:
+	if mi.skin == null or not (mi.mesh is ArrayMesh):
+		return {}
+	var key := "grain_rest_%d" % surface
+	if not mi.mesh.has_meta(key):
+		var rest := {}
+		var arrays := (mi.mesh as ArrayMesh).surface_get_arrays(surface)
+		if arrays.size() > Mesh.ARRAY_NORMAL and arrays[Mesh.ARRAY_VERTEX] is PackedVector3Array and arrays[Mesh.ARRAY_NORMAL] is PackedVector3Array:
+			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			var norms: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+			var count := verts.size()
+			var places := verts.to_byte_array()
+			# three floats a vertex (an engine built with doubles has six: then the grain is laid on the moved mesh)
+			if count > 0 and norms.size() == count and places.size() == count * 12:
+				var width := mini(count, 2048)
+				var rows := int(ceil(float(count) / float(width)))
+				places.resize(width * rows * 12)
+				var lies := norms.to_byte_array()
+				lies.resize(width * rows * 12)
+				places.append_array(lies)
+				var img := Image.create_from_data(width, rows * 2, false, Image.FORMAT_RGBF, places)
+				rest = { "tex": ImageTexture.create_from_image(img), "width": width, "rows": rows }
+		mi.mesh.set_meta(key, rest)
+	return mi.mesh.get_meta(key, {})
+
+## What each surface under a body is covered in (data/style.json, materials.grains), by its
+## material's name; a marking or a Path's colour takes the grain of the largest surface of the
+## same mesh (the fur under a stripe), or of the whole body where its mesh has no other.
+## "<mesh instance>|<surface>" -> Style.grain_for's answer.
+func _grains_of(meshes: Array, kind: String) -> Dictionary:
+	var out := {}
+	var beside: Array = []         # [key, mesh instance id, what it takes alone]
+	var most := {}                 # mesh instance id -> [vertices, grain] of its largest surface
+	var most_of_all := [0, {}]
+	for m in meshes:
+		var mi: MeshInstance3D = m
+		if mi.mesh == null:
+			continue
+		for i in mi.mesh.get_surface_count():
+			var mat := mi.get_active_material(i)
+			if mat == null or not (mat is StandardMaterial3D):
+				continue
+			var g: Dictionary = Style.grain_for(String(mat.resource_name), surface_of(String(mat.resource_name), (mat as StandardMaterial3D).albedo_color), kind)
+			var key := "%d|%d" % [mi.get_instance_id(), i]
+			if g.get("beside", false):
+				beside.append([key, mi.get_instance_id(), g])
+				continue
+			out[key] = g
+			if g.is_empty():
+				continue
+			var count := (mi.mesh as ArrayMesh).surface_get_array_len(i) if mi.mesh is ArrayMesh else 1
+			if count > int((most.get(mi.get_instance_id(), [0, {}]) as Array)[0]):
+				most[mi.get_instance_id()] = [count, g]
+			if count > int(most_of_all[0]):
+				most_of_all = [count, g]
+	for b in beside:
+		var near: Dictionary = (most.get(b[1], most_of_all) as Array)[1]
+		out[b[0]] = near if not near.is_empty() else (b[2] as Dictionary)
+	return out
+
+## From a mesh's own space to the world, as far as that is known when its look is given (up
+## through every parent it has by then), or to the space of `within`, the body it is part of;
+## for a mesh with bones, by where its first bone rests.
+func _made_xf(mi: MeshInstance3D, within: Node = null) -> Transform3D:
+	var xf := Transform3D.IDENTITY
+	var cur: Node = mi
+	var sk := mi.get_node_or_null(mi.skeleton) as Skeleton3D if _boned(mi) else null
+	if sk != null:
+		cur = sk
+		if mi.skin != null and mi.skin.get_bind_count() > 0:
+			var bone := mi.skin.get_bind_bone(0)
+			if bone < 0:
+				bone = sk.find_bone(String(mi.skin.get_bind_name(0)))
+			if bone >= 0:
+				xf = sk.get_bone_global_rest(bone) * mi.skin.get_bind_pose(0)
+	while cur != null and cur != within:
+		if cur is Node3D:
+			xf = (cur as Node3D).transform * xf
+		cur = cur.get_parent()
+	return xf
+
+## The turn that lays a grain along a piece's own length where that is not the body's (a bow
+## standing in the hand, a door's planks, a blade): for the grains that follow the piece they
+## are on (data/style.json, materials.grainFit.along: wood, brushed metal, horn's rings) and not
+## the body's nose to tail. `in_body` is from the mesh's own space to the body's.
+func _along(mi: MeshInstance3D, in_body: Transform3D) -> Basis:
+	var size := (in_body * mi.get_aabb()).size.abs()
+	if size.y > size.z * 1.3 and size.y >= size.x * 0.9:
+		return Basis(Vector3(1, 0, 0), Vector3(0, 0, 1), Vector3(0, -1, 0))      # what stands is laid down
+	if size.x > size.z * 1.3 and size.x > size.y:
+		return Basis(Vector3(0, 0, 1), Vector3(0, 1, 0), Vector3(-1, 0, 0))      # what lies across is turned
+	return Basis.IDENTITY
+
+## Whether a mesh is moved by bones.
+func _boned(mi: MeshInstance3D) -> bool:
+	return mi.mesh is ArrayMesh and mi.mesh.get_surface_count() > 0 and ((mi.mesh as ArrayMesh).surface_get_format(0) & Mesh.ARRAY_FORMAT_BONES) != 0 and mi.get_node_or_null(mi.skeleton) is Skeleton3D
+
+## How a body's grain is fitted to its size (data/style.json, materials.grainFit): a grain is
+## so many repeats to a metre, and a small body would show two scales and a great one a
+## thousand; so a body smaller than `size` across takes it finer and a larger one coarser, by
+## `power` (0 for the same grain on everything, 1 for the same count of scales on every body).
+func _grain_fit(xfs: Dictionary) -> float:
+	var fit: Dictionary = Style.data()["materials"].get("grainFit", {})
+	var box := AABB()
+	var first := true
+	for m in xfs:
+		var mi: MeshInstance3D = m
+		if not mi.visible:
+			continue
+		var b: AABB = (xfs[m] as Transform3D) * mi.get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	var across := maxf(box.size.x, maxf(box.size.y, box.size.z))
+	if first or across <= 0.001:
+		return 1.0
+	return clampf(pow(float(fit.get("size", 1.0)) / across, float(fit.get("power", 0.0))), float(fit.get("least", 1.0)), float(fit.get("most", 1.0)))
 
 ## The cel look, and the style's hold on every surface (docs/style.md): each StandardMaterial3D
 ## under the node becomes a banded toon material of its class. Its colour is brought onto the
 ## ramps its class allows (a painted texture too), a lit thing takes the lamp's or the moon's
 ## colour, and its emission is kept. Off when data/style.json shading.cel is false.
-func toonify(node: Node) -> void:
+## `place` is true for ground, walls and whatever stands still: its grain is laid in the
+## world's space, so neighbouring pieces match. Everything else is a BODY (a person, a beast,
+## a genius, a thing carried): its grain is by what its materials are named (materials.grains),
+## laid in the body's own space so it stays on the body; `kind` is a genius's base, for a body
+## whose materials' names are another animal's.
+func toonify(node: Node, place := false, kind := "") -> void:
 	if not Style.data()["shading"].get("cel", true) or node == null:
 		return
 	if _toon_shader == null:
 		_toon_shader = Shader.new()
 		_toon_shader.code = TOON
+		# -- --grain=world: every grain laid as a place's is (its class's, in the world's space),
+		# which is how a body's was laid before it had its own; --grain=none: no grain on a body.
+		# To look at the difference.
+		for a in OS.get_cmdline_user_args():
+			if a.begins_with("--grain="):
+				_grain_as = a.get_slice("=", 1)
+	if _grain_as == "world":
+		place = true
 	var meshes := node.find_children("*", "MeshInstance3D", true, false)
 	if node is MeshInstance3D:
 		meshes.append(node)
+	var grains := {}
+	var xfs := {}
+	var fit := 1.0
+	var along: Array = Style.data()["materials"].get("grainFit", {}).get("along", [])
+	var show := float(Style.data()["materials"].get("grainFit", {}).get("show", 1.0))      # every body's grain, stronger or weaker at once
+	if not place:
+		grains = _grains_of(meshes, kind)
+		for m in meshes:
+			if (m as MeshInstance3D).mesh != null:
+				xfs[m] = _made_xf(m)
+		fit = _grain_fit(xfs)
 	for m in meshes:
 		var mi: MeshInstance3D = m
 		if mi.mesh == null:
 			continue
+		# how its grain is laid: turned from the mesh's own space to the body's (a mesh made lying
+		# on its back still has its fur run nose to tail), at the body's size (how many of the
+		# world's metres one unit of the mesh is: a model made in centimetres), and with down
+		# the picture toward the tail and the ground
+		var lay := GRAIN_DOWN
+		var lay_along := GRAIN_DOWN      # and for a grain that follows the piece it is on
+		if xfs.has(m) and absf((xfs[m] as Transform3D).basis.determinant()) > 1e-12:
+			var unit := pow(absf((xfs[m] as Transform3D).basis.determinant()), 1.0 / 3.0)
+			var in_body := _made_xf(mi, node)
+			var turn := in_body.basis.orthonormalized() * unit
+			lay = GRAIN_DOWN * turn
+			lay_along = GRAIN_DOWN * _along(mi, in_body) * turn
 		for i in mi.mesh.get_surface_count():
 			var mat := mi.get_active_material(i)
 			if mat == null or not (mat is StandardMaterial3D):
@@ -1052,7 +1288,16 @@ func toonify(node: Node) -> void:
 					t.set_shader_parameter("ramp_lut", Style.ramp_lut())
 			else:
 				t.set_shader_parameter("albedo", Style.conform(sm.albedo_color, cls))
-			_surface_look(t, cls, mi)
+			var body = null
+			if not place:
+				body = (grains.get("%d|%d" % [mi.get_instance_id(), i], {}) as Dictionary).duplicate()
+				if _grain_as == "none":
+					body = {}
+				if body.has("scale"):
+					body["scale"] = float(body["scale"]) * fit
+					body["strength"] = float(body.get("strength", 0.0)) * show
+					body["lay"] = lay_along if along.has(String(body.get("grain", ""))) else lay
+			_surface_look(t, cls, mi, body, i)
 			if sm.emission_enabled:
 				var glow := sm.emission
 				var energy := sm.emission_energy_multiplier
@@ -2829,7 +3074,7 @@ func _kit_piece(name: String, pos: Vector3, rot_deg := 0.0, scale := Vector3.ONE
 	n.rotation_degrees.y = rot_deg
 	n.scale = scale
 	_place_root.add_child(n)
-	toonify(n)
+	toonify(n, true)
 	if name.begins_with("floor_"):
 		# a floor takes shadows and casts none
 		for m in n.find_children("*", "MeshInstance3D", true, false):
@@ -3197,7 +3442,7 @@ func _wild_piece(name: String, pos: Vector3, rot_deg := 0.0, scale := 1.0) -> No
 		n.rotation_degrees.y = rot_deg
 		n.scale = Vector3.ONE * scale
 		_place_root.add_child(n)
-		toonify(n)
+		toonify(n, true)
 		return n
 	var sub := "rubble_half"
 	var sub_scale := scale
@@ -4011,7 +4256,10 @@ func make_form(info: Dictionary, color: Color) -> Node3D:
 	# An art body takes the cel bands like everything else that lives (the placeholders keep
 	# their shadow shader: toonify only turns standard materials).
 	if gb.uses_art:
-		toonify(gb)
+		# (its base says what it is covered in where its materials' names do not: a Drake wears
+		# the Wolf's names and is scaled; data/style.json, materials.grains)
+		var of_form := gb.own_body if gb.own_body != "" else String(info.get("form", ""))
+		toonify(gb, false, String(Data.form(of_form).get("base", "")).get_slice("+", 0))
 	for m in gb.find_children("*", "MeshInstance3D", true, false):
 		var mi := m as MeshInstance3D
 		if mi.material_overlay:

@@ -521,6 +521,28 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   the **Carp**. The readings taken (which companions, what "50% graphics precision" means)
   and the calls they leave are in `docs/genius-lines.md`, "The second pass", and
   `docs/decisions-needed.md`.
+- **The Angel, the Demon and the Elemental** (owner, 2026-11-11): "Add three more one
+  angel line, one demon line, and one line specifically for elementals with a humanoid
+  form like tiny demigods." Three more companions, each a whole line of small people (a
+  forearm tall; adult and heroic in proportion, not chibi). The **Angel** is conscience:
+  the soul of one who answers to something larger than themselves. The **Demon** is
+  refusal: the soul of one who will not be told; it is not evil, and it is neither the
+  Fiend (a flame) nor the Imp (a clerk). The **Elemental** is the soul of one who is more
+  a place or a weather than a person: tiny demigods of Earth, Sea and Sky. None of the
+  three takes a real religion's names or symbols: they belong to this world, where magic
+  is the will of living things, and an angel's halo is the field's light. That makes
+  nineteen companions and twenty-eight lines. Their classes, roles and Paths are calls
+  recorded in `docs/decisions-needed.md`.
+- **Playable by morning** (owner, 2026-11-11, at night): "The weapons tutorial is broken...
+  get everything into a playable AAA studio standard for me to play tomorrow morning. I give
+  you creative license to improve the game and the methods you are employing to achieve the
+  best result. I want you to really be able to immerse myself in the full game. Also the
+  faces of the character creator need a little more work and variety. I want people to have
+  beautiful characters and the design of the clothing should be more distinct. I want the
+  games graphics to be improved dramatically and upgraded resolution." So, ahead of more
+  genius lines: nothing in the game may be a dead end for any character; faces are to be
+  beautiful and chosen, not one a home; each home's dress is to be told by its outline and
+  its colours; and the picture itself (light, ground, depth, sharpness) is to be raised.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.

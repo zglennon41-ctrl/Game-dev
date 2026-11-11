@@ -1071,6 +1071,7 @@
         }
       }
     },
+    "moth": { "role": "lookout", "paths": { "moth-candle": { "shade": "hunter", "text": "It goes where the fire is: heavier into every opening." }, "moth-emperor": { "shade": "bulwark", "text": "It opens its eyes at the foe: the foe looks at it, and not at you." }, "moth-moon": { "shade": "lookout", "text": "It keeps its one far light in view: the moment to parry is longer still." } } },
     "fog": {
       "role": "harrier",
       "paths": {
