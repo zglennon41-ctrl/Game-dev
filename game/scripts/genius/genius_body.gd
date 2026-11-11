@@ -104,6 +104,10 @@ var _t := 0.0
 ## What moves of a body that has no clips for it (docs/genius-lines.md, "What moves"): a piece
 ## of the model named for how it moves, <kind>_<what>[_l|_r][_<n>], about its own origin.
 const MOVES := ["beat", "glide", "sway", "wave", "wag", "spin", "flick", "pulse", "bob", "turn", "blink"]
+## A form's own model carries no clips but, if it has one, this: how it holds itself when it has
+## stood a while (it sits, it lies down with its head up, it lifts a forepaw). It gets up to walk
+## by its base body's clips like any other. docs/genius-lines.md, "How it rests".
+const REST := "rest"
 var _movers: Array = []            # [node, kind, its rest, phase, side, place in its chain, the way the body faces in its frame]
 var worn_piece: Node3D = null      # what is shown of it when it is worn, in place of the rest (a piece named worn)
 var is_worn := false
@@ -159,7 +163,7 @@ func _assemble(instar: int) -> void:
 			worn_piece.visible = false
 		_art_sockets(_model)
 		anim = _model.find_child("AnimationPlayer", true, false)
-		if anim == null and own_body != "" and ResourceLoader.exists(BODY_DIR % sil):
+		if (anim == null or anim.has_animation(REST)) and own_body != "" and ResourceLoader.exists(BODY_DIR % sil):
 			_borrow_clips(BODY_DIR % sil)
 		if anim:
 			anim_names = _clips(cfg["kinds"].get(kind, {}).get("anim", {}))
@@ -265,6 +269,12 @@ func _assemble(instar: int) -> void:
 				anim.get_animation(anim_names[k]).loop_mode = Animation.LOOP_LINEAR
 		anim.play(anim_names["idle"])
 		anim.speed_scale = World.breath(anim, anim_names["idle"])      # the living breathe on one period
+		if anim.has_animation(REST):
+			# one with a way of resting is first seen in it: it has been standing a while
+			anim.get_animation(REST).loop_mode = Animation.LOOP_LINEAR
+			_stood = rest_after()
+			anim.play(REST)
+			anim.speed_scale = 1.0
 
 ## A body of a form's own carries no clips of its own: it moves by its base body's, fitted
 ## to its own proportions. Each bone keeps where the form's rest puts it and how it lies there,
@@ -277,6 +287,7 @@ func _borrow_clips(donor_path: String) -> void:
 	if sks.is_empty():
 		return
 	var sk: Skeleton3D = sks[0]
+	var own: AnimationPlayer = _model.find_child("AnimationPlayer", true, false)      # its own clip, if it has one (REST)
 	var lib: AnimationLibrary = _borrowed.get(own_body)
 	if lib == null:
 		var donor: Node = load(donor_path).instantiate()
@@ -306,7 +317,14 @@ func _borrow_clips(donor_path: String) -> void:
 						a.track_set_key_value(t, k, fix * (a.track_get_key_value(t, k) as Quaternion))
 			lib.add_animation(clip, a)
 		donor.free()
+		if own:      # what is its own is made on its own bones, and is taken as it is
+			for clip in own.get_animation_list():
+				if not lib.has_animation(clip):
+					lib.add_animation(clip, own.get_animation(clip).duplicate(true))
 		_borrowed[own_body] = lib
+	if own:
+		own.get_parent().remove_child(own)
+		own.free()
 	var player := AnimationPlayer.new()
 	player.name = "AnimationPlayer"
 	_model.add_child(player)
@@ -575,6 +593,11 @@ func walks() -> bool:
 
 var _gait := 0.0
 var _gait_speed := 0.0
+var _stood := 0.0      # how long it has stood still, in seconds
+
+## How long one with a way of resting stands before it takes it (data/style.json, motion.rest.after).
+static func rest_after() -> float:
+	return Style.motion("rest", "after", 2.5)
 
 ## Play idle, walk or run by how fast it is moving. An art body with no rig gets a gait of
 ## its own: a bob and a lean that read as walking.
@@ -583,8 +606,12 @@ func move_at(speed: float) -> void:
 	if not anim:
 		return
 	var want: String = anim_names.get("run" if speed > 4.0 else ("walk" if speed > 0.4 else "idle"), "")
+	# one with a way of resting takes it when it has stood a while, and gets up to walk
+	var was_resting := anim.current_animation == REST
+	if speed <= 0.4 and anim.has_animation(REST) and (_stood >= rest_after() or was_resting):
+		want = REST
 	if want != "" and anim.has_animation(want) and anim.current_animation != want:
-		anim.play(want, 0.2)
+		anim.play(want, Style.motion("rest", "settle", 0.7) if want == REST else (Style.motion("rest", "rise", 0.35) if was_resting else 0.2))
 		anim.speed_scale = World.breath(anim, want)      # its idle on the common breath; a gait at its own pace
 
 ## The proportions of its age, on a rigged body: each bone named is scaled, and the body set
@@ -669,6 +696,7 @@ func set_rim(k: float) -> void:
 
 func _process(dt: float) -> void:
 	_t += dt
+	_stood = _stood + dt if _gait_speed <= 0.4 else 0.0
 	for w in _wings:
 		var side: float = w.get_meta("wing")
 		var beat := side * (0.35 + 0.45 * sin(_t * 14.0))

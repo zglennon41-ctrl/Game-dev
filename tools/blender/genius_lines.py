@@ -368,15 +368,17 @@ def _has(r, slot, *styles):
     return any(st.partition(":")[0] in styles for st, _ in each(getattr(r, "_spec", {}).get(slot)))
 
 
-def _later(r, kind, what, items, pivot, bone, side="", n=None, solid=None, under=None):
+def _later(r, kind, what, items, pivot, bone, side="", n=None, solid=None, under=None, hang=False):
     """A piece that moves by its name (docs/genius-lines.md, "What moves"): it is made as the
     body is, and put on its bone once the body has been brought to size. items are
     [(geometry, material), ...]; or solid is (geometry, [the material of each face]), for a
     thing of one closed skin and several materials (an eye). under: the name of a piece made
-    before it that it rides (a lamp's light breathes inside the lamp that sways)."""
+    before it that it rides (a lamp's light breathes inside the lamp that sways). hang: it hangs
+    from its pivot, and is given a bone of its own there (Hang.<n>, which no clip moves), so
+    that a body that sits or lies down can keep it plumb."""
     if not hasattr(r, "_late"):
         return
-    r._late.append({"kind": kind, "what": what, "items": items, "pivot": Vector(pivot), "bone": bone, "side": side, "n": n, "solid": solid, "under": under})
+    r._late.append({"kind": kind, "what": what, "items": items, "pivot": Vector(pivot), "bone": bone, "side": side, "n": n, "solid": solid, "under": under, "hang": hang})
 
 
 def _solid(name, geo, mats, smooth=True):
@@ -925,7 +927,7 @@ def grow_armor(r, A, style, size):
         weight = g.lathe([(0.02, 0.1), (0.1, 0.02), (0.13, -0.1), (0.05, -0.16)], n=8 if _own(r) else 6, centre=p + Vector((0, 0, -0.14 * size)))
         if _own(r):                  # what hangs of it swings, and rings on the low note
             _add(r, "chain", geo, "Neck2", mat("metal_iron"))
-            _later(r, "sway", "chain", [(hang, mat("metal_iron")), (weight, _trim(r, "metal_iron_light"))], p0, "Neck2")
+            _later(r, "sway", "chain", [(hang, mat("metal_iron")), (weight, _trim(r, "metal_iron_light"))], p0, "Neck2", hang=True)
         else:
             _add(r, "chain", g.merge(geo, hang), "Neck2", mat("metal_iron"))
             _add(r, "chain_weight", weight, "Neck2", mat("metal_iron_light"))
@@ -969,14 +971,14 @@ def _hang_lamp(r, name, at, s, bone, strength=3.4, glow_name="lamp"):
         a = math.pi / 4 + k * math.pi / 2
         p = c + Vector((math.cos(a) * s * 0.5, math.sin(a) * s * 0.5, 0))
         items.append((g.tube([p + Vector((0, 0, -s * 0.62)), p + Vector((0, 0, s * 0.55))], s * 0.05, n=4), iron))
-    _later(r, "sway", name, items, at, bone)
+    _later(r, "sway", name, items, at, bone, hang=True)
     _later(r, "pulse", name + "_light", [(g.ico(c, s * 0.36, sub=2, scale=(1, 1, 1.25)), field(glow_name, strength))], c, bone, under="sway_" + name)
 
 
 def _hung(r, name, items, pivot, bone):
     """Things that hang from the body: on the Wolf's own they sway about where they hang from."""
     if _own(r):
-        _later(r, "sway", name, items, pivot, bone)
+        _later(r, "sway", name, items, pivot, bone, hang=True)
     else:
         _add_items(r, name, items, bone)
 
@@ -1003,7 +1005,7 @@ def grow_carry(r, A, style, size):
             geo = g.merge(geo, g.tube([c + Vector((sx * 0.17 * s, 0.02, 0.26 * s)), Vector((sx * (rx + 0.02), y - 0.04, zc - rz * 0.4))], 0.03, n=5))
         if _own(r):                  # the straps swing with the book
             items.append((geo, mat("leather")))
-            _later(r, "sway", "book", items, Vector((0, y - 0.04, zc - rz * 0.4)), "Torso3")
+            _later(r, "sway", "book", items, Vector((0, y - 0.04, zc - rz * 0.4)), "Torso3", hang=True)
         else:
             for i, (ig, im) in enumerate(items):
                 _add(r, ("book", "book_pages", "book_clasp", "book_seal")[i], ig, "Torso3", im)
@@ -1029,7 +1031,7 @@ def grow_carry(r, A, style, size):
         if _own(r):                  # each hangs from the cord, and they swing together
             m1 = mat("bone") if style == "tags" else _am("dark")
             m2 = _am("") if style == "tags" else _am("light")
-            _later(r, "sway", style, [(geo, m1), (geo2, m2)], Vector((0, y, zc - rz * 0.3)), "Neck1")
+            _later(r, "sway", style, [(geo, m1), (geo2, m2)], Vector((0, y, zc - rz * 0.3)), "Neck1", hang=True)
         else:
             _add(r, style, geo, "Neck1", mat("bone") if style == "tags" else mat("cord"))
             _add(r, style + "_b", geo2, "Neck1", mat("metal_brass") if style == "tags" else mat("fur_pale"))
@@ -1624,6 +1626,18 @@ def wolf_form(form_id, level, spec, species=None, coat=("fur_dark", "fur_light")
     sockets["ref_top"] = kit.free_socket("ref_top", (0, 0, STAND))
     # what moves by its name rides its bone, and goes out with the body (export takes whatever
     # is in sockets)
+    hangs = [piece for piece in r._late if piece.get("hang")]
+    if hangs:
+        def hooks(ebs):
+            for i, piece in enumerate(hangs):
+                eb = ebs.new("Hang.%d" % i)
+                eb.head = r.MAinv @ (piece["pivot"] * k)
+                eb.tail = r.MAinv @ (piece["pivot"] * k + Vector((0, 0.03, 0)))
+                eb.parent = ebs[piece["bone"]]
+                eb.use_connect = False
+                piece["bone"] = eb.name
+        r._edit(hooks)
+        bpy.context.view_layer.update()
     made = {}
     for i, piece in enumerate(r._late):
         ob = _on_bone(r, piece, k, made)
@@ -1768,6 +1782,373 @@ def build_baby():
     export_objects([ob], {}, os.path.join(OUT, "baby.glb"), ref=STAND)
 
 
+# --- how it rests (docs/genius-lines.md, "How it rests") ---------------------------------------
+#
+# A form's `rest` is what it does when it has stood a while: it sits, it lies down with its head
+# up, it lifts a forepaw. That cannot be the pose its model stands in (the clips it borrows move
+# it from there, and a wolf that walked from a sit would shuffle on its haunches), so it is one
+# clip of the model's own, named rest, worked out here on its own bones: its legs are as long as
+# this form's are, and its feet come to the ground. The game plays it for idle once the body has
+# stood still a few seconds, and goes back to the borrowed clips when it moves.
+
+PAWS = (("fl", "FrontLowerLeg.L", "IKFrontLeg.L"), ("fr", "FrontLowerLeg.R", "IKFrontLeg.R"),
+        ("bl", "BackLowerLeg.L", "IKBackLeg.L"), ("br", "BackLowerLeg.R", "IKBackLeg.R"))
+
+
+def _paw_bones(r):
+    """A joint for each paw. The rig's feet are one piece with the leg above them (its foot bones
+    are the wolf's own, and fit only the wolf), so a leg laid along the ground would stand its
+    paw on end; a paw bone lets the paw lie flat. No clip moves it, so it walks as it did."""
+    at = {tag: r.bone(ik) for tag, _, ik in PAWS}
+
+    def add(ebs):
+        for tag, lower, _ in PAWS:
+            eb = ebs.new("Paw." + tag)
+            eb.head = r.MAinv @ at[tag]
+            eb.tail = r.MAinv @ (at[tag] + Vector((0, -0.05, 0)))
+            eb.parent = ebs[lower]
+            eb.use_connect = False
+    r._edit(add)
+    me = r.mesh.data
+    for tag, lower, _ in PAWS:
+        low, paw = r.mesh.vertex_groups[lower], r.mesh.vertex_groups.new(name="Paw." + tag)
+        z0, z1 = at[tag].z * 0.85, at[tag].z * 1.5          # below z0 it is all paw; above z1, all leg
+        for v in me.vertices:
+            w = next((gp.weight for gp in v.groups if gp.group == low.index), 0.0)
+            if w <= 0.0:
+                continue
+            t = max(0.0, min(1.0, (z1 - (r.M @ v.co).z) / (z1 - z0)))
+            t = t * t * (3 - 2 * t)
+            if t > 0.0:
+                paw.add([v.index], w * t, "REPLACE")
+                if t < 1.0:
+                    low.add([v.index], w * (1.0 - t), "REPLACE")
+                else:
+                    low.remove([v.index])
+
+
+def _yz(v):
+    return math.hypot(v.y, v.z)
+
+
+def _wrap(a):
+    return (a + math.pi) % (2 * math.pi) - math.pi
+
+
+class Poser:
+    """A way of holding itself, worked out bone by bone: D[bone] is the rigid move that carries
+    the bone, and all it carries, from where it rests. A turn or a shift of a bone takes
+    everything under it along. Turns are about the axis it walks along (X) unless said."""
+
+    def __init__(self, r):
+        self.r = r
+        self.names = [b.name for b in r.arm.data.bones]
+        self.D = {n: Matrix.Identity(4) for n in self.names}
+        self.rest = {n: r.bone(n) for n in self.names}
+
+    def copy(self):
+        other = Poser.__new__(Poser)
+        other.r, other.names, other.rest = self.r, self.names, self.rest
+        other.D = {n: m.copy() for n, m in self.D.items()}
+        return other
+
+    def at(self, bone):
+        """Where a bone's joint now is."""
+        return self.D[bone] @ self.rest[bone]
+
+    def move(self, bone, T):
+        for b in self.r.family(bone):
+            self.D[b] = T @ self.D[b]
+
+    def everything(self, T):
+        for b in self.names:
+            self.D[b] = T @ self.D[b]
+
+    def turn(self, bone, angle, axis=X, pivot=None):
+        p = self.at(bone) if pivot is None else V(pivot)
+        self.move(bone, Matrix.Translation(p) @ Matrix.Rotation(angle, 4, axis) @ Matrix.Translation(-p))
+
+    def angle(self, bone):
+        """How far a bone has been turned about X (of one turned about nothing else)."""
+        R = self.D[bone].to_3x3()
+        return math.atan2(R[2][1], R[1][1])
+
+    def aim(self, bone, tip, target):
+        """Turn a bone about its joint, in the plane it walks in, to bring a point it carries
+        (tip: where that point now is) into line with target."""
+        o = self.at(bone)
+        self.turn(bone, _wrap(math.atan2(target.z - o.z, target.y - o.y) - math.atan2(tip.z - o.z, tip.y - o.y)))
+
+    def reach(self, a, b, end, target):
+        """Two bones bent to put the end of the second (end: the bone that begins there) at
+        target, keeping the way the joint between them bends at rest."""
+        o, j, e = self.at(a), self.at(b), self.at(end)
+        la, lb = _yz(j - o), _yz(e - j)
+        d = max(abs(la - lb) + 1e-4, min(la + lb - 1e-4, _yz(target - o)))
+        alpha = math.acos(max(-1.0, min(1.0, (la * la + d * d - lb * lb) / (2 * la * d))))
+        base = math.atan2(target.z - o.z, target.y - o.y)
+        bend = (j - o).y * (e - o).z - (j - o).z * (e - o).y
+        want = base - alpha if bend > 0 else base + alpha
+        self.turn(a, _wrap(want - math.atan2(j.z - o.z, j.y - o.y)))
+        j, e = self.at(b), self.at(end)
+        self.turn(b, _wrap(math.atan2(target.z - j.z, target.y - j.y) - math.atan2(e.z - j.z, e.y - j.y)))
+
+    def flat(self, paw):
+        """A paw laid as it stands at rest, whatever its leg has done."""
+        self.turn(paw, -self.angle(paw))
+
+    def lowest(self, bones):
+        """How low the part of the body these bones carry now comes."""
+        names, vgs = set(bones), self.r.mesh.vertex_groups
+        of = {vgs[b].index: b for b in self.names if b in vgs}
+        low = 1e9
+        for v in self.r.mesh.data.vertices:
+            ws = [(of[gp.group], gp.weight) for gp in v.groups if gp.group in of and gp.weight > 0.0]
+            tot = sum(w for _, w in ws)
+            if tot <= 0.0 or sum(w for b, w in ws if b in names) < 0.5 * tot:
+                continue
+            p = self.r.M @ v.co
+            low = min(low, sum(((self.D[b] @ p) * w for b, w in ws), Vector()).z / tot)
+        return low
+
+    def head_clear(self, z):
+        """Its neck lifted until its head is off the ground."""
+        head = self.r.family("Neck3")
+        for _ in range(16):
+            if self.lowest(head) >= z:
+                break
+            self.turn("Neck1", -0.06)
+
+    def plumb(self):
+        """What hangs from it hangs straight down, however it holds itself."""
+        for b in self.names:
+            if b.startswith("Hang."):
+                self.flat(b)
+
+    def level(self, turned, share=1.0):
+        """The neck takes back a turn of the body, so the head is carried as it was."""
+        for bone, part in (("Neck1", 0.4), ("Neck2", 0.3), ("Neck3", 0.15), ("Head", 0.15)):
+            self.turn(bone, -turned * share * part)
+
+    def tail_down(self, z=0.1, wrap=0.3):
+        """The tail laid along the ground behind it, and curled round toward its feet."""
+        root, tip = self.at("Tail1"), self.at("Tail8")
+        L = (tip - root).length
+        want = -math.asin(max(-1.0, min(1.0, (root.z - z) / max(L, 1e-6))))
+        self.turn("Tail1", _wrap(want - math.atan2(tip.z - root.z, tip.y - root.y)))
+        for i in range(2, 8):
+            self.turn("Tail%d" % i, wrap, axis=Z)
+
+
+def _lay_foreleg(P, s, z_paw):
+    """A foreleg laid down: its elbow under and behind the shoulder, the forearm along the ground
+    in front of it, the paw flat."""
+    up, low, paw = "FrontUpperLeg." + s, "FrontLowerLeg." + s, "Paw.f" + s.lower()
+    S, E, W = P.at(up), P.at(low), P.at(paw)
+    se, ew = _yz(E - S), _yz(W - E)
+    drop = min(se * 0.97, max(0.0, S.z - z_paw * 0.9))
+    P.aim(up, E, S + Vector((0, math.sqrt(max(0.0, se * se - drop * drop)), -drop)))
+    E = P.at(low)
+    dz = max(-ew * 0.5, min(ew * 0.5, z_paw - E.z))
+    P.aim(low, P.at(paw), E + Vector((0, -math.sqrt(ew * ew - dz * dz), dz)))
+    P.flat(paw)
+
+
+def _fold_hindleg(P, s, z_paw, thigh=0.6):
+    """A hind leg folded under it: the thigh forward (thigh: how far below level, in radians),
+    the hock back on the ground, the foot forward along the ground, the paw flat."""
+    hip, shin, foot, paw = "BackLeg." + s, "BackUpperLeg." + s, "BackLowerLeg." + s, "Paw.b" + s.lower()
+    H, K, T, F = P.at(hip), P.at(shin), P.at(foot), P.at(paw)
+    hk, kt, tf = _yz(K - H), _yz(T - K), _yz(F - T)
+    zt = z_paw * 1.35                                       # the hock, lying on the ground
+    a = max(-1.2, min(thigh, math.asin(max(-1.0, min(1.0, (H.z - zt * 1.1) / hk)))))   # (a thigh may not go through the floor)
+    Kn = H + Vector((0, -hk * math.cos(a), -hk * math.sin(a)))
+    P.aim(hip, K, Kn)
+    dz = max(-kt * 0.95, min(kt * 0.95, Kn.z - zt))
+    Tn = Kn + Vector((0, math.sqrt(kt * kt - dz * dz), -dz))
+    P.aim(shin, P.at(foot), Tn)
+    dz = min(tf * 0.5, zt - z_paw)
+    P.aim(foot, P.at(paw), Tn + Vector((0, -math.sqrt(tf * tf - dz * dz), -dz)))
+    P.flat(paw)
+
+
+def _stand_leg(P, tag, target):
+    """A leg bent or straightened to stand its paw at target."""
+    s = "L" if tag[1] == "l" else "R"
+    if tag[0] == "f":
+        P.reach("FrontUpperLeg." + s, "FrontLowerLeg." + s, "Paw." + tag, target)
+    else:
+        P.reach("BackUpperLeg." + s, "BackLowerLeg." + s, "Paw." + tag, target)
+    P.flat("Paw." + tag)
+
+
+def _lift_forepaw(P, s="R", k=1.0):
+    """One forepaw lifted and held, as a hound holds it on a scent."""
+    P.turn("FrontUpperLeg." + s, -0.55 * k)
+    P.turn("FrontLowerLeg." + s, 1.25 * k)
+    P.turn("Paw.f" + s.lower(), 0.6 * k)
+
+
+def rest_pose(r, style, size):
+    """The pose of a way of resting, as a Poser (None: it has none)."""
+    P = Poser(r)
+    paw0 = {tag: P.at("Paw." + tag) for tag, _, _ in PAWS}
+    z_paw = paw0["fl"].z
+    hips = (P.at("BackLeg.L") + P.at("BackLeg.R")) / 2
+    shoulders = (P.at("FrontUpperLeg.L") + P.at("FrontUpperLeg.R")) / 2
+    if style == "sit":               # on its haunches, its forelegs straight under it, its head as it carries it
+        H, K, T, F = P.at("BackLeg.L"), P.at("BackUpperLeg.L"), P.at("BackLowerLeg.L"), paw0["bl"]
+        hk, kt, tf = _yz(K - H), _yz(T - K), _yz(F - T)
+        zt = z_paw * 1.35
+        Tn_y = F.y + math.sqrt(max(0.0, tf * tf - (zt - z_paw) ** 2))            # its hock, behind where its paw stands
+        b, c = math.radians(20), math.radians(22)
+        Kn = Vector((0, Tn_y - kt * math.cos(b), zt + kt * math.sin(b)))
+        Hn = Vector((0, Kn.y + hk * math.cos(c), Kn.z - hk * math.sin(c)))
+        P.everything(Matrix.Translation(Vector((0, Hn.y - hips.y, Hn.z - hips.z))))
+        # its back rises to where its shoulders stand as high as they did
+        L = _yz(shoulders - hips)
+        was = math.atan2(shoulders.z - hips.z, shoulders.y - hips.y)
+        now = math.pi - math.asin(max(-1.0, min(1.0, (shoulders.z * (0.96 + 0.04 * size) - Hn.z) / L)))
+        turned = _wrap(now - was)
+        P.turn("Body", turned, pivot=Vector((0, Hn.y, Hn.z)))
+        for s in ("L", "R"):
+            _fold_hindleg(P, s, z_paw, thigh=-c)
+            P.turn("FrontUpperLeg." + s, -P.angle("FrontUpperLeg." + s))        # its forelegs as they stand
+        P.level(turned)
+        P.tail_down(z=z_paw * 0.8, wrap=0.32)
+        # it sits where it stood: between where its feet were
+        fore = (P.at("Paw.fl").y - paw0["fl"].y)
+        P.everything(Matrix.Translation(Vector((0, -fore * 0.5, 0))))
+    elif style == "lie":             # lying, its chest on the ground and its head up, its forelegs out in front of it
+        wt = r._weights(["Torso2", "Torso3"])
+        low = min((r.M @ v.co).z for v, w in zip(r.mesh.data.vertices, wt) if w > 0.6)
+        P.everything(Matrix.Translation(Vector((0, 0, -(low - z_paw * 0.5)))))
+        sh = (P.at("FrontUpperLeg.L") + P.at("FrontUpperLeg.R")) / 2
+        tilt = 0.14 * size                                                       # its rump a little the lower
+        P.turn("Body", -tilt, pivot=sh)
+        for s in ("L", "R"):
+            _lay_foreleg(P, s, z_paw)
+            _fold_hindleg(P, s, z_paw, thigh=0.75)
+        P.level(-tilt)
+        P.turn("Neck1", -0.22)                                                   # and its head held up: it is awake
+        P.turn("Neck2", -0.1)
+        P.head_clear(z_paw * 1.5)
+        P.tail_down(z=z_paw * 0.8, wrap=0.3)
+    elif style == "crouch":          # its chest down on its forelegs and its rump up: it is about to be somewhere else
+        turned = 0.4 * size
+        P.turn("Body", turned, pivot=hips)
+        for s in ("L", "R"):
+            P.turn("BackLeg." + s, -P.angle("BackLeg." + s))                    # its hind legs stand where they stood
+        for tag in ("fl", "fr"):                                                 # and its forelegs bend, set out in front of it
+            _stand_leg(P, tag, paw0[tag] + Vector((0, -0.2 * shoulders.z, 0)))
+        P.level(turned, 1.15)                                                    # and it looks up at you from there
+        P.head_clear(z_paw * 1.2)
+        P.turn("Tail1", 0.5)
+    elif style in ("stride", "stalk"):
+        # stride: caught between two steps, every foot on the ground, the near fore reaching.
+        # stalk: the same sunk low on bent legs, and one forepaw held off the ground.
+        sink = (0.05 if style == "stride" else 0.2) * shoulders.z
+        reach = (0.26 if style == "stride" else 0.16) * shoulders.z * size
+        P.everything(Matrix.Translation(Vector((0, 0, -sink))))
+        for tag, dy in (("fr", -1.0), ("fl", 0.8), ("br", 0.9), ("bl", -0.6)):
+            if style == "stalk" and tag == "fr":
+                continue
+            if tag[0] == "b":       # a hind leg swings from the hip as well
+                P.turn("BackLeg." + ("L" if tag[1] == "l" else "R"), -0.18 * dy * size)
+            _stand_leg(P, tag, paw0[tag] + Vector((0, reach * dy, 0)))
+        if style == "stalk":
+            _stand_leg(P, "fr", paw0["fr"] + Vector((0, -reach * 0.6, 0)))
+            _lift_forepaw(P, "R", 0.8)
+    elif style == "point":           # standing on three legs with one forepaw lifted: it has the scent
+        _lift_forepaw(P, "R", size)
+        P.turn("Tail1", 0.12)
+    else:
+        return None
+    P.plumb()
+    return P
+
+
+def _keyed(r, poses, seconds):
+    """One clip of the model's own, named rest: the poses in turn, `seconds` apart (the last is
+    the first again, so that it goes round). Only bones that are moved are keyed."""
+    arm = r.arm
+    for a in list(bpy.data.actions):
+        bpy.data.actions.remove(a)
+    arm.data.pose_position = "POSE"
+    for pb in arm.pose.bones:
+        pb.rotation_mode = "QUATERNION"
+        pb.matrix_basis = Matrix.Identity(4)
+    scene = bpy.context.scene
+    scene.render.fps, scene.render.fps_base = 1, 1.0
+    arm.animation_data_create()
+    act = bpy.data.actions.new("rest")
+    arm.animation_data.action = act
+    bones = arm.data.bones
+    A, Ainv = r.MA, r.MAinv
+    basis = []
+    for P in poses:
+        out = {}
+        for b in bones:
+            Rb = b.matrix_local
+            Pb = Ainv @ P.D[b.name] @ A @ Rb
+            if b.parent:
+                Rp = b.parent.matrix_local
+                Pp = Ainv @ P.D[b.parent.name] @ A @ Rp
+                out[b.name] = Rb.inverted() @ Rp @ Pp.inverted() @ Pb
+            else:
+                out[b.name] = Rb.inverted() @ Pb
+        basis.append(out)
+    ident = Matrix.Identity(4)
+    moved = [b.name for b in bones if any(sum(abs(m[b.name][i][j] - ident[i][j]) for i in range(4) for j in range(4)) > 1e-5 for m in basis)]
+    for k, out in enumerate(basis):
+        frame = k * seconds
+        for name in moved:
+            pb = arm.pose.bones[name]
+            pb.matrix_basis = out[name]
+            pb.keyframe_insert("rotation_quaternion", frame=frame)
+            if out[name].translation.length > 1e-7 or any(m[name].translation.length > 1e-7 for m in basis):
+                pb.keyframe_insert("location", frame=frame)
+    scene.frame_start, scene.frame_end = 0, (len(poses) - 1) * seconds
+    scene.frame_set(0)
+    for pb in arm.pose.bones:       # the model itself is exported standing at rest; the clip holds the pose
+        pb.matrix_basis = Matrix.Identity(4)
+    log("rest: %d bones keyed" % len(moved))
+
+
+def rest(r, spec):
+    """Give the body its way of resting, if its `rest` names one: the paw joints it needs, and
+    the clip. Returns whether it has one."""
+    style, size = opt(spec.get("rest"))
+    if not style:
+        return False
+    _paw_bones(r)
+    P = rest_pose(r, style, size)
+    if P is None:
+        log("NO SUCH REST:", style)
+        return False
+    Q = P.copy()                     # and it breathes: its head a little up and back again
+    Q.turn("Neck1", -0.025)
+    Q.turn("Head", 0.012)
+    Q.turn("Tail5", 0.03, axis=Z)
+    _keyed(r, [P, Q, P], 2)
+    return True
+
+
+def export_resting(r, sockets, path):
+    """As export, with the one clip of its own."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in [r.arm, r.mesh] + list(sockets.values()):
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = r.arm
+    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_yup=True, export_apply=False,
+                              export_animations=True, export_animation_mode="ACTIONS", export_skins=True, export_texcoords=False,
+                              export_optimize_animation_size=True, export_optimize_animation_keep_anim_armature=False,
+                              export_rest_position_armature=True, export_anim_slide_to_zero=True)
+    tris = sum(len(p.vertices) - 2 for p in r.mesh.data.polygons)
+    log("wrote", os.path.relpath(path, ROOT), "%d triangles, %d KB" % (tris, os.path.getsize(path) // 1024))
+
+
 # --- the Wolf's gift: what a hybrid wears of it on another base's body ---------------------
 
 def fangs_gift():
@@ -1800,7 +2181,11 @@ GIFTS = {"fangs": fangs_gift, "ruff": ruff_gift}
 def build_wolf(form_id, level, spec, base):
     r, sockets = wolf_form(form_id, level, spec)
     carriage(r, spec)
-    export(r, sockets, os.path.join(OUT, form_id + ".glb"))
+    path = os.path.join(OUT, form_id + ".glb")
+    if rest(r, spec):
+        export_resting(r, sockets, path)
+    else:
+        export(r, sockets, path)
 
 
 # base id -> build(form id, level, body, base): writes game/assets/genius/forms/<form id>.glb
