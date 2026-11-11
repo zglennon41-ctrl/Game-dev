@@ -903,7 +903,9 @@ shader_type spatial;
 // to the body's and gives it the body's size, so that a grain is so many repeats to a metre
 // and runs the same way on every body however its mesh was made: down the picture is toward
 // the tail along a body's sides and back, and toward the ground on its front.
-// A fragment reads the grain three times (once from each side) and a painted texture once.
+// A body's grain is in its highlight as well as its colour: the edge of the shine follows the
+// dimples and the creases. A fragment reads the grain three times (once from each side) and a
+// painted texture once; a vertex of a body with bones reads where it rests twice.
 render_mode cull_back;
 uniform vec4 albedo : source_color = vec4(1.0);
 uniform sampler2D albedo_tex : source_color, filter_linear_mipmap;
@@ -936,6 +938,7 @@ uniform bool use_ao = false;
 varying vec3 world_pos;
 varying vec3 world_nrm;
 varying float ao;
+varying float grain;      // what a body's grain makes of this fragment (1.0: nothing), for its highlight
 void vertex() {
 	if (detail_local) {
 		vec3 p = VERTEX;
@@ -977,9 +980,14 @@ void fragment() {
 		vec3 painted = texture(albedo_tex, UV).rgb;
 		col *= use_lut ? on_ramps(painted) : painted;
 	}
+	grain = 1.0;
 	if (detail_strength > 0.0) {
 		float d = triplanar(world_pos, world_nrm);
-		col *= mix(1.0, d * 2.0, detail_strength);
+		float g = mix(1.0, d * 2.0, detail_strength);
+		col *= g;
+		// on a body the grain is in the highlight too (hammered iron and worn leather are seen
+		// by their shine, and a coat near black by nothing else); a place's highlight is as it was
+		grain = detail_local ? g : 1.0;
 	}
 	float occ = mix(1.0, ao, ao_strength);
 	ALBEDO = col * occ;
@@ -996,9 +1004,9 @@ void light() {
 	vec3 lit = mix(ALBEDO * shadow_tint.rgb, ALBEDO, stepped);
 	DIFFUSE_LIGHT += lit * LIGHT_COLOR * ATTENUATION;
 	vec3 h = normalize(LIGHT + VIEW);
-	float s = pow(max(dot(NORMAL, h), 0.0), spec_gloss);
+	float s = pow(max(dot(NORMAL, h), 0.0), spec_gloss) * grain * grain;
 	float sb = s > 0.5 ? 1.0 : (s > 0.2 ? 0.4 : 0.0);
-	SPECULAR_LIGHT += sb * spec_strength * LIGHT_COLOR * ATTENUATION * (stepped > 0.0 ? 1.0 : 0.3);
+	SPECULAR_LIGHT += sb * grain * spec_strength * LIGHT_COLOR * ATTENUATION * (stepped > 0.0 ? 1.0 : 0.3);
 }
 """
 
@@ -1199,8 +1207,6 @@ func _grain_fit(xfs: Dictionary) -> float:
 		box = b if first else box.merge(b)
 		first = false
 	var across := maxf(box.size.x, maxf(box.size.y, box.size.z))
-	if OS.get_cmdline_user_args().has("--grain-tell"):      # DEBUG
-		print("FIT across %.2f box %s of %d meshes" % [across, box.size.snapped(Vector3.ONE * 0.01), xfs.size()])
 	if first or across <= 0.001:
 		return 1.0
 	return clampf(pow(float(fit.get("size", 1.0)) / across, float(fit.get("power", 0.0))), float(fit.get("least", 1.0)), float(fit.get("most", 1.0)))
@@ -1290,9 +1296,6 @@ func toonify(node: Node, place := false, kind := "") -> void:
 					body["scale"] = float(body["scale"]) * fit
 					body["lay"] = lay_along if along.has(String(body.get("grain", ""))) else lay
 			_surface_look(t, cls, mi, body, i)
-			if OS.get_cmdline_user_args().has("--grain-tell") and i == 0:      # DEBUG
-				var bx := lay
-				print("GRAIN %s | %s | mesh %s | %s | boned %s rest %s | verts %d | unit %.3f fit %.2f | x>%s y>%s z>%s | %s" % [node.name, kind, mi.name, sm.resource_name, _boned(mi), t.get_shader_parameter("use_rest"), (mi.mesh as ArrayMesh).surface_get_array_len(0) if mi.mesh is ArrayMesh else -1, bx.x.length(), fit, bx.x.normalized().snapped(Vector3.ONE * 0.1), bx.y.normalized().snapped(Vector3.ONE * 0.1), bx.z.normalized().snapped(Vector3.ONE * 0.1), body.get("grain", "") if body is Dictionary else "place"])
 			if sm.emission_enabled:
 				var glow := sm.emission
 				var energy := sm.emission_energy_multiplier

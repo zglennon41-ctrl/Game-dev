@@ -116,7 +116,7 @@ static func class_spec(cls: String) -> Dictionary:
 ## name; by @<base>, for the coat-class surfaces of a genius of that base (kind) whatever they
 ## are named; by @<base>:<word>; by #<class>; or by #<class>:<word>.
 ## Returns { grain, scale, strength } (a texture of game/assets/textures/detail, its repeats to
-## one unit of the body, how strongly it shows); {} for none; and { beside: true, ... } where
+## a metre on a body one metre across, how strongly it shows); {} for none; and { beside: true, ... } where
 ## it is to take the grain of what lies beside it (the rest is what it takes with no neighbour,
 ## and may be absent).
 static var _grains: Dictionary = {}       # material name|class|kind -> what it is covered in

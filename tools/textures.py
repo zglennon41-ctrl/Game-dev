@@ -4,15 +4,24 @@ docs/style.md rule 3). 256 square, mid-grey on average so they neither lighten n
 colour. Run: python3 tools/textures.py
 
 The first seven are what a thing is made of, by its class (data/style.json,
-materials.classes): linen (a weave), wool (a soft noise), leather (grain), bronze (brushed),
-skin (fine pores), stone (a mottle), wood (grain).
+materials.classes), and are what a place wears: linen (a weave), wool (a soft noise), leather
+(grain), bronze (brushed), skin (fine pores), stone (a mottle), wood (grain).
 
-The second nine are what a body is covered in, by its material's name (materials.grains):
-fur (strokes with a lie), feathers (overlapping, barbed), scales (overlapping rows), pebble
-(a hide of small bumps), horn (fine ridges: horn, claw, beak, shell, chitin), hammered (soft
-dimples: plate), twill (a herringbone weave: a cloak, a robe), bark (fissures), fog (soft
-cloud: mist, smoke, shadow). Where a pattern has a direction it runs down the picture, which
-the shader lays along a body's length and down its front.
+The other thirteen are what a body is covered in, by its material's name (materials.grains):
+fur (pointed locks, a lit tip over the dark root of the next), feathers (overlapping vanes,
+shafted and barbed), scales (overlapping rows), pebble (a hide of small bumps), horn (fine
+rings: horn, claw, beak, shell, chitin), hammered (soft dimples: plate, iron), twill (a
+herringbone weave: a cloak, a robe, a rope), bark (fissures), fog (soft cloud: mist, smoke,
+shadow), timber (wood's figure and pores), creased (worn leather), brushed (steel, brass), rock
+(stone, slate, clay, coal, bone). A coat's are shapes cut clean, and shaded root to tip so
+that they still read from across a yard, where a thin line would be gone (docs/style.md,
+rule 1: detail is cut in as planes, never as noise).
+
+Where a pattern has a direction it runs down the picture, which the shader lays toward the
+tail along a body's back and sides and toward the ground on its front; wood, brushed metal,
+bark and horn run along the piece they are on instead (materials.grainFit.along). Every one
+tiles: each is made of pieces that wrap (noise shaped in its Fourier transform, points and
+rows counted round the edge), never of a picture cut to size.
 """
 import os
 import zlib
@@ -193,11 +202,11 @@ def more():
     # fur: locks lying down the picture, each a pointed tuft over the next (what is seen of a
     # coat from across a yard), and strokes within them (what is seen of it close)
     fresh("fur")
-    x, y, on = shingles(N, 5, 4, 2.3, 1.35, 1.2, du=0.012 * streaks(N, 40.0, 20.0), dv=0.065 * streaks(N, 9.0, 70.0))
-    lock = 0.25 + 0.5 * step(0.3, 1.0, y) - 0.14 * step(0.62, 1.0, np.abs(x)) * (1.0 - 0.6 * y)
+    x, y, on = shingles(N, 8, 2, 1.7, 1.5, 1.35, du=0.01 * streaks(N, 40.0, 20.0), dv=0.13 * streaks(N, 6.0, 80.0))
+    lock = 0.3 + 0.44 * step(0.3, 0.75, y) - 0.2 * step(0.5, 1.0, np.abs(x)) * (1.0 - 0.5 * y)
     strokes = np.tanh(2.0 * streaks(N, 1.0, 11.0)) * 0.5 + np.tanh(1.4 * streaks(N, 2.6, 26.0)) * 0.36 + 0.3 * streaks(N, 11.0, 22.0)
-    lock = smooth(np.where(on, lock, 0.22), 1.0, 1.0)
-    save("fur", level((lock - lock.mean()) / lock.std() * 0.85 + strokes / strokes.std() * 0.36, 0.105, 0.2, 0.8))
+    lock = smooth(np.where(on, lock, 0.25), 1.0, 1.6)
+    save("fur", level((lock - lock.mean()) / lock.std() * 0.8 + strokes / strokes.std() * 0.5, 0.095, 0.2, 0.8))
     # feathers: long vanes overlapping, each with a shaft and its barbs, a dark edge where the next lies under
     fresh("feathers")
     x, y, on = shingles(N, 3, 4, 2.3, 1.12, 2.2)

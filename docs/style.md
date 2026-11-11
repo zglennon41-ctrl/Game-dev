@@ -18,6 +18,7 @@ same as a failing test.
 |---|---|
 | A colour of the palette, the cap on saturation | `ramps`, `cap` |
 | What a material is, how it is shaded, how worn it looks | `materials` |
+| What a body is covered in (fur, scales, feathers, hammered iron), how coarse, how strongly it shows | `materials.grains`, `materials.grainFit` |
 | The ink line's weight or colour | `ink` |
 | The lamp's, the fire's or the moon's colour; how a kind of place is lit | `lights` |
 | The picture's grade, grain, exposure | `film` |
@@ -69,8 +70,9 @@ Each rule says what holds it. "The check" is `npm run check:style`.
   interface's plates are clipped at 45°; stone and timber are cut square or chamfered; a
   blade's tip and a lancet come to a point. Nothing is rounded like a toy (the borrowed
   dungeon tiles of the Cut still are: see "Not done"). This one is held by eye.
-- **Worn and mended.** Nothing is new: every made thing carries its grain (`materials`,
-  `wear`).
+- **Worn and mended.** Nothing is new: every made thing carries its grain, and every living
+  thing its coat (`materials`: `wear`, `grains`; rule 3). A grain is cut shapes too: locks,
+  vanes, scales, dimples, never a speckle.
 
 ### 2. Colour: ramps, and a cap
 
@@ -113,6 +115,66 @@ its grain and how worn it looks.
 - Skin's shadow is warm; everything else's is near grey, a little cool (a blue coat in
   moonlight in a blue shadow is how a quiet colour turns loud, so the shadow adds almost
   no colour of its own). Metal has a hard highlight; cloth almost none.
+
+#### Grain
+
+Every surface but light, an eye and glass wears a grain: a grey picture that repeats without
+a seam (`game/assets/textures/detail/`, twenty of them, all made by `python3
+tools/textures.py`) and lightens and darkens the colour under the bands. It is laid from
+three sides, so no model has to be unwrapped for it.
+
+- **A place wears its class's grain, laid in the world's space** (`materials.classes`:
+  `grain`, `grainScale` repeats to a metre, `wear` how strongly). The pattern belongs to the
+  ground and not to the tile, so neighbouring tiles of a floor match.
+- **A body wears the grain of what its material's name says it is covered in, laid in the
+  body's own space** (`materials.grains`). A body is whatever lives or is carried: a person,
+  a beast, a genius, a weapon. The grain stays on it as it walks, and where it has bones it
+  is laid on the body as it lies at rest, so it does not slide along a limb as the limb
+  swings. (Before this a wolf walked through its own fur.)
+- **The table** is rows of *what fits, the grain, repeats to a metre, how strongly*. The
+  first row that fits wins; a material no row fits wears its class's grain. What fits is a
+  word in the name (`fur`, `feather`, `plate`); or `@drake`, for the coat of a genius of that
+  base whatever it is named (a drake wears the wolf's names, and is scaled); or `#iron`, for
+  a class. `beside:` is for a marking or a Path's colour: it wears the grain of the largest
+  surface beside it, so a stripe in fur is fur and a blazon on a shield is its wood.
+
+| Grain | Is | Worn by |
+|---|---|---|
+| fur | pointed locks, a lit tip over the dark root of the next | fur, pelt, mane, ruff, hair, a beast's coat |
+| feathers | overlapping vanes, each with its shaft and barbs | feather, plume, wing, a hawk |
+| scales | rows of round scales | scale, a drake, a carp |
+| pebble | small bumps with dark grooves between | a tortoise's hide, an eel's, an octopus's, a scar |
+| horn | fine uneven rings | horn, antler, claw, talon, beak, tooth, shell, chitin |
+| hammered | soft dimples with bright rims | plate, iron |
+| brushed | fine scratches one way | steel, brass, the other metals |
+| timber | the figure of the grain and its pores | wood |
+| bark | broad ridges and dark fissures | bark |
+| creased | a crackle of creases over a fine pebble | leather, a drum's hide, a membrane |
+| twill | a herringbone weave | robe, cloak, cape, mantle, homespun; rope and cord |
+| linen, wool | a plain weave; a soft nap | cloth; wool, moss, and a Path's colour with nothing beside it |
+| rock | a rough mottle, pits, a few cracks | stone, slate, clay, coal, ash, bone |
+| fog | soft cloud with nothing small in it | mist, fog, steam, smoke, shade, a body of shadow |
+| none | | light, eyes, glass, a nose, the inside of a mouth, a painted texture |
+
+- **Which way it runs.** Down the picture is toward the tail along a body's back and sides,
+  and toward the ground on its front, however its mesh was made: fur lies back, scales and
+  feathers overlap toward the tail. Wood, brushed metal, bark and horn follow the length of
+  the piece they are on instead (`grainFit.along`): up a bow, along a blade, down a door's
+  planks.
+- **How big.** A row's number is repeats to a metre on a body one metre across. A smaller
+  body wears its grain finer and a larger one coarser (`grainFit`: `size`, `power`, `least`,
+  `most`), so that a hatchling is not three scales and an apex not ten thousand, and every
+  portrait shows about the same count.
+- **How strong.** Enough to see on a portrait; never over 0.7 (the check holds it), where it
+  would fight the bands. From far off a grain fades to its mid-grey: it does not sparkle.
+- **To look at the difference**: `-- --grain=world` lays every body's grain as it was laid
+  before (its class's, in the world's space) and `-- --grain=none` lays none.
+
+Held by: the check finds a texture for every grain named, holds each to mid-grey (so that a
+grain moves no colour off its ramp) and every strength under 0.7, asks the table what a
+wolf's fur, a drake's, a tortoise's plate and a blade's steel are covered in, and builds a
+hero, a beast, a genius and a wall to see that the bodies wear theirs in their own space and
+the wall in the world's.
 
 ### 4. Ink
 
@@ -214,7 +276,10 @@ For whoever builds the bodies (`tools/blender/genius_*.py`, `GeniusBody`). The c
 already walks `game/assets/genius`.
 
 1. **Name every material for what it is made of** (a word from `materials.words`). What is
-   light is named `field_*`.
+   light is named `field_*`. The name also chooses the grain (rule 3, `materials.grains`):
+   `fur_`, `feather_`, `scale_`, `hide_`, `horn`, `bark`, `leather`, `*_plate`, `robe`, `mist`
+   each look like what they say, and a base whose coat is not what its names say has a row
+   of its own (`@drake`).
 2. **Colours on the ramps**: `style.conform(name, color)` in the kit's `mat()` does it
    (`tools/blender/style.py`). Coats in `data/genius-looks.json` belong on the coat's
    ramps (132 of 637 are off today, 2 far off: two of the carp's).
@@ -240,12 +305,14 @@ godot --headless --path . res://game/tests/style_check.tscn -- --verbose
 
 It checks, in order: the style's own numbers (every ramp under its cap and running shadow
 to light; the telegraph no Shape's colour; the moon's cast pale; every kind of place warm
-and cool; the fight's feel inside the motion's bounds; hair, skin and each zone's night);
+and cool; the fight's feel inside the motion's bounds; hair, skin and each zone's night; the
+grains: a texture for each, mid-grey, none too strong, and what the bodies are covered in);
 the typefaces and that no screen keeps its own palette; every material in the art (a known
 class; nothing glowing that is not light; no colour that is not a shade of anything its
 class may be) and what the game makes of it (on a ramp, under the cap, a painted texture
-brought over); the ink line on the living and not on places; and the warm and cool light of
-every place.
+brought over); the ink line on the living and not on places; where the grain is laid (a
+body's in its own space, a place's in the world's); and the warm and cool light of every
+place.
 
 A **FAIL** is off-style and the game cannot put it right by itself. A colour the game
 moves onto its ramp when the material is made is counted and passes; `--verbose` lists
@@ -280,4 +347,15 @@ the colours the data names (hair, a zone's night, the creator's lights).
   wants a kit of its own, like the Academy's.
 - The game shows every lit surface of a genius at one brightness whatever its model asks,
   so a large lit area glares; the bodies keep light to edges and small things for it.
+- **The grain runs by the body, not by the limb.** On the side of a leg, fur lies across it
+  and not down it; a horn made in one piece with its body is ringed the wrong way on two of
+  its sides; a beam across a door of upright planks takes the planks' grain. Putting this
+  right wants a direction written into the model, which no model has.
+- **The places still wear the first seven grains** (linen, wool, leather, bronze, skin,
+  stone, wood), which are faint and blocky beside the thirteen made since. They want making
+  again and looking at place by place; nothing of a place was changed here.
+- **A grain multiplies the colour**, so a coat near black shows little of it, and a pale one
+  the most.
+- **A Path's colour takes the grain of what lies beside it**, so a band of the Path's colour
+  that is a made thing (a collar, a strap) on a furred body is furred.
 - Sound.
