@@ -55,6 +55,33 @@
           "minItems": 10,
           "items": { "type": "array", "items": { "type": "string", "minLength": 2 }, "minItems": 2, "maxItems": 2 }
         },
+        "grains": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "items": [
+              { "type": "string", "minLength": 2 },
+              { "type": "string" },
+              { "type": "number", "minimum": 0, "maximum": 40 },
+              { "$ref": "#/definitions/unit" }
+            ]
+          }
+        },
+        "grainFit": {
+          "type": "object",
+          "required": ["size", "power", "least", "most", "sharp"],
+          "additionalProperties": false,
+          "properties": {
+            "$comment": { "type": "string" },
+            "size": { "type": "number", "exclusiveMinimum": 0 },
+            "power": { "$ref": "#/definitions/unit" },
+            "least": { "type": "number", "exclusiveMinimum": 0 },
+            "most": { "type": "number", "exclusiveMinimum": 0 },
+            "sharp": { "type": "number", "minimum": 1, "maximum": 16 }
+          }
+        },
         "classes": {
           "type": "object",
           "required": ["skin", "cloth", "leather", "wood", "stone", "iron", "brass", "bone", "glass", "field", "coat", "growth", "earth", "water", "lit", "eye", "ink", "mixed"],

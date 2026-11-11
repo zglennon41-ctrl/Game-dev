@@ -57,6 +57,51 @@ static func warm(c: Color) -> bool:
 static func cool(c: Color) -> bool:
 	return Style.saturation(c) > 0.05 and c.h > 0.45 and c.h < 0.78
 
+## The grains (materials.grains and each class's own): every one named is a texture that is
+## there (tools/textures.py makes them), mid-grey on the whole so that it changes no colour's
+## place on its ramp; no grain is laid on strongly enough to fight the cel bands; and the
+## table still says what the bodies are covered in.
+func check_grains(d: Dictionary, classes: Dictionary) -> void:
+	for g in Style.grain_names():
+		var path := "res://game/assets/textures/detail/%s.png" % g
+		if not ResourceLoader.exists(path):
+			fail("a grain is named that has no texture: %s (tools/textures.py makes them)" % g)
+			continue
+		var img := (load(path) as Texture2D).get_image()
+		if img == null or img.is_empty():
+			continue
+		if img.is_compressed():
+			img.decompress()
+		var sum := 0.0
+		for y in range(0, img.get_height(), 4):
+			for x in range(0, img.get_width(), 4):
+				sum += img.get_pixel(x, y).r
+		var mean := sum / float((img.get_width() / 4) * (img.get_height() / 4))
+		if absf(mean - 0.5) > 0.05:
+			fail("the grain %s is not mid-grey on the whole (%.2f): it would darken or lighten everything it is laid on" % [g, mean])
+	var limit := 0.7
+	for cn in classes:
+		if float(classes[cn].get("wear", 0.0)) > limit:
+			fail("class %s wears its grain at %.2f: over %.2f it fights the cel bands" % [cn, float(classes[cn]["wear"]), limit])
+	for row in d["materials"].get("grains", []):
+		var what := String(row[0])
+		if what.begins_with("#") and not classes.has(what.substr(1).get_slice(":", 0)):
+			fail("the grain row '%s' names a class that is not there" % what)
+		if float(row[3]) > limit:
+			fail("the grain row '%s' lays its grain on at %.2f: over %.2f it fights the cel bands" % [what, float(row[3]), limit])
+		if String(row[1]) != "" and float(row[3]) > 0.0 and float(row[2]) <= 0.0:
+			fail("the grain row '%s' has a grain and no scale" % what)
+	# what the table is for: a body is covered in what it is, whatever its material was named
+	var wants := [
+		["fur_dark", "wolf", "fur"], ["fur_dark", "drake", "scales"], ["feather_wing", "hawk", "feathers"],
+		["stone_plate", "tortoise", "horn"], ["horn_ridge", "tortoise", "horn"], ["metal_plate", "", "hammered"],
+		["leather_strap", "", "leather"], ["eye_gold", "wolf", ""], ["field_glow", "wolf", ""] ]
+	for w in wants:
+		var cls := World.surface_of(String(w[0]))
+		var got := String(Style.grain_for(String(w[0]), cls, String(w[1])).get("grain", ""))
+		if got != String(w[2]):
+			fail("a %s's %s should be covered in '%s' and is covered in '%s' (materials.grains: the first row that fits wins)" % [w[1] if w[1] != "" else "thing", w[0], w[2], got])
+
 func check_data() -> void:
 	var d := Style.data()
 	var cap := float(d["cap"])
@@ -80,6 +125,7 @@ func check_data() -> void:
 		for cn in String(pair[1]).split("|"):
 			if not classes.has(cn):
 				fail("the word '%s' names a class that is not there: %s" % [pair[0], cn])
+	check_grains(d, classes)
 	# the loud are loud, and the telegraph is the telegraph everywhere
 	for sh in d["loud"]["shapes"]:
 		if Style.saturation(Style.shape_color(sh)) < 0.1:
