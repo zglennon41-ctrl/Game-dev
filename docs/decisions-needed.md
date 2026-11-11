@@ -437,3 +437,24 @@ played the arc); barks stay as floating text. Still to be played rather than dec
     their Paths and forms, and what play earns each, are first drafts until you have read
     them on the tree page.
 
+
+87. **Playable by morning** (owner's direction, 2026-11-11 night: creative license "to
+    improve the game and the methods"; all of it mine and the night's workers', each yours
+    to overrule). (a) **The Discipline lesson** offers the weapons of the school's city,
+    and an Alexandrian (whose city has no school) is offered their Discipline's. (b)
+    **Lesson words** stay up until read, then fold to a plate; H brings them back. (c)
+    **A gamepad** does every lesson: the school's three techniques, reload and "the step
+    again" are D-pad down, D-pad right, LT, RT and L3. (d) **The station** moves on after
+    a minute if the Pattern's Trigger is not met. (e) **A game left mid-run or
+    mid-trouble** starts that run or trouble over, in the quad. (f) **In a browser**, the
+    game holds when the pointer is taken back, and Quit is hidden. (g) **Faces**: eight
+    face shapes, four feature sliders, eye colours, brows, lips, marks, fourteen hair
+    styles, and "Surprise me". (h) **Dress**: each home's dress in its own colours, worn
+    three ways (plain, some, all); the cloak is off unless chosen; some homes' men are
+    bare-chested; instructors dress as masters. (i) **Graphics**: sharper shadows, a sky
+    of its own, halos on lamps, contact shadows, surface grain; no daytime yet. (j) **The
+    Wolf rests** when you stand still; **the Coat is worn** as a mantle; **the Drake is a
+    true drake**. (k) Held back for the budget: the second pass on Fox and Stag, Shield
+    and Gauntlet, Hawk and Tortoise, the small people, the instruments, the weapons, Fiend
+    and Ember. (l) **People's shape keys are packed** (`game/scripts/shapes.gd`) so the
+    web game fits its page; it costs a moment when a new home's person first appears.
