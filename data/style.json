@@ -38,13 +38,13 @@
       ["field_lamp", "lit"], ["field", "field"], ["echo_glow", "field"], ["glow", "field"], ["_lit", "lit"], ["lamp", "lit"], ["flame", "lit"], ["eye", "eye"],
       ["iris", "eye"], ["pupil", "eye"], ["lash", "eye"], ["skin", "skin"], ["lips", "skin"], ["gill", "skin"], ["cloth", "cloth"],
       ["bowstring", "cloth"], ["keepsake", "cloth"], ["cape", "cloth"], ["tunic", "cloth"], ["trousers", "cloth"], ["linen", "cloth"],
-      ["glass", "glass"], ["lens", "glass"], ["ice", "glass"], ["iron", "iron"], ["steel", "iron"], ["brass", "brass"], ["gold", "brass"],
+      ["glass_red", "mixed"], ["glass_blue", "mixed"], ["glass", "glass"], ["lens", "glass"], ["ice", "glass"], ["iron", "iron"], ["steel", "iron"], ["brass", "brass"], ["gold", "brass"],
       ["copper", "brass"], ["bronze", "brass"], ["trim", "brass"], ["metal", "iron|brass"], ["leather", "leather"], ["boots", "leather"],
       ["strap", "leather"], ["belt", "leather"], ["cord", "leather"], ["rope", "leather"], ["wood", "wood"], ["plank", "wood"], ["timber", "wood"],
       ["beam", "wood"], ["door", "wood"], ["bark", "wood"], ["trunk", "wood"], ["crate", "wood"], ["barrel", "wood"], ["root", "wood"],
       ["stone", "stone"], ["rock", "stone"], ["brick", "stone"], ["floor", "stone"], ["wall", "stone"], ["tile", "stone"], ["slate", "stone"],
       ["pillar", "stone"], ["plaster", "stone"], ["roof", "stone"], ["ruin", "stone"], ["clay", "stone"], ["bone", "bone"], ["horn", "bone"],
-      ["antler", "bone"], ["fang", "bone"], ["tooth", "bone"], ["claw", "bone"], ["talon", "bone"], ["beak", "bone"], ["seal", "cloth"], ["wax", "bone"],
+      ["antler", "bone"], ["fang", "bone"], ["tooth", "bone"], ["claw", "bone"], ["talon", "bone"], ["beak", "bone"], ["wax_red", "cloth"], ["seal", "cloth"], ["wax", "bone"],
       ["paper", "bone"], ["grass", "growth"], ["leaf", "growth"], ["moss", "growth"], ["reed", "growth"], ["straw", "growth"], ["petal", "growth"],
       ["earth", "earth"], ["dirt", "earth"], ["ground", "earth"], ["mud", "earth"], ["sand", "earth"], ["dust", "earth"], ["coal", "earth"],
       ["water", "water"], ["mist", "water"], ["current", "water"], ["fur", "coat"], ["hair", "coat"], ["feather", "coat"], ["plume", "coat"],
@@ -53,7 +53,8 @@
       ["dress", "cloth"], ["home_", "cloth"], ["banner", "cloth"], ["main", "coat"], ["tin", "iron"], ["texture", "mixed"],
       ["homespun", "cloth"], ["robe", "cloth"], ["thread", "cloth"], ["pelt", "coat"], ["moth", "coat"], ["beetle", "coat"], ["maw", "coat"],
       ["tongue", "coat"], ["welt", "coat"], ["scar", "coat"], ["soot", "earth"], ["chalk", "stone"], ["fired", "stone"], ["acorn", "wood"],
-      ["weed", "growth"], ["verdigris", "growth"], ["glaze", "glass"], ["frost", "glass"], ["visor", "iron"], ["smoke", "ink"], ["paint", "mixed"]
+      ["weed", "growth"], ["verdigris", "growth"], ["glaze", "glass"], ["frost", "glass"], ["visor", "iron"], ["smoke", "ink"], ["paint", "mixed"],
+      ["enamel", "mixed"], ["dial", "bone"], ["white", "bone"], ["ribbon", "cloth"], ["crepe", "cloth"], ["night", "iron"]
     ],
     "classes": {
       "field": {"glows": true, "ramps": [], "bands": 1, "shadowTint": "#FFFFFF", "spec": [0.0, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0},

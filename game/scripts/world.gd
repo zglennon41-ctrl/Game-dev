@@ -4227,10 +4227,15 @@ func _update_form(f: Fight, dt: float) -> void:
 		_g_form.global_transform = Transform3D(hb * Basis.from_scale(Vector3.ONE * k), at)
 		# A weapon with a model of its own says where the hand closes on it (an empty named
 		# grip, turned as a weapon is turned in the hand): it is seated there, whatever its form.
+		# Such a model is made in the weapon kit's frame and at its size (docs/genius-evolutions.md,
+		# "The weapons"): the size it floats at is undone, and a gun or a bow takes the quarter
+		# turn the kit's own take in the hand.
 		var grip := _held_at("grip")
 		if grip:
 			var g := _g_body._local_xf(grip)
-			var fb := slot * g.basis.orthonormalized().inverse() * Basis.from_scale(Vector3.ONE * k)
+			var made := 1.0 / maxf(0.001, _g_body._model.scale.y)
+			var quarter := Basis(Vector3.UP, PI / 2.0) if String(f.g_weapon.get("style", "")) in ["gun", "bow"] else Basis.IDENTITY
+			var fb := slot * quarter * g.basis.orthonormalized().inverse() * Basis.from_scale(Vector3.ONE * made)
 			_g_form.global_transform = Transform3D(fb, _sword.global_position - fb * g.origin)
 		_g_form_pos = _sword.global_position
 		if _g_body:

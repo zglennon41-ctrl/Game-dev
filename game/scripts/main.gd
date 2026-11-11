@@ -1282,6 +1282,9 @@ func _process(delta: float) -> void:
 		world.cine = true
 		world.cine_look = world._v3(fight.p_pos, 1.05)
 		world.cine_pos = world._v3(fight.p_pos + Vector2.from_angle(turn) * 2.9, 1.45)
+		# --inhand: and a weapon genius is kept in the hand, to see how it sits there
+		if _args.has("inhand") and fight.genius != null and fight.g_type == "weapon" and not fight.g_in_hand and fight.p_state == "free":
+			fight.input("order")
 	world.draw(fight, real_dt, cam, move)
 	var timer := ""
 	var score := "the old station" if mode == "prologue" else "the yard"
