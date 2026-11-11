@@ -390,7 +390,7 @@ def painter(spec, fish, level):
         if "stripe" in marks and top < 0.36 * marks["stripe"] and 0.1 < t < 0.985:
             base = two("accent", "accent_dark")
         if "bands" in marks and s > -0.4 and any(lo < t < lo + 0.06 * marks["bands"] for lo in (0.33, 0.47, 0.61, 0.75, 0.87)):
-            base = two("accent_dark", "accent_deep")
+            base = two("accent_light", "accent") if "back" in marks else two("accent_dark", "accent_deep")      # bright across a dark back
         if "dash" in marks and 0.3 < t < 0.9 and 0.45 < s < 0.95 and i % 2 == 0:
             base = "accent_light"
         if "shoulder" in marks and fish.ht * 0.85 < t < fish.ht * 1.6 and s > -0.2:

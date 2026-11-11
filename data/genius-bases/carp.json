@@ -1253,7 +1253,17 @@
         0.7
        ]
       ],
-      "brow": "mild"
+      "brow": "mild",
+      "marks": [
+       [
+        "back",
+        1.0
+       ],
+       [
+        "bands",
+        0.8
+       ]
+      ]
      },
      "finishes": [
       {
@@ -1400,7 +1410,17 @@
        "sail",
        0.7
       ],
-      "brow": "calm"
+      "brow": "calm",
+      "marks": [
+       [
+        "back",
+        1.0
+       ],
+       [
+        "dash",
+        1.0
+       ]
+      ]
      },
      "finishes": [
       {
