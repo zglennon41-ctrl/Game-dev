@@ -16,6 +16,7 @@ import math
 import os
 import sys
 
+import bmesh
 import bpy
 from mathutils import Matrix, Vector
 
@@ -37,6 +38,24 @@ PALETTE.update({
     "pane": ((0.1, 0.14, 0.17), 0.12, 0.0), "stone_grave": ((0.38, 0.39, 0.37), 0.95, 0.0), "timber": ((0.22, 0.15, 0.09), 0.85, 0.0),
     "mask_pale": ((0.74, 0.71, 0.64), 0.6, 0.0), "veil": ((0.56, 0.57, 0.6), 0.9, 0.0), "steam": ((0.8, 0.81, 0.8), 0.9, 0.0),
     "stubble": ((0.06, 0.05, 0.045), 0.95, 0.0), "grass_dry": ((0.42, 0.38, 0.2), 0.9, 0.0),
+})
+
+
+
+def _ramp(name, step, rough=0.9, metal=0.0):
+    """A colour of the style's ramps (data/style.json), as a palette entry."""
+    import style
+    return (tuple(style.ramp(name, step)[:3]), rough, metal)
+
+
+# The second pass: the ground a floor-lying form carries (a flag floor, a doorstep, a road),
+# and what stands on it. All of it weathered and grey, off the ramps, so that the only colour
+# on a form is its Path's.
+PALETTE.update({
+    "wood_grey": _ramp("stone", 1, 0.85), "wood_grey_pale": _ramp("stone", 2, 0.85), "wood_black": _ramp("ink", 3, 0.8),
+    "stone_flag": _ramp("slate", 2, 0.95), "stone_flag_pale": _ramp("slate", 3, 0.95), "stone_dark": _ramp("slate", 0, 0.95),
+    "stone_step": _ramp("stone", 2, 0.95), "stone_sett": _ramp("slate", 1, 0.95), "earth_grey": _ramp("stone", 1, 0.95),
+    "grass_dew": _ramp("verdigris", 2, 0.9), "cloth_grey": _ramp("slate", 2, 0.9), "paper_pale": _ramp("bone", 3, 0.8),
 })
 
 SPREAD = 1.7        # how far across a body may be, against the height it is stood to
@@ -336,6 +355,95 @@ def gear(c, r, teeth=8, thick=0.02, axis=Y):
     return g.loft([rim(-thick / 2), rim(thick / 2)], caps=True)
 
 
+# --- fog, smoke, a bank of cloud: one round surface ---------------------------------------------
+
+_CLOUDS = [0]
+_CLOUD_AT = 0.6     # where the surface of a cloud is drawn in the field its balls make
+
+
+def cloud(balls, res=0.045, keep=None, firm=3.0):
+    """One round, lumpy surface about a list of balls: what fog is made of, so that a bank of
+    it has one outline and not a line round every roll. A ball is (centre, radius); a third
+    value scales it by axis, a fourth turns it about the vertical, and a fifth below 0 takes
+    it away from the rest (a hollow). A ball alone comes out at its radius; beside another it
+    swells to meet it. `res` is the size of a facet, `keep` thins the surface to about that
+    many corners, and `firm` (1 to 10) is how far two rolls stay two."""
+    balls = [b for b in balls if b]
+    if not balls:
+        return None
+    _CLOUDS[0] += 1
+    name = "cloudof%s" % "".join(chr(97 + int(c)) for c in str(_CLOUDS[0]))       # no number in it: a number makes a family of them
+    mb = bpy.data.metaballs.new(name)
+    mb.resolution = res
+    mb.render_resolution = res
+    mb.threshold = _CLOUD_AT
+    ob = bpy.data.objects.new(name, mb)
+    bpy.context.collection.objects.link(ob)
+    k = 2.0 * math.sqrt(1.0 - (_CLOUD_AT / firm) ** (1.0 / 3.0))
+    for b in balls:
+        c, r = V(b[0]), float(b[1])
+        sc = b[2] if len(b) > 2 and b[2] is not None else (1, 1, 1)
+        e = mb.elements.new(type="ELLIPSOID")
+        e.co = c
+        e.radius = 2.0
+        e.stiffness = firm
+        e.size_x, e.size_y, e.size_z = [max(1e-4, r * s / k) for s in sc]
+        if len(b) > 3 and b[3]:
+            e.rotation = Matrix.Rotation(b[3], 3, "Z").to_quaternion()
+        if len(b) > 4 and b[4] < 0:
+            e.use_negative = True
+    bpy.context.view_layer.update()
+    me = bpy.data.meshes.new_from_object(ob.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+    bpy.data.objects.remove(ob)
+    bpy.data.metaballs.remove(mb)
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=res * 0.2)
+    if keep and len(bm.verts) > keep:
+        ratio = keep / float(len(bm.verts))
+        bm.to_mesh(me)
+        bm.free()
+        tmp = bpy.data.objects.new(name + "thin", me)
+        bpy.context.collection.objects.link(tmp)
+        tmp.modifiers.new("thin", "DECIMATE").ratio = ratio
+        thin = bpy.data.meshes.new_from_object(tmp.evaluated_get(bpy.context.evaluated_depsgraph_get()))
+        bpy.data.objects.remove(tmp)
+        bpy.data.meshes.remove(me)
+        me = thin
+        bm = bmesh.new()
+        bm.from_mesh(me)
+    verts = [v.co.copy() for v in bm.verts]
+    faces = [tuple(v.index for v in f.verts) for f in bm.faces]
+    bm.free()
+    bpy.data.meshes.remove(me)
+    return (verts, faces) if faces else None
+
+
+def strand(points, w, n=6, swell=0.0, flat=1.0, tip=0.04):
+    """A strand of fog or smoke or shadow through points: round, w wide at its root, a little
+    fuller part of the way along (`swell`), thinning to nothing at its end."""
+    pts = [V(p) for p in points]
+    m = len(pts) - 1
+    radii = [max(w * tip, w * 0.5 * (1.0 - i / m) ** 0.8 * (1.0 + swell * math.sin(math.pi * i / m))) for i in range(m + 1)]
+    return g.tube(pts, radii, n=n, flat=flat)
+
+
+def curve(points, n=4):
+    """More points along a line of points, rounded (Catmull-Rom): a wisp that bends, not a wire."""
+    pts = [V(p) for p in points]
+    if len(pts) < 3:
+        return pts
+    out = []
+    ext = [pts[0] * 2 - pts[1]] + pts + [pts[-1] * 2 - pts[-2]]
+    for i in range(1, len(ext) - 2):
+        p0, p1, p2, p3 = ext[i - 1], ext[i], ext[i + 1], ext[i + 2]
+        for k in range(n):
+            t = k / n
+            out.append(0.5 * ((2 * p1) + (p2 - p0) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (3 * p1 - p0 - 3 * p2 + p3) * t * t * t))
+    out.append(pts[-1])
+    return out
+
+
 # --- a body --------------------------------------------------------------------------------
 
 class Body:
@@ -347,6 +455,7 @@ class Body:
         self.sil = silhouette_of(base, form_id)
         self.roles = roles_of(self.sil)
         self.items = []
+        self.movers = []          # the pieces of it that the game moves by their names (move)
         self.socks = {}
         self.top, self.front, self.mid, self.half = STAND, -0.13, 0.4, 0.16
         self.ground = False       # it stands on the ground: nothing of it may be under z = 0
@@ -378,6 +487,21 @@ class Body:
         for it in items:
             self.add(*it)
 
+    def move(self, kind, what, items, pivot, side="", n=None, parent=None, up=None):
+        """A piece of it that the game moves by its name (docs/genius-lines.md, "What moves"):
+        <kind>_<what>[_l|_r][_<n>], about `pivot`. items: [(geometry, material[, smooth]), ...]
+        made where the piece stands in the body. Its own up is Z as it is made, or `up` where
+        that is given (an eye that looks up out of a pool shuts along the pool; a ring turns
+        about the way it faces). `parent` is another piece (what this returned for it) that
+        this one rides: an eye in a head that turns. Returns the piece, to be a parent in its
+        turn."""
+        assert kind in lines().MOVES, kind
+        mv = {"name": "%s_%s%s%s" % (kind, what, "_" + side if side else "", "_%d" % n if n is not None else ""), "up": None if up is None else V(up).normalized(),
+              "items": [it for it in items if it and it[0] and it[0][0]], "pivot": V(pivot).copy(), "parent": parent, "ob": None}
+        if mv["items"]:
+            self.movers.append(mv)
+        return mv
+
     def frame(self, top, front=None, mid=None, half=None):
         """Where its sockets go: the crown of its head, its front (a y), its middle height, its half-width."""
         self.top = top
@@ -394,11 +518,21 @@ class Body:
             sm = material.name.startswith(SOFT) if smooth is None else smooth
             objs.append(g.to_object("p%d" % i, geo, material, sm))
         ob = g.join(self.id.replace("-", "_"), objs)
+        # what moves: each piece an object of its own, named for how it moves
+        for mv in self.movers:
+            parts = []
+            for i, it in enumerate(mv["items"]):
+                material = mat(it[1]) if isinstance(it[1], str) else it[1]
+                sm = material.name.startswith(SOFT) if len(it) < 3 or it[2] is None else it[2]
+                parts.append(g.to_object("%s_p%d" % (mv["name"], i), it[0], material, sm))
+            mv["ob"] = g.join(mv["name"], parts)
+        moving = [mv["ob"] for mv in self.movers]
         # stand it on z = 0: the lowest of it there, whatever it was built at
-        low = min((ob.matrix_world @ v.co).z for v in ob.data.vertices)
-        for v in ob.data.vertices:
-            v.co.z -= low
-        ob.data.update()
+        low = min(v.co.z for o in [ob] + moving for v in o.data.vertices)
+        for o in [ob] + moving:
+            for v in o.data.vertices:
+                v.co.z -= low
+            o.data.update()
         socks = dict(gh._table(self.top - low, self.front, self.mid - low, self.half, None))
         for name, at in self.socks.items():
             if name in socks:
@@ -408,9 +542,24 @@ class Body:
         # The game stands it to its stage's height by this mark. A thing that is low and long (a
         # streak, a line of fire, a pool) is not stood by its crown, or it would fill the room:
         # nothing is more than SPREAD times as far across as the height it is stood to.
-        xs, ys = [v.co.x for v in ob.data.vertices], [v.co.y for v in ob.data.vertices]
+        xs, ys = [v.co.x for o in [ob] + moving for v in o.data.vertices], [v.co.y for o in [ob] + moving for v in o.data.vertices]
         ref = max(self.top - low, max(max(xs) - min(xs), max(ys) - min(ys)) / SPREAD)
+        # each moving piece turns about its own place, and rides what it was given to ride
+        for mv in self.movers:
+            at = mv["pivot"] - Vector((0, 0, low))
+            if mv["up"] is None:
+                lines().set_origin(mv["ob"], at)
+            else:       # its own up is not the world's: the piece is turned, and what it is made of turned back
+                z = mv["up"]
+                x = Y.cross(z)
+                x = x.normalized() if x.length > 1e-4 else X.copy()
+                M = Matrix.Translation(at) @ Matrix((x, z.cross(x), z)).transposed().to_4x4()
+                mv["ob"].data.transform(M.inverted())
+                mv["ob"].matrix_world = M
+        for mv in self.movers:
+            if mv["parent"] is not None and mv["parent"].get("ob") is not None:
+                lines().child_of(mv["ob"], mv["parent"]["ob"])
         path = os.path.join(OUT, self.id + ".glb")
-        lines().export_objects([ob], socks, path, ref=ref)
-        tris = sum(len(p.vertices) - 2 for p in ob.data.polygons)
-        log(self.id, "%d triangles, %d KB" % (tris, os.path.getsize(path) // 1024))
+        lines().export_objects([ob] + moving, socks, path, ref=ref)
+        tris = sum(len(p.vertices) - 2 for o in [ob] + moving for p in o.data.polygons)
+        log(self.id, "%d triangles, %d KB%s" % (tris, os.path.getsize(path) // 1024, ", %d moving" % len(moving) if moving else ""))
