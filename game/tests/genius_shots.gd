@@ -3,7 +3,10 @@ extends Node
 ## the Warden with one genius on one order, and the frame after a given event is saved.
 ##   xvfb-run -a godot --path . res://game/tests/genius_shots.tscn -- FORM INSTAR ORDER EVENT OUT.png
 ## FORM is a form of the tree by its id (a base's, or a hybrid's: wolf+hawk:wolf-courser); with
-## none, the first prong of the first base.   (EVENT: genius-move, genius-great, genius-hold, free, genius-guard)
+## none, the first prong of the first base.   (EVENT: genius-move, genius-great, genius-hold, free, genius-guard;
+## for a weapon or an item, whose key the hand uses as a bot does: genius-take, genius-use, genius-took,
+## genius-caught, genius-lamp, genius-sight, genius-toll; hit-in-hand for a blow landed with a weapon genius;
+## pose: no foe, the camera close, the genius in the hand if it is a weapon, to look at how it is held)
 
 func _ready() -> void:
 	_run.call_deferred()
@@ -45,6 +48,30 @@ func _run() -> void:
 	var dt := 1.0 / 60.0
 	var shot_at := -1.0
 	var done := false
+	if want == "pose":
+		f.w_state = "absent"
+		f.passive = true
+		world.show_wolf = false
+		if f.g_type == "weapon":
+			f.input("order")
+		for i in 90:
+			f.update(dt, Vector2.ZERO)
+			world.feedback(f, f.drain())
+			world.draw(f, dt, Vector2.ZERO, Vector2.ZERO)
+			hud.update_play(f, "", "", false)
+			var at := Vector3(f.p_pos.x, 0.0, f.p_pos.y)
+			world.cine = true
+			world.cine_pos = at + Vector3(1.6, 1.5, 2.4)
+			world.cine_look = at + Vector3(0, 1.0, 0)
+			world._cam_pos = world.cine_pos
+			world._cam_look = world.cine_look
+			if i % 6 == 0:
+				await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		root.get_viewport().get_texture().get_image().save_png(out)
+		print("SHOT (pose) ", out, " in hand ", f.g_in_hand)
+		get_tree().quit()
+		return
 	for i in 60 * 40:
 		var to_w := f.w_pos - f.p_pos
 		var move := Vector2.ZERO
@@ -52,7 +79,11 @@ func _run() -> void:
 			f.input("block-down")
 		if f.p_block_held and f.w_state != "windup":
 			f.input("block-up")
-		if to_w.length() < 2.4 and f.w_state in ["recover", "stagger", "flinch"] and not f.p_block_held:
+		if f.g_type != "companion" and GeniusTypes.bot_wants_key(f, f.w_state == "windup" and int((f.now - f.w_timer) * 7.0) % 3 != 0):
+			f.input("order")
+		if f.p_state == "draw" and f.p_draw >= f.draw_seconds():
+			f.input("attack-up")
+		if (to_w.length() < 2.4 or f.ranged) and f.w_state in ["recover", "stagger", "flinch"] and not f.p_block_held:
 			f.input("attack")
 		if order != "hold" and to_w.length() > 2.0 and f.w_state != "windup" and f.w_state not in ["down", "absent"]:
 			move = to_w.normalized()
@@ -62,8 +93,9 @@ func _run() -> void:
 		world.draw(f, dt, Vector2.ZERO, move)
 		hud.update_play(f, "", "", true)
 		for e in evs:
-			if shot_at < 0.0 and (f.now > 3.0 or want == "free") and String(e["type"]) == want:
-				shot_at = f.now + 0.35
+			var is_it: bool = String(e["type"]) == want or (want == "hit-in-hand" and String(e["type"]) == "hit" and e.get("hand", false))
+			if shot_at < 0.0 and (f.now > 3.0 or want == "free" or f.g_type != "companion") and is_it:
+				shot_at = f.now + (0.12 if want == "hit-in-hand" else 0.35)
 		if i % 12 == 0 or (shot_at > 0.0):
 			await get_tree().process_frame
 		if shot_at > 0.0 and f.now >= shot_at:

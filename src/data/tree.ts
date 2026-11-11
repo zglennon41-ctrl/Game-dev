@@ -9,6 +9,8 @@ export interface TreeNode {
   /** What a stranger would notice about it; what it does when nothing is happening. */
   sign?: string; habit?: string;
   leans?: Leans; silhouette?: string; prongs?: TreeNode[]; finishes?: TreeNode[];
+  /** The form whose own model it wears, where that is not itself (a form carried into a hybrid). */
+  wears?: string;
 }
 export interface Base {
   id: string; name: string; class: string; expression: string; silhouette: string; toBuild?: string[];
@@ -37,6 +39,8 @@ export interface Form {
   silhouette: string;
   /** The silhouette whose palette of coats it wears (a hybrid wears its second base's). */
   coatOf: string;
+  /** The form whose own model it wears: its own; or, carried into a hybrid from its second base, the form of the first it took the place of. */
+  wears: string;
   /** What this form adds. */
   own: string[];
   /** Its own and those of every form above it on its path. */
@@ -71,7 +75,7 @@ function grow(parent: { id: string; features: string[] }, nodes: TreeNode[], lev
     const f: Form = {
       id: c.id(n), name: n.name, text: n.text, of: n.of ?? '', sign: n.sign ?? '', habit: n.habit ?? '',
       base: c.base, kind: c.kind, level, parent: parent.id,
-      expression: c.expression, class: c.class, silhouette: sil, coatOf: c.coatOf || sil,
+      expression: c.expression, class: c.class, silhouette: sil, coatOf: c.coatOf || sil, wears: n.wears ?? n.id,
       own: [...n.features], features: uniq([...parent.features, ...n.features]), leans: n.leans ?? {}, children: [],
       instars: { min: level, max: level >= 4 ? 6 : level },
     };
@@ -172,9 +176,10 @@ export function compose(a: Base, b: Base, hy: Hybrids, labels: Record<string, st
     const gone = mine[drop];
     const carried: TreeNode = said({
       id: best.id, name: rename(rule.carried, a.hybrid.adj, best.name), text: best.text, of: best.of, sign: '', habit: gone?.habit || best.habit,
-      features: best.features, leans: best.leans,
+      features: best.features, leans: best.leans, wears: gone?.id ?? best.id,
       finishes: (best.finishes ?? []).map((f, j) => said({
         id: f.id, name: rename(rule.carried, a.hybrid.adj, f.name), text: f.text, of: f.of, sign: '', habit: gone?.finishes?.[j]?.habit || f.habit, features: f.features, leans: f.leans,
+        wears: gone?.finishes?.[j]?.id ?? gone?.id ?? f.id,
       })),
     });
     // every path of a hybrid is earned by its own play: bend less far while two would share a signature

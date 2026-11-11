@@ -25,4 +25,7 @@ for b in "${BASES[@]}"; do
   esac
   echo "$b"
 done
+# the Baby, everyone's before the rite
+mkdir -p "$SHOTS/sheet-baby"
+"${RUN[@]}" godot --path . --resolution 3200x1800 -- --sheet=baby --shots="$SHOTS/sheet-baby" > "$SHOTS/sheet-baby.log" 2>&1
 python3 tools/genius-tree-page.py --out "$OUT" --shots "$SHOTS"

@@ -56,6 +56,25 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .pic { flex: none; display: block; width: 84px; aspect-ratio: 8 / 9; padding: 0; border: 1px solid var(--rule); border-radius: 3px; background-color: var(--shot); background-repeat: no-repeat; background-size: 800% 400%; background-position: calc(var(--c) / 7 * 100%) calc(var(--r) / 3 * 100%); cursor: zoom-in }
 .pic:hover, .pic:focus-visible { border-color: var(--brass-hi); outline: none }
 __SPRITES__
+/* the line at a glance: an evolution chart, one column a Final, read top down */
+.chartwrap { overflow-x: auto; margin-top: 20px; border: 1px solid var(--rule); border-top: 3px solid var(--brass); background: var(--plate); padding: 12px 10px 14px }
+.chart { display: grid; grid-template-columns: 92px repeat(18, minmax(70px, 1fr)); min-width: 1352px }
+.chart .lab { grid-column: 1; align-self: center; font-family: var(--ui); font-weight: 700; font-size: 11px; letter-spacing: .13em; text-transform: uppercase; color: var(--faint) }
+.node { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 14px 2px 14px; text-align: center; font-family: var(--ui); font-size: 11.5px; line-height: 1.15; color: var(--fg); min-width: 0 }
+.node span { overflow-wrap: anywhere }
+.node .pic { width: 64px }
+.node.n1 .pic { width: 112px } .node.n2 .pic { width: 96px } .node.n3 .pic { width: 80px }
+.node.n1 { font-family: var(--display); font-size: 15px; letter-spacing: .04em; color: var(--brass-hi) }
+.node.n2 { font-family: var(--display); font-size: 13px; letter-spacing: .03em; color: var(--brass-hi) }
+.node.n3 { font-size: 12.5px; font-weight: 700 }
+.node::before { content: ""; position: absolute; top: 0; left: 50%; height: 12px; border-left: 1px solid var(--brass) }       /* the stem up to the bar */
+.node::after { content: ""; position: absolute; top: 0; left: 0; right: 0; border-top: 1px solid var(--brass) }               /* its share of the bar */
+.node.first::after { left: 50% } .node.last::after { right: 50% }
+.node.only::before, .node.only::after, .node.solo::after { display: none }
+.node.n0 img { width: 84px; height: auto; border: 1px solid var(--rule); border-radius: 3px; background: var(--shot) }
+.node.n0 .mote { width: 18px; height: 18px; border-radius: 50%; background: var(--brass-hi); box-shadow: 0 0 14px 5px var(--brass) }
+.node.n0 { font-family: var(--display); font-size: 13px; letter-spacing: .04em; color: var(--dim) }
+.node i { position: absolute; bottom: 0; left: 50%; height: 12px; border-left: 1px solid var(--brass) }                        /* the drop to its children's bar */
 .life { margin: 18px 0 0 }
 .life img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 3px; background: var(--shot) }
 .life figcaption { font-family: var(--ui); font-size: 14px; color: var(--dim); margin-top: 6px; max-width: 90ch }
@@ -101,7 +120,7 @@ footer { color: var(--faint); font-family: var(--ui); font-size: 13px; padding-b
 <div class="wrap top">
   <h1>The Genius Tree</h1>
   <p>A genius is its partner's soul, standing where it can be seen. Every one is on one of these trees. Each path is a trait in a person, and no two paths are earned by the same play. __SEEN__</p>
-  <div class="levels"><span><b>The spark</b> before the rite</span><span><b>Settled</b> at the rite</span><span><b>A path</b> of three, at the Gate</span><span><b>A prong</b> of three</span><span><b>A finish</b> of two</span><span>then it grows great, and to its apex</span></div>
+  <div class="levels"><span><b>Baby</b> before the rite</span><span><b>Starter</b> at the rite, three offered</span><span><b>Path</b> one of three, at the Gate</span><span><b>Advancement</b> one of three</span><span><b>Final</b> one of two</span><span>then it grows great, and to its apex</span></div>
 </div>
 <nav class="rail" aria-label="Bases"><div class="wrap">__NAV__</div></nav>
 <div class="wrap">

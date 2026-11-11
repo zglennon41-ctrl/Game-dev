@@ -1,0 +1,172 @@
+{
+  "$comment": "One style for the whole game (docs/style.md; owner, 2026-11-10): lamplight gothic, as numbers. Everything the game draws and moves reads this file (game/scripts/style.gd), and tools/blender/style.py reads it for the kits; `godot --headless --path . -s res://game/tests/check_style.gd` fails on whatever is off it. cap is the most saturated (HSV) an unlit surface may be; accentCap is for the ramps named in accents (brass: rims and fittings only; rust: red hair, a fox's coat); skinCap for skin. A ramp is a line of five colours from shadow to light; a material's colour is on-style when it lies on a ramp its class allows (within tolerance, in RGB), and one that is not is moved to the nearest point of the nearest such ramp when the material is made. loud is everything that may pass the cap: the six Shapes' colours (the field), the telegraph's red, the unshaped field's moss, and the lights themselves.",
+  "cap": 0.5,
+  "accentCap": 0.66,
+  "skinCap": 0.62,
+  "tolerance": 0.035,
+  "ramps": {
+    "ink": ["#090807", "#110E0C", "#1C1815", "#2B2622", "#3D3631"],
+    "slate": ["#191C21", "#2C2F38", "#444954", "#646975", "#888D99"],
+    "stone": ["#2E2B27", "#4C4843", "#706B65", "#918B84", "#B2ACA4"],
+    "bone": ["#574E40", "#857965", "#B2A58F", "#D6CAB4", "#F2E8D6"],
+    "umber": ["#261D15", "#423224", "#664E3B", "#8A6D55", "#AD8E74"],
+    "leather": ["#211712", "#3B2820", "#593E33", "#7A5849", "#997262"],
+    "oxblood": ["#291615", "#4C2926", "#753F3B", "#A15954", "#CC746E"],
+    "ochre": ["#3D331F", "#6B5936", "#998150", "#C7AA6F", "#EDD095"],
+    "saffron": ["#4C3826", "#7A5A3D", "#A87B54", "#D19969", "#EDB380"],
+    "moss": ["#1C2416", "#324028", "#4B5E3C", "#647D51", "#7F9C6A"],
+    "verdigris": ["#1A2923", "#314A41", "#4C7063", "#729E8E", "#9FCCBC"],
+    "indigo": ["#151C29", "#273247", "#3E4D6B", "#596B8F", "#798CB2"],
+    "plum": ["#291A28", "#472E45", "#6B4868", "#8F648B", "#B284AF"],
+    "earth": ["#241E17", "#3D3428", "#5C4E3D", "#786650", "#948068"],
+    "reed": ["#47412B", "#6B6141", "#8F825A", "#AD9F71", "#CCBD8B"],
+    "water": ["#090F12", "#121F24", "#1D3138", "#2C464F", "#42606B"],
+    "iron": ["#16171A", "#2D2E33", "#46484F", "#60636B", "#80828C"],
+    "steel": ["#6F747A", "#91979E", "#B2B7BF", "#D3D7DE", "#EDF1F5"],
+    "brass": ["#382D1B", "#5C4B30", "#A8803F", "#D1A358", "#FFCA75"],
+    "rust": ["#291710", "#4D2A1D", "#75402D", "#9E593F", "#C7775A"]
+  },
+  "accents": ["brass", "rust"],
+  "loud": {
+    "shapes": { "anchor": "#F2AD40", "turn": "#FF6B26", "cast": "#8CD9FF", "read": "#D9D9FF", "bind": "#BF73FF", "make": "#80FF99" },
+    "telegraph": "#FF3820",
+    "unshaped": "#9EF2B3"
+  },
+  "materials": {
+    "$comment": "What a material may be. words: a material is of the class of the first word in this list that is in its name (a class written a|b is whichever of the two its colour is nearer). classes: the ten of the made and worn world (skin, cloth, leather, wood, stone, iron, brass, bone, glass, and the field's light), four of the land and the living (coat: hair, fur, feather, hide and a genius's markings; growth; earth; water), and three the game needs (lit: a lamp, a flame, a lit pane; eye; ink: shadow and void), with mixed for a kit's painted texture. glows: whether it may shine with a light of its own (the field, the lit, and the moon on water; nothing else). ramps: the ramps its colour may lie on ([] for a class that is not moved: skin keeps the tones of data/creation.json, light keeps its light). bands: steps of light. shadowTint: what its shadow side is multiplied by. spec: the two-band highlight (strength, gloss). grain: the tileable texture laid over it (game/assets/textures/detail/<name>.png) at grainScale; wear: how strongly that grain shows, 0 to 1 (nothing is new).",
+    "words": [
+      ["field_lamp", "lit"], ["field", "field"], ["echo_glow", "field"], ["glow", "field"], ["_lit", "lit"], ["lamp", "lit"], ["flame", "lit"], ["eye", "eye"],
+      ["iris", "eye"], ["pupil", "eye"], ["lash", "eye"], ["skin", "skin"], ["lips", "skin"], ["gill", "skin"], ["cloth", "cloth"],
+      ["bowstring", "cloth"], ["keepsake", "cloth"], ["cape", "cloth"], ["tunic", "cloth"], ["trousers", "cloth"], ["linen", "cloth"],
+      ["glass", "glass"], ["lens", "glass"], ["ice", "glass"], ["iron", "iron"], ["steel", "iron"], ["brass", "brass"], ["gold", "brass"],
+      ["copper", "brass"], ["bronze", "brass"], ["trim", "brass"], ["metal", "iron|brass"], ["leather", "leather"], ["boots", "leather"],
+      ["strap", "leather"], ["belt", "leather"], ["cord", "leather"], ["rope", "leather"], ["wood", "wood"], ["plank", "wood"], ["timber", "wood"],
+      ["beam", "wood"], ["door", "wood"], ["bark", "wood"], ["trunk", "wood"], ["crate", "wood"], ["barrel", "wood"], ["root", "wood"],
+      ["stone", "stone"], ["rock", "stone"], ["brick", "stone"], ["floor", "stone"], ["wall", "stone"], ["tile", "stone"], ["slate", "stone"],
+      ["pillar", "stone"], ["plaster", "stone"], ["roof", "stone"], ["ruin", "stone"], ["clay", "stone"], ["bone", "bone"], ["horn", "bone"],
+      ["antler", "bone"], ["fang", "bone"], ["tooth", "bone"], ["claw", "bone"], ["talon", "bone"], ["beak", "bone"], ["wax", "bone"],
+      ["paper", "bone"], ["grass", "growth"], ["leaf", "growth"], ["moss", "growth"], ["reed", "growth"], ["straw", "growth"], ["petal", "growth"],
+      ["earth", "earth"], ["dirt", "earth"], ["ground", "earth"], ["mud", "earth"], ["sand", "earth"], ["dust", "earth"], ["coal", "earth"],
+      ["water", "water"], ["mist", "water"], ["current", "water"], ["fur", "coat"], ["hair", "coat"], ["feather", "coat"], ["plume", "coat"],
+      ["bristle", "coat"], ["whisker", "coat"], ["hide", "coat"], ["scale", "coat"], ["fin", "coat"], ["nose", "coat"], ["bare", "coat"],
+      ["mark", "coat"], ["echo", "coat"], ["brow", "coat"], ["beard", "coat"], ["shadow", "ink"], ["void", "ink"], ["shade", "ink"], ["ink", "ink"],
+      ["dress", "cloth"], ["home_", "cloth"], ["banner", "cloth"], ["main", "coat"], ["tin", "iron"], ["texture", "mixed"]
+    ],
+    "classes": {
+      "field": {"glows": true, "ramps": [], "bands": 1, "shadowTint": "#FFFFFF", "spec": [0.0, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
+      "lit": {"glows": true, "ramps": [], "bands": 1, "shadowTint": "#FFFFFF", "spec": [0.0, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
+      "eye": {"ramps": [], "bands": 2, "shadowTint": "#A9A6B4", "spec": [0.8, 60.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
+      "skin": {"ramps": [], "bands": 3, "shadowTint": "#B58F92", "spec": [0.1, 10.0], "grain": "skin", "grainScale": 5.0, "wear": 0.2},
+      "coat": {"ramps": ["rust", "ink", "umber", "leather", "earth", "ochre", "reed", "oxblood", "saffron", "slate", "iron", "steel", "stone", "bone", "moss", "verdigris", "water", "indigo", "plum"], "bands": 3, "shadowTint": "#9A94A6", "spec": [0.22, 14.0], "grain": "wool", "grainScale": 7.0, "wear": 0.4},
+      "cloth": {"ramps": ["bone", "stone", "slate", "ink", "iron", "oxblood", "ochre", "saffron", "moss", "verdigris", "indigo", "plum", "umber", "earth", "reed", "leather", "steel"], "bands": 3, "shadowTint": "#9A96A8", "spec": [0.05, 8.0], "grain": "linen", "grainScale": 4.0, "wear": 0.25},
+      "leather": {"ramps": ["leather", "umber", "ink", "oxblood", "earth", "reed", "saffron"], "bands": 3, "shadowTint": "#958D9E", "spec": [0.2, 18.0], "grain": "leather", "grainScale": 4.0, "wear": 0.4},
+      "wood": {"ramps": ["umber", "earth", "ink", "stone", "leather"], "bands": 3, "shadowTint": "#9690A2", "spec": [0.1, 10.0], "grain": "wood", "grainScale": 1.5, "wear": 0.35},
+      "stone": {"ramps": ["stone", "slate", "bone", "ink", "earth"], "bands": 3, "shadowTint": "#9594A6", "spec": [0.08, 6.0], "grain": "stone", "grainScale": 0.7, "wear": 0.3},
+      "iron": {"ramps": ["iron", "steel", "slate", "ink"], "bands": 3, "shadowTint": "#9496A6", "spec": [0.55, 44.0], "grain": "bronze", "grainScale": 4.0, "wear": 0.3},
+      "brass": {"ramps": ["brass", "ochre"], "bands": 3, "shadowTint": "#8C8494", "spec": [0.6, 48.0], "grain": "bronze", "grainScale": 4.0, "wear": 0.35},
+      "bone": {"ramps": ["bone", "stone", "ink", "umber", "earth", "ochre"], "bands": 3, "shadowTint": "#A29BA8", "spec": [0.12, 12.0], "grain": "stone", "grainScale": 3.0, "wear": 0.25},
+      "glass": {"ramps": ["slate", "water", "steel", "verdigris"], "bands": 2, "shadowTint": "#A4A7B8", "spec": [0.7, 56.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
+      "growth": {"ramps": ["moss", "reed", "verdigris", "earth"], "bands": 3, "shadowTint": "#9699A8", "spec": [0.04, 8.0], "grain": "linen", "grainScale": 3.0, "wear": 0.2},
+      "earth": {"ramps": ["earth", "stone", "reed", "ink", "umber", "bone"], "bands": 3, "shadowTint": "#9590A2", "spec": [0.05, 6.0], "grain": "stone", "grainScale": 0.7, "wear": 0.3},
+      "water": {"glows": true, "ramps": ["water", "slate", "steel"], "bands": 2, "shadowTint": "#9DA1B0", "spec": [0.5, 40.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
+      "ink": {"ramps": ["ink", "slate", "iron", "plum", "water"], "bands": 2, "shadowTint": "#8E8EA0", "spec": [0.0, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
+      "mixed": {"ramps": ["ink", "slate", "stone", "bone", "umber", "leather", "oxblood", "ochre", "saffron", "moss", "verdigris", "indigo", "plum", "earth", "reed", "water", "iron", "steel", "brass"], "bands": 3, "shadowTint": "#9A96A8", "spec": [0.05, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0}
+    }
+  },
+  "shading": {
+    "$comment": "The cel look (the art bible, 11): light in bands with a tinted shadow side. rim is the light along a form's edge. occlusion scales the baked cavity darkening. smooth: the living are smooth-shaded and the made keep their cut edges (the kits read this).",
+    "cel": true,
+    "sky": true,
+    "rim": { "strength": 0.28, "color": "#D2D8EC", "power": 3.2 },
+    "occlusion": 0.8,
+    "smooth": { "living": true, "made": false }
+  },
+  "ink": {
+    "$comment": "Ink on the living (the art bible, rule 4). width is in pixels on a screen `screen` pixels tall, by what carries it; 0 is no line. Places carry none.",
+    "color": "#0B0807",
+    "screen": 900,
+    "width": { "people": 2.0, "beasts": 2.0, "genii": 2.0, "weapons": 0.0, "places": 0.0 }
+  },
+  "lights": {
+    "$comment": "The three lights. color is the light as you see its source (a flame, the moon's disc, a lit pane); cast is what it throws on a surface, paler, so that a wall in moonlight is not blue paint. energy scales every light of that name. kinds: what each kind of place is lit by: sky (the dark behind everything), ambient and its energy, fog, how strong the moon stands (0 indoors), and which light keys it (`key`) with which it fills (`fill`); every place has a warm light and a cool one. window is a lit pane; stain is the Library's glass, the Shapes' own colours banked down.",
+    "lamp": { "color": "#FF9A4D", "cast": "#FFB57A", "energy": 1.0 },
+    "fire": { "color": "#FF8A3D", "cast": "#FFA763", "energy": 1.0 },
+    "moon": { "color": "#8C9EF2", "cast": "#B3BDE6", "energy": 1.0 },
+    "window": { "color": "#FFAE5C", "energy": 0.7 },
+    "stain": { "cast": "#B9A6D9", "energy": 0.4, "darken": 0.38 },
+    "kinds": {
+      "hall": { "key": "lamp", "fill": "moon", "sky": "#040303", "ambient": "#A88A76", "ambientEnergy": 0.3, "fog": "#0D0907", "fogDensity": 0.016, "moon": 0.0 },
+      "court": { "key": "moon", "fill": "lamp", "sky": "#06070B", "ambient": "#8F94A6", "ambientEnergy": 0.5, "fog": "#0C0D12", "fogDensity": 0.006, "moon": 0.4 },
+      "wild": { "key": "moon", "fill": "lamp", "sky": "#07090C", "ambient": "#8C93A3", "ambientEnergy": 0.4, "fog": "#0B0D11", "fogDensity": 0.018, "moon": 0.8 },
+      "cut": { "key": "moon", "fill": "fire", "sky": "#050505", "ambient": "#8A8490", "ambientEnergy": 0.2, "fog": "#0F0D0F", "fogDensity": 0.022, "moon": 0.28 }
+    },
+    "sky": { "top": "#131824", "mid": "#222938", "low": "#39343F", "ember": "#7A4A32", "stars": "#CCD4EA", "moon": "#DDE2F2", "halo": "#3A4260" }
+  },
+  "film": {
+    "$comment": "The film the game is shot on: one grade over the whole world and never over the interface. shadows and highlights are what the dark and the light of the picture are multiplied by; saturation, contrast and exposure are the picture's; vignette is how far the frame's edge falls into dark; grain is the grain.",
+    "shadows": [0.92, 0.97, 1.06],
+    "highlights": [1.06, 1.0, 0.9],
+    "saturation": 0.92,
+    "contrast": 1.02,
+    "exposure": 0.9,
+    "vignette": 0.5,
+    "grain": 0.03,
+    "bloom": 0.08,
+    "glow": 0.7
+  },
+  "genius": {
+    "$comment": "What a genius's body must hold to (the lead's kits apply it): smooth where it is flesh; field light on no more than `glowShare` of its surface, in eyes, seams and one sigil, never a whole limb; the energy of that light by instar; the rest of it on the ramps like anything else.",
+    "glowShare": 0.12,
+    "glowEnergy": { "1": 1.2, "2": 1.4, "3": 1.7, "4": 2.0, "5": 2.4, "6": 2.8 },
+    "groundLight": 0.6
+  },
+  "effects": {
+    "$comment": "One family of shapes, in ink and light: the ring (thin, flat), the shard (a long splinter of light, laid along its travel), the puff (a soft blot of ink or dust), the slash (the blade's trail) and the word. colors: what each kind of event is drawn in; `shape` is the Shape's colour of whoever made it. Telegraphs are the telegraph red and nothing else is. guard is a block and a parry (the moon's colour, lit); stagger a break; spark a blow landing; hurt the screen's edge when the partner is struck.",
+    "colors": {
+      "telegraph": "#FF3820",
+      "hurt": "#C72B24",
+      "guard": "#A6B4F4",
+      "stagger": "#FFD175",
+      "spark": "#FFE0A8",
+      "dust": "#786650",
+      "shot": "#FFE0A8",
+      "text": "#F2E8D6",
+      "dim": "#A89B8A"
+    },
+    "ring": { "thickness": 0.06, "seconds": 0.35 },
+    "shard": { "length": 0.22, "width": 0.035, "seconds": 0.4 },
+    "puff": { "size": 0.16, "seconds": 0.7, "alpha": 0.55 },
+    "flash": { "seconds": 0.13 },
+    "word": { "seconds": 0.9, "rise": 0.9, "outline": 12 }
+  },
+  "motion": {
+    "$comment": "How things move, so that they move alike. Times are in seconds. A motion made for show has three parts: the anticipation (it gathers), the strike (it goes) and the settle (it comes to rest), in the shares given; the fight's own timings are the fight's (data/combat-room.json) and are held only to the bounds in hit. idle: the living breathe on one period. hover: the unliving that float rise and fall on another, by `rise` of their own height. flicker: a flame's. ui: the interface's three times (quick for a prompt, arrive for a panel, ceremony for a title or a fade between places), how long one line waits for the line before it (stagger), how long a title holds, and the one easing. settle: how a thing with weight comes to rest in the world (back: one small overshoot; nothing bounces twice). camera: how fast a held camera travels.",
+    "shares": { "anticipation": 0.3, "strike": 0.15, "settle": 0.55 },
+    "idle": { "period": 3.6 },
+    "hover": { "period": 2.8, "rise": 0.05 },
+    "flicker": { "period": 0.7, "depth": 0.12 },
+    "hit": { "stopMin": 0.04, "stopMax": 0.14, "shakeMin": 0.04, "shakeMax": 0.2 },
+    "ui": { "quick": 0.2, "arrive": 0.35, "leave": 0.25, "ceremony": 0.7, "stagger": 0.05, "hold": 1.6, "ease": "out-cubic" },
+    "settle": "back",
+    "word": { "in": 0.08, "hold": 0.6 },
+    "camera": { "cut": 60.0, "glide": 2.0 }
+  },
+  "type": {
+    "$comment": "The three typefaces and nothing else: the titles', the story's and the interface's (game/assets/fonts).",
+    "title": "Cinzel",
+    "body": "Alegreya",
+    "ui": "AlegreyaSans"
+  },
+  "interface": {
+    "$comment": "The interface: ink plates with brass rims and clipped corners. cut is the corner's cut and rim the rim's width, in pixels.",
+    "colors": {
+      "ink": "#090807", "plate": "#100D0C", "plateHi": "#21180F", "plateOn": "#452E12",
+      "brass": "#A8803F", "brassDim": "#5C4A30", "brassHi": "#FFD175",
+      "fg": "#F2E8D6", "dim": "#A89B8A", "faint": "#73695C",
+      "gold": "#FFCC61", "ember": "#EB5C33", "blood": "#C72B24", "will": "#6BADFA", "field": "#9EF2B3"
+    },
+    "plateAlpha": 0.94,
+    "cut": 7,
+    "rim": 1
+  }
+}

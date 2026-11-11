@@ -4,6 +4,10 @@ A genius fights as what it is. This is item 1 of "What 'the best part' needs fir
 `docs/genius-signature.md`: until now every genius guarded and hunted the same way, and one
 kind differed from another by two numbers.
 
+Since 2026-11-10 it also fights as its **type** (a weapon is taken in hand, an item is worn
+and used, a companion has a role): `docs/genius-types.md`. What is written here is what a
+companion does, and what the types are laid over.
+
 What it does in a fight now follows from four things, each of which a player can see:
 
 1. **What it is**: the kind of body it has and the features it carries give it its moves.

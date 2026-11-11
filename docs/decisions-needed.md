@@ -336,3 +336,18 @@ played the arc); barks stay as floating text. Still to be played rather than dec
     (`npx tsx tools/genius-offers.ts`: now between 7 and 21 bowls in a hundred); how much
     play fills a line of the Tally (twenty blows, ten runs, six postings, a hundred Pattern
     fires, which a week at the Academy does not reach).
+80. **A line as an evolution** (owner's direction, 2026-11-10; mine to build;
+    `docs/genius-evolutions.md`): (a) the reading taken of "Baby, three starters, three
+    paths from each starter and hybrid lines, three advancements from there, final
+    advancement": the Baby is everyone's before the rite, the three starters are the rite's
+    three offers, and the tree keeps its shape; the other reading is one more tier on every
+    tree. (b) One Final under each Advancement, or the two the tree has. (c) The stages'
+    names (Baby, Starter, Path, Advancement, Final) as the player's words; the files still
+    say settled, path, prong, finish. (d) How strange a Final may be: the Wolf's stay
+    wolves. (e) The Baby: one small dark body with lit eyes for everyone. (f) Every form's
+    body, written from its sign (the Wolf's thirty-one first; the other twenty-one lines by
+    the same rule). (g) That a form wears its partner's own coat shifted (night, frost,
+    slate, ember and the rest), never a coat of its own. (h) That the change of form at the
+    Gate is a scene of about three seconds. (i) Seventy-one painted cards of forms the tree
+    replaced were removed to make room; whether every form of the tree is to have a painted
+    card again (682) is open: the game draws the living body on a card today.

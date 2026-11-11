@@ -19,12 +19,13 @@ signal shifted(part: float)             # the part of the screen's width the wor
 signal turned(by: float)                # the figure is turned, in radians
 signal field(col: Color, k: float, flare: float)   # the field at the spot: colour, how far gathered, a flare
 
-const BG := Color(0.03, 0.025, 0.025, 0.86)
-const PANEL := Color(0.06, 0.05, 0.045, 0.94)
-const FG := Color(0.94, 0.9, 0.83)
-const DIM := Color(0.62, 0.58, 0.52)
-const GOLD := Color(1.0, 0.8, 0.35)
-const EDGE := Color(0.32, 0.27, 0.21)
+# The interface's one palette (Style, from data/style.json).
+static var BG: Color = Color(Style.INK, 0.86)
+static var PANEL: Color = Style.PLATE
+static var FG: Color = Style.FG
+static var DIM: Color = Style.DIM
+static var GOLD: Color = Style.GOLD
+static var EDGE: Color = Style.BRASS_DIM
 const PANEL_W := 640.0      # the reveal's panel
 const COL_W := 700.0        # the column of the questions
 const COL_MARGIN := 64.0
@@ -475,7 +476,7 @@ func _draw_reveal(first := false) -> void:
 	if first:
 		_arrive(v)
 		panel.modulate.a = 0.0
-		panel.create_tween().tween_property(panel, "modulate:a", 1.0, 0.5).set_delay(0.35)
+		Style.ease_ui(panel.create_tween().tween_property(panel, "modulate:a", 1.0, Style.t("arrive")).set_delay(Style.t("arrive")))
 	else:
 		var keep := _scroll_keep
 		scroll.ready.connect(func(): scroll.set_deferred("scroll_vertical", keep))
@@ -710,16 +711,18 @@ func _headgear_covers() -> bool:
 	var hg: Variant = _home().get("dress", {}).get("headgear", null)
 	return hg is Dictionary and not (Data.creation.get("look", {}).get("openHeadgear", []) as Array).has(String(hg.get("type", "")))
 
-## The cloak's colours as the world dyes them (World.cape_color_for).
+## The cloak's colours as the world dyes them (World.cape_color_for): cloth, on the ramps.
 func _cape_color(which: String) -> Color:
+	var plain := Color(0.5, 0.42, 0.36)
+	var col := plain
 	match which:
-		"shape": return (World.SHAPE_COLORS.get(hero["shape"], Color(0.5, 0.42, 0.36)) as Color).darkened(0.25)
-		"city": return World.CITY_COLORS.get(hero["city"], Color(0.5, 0.42, 0.36))
+		"shape": col = (World.SHAPE_COLORS.get(hero["shape"], plain) as Color).darkened(0.25)
+		"city": col = World.CITY_COLORS.get(hero["city"], plain)
 		"blood":
 			var b: Dictionary = Creation.blood(hero["blood"])
 			var lean: Dictionary = b.get("shapeLean", {})
-			return Color(0.25, 0.12, 0.14).lerp(World.SHAPE_COLORS.get(String(lean.keys()[0]) if not lean.is_empty() else "anchor", Color.WHITE), 0.5)
-	return Color(0.5, 0.42, 0.36)
+			col = Color(0.25, 0.12, 0.14).lerp(World.SHAPE_COLORS.get(String(lean.keys()[0]) if not lean.is_empty() else "anchor", Color.WHITE), 0.5)
+	return Style.conform(col, "cloth")
 
 func _shape_line(shape: String) -> String:
 	match shape:
@@ -1065,7 +1068,7 @@ func _arrive(box: Control) -> void:
 		if c is CanvasItem:
 			var it := c as CanvasItem
 			it.modulate.a = 0.0
-			it.create_tween().tween_property(it, "modulate:a", 1.0, 0.35).set_delay(0.045 * i).set_trans(Tween.TRANS_SINE)
+			Style.ease_ui(it.create_tween().tween_property(it, "modulate:a", 1.0, Style.t("arrive")).set_delay(Style.t("stagger") * i))
 			i += 1
 
 const BACKDROP := """

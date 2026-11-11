@@ -49,11 +49,12 @@ BASES = os.path.join(ROOT, "data", "genius-bases")
 
 # what the forms are made of that the kit's palette did not have: muted, a value apart
 PALETTE.update({
-    "fur_pale": ((0.6, 0.56, 0.48), 0.9, 0.0), "fur_mask": ((0.03, 0.028, 0.03), 0.9, 0.0), "fur_grey": ((0.4, 0.39, 0.38), 0.9, 0.0),
-    "maw": ((0.13, 0.025, 0.025), 0.6, 0.0), "tongue": ((0.42, 0.12, 0.11), 0.5, 0.0),
+    "fur_pale": ((0.6, 0.56, 0.48), 0.9, 0.0), "fur_mask": ((0.03, 0.028, 0.03), 0.9, 0.0), "fur_grey": ((0.27, 0.265, 0.26), 0.9, 0.0),
+    "hide_maw": ((0.13, 0.025, 0.025), 0.6, 0.0), "hide_tongue": ((0.42, 0.12, 0.11), 0.5, 0.0),
     "slate": ((0.19, 0.2, 0.23), 0.85, 0.0), "slate_light": ((0.37, 0.38, 0.41), 0.85, 0.0),
-    "smoke": ((0.1, 0.095, 0.11), 1.0, 0.0), "scar": ((0.6, 0.48, 0.44), 0.6, 0.0), "iron_bristle": ((0.15, 0.15, 0.17), 0.4, 0.8),
-    "star": ((0.8, 0.78, 0.7), 0.4, 0.0), "wool_stripe": ((0.34, 0.12, 0.08), 0.95, 0.0), "cloth_watch": ((0.17, 0.2, 0.3), 0.95, 0.0),
+    "shade_smoke": ((0.1, 0.095, 0.11), 1.0, 0.0), "hide_scar": ((0.6, 0.48, 0.44), 0.6, 0.0), "iron_bristle": ((0.15, 0.15, 0.17), 0.4, 0.8),
+    "hide_baby": ((0.2, 0.185, 0.18), 0.8, 0.0), "hide_baby_dark": ((0.09, 0.082, 0.08), 0.8, 0.0), "hide_baby_pale": ((0.56, 0.52, 0.46), 0.8, 0.0),
+    "cloth_stripe": ((0.34, 0.12, 0.08), 0.95, 0.0), "cloth_watch": ((0.17, 0.2, 0.3), 0.95, 0.0),
 })
 
 
@@ -117,8 +118,23 @@ class Anat:
             rz = 0.31 * k
             self.neck[name] = (y, top - rz, 0.28 * k, rz)
 
+        # the line of its back and the breadth of its flank, as they are before anything is
+        # grown on it: a cloth is cut to the body, not to the mane under it
+        self._ys = [self.n3.y - 0.3 + 0.1 * i for i in range(int((self.tail[1].y + 0.5 - self.n3.y) / 0.1) + 2)]
+        self._tops = [r.top(y) for y in self._ys]
+        self._sides = [r.side(y, t - 0.42) for y, t in zip(self._ys, self._tops)]
+
+    def _at(self, table, y):
+        i = (y - self._ys[0]) / 0.1
+        i0 = max(0, min(len(table) - 2, int(i)))
+        t = max(0.0, min(1.0, i - i0))
+        return table[i0] * (1 - t) + table[i0 + 1] * t
+
     def top(self, y):
-        return self.r.top(y)
+        return self._at(self._tops, y)
+
+    def flank(self, y):
+        return self._at(self._sides, y)
 
 
 def _head(r):
@@ -229,7 +245,7 @@ def build(r, b):
 # --- small builders ---------------------------------------------------------------------
 
 # what is soft is shaded round (fur, cloth, smoke, light); what is hard keeps its planes
-SOFT = ("fur", "cloth", "wool", "smoke", "shade", "tongue", "maw", "field", "cord", "leather", "scar")
+SOFT = ("fur", "cloth", "shade", "hide", "field", "cord", "leather")
 
 
 def _add(r, name, geo, weights, material, smooth=None):
@@ -240,21 +256,9 @@ def _add(r, name, geo, weights, material, smooth=None):
 
 
 def _weld(r):
-    """The wolf comes with every face's corners its own (it was made flat): weld them, so the
-    body is one skin, shaded round, and a third the size on disk."""
-    import bmesh
-    me = r.mesh.data
-    bm = bmesh.new()
-    bm.from_mesh(me)
-    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-4)
-    bm.to_mesh(me)
-    bm.free()
-    for name in ("custom_normal", "sharp_face", "sharp_edge"):
-        if name in me.attributes:
-            me.attributes.remove(me.attributes[name])
-    for p in me.polygons:
-        p.use_smooth = True
-    me.update()
+    """One welded skin, shaded round (beast_kit's)."""
+    r.weld()
+
 
 
 def _spine_w(r, geo):
@@ -389,7 +393,7 @@ def grow_maw(r, A, style, size):
             if wh[i] > 0.5 and p.y < hinge.y and p.z < zcut:
                 v.co = r.Minv @ (hinge + Rm @ (p - hinge))
                 moved.add(i)
-        maw = mat("maw")
+        maw = mat("hide_maw")
         if maw.name not in [m.name for m in me.materials]:
             me.materials.append(maw)
         slot = [m.name for m in me.materials].index(maw.name)
@@ -400,7 +404,7 @@ def grow_maw(r, A, style, size):
         # the tongue, and the dark behind it
         t0 = Vector((0, hinge.y - 0.05, zcut - 0.05))
         tip = hinge + Rm @ (Vector((0, A.nose.y + 0.12, zcut - 0.02)) - hinge)
-        _add(r, "tongue", g.tongue([t0, (t0 + tip) / 2 + Vector((0, 0, 0.03)), tip], [0.2, 0.18, 0.1], thick=0.3, normal=Z), head, mat("tongue"))
+        _add(r, "tongue", g.tongue([t0, (t0 + tip) / 2 + Vector((0, 0, 0.03)), tip], [0.2, 0.18, 0.1], thick=0.3, normal=Z), head, mat("hide_tongue"))
         if style == "glow":
             c = Vector((0, hinge.y - 0.12, zcut - 0.02))
             _add(r, "throat_light", g.ico(c, 0.13 * size, sub=1, scale=(1.0, 1.3, 0.8)), head, field("throat", 3.6))
@@ -512,9 +516,9 @@ def _cape(r, A, name, y0, y1, drop, material, steps=9, off=0.05, flare=0.1, hem=
     """A cloth over the back: round the top of the body to where the flank is widest, then
     hanging to its hem."""
     def section(y):
-        top = r.top(y)
+        top = A.top(y)
         zc = top - 0.42
-        w = r.side(y, zc) + off
+        w = A.flank(y) + off
         t = (y - y0) / max(1e-6, y1 - y0)
         pts = []
         for j in range(11):
@@ -577,7 +581,7 @@ def grow_spine(r, A, style, size):
             else:
                 geo = g.merge(geo, tg)
                 ws.extend([r.spine_weights(y)] * len(tg[0]))
-        _add(r, "smoke", geo, ws, mat("smoke"))
+        _add(r, "smoke", geo, ws, mat("shade_smoke"))
         _add(r, "smoke_lit", lit, wl, field("smoke", 0.7))
     elif style == "stars":           # a night's worth of pale points along its back
         geo, ws = None, []
@@ -615,7 +619,7 @@ def grow_tail(r, A, style, size):
             b0 = tb[i]
             k = size * (0.7 + 0.15 * i)
             pts = [b0, b0 + Vector((0.05, 0.2, 0.16)) * k, b0 + Vector((-0.08, 0.42, 0.42)) * k, b0 + Vector((0.04, 0.5, 0.72)) * k]
-            _add(r, "tailsmoke_%d" % i, g.tongue(pts, [0.17, 0.15, 0.09, 0.02], thick=0.35, normal=X), "Tail%d" % (i + 1), mat("smoke"))
+            _add(r, "tailsmoke_%d" % i, g.tongue(pts, [0.17, 0.15, 0.09, 0.02], thick=0.35, normal=X), "Tail%d" % (i + 1), mat("shade_smoke"))
     elif style == "lamp":            # a tail-lamp, like the last car's
         tip = tb[7]
         post = [tip, tip + Vector((0, 0.1, 0.28 * size)), tip + Vector((0, 0.3, 0.36 * size))]
@@ -697,7 +701,7 @@ def grow_armor(r, A, style, size):
         _add(r, "harness", geo, "Torso3", mat("leather"))
         _add(r, "harness_tag", g.ico((0, A.chest_y - 0.04, A.sh.z + 0.2), 0.09, sub=1, scale=(1.0, 0.4, 1.2)), "Torso3", mat("metal_brass"))
     elif style == "scars":           # healed lines across the coat
-        m = mat("scar")
+        m = mat("hide_scar")
         for i, (side, ya, yb, za, zb) in enumerate(((1, -0.6, 0.5, 0.25, -0.1), (1, -0.3, 0.7, -0.05, 0.2), (-1, -0.7, 0.2, 0.05, 0.3), (-1, -0.1, 0.8, 0.3, -0.05), (1, 0.2, 0.9, -0.2, -0.3))):
             zmid = (A.withers + A.belly) / 2
             r.flank_line("scar_%d" % i, A.t3.y + ya + 0.6, A.t3.y + yb + 0.6, lambda t, za=za, zb=zb, zmid=zmid: zmid + 0.25 + za + (zb - za) * t, m, height=0.05 * size, depth=0.06, side=side)
@@ -753,9 +757,11 @@ def grow_carry(r, A, style, size):
     elif style == "cloak":           # a watch-cloak over the shoulders and back
         _cape(r, A, "cloak", A.n1.y, (A.t1.y if size < 1.2 else A.back.y + 0.1), 0.5 * size, mat("cloth_watch"))
         _add(r, "cloak_clasp", g.ico(Vector((0, A.chest_y - 0.02, A.sh.z + 0.42)), 0.08, sub=1, scale=(1, 0.5, 1)), "Torso3", mat("metal_brass"))
+    elif style == "shroud":          # a cloak of shadow, tattered at the hem
+        _cape(r, A, "shroud", A.n1.y, A.back.y + 0.2, 0.62 * size, mat("shade_edge"), hem=0.14, flare=0.14)
     elif style == "rug":             # a woven rug across its back
         _cape(r, A, "rug", A.t3.y + 0.12, A.t1.y + 0.3, 0.4 * size, mat("cloth_wool"), hem=0.0, flare=0.03)
-        _cape(r, A, "rug_stripe", A.t3.y + 0.42, A.t1.y + 0.0, 0.34 * size, mat("wool_stripe"), steps=5, hem=0.0, flare=0.04, off=0.07)
+        _cape(r, A, "rug_stripe", A.t3.y + 0.42, A.t1.y + 0.0, 0.34 * size, mat("cloth_stripe"), steps=5, hem=0.0, flare=0.04, off=0.07)
     elif style == "bell":            # a bell at its throat
         _collar(r, A, mat("leather"))
         c = throat + Vector((0, -0.02, -0.16 * size))
@@ -965,6 +971,58 @@ def export_objects(objects, sockets, path, ref=STAND):
     return kit.Built(objects, sockets).export(path)
 
 
+def build_baby():
+    """The Baby: everyone's genius from the night the field wakes until the rite. A small round
+    thing of pale matter with a face, the field in its eyes, in its belly and at the tip of
+    its tail; it has not yet been born into a form. One model, for everyone."""
+    kit.reset()
+    skin, dark = mat("hide_baby"), mat("hide_baby_dark")
+    R = STAND / 1.85
+    c = Vector((0, 0, R * 0.95))
+    items = [(g.ico(c, R, sub=2, scale=(1.0, 0.95, 0.9)), skin)]
+    items.append((g.ico(c + Vector((0, -R * 0.58, -R * 0.34)), R * 0.46, sub=2, scale=(1.0, 0.62, 0.86)), field("heart", 2.2)))
+    for sg in (1, -1):
+        items.append((g.ico(c + Vector((sg * R * 0.36, -R * 0.74, R * 0.26)), R * 0.25, sub=2, scale=(0.95, 0.6, 1.15)), field("eyes", 3.8)))
+        items.append((g.blade(c + Vector((sg * R * 0.42, 0.02, R * 0.66)), c + Vector((sg * R * 0.86, 0.12, R * 1.5)), R * 0.46, normal=Vector((0, -1, 0.2)), belly=0.42), skin))
+        items.append((g.blade(c + Vector((sg * R * 0.66, 0.04, R * 1.12)), c + Vector((sg * R * 0.9, 0.11, R * 1.56)), R * 0.26, normal=Vector((0, -1, 0.2)), belly=0.42), mat("hide_baby_pale")))
+        items.append((g.ico(Vector((sg * R * 0.36, -R * 0.3, R * 0.12)), R * 0.2, sub=1, scale=(1.0, 1.35, 0.7)), dark))
+    t0 = c + Vector((0, R * 0.78, -R * 0.25))
+    pts = [t0, t0 + Vector((0, R * 0.55, R * 0.05)), t0 + Vector((0, R * 0.9, R * 0.55)), t0 + Vector((0, R * 0.62, R * 1.12))]
+    items.append((g.tongue(pts, [R * 0.44, R * 0.36, R * 0.24, R * 0.07], thick=0.75, normal=X), skin))
+    items.append((g.ico(pts[-1], R * 0.15, sub=1), field("tail", 3.0)))
+    ob = g.pieces("baby", items, smooth=True)
+    export_objects([ob], {}, os.path.join(OUT, "baby.glb"), ref=STAND)
+
+
+# --- the Wolf's gift: what a hybrid wears of it on another base's body ---------------------
+
+def fangs_gift():
+    """Fangs anyone can see: two long from above, two short from below."""
+    up = g.tongue([(0.03, 0.0, 0.008), (0.035, -0.012, -0.052), (0.027, 0.0, -0.125)], [0.032, 0.023, 0.002], thick=0.7, normal=(1, 0, 0))
+    low = g.tongue([(0.021, -0.022, -0.085), (0.023, -0.028, -0.05), (0.02, -0.022, -0.02)], [0.017, 0.013, 0.002], thick=0.7, normal=(1, 0, 0))
+    return [kit._part("fangs", [(g.merge(up, g.mirrored(up)), mat("bone")), (g.merge(low, g.mirrored(low)), mat("bone"))])]
+
+
+def ruff_gift():
+    """A wolf's ruff, round the throat of whatever wears it."""
+    geo, geo2 = None, None
+    n = 13
+    for i in range(n):
+        a = math.pi * (-0.15 + 1.3 * i / (n - 1))
+        d = Vector((math.cos(a), 0, math.sin(a)))
+        base = Vector((0.1 * d.x, 0.0, 0.09 + 0.1 * d.z))
+        L = 0.19 * (1.0 + 0.15 * math.sin(i * 2.3))
+        bl = g.blade(base, base + Vector((d.x * L * 0.6, L * 0.75, d.z * L * 0.6)), 0.085, normal=d, belly=0.32)
+        if i % 2:
+            geo2 = g.merge(geo2, bl)
+        else:
+            geo = g.merge(geo, bl)
+    return [kit._part("ruff", [(geo, mat("fur_ruff")), (geo2, mat("fur_light"))])]
+
+
+GIFTS = {"fangs": fangs_gift, "ruff": ruff_gift}
+
+
 def build_wolf(form_id, level, spec, base):
     r, sockets = wolf_form(form_id, level, spec)
     export(r, sockets, os.path.join(OUT, form_id + ".glb"))
@@ -1028,7 +1086,14 @@ _families()
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    if not args or args[0] == "--all":
+    if args and args[0] == "gifts":       # the parts a hybrid wears of the bases built here
+        kit.PARTS.update(GIFTS)
+        for feature in GIFTS:
+            kit.build_part(feature)
+    elif args and args[0] == "baby":
+        build_baby()
+    elif not args or args[0] == "--all":
+        build_baby()
         for b in sorted(BUILDERS):
             build_base(b)
     else:

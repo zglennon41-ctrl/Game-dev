@@ -5,14 +5,29 @@
 class_name World
 extends Node3D
 
-const C_STANCE := Color(0.95, 0.68, 0.25)
-const C_WINDUP := Color(1.0, 0.22, 0.12)
-const C_STAGGER := Color(1.0, 0.85, 0.35)
-const C_HIT := Color(1.0, 1.0, 1.0)
-const C_GUARD := Color(0.55, 0.8, 1.0)
-const C_TEXT := Color(0.95, 0.92, 0.85)
-const C_DIM := Color(0.7, 0.66, 0.6)
-const C_GOLD := Color(1.0, 0.8, 0.35)
+# The colours of what happens in a fight (data/style.json, effects.colors and loud).
+static var C_STANCE: Color
+static var C_WINDUP: Color
+static var C_STAGGER: Color
+static var C_HIT: Color
+static var C_GUARD: Color
+static var C_TEXT: Color
+static var C_DIM: Color
+static var C_GOLD: Color
+## The six Shapes' colours: the field's, and the only loud thing a partner owns.
+static var SHAPE_COLORS: Dictionary = {}
+
+static func _static_init() -> void:
+	C_STANCE = Style.shape_color("anchor")
+	C_WINDUP = Style.telegraph()
+	C_STAGGER = Style.fx("stagger")
+	C_HIT = Style.fx("spark")
+	C_GUARD = Style.fx("guard")
+	C_TEXT = Style.fx("text")
+	C_DIM = Style.fx("dim")
+	C_GOLD = Style.GOLD
+	for sh in Style.data()["loud"]["shapes"]:
+		SHAPE_COLORS[sh] = Style.shape_color(sh)
 const WOLF_SCALE := 0.8
 const WA := "AnimalArmature|"
 
@@ -119,16 +134,18 @@ func _piece(name: String, pos: Vector3, rot_deg := 0.0, scale := 1.0) -> Node3D:
 
 func _build_environment() -> void:
 	var env := Environment.new()
+	var cut := Style.place_light("cut")
+	var film: Dictionary = Style.data()["film"]
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.02, 0.018, 0.02)
+	env.background_color = Color(String(cut["sky"]))
 	# The ambient from a sky: the tops of forms lit cooler and lighter than their undersides.
-	var art: Dictionary = Data.rules.get("art", {})
-	if art.get("sky", false):
+	if Style.data()["shading"].get("sky", true):
+		var moon_cast := Style.light("moon")
 		var sky_mat := ProceduralSkyMaterial.new()
-		sky_mat.sky_top_color = Color(0.18, 0.22, 0.4)
-		sky_mat.sky_horizon_color = Color(0.3, 0.26, 0.3)
-		sky_mat.ground_bottom_color = Color(0.05, 0.04, 0.05)
-		sky_mat.ground_horizon_color = Color(0.16, 0.13, 0.14)
+		sky_mat.sky_top_color = moon_cast.darkened(0.7)
+		sky_mat.sky_horizon_color = Color(String(cut["ambient"])).darkened(0.58)
+		sky_mat.ground_bottom_color = Style.ramp_at("ink", 2)
+		sky_mat.ground_horizon_color = Style.ramp_at("ink", 3)
 		sky_mat.sun_angle_max = 10.0
 		sky_mat.sun_curve = 0.2
 		var sky := Sky.new()
@@ -139,19 +156,19 @@ func _build_environment() -> void:
 		env.ambient_light_energy = 0.55
 	else:
 		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		env.ambient_light_color = Color(0.5, 0.44, 0.48)
-		env.ambient_light_energy = 0.2
+		env.ambient_light_color = Color(String(cut["ambient"]))
+		env.ambient_light_energy = float(cut["ambientEnergy"])
 	env.fog_enabled = true
-	env.fog_light_color = Color(0.06, 0.05, 0.06)
-	env.fog_density = 0.022
+	env.fog_light_color = Color(String(cut["fog"]))
+	env.fog_density = float(cut["fogDensity"])
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_exposure = 0.9
+	env.tonemap_exposure = float(film.get("exposure", 0.9))
 	env.glow_enabled = true
-	env.glow_intensity = 0.7
-	env.glow_bloom = 0.08
+	env.glow_intensity = float(film.get("glow", 0.7))
+	env.glow_bloom = float(film.get("bloom", 0.08))
 	env.adjustment_enabled = true
-	env.adjustment_contrast = 1.08
-	env.adjustment_saturation = 1.1
+	env.adjustment_contrast = float(film.get("contrast", 1.0))
+	env.adjustment_saturation = float(film.get("saturation", 1.0))
 	_env = env
 	_ambient_default = env.ambient_light_source
 	var we := WorldEnvironment.new()
@@ -160,8 +177,7 @@ func _build_environment() -> void:
 	# Moonlight through the broken roof of the Cut: cool, from above, casting the shadows.
 	var moon := DirectionalLight3D.new()
 	moon.rotation_degrees = Vector3(-62, -35, 0)
-	moon.light_color = Color(0.6, 0.68, 0.95)
-	moon.light_energy = 0.28
+	moon.light_color = Style.light("moon")
 	moon.shadow_enabled = true
 	moon.directional_shadow_max_distance = 40.0
 	moon.shadow_blur = 2.0
@@ -169,6 +185,19 @@ func _build_environment() -> void:
 	moon.light_energy = 0.42
 	add_child(moon)
 	_moon = moon
+
+## The light of a kind of place (data/style.json, lights.kinds: hall, court, wild, cut, stage):
+## the dark behind it, its ambient, its fog and how strong the moon stands. A place's own
+## numbers (a zone's, a hall's) are given over the kind's.
+func _light_place(kind: String, over: Dictionary = {}) -> void:
+	var L := Style.place_light(kind)
+	_env.background_color = Color(String(over.get("sky", L["sky"])))
+	_env.ambient_light_color = Color(String(over.get("ambient", L["ambient"])))
+	_env.ambient_light_energy = float(over.get("ambientEnergy", L["ambientEnergy"]))
+	_env.fog_light_color = Color(String(over.get("fog", L["fog"])))
+	_env.fog_density = float(over.get("fogDensity", L["fogDensity"]))
+	_moon.light_color = Color(String(over["moonColor"])) if over.has("moonColor") else Style.light("moon")
+	_moon.light_energy = float(over.get("moon", L["moon"])) * Style.light_energy("moon")
 
 func _build_chamber() -> void:
 	var a: Dictionary = Data.room["arena"]
@@ -221,8 +250,8 @@ func _build_chamber() -> void:
 			if k % 2 == 1:
 				var t := _piece("torch_mounted", Vector3(wx, 2.4, side * (hd - 0.45)), 0.0 if side < 0 else 180.0)
 				var light := OmniLight3D.new()
-				light.light_color = Color(1.0, 0.6, 0.3)
-				light.light_energy = 1.5
+				light.light_color = Style.light("fire")
+				light.light_energy = 1.5 * Style.light_energy("fire")
 				light.omni_range = 7.5
 				light.omni_attenuation = 1.6
 				light.shadow_enabled = false
@@ -273,7 +302,7 @@ func build_hero(hero: Dictionary) -> void:
 	_p_current = ""
 	_p_meshes = _player.find_children("*", "MeshInstance3D", true, false)
 	_overlay_player = _mat(C_HIT, 2.0, true, 0.0)
-	_overlay_player.next_pass = _ink(2.2)
+	_overlay_player.next_pass = _ink("people")
 	for m in _p_meshes:
 		m.material_overlay = _overlay_player
 	_aura = MeshInstance3D.new()
@@ -323,8 +352,6 @@ func _attach(skel: Skeleton3D, bone: String, path: String) -> Node3D:
 
 const RANGED_MODELS := ["pistol", "air_pistol", "musket", "bolt_thrower", "seed_sling", "bow_short", "bow_long", "astrolabe", "chakram", "crossbow_1handed", "crossbow_2handed"]
 
-const SHAPE_COLORS := { "anchor": Color(0.95, 0.68, 0.25), "turn": Color(1.0, 0.42, 0.15), "cast": Color(0.55, 0.85, 1.0),
-	"read": Color(0.85, 0.85, 1.0), "bind": Color(0.75, 0.45, 1.0), "make": Color(0.5, 1.0, 0.6) }
 
 func _shape_color(shape: String) -> Color:
 	return SHAPE_COLORS.get(shape, C_STANCE)
@@ -374,7 +401,7 @@ func _dress_blood(skel: Skeleton3D, blood_id: String) -> void:
 		"glow":
 			_tint = Color(1.0, 0.85, 0.5, 0.18)
 			_glow_light = OmniLight3D.new()
-			_glow_light.light_color = Color(1.0, 0.85, 0.55)
+			_glow_light.light_color = Style.light("lamp")
 			_glow_light.light_energy = 0.8
 			_glow_light.omni_range = 3.0
 			_glow_light.position = Vector3(0, 1.4, 0)
@@ -427,7 +454,7 @@ func set_foe(spec: Dictionary) -> void:
 			_w_anim.get_animation(_w_anims[key]).loop_mode = Animation.LOOP_LINEAR
 	_w_meshes = _wolf.find_children("*", "MeshInstance3D", true, false)
 	_overlay_wolf = _mat(C_WINDUP, 2.0, true, 0.0)
-	_overlay_wolf.next_pass = _ink(2.4)
+	_overlay_wolf.next_pass = _ink("beasts")
 	for m in _w_meshes:
 		m.material_overlay = _overlay_wolf
 	_w_current = ""
@@ -576,14 +603,14 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 		if n.begins_with("Hair_"):
 			a.visible = n.begins_with("Hair_%s_" % hair) and not hooded and (n.ends_with("_fall") or not covers)
 			if a.visible:
-				_recolor(a, col)
+				_recolor(a, col, "coat")
 		elif n.begins_with("Beard_"):
 			a.visible = n == "Beard_%s" % beard or n.begins_with("Beard_%s_" % beard)
 			if a.visible:
-				_recolor(a, col)
+				_recolor(a, col, "coat")
 		elif n.begins_with("Brow_"):
 			# the brows take the hair's colour, a little darker
-			_recolor(a, col.darkened(0.3))
+			_recolor(a, col.darkened(0.3), "coat")
 		else:
 			# Only headgear and a cape are the look's to show or hide: the eyes, the lashes and
 			# the dress's rigid pieces (a button, a pauldron) stay as the body has them.
@@ -651,6 +678,9 @@ func _recolor_named(mi: MeshInstance3D, name: String, col: Color, glow := Color(
 		var mat := mi.get_active_material(i)
 		if mat == null or String(mat.resource_name) != name:
 			continue
+		# on the ramps of what it is, unless it shines: what glows is the field's, and keeps its colour
+		if glow_k <= 0.0:
+			col = Style.conform_named(col, name)
 		if mat is ShaderMaterial and _toon_shader != null and (mat as ShaderMaterial).shader == _toon_shader:
 			var t: ShaderMaterial = (mat as ShaderMaterial).duplicate()
 			t.set_shader_parameter("albedo", col)
@@ -674,11 +704,11 @@ static func lip_color(tone: Color) -> Color:
 	var warm := Color(0.62, 0.3, 0.32)
 	return tone.darkened(0.18).lerp(warm, 0.3)
 
-## A hair colour by its name in data/creation.json.
+## A hair colour by its name in data/creation.json, on the coat's ramps (docs/style.md).
 func hair_color(id: String) -> Color:
 	var cols: Dictionary = Data.creation.get("look", {}).get("hairColors", {})
 	var c: Array = cols.get(id, cols.get("brown", [0.2, 0.12, 0.07]))
-	return Color(c[0], c[1], c[2])
+	return Style.conform(Color(c[0], c[1], c[2]), "coat")
 
 ## A look for someone the player did not make (a classmate, an instructor, the smith), the same
 ## every time for the same name: hair, beard, colour, stature, and whether they go bare-headed.
@@ -696,8 +726,10 @@ func look_for(name: String) -> Dictionary:
 		"hair_color": cols[(h / 5) % cols.size()], "stature": sts[(h / 17) % sts.size()],
 		"skin": tones[(h / 19) % tones.size()], "build": builds[(h / 23) % builds.size()] }
 
-## Recolour an attachment's meshes, keeping the cel shading when it has it.
-func _recolor(att: Node, col: Color) -> void:
+## Recolour an attachment's meshes, keeping the cel shading when it has it. The colour is
+## brought onto the ramps of what it is (cloth, unless said).
+func _recolor(att: Node, col: Color, cls := "cloth") -> void:
+	col = Style.conform(col, cls)
 	for m in att.find_children("*", "MeshInstance3D", true, false):
 		var mi: MeshInstance3D = m
 		if mi.mesh == null:
@@ -839,15 +871,14 @@ uniform sampler2D screen_tex : hint_screen_texture, filter_linear;
 uniform vec4 tint : source_color = vec4(0.0);
 uniform float base = 0.5;
 uniform float grain = 0.03;
+uniform vec3 cool = vec3(0.92, 0.97, 1.06);
+uniform vec3 warm = vec3(1.06, 1.0, 0.9);
 float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 void fragment() {
 	vec3 c = texture(screen_tex, SCREEN_UV).rgb;
 	float l = dot(c, vec3(0.299, 0.587, 0.114));
-	vec3 cool = vec3(0.84, 0.94, 1.12);
-	vec3 warm = vec3(1.1, 1.0, 0.84);
 	vec3 g = c * mix(cool, warm, smoothstep(0.04, 0.55, l));
-	g += vec3(0.006, 0.008, 0.016) * (1.0 - smoothstep(0.0, 0.25, l));
-	g = mix(vec3(l), g, 1.08);
+	g += vec3(0.005, 0.006, 0.009) * (1.0 - smoothstep(0.0, 0.25, l));
 	vec2 uv = UV - 0.5;
 	float d = length(uv * vec2(1.5, 1.0));
 	g *= 1.0 - smoothstep(0.36, 0.95, d) * base;
@@ -868,6 +899,10 @@ render_mode cull_back;
 uniform vec4 albedo : source_color = vec4(1.0);
 uniform sampler2D albedo_tex : source_color, filter_linear_mipmap;
 uniform bool use_tex = false;
+// the palette's ramps as a lookup (Style.ramp_lut): a painted texture that could not be
+// brought onto the ramps beforehand is brought onto them here
+uniform sampler2D ramp_lut : source_color, filter_linear, repeat_disable;
+uniform bool use_lut = false;
 uniform float bands = 3.0;
 uniform vec4 shadow_tint : source_color = vec4(0.5, 0.55, 0.78, 1.0);
 uniform vec4 emission : source_color = vec4(0.0);
@@ -898,9 +933,22 @@ float triplanar(vec3 p, vec3 n) {
 	float z = texture(detail_tex, p.xy * detail_scale).r;
 	return x * w.x + y * w.y + z * w.z;
 }
+vec3 on_ramps(vec3 lin) {
+	vec3 c = clamp(pow(max(lin, vec3(0.0)), vec3(1.0 / 2.2)), 0.0, 1.0);
+	float b = c.b * 15.0;
+	float b0 = floor(b);
+	float b1 = min(b0 + 1.0, 15.0);
+	vec2 at = vec2(0.5 + c.r * 15.0, (0.5 + c.g * 15.0) / 16.0);
+	vec3 lo = texture(ramp_lut, vec2((b0 * 16.0 + at.x) / 256.0, at.y)).rgb;
+	vec3 hi = texture(ramp_lut, vec2((b1 * 16.0 + at.x) / 256.0, at.y)).rgb;
+	return mix(lo, hi, b - b0);
+}
 void fragment() {
 	vec3 col = albedo.rgb;
-	if (use_tex) { col *= texture(albedo_tex, UV).rgb; }
+	if (use_tex) {
+		vec3 painted = texture(albedo_tex, UV).rgb;
+		col *= use_lut ? on_ramps(painted) : painted;
+	}
 	if (detail_strength > 0.0) {
 		float d = triplanar(world_pos, world_nrm);
 		col *= mix(1.0, d * 2.0, detail_strength);
@@ -929,59 +977,50 @@ void light() {
 var _toon_shader: Shader = null
 var _detail_cache: Dictionary = {}
 
-## Which surface a material is, by its name: metal, leather, skin, hair, fur, eye, or cloth.
-static func surface_of(name: String) -> String:
-	var n := name.to_lower()
-	for word in ["metal", "leather", "skin", "lips", "hair", "fur", "iris", "eye", "pupil", "horn", "scale", "feather", "hide", "trim", "cape", "boots", "tunic", "trousers", "stone", "rock", "floor", "wall", "tile", "pillar", "brick", "wood", "plank", "crate", "barrel", "beam", "door", "bone", "ground", "dirt", "grass", "bark", "trunk", "leaf"]:
-		if n.contains(word):
-			match word:
-				"metal", "trim": return "metal"
-				"leather", "boots", "horn", "hide": return "leather"
-				"skin", "lips": return "skin"
-				"hair", "feather": return "hair"
-				"pupil": return "eye"
-				"fur": return "fur"
-				"iris", "eye", "scale": return "eye"
-				"stone", "rock", "floor", "wall", "tile", "pillar", "brick", "ground", "dirt", "bone": return "stone"
-				"wood", "plank", "crate", "barrel", "beam", "door", "bark", "trunk": return "wood"
-				"grass", "leaf": return "cloth"
-				_: return "cloth"
-	return "cloth"
+## Which class a material is, by its name (data/style.json, materials): skin, coat, cloth,
+## leather, wood, stone, iron, brass, bone, glass, growth, earth, water, eye, ink, the field's
+## light or a lit thing. "cloth" for a name that says nothing (the style check finds those).
+static func surface_of(name: String, color := Color(-1, -1, -1)) -> String:
+	var cls := Style.material_class(name, color)
+	return cls if cls != "" else "cloth"
 
-## The surface's specular, detail texture and occlusion on a toon material (data/rules.json, art).
-func _surface_look(t: ShaderMaterial, name: String, art: Dictionary, mi: MeshInstance3D) -> void:
-	var kind := surface_of(name)
-	var spec: Array = art.get("specular", {}).get(kind, [0.05, 8.0])
-	t.set_shader_parameter("spec_strength", float(spec[0]))
-	t.set_shader_parameter("spec_gloss", float(spec[1]))
-	var rim: Dictionary = art.get("rim", {})
-	var rc: Array = rim.get("color", [0.85, 0.9, 1.0])
-	t.set_shader_parameter("rim_strength", float(rim.get("strength", 0.35)))
+## The class's look on a toon material: its bands, its shadow's tint, its highlight, its grain
+## and wear, the rim light, and the occlusion baked in the vertex colour.
+func _surface_look(t: ShaderMaterial, cls: String, mi: MeshInstance3D) -> void:
+	var spec: Dictionary = Style.class_spec(cls)
+	var sh: Dictionary = Style.data()["shading"]
+	t.set_shader_parameter("bands", float(spec.get("bands", 3)))
+	t.set_shader_parameter("shadow_tint", Color(String(spec.get("shadowTint", "#9690A8"))))
+	var hl: Array = spec.get("spec", [0.05, 8.0])
+	t.set_shader_parameter("spec_strength", float(hl[0]))
+	t.set_shader_parameter("spec_gloss", float(hl[1]))
+	var rim: Dictionary = sh.get("rim", {})
+	t.set_shader_parameter("rim_strength", float(rim.get("strength", 0.22)))
 	t.set_shader_parameter("rim_power", float(rim.get("power", 3.0)))
-	t.set_shader_parameter("rim_color", Color(rc[0], rc[1], rc[2]))
-	var det: Array = art.get("detail", {}).get(kind if kind != "eye" else "", [])
-	if det.size() == 3:
-		var path := "res://game/assets/textures/detail/%s.png" % String(det[0])
+	t.set_shader_parameter("rim_color", Color(String(rim.get("color", "#D2D8EC"))))
+	var grain := String(spec.get("grain", ""))
+	if grain != "" and float(spec.get("wear", 0.0)) > 0.0:
+		var path := "res://game/assets/textures/detail/%s.png" % grain
 		if not _detail_cache.has(path):
 			_detail_cache[path] = load(path) if ResourceLoader.exists(path) else null
 		if _detail_cache[path] != null:
 			t.set_shader_parameter("detail_tex", _detail_cache[path])
-			t.set_shader_parameter("detail_scale", float(det[1]))
-			t.set_shader_parameter("detail_strength", float(det[2]))
-	t.set_shader_parameter("ao_strength", float(art.get("ambientOcclusion", 0.8)))
+			t.set_shader_parameter("detail_scale", float(spec.get("grainScale", 4.0)))
+			t.set_shader_parameter("detail_strength", float(spec["wear"]))
+	t.set_shader_parameter("ao_strength", float(sh.get("occlusion", 0.8)))
 	var has_color := mi.mesh != null and mi.mesh is ArrayMesh and (mi.mesh as ArrayMesh).surface_get_format(0) & Mesh.ARRAY_FORMAT_COLOR
 	t.set_shader_parameter("use_ao", bool(has_color))
 
-## The cel look: every StandardMaterial3D under the node becomes a banded toon material that
-## keeps its colour, its texture and its emission. Off when data/rules.json art.cel is false.
+## The cel look, and the style's hold on every surface (docs/style.md): each StandardMaterial3D
+## under the node becomes a banded toon material of its class. Its colour is brought onto the
+## ramps its class allows (a painted texture too), a lit thing takes the lamp's or the moon's
+## colour, and its emission is kept. Off when data/style.json shading.cel is false.
 func toonify(node: Node) -> void:
-	var art: Dictionary = Data.rules.get("art", {})
-	if not art.get("cel", false) or node == null:
+	if not Style.data()["shading"].get("cel", true) or node == null:
 		return
 	if _toon_shader == null:
 		_toon_shader = Shader.new()
 		_toon_shader.code = TOON
-	var tint: Array = art.get("shadowTint", [0.5, 0.55, 0.78])
 	var meshes := node.find_children("*", "MeshInstance3D", true, false)
 	if node is MeshInstance3D:
 		meshes.append(node)
@@ -996,19 +1035,43 @@ func toonify(node: Node) -> void:
 			var sm: StandardMaterial3D = mat
 			if sm.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED or sm.shading_mode == BaseMaterial3D.SHADING_MODE_UNSHADED or sm.blend_mode != BaseMaterial3D.BLEND_MODE_MIX:
 				continue
+			var cls := surface_of(String(sm.resource_name), sm.albedo_color)
 			var t := ShaderMaterial.new()
 			t.shader = _toon_shader
 			t.resource_name = sm.resource_name
-			t.set_shader_parameter("albedo", sm.albedo_color)
 			t.set_shader_parameter("use_tex", sm.albedo_texture != null)
 			if sm.albedo_texture:
-				t.set_shader_parameter("albedo_tex", sm.albedo_texture)
-			t.set_shader_parameter("bands", float(art.get("bands", 3)))
-			t.set_shader_parameter("shadow_tint", Color(tint[0], tint[1], tint[2]))
-			_surface_look(t, String(sm.resource_name), art, mi)
+				# a painted texture is brought onto the ramps whole; what multiplies it is left
+				# (-- --style-lut leaves it to the shader everywhere, to look at that way of doing it)
+				var painted := sm.albedo_texture if OS.get_cmdline_user_args().has("--style-lut") else Style.conform_texture(sm.albedo_texture)
+				t.set_shader_parameter("albedo_tex", painted)
+				t.set_shader_parameter("albedo", sm.albedo_color)
+				if painted == sm.albedo_texture:
+					# it could not be read back here: the shader brings it over as it draws
+					t.set_shader_parameter("use_lut", true)
+					t.set_shader_parameter("ramp_lut", Style.ramp_lut())
+			else:
+				t.set_shader_parameter("albedo", Style.conform(sm.albedo_color, cls))
+			_surface_look(t, cls, mi)
 			if sm.emission_enabled:
-				t.set_shader_parameter("emission", sm.emission)
-				t.set_shader_parameter("emission_energy", sm.emission_energy_multiplier)
+				var glow := sm.emission
+				var energy := sm.emission_energy_multiplier
+				if cls == "lit":
+					# a lamp, a flame, a lit pane: the lamp's light or the moon's; coloured glass banked
+					var stained := String(sm.resource_name).to_lower().contains("stain")
+					if stained:
+						var st: Dictionary = Style.data()["lights"]["stain"]
+						glow = glow.darkened(float(st.get("darken", 0.25)))
+						energy *= float(st.get("energy", 0.5))
+						t.set_shader_parameter("albedo", sm.albedo_color.darkened(float(st.get("darken", 0.25)) + 0.2))
+					else:
+						# its light's own colour, over a pane dark enough that the light is what shows
+						glow = Style.conform_light(glow, "color")
+						if String(sm.resource_name).to_lower().contains("glass"):
+							energy *= float(Style.data()["lights"]["window"].get("energy", 1.0))
+						t.set_shader_parameter("albedo", glow.darkened(0.72))
+				t.set_shader_parameter("emission", glow)
+				t.set_shader_parameter("emission_energy", energy)
 			t.next_pass = sm.next_pass
 			mi.set_surface_override_material(i, t)
 
@@ -1019,12 +1082,13 @@ shader_type spatial;
 render_mode unshaded, cull_front, shadows_disabled, depth_draw_opaque;
 uniform vec4 ink : source_color = vec4(0.045, 0.03, 0.028, 1.0);
 uniform float width = 2.0;
+uniform float screen = 900.0;
 void vertex() {
 	vec4 clip = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
 	vec3 n = (MODELVIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
 	vec2 off = (PROJECTION_MATRIX * vec4(n, 0.0)).xy;
 	off = off / max(length(off), 1e-4);
-	clip.xy += off * width * 2.0 / VIEWPORT_SIZE * clip.w;
+	clip.xy += off * width * (VIEWPORT_SIZE.y / screen) * 2.0 / VIEWPORT_SIZE * clip.w;
 	POSITION = clip;
 }
 void fragment() {
@@ -1036,7 +1100,7 @@ const SHAFT := """
 shader_type spatial;
 // A shaft of moonlight through the broken roof: brightest where you look across it.
 render_mode unshaded, blend_add, cull_disabled, depth_draw_never, shadows_disabled;
-uniform vec4 tint : source_color = vec4(0.5, 0.62, 1.0, 1.0);
+uniform vec4 tint : source_color = vec4(0.55, 0.62, 0.95, 1.0);
 uniform float strength = 0.17;
 uniform float half_height = 7.0;
 varying float h;
@@ -1092,6 +1156,14 @@ func _build_effects() -> void:
 	sh.code = VIGNETTE
 	var sm := ShaderMaterial.new()
 	sm.shader = sh
+	# the film the game is shot on (data/style.json, film)
+	var film: Dictionary = Style.data()["film"]
+	var fs: Array = film.get("shadows", [0.92, 0.97, 1.06])
+	var fh: Array = film.get("highlights", [1.06, 1.0, 0.9])
+	sm.set_shader_parameter("cool", Vector3(fs[0], fs[1], fs[2]))
+	sm.set_shader_parameter("warm", Vector3(fh[0], fh[1], fh[2]))
+	sm.set_shader_parameter("base", float(film.get("vignette", 0.5)))
+	sm.set_shader_parameter("grain", float(film.get("grain", 0.03)))
 	_vignette.material = sm
 	layer.add_child(_vignette)
 
@@ -1136,48 +1208,116 @@ func _update_trail(swinging: bool, dt: float) -> void:
 		_trail_mesh.surface_add_vertex(p["b"])
 	_trail_mesh.surface_end()
 
+# --- Effects: one family of shapes, in ink and light (data/style.json, effects) ----------------
+# The ring (thin, flat), the shard (a long splinter of light laid along its travel), the puff
+# (a soft blot of dust or ink), the flash (a four-pointed star) and the word. Nothing else.
+
+static var _fx_shard: ArrayMesh
+static var _fx_star: ImageTexture
+
+## A shard: a long thin diamond, its length along Y so a particle lies along its travel.
+static func fx_shard_mesh() -> ArrayMesh:
+	if _fx_shard:
+		return _fx_shard
+	var half := Style.fx_n("shard", "length", 0.22) / 2.0
+	var w := Style.fx_n("shard", "width", 0.035) / 2.0
+	var top := Vector3(0, half, 0)
+	var bot := Vector3(0, -half, 0)
+	var ring := [Vector3(w, 0, 0), Vector3(0, 0, w), Vector3(-w, 0, 0), Vector3(0, 0, -w)]
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for i in 4:
+		var p: Vector3 = ring[i]
+		var q: Vector3 = ring[(i + 1) % 4]
+		for tri in [[top, q, p], [bot, p, q]]:
+			for v in tri:
+				st.add_vertex(v)
+	st.generate_normals()
+	_fx_shard = st.commit()
+	return _fx_shard
+
+## The flash: a four-pointed star, drawn once.
+static func fx_star() -> ImageTexture:
+	if _fx_star:
+		return _fx_star
+	var n := 96
+	var img := Image.create(n, n, false, Image.FORMAT_RGBA8)
+	for y in n:
+		for x in n:
+			var u := absf((x + 0.5) / n * 2.0 - 1.0)
+			var v := absf((y + 0.5) / n * 2.0 - 1.0)
+			var star := clampf(1.0 - (sqrt(u) + sqrt(v)), 0.0, 1.0)
+			var core := clampf(1.0 - Vector2(u, v).length() * 2.2, 0.0, 1.0)
+			img.set_pixel(x, y, Color(1, 1, 1, clampf(pow(star, 1.3) * 2.2 + core * core, 0.0, 1.0)))
+	_fx_star = ImageTexture.create_from_image(img)
+	return _fx_star
+
+## A flash where a blow lands: the star, opening and gone.
 func impact(at: Vector3, color: Color, size := 0.7) -> void:
 	var mi := MeshInstance3D.new()
-	var sm := SphereMesh.new()
-	sm.radius = 0.5
-	sm.height = 1.0
-	mi.mesh = sm
-	var m := _mat(color, 4.0, true, 0.9)
+	var qm := QuadMesh.new()
+	qm.size = Vector2(1.6, 1.6)
+	mi.mesh = qm
+	var m := _mat(color, 0.0, true, 0.95)
 	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	m.albedo_texture = fx_star()
+	m.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	m.billboard_keep_scale = true
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	m.no_depth_test = true
 	mi.material_override = m
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.position = at
-	mi.scale = Vector3.ONE * size * 0.3
+	mi.scale = Vector3.ONE * size * 0.35
+	mi.rotation.z = randf_range(0.0, PI / 2.0)
 	add_child(mi)
+	var secs := Style.fx_n("flash", "seconds", 0.13)
 	var tw: Tween = create_tween()
 	tw.set_parallel(true)
-	tw.tween_property(mi, "scale", Vector3.ONE * size, 0.12).set_ease(Tween.EASE_OUT)
-	tw.tween_property(m, "albedo_color:a", 0.0, 0.14)
+	tw.tween_property(mi, "scale", Vector3.ONE * size, secs).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	tw.tween_property(m, "albedo_color:a", 0.0, secs * 1.1)
 	tw.chain().tween_callback(mi.queue_free)
 
+## Dust kicked up: a few soft blots, in the dust's colour, that swell and thin.
 func dust(at: Vector3, amount := 18) -> void:
 	var p := CPUParticles3D.new()
+	var secs := Style.fx_n("puff", "seconds", 0.7)
 	p.one_shot = true
-	p.amount = amount
-	p.lifetime = 0.6
+	p.amount = maxi(4, amount / 2)
+	p.lifetime = secs
 	p.explosiveness = 0.9
 	p.direction = Vector3(0, 1, 0)
 	p.spread = 80.0
-	p.initial_velocity_min = 0.8
-	p.initial_velocity_max = 2.2
-	p.gravity = Vector3(0, -1.5, 0)
+	p.initial_velocity_min = 0.5
+	p.initial_velocity_max = 1.6
+	p.gravity = Vector3(0, -0.6, 0)
 	p.damping_min = 2.0
 	p.damping_max = 4.0
-	p.scale_amount_min = 1.0
-	p.scale_amount_max = 2.5
-	var sm := SphereMesh.new()
-	sm.radius = 0.06
-	sm.height = 0.12
-	p.mesh = sm
-	p.material_override = _mat(Color(0.55, 0.47, 0.4), 0.0, true, 0.5)
+	p.scale_amount_min = 0.7
+	p.scale_amount_max = 1.5
+	var grow := Curve.new()
+	grow.add_point(Vector2(0.0, 0.45))
+	grow.add_point(Vector2(1.0, 1.6))
+	p.scale_amount_curve = grow
+	var fade := Gradient.new()
+	fade.set_color(0, Color(1, 1, 1, 1))
+	fade.set_color(1, Color(1, 1, 1, 0))
+	p.color_ramp = fade
+	var qm := QuadMesh.new()
+	var sz := Style.fx_n("puff", "size", 0.16) * 2.0
+	qm.size = Vector2(sz, sz)
+	p.mesh = qm
+	var m := _mat(Style.fx("dust"), 0.0, true, Style.fx_n("puff", "alpha", 0.55))
+	m.albedo_texture = _soft_dot()
+	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	m.billboard_keep_scale = true
+	m.vertex_color_use_as_albedo = true
+	p.material_override = m
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	p.position = at
 	add_child(p)
 	p.emitting = true
-	get_tree().create_timer(1.2, true, false, true).timeout.connect(p.queue_free)
+	get_tree().create_timer(secs + 0.6, true, false, true).timeout.connect(p.queue_free)
 
 func flash_screen(color: Color, strength: float) -> void:
 	_vig_tint = Color(color, maxf(_vig_tint.a, strength))
@@ -1216,6 +1356,13 @@ func _play(ap: AnimationPlayer, name: String, speed := 1.0, blend := 0.12) -> vo
 	if not ap.has_animation(name):
 		return
 	ap.play(name, blend, speed)
+
+## The living idle on one breath (data/style.json, motion.idle): the speed that makes an idle
+## clip's loop last the breath's period, whatever the clip's own length. 1 for any other clip.
+static func breath(ap: AnimationPlayer, name: String) -> float:
+	if ap == null or not name.to_lower().ends_with("idle") or not ap.has_animation(name):
+		return 1.0
+	return clampf(ap.get_animation(name).length / Style.motion("idle", "period", 3.6), 0.25, 1.5)
 
 ## A one-shot from the fight (a swing, a dodge, a bite): it holds the body until it ends.
 func anim_event(e: Dictionary) -> void:
@@ -1262,6 +1409,7 @@ static func stride_scale(clip: String, v: float) -> float:
 
 func _loop(ap: AnimationPlayer, name: String, speed := 1.0, is_wolf := false) -> void:
 	var current := _w_current if is_wolf else _p_current
+	speed *= breath(ap, name)
 	if current == name and ap.is_playing():
 		ap.speed_scale = speed
 		return
@@ -1282,8 +1430,8 @@ func floater(at: Vector3, text: String, color: Color, size := 56, life := 0.9, r
 	l.fixed_size = true
 	l.pixel_size = 0.0009
 	l.modulate = color
-	l.outline_size = 12
-	l.outline_modulate = Color(0, 0, 0, 0.85)
+	l.outline_size = int(Style.fx_n("word", "outline", 12))
+	l.outline_modulate = Color(Style.ink_color(), 0.85)
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	l.no_depth_test = true
 	# Several at once near the same spot stack upward instead of piling on one another.
@@ -1295,44 +1443,56 @@ func floater(at: Vector3, text: String, color: Color, size := 56, life := 0.9, r
 	add_child(l)
 	_floaters.append({ "l": l, "age": 0.0, "life": life, "rise": rise })
 
+## Sparks thrown from a blow: shards of light, each lying along its own travel.
 func burst(at: Vector3, color: Color, amount: int, speed := 5.0) -> void:
 	var p := CPUParticles3D.new()
+	var secs := Style.fx_n("shard", "seconds", 0.4)
 	p.one_shot = true
-	p.amount = amount
-	p.lifetime = 0.45
+	p.amount = maxi(4, int(amount * 0.7))
+	p.lifetime = secs
 	p.explosiveness = 1.0
 	p.direction = Vector3(0, 1, 0)
 	p.spread = 180.0
 	p.initial_velocity_min = speed * 0.4
 	p.initial_velocity_max = speed
-	p.gravity = Vector3(0, -12, 0)
-	p.scale_amount_min = 0.5
-	p.scale_amount_max = 1.2
-	var sm := SphereMesh.new()
-	sm.radius = 0.035
-	sm.height = 0.07
-	p.mesh = sm
-	p.material_override = _mat(color, 4.0, true)
+	p.gravity = Vector3(0, -9, 0)
+	p.scale_amount_min = 0.6
+	p.scale_amount_max = 1.5
+	var thin := Curve.new()
+	thin.add_point(Vector2(0.0, 1.0))
+	thin.add_point(Vector2(1.0, 0.0))
+	p.scale_amount_curve = thin
+	p.particle_flag_align_y = true
+	p.mesh = fx_shard_mesh()
+	var m := _mat(color, 4.0, true)
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	p.material_override = m
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	p.position = at
 	add_child(p)
 	p.emitting = true
-	get_tree().create_timer(1.2, true, false, true).timeout.connect(p.queue_free)
+	get_tree().create_timer(secs + 0.8, true, false, true).timeout.connect(p.queue_free)
 
+## A ring run out across the ground: thin and flat.
 func _ring_wave(at: Vector3, color: Color, radius: float) -> void:
 	var mi := MeshInstance3D.new()
 	var t := TorusMesh.new()
-	t.inner_radius = 0.9
+	t.inner_radius = 1.0 - Style.fx_n("ring", "thickness", 0.06)
 	t.outer_radius = 1.0
+	t.rings = 48
 	mi.mesh = t
-	mi.scale = Vector3(0.2, 0.05, 0.2)
+	mi.scale = Vector3(0.2, 0.03, 0.2)
 	mi.position = at + Vector3(0, 0.08, 0)
 	var m := _mat(color, 3.0, true, 0.9)
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	mi.material_override = m
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
+	var secs := Style.fx_n("ring", "seconds", 0.35)
 	var tw: Tween = create_tween()
 	tw.set_parallel(true)
-	tw.tween_property(mi, "scale", Vector3(radius, 0.05, radius), 0.35).set_ease(Tween.EASE_OUT)
-	tw.tween_property(m, "albedo_color:a", 0.0, 0.35)
+	tw.tween_property(mi, "scale", Vector3(radius, 0.03, radius), secs).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	tw.tween_property(m, "albedo_color:a", 0.0, secs)
 	tw.chain().tween_callback(mi.queue_free)
 
 var _ward: MeshInstance3D = null
@@ -1345,7 +1505,7 @@ func _tracer(from: Vector3, to: Vector3, hit: bool) -> void:
 	var im := ImmediateMesh.new()
 	var mi := MeshInstance3D.new()
 	mi.mesh = im
-	var m := _mat(Color(1.0, 0.9, 0.6), 4.0, true, 0.9)
+	var m := _mat(Style.fx("shot"), 4.0, true, 0.9)
 	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 	mi.material_override = m
 	im.surface_begin(Mesh.PRIMITIVE_LINES)
@@ -1353,11 +1513,11 @@ func _tracer(from: Vector3, to: Vector3, hit: bool) -> void:
 	im.surface_add_vertex(to)
 	im.surface_end()
 	add_child(mi)
-	impact(from, Color(1.0, 0.85, 0.5), 0.5)
+	impact(from, Style.fx("shot"), 0.5)
 	if hit:
-		impact(to, Color(1.0, 0.9, 0.7), 0.6)
+		impact(to, Style.fx("spark"), 0.6)
 	var tw: Tween = create_tween()
-	tw.tween_property(m, "albedo_color:a", 0.0, 0.12)
+	tw.tween_property(m, "albedo_color:a", 0.0, Style.fx_n("flash", "seconds", 0.13))
 	tw.tween_callback(mi.queue_free)
 
 ## The first time: the field wakes. A wave of the Shape's colour, and the screen breathes.
@@ -1408,8 +1568,8 @@ func feedback(f: Fight, events: Array) -> void:
 			"shot":
 				if e.get("cone", false):
 					var m := _v3(f.p_pos, 1.2) + _v3(Vector2.from_angle(f.p_facing) * 1.0)
-					burst(m, Color(1.0, 0.8, 0.5), 40, 9.0)
-					impact(m, Color(1.0, 0.75, 0.4), 1.2)
+					burst(m, Style.fx("shot"), 40, 9.0)
+					impact(m, Style.fx("shot"), 1.2)
 					_shake = maxf(_shake, 0.2)
 				else:
 					_tracer(_v3(e["from"], 1.35) + _v3(Vector2.from_angle(f.p_facing) * 0.6), _v3(e["to"], 1.0), e["hit"])
@@ -1421,30 +1581,30 @@ func feedback(f: Fight, events: Array) -> void:
 				if float(e.get("charge", 0.0)) >= 0.99:
 					floater(P + Vector3(0, 0.2, 0), "FULL DRAW", C_GOLD, 44, 0.8)
 			"burst":
-				_ring_wave(_v3(e["at"]), Color(1.0, 0.45, 0.15), 2.8)
-				burst(_v3(e["at"], 0.8), Color(1.0, 0.5, 0.15), 40, 6.0)
-				impact(_v3(e["at"], 1.0), Color(1.0, 0.5, 0.2), 1.6)
+				_ring_wave(_v3(e["at"]), Style.shape_color("turn"), 2.8)
+				burst(_v3(e["at"], 0.8), Style.shape_color("turn"), 40, 6.0)
+				impact(_v3(e["at"], 1.0), Style.shape_color("turn"), 1.6)
 			"crit-open":
 				floater(W + Vector3(0, 0.9, 0), "THE BREAK IS OPEN", Color(0.9, 0.9, 1.0), 56, 1.4)
 			"tether":
-				floater(W + Vector3(0, 0.9, 0), "LEASHED", Color(0.8, 0.55, 1.0), 56, 1.2)
+				floater(W + Vector3(0, 0.9, 0), "LEASHED", Style.shape_color("bind"), 56, 1.2)
 			"ward-up":
 				_ward_at = _v3(e["at"])
-				_ring_wave(_ward_at, Color(0.5, 1.0, 0.6), 2.0)
+				_ring_wave(_ward_at, Style.shape_color("make"), 2.0)
 			"ward-broken":
 				if _ward:
-					burst(_ward.position + Vector3(0, 1.0, 0), Color(0.5, 1.0, 0.6), 40, 6.0)
-				floater(P, "THE WARD TAKES IT", Color(0.5, 1.0, 0.6), 52)
+					burst(_ward.position + Vector3(0, 1.0, 0), Style.shape_color("make"), 40, 6.0)
+				floater(P, "THE WARD TAKES IT", Style.shape_color("make"), 52)
 			"burn-tick":
 				floater(W + Vector3(randf_range(-0.3, 0.3), 0, 0), "%d" % int(e["damage"]), Color(1.0, 0.55, 0.2), 34, 0.6)
 			"second-heart":
 				floater(P + Vector3(0, 0.4, 0), "A SECOND HEART", Color(1.0, 0.4, 0.4), 72, 1.6)
-				flash_screen(Color(1.0, 0.2, 0.2), 0.6)
+				flash_screen(Style.fx("hurt"), 0.6)
 			"hesitates":
 				floater(W + Vector3(0, 0.8, 0), "IT HESITATES", C_TEXT, 56)
 			"quake":
 				_ring_wave(_v3(e["at"]), C_STANCE, 2.6)
-				burst(_v3(e["at"], 0.1), Color(0.7, 0.6, 0.5), 24, 4.0)
+				dust(_v3(e["at"], 0.1), 24)
 				_shake = maxf(_shake, 0.12)
 			"break":
 				floater(W + Vector3(0, 0.9, 0), "BREAK %d/%d" % [e["count"], e["needed"]], C_STAGGER, 48)
@@ -1461,7 +1621,7 @@ func feedback(f: Fight, events: Array) -> void:
 				_shake = 0.12
 				slowmo(float(feel["parrySlowmo"]), 0.3)
 				impact((_v3(f.p_pos, 1.2) + _v3(from, 1.2)) / 2.0, C_GUARD, 1.4)
-				flash_screen(Color(0.4, 0.7, 1.0), 0.35)
+				flash_screen(C_GUARD, 0.35)
 			"block":
 				floater(P, "BLOCKED  -%d" % int(e["damage"]), C_GUARD, 48)
 				burst(_v3(f.p_pos, 1.2) + _v3(Vector2.from_angle(f.p_facing) * 0.5), C_GUARD, 12, 4.0)
@@ -1471,7 +1631,7 @@ func feedback(f: Fight, events: Array) -> void:
 				floater(P, "-%d" % int(e["damage"]), C_WINDUP, 80)
 				_player_flash = 1.0
 				_shake = float(feel["shakeOnHurt"])
-				flash_screen(Color(0.9, 0.08, 0.05), 0.55)
+				flash_screen(Style.fx("hurt"), 0.55)
 				hitstop(0.08)
 			"evade":
 				floater(P, "EVADED" if e["how"] == "dodged" else "MISSED", C_DIM, 44)
@@ -1534,6 +1694,62 @@ func feedback(f: Fight, events: Array) -> void:
 				_ring_wave(_v3(f.p_pos), _g_tint, 1.6)
 				floater(P, "GUARDED", _g_tint.lightened(0.3), 52, 1.0)
 				genius_react("parry")
+			"genius-take":
+				# a weapon genius changes hands
+				if e["in"]:
+					floater(P + Vector3(0, 0.3, 0), "IN HAND" + ("  ·  THE CUT" if e.get("cut", false) else ""), _g_tint.lightened(0.35), 46, 0.9)
+					burst(P, _g_tint.lightened(0.3), 14, 3.0)
+				else:
+					floater(P + Vector3(0, 0.3, 0), "IT IS SPENT" if e.get("spent", false) else "LET GO", _g_tint.lightened(0.2) if not e.get("spent", false) else Color(0.8, 0.75, 0.7), 42, 0.9)
+				genius_react("cue")
+			"genius-use":
+				var ua := _v3(e.get("at", f.p_pos), 1.7)
+				floater(ua, String(e["name"]).to_upper() + ("  ·  ON AIR" if e.get("miss", false) else ""), _g_tint.lightened(0.35) if not e.get("miss", false) else C_DIM, 44, 1.1)
+				if String(e.get("effect", "")) == "set" and not e.get("miss", false):
+					_ring_wave(_v3(f.p_pos), _g_tint, 1.4)
+				genius_react("stance")
+			"genius-took":
+				var who := int(e.get("ally", -1))
+				var ta: Vector3 = P if who < 0 or who >= f.allies.size() else _v3(f.allies[who]["pos"], 1.2)
+				impact(ta, _g_tint, 1.2)
+				_ring_wave(Vector3(ta.x, 0.0, ta.z), _g_tint, 1.8)
+				floater(ta + Vector3(0, 0.5, 0), "IT TAKES THE BLOW", _g_tint.lightened(0.3), 48, 1.0)
+				genius_react("parry")
+			"genius-door":
+				_ring_wave(_v3(e["at"]), _g_tint, float(e["radius"]))
+			"genius-caught":
+				var ca := _v3(e["at"], 1.0)
+				impact(ca, _g_tint, 1.4)
+				burst(ca, _g_tint.lightened(0.3), 16, 3.5)
+				floater(ca + Vector3(0, 0.8, 0), "CAUGHT", _g_tint.lightened(0.35), 52, 1.0)
+			"genius-lamp":
+				_ring_wave(_v3(e["at"]), Color(1.0, 0.9, 0.6), float(e["radius"]))
+			"genius-sight":
+				_ring_wave(_v3(f.w_pos), _g_tint.lightened(0.3), 1.6)
+				floater(W + Vector3(0, 1.0, 0), "SIGHTED", _g_tint.lightened(0.35), 46, 1.2)
+			"genius-toll":
+				_ring_wave(_v3(e["at"]), _g_tint.lightened(0.2), float(e["radius"]))
+				floater(P + Vector3(0, 0.5, 0), "IT TOLLS" if not e.get("auto", false) else "IT TOLLS OF ITSELF", _g_tint.lightened(0.35), 50, 1.1)
+				if int(e.get("broke", 0)) > 0:
+					flash_screen(_g_tint, 0.12)
+			"genius-took-back":
+				floater(P + Vector3(0, 0.2, 0), "+%d" % roundi(float(e["amount"])), _g_tint.lightened(0.4), 46, 1.0)
+			"genius-caught-fall":
+				flash_screen(_g_tint, 0.4)
+				_ring_wave(_v3(f.p_pos), _g_tint, 2.4)
+				floater(P + Vector3(0, 0.6, 0), "IT CATCHES YOU", _g_tint.lightened(0.4), 60, 1.6)
+				genius_react("parry")
+			"genius-mend":
+				var mw := int(e.get("who", -1))
+				var ma: Vector3 = P if mw < 0 or mw >= f.allies.size() else _v3(f.allies[mw]["pos"], 1.6)
+				floater(ma + Vector3(0.3, 0.1, 0), "+%d" % roundi(float(e["amount"])), _g_tint.lightened(0.45), 40, 0.9)
+			"genius-held-blow":
+				impact(_v3(e["at"], 0.9), _g_tint, 1.2)
+				floater(_v3(e["at"], 1.7), "IT HOLDS", _g_tint.lightened(0.3), 46, 1.0)
+			"genius-sig":
+				floater(W + Vector3(-0.3, 0.9, 0), String(e["name"]).to_upper(), _g_tint.lightened(0.4), 42, 1.0)
+			"genius-not-ready":
+				floater(P, "your genius is not ready", C_DIM, 36)
 			"genius-fall":
 				genius_down = true
 				floater(P + Vector3(0, 0.4, 0), "YOUR GENIUS FALLS", Color(0.8, 0.75, 0.7), 56, 1.6)
@@ -1566,21 +1782,21 @@ func feedback(f: Fight, events: Array) -> void:
 				floater(W + Vector3(0, 0.9, 0), "UNDER WARRANT", C_GOLD, 56, 1.4)
 				_ring_wave(_v3(f.w_pos), C_GOLD, 2.0)
 			"sounded":
-				floater(W + Vector3(0, 0.9, 0), "SOUNDED", Color(0.6, 0.85, 1.0), 56, 1.2)
-				_ring_wave(_v3(f.w_pos), Color(0.6, 0.85, 1.0), 3.0)
+				floater(W + Vector3(0, 0.9, 0), "SOUNDED", Style.shape_color("cast"), 56, 1.2)
+				_ring_wave(_v3(f.w_pos), Style.shape_color("cast"), 3.0)
 			"pulled":
-				floater(W + Vector3(0, 0.9, 0), "LINE ACROSS", Color(0.8, 0.55, 1.0), 56, 1.0)
+				floater(W + Vector3(0, 0.9, 0), "LINE ACROSS", Style.shape_color("bind"), 56, 1.0)
 				_tracer(_v3(f.p_pos, 1.3), _v3(f.w_pos, 1.0), true)
 			"named":
 				floater(_v3(f.p_pos, 2.6), "%s!" % String(e["who"]).to_upper(), C_TEXT, 64, 1.0)
 			"bar-warning":
 				floater(P + Vector3(0, 0.5, 0), String(e["bars"][0]).to_upper(), C_WINDUP, 60, 1.6)
 				floater(P, "press R again to break your Term", C_WINDUP, 40, 1.6)
-				flash_screen(Color(0.8, 0.1, 0.05), 0.25)
+				flash_screen(Style.fx("hurt"), 0.25)
 			"breach":
 				floater(P + Vector3(0, 0.8, 0), "TERM BROKEN", C_WINDUP, 110, 2.2)
 				floater(P + Vector3(0, 0.2, 0), "the Pattern is lost for good" if e["sworn"] else "the Pattern is lost for a season", C_WINDUP, 48, 2.2)
-				flash_screen(Color(0.6, 0.0, 0.0), 0.8)
+				flash_screen(Style.fx("hurt").darkened(0.25), 0.8)
 				_shake = 0.35
 			"turned":
 				floater(P, "TURNED ASIDE", C_GUARD, 56)
@@ -1588,7 +1804,7 @@ func feedback(f: Fight, events: Array) -> void:
 			"ward-pulse":
 				_ring_wave(_v3(f.p_pos), C_GUARD, 2.2)
 			"mend":
-				floater(P, "+%d" % int(e["amount"]), Color(0.5, 1.0, 0.55), 56)
+				floater(P, "+%d" % int(e["amount"]), Style.shape_color("make"), 56)
 			"pattern-start":
 				floater(P + Vector3(0, 0.5, 0), String(e["name"]).to_upper(), C_GOLD, 96, 1.4)
 				for i in e["tolls"].size():
@@ -1602,7 +1818,7 @@ func feedback(f: Fight, events: Array) -> void:
 					floater(P, "%s" % ("too early" if e["offset_ms"] < 0 else "late"), C_DIM, 44)
 			"pattern-done":
 				if e.has("heal"):
-					floater(P + Vector3(0, 0.6, 0), "+%d" % int(e["heal"]), Color(0.5, 1.0, 0.55), 140, 1.6, 0.6)
+					floater(P + Vector3(0, 0.6, 0), "+%d" % int(e["heal"]), Style.shape_color("make"), 140, 1.6, 0.6)
 				else:
 					floater(W + Vector3(0, 1.0, 0), "%d" % int(e["damage"]), C_GOLD, 140, 1.6, 0.6)
 				_ring_wave(_v3(f.w_pos), C_GOLD, 5.0)
@@ -1737,13 +1953,16 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 			_cue_mat.albedo_color = Color(C_GOLD, clampf(1.0 - k * 0.5, 0.3, 1.0))
 
 	# Torches flicker.
+	# (one flame's flicker for all of them: data/style.json, motion.flicker; an open flame twice a lamp's)
+	var fw := TAU / Style.motion("flicker", "period", 0.7)
+	var fd := Style.motion("flicker", "depth", 0.12)
 	for idx in _torches.size():
 		var l: OmniLight3D = _torches[idx]
-		l.light_energy = 1.4 + 0.25 * sin(_clock * 9.0 + idx * 1.7) + 0.15 * sin(_clock * 23.0 + idx)
+		l.light_energy = 1.4 * Style.light_energy("fire") * (1.0 + 2.0 * fd * (0.6 * sin(_clock * fw + idx * 1.7) + 0.4 * sin(_clock * fw * 2.6 + idx)))
 	# The Academy's lamps and fires, each about its own level; the rite dims them.
 	for idx in _lamps.size():
 		var lm: Dictionary = _lamps[idx]
-		var fl := 1.0 if lm["steady"] else 1.0 + 0.09 * sin(_clock * 8.0 + idx * 1.9) + 0.05 * sin(_clock * 21.0 + idx)
+		var fl := 1.0 if lm["steady"] else 1.0 + fd * (0.65 * sin(_clock * fw + idx * 1.9) + 0.35 * sin(_clock * fw * 2.6 + idx))
 		(lm["light"] as OmniLight3D).light_energy = float(lm["base"]) * fl * lerpf(1.0, 0.1, _torch_dim)
 	_update_cutaway()
 
@@ -1860,7 +2079,7 @@ func _update_statuses(f: Fight) -> void:
 		cm.bottom_radius = 0.35
 		cm.height = 2.2
 		_ward.mesh = cm
-		_ward.material_override = _mat(Color(0.5, 1.0, 0.6), 1.5, true, 0.45)
+		_ward.material_override = _mat(Style.shape_color("make"), 1.5, true, 0.45)
 		add_child(_ward)
 	if _ward:
 		if warded:
@@ -1951,8 +2170,8 @@ func reset_feedback() -> void:
 	_w_oneshot_until = 0.0
 	_p_current = ""
 	_w_current = ""
-	_play(_p_anim, "Idle", 1.0, 0.0)
-	_play(_w_anim, _wa("idle"), 1.0, 0.0)
+	_play(_p_anim, "Idle", breath(_p_anim, "Idle"), 0.0)
+	_play(_w_anim, _wa("idle"), breath(_w_anim, _wa("idle")), 0.0)
 
 # --- The look: ink, motes, moonlight -------------------------------------------
 
@@ -1967,9 +2186,14 @@ func _shader_mat(code: String) -> ShaderMaterial:
 	m.shader = _shaders[code]
 	return m
 
-func _ink(width: float) -> ShaderMaterial:
+## The ink line on the living (data/style.json, ink): by what carries it, "people", "beasts"
+## or "genii". Places carry none. (A width given as a number, as this once took, is not
+## heeded: the weight of the line is the style's.)
+func _ink(category = "people") -> ShaderMaterial:
 	var m := _shader_mat(INK)
-	m.set_shader_parameter("width", width)
+	m.set_shader_parameter("width", Style.ink_width(String(category) if category is String else "people"))
+	m.set_shader_parameter("screen", float(Style.data()["ink"].get("screen", 900)))
+	m.set_shader_parameter("ink", Style.ink_color())
 	return m
 
 ## The chamber's air: motes of field drifting in the dark, and moonlight falling through the
@@ -2037,6 +2261,7 @@ func _moonlight(spots: Array) -> void:
 		shaft.mesh = cm
 		var sm := _shader_mat(SHAFT)
 		sm.set_shader_parameter("half_height", 7.0)
+		sm.set_shader_parameter("tint", Style.light("moon", "color"))
 		shaft.material_override = sm
 		shaft.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var y := up
@@ -2050,8 +2275,8 @@ func _moonlight(spots: Array) -> void:
 		pool.mesh = pm
 		var gm := _shader_mat(GLOW)
 		gm.set_shader_parameter("billboard", false)
-		gm.set_shader_parameter("tint", Color(0.45, 0.58, 1.0))
-		gm.set_shader_parameter("strength", 0.35)
+		gm.set_shader_parameter("tint", Style.light("moon", "color"))
+		gm.set_shader_parameter("strength", 0.3)
 		gm.set_shader_parameter("falloff", 1.4)
 		pool.material_override = gm
 		pool.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -2081,6 +2306,9 @@ var genius_visible := true
 var _genius := Node3D.new()
 var _g_core := MeshInstance3D.new()
 var _g_core_mat := StandardMaterial3D.new()
+var _g_baby: Node3D = null         # the Baby: the body it has before the rite (docs/genius-evolutions.md)
+var _g_baby_lit: Array = []        # its materials of the field, which take the partner's colour
+var _g_baby_was := Vector3.ZERO
 var _g_halo := MeshInstance3D.new()
 var _g_halo_mat: ShaderMaterial
 var _g_light := OmniLight3D.new()
@@ -2119,6 +2347,34 @@ func _build_genius() -> void:
 	_g_core.material_override = _g_core_mat
 	_g_core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_genius.add_child(_g_core)
+	# The Baby: before the rite the genius is the same small thing for everyone, a round body
+	# with a face and the field in its eyes, its belly and the tip of its tail. It rides where
+	# the orb did, and the orb's light is still round it.
+	const BABY := "res://game/assets/genius/forms/baby.glb"
+	if ResourceLoader.exists(BABY):
+		_g_baby = load(BABY).instantiate()
+		_g_core.mesh = null
+		_g_core.add_child(_g_baby)
+		_g_baby.scale = Vector3.ONE * (0.26 / 0.72)
+		_g_baby.position = Vector3(0, -0.13, 0)
+		var skins := _g_baby.find_children("*", "MeshInstance3D", true, false)
+		for m in skins:
+			var mi := m as MeshInstance3D
+			for i in mi.mesh.get_surface_count():
+				var born := mi.mesh.surface_get_material(i)
+				if born is StandardMaterial3D and String(born.resource_name).begins_with("field"):
+					var lit := (born as StandardMaterial3D).duplicate() as StandardMaterial3D
+					lit.emission_enabled = true
+					lit.emission_energy_multiplier = 2.2
+					mi.set_surface_override_material(i, lit)
+		toonify(_g_baby)
+		for m in skins:
+			var mi := m as MeshInstance3D
+			mi.material_overlay = _ink(1.2)
+			for i in mi.mesh.get_surface_count():
+				var am := mi.get_active_material(i)
+				if am and String(am.resource_name).begins_with("field"):
+					_g_baby_lit.append(am)
 	var q := QuadMesh.new()
 	q.size = Vector2(0.9, 0.9)
 	_g_halo.mesh = q
@@ -2162,6 +2418,11 @@ func _build_genius() -> void:
 func _tint_genius(c: Color) -> void:
 	_g_tint = c.lightened(0.25)
 	_g_core_mat.albedo_color = c.lightened(0.7)
+	for m in _g_baby_lit:
+		if m is ShaderMaterial:
+			(m as ShaderMaterial).set_shader_parameter("emission", _g_tint)
+		elif m is StandardMaterial3D:
+			(m as StandardMaterial3D).emission = _g_tint
 	_g_halo_mat.set_shader_parameter("tint", _g_tint)
 	_g_light.light_color = _g_tint
 	var ramp := Gradient.new()
@@ -2238,8 +2499,14 @@ func _update_genius(f: Fight, dt: float) -> void:
 		bright *= 0.35 + 0.65 * absf(sin(_clock * 40.0))
 	var s := (0.9 + 0.7 * _g_pulse + 0.06 * sin(_clock * 6.0)) * (0.3 + 0.7 * born_k)
 	_g_core.scale = Vector3.ONE * s
+	if _g_baby:
+		# it looks where it is going
+		var went := _g_pos - _g_baby_was
+		_g_baby_was = _g_pos
+		if Vector2(went.x, went.z).length() > 0.0004:
+			_g_baby.rotation.y = lerp_angle(_g_baby.rotation.y, atan2(went.x, went.z), 1.0 - exp(-dt * 9.0))
 	_g_halo.scale = Vector3.ONE * (0.8 + 1.4 * _g_pulse) * (0.3 + 0.7 * born_k)
-	_g_halo_mat.set_shader_parameter("strength", (0.7 + 0.9 * _g_pulse) * bright)
+	_g_halo_mat.set_shader_parameter("strength", (0.7 + 0.9 * _g_pulse) * bright * (0.42 if _g_baby else 1.0))
 	_g_light.light_energy = (0.55 + 1.6 * _g_pulse) * bright
 	_g_core_mat.albedo_color = _g_tint.lightened(0.55 + 0.4 * _g_pulse) * Color(1, 1, 1, 1)
 
@@ -2269,11 +2536,7 @@ func set_place(id: String, spec: Dictionary = {}) -> void:
 	if id == "cut":
 		_build_chamber()
 		_moonlight([[Vector3(-5.5, 0, -2.6), 1.3], [Vector3(3.2, 0, 3.4), 0.9], [Vector3(8.6, 0, -4.4), 1.1]])
-		_env.background_color = Color(0.02, 0.018, 0.02)
-		_env.ambient_light_energy = 0.2
-		_env.ambient_light_color = Color(0.5, 0.44, 0.48)
-		_env.fog_density = 0.022
-		_moon.light_energy = 0.28
+		_light_place("cut")
 	elif id == "stage":
 		_build_stage()
 	else:
@@ -2483,18 +2746,10 @@ func _build_academy_place(spec: Dictionary) -> void:
 		return
 	if wild:
 		_furnish_wild(spec)
-		_env.background_color = Color(0.03, 0.045, 0.06)
-		_env.ambient_light_energy = 0.42
-		_env.ambient_light_color = Color(0.5, 0.6, 0.75)
-		_env.fog_density = 0.018
-		_moon.light_energy = 0.9
+		_light_place("wild")
 		_moonlight([[Vector3(-arena.x * 0.2, 0, -arena.y * 0.15), 1.4], [Vector3(arena.x * 0.28, 0, arena.y * 0.2), 1.0], [Vector3(0, 0, 0), 0.8]])
 		return
-	_env.background_color = Color(0.045, 0.05, 0.095)
-	_env.ambient_light_energy = 0.34
-	_env.ambient_light_color = Color(0.5, 0.44, 0.48)
-	_env.fog_density = 0.012
-	_moon.light_energy = 0.28
+	_light_place("court", { "ambientEnergy": 0.34, "fogDensity": 0.012, "moon": 0.28 })
 	if spec.get("walls", "") != "fortress" or arena.x > 20.0:
 		_moonlight([[Vector3(arena.x * 0.18, 0, -arena.y * 0.12), 1.2], [Vector3(-arena.x * 0.25, 0, arena.y * 0.2), 0.9]])
 
@@ -2503,10 +2758,16 @@ func _build_academy_place(spec: Dictionary) -> void:
 const ACADEMY_DIR := "res://game/assets/academy/%s.glb"
 ## Pieces 8 wide; every other wall piece is 4.
 const WIDE_PIECES := ["range_portal", "library_portal", "gatehouse", "curtain_portal", "station_portal", "line_arch", "hall_portal", "hall_hearth"]
-## What a light the kit marks (an empty named light_<kind>) gives: colour, energy, range.
-const KIT_LIGHTS := {
-	"lamp": [Color(1.0, 0.68, 0.36), 0.95, 7.0], "fire": [Color(1.0, 0.56, 0.26), 2.0, 12.0],
-	"stain": [Color(0.72, 0.52, 1.0), 0.5, 6.5], "cool": [Color(0.5, 0.72, 1.0), 1.1, 8.0] }
+## What a light the kit marks (an empty named light_<kind>) gives: colour, energy, range. The
+## colours are the style's lights (data/style.json): the lamp's, the fire's, the moon's, and
+## the Library's glass banked down.
+static func kit_light(kind: String) -> Array:
+	match kind:
+		"lamp": return [Style.light("lamp"), 0.95 * Style.light_energy("lamp"), 7.0]
+		"fire": return [Style.light("fire"), 2.0 * Style.light_energy("fire"), 12.0]
+		"stain": return [Color(String(Style.data()["lights"]["stain"].get("cast", "#B9A6D9"))), 0.5 * float(Style.data()["lights"]["stain"].get("energy", 0.5)) * 2.0, 6.5]
+		"cool": return [Style.light("moon"), 1.1 * Style.light_energy("moon"), 8.0]
+	return []
 
 var _cut_walls: Array = []    # {upper, at, out, out2}: a wall's upper part hides on the camera's side
 var _lamps: Array = []        # {light, base, steady}: the kit's lights, flickering about their own level
@@ -2521,6 +2782,13 @@ shader_type spatial;
 // stars, a moon. A dome drawn behind everything.
 render_mode unshaded, cull_disabled, depth_draw_never, fog_disabled, shadows_disabled;
 uniform vec3 moon_dir = vec3(0.35, 0.55, -0.75);
+uniform vec3 top : source_color = vec3(0.075, 0.094, 0.14);
+uniform vec3 mid : source_color = vec3(0.13, 0.16, 0.22);
+uniform vec3 low : source_color = vec3(0.22, 0.2, 0.25);
+uniform vec3 ember : source_color = vec3(0.48, 0.29, 0.2);
+uniform vec3 stars : source_color = vec3(0.8, 0.83, 0.92);
+uniform vec3 moon : source_color = vec3(0.87, 0.89, 0.95);
+uniform vec3 halo : source_color = vec3(0.23, 0.26, 0.38);
 varying vec3 dir;
 float hash(vec3 p) {
 	p = fract(p * 0.3183099 + 0.1);
@@ -2531,10 +2799,6 @@ void vertex() { dir = normalize(VERTEX); }
 void fragment() {
 	vec3 d = normalize(dir);
 	float h = d.y;
-	vec3 top = vec3(0.02, 0.03, 0.085);
-	vec3 mid = vec3(0.06, 0.08, 0.2);
-	vec3 low = vec3(0.2, 0.14, 0.21);
-	vec3 ember = vec3(0.5, 0.24, 0.14);
 	vec3 col = mix(mid, top, smoothstep(0.12, 0.8, h));
 	col = mix(low, col, smoothstep(0.0, 0.3, h));
 	// the last light, in the west only
@@ -2545,11 +2809,11 @@ void fragment() {
 	vec3 g = floor(gp);
 	float r = hash(g);
 	float star = step(0.992, r) * smoothstep(0.08, 0.4, h) * smoothstep(0.3, 0.05, length(fract(gp) - 0.5));
-	col += vec3(0.8, 0.85, 1.0) * star * (0.5 + 0.5 * sin(TIME * (1.0 + r * 3.0) + r * 40.0)) * 0.9;
+	col += stars * star * (0.5 + 0.5 * sin(TIME * (1.0 + r * 3.0) + r * 40.0)) * 0.9;
 	// the moon and its halo
 	float m = dot(d, normalize(moon_dir));
-	col += vec3(0.75, 0.8, 0.95) * smoothstep(0.99965, 0.9998, m);
-	col += vec3(0.16, 0.2, 0.34) * pow(max(m, 0.0), 220.0);
+	col += moon * smoothstep(0.99965, 0.9998, m);
+	col += halo * pow(max(m, 0.0), 220.0);
 	if (h < 0.0) { col = mix(low * 0.35, vec3(0.008, 0.008, 0.012), smoothstep(0.0, -0.08, h)); }
 	ALBEDO = col;
 }
@@ -2572,7 +2836,7 @@ func _kit_piece(name: String, pos: Vector3, rot_deg := 0.0, scale := Vector3.ONE
 			(m as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	for c in n.find_children("light_*", "", true, false):
 		var kind := String(c.name).get_slice("_", 1)
-		if not KIT_LIGHTS.has(kind):
+		if kit_light(kind).is_empty():
 			continue
 		# coloured glass lights every other bay only, and no place more lights than it can draw
 		if kind == "stain":
@@ -2581,7 +2845,7 @@ func _kit_piece(name: String, pos: Vector3, rot_deg := 0.0, scale := Vector3.ONE
 				continue
 		if _lamps.size() >= 26:
 			continue
-		var k: Array = KIT_LIGHTS[kind]
+		var k: Array = kit_light(kind)
 		var light := OmniLight3D.new()
 		light.light_color = k[0]
 		light.light_energy = k[1]
@@ -2729,19 +2993,10 @@ func _build_kit_place(spec: Dictionary) -> void:
 	_torch_dim = 0.0
 	if hall:
 		# indoors: no sky, the dark of a roof overhead, lamps and a fire
-		_env.background_color = Color(0.016, 0.012, 0.011)
 		_env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		_env.ambient_light_color = Color(0.62, 0.5, 0.42)
-		_env.ambient_light_energy = _ambient_lit
-		_env.fog_light_color = Color(0.05, 0.035, 0.028)
-		_env.fog_density = 0.016
-		_moon.light_energy = 0.0
+		_light_place("hall", { "ambientEnergy": _ambient_lit })
 	else:
-		_env.background_color = Color(0.02, 0.02, 0.035)
-		_env.ambient_light_energy = _ambient_lit
-		_env.fog_light_color = Color(0.05, 0.05, 0.085)
-		_env.fog_density = 0.006
-		_moon.light_energy = float(style.get("moon", 0.5))
+		_light_place("court", { "ambientEnergy": _ambient_lit, "moon": float(style.get("moon", Style.place_light("court")["moon"])) })
 		_sky_dome = MeshInstance3D.new()
 		var sm := SphereMesh.new()
 		sm.radius = 260.0
@@ -2749,7 +3004,11 @@ func _build_kit_place(spec: Dictionary) -> void:
 		sm.radial_segments = 24
 		sm.rings = 12
 		_sky_dome.mesh = sm
-		_sky_dome.material_override = _shader_mat(SKY)
+		var sky_mat := _shader_mat(SKY)
+		var sky_cols: Dictionary = Style.data()["lights"]["sky"]
+		for k in ["top", "mid", "low", "ember", "stars", "moon", "halo"]:
+			sky_mat.set_shader_parameter(k, Color(String(sky_cols[k])))
+		_sky_dome.material_override = sky_mat
 		_sky_dome.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_sky_dome.extra_cull_margin = 1000.0
 		_place_root.add_child(_sky_dome)
@@ -2832,8 +3091,8 @@ func _rails(hw: float, from := -INF) -> void:
 func _torch(at: Vector3, rot: float) -> void:
 	var t := _piece("torch_mounted", at, rot)
 	var light := OmniLight3D.new()
-	light.light_color = Color(1.0, 0.6, 0.3)
-	light.light_energy = 1.5
+	light.light_color = Style.light("fire")
+	light.light_energy = 1.5 * Style.light_energy("fire")
 	light.omni_range = 8.0
 	light.omni_attenuation = 1.5
 	light.shadow_enabled = false
@@ -2908,8 +3167,8 @@ func _build_post(pa: Vector3) -> void:
 		ring.material_override = _mat(Color(0.55, 0.75, 1.0), 2.0, true, 0.5)
 		_place_root.add_child(ring)
 		var lamp := OmniLight3D.new()
-		lamp.light_color = Color(0.6, 0.78, 1.0)
-		lamp.light_energy = 1.8
+		lamp.light_color = Style.light("lamp")
+		lamp.light_energy = 1.8 * Style.light_energy("lamp")
 		lamp.omni_range = 8.0
 		lamp.position = pa + Vector3(0, lamp_y, 0)
 		_place_root.add_child(lamp)
@@ -3042,8 +3301,8 @@ func _furnish_zone(spec: Dictionary) -> void:
 			var along_x := absf(out_dir.x) > absf(out_dir.y)
 			_wild_piece("set_car", Vector3(ca.x, 0, ca.y), 0.0 if along_x else 90.0)
 			var lamp := OmniLight3D.new()
-			lamp.light_color = Color(1.0, 0.8, 0.55)
-			lamp.light_energy = 1.4
+			lamp.light_color = Style.light("lamp")
+			lamp.light_energy = 1.4 * Style.light_energy("lamp")
 			lamp.omni_range = 9.0
 			lamp.position = Vector3(ca.x, 2.4, ca.y) - Vector3(out_dir.x, 0, out_dir.y) * 2.0
 			_place_root.add_child(lamp)
@@ -3080,13 +3339,11 @@ func _furnish_zone(spec: Dictionary) -> void:
 		placed += 1
 	# The zone's night.
 	var L: Dictionary = z["light"]
-	_env.background_color = Color(L["sky"][0], L["sky"][1], L["sky"][2])
-	_env.ambient_light_energy = float(L["ambientEnergy"])
-	_env.ambient_light_color = Color(L["ambient"][0], L["ambient"][1], L["ambient"][2])
-	_env.fog_density = float(L["fog"])
-	_moon.light_energy = float(L["moon"])
+	var over := { "sky": Color(L["sky"][0], L["sky"][1], L["sky"][2]).to_html(false), "ambient": Color(L["ambient"][0], L["ambient"][1], L["ambient"][2]).to_html(false),
+		"ambientEnergy": float(L["ambientEnergy"]), "fogDensity": float(L["fog"]), "moon": float(L["moon"]) }
 	if L.has("moonColor"):
-		_moon.light_color = Color(L["moonColor"][0], L["moonColor"][1], L["moonColor"][2])
+		over["moonColor"] = Color(L["moonColor"][0], L["moonColor"][1], L["moonColor"][2]).to_html(false)
+	_light_place("wild", over)
 	_moonlight([[Vector3(-arena.x * 0.2, 0, -arena.y * 0.15), 1.4], [Vector3(arena.x * 0.28, 0, arena.y * 0.2), 1.0], [Vector3(0, 0, 0), 0.8]])
 
 func _furnish_quad() -> void:
@@ -3095,8 +3352,8 @@ func _furnish_quad() -> void:
 		_piece("pillar_decorated", Vector3(c.x, 0, c.y), 0.0)
 		obstacles.append(Vector3(c.x, c.y, 0.9))
 	var lamp := OmniLight3D.new()
-	lamp.light_color = Color(1.0, 0.72, 0.42)
-	lamp.light_energy = 2.2
+	lamp.light_color = Style.light("fire")
+	lamp.light_energy = 2.2 * Style.light_energy("fire")
 	lamp.omni_range = 10.0
 	lamp.position = Vector3(0, 2.2, 0)
 	_place_root.add_child(lamp)
@@ -3183,7 +3440,7 @@ func _pack_make(fo: Foe) -> Dictionary:
 			ap.get_animation(WOLF_ANIMS[key]).loop_mode = Animation.LOOP_LINEAR
 	var meshes := n.find_children("*", "MeshInstance3D", true, false)
 	var ov := _mat(C_WINDUP, 2.0, true, 0.0)
-	ov.next_pass = _ink(2.4)
+	ov.next_pass = _ink("beasts")
 	for m in meshes:
 		m.material_overlay = ov
 	var l := Label3D.new()
@@ -3217,6 +3474,7 @@ func _pack_free(d: Dictionary) -> void:
 
 func _pack_loop(d: Dictionary, name: String, speed: float) -> void:
 	var ap: AnimationPlayer = d["anim"]
+	speed *= breath(ap, name)
 	if d["cur"] == name and ap.is_playing():
 		ap.speed_scale = speed
 		return
@@ -3356,12 +3614,13 @@ func set_allies(specs: Array) -> void:
 		if w.has("offhand"):
 			_attach(skel, "handslot.l", _weapon_model(w["offhand"]))
 		for m in n.find_children("*", "MeshInstance3D", true, false):
-			m.material_overlay = _ink(2.0)
+			m.material_overlay = _ink("people")
 		var ap: AnimationPlayer = n.find_child("AnimationPlayer", true, false)
 		for loop in ["Idle", "Running_A"]:
 			if ap.has_animation(loop):
 				ap.get_animation(loop).loop_mode = Animation.LOOP_LINEAR
 		ap.play("Idle")
+		ap.speed_scale = breath(ap, "Idle")
 		var l := Label3D.new()
 		l.text = sp.get("name", "")
 		l.font = Style.font("title")
@@ -3403,7 +3662,7 @@ func _update_allies(f: Fight, dt: float) -> void:
 		if al["moving"] and not al["down"]:
 			ap.speed_scale = stride_scale(want, v)
 		elif not al["down"]:
-			ap.speed_scale = 1.0
+			ap.speed_scale = breath(ap, want)
 
 func _ally_event(f: Fight, e: Dictionary) -> void:
 	var i := int(e.get("who", -1))
@@ -3530,13 +3789,13 @@ func add_figure(body: String, at: Vector2, facing: float, title: String, sub: St
 			_attach(skel, "handslot.l", _weapon_model(w["offhand"]))
 	var over := _mat(C_HIT, 0.0, true, 0.0)
 	over.albedo_color = tint
-	over.next_pass = _ink(2.0)
+	over.next_pass = _ink("people")
 	for m in n.find_children("*", "MeshInstance3D", true, false):
 		m.material_overlay = over
 	var ap: AnimationPlayer = n.find_child("AnimationPlayer", true, false)
 	if ap.has_animation("Idle"):
 		ap.get_animation("Idle").loop_mode = Animation.LOOP_LINEAR
-		ap.play("Idle", 0.0, randf_range(0.85, 1.1))
+		ap.play("Idle", 0.0, breath(ap, "Idle") * randf_range(0.9, 1.1))
 		ap.seek(randf() * 2.0, true)
 	n.position = _v3(at)
 	n.rotation.y = _yaw(facing)
@@ -3628,7 +3887,7 @@ func _furnish_hearth(kit := false) -> void:
 	bowl_flame.scale = Vector3(0.6, 0.8, 0.6)
 	_place_root.add_child(bowl_flame)
 	bowl_light = OmniLight3D.new()
-	bowl_light.light_color = Color(1.0, 0.65, 0.35)
+	bowl_light.light_color = Style.light("fire")
 	bowl_light.light_energy = 2.0
 	bowl_light.omni_range = 9.0
 	bowl_light.position = BOWL + Vector3(0, 2.0, 0)
@@ -3756,9 +4015,9 @@ func make_form(info: Dictionary, color: Color) -> Node3D:
 	for m in gb.find_children("*", "MeshInstance3D", true, false):
 		var mi := m as MeshInstance3D
 		if mi.material_overlay:
-			mi.material_overlay.next_pass = _ink(1.6)
+			mi.material_overlay.next_pass = _ink("genii")
 		else:
-			mi.material_overlay = _ink(1.6)
+			mi.material_overlay = _ink("genii")
 	return gb
 
 func _sphere(r: float) -> SphereMesh:
@@ -3842,6 +4101,8 @@ func _genius_move_shown(f: Fight, e: Dictionary, P: Vector3, W: Vector3) -> void
 			burst(at + Vector3(0, 0.4, 0), hi, 6, 2.0)
 
 var _g_hold_ring: MeshInstance3D = null
+var _g_door_ring: MeshInstance3D = null
+var _g_door_r := 0.0
 var _g_zone_disc: MeshInstance3D = null
 var _g_lit_light: OmniLight3D = null
 
@@ -3867,7 +4128,9 @@ func _genius_ground(f: Fight) -> void:
 		if holding:
 			_g_hold_ring.position = _v3(f.g_hold_at, 0.07)
 			_g_hold_ring.scale = Vector3.ONE * (1.0 + 0.015 * sin(_clock * 2.0))
-	var zoned := up and not f.g_zone.is_empty()
+	# a lamp set down lights its circle the way a genius laid on the ground does its own
+	var lamped := up and not f.g_lamp.is_empty()
+	var zoned := (up and not f.g_zone.is_empty()) or lamped
 	if zoned and _g_zone_disc == null:
 		_g_zone_disc = MeshInstance3D.new()
 		var pm := PlaneMesh.new()
@@ -3882,17 +4145,38 @@ func _genius_ground(f: Fight) -> void:
 	if _g_zone_disc:
 		_g_zone_disc.visible = zoned
 		if zoned:
-			var zr := minf(float(f.g_zone["radius"]), 14.0)
-			var zc: Color = { "burn": Color(1.0, 0.45, 0.15), "chill": Color(0.6, 0.85, 1.0), "dark": Color(0.35, 0.2, 0.55) }.get(String(f.g_zone["effect"]), _g_tint)
-			_g_zone_disc.position = _v3(f.g_zone["at"], 0.09)
+			var zone: Dictionary = f.g_lamp if lamped else f.g_zone
+			var zr := minf(float(zone["radius"]), 14.0)
+			var zc: Color = Style.light("lamp", "color") if lamped else { "burn": Color(1.0, 0.45, 0.15), "chill": Style.shape_color("cast"), "dark": Color(0.35, 0.2, 0.55) }.get(String(f.g_zone["effect"]), _g_tint)
+			_g_zone_disc.position = _v3(zone["at"], 0.09)
 			_g_zone_disc.scale = Vector3(zr, 1, zr)
 			var zm := _g_zone_disc.material_override as ShaderMaterial
 			zm.set_shader_parameter("tint", zc)
 			zm.set_shader_parameter("strength", 0.55 + 0.12 * sin(_clock * 5.0))
-	var lit := up and f.now < f.g_lit_until
+	# a shield standing as a door: a ring round the ground it covers
+	var doored := up and not f.g_door.is_empty()
+	if doored and (_g_door_ring == null or not is_equal_approx(_g_door_r, float(f.g_door["radius"]))):
+		if _g_door_ring:
+			_g_door_ring.queue_free()
+		_g_door_r = float(f.g_door["radius"])
+		_g_door_ring = MeshInstance3D.new()
+		var dm := TorusMesh.new()
+		dm.inner_radius = _g_door_r - 0.09
+		dm.outer_radius = _g_door_r
+		dm.rings = 64
+		dm.ring_segments = 6
+		_g_door_ring.mesh = dm
+		_g_door_ring.material_override = _mat(_g_tint.lightened(0.2), 1.8, true, 0.6)
+		_g_door_ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(_g_door_ring)
+	if _g_door_ring:
+		_g_door_ring.visible = doored
+		if doored:
+			_g_door_ring.position = _v3(f.g_door["at"], 0.08)
+	var lit := (up and f.now < f.g_lit_until) or (lamped and f.p_pos.distance_to(f.g_lamp["at"]) <= float(f.g_lamp["radius"]))
 	if lit and _g_lit_light == null:
 		_g_lit_light = OmniLight3D.new()
-		_g_lit_light.light_color = Color(1.0, 0.9, 0.65)
+		_g_lit_light.light_color = Style.light("lamp").lerp(Color.WHITE, 0.35)
 		_g_lit_light.omni_range = 9.0
 		_g_lit_light.omni_attenuation = 1.2
 		add_child(_g_lit_light)
@@ -3902,10 +4186,58 @@ func _genius_ground(f: Fight) -> void:
 
 ## The First Form follows: fliers and fey and flames at the shoulder, walkers at the heel. On
 ## Hunt it is at the foe; on Hold it stands on its ground; a flier that has stooped climbs.
+## Where a genius's own model says it is taken hold of (grip), worn (wear) or carried (carry):
+## an empty of that name in its model, found once for each body.
+var _held_body: GeniusBody = null
+var _held_nodes := {}
+func _held_at(what: String) -> Node3D:
+	if _g_body == null or not is_instance_valid(_g_body) or _g_body._model == null:
+		return null
+	if _held_body != _g_body:
+		_held_body = _g_body
+		_held_nodes = {}
+	if not _held_nodes.has(what):
+		_held_nodes[what] = _g_body._model.find_child(what, true, false)
+	return _held_nodes[what] as Node3D
+
 func _update_form(f: Fight, dt: float) -> void:
 	_genius.visible = false
 	_g_trail.emitting = false
 	_genius_ground(f)
+	# A weapon genius in the hand is the weapon: it sits where the weapon put away sat, at the
+	# length a hand holds (data/genius-types.json, weapon.bases.*.held), and that one is not drawn.
+	if _sword:
+		_sword.visible = not f.g_in_hand
+	if f.g_in_hand and _sword and _g_form:
+		# length: how long it is in the hand, in metres. grip: how far along that length, from its
+		# foot, the hand takes it. flip: its foot is its point (a blade that floats point down).
+		var held: Dictionary = f.g_weapon.get("held", {})
+		var long := float(held.get("length", 1.0))
+		var k := long / maxf(0.2, _g_body.stands if _g_body else 1.0)
+		var slot := _sword.global_transform.basis.orthonormalized()
+		var hb := slot
+		var at := _sword.global_position - slot.y * long * float(held.get("grip", 0.0))
+		if held.get("upright", false):
+			# a thing held level (a gun): upright, turned the way its partner faces
+			hb = Basis(Vector3.UP, _yaw(f.p_facing))
+			at = _sword.global_position - Vector3.UP * long * float(held.get("grip", 0.0))
+		elif held.get("flip", false):
+			hb = slot * Basis(Vector3.RIGHT, PI)
+			at = _sword.global_position + slot.y * long * float(held.get("grip", 0.0))
+		_g_form.global_transform = Transform3D(hb * Basis.from_scale(Vector3.ONE * k), at)
+		# A weapon with a model of its own says where the hand closes on it (an empty named
+		# grip, turned as a weapon is turned in the hand): it is seated there, whatever its form.
+		var grip := _held_at("grip")
+		if grip:
+			var g := _g_body._local_xf(grip)
+			var fb := slot * g.basis.orthonormalized().inverse() * Basis.from_scale(Vector3.ONE * k)
+			_g_form.global_transform = Transform3D(fb, _sword.global_position - fb * g.origin)
+		_g_form_pos = _sword.global_position
+		if _g_body:
+			_g_body.move_at(0.0)
+		return
+	if not _g_form.scale.is_equal_approx(Vector3.ONE):
+		_g_form.scale = Vector3.ONE
 	var walker := _g_body != null and _g_body.walks()
 	var side := Vector2.from_angle(f.p_facing + (2.2 if walker else 1.9))
 	var want := _v3(f.p_pos + side * (1.1 if walker else 0.8), 0.0 if walker else 1.5 + 0.08 * sin(_clock * 2.4))

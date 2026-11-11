@@ -54,6 +54,9 @@ static func _grow(parent_id: String, parent_features: Array, nodes: Array, level
 			"own": (n["features"] as Array).duplicate(), "features": _uniq(parent_features + n["features"]), "leans": n.get("leans", {}), "children": [],
 			"instars": { "min": level, "max": 6 if level >= 4 else level },
 			"body": wear(parent_body, n.get("body", {})),
+			# the form whose own model it wears: its own; or, carried into a hybrid from its second
+			# base, the form of the first it took the place of (a hybrid keeps its first's body)
+			"wears": String(n.get("wears", n["id"])),
 		}
 		out.append(f)
 		ids.append(f["id"])
@@ -194,9 +197,11 @@ static func compose(a: Dictionary, b: Dictionary, hy: Dictionary, labels: Dictio
 		for j in theirs_fins.size():
 			var f: Dictionary = theirs_fins[j]
 			fins.append(_said({ "id": f["id"], "name": rename(rule["carried"], String(a["hybrid"]["adj"]), String(f["name"])), "text": f["text"], "of": f.get("of", ""), "sign": "",
-				"habit": _or(gone_fins[j].get("habit") if j < gone_fins.size() else null, f.get("habit")), "features": f["features"], "leans": f.get("leans", {}) }, pair, rule, words))
+				"habit": _or(gone_fins[j].get("habit") if j < gone_fins.size() else null, f.get("habit")), "features": f["features"], "leans": f.get("leans", {}),
+				"wears": String(gone_fins[j]["id"]) if j < gone_fins.size() else String(gone.get("id", f["id"])) }, pair, rule, words))
 		var carried := _said({ "id": best["id"], "name": rename(rule["carried"], String(a["hybrid"]["adj"]), String(best["name"])), "text": best["text"], "of": best.get("of", ""), "sign": "",
-			"habit": _or(gone.get("habit"), best.get("habit")), "features": best["features"], "leans": best.get("leans", {}), "finishes": fins }, pair, rule, words)
+			"habit": _or(gone.get("habit"), best.get("habit")), "features": best["features"], "leans": best.get("leans", {}), "finishes": fins,
+			"wears": String(gone.get("id", best["id"])) }, pair, rule, words)
 		var prongs: Array = []
 		for i in mine.size():
 			if i == drop:

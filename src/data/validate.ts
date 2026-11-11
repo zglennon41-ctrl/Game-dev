@@ -125,6 +125,40 @@ export function validateData(dir = 'data', opts: { basesDir?: string } = {}): Pr
   }
   // A home's lean names a home and bases; a pair written by hand names two bases.
   const baseIds = new Set<string>(bases.map((b) => b.id));
+  // The three types of genius (docs/genius-types.md): every base of the game has its type
+  // written, by its class, with what each of its three paths changes. (The tests' own bases
+  // are given theirs by the tests.)
+  if (!opts.basesDir) {
+    const T = D('genius-types');
+    const tsay = (message: string) => problems.push({ file: 'genius-types.json', message });
+    const typeOf = (cls: string) => Object.entries<{ classes?: string[] }>(T.types).find(([k, t]) => !k.startsWith('$') && (t.classes ?? []).includes(cls))?.[0] ?? '';
+    const styles = new Set(Object.keys(D('combat-room').styles));
+    const moves = new Set(Object.keys(D('genius').fight.moves));
+    for (const b of bases) {
+      const type = typeOf(b.class);
+      const paths: string[] = b.paths.map((p: { id: string }) => p.id).sort();
+      const pathsOk = (where: string, named: string[]) => { if (JSON.stringify([...named].sort()) !== JSON.stringify(paths)) tsay(`${where}.paths names ${named.join(', ')}; the paths of ${b.id} are ${paths.join(', ')}`); };
+      if (type === 'weapon') {
+        const w = T.weapon.bases[b.id];
+        if (!w) { tsay(`${b.id} is a weapon, and weapon.bases does not say what it is in the hand`); continue; }
+        if (!styles.has(w.style)) tsay(`weapon.bases.${b.id}: ${w.style} is not a weapon type of combat-room.json`);
+        pathsOk(`weapon.bases.${b.id}`, Object.keys(w.paths));
+      } else if (type === 'defense' || type === 'ritual') {
+        const it = T.items[b.id];
+        if (!it) { tsay(`${b.id} is an item, and items does not say what it does`); continue; }
+        if (it.type !== type) tsay(`items.${b.id} says it is a ${it.type} item; its class (${b.class}) makes it a ${type} one`);
+        pathsOk(`items.${b.id}`, Object.keys(it.paths));
+      } else if (type === 'companion') {
+        const c = T.companions[b.id];
+        if (!c) { tsay(`${b.id} is a companion, and companions does not give it a role`); continue; }
+        pathsOk(`companions.${b.id}`, Object.keys(c.paths));
+      } else tsay(`${b.id}: no type takes the class ${b.class}`);
+    }
+    for (const k of Object.keys(T.weapon.bases)) if (!baseIds.has(k)) tsay(`weapon.bases.${k}: there is no such base`);
+    for (const k of Object.keys(T.items)) if (!k.startsWith('$') && !baseIds.has(k)) tsay(`items.${k}: there is no such base`);
+    for (const k of Object.keys(T.companions)) if (!k.startsWith('$') && !baseIds.has(k)) tsay(`companions.${k}: there is no such base`);
+    for (const [rid, r] of Object.entries<{ favours?: string[] }>(T.roles)) for (const m of r.favours ?? []) if (!moves.has(m)) tsay(`roles.${rid} favours ${m}, which is not a move of genius.json`);
+  }
   const homeIds = new Set(Object.keys(D('bodies').homes));
   for (const [home, leans] of Object.entries<Record<string, number>>(D('genius-homes'))) {
     if (home.startsWith('$')) continue;

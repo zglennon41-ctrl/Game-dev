@@ -420,7 +420,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 		_fade.modulate.a = 1.0
 		var tw := _fade.create_tween()
 		tw.tween_interval(0.15)
-		tw.tween_property(_fade, "modulate:a", 0.0, 0.7).set_trans(Tween.TRANS_SINE)
+		Style.ease_ui(tw.tween_property(_fade, "modulate:a", 0.0, Style.t("ceremony")))
 	save()
 
 ## Marks earned: counted on the record, logged by day, and shown as they land.
@@ -456,9 +456,9 @@ func _show_place(title: String) -> void:
 	_place_card.text = title
 	var tw := _place_card.create_tween()
 	_place_card.modulate.a = 0.0
-	tw.tween_property(_place_card, "modulate:a", 1.0, 0.6)
-	tw.tween_interval(1.6)
-	tw.tween_property(_place_card, "modulate:a", 0.0, 0.9)
+	tw.tween_property(_place_card, "modulate:a", 1.0, Style.t("ceremony"))
+	tw.tween_interval(Style.t("hold"))
+	tw.tween_property(_place_card, "modulate:a", 0.0, Style.t("ceremony"))
 
 # --- Talking -----------------------------------------------------------------
 
@@ -489,6 +489,8 @@ func fill(t: String, c: Dictionary = {}) -> String:
 	var arch := Marks.archetype_for(hero["shape"], hero.get("discipline", ""))
 	t = t.replace("{archetype}", arch.get("name", "Journeyman")).replace("{marks}", str(int(progress["record"].get("marks", 0))))
 	t = t.replace("{weekday}", weekday()).replace("{season}", String(Data.academy.get("calendar", {}).get("season", "the Thaw")))
+	# what G does is the genius's type's: its order, the hand, its use (docs/genius-types.md)
+	t = t.replace("{genius_key}", GeniusTypes.key_words(genius))
 	t = t.replace("{discipline_rite}", String(Data.discipline_kits.get(hero.get("discipline", ""), {}).get("rite", "the Instructor's test")))
 	var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
 	if not dk.is_empty():
@@ -769,7 +771,7 @@ func _rest_now() -> void:
 		_fade.modulate.a = 1.0
 		var tw := _fade.create_tween()
 		tw.tween_interval(0.6)
-		tw.tween_property(_fade, "modulate:a", 0.0, 1.0).set_trans(Tween.TRANS_SINE)
+		Style.ease_ui(tw.tween_property(_fade, "modulate:a", 0.0, Style.t("ceremony")))
 		title_card("DAY %d" % int(progress["day"]), "%s  ·  %s" % [date_line(), Data.academy.get("calendar", {}).get("notes", {}).get(weekday(), "")], Style.GOLD)
 		sfx.play("stance", 0.8, -6.0))
 
@@ -1723,13 +1725,13 @@ func title_card(text: String, sub: String, color: Color) -> void:
 	_big.pivot_offset = Vector2(700, 70)
 	_big.scale = Vector2(1.25, 1.25)
 	var tw := _big.create_tween().set_parallel(true)
-	tw.tween_property(_big, "modulate:a", 1.0, 0.25)
-	tw.tween_property(_big, "scale", Vector2.ONE, 0.6).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tw.tween_property(_big_sub, "modulate:a", 1.0, 0.6).set_delay(0.5)
+	tw.tween_property(_big, "modulate:a", 1.0, Style.t("quick"))
+	Style.ease_settle(tw.tween_property(_big, "scale", Vector2.ONE, Style.t("ceremony")))
+	tw.tween_property(_big_sub, "modulate:a", 1.0, Style.t("ceremony")).set_delay(Style.t("ceremony") * 0.7)
 	var out := _big.create_tween()
 	out.tween_interval(3.4)
-	out.tween_property(_big, "modulate:a", 0.0, 0.8)
-	out.parallel().tween_property(_big_sub, "modulate:a", 0.0, 0.8)
+	out.tween_property(_big, "modulate:a", 0.0, Style.t("ceremony"))
+	out.parallel().tween_property(_big_sub, "modulate:a", 0.0, Style.t("ceremony"))
 
 ## Name the genius: a box with its form's name already in it.
 func ask_name(default_name: String, then: Callable) -> void:
@@ -1790,8 +1792,8 @@ func show_card(info: Dictionary, color: Color, title: String) -> void:
 	_card.modulate.a = 0.0
 	_card.position.x -= 40
 	var tw := _card.create_tween().set_parallel(true)
-	tw.tween_property(_card, "modulate:a", 1.0, 0.5)
-	tw.tween_property(_card, "position:x", 60.0, 0.6).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	Style.ease_ui(tw.tween_property(_card, "modulate:a", 1.0, Style.t("arrive")))
+	Style.ease_ui(tw.tween_property(_card, "position:x", 60.0, Style.t("arrive") * 1.5))
 
 func hide_card() -> void:
 	if _card:
@@ -1922,8 +1924,8 @@ func _take_post() -> void:
 	fight.p_lock = true
 	world.lock_on = true
 	world.show_wolf = true
-	world._ring_wave(world._v3(fight.p_pos), Color(0.6, 0.8, 1.0), 4.0)
-	title_card("THE POST IS YOURS", "hold it", Color(0.6, 0.8, 1.0))
+	world._ring_wave(world._v3(fight.p_pos), Style.fx("guard"), 4.0)
+	title_card("THE POST IS YOURS", "hold it", Style.fx("guard"))
 	sfx.play("stance", 1.2)
 	progress["record"]["posts_held"] = int(progress["record"].get("posts_held", 0)) + 1
 	if genius:
@@ -2089,7 +2091,10 @@ func show_reading(reading: Dictionary, then: Callable, heading := "", subheading
 	var kind := genius.kind() if genius and genius.is_born() else ""
 	var title := Label.new()
 	Style.label(title, 30, Style.FG, "title")
-	title.text = heading if heading != "" else String(["", "The bowl offers three", "The first refinement: its path", "The second refinement: its prong", "The last refinement: its finish"][clampi(level, 1, 4)])
+	# in the player's words for the stages of its line (data/genius.json, stages)
+	var stages: Dictionary = Data.genius().get("stages", {})
+	var stage := func(l: int, key := "name") -> String: return String(stages.get(str(l), {}).get(key, "form"))
+	title.text = heading if heading != "" else String(["", "The bowl offers three %s" % stage.call(1, "plural"), "The first refinement: its %s" % stage.call(2), "The second refinement: its %s" % stage.call(3), "The last refinement: its %s" % stage.call(4)][clampi(level, 1, 4)])
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(title)
 	var sub := Label.new()
@@ -3074,7 +3079,7 @@ func _visit_shade() -> void:
 			genius.offer_graft({ "id": "shade:" + sd["id"], "feature": sd["graftFeature"], "source": "shade:" + sd["id"] })
 			genius.bonded("shade")
 			progress["record"]["shade_accepted"] = true
-			title_card("ACCEPTED", "the shade's graft waits for the Gate", Color(0.7, 0.8, 1.0))
+			title_card("ACCEPTED", "the shade's graft waits for the Gate", Style.fx("guard"))
 			sfx.play("done")
 		save())
 

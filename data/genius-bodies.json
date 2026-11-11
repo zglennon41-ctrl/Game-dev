@@ -28,6 +28,7 @@
     "beak": ["socket_mouth"], "fangs": ["socket_mouth"], "lantern-jaw": ["socket_mouth"], "maw": ["socket_mouth"],
     "small-hands": ["socket_hand_l", "socket_hand_r"], "brush": ["socket_grip"], "tail": ["socket_tail"], "short-blade": ["socket_grip"],
     "chain": ["socket_hand_l"],
+    "ruff": ["socket_throat"],
     "grip": ["socket_back"], "ledger": ["socket_body"], "broad-guard": ["socket_arm_l", "socket_arm_r"], "shell": ["socket_back"]
   },
   "kinds": {

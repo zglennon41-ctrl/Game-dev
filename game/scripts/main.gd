@@ -192,6 +192,7 @@ func _ready() -> void:
 			pg.ran("ruin", true, 0)
 			pg.save_to(ph)
 		menu()
+		page.hero = ph
 		page.open(Genius.for_hero(ph), World.SHAPE_COLORS.get(ph.get("shape", "anchor"), Color.WHITE), 0, int(ph.get("academy", {}).get("record", {}).get("marks", 0)))
 		if _args.has("shots"):
 			await get_tree().create_timer(1.5).timeout
@@ -364,6 +365,27 @@ func _ready() -> void:
 	elif _args.has("fight"):
 		if _args.has("saved"):
 			hero = Settings.hero()
+		# --fight --genius=<form id>[:instar] (and --weapon=<weapon id>): the practice yard beside
+		# a genius standing at that form, to try what its type does (docs/genius-types.md). The
+		# form is a base's, or a hybrid's (wolf+blade:wolf-counting-wolf).
+		if _args.has("genius"):
+			var spec := str(_args["genius"])
+			var at := spec.rfind(":")
+			var form_id := spec
+			var instar := 0
+			if at > 0 and spec.substr(at + 1).is_valid_int():
+				form_id = spec.substr(0, at)
+				instar = int(spec.substr(at + 1))
+			var tg := Genius.at_form(form_id, instar)
+			if tg.is_born():
+				hero = Fight.default_hero().duplicate(true)
+				hero["name"] = "Test"
+				if _args.has("weapon") and not Data.by_id(Data.weapons, str(_args["weapon"])).is_empty():
+					hero["weapon"] = str(_args["weapon"])
+				tg.look = GeniusLook.born(4711)
+				tg.save_to(hero)
+			else:
+				push_warning("--genius: no form %s on any tree" % form_id)
 		start("fight")
 	else:
 		menu()
@@ -422,7 +444,7 @@ func menu() -> void:
 		buttons.append(["Practice yard: fight cut-wolves as %s  (two minutes)" % saved["name"], func(): hero = saved; start("fight")])
 	if saved.has("genius") and Genius.from_dict(saved["genius"]).is_born():
 		var sg := Genius.for_hero(saved)
-		buttons.append(["Your genius: %s" % (sg.name if sg.name != "" else sg.form_name()), func(): page.open(sg, World.SHAPE_COLORS.get(saved["shape"], Color.WHITE), 0, int(saved.get("academy", {}).get("record", {}).get("marks", 0)))])
+		buttons.append(["Your genius: %s" % (sg.name if sg.name != "" else sg.form_name()), func(): page.hero = saved; page.open(sg, World.SHAPE_COLORS.get(saved["shape"], Color.WHITE), 0, int(saved.get("academy", {}).get("record", {}).get("marks", 0)))])
 	buttons.append(["Combat tutorial  (as an Anchor)", func(): hero = {}; start("tutorial")])
 	buttons.append(["Quit", func(): get_tree().quit()])
 	hud.show_screen("WILDLINE", "The Cumberland Cut", body, buttons, "title")
@@ -568,6 +590,8 @@ func _sheet(what: String) -> void:
 	world.genius_visible = false
 	world._player.visible = false
 	var tree := Data.tree_of(what)
+	if what == "baby":      # everyone's, before the rite: one body, and no tree
+		tree = [{ "id": "baby", "level": 1, "silhouette": "aspect-wisps", "expression": "aspect", "features": [] }]
 	if tree.is_empty():
 		push_error("no such base: " + what)
 		get_tree().quit(1)
@@ -582,8 +606,13 @@ func _sheet(what: String) -> void:
 	var key := DirectionalLight3D.new()
 	key.rotation_degrees = Vector3(-32, 28, 0)
 	key.light_color = Color(1.0, 0.93, 0.82)
-	key.light_energy = 0.3
+	key.light_energy = 0.36
 	world.add_child(key)
+	var cool := DirectionalLight3D.new()      # a faint cool light from the other side, to open the shadows
+	cool.rotation_degrees = Vector3(-12, -70, 0)
+	cool.light_color = Color(0.62, 0.7, 0.95)
+	cool.light_energy = 0.14
+	world.add_child(cool)
 	var ground := StandardMaterial3D.new()
 	ground.albedo_color = Color(0.2, 0.17, 0.14)
 	ground.roughness = 1.0
@@ -597,6 +626,22 @@ func _sheet(what: String) -> void:
 			most = float(called[sh])
 			col = World.SHAPE_COLORS[sh]
 	var look := GeniusLook.born(4711 + what.hash() % 97)
+	# for a portrait, a coat of middling value: one near black hides what the body has grown
+	var sil0 := String(tree[0].get("silhouette", ""))
+	for k in 60:
+		var tryit := GeniusLook.born(4711 + what.hash() % 97 + k * 131)
+		var cols: Dictionary = GeniusLook.resolve(tryit, String(tree[0]["id"]), sil0, 3)["colors"]
+		var v := 0.0
+		var n := 0
+		for name in cols:
+			if name != "keepsake_tint" and not String(name).begins_with("mark_"):
+				v += (cols[name] as Color).v
+				n += 1
+		if n == 0:
+			break
+		if v / n > 0.3 and v / n < 0.55:
+			look = tryit
+			break
 	var ids: Array = []
 	var bodies: Array = []
 	for i in tree.size():
@@ -719,7 +764,7 @@ func _lineage(what: String) -> void:
 	while not Data.children_of(String(road.back())).is_empty():
 		road.append(Data.children_of(String(road.back()))[0]["id"])
 	var stand: Array = []      # [info, label]
-	var names := ["First Form", "Second Form", "Third Form", "Fourth Form", "Fifth Form", "Apex"]
+	var names := ["Starter", "Path", "Advancement", "Final", "Great", "Apex"]
 	var homes_row: Array = []
 	if what.begins_with("homes"):
 		# --lineage=homes:0 (or :1): a grown genius of one kind beside a partner from each home,
@@ -880,6 +925,33 @@ func enter_academy() -> void:
 			await _shot("rite-offer")
 			get_tree().quit()
 		return
+	if _args.has("becoming") and academy.genius and academy.genius.is_born():
+		# --becoming (with --academy --fresh --gate --shots=DIR): the change of form at the Gate,
+		# taken at once (the first offer), and shot as it goes: the old body into light, the new
+		# out of it. --becoming=<base> for a genius of that base.
+		var bg: Genius = academy.genius
+		var want := str(_args["becoming"])
+		if not Data.base(want).is_empty():
+			bg = Genius.at_form(String(Data.base(want)["settled"]["id"]))
+			bg.look = academy.genius.look
+			academy.genius = bg
+			bg.save_to(academy.hero)
+			world.build_hero(academy.hero)
+		bg.milestone("gate")
+		bg.day = maxi(bg.day, 7)
+		academy.auto = false
+		await get_tree().create_timer(4.0).timeout      # the place's own title card has gone by then
+		var gate := GateScene.new(academy, academy.hero)
+		world.cine = true
+		gate.reading = bg.read(2)
+		gate._take(0)
+		var n := 0
+		for wait in [0.7, 0.7, 0.5, 0.25, 0.5, 1.2, 1.5]:
+			await get_tree().create_timer(wait).timeout
+			n += 1
+			await _shot("becoming-%d" % n)
+		get_tree().quit()
+		return
 	if _args.has("reading") and academy.genius and academy.genius.is_born():
 		# --reading (with --academy --gate): open the Gate's Reading at once, to look at it.
 		var rg: Genius = academy.genius
@@ -981,6 +1053,7 @@ func _open_builder() -> void:
 
 func open_genius_page() -> void:
 	if academy.genius and academy.genius.is_born():
+		page.hero = academy.hero
 		page.open(academy.genius, World.SHAPE_COLORS.get(academy.hero["shape"], Color.WHITE), 0, int(academy.progress["record"].get("marks", 0)))
 
 ## A classmate speaks for the moment, in their temperament's voice.
@@ -1105,6 +1178,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		hud.show_prompt_again()
 	if mode == "academy":
 		if event.is_action_pressed("genius_page") and not academy.busy() and not academy.in_lesson() and academy.genius and academy.genius.is_born():
+			page.hero = academy.hero
 			page.open(academy.genius, World.SHAPE_COLORS.get(academy.hero["shape"], Color.WHITE), 0, int(academy.progress["record"].get("marks", 0)))
 			return
 		if event.is_action_pressed("menu"):
@@ -1266,6 +1340,16 @@ func _sounds(events: Array) -> void:
 			"genius-up": sfx.play("cue-hit", 0.7)
 			"field-open": sfx.play("pattern", 1.1)
 			"order": sfx.play("stance", 1.7, -4.0)
+			# the genius's key, by its type
+			"genius-take": sfx.play("stance", 1.9 if e.get("in", false) else 1.3, -3.0)
+			"genius-use": sfx.play("stance" if not e.get("miss", false) else "deny", 1.5, -3.0)
+			"genius-took": sfx.play("block", 1.4)
+			"genius-caught": sfx.play("stagger", 1.4, -2.0)
+			"genius-toll": sfx.play("cue-hit", 0.5)
+			"genius-caught-fall": sfx.play("parry", 0.8)
+			"genius-held-blow": sfx.play("block", 1.1, -3.0)
+			"genius-mend", "genius-took-back": sfx.play("cue-hit", 1.2, -8.0)
+			"genius-not-ready": sfx.play("deny", 1.2, -6.0)
 
 func _shot(label: String) -> void:
 	if not _args.has("shots"):
@@ -1303,6 +1387,11 @@ func _bot() -> Vector2:
 		f.input("block-down")
 	elif f.p_block_held and f.w_state != "windup":
 		f.input("block-up")
+	# its genius's key, by its type: a weapon taken up and let go, an item used
+	if f.genius != null and f.g_type != "companion" and GeniusTypes.bot_wants_key(f, f.w_state == "windup" and int((f.now - f.w_timer) * 7.0) % 3 != 0):
+		f.input("order")
+	if f.p_state == "draw" and f.p_draw >= f.draw_seconds():
+		f.input("attack-up")
 	if f.pattern_ready():
 		f.input("pattern")
 	if f.p_state == "pattern" and not f.chain.is_empty():

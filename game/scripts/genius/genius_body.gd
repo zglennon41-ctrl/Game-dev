@@ -45,6 +45,7 @@ render_mode blend_add, unshaded, cull_back, depth_draw_never;
 uniform vec4 glow : source_color = vec4(1.0, 0.7, 0.3, 1.0);
 uniform float strength = 1.0;
 uniform float molt = 0.0;      // 0 to 1: the molt lines, as a Reading nears
+uniform float flood = 0.0;     // 0 to 1: the whole body gone to light, as it changes form
 uniform float molt_scale = 1.0;
 varying vec3 lp;
 void vertex() { lp = VERTEX * length(MODEL_MATRIX[0].xyz); }   // the body's own space, in metres
@@ -63,6 +64,8 @@ void fragment() {
 		float breathe = 0.75 + 0.25 * sin(TIME * 2.2 + lp.y * 5.0);
 		col += mix(glow.rgb, vec3(1.0), 0.3) * seams(lp * molt_scale) * molt * breathe * 3.2;
 	}
+	// going from one form to the next it is a shape of light, and nothing else
+	col += mix(glow.rgb, vec3(1.0), 0.6) * flood * (1.2 + 0.5 * flood);
 	ALBEDO = col;
 }
 """
@@ -91,6 +94,7 @@ var shapes_set: Dictionary = {}    # blend shape -> value, as set on its meshes
 var _field_surfaces: Array = []    # [mesh, surface, energy]: the field's surfaces, for a light that pulses
 var _rims: Array = []              # the edge-light laid over its art, so a portrait can turn it down
 var _glow := 1.0
+var _field := 1.8                  # the energy of its field's light
 var _mat: ShaderMaterial
 var _model: Node3D
 var _wings: Array = []
@@ -122,14 +126,17 @@ func _assemble(instar: int) -> void:
 	_mat.set_shader_parameter("glow", color)
 	_apply_surfaces(cfg)
 	_glow = GeniusLook.glow(int(info.get("instar", instar)))
+	# how brightly the field burns on it, by its instar (the one style: data/style.json, genius)
+	_field = float(Style.data().get("genius", {}).get("glowEnergy", {}).get(str(clampi(int(info.get("instar", instar)), 1, 6)), 1.8))
 	var born: Dictionary = info.get("look", {})
 	if not born.is_empty():
 		look = GeniusLook.resolve(born, String(info.get("form", "")), sil, int(info.get("instar", instar)))
 		_glow *= float(look["eyes"]["energy"])
+		_field *= float(look["eyes"]["energy"])
 	# A form with a body of its own wears it (a hybrid's form wears the body of the form it came
 	# from, first+second:<form>): its build, its great parts and its marks are in the model.
 	var fid := String(info.get("form", ""))
-	var src := fid.get_slice(":", 1) if fid.contains(":") else fid
+	var src := String(Data.form(fid).get("wears", fid.get_slice(":", 1) if fid.contains(":") else fid))
 	var carried: Array = []
 	if src != "" and ResourceLoader.exists(FORM_DIR % src):
 		own_body = src
@@ -214,7 +221,7 @@ func _assemble(instar: int) -> void:
 		var gl := OmniLight3D.new()
 		gl.name = "GroundLight"
 		gl.light_color = color
-		gl.light_energy = float(pres["ground"])
+		gl.light_energy = minf(float(pres["ground"]), float(Style.data().get("genius", {}).get("groundLight", 0.6)))
 		gl.omni_range = stands * 2.2
 		gl.omni_attenuation = 1.6
 		gl.position = Vector3(0, stands * 0.25, 0)
@@ -229,6 +236,7 @@ func _assemble(instar: int) -> void:
 			if anim.has_animation(anim_names[k]):
 				anim.get_animation(anim_names[k]).loop_mode = Animation.LOOP_LINEAR
 		anim.play(anim_names["idle"])
+		anim.speed_scale = World.breath(anim, anim_names["idle"])      # the living breathe on one period
 
 ## A body of a form's own carries no clips of its own: it moves by its base body's, fitted
 ## to its own proportions. Each bone keeps where the form's rest puts it and how it lies there,
@@ -296,10 +304,10 @@ func _adopt_art(n: Node) -> void:
 				var t := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
 				t.emission_enabled = true
 				t.emission = color
-				t.emission_energy_multiplier = 1.8 * _glow
+				t.emission_energy_multiplier = _field
 				t.albedo_color = color.darkened(0.7)
 				mi.set_surface_override_material(i, t)
-				_field_surfaces.append([mi, i, 1.8 * _glow])
+				_field_surfaces.append([mi, i, _field])
 			elif mat and mat is StandardMaterial3D and look.get("colors", {}).has(String(mat.resource_name)):
 				# its own coat, and its markings: shown in the marking's colour, or hidden in the coat's
 				var c := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
@@ -492,6 +500,7 @@ func move_at(speed: float) -> void:
 	var want: String = anim_names.get("run" if speed > 4.0 else ("walk" if speed > 0.4 else "idle"), "")
 	if want != "" and anim.has_animation(want) and anim.current_animation != want:
 		anim.play(want, 0.2)
+		anim.speed_scale = World.breath(anim, want)      # its idle on the common breath; a gait at its own pace
 
 ## The proportions of its age, on a rigged body: each bone named is scaled, and the body set
 ## down again so its feet stay on the ground when its legs are shorter or longer.
@@ -564,6 +573,11 @@ func set_strength(k: float) -> void:
 
 ## How strongly the Shape colour lies along its edges (1 in the world; a portrait that must
 ## show its coat turns it down).
+## The whole body gone to light (0 to 1): what it is while it changes from one form to the next.
+func set_flood(k: float) -> void:
+	for r in _rims:
+		(r as ShaderMaterial).set_shader_parameter("flood", k)
+
 func set_rim(k: float) -> void:
 	for r in _rims:
 		(r as ShaderMaterial).set_shader_parameter("strength", k)
@@ -601,7 +615,8 @@ func _process(dt: float) -> void:
 		mantle.scale = Vector3.ONE * (1.0 + 0.04 * sin(_t * 1.3))
 		mantle.rotation.x = -0.12 + 0.03 * sin(_t * 0.9)
 	if hover and _model:
-		_model.position.y = 0.06 * sin(_t * 2.2)
+		# the unliving that float rise and fall alike, by a share of their own height
+		_model.position.y = stands * Style.motion("hover", "rise", 0.05) * sin(TAU * _t / Style.motion("hover", "period", 2.8))
 	elif _model and anim == null and uses_art:
 		# No rig: a gait from the body itself.
 		_gait += dt * clampf(_gait_speed, 0.0, 6.0) * 3.0

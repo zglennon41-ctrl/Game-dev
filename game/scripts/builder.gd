@@ -7,13 +7,14 @@ extends CanvasLayer
 signal done(spec: Dictionary)
 signal cancelled
 
-const BG := Color(0.035, 0.03, 0.028, 0.97)
-const FG := Color(0.94, 0.9, 0.83)
-const DIM := Color(0.6, 0.56, 0.5)
-const OFF := Color(0.4, 0.37, 0.33)
-const GOLD := Color(1.0, 0.8, 0.35)
-const RED := Color(0.9, 0.35, 0.3)
-const EDGE := Color(0.32, 0.27, 0.21)
+# The interface's one palette (Style, from data/style.json).
+static var BG: Color = Color(Style.INK, 0.97)
+static var FG: Color = Style.FG
+static var DIM: Color = Style.DIM
+static var OFF: Color = Style.FAINT
+static var GOLD: Color = Style.GOLD
+static var RED: Color = Style.EMBER
+static var EDGE: Color = Style.BRASS_DIM
 
 var spec := {}
 var _form_buttons := {}

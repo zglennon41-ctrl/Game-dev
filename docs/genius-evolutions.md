@@ -81,7 +81,7 @@ On the wolf's rig (`tools/blender/genius_lines.py`):
 | `tail` | | `whip` `short` (its shape); `flag` `smoke` `lamp` `rings` `ember` |
 | `flags` | from the shoulders | `fur` `pale` `light` |
 | `armor` | | `brow` `chest` `chain` `harness` `scars` |
-| `carry` | what it has been given | `lamp` `book` `tags` `knots` `post` `cloak` `rug` `bell` |
+| `carry` | what it has been given | `lamp` `book` `tags` `knots` `post` `cloak` `shroud` `rug` `bell` |
 | `paws` | | `set` `grease` `shade` `frost` |
 | `aura` | | `windows` `motes` `cold` `crescent` |
 | `coat` | how its partner's coat is worn | a shift in `data/genius-looks.json`, `shifts`: `night` `ash` `frost` `ember` `slate` `iron` `hearth` `blood` `moon` |
@@ -141,7 +141,7 @@ bash tools/genius-tree-page.sh wolf                 # the page of the whole tree
 |---|---|
 | Wolf | all thirty-one (the proof) |
 | the other twenty-one | their base's body and parts, until built |
-| Baby | the orb it was; to be given a body |
+| Baby | built: a small round thing of pale matter with a face, the field in its eyes, its belly and the tip of its tail (`python tools/blender/genius_lines.py baby`); it rides where the orb did until the rite |
 
 ## Calls that are the owner's
 

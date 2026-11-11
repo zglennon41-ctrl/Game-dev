@@ -29,6 +29,7 @@ var _secondary: Array
 var _shades: Array
 var _bodies: Dictionary
 var _looks: Dictionary   # what makes one genius unlike another of its form (data/genius-looks.json)
+var _types: Dictionary   # the three types of genius: what each base does beside its partner (data/genius-types.json)
 var discipline_kits: Dictionary
 var _archetypes: Array
 var _zones: Array
@@ -66,6 +67,7 @@ func _init() -> void:
 	_shades = _load("res://data/shades.json")
 	_bodies = _load("res://data/genius-bodies.json")
 	_looks = _load("res://data/genius-looks.json")
+	_types = _load("res://data/genius-types.json") if FileAccess.file_exists("res://data/genius-types.json") else {}
 	discipline_kits = _load("res://data/discipline-kits.json")
 	_archetypes = _load("res://data/archetypes.json")
 	_zones = _load("res://data/zones.json")
@@ -190,6 +192,11 @@ func secondary_forms() -> Array: return _secondary
 func shades() -> Array: return _shades
 func genius_bodies() -> Dictionary: return _bodies
 func genius_looks() -> Dictionary: return _looks
+func genius_types() -> Dictionary: return _types
+
+## Set the types the rules run on (the game's own by default; a test lays its own bases' over them).
+func use_types(d: Dictionary) -> void:
+	_types = d
 func archetypes() -> Array: return _archetypes
 func zones() -> Array: return _zones
 func zone(id: String) -> Dictionary: return by_id(_zones, id)

@@ -46,21 +46,56 @@ func _take(i: int) -> void:
 	g.save_to(hero)
 	ac.save()
 	var col: Color = World.SHAPE_COLORS.get(hero["shape"], Color.WHITE)
-	# The old body into light, the new out of it.
+	# The old body goes into light: its seams open, it becomes a shape of light and nothing
+	# else, and the light draws in. Then the new body comes out of it. (An evolution is a
+	# thing to watch, not a flash: docs/genius-evolutions.md.)
 	var p := Vector3(ac.fight.p_pos.x, 0, ac.fight.p_pos.y)
-	world.cine_pos = p + Vector3(2.4, 2.0, 3.6)
-	world.cine_look = p + Vector3(0.6, 1.2, 0)
+	var body: GeniusBody = world._g_body
+	var at: Vector3 = body.global_position if body and is_instance_valid(body) else p + Vector3(0.6, 0, 0)
+	var tall: float = body.stands if body and is_instance_valid(body) else 0.6
+	world.cine_speed = 2.4
+	world.cine_pos = at + Vector3(1.5 + tall, 0.9 + tall, 2.2 + tall * 1.6)
+	world.cine_look = at + Vector3(0, tall * 0.6, 0)
+	sfx.play("pattern", 0.5)
+	var beat := [0]
+	var tw := ac.create_tween()
+	tw.tween_method(func(k: float):
+		if body and is_instance_valid(body):
+			body.set_molt(minf(1.0, k * 1.6))
+			body.set_flood(k * k)
+		# the light draws in, quicker as it goes
+		if int(k * (5.0 + 6.0 * k)) > beat[0]:
+			beat[0] = int(k * (5.0 + 6.0 * k))
+			world.burst(at + Vector3(0, tall * 0.5, 0), col, 10, 1.2 + 2.0 * k)
+			world._ring_wave(at, col, 2.4 - 1.6 * k), 0.0, 1.0, 2.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	tw.tween_callback(func(): _becomes(g, c, i, old_name, col, at))
+
+## The new body, out of the light.
+func _becomes(g: Genius, c: Dictionary, i: int, old_name: String, col: Color, at: Vector3) -> void:
 	world.flash_screen(col, 0.8)
-	world._ring_wave(p, col, 6.0)
-	world.burst(p + Vector3(0.6, 1.2, 0), col, 120, 7.0)
-	world.impact(p + Vector3(0.6, 1.2, 0), col, 2.4)
+	world._ring_wave(at, col, 6.0)
+	world.burst(at + Vector3(0, 0.8, 0), col, 120, 7.0)
+	world.impact(at + Vector3(0, 0.8, 0), col, 2.4)
 	world.slowmo(0.5, 0.3)
 	sfx.play("pattern", 0.9)
 	sfx.play("heavy", 0.6)
 	world.build_hero(hero)
+	var now: GeniusBody = world._g_body
+	if now and is_instance_valid(now):
+		var rest := now.lines
+		now.set_flood(1.0)
+		var tw := ac.create_tween()
+		tw.tween_method(func(k: float):
+			if is_instance_valid(now):
+				now.set_flood(1.0 - k)
+				now.set_molt(maxf(rest, 1.0 - k)), 0.0, 1.0, 1.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		world.cine_pos = at + Vector3(1.6 + now.stands, 1.0 + now.stands, 2.4 + now.stands * 1.7)
+		world.cine_look = at + Vector3(0, now.stands * 0.6, 0)
 	var feats: Array = c["features"].map(func(f): return Rite.feature_label(String(f)))
-	ac.title_card(g.form_name().to_upper(), "SECOND FORM  ·  %s  ·  %s" % [g.kind().to_upper(), ", ".join(feats)], col)
-	ac.show_card(g.to_dict(), col, "SECOND FORM")
+	# where it now is on its line, in the player's words
+	var stage := String(Data.genius().get("stages", {}).get(str(g.level()), {}).get("name", "Second Form")).to_upper()
+	ac.title_card(g.form_name().to_upper(), "%s  ·  %s  ·  %s" % [stage, g.kind().to_upper(), ", ".join(feats)], col)
+	ac.show_card(g.to_dict(), col, stage)
 	var key := "settled" if i == -1 else "chosen"
 	var line := String(cfg["lines"][key]).replace("{genius_name}", g.name).replace("{form}", g.form_name().to_lower()).replace("{was}", old_name.to_lower())
 	ac.say(cfg["instructor"], [line], func():

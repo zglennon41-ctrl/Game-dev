@@ -26,6 +26,9 @@ import sys
 
 import bpy
 import bmesh
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import style  # noqa: E402  (the game's one style: data/style.json, docs/style.md)
 from mathutils import Matrix, Vector
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -63,7 +66,7 @@ def log(*a):
 # ======================================================================================
 
 class Rig:
-    def __init__(self, fk_feet=True):
+    def __init__(self, fk_feet=True, weld=False):
         bpy.ops.wm.read_factory_settings(use_empty=True)
         bpy.ops.import_scene.gltf(filepath=WOLF)
         self.arm = bpy.data.objects["AnimalArmature"]
@@ -78,8 +81,27 @@ class Rig:
             if o.type == "MESH" and o is not self.mesh:
                 bpy.data.objects.remove(o)
         self._edit(lambda ebs: [setattr(eb, "use_connect", False) for eb in ebs])
+        if weld:
+            self.weld()
         if fk_feet:
             self.fk_feet()
+
+    def weld(self):
+        """The wolf comes with every face's corners its own (it was made flat). Welded, the body
+        is one skin, shaded round (docs/style.md: smooth where it is flesh), and a third the
+        size on disk."""
+        me = self.mesh.data
+        bm = bmesh.new()
+        bm.from_mesh(me)
+        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-4)
+        bm.to_mesh(me)
+        bm.free()
+        for name in ("custom_normal", "sharp_face", "sharp_edge"):
+            if name in me.attributes:
+                me.attributes.remove(me.attributes[name])
+        for p in me.polygons:
+            p.use_smooth = True
+        me.update()
 
     # --- bones ------------------------------------------------------------------------
 
@@ -484,6 +506,7 @@ class Rig:
     @staticmethod
     def _set_material(m, color, rough, metallic, emission, strength):
         bsdf = m.node_tree.nodes.get("Principled BSDF")
+        color = style.conform(m.name, color)      # on the ramps of what its name says it is
         bsdf.inputs["Base Color"].default_value = (color[0], color[1], color[2], 1)
         bsdf.inputs["Roughness"].default_value = rough
         bsdf.inputs["Metallic"].default_value = metallic
@@ -535,14 +558,14 @@ def check_glb(path):
 
 def cut_wolf():
     """The wolf untouched, through the same pipeline: the control."""
-    r = Rig(fk_feet=False)
+    r = Rig(fk_feet=False, weld=True)
     return r
 
 
 def river_thing():
     """Low and long: a slick blue-black otter-crocodile with a fin ridge down its back, a flat
     paddle tail and small glowing eyes."""
-    r = Rig()
+    r = Rig(weld=True)
     head = r.family("Head", "Ear1.L", "Ear1.R")
     body = r.body_bones()
     # Flattened about the belly line, so the legs still meet the body where they did.
@@ -579,7 +602,7 @@ def river_thing():
 
 def ruin_stag():
     """Tall and gaunt on long legs, pale bone-grey, a wide rack of antlers, a long neck."""
-    r = Rig()
+    r = Rig(weld=True)
     head = r.family("Head", "Ear1.L", "Ear1.R")
     # Legs half again as long and thin; the body carried up with them.
     r.leg_length(-0.75)
@@ -623,7 +646,7 @@ def ruin_stag():
 def molted_hound():
     """Bigger than the wolf, patchy dark fur with bare seams along the back and flanks that
     glow faintly; a heavier jaw."""
-    r = Rig(fk_feet=False)
+    r = Rig(fk_feet=False, weld=True)
     r.uniform(1.25)
     head = r.family("Head", "Ear1.L", "Ear1.R")
     # A heavy jaw: the head grows down from its crown; the neck thickens to carry it.
@@ -650,7 +673,7 @@ def molted_hound():
 def post_breaker():
     """Massive and squat: armoured shoulder and skull plates, a short tail, a deep chest;
     about 1.4 times the wolf's bulk."""
-    r = Rig()
+    r = Rig(weld=True)
     head = r.family("Head", "Ear1.L", "Ear1.R")
     # Broad and long, then down on shorter, thicker legs.
     r.scale([], (0, 0, 0), (1.3, 1.12, 1.0), spatial=True)
@@ -690,7 +713,7 @@ def post_breaker():
 def current_eel():
     """The wolf rig stretched long and thin, legs shrunk to stubs, a ribbon fin along the whole
     back and tail, dark green-black, a glowing lateral line."""
-    r = Rig()
+    r = Rig(weld=True)
     head = r.family("Head", "Ear1.L", "Ear1.R")
     # Long and thin.
     r.scale([], (0, 0, 0), (0.55, 1.75, 0.62), spatial=True)

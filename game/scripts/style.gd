@@ -1,43 +1,333 @@
-## WILDLINE's look on screen: "lamplight gothic". An old printer's capitals for titles (Cinzel),
-## a warm book face for the story (Alegreya), a clean humanist face for the HUD (Alegreya Sans);
-## dark ink plates with brass rims and clipped corners, like the plates on a rail engine.
-## Every screen builds its panels and buttons from here, so the look changes in one place.
+## WILDLINE's one style, read from data/style.json (docs/style.md): "lamplight gothic". The
+## interface's own look is here too: an old printer's capitals for titles (Cinzel), a warm book
+## face for the story (Alegreya), a clean humanist face for the HUD (Alegreya Sans); dark ink
+## plates with brass rims and clipped corners, like the plates on a rail engine. Every screen
+## builds its panels and buttons from here, and everything the world draws asks here what its
+## colours, lights, lines and motions are, so the look changes in one place: the data.
 class_name Style
 extends RefCounted
 
-# The palette.
-const INK := Color(0.035, 0.03, 0.028)
-const PLATE := Color(0.062, 0.052, 0.046, 0.94)
-const PLATE_HI := Color(0.13, 0.095, 0.06, 0.96)
-const PLATE_ON := Color(0.27, 0.18, 0.07, 0.97)
-const BRASS := Color(0.66, 0.5, 0.27)
-const BRASS_DIM := Color(0.36, 0.29, 0.19)
-const BRASS_HI := Color(1.0, 0.82, 0.46)
-const FG := Color(0.95, 0.91, 0.84)
-const DIM := Color(0.66, 0.61, 0.54)
-const FAINT := Color(0.45, 0.41, 0.36)
-const GOLD := Color(1.0, 0.8, 0.38)
-const EMBER := Color(0.92, 0.36, 0.2)
-const BLOOD := Color(0.78, 0.17, 0.14)
-const WILL := Color(0.42, 0.68, 0.98)
-const FIELD := Color(0.62, 0.95, 0.7)
+# The interface's palette (data/style.json, interface.colors).
+static var INK: Color
+static var PLATE: Color
+static var PLATE_HI: Color
+static var PLATE_ON: Color
+static var BRASS: Color
+static var BRASS_DIM: Color
+static var BRASS_HI: Color
+static var FG: Color
+static var DIM: Color
+static var FAINT: Color
+static var GOLD: Color
+static var EMBER: Color
+static var BLOOD: Color
+static var WILL: Color
+static var FIELD: Color
+
+static var _d: Dictionary = {}
+static var _ramps: Dictionary = {}        # ramp -> [Color x5]
+static var _conformed: Dictionary = {}    # class|rgb -> Color
+static var _classes: Dictionary = {}      # material name -> class
+static var _textures: Dictionary = {}     # a texture's content -> its conformed copy
+
+static func _static_init() -> void:
+	data()
+
+## The style, as data. Read once.
+static func data() -> Dictionary:
+	if _d.is_empty():
+		_d = JSON.parse_string(FileAccess.get_file_as_string("res://data/style.json"))
+		for k in _d["ramps"]:
+			_ramps[k] = (_d["ramps"][k] as Array).map(func(h): return Color(String(h)))
+		var ui: Dictionary = _d["interface"]["colors"]
+		var a := float(_d["interface"].get("plateAlpha", 0.94))
+		INK = Color(String(ui["ink"]))
+		PLATE = Color(Color(String(ui["plate"])), a)
+		PLATE_HI = Color(Color(String(ui["plateHi"])), a + 0.02)
+		PLATE_ON = Color(Color(String(ui["plateOn"])), a + 0.03)
+		BRASS = Color(String(ui["brass"]))
+		BRASS_DIM = Color(String(ui["brassDim"]))
+		BRASS_HI = Color(String(ui["brassHi"]))
+		FG = Color(String(ui["fg"]))
+		DIM = Color(String(ui["dim"]))
+		FAINT = Color(String(ui["faint"]))
+		GOLD = Color(String(ui["gold"]))
+		EMBER = Color(String(ui["ember"]))
+		BLOOD = Color(String(ui["blood"]))
+		WILL = Color(String(ui["will"]))
+		FIELD = Color(String(ui["field"]))
+	return _d
+
+# --- Colour: the ramps, and what may be loud -------------------------------------------
+
+## A ramp's five colours, shadow to light.
+static func ramp(name: String) -> Array:
+	data()
+	return _ramps.get(name, [])
+
+static func ramp_at(name: String, step: int) -> Color:
+	var r := ramp(name)
+	return r[clampi(step, 0, r.size() - 1)] if not r.is_empty() else Color.MAGENTA
+
+## How saturated a colour is (HSV), the measure the cap is in.
+static func saturation(c: Color) -> float:
+	var mx := maxf(c.r, maxf(c.g, c.b))
+	return 0.0 if mx <= 0.0001 else (mx - minf(c.r, minf(c.g, c.b))) / mx
+
+## The Shape's colour: the field's, and the only loud thing a partner owns.
+static func shape_color(shape: String) -> Color:
+	var sh: Dictionary = data()["loud"]["shapes"]
+	return Color(String(sh.get(shape, sh["anchor"])))
+
+static func telegraph() -> Color:
+	return Color(String(data()["loud"]["telegraph"]))
+
+## The class of a material, by its name (data/style.json, materials.words): the first word in
+## the list that the name carries. "" for a name that says nothing; a class written a|b is
+## decided by the colour.
+static func material_class(name: String, color := Color(-1, -1, -1)) -> String:
+	var key := name.to_lower()
+	var found := ""
+	if _classes.has(key):
+		found = _classes[key]
+	else:
+		for pair in data()["materials"]["words"]:
+			if key.contains(String(pair[0])):
+				found = String(pair[1])
+				break
+		_classes[key] = found
+	if found.contains("|"):
+		var best := ""
+		var best_d := 1e9
+		for alt in found.split("|"):
+			var d := off_ramp(color, alt) if color.r >= 0.0 else 0.0
+			if d < best_d:
+				best_d = d
+				best = alt
+		return best
+	return found
+
+## What a class is: its ramps, bands, shadow tint, highlight, grain and wear.
+static func class_spec(cls: String) -> Dictionary:
+	return data()["materials"]["classes"].get(cls, data()["materials"]["classes"]["cloth"])
+
+## The nearest point to a colour on the ramps a class allows, and how far it is: [Color, distance].
+static func _nearest(c: Color, cls: String) -> Array:
+	var names: Array = class_spec(cls).get("ramps", [])
+	var best := c
+	var best_d := 1e9
+	for rn in names:
+		var pts: Array = ramp(String(rn))
+		for i in pts.size() - 1:
+			var a: Color = pts[i]
+			var b: Color = pts[i + 1]
+			var ab := Vector3(b.r - a.r, b.g - a.g, b.b - a.b)
+			var t := clampf(Vector3(c.r - a.r, c.g - a.g, c.b - a.b).dot(ab) / maxf(ab.length_squared(), 1e-9), 0.0, 1.0)
+			var p := Vector3(a.r, a.g, a.b) + ab * t
+			var d := p.distance_to(Vector3(c.r, c.g, c.b))
+			if d < best_d:
+				best_d = d
+				best = Color(p.x, p.y, p.z, c.a)
+	return [best, best_d if best_d < 1e8 else 0.0]
+
+## How far a colour is from the ramps its class allows (0 for a class that is not held to any).
+static func off_ramp(c: Color, cls: String) -> float:
+	return float(_nearest(c, cls)[1])
+
+## The colour a surface of this class takes: itself if it is on a ramp (within the tolerance),
+## else the nearest point of the nearest ramp its class allows. The field, the lit and skin
+## are not moved.
+static func conform(c: Color, cls: String) -> Color:
+	if cls == "" or (class_spec(cls).get("ramps", []) as Array).is_empty():
+		return c
+	var key := "%s|%d|%d|%d" % [cls, int(c.r * 255.0 + 0.5), int(c.g * 255.0 + 0.5), int(c.b * 255.0 + 0.5)]
+	if not _conformed.has(key):
+		var n := _nearest(c, cls)
+		var near := float(n[1]) <= float(data().get("tolerance", 0.03)) and saturation(c) <= cap_of(cls)
+		_conformed[key] = c if near else Color((n[0] as Color).r, (n[0] as Color).g, (n[0] as Color).b)
+	var out: Color = _conformed[key]
+	return Color(out.r, out.g, out.b, c.a)
+
+## The most saturated a surface of this class may be: the cap, or the accents' for a class
+## that may wear brass, or skin's.
+static func cap_of(cls: String) -> float:
+	if cls == "skin":
+		return float(data()["skinCap"])
+	for rn in class_spec(cls).get("ramps", []):
+		if (data()["accents"] as Array).has(rn):
+			return float(data()["accentCap"])
+	return float(data()["cap"])
+
+## Whether a class may shine with a light of its own: the field, the lit, the moon on water.
+static func glows(cls: String) -> bool:
+	return bool(class_spec(cls).get("glows", false)) if cls != "" else false
+
+## The same, for a material known only by its name.
+static func conform_named(c: Color, name: String) -> Color:
+	return conform(c, material_class(name, c))
+
+## Whether a colour is on-style for its class: on a ramp, or of a class that carries light.
+static func on_style(c: Color, cls: String) -> bool:
+	if cls == "":
+		return false
+	if (class_spec(cls).get("ramps", []) as Array).is_empty():
+		return cls != "skin" or saturation(c) <= float(data()["skinCap"])
+	return off_ramp(c, cls) <= float(data().get("tolerance", 0.03)) + 0.002
+
+## A painted texture brought onto the ramps (a CC0 kit's palette sheet): every colour in it
+## moved as conform() would move it. Made once for each picture, small, and kept.
+static func conform_texture(tex: Texture2D) -> Texture2D:
+	if tex == null:
+		return tex
+	var path := tex.resource_path
+	if path != "" and _textures.has(path):
+		return _textures[path]
+	var img: Image = tex.get_image()
+	if (img == null or img.is_empty()) and path != "" and FileAccess.file_exists(path):
+		img = Image.load_from_file(path)      # headless: the picture is not on a graphics card
+	if img == null or img.is_empty():
+		return tex
+	if img.is_compressed():
+		if img.decompress() != OK:
+			return tex
+	img.convert(Image.FORMAT_RGBA8)
+	# a picture the engine has given mipmaps (it does, once it has seen it on a model) carries
+	# them in its data: only the picture itself is brought over, and its mipmaps made again
+	if img.has_mipmaps():
+		img.clear_mipmaps()
+	if maxi(img.get_width(), img.get_height()) > 256:
+		img.resize(mini(img.get_width(), 256), mini(img.get_height(), 256), Image.INTERPOLATE_BILINEAR)
+	var bytes := img.get_data()
+	var key := "%d:%d" % [bytes.size(), hash(bytes)]
+	if not _textures.has(key):
+		var memo := {}
+		for i in range(0, bytes.size(), 4):
+			var k := (bytes[i] >> 2) << 12 | (bytes[i + 1] >> 2) << 6 | (bytes[i + 2] >> 2)
+			if not memo.has(k):
+				var c := conform(Color8(bytes[i], bytes[i + 1], bytes[i + 2]), "mixed")
+				memo[k] = [c.r8, c.g8, c.b8]
+			var m: Array = memo[k]
+			bytes[i] = m[0]
+			bytes[i + 1] = m[1]
+			bytes[i + 2] = m[2]
+		var out := Image.create_from_data(img.get_width(), img.get_height(), false, Image.FORMAT_RGBA8, bytes)
+		out.generate_mipmaps()
+		_textures[key] = ImageTexture.create_from_image(out)
+	if path != "":
+		_textures[path] = _textures[key]
+	return _textures[key]
+
+## The ramps as a lookup, for a shader: sixteen slices of sixteen by sixteen side by side,
+## each colour of the cube moved as conform() would move a painted texture's. Made once, and
+## only where a texture could not be brought over on the processor.
+static var _lut: ImageTexture
+static func ramp_lut() -> ImageTexture:
+	if _lut:
+		return _lut
+	var n := 16
+	var img := Image.create(n * n, n, false, Image.FORMAT_RGB8)
+	for b in n:
+		for g in n:
+			for r in n:
+				img.set_pixel(b * n + r, g, conform(Color(r / 15.0, g / 15.0, b / 15.0), "mixed"))
+	_lut = ImageTexture.create_from_image(img)
+	return _lut
+
+# --- Light ------------------------------------------------------------------------------
+
+## One of the three lights (lamp, fire, moon, window): "cast" is what it throws on a surface,
+## "color" the light as you see its source.
+static func light(name: String, what := "cast") -> Color:
+	var l: Dictionary = data()["lights"].get(name, {})
+	return Color(String(l.get(what, l.get("color", "#FFFFFF"))))
+
+static func light_energy(name: String) -> float:
+	return float(data()["lights"].get(name, {}).get("energy", 1.0))
+
+## What a kind of place is lit by (hall, court, wild, cut). A place may give its own numbers
+## over its kind's (data/academy.json and data/creation.json, style; a zone's light).
+static func place_light(kind: String) -> Dictionary:
+	var kinds: Dictionary = data()["lights"]["kinds"]
+	return kinds.get(kind, kinds["court"])
+
+## A light's colour brought to the style: a warm one becomes the lamp's (or the fire's, if it
+## is redder), a cool one the moon's. `what` is "cast" for what it throws on a surface, "color"
+## for the light as you see its source (a flame, a lit pane).
+static func conform_light(c: Color, what := "cast") -> Color:
+	if saturation(c) < 0.04:
+		return c
+	var h := c.h
+	if h < 0.2 or h > 0.9:
+		if what == "color" and h >= 0.075 and h < 0.2:
+			return Color(String(data()["lights"]["window"]["color"]))
+		return light("fire" if (h < 0.075 or h > 0.9) else "lamp", what)
+	if h > 0.5 and h < 0.75:
+		return light("moon", what)
+	return c
+
+# --- Line, effects, motion --------------------------------------------------------------
+
+## The ink line's width in pixels for what carries it (people, beasts, genii; 0 for places),
+## on a screen of the given height.
+static func ink_width(category: String, screen_height := 0.0) -> float:
+	var ink: Dictionary = data()["ink"]
+	var w := float(ink["width"].get(category, 0.0))
+	return w * (screen_height / float(ink.get("screen", 900)) if screen_height > 0.0 else 1.0)
+
+static func ink_color() -> Color:
+	return Color(String(data()["ink"]["color"]))
+
+## An effect's colour by what it is for (telegraph, hurt, guard, stagger, spark, dust, shot,
+## text, dim).
+static func fx(name: String) -> Color:
+	return Color(String(data()["effects"]["colors"].get(name, "#F2E8D6")))
+
+## A number of the effects' shapes: fx_n("ring", "seconds").
+static func fx_n(shape: String, key: String, fallback := 0.0) -> float:
+	return float(data()["effects"].get(shape, {}).get(key, fallback))
+
+## One of the interface's times (data/style.json, motion.ui): "quick" for a prompt, "arrive"
+## for a panel, "leave", "ceremony" for a title or a fade between places, "stagger", "hold".
+static func t(name: String) -> float:
+	return float(data()["motion"]["ui"].get(name, 0.3))
+
+## How a thing with weight comes to rest in the world: one small overshoot, never a bounce.
+static func ease_settle(tw: PropertyTweener) -> PropertyTweener:
+	if String(data()["motion"].get("settle", "back")) == "back":
+		return tw.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	return tw.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+## A number of the motion language: motion("hover", "period"), motion("idle", "period").
+static func motion(group: String, key: String, fallback := 0.0) -> float:
+	return float(data()["motion"].get(group, {}).get(key, fallback))
+
+## The interface's easing on a tween's step: everything arrives the same way.
+static func ease_ui(t: PropertyTweener) -> PropertyTweener:
+	match String(data()["motion"]["ui"].get("ease", "out-cubic")):
+		"out-sine": return t.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		"out-quad": return t.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		"linear": return t.set_trans(Tween.TRANS_LINEAR)
+		_: return t.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+# --- The interface ----------------------------------------------------------------------
 
 static var _fonts := {}
 
 static func font(kind: String) -> Font:
 	if _fonts.has(kind):
 		return _fonts[kind]
+	var ty: Dictionary = data()["type"]
 	var path := ""
 	var weight := 0
 	match kind:
-		"title": path = "Cinzel.ttf"; weight = 600
-		"title_light": path = "Cinzel.ttf"; weight = 450
-		"body": path = "Alegreya.ttf"; weight = 400
-		"body_bold": path = "Alegreya.ttf"; weight = 700
-		"italic": path = "Alegreya-Italic.ttf"
-		"ui": path = "AlegreyaSans-Medium.ttf"
-		"ui_bold": path = "AlegreyaSans-Bold.ttf"
-		_: path = "AlegreyaSans-Regular.ttf"
+		"title": path = "%s.ttf" % ty["title"]; weight = 600
+		"title_light": path = "%s.ttf" % ty["title"]; weight = 450
+		"body": path = "%s.ttf" % ty["body"]; weight = 400
+		"body_bold": path = "%s.ttf" % ty["body"]; weight = 700
+		"italic": path = "%s-Italic.ttf" % ty["body"]
+		"ui": path = "%s-Medium.ttf" % ty["ui"]
+		"ui_bold": path = "%s-Bold.ttf" % ty["ui"]
+		_: path = "%s-Regular.ttf" % ty["ui"]
 	# Loaded as an imported resource, so it is packed into every export (the web too).
 	var ff: FontFile = load("res://game/assets/fonts/" + path)
 	ff.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
@@ -52,12 +342,12 @@ static func font(kind: String) -> Font:
 	return f
 
 ## A plate: dark ink, a brass rim, clipped corners.
-static func plate(bg := PLATE, rim := BRASS_DIM, width := 1, margin := 14.0, cut := 7) -> StyleBoxFlat:
+static func plate(bg := PLATE, rim := BRASS_DIM, width := -1, margin := 14.0, cut := -1) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
 	s.bg_color = bg
 	s.border_color = rim
-	s.set_border_width_all(width)
-	s.set_corner_radius_all(cut)
+	s.set_border_width_all(width if width >= 0 else int(data()["interface"].get("rim", 1)))
+	s.set_corner_radius_all(cut if cut >= 0 else int(data()["interface"].get("cut", 7)))
 	s.corner_detail = 1   # straight cuts, not rounds
 	s.set_content_margin_all(margin)
 	s.shadow_color = Color(0, 0, 0, 0.45)
@@ -191,7 +481,8 @@ static func apply_global() -> void:
 	t.set_color("font_color", "Label", FG)
 	t.set_color("default_color", "RichTextLabel", FG)
 
-## Fade a control in from slightly below: every screen arrives this way.
+## Fade a control in from slightly below: every screen arrives this way, in the motion
+## language's time (data/style.json, motion.ui).
 static func arrive(c: CanvasItem, delay := 0.0, rise := 12.0) -> void:
 	if not c.is_inside_tree():
 		return
@@ -199,8 +490,19 @@ static func arrive(c: CanvasItem, delay := 0.0, rise := 12.0) -> void:
 	var ctl := c as Control
 	var tw := c.create_tween()
 	tw.set_parallel(true)
-	tw.tween_property(c, "modulate:a", 1.0, 0.35).set_delay(delay).set_trans(Tween.TRANS_SINE)
+	ease_ui(tw.tween_property(c, "modulate:a", 1.0, t("arrive")).set_delay(delay))
 	if ctl and not (ctl.get_parent() is Container):
 		var to := ctl.position
 		ctl.position.y += rise
-		tw.tween_property(ctl, "position", to, 0.45).set_delay(delay).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		ease_ui(tw.tween_property(ctl, "position", to, t("arrive")).set_delay(delay))
+
+## The same going: a control fades in the interface's leaving time, then `then` is called.
+static func leave(c: CanvasItem, then: Callable = Callable()) -> void:
+	if not c.is_inside_tree():
+		if then.is_valid():
+			then.call()
+		return
+	var tw := c.create_tween()
+	ease_ui(tw.tween_property(c, "modulate:a", 0.0, t("leave")))
+	if then.is_valid():
+		tw.tween_callback(then)
