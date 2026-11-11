@@ -115,6 +115,7 @@ const REST := "rest"
 var _movers: Array = []            # [node, kind, its rest, phase, side, place in its chain, the way the body faces in its frame]
 var worn_piece: Node3D = null      # what is shown of it when it is worn, in place of the rest (a piece named worn)
 var is_worn := false
+var _furling: Array = []           # pieces of its parts that show only free (aloft*) or only worn (furled*)
 
 static var _shader: Shader
 
@@ -218,16 +219,23 @@ func _assemble(instar: int) -> void:
 		slot_count[slot] = i + 1
 		# A hybrid's gift hangs from the giver's own part where it has made one (the Imp's horns
 		# are not the Drake's): gifts/<giver>-<feature>.glb, or else the part every base shares.
+		# And a giver may make its gift again for one base it sits badly on (the Hawk's wings on a
+		# Shield are the shield's own metal, not a bird's wings stuck to a plate):
+		# gifts/<giver>-<feature>-on-<first base>.glb, hung where featureSockets says under that name.
 		var part_path := PART_DIR % f
+		var own_key := "%s-%s" % [giver, f]
 		if giver != "" and gift.has(f) and ResourceLoader.exists(GIFT_DIR % [giver, f]):
 			part_path = GIFT_DIR % [giver, f]
+			var on_key := "%s-on-%s" % [f, fid.get_slice("+", 0)]
+			if ResourceLoader.exists(GIFT_DIR % [giver, on_key]):
+				part_path = GIFT_DIR % [giver, on_key]
+				own_key = "%s-%s" % [giver, on_key]
 		if ResourceLoader.exists(part_path):
 			# A part made for a paired slot (limbs, arms) goes on every socket the body has for it;
 			# some features name their own sockets (a beak at the mouth, hands at the wrists).
 			# (a giver's own make of a part may hang somewhere of its own: the Lurker's cloak down
 			# the back where the Coat's is on the head; featureSockets, "<giver>-<feature>")
 			var place_of: Dictionary = cfg.get("featureSockets", {})
-			var own_key := "%s-%s" % [giver, f]
 			var named: Array = place_of.get(own_key if part_path != PART_DIR % f and place_of.has(own_key) else f, []).filter(func(sn): return sockets.has(sn))
 			var targets: Array = named if not named.is_empty() else (socks.filter(func(sn): return sockets.has(sn)) if socks.size() > 1 else [socks[0]])
 			if targets.is_empty():
@@ -239,6 +247,17 @@ func _assemble(instar: int) -> void:
 				if is_right(String(sn)):
 					art.scale.x = -1.0
 				_adopt_art(art)
+				for piece in art.find_children("*", "Node3D", true, false):
+					if String(piece.name).begins_with("aloft") or String(piece.name).begins_with("furled"):
+						(piece as Node3D).visible = String(piece.name).begins_with("aloft")
+						_furling.append(piece)
+				# A part of several pieces says where each goes: a piece named at_<socket> hangs
+				# on that socket (a head at the top, a wing at each side), where the body has it.
+				for piece in art.get_children():
+					var where := String(piece.name).trim_prefix("at_")
+					if String(piece.name).begins_with("at_") and sockets.has(where):
+						art.remove_child(piece)
+						_socket(where).add_child(piece)
 			parts_from_art.append(f)
 		else:
 			_placeholder_part(f, slot, socks)
@@ -427,10 +446,18 @@ static func accent_of(form_id: String, material: String) -> Color:
 
 ## Worn, a genius that has a piece made for wearing (a mantle where the whole coat would not
 ## sit) shows that piece and nothing else of itself; let go, the rest and not the piece.
+## A part may be made twice over, for a genius going free and for one on its partner (wings
+## spread, and wings shut along a shield's rim): pieces named aloft show while it is free, and
+## pieces named furled while it is worn or held.
 func set_worn(on: bool) -> void:
-	if worn_piece == null or on == is_worn:
+	if on == is_worn:
 		return
 	is_worn = on
+	for f in _furling:
+		if is_instance_valid(f):
+			(f as Node3D).visible = on == String(f.name).begins_with("furled")
+	if worn_piece == null:
+		return
 	for c in worn_piece.get_parent().get_children():
 		if c is Node3D and c != worn_piece:
 			(c as Node3D).visible = not on

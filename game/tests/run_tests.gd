@@ -3209,6 +3209,33 @@ func test_lines() -> void:
 		if not ok:
 			wrong.append(id)
 		body.queue_free()
+	# A gift made again for one base (docs/genius-lines.md): the Hawk's on a Shield is an eagle
+	# displayed, a wing on each side of the rim and a head on the top edge, spread while the
+	# shield goes free and shut while it is on an arm; on a wolf the Hawk's wings are as they were.
+	var ws: Array = Data.tree_of("shield+hawk").filter(func(f): return String(f["id"]) == "shield+hawk:shield-wall")
+	if not ws.is_empty() and ResourceLoader.exists(GeniusBody.GIFT_DIR % ["hawk", "wings-on-shield"]):
+		var wf: Dictionary = ws[0]
+		var wb := GeniusBody.build({ "form": wf["id"], "silhouette": wf["silhouette"], "expression": wf["expression"], "features": wf["features"], "instar": int(wf["level"]), "look": GeniusLook.born(7) }, Color.ORANGE, int(wf["level"]))
+		add_child(wb)
+		var on_sockets := true
+		for sn in ["socket_arm_l", "socket_arm_r", "socket_head", "socket_tail"]:
+			on_sockets = on_sockets and wb.sockets.has(sn) and (wb.sockets[sn] as Node).find_child("at_" + sn, false, false) != null
+		check(on_sockets, "the Winged Shield wears the Hawk's gift as made for a shield: a wing at each side, a head on top, feet below")
+		var spread: Array = wb.find_children("aloft*", "Node3D", true, false)
+		var shut: Array = wb.find_children("furled*", "Node3D", true, false)
+		check(spread.size() == 3 and shut.size() == 3 and spread.all(func(n): return n.visible) and not shut.any(func(n): return n.visible), "going free its wings are spread and its feet open")
+		wb.set_worn(true)
+		check(shut.all(func(n): return n.visible) and not spread.any(func(n): return n.visible), "on an arm its wings are shut down its rim and its feet drawn up")
+		wb.set_worn(false)
+		check(spread.all(func(n): return n.visible), "and let go, it spreads them again")
+		wb.queue_free()
+		var wh: Array = Data.tree_of("wolf+hawk").filter(func(f): return String(f["id"]) == "wolf+hawk:wolf-counting-wolf")
+		if not wh.is_empty():
+			var hf: Dictionary = wh[0]
+			var hb := GeniusBody.build({ "form": hf["id"], "silhouette": hf["silhouette"], "expression": hf["expression"], "features": hf["features"], "instar": int(hf["level"]), "look": GeniusLook.born(7) }, Color.ORANGE, int(hf["level"]))
+			add_child(hb)
+			check(hb.find_children("at_*", "Node3D", true, false).is_empty() and hb.parts_from_art.has("wings"), "a Winged Wolf wears the Hawk's own wings, not the shield's")
+			hb.queue_free()
 	# a form with a way of resting (one clip of its model's own: docs/genius-lines.md, "How it
 	# rests") is first seen in it, gets up to walk by its base body's clips, and takes its rest
 	# again when it has stood a while
