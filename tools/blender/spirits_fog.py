@@ -63,7 +63,7 @@ def bank(B, c, w, d, h, seed=0.0, dark=False, part="", deep=None):
     if deep:
         for i in range(3):
             a = seed + 1.1 + 2 * math.pi * i / 3
-            roll(B, c + Vector((w * 0.36 * math.cos(a), -abs(d * 0.34 * math.sin(a)) - d * 0.06, -h * 0.3)), 0.2 * w, (1.0, d / w, 0.8 * h / w), deep, a, part)
+            roll(B, c + Vector((w * 0.36 * math.cos(a), -abs(d * 0.32 * math.sin(a)) - d * 0.03, -h * 0.32)), 0.16 * w, (1.0, d / w, 0.7 * h / w), deep, a, part)
 
 
 def on(B, geo, material, smooth=None, part=""):
@@ -127,7 +127,7 @@ def eyes(B, c, dx, r, style="soft", patch=True, part="", what="eyes", up=None, r
         lit.append((sk.eye_pair(c + Vector((0, -r * 0.5, -r * 0.2)), dx, r * 0.6, scale=(1.0, 0.5, 1.0), slant=0.0), field("eyes", 2.6), True))
     else:
         if patch:
-            stat.append((sk.eye_pair(c + Vector((0, 0.008, 0)), dx, r * 1.55, scale=(1.15, 0.4, 0.95), slant=0.0), B.under, True))
+            stat.append((_pair(c + Vector((0, 0.014, 0)), dx, r * 1.5, (1.15, 0.28, 0.95), 0.0), B.under, True))
         if style == "old":            # old grey eyes that count: heavy-lidded
             lit.append((_pair(c + Vector((0, -0.004, -r * 0.2)), dx, r * 0.9, (1.1, 0.5, 0.7), -0.1), field("eyes", 2.4), True))
             lids = None
@@ -360,6 +360,7 @@ def plan_layer(B):
     for i, (x, y) in enumerate(((0.3, 0.16), (0.36, 0.02), (0.24, 0.24), (-0.3, -0.1), (0.12, 0.3))):
         heads = g.merge(heads, g.tube([(x, y, 0.22), (x + 0.01, y, 0.31 + 0.02 * (i % 2))], 0.004, n=3), g.ico((x + 0.012, y, 0.33 + 0.02 * (i % 2)), 0.012, sub=0, scale=(0.7, 0.7, 1.6)))
     B.add(heads, "grass_dew", False)
+    B.budget = 1300
     ragged(B, (0, 0, 0.13), 0.46, 0.4, n=6, L=0.13, w=0.05, what="edge")
     hanging(B, [(0.2, 0.1, 0.04), (-0.22, 0.05, 0.04), (0.0, -0.2, 0.04)])
     _done(B, 0.7, -0.17, 0.27, 0.36, e, crown=(0, 0.04, 0.56))
@@ -409,6 +410,7 @@ def plan_horseshoe(B):
     for j, (i, off) in enumerate(((0, 0.0), (1, 0.05), (7, -0.05), (8, 0.0))):
         p, r = seats[i]
         eyes(B, p + Vector((off, -r * 1.02, 0.02)), 0.038, 0.014, "old", what="eyes_" + "abcd"[j])
+    B.budget = 1200
     for s in (1, -1):       # the piles of the harbour it came into, and the rope on them
         B.add(sk.post((s * 0.5, -0.2, 0.08), 0.4, r=0.03, n=6), "wood_grey", False)
         B.add(sk.hoop((s * 0.5, -0.2, 0.4), 0.04, 0.04, 0.01, n=8, sides=4), "accent", False)
@@ -571,7 +573,7 @@ def plan_pillar(B):
     """It hangs in one spot in still air and does not thin; sounds from long ago carry in it, and it listens for them."""
     for i, (z, r, m) in enumerate(((0.2, 0.15, "under"), (0.32, 0.165, "main"), (0.46, 0.15, "trim"), (0.58, 0.16, "main"), (0.7, 0.14, "trim"), (0.8, 0.1, "main"))):
         roll(B, (0.012 * math.sin(i * 2.0), 0.0, z), r, (1.0, 0.95, 0.72), m, i)
-    deep(B, (0, -0.06, 0.3), 0.11, (1.0, 0.6, 1.0), step="accent_pale")
+    deep(B, (0, -0.05, 0.3), 0.1, (1.0, 0.6, 1.0), step="accent_light")
     # it listens: an ear-trumpet of old brass, out of the side of it
     c = Vector((0.1, 0.0, 0.62))
     horn = [g.ring(c + X * off + Z * off * 0.25, r, r * 1.08, n=14, u=Y, v=Z) for off, r in ((0.0, 0.022), (0.07, 0.035), (0.14, 0.07), (0.2, 0.13), (0.23, 0.18))]
@@ -590,7 +592,7 @@ def plan_wall(B):
     for j in range(4):
         for i in range(4):
             roll(B, (-0.21 + 0.14 * i, 0.0, 0.2 + 0.17 * j), 0.105, (1.0, 0.42, 1.0), ("main", "trim")[(i + j) % 2], 0.0)
-    deep(B, (0, -0.02, 0.2), 0.1, (2.4, 0.4, 0.6), step="accent_pale")
+    deep(B, (0, 0.0, 0.17), 0.075, (2.6, 0.5, 0.6), step="accent_light")
     B.add(g.box((0, 0, 0.83), (0.62, 0.1, 0.028)), B.trim, False)                 # its top, ruled
     for s in (1, -1):
         B.add(g.merge(g.box((s * 0.37, 0, 0.44), (0.11, 0.11, 0.68)), g.box((s * 0.37, 0, 0.79), (0.14, 0.14, 0.04))), "stone_grave", False)
@@ -609,15 +611,17 @@ def plan_drift(B):
         r = 0.1 + 0.11 * t
         roll(B, (x, 0.02 * math.sin(i * 2.0), 0.12 + 0.28 * t), r, (1.2, 1.3, 0.85), "main" if i % 2 else "under", i)
         roll(B, (x + 0.02, -0.02, 0.12 + 0.28 * t + r * 0.6), r * 0.72, (1.2, 1.3, 0.6), "trim", i)
-    deep(B, (0.04, -0.12, 0.34), 0.13, (1.0, 0.6, 1.0), step="accent_pale")
+    for dx, dz, r in ((-0.14, -0.04, 0.06), (0.12, -0.1, 0.055)):
+        deep(B, (0.04 + dx, -0.17, 0.44 + dz), r, (1.0, 0.6, 1.0), step="accent_pale")
     B.add(g.merge(g.box((0.36, 0.1, 0.4), (0.1, 0.5, 0.6)), g.box((0.36, 0.1, 0.715), (0.13, 0.54, 0.03))), "stone_grave", False)
-    B.add(g.tube([(0.08, 0.02, 0.1), (0.08, 0.02, 0.9)], [0.02, 0.018], n=6), "metal_iron", False)
-    B.add(g.tube([(0.08, 0.02, 0.88), (0.08, -0.06, 0.94), (0.08, -0.14, 0.92)], 0.012, n=4), "metal_iron", False)
+    B.add(g.tube([(0.08, 0.02, 0.1), (0.08, 0.02, 0.9)], [0.024, 0.02], n=6), "accent_dark", False)
+    B.add(g.tube([(0.08, 0.02, 0.88), (0.08, -0.06, 0.94), (0.08, -0.14, 0.92)], 0.014, n=4), "accent_dark", False)
+    B.add(g.merge(g.box((0.36, 0.1, 0.735), (0.14, 0.56, 0.016)), sk.hoop((0.08, 0.02, 0.5), 0.028, 0.028, 0.008, n=8, sides=4)), "accent", False)
     at = Vector((0.08, -0.14, 0.92))
     B.move("sway", "lamp", sk.lantern(at, 0.07, glow="lamp", strength=3.4, cap="accent", frame="accent_dark"), at)
     # the lamp, seen through it: a low sun
     sun = Vector((0.04, -0.23, 0.44))
-    B.move("pulse", "sun", [(g.ico(sun, 0.085, sub=2, scale=(1.0, 0.25, 1.0)), field("sun", 2.0), True), (sk.hoop(sun + Vector((0, -0.01, 0)), 0.13, 0.13, 0.006, n=16, u=X, v=Z, sides=3), "accent_light", True)], sun)
+    B.move("pulse", "sun", [(g.ico(sun, 0.085, sub=2, scale=(1.0, 0.25, 1.0)), field("sun", 2.0), True), (sk.hoop(sun + Vector((0, -0.01, 0)), 0.13, 0.13, 0.011, n=18, u=X, v=Z, sides=4), "accent_light", True)], sun)
     e = Vector((-0.25, -0.17, 0.3))
     eyes(B, e, 0.047, 0.018)
     ragged(B, (-0.3, 0, 0.12), 0.2, 0.14, n=4, L=0.14, w=0.05, arc=(1.8, 5.0), what="edge")
@@ -625,41 +629,55 @@ def plan_drift(B):
 
 
 def plan_streamers(B):
-    """It comes in off the water over the quay in long streamers, low, one after another, and the wind has their backs."""
+    """It comes in off the water over the quay, low and all at once, and reaches up the land in
+    long streamers; the wind has its back, and there is salt in it."""
+    for i in range(5):         # the body of it, heaped on the quay and over its edge
+        x = -0.3 + 0.15 * i
+        roll(B, (x, 0.3, 0.36 + 0.03 * math.sin(i * 2.0)), 0.14, (1.1, 1.0, 0.75), "main" if i % 2 else "under", i)
+        roll(B, (x + 0.03, 0.14, 0.3), 0.12, (1.1, 1.2, 0.7), "trim" if i % 2 else "main", i)
     first = None
-    for j, (x, z, L, w) in enumerate(((0.0, 0.42, 1.0, 1.0), (0.27, 0.3, 0.8, 0.8), (-0.26, 0.27, 0.72, 0.74))):
-        pts = [Vector((x + 0.04 * math.sin(i * 1.3 + j), -0.42 * L + 0.84 * L * i / 5, z + 0.035 * math.sin(i * 1.9 + j) - (0.1 if i == 0 else 0.0))) for i in range(6)]
+    for j, (x, L, w) in enumerate(((0.0, 1.0, 1.0), (0.27, 0.74, 0.8), (-0.27, 0.62, 0.74))):       # and the streamers, each lower and thinner as it goes
+        pts = [Vector((x + 0.03 * math.sin(i * 1.3 + j), 0.06 - 0.5 * L * i / 4, 0.27 - 0.11 * i / 4 + 0.02 * math.sin(i * 1.9 + j))) for i in range(5)]
         for i, p in enumerate(pts):
-            roll(B, p, (0.105, 0.115, 0.105, 0.09, 0.07, 0.045)[i] * w, (1.0, 1.5, 0.72), ("main", "trim")[i % 2] if j == 0 else ("under", "main")[i % 2], 0.0, "abc"[j])
-        back = [[pts[i] + Vector((0, 0.02, 0.06 * w)), pts[i] + Vector((0.01, 0.1, 0.12 * w)), pts[i] + Vector((0.0, 0.2, 0.13 * w))] for i in (1, 2, 3)]
-        wisps(B, back, w=0.045 * w, role="trim", what="spray_" + "abc"[j], pivot=pts[2])
-        e = pts[0] + Vector((0, -0.118 * w, 0.02))
-        eyes(B, e, 0.04 * w, 0.016 * w, part="abc"[j], what="eyes_" + "abc"[j])
-        first = first or e
-    # the quay it comes in over: the coping, a bollard with a ring in it
-    B.add(g.box((0.0, 0.38, 0.11), (0.74, 0.18, 0.2)), "stone_grave", False)
-    B.add(g.box((0.0, 0.38, 0.22), (0.78, 0.22, 0.03)), "stone_step", False)
-    B.add(g.lathe([(0.04, 0.0), (0.034, 0.07), (0.05, 0.09), (0.04, 0.12), (0.0, 0.125)], n=8, centre=(0.3, 0.38, 0.235)), "accent", False)
-    B.add(sk.hoop((0.3, 0.27, 0.13), 0.04, 0.04, 0.009, n=10, u=X, v=Z, sides=4), "accent_light", False)
-    B.add(g.merge(g.box((-0.2, 0.287, 0.14), (0.16, 0.006, 0.018)), g.box((-0.2, 0.287, 0.1), (0.1, 0.006, 0.018))), "accent", False)       # the mark of the highest tide
+            roll(B, p, (0.1, 0.092, 0.084, 0.078, 0.086)[i] * w, (1.0, 1.5, 0.66), ("main", "trim")[i % 2] if j == 0 else ("under", "main")[i % 2], 0.0)
+        deep(B, pts[2] + Vector((0, 0, -0.035 * w)), 0.06 * w, (1.0, 2.2, 0.6), step="accent_light")
+        if j == 0:
+            first = pts[4] + Vector((0, -0.118 * w, 0.02))
+            eyes(B, first, 0.04, 0.017)
+    back = [[Vector((x, 0.36, 0.44)), Vector((x + 0.02, 0.46, 0.5)), Vector((x - 0.01, 0.58, 0.5)), Vector((x + 0.02, 0.7, 0.46))] for x in (-0.24, -0.08, 0.08, 0.22)]
+    wisps(B, back, w=0.032, role="trim", what="spray", pivot=(0, 0.36, 0.46), swell=0.1)
+    B.budget = 1300
+    # the quay it comes in over: the coping, a bollard with a ring in it, the mark of the highest tide, the harbour light
+    B.add(g.box((0.0, 0.38, 0.11), (0.86, 0.2, 0.2)), "stone_grave", False)
+    B.add(g.box((0.0, 0.38, 0.22), (0.9, 0.24, 0.03)), "stone_step", False)
+    B.add(g.lathe([(0.045, 0.0), (0.038, 0.08), (0.056, 0.1), (0.045, 0.135), (0.0, 0.14)], n=8, centre=(0.37, 0.3, 0.235)), "accent", False)
+    B.add(sk.hoop((0.37, 0.268, 0.13), 0.045, 0.045, 0.01, n=10, u=X, v=Z, sides=4), "accent_light", False)
+    B.add(g.merge(g.box((-0.26, 0.277, 0.15), (0.2, 0.008, 0.022)), g.box((-0.26, 0.277, 0.1), (0.13, 0.008, 0.022))), "accent", False)
+    post = Vector((-0.38, 0.42, 0.235))
+    B.add(g.tube([post, post + Z * 0.5], [0.016, 0.013], n=6), "metal_iron", False)
+    B.move("sway", "light", sk.lantern(post + Vector((0.0, -0.05, 0.56)), 0.075, glow="lamp", strength=3.2, cap="accent", frame="accent_dark") + [(g.tube([post + Z * 0.5, post + Vector((0, -0.03, 0.57)), post + Vector((0, -0.05, 0.56))], 0.009, n=4), mat("metal_iron"))], post + Vector((0.0, -0.05, 0.56)))
     salt = None
-    for x, y, z in ((0.1, 0.1, 0.62), (-0.12, 0.3, 0.56), (0.2, 0.3, 0.5), (-0.3, 0.0, 0.46)):
+    for x, y, z in ((0.1, 0.1, 0.56), (-0.12, 0.3, 0.6), (0.2, 0.3, 0.56), (-0.3, 0.0, 0.42), (0.3, -0.1, 0.4)):
         salt = g.merge(salt, g.ico((x, y, z), 0.012, sub=0))
     B.move("bob", "salt", [(salt, "bone", False)], (0, 0.1, 0.5))
-    _done(B, 0.72, -0.46, 0.4, 0.36, first, crown=(0, -0.4, 0.56))
+    ragged(B, (0, -0.2, 0.15), 0.34, 0.24, n=4, L=0.1, w=0.04, arc=(3.6, 5.8), what="edge")
+    _done(B, 0.8, -0.5, 0.36, 0.4, first, crown=(0, 0.3, 0.52))
 
 
 def plan_graves(B):
     """Figures stand in it at the edge of sight. It looks at them with old eyes and does not point them out."""
-    bank(B, (0, 0, 0.2), 0.74, 0.5, 0.2, seed=0.5, deep="accent_pale")
+    bank(B, (0, 0, 0.2), 0.74, 0.5, 0.2, seed=0.5, deep="accent_light")
     for j, (x, y, hh) in enumerate(((-0.2, 0.16, 0.52), (0.04, 0.22, 0.62), (0.26, 0.14, 0.48))):       # a robe, a bowed head, and no more than that
         for z, r in ((0.12, 0.085), (0.3, 0.07), (0.48, 0.062), (0.62, 0.05)):
             roll(B, (x, y, 0.18 + hh * z), r, (1.0, 0.85, 1.3), "trim", 0.0, "figs")
         roll(B, (x, y - 0.012, 0.16 + hh * 0.9), 0.05, (0.9, 0.95, 1.1), "trim", 0.0, "figs")
     stone(B, (-0.3, -0.21, 0.1), 0.17, 0.36, lean=0.16)
     at = Vector((-0.12, -0.3, 0.135))       # the lamp left at the stone, at the lamp hour
-    B.add(g.lathe([(0.03, 0.0), (0.03, 0.012), (0.012, 0.02)], n=8, centre=at), "accent", False)
-    B.move("flick", "flame", [(g.tongue([at + Z * 0.02, at + Vector((0.004, 0, 0.04)), at + Z * 0.075], [0.016, 0.022, 0.002], thick=0.7, normal=Y), field("flame", 2.8), True)], at + Z * 0.02)
+    B.add(g.lathe([(0.045, 0.0), (0.045, 0.016), (0.02, 0.03), (0.016, 0.06)], n=8, centre=at), "accent", False)
+    B.add(sk.hoop(at + Vector((0, 0, 0.004)), 0.1, 0.085, 0.009, n=14, sides=4), "accent_light", True)
+    for dx, dy in ((0.14, 0.02), (-0.06, 0.07)):
+        deep(B, (at.x + dx, at.y + dy, 0.13), 0.07, (1.3, 0.9, 0.6), step="accent_light")
+    B.move("flick", "flame", [(g.tongue([at + Z * 0.06, at + Vector((0.004, 0, 0.085)), at + Z * 0.125], [0.018, 0.026, 0.002], thick=0.7, normal=Y), field("flame", 2.8), True)], at + Z * 0.06)
     e = Vector((0.1, -0.265, 0.25))
     eyes(B, e, 0.052, 0.017, "old")
     ragged(B, (0, 0, 0.12), 0.38, 0.26, n=6, L=0.12, w=0.05, what="edge")
@@ -669,7 +687,7 @@ def plan_graves(B):
 def plan_bust(B):
     """It holds a lit shape for a breath after a shade has gone: a turned head, a shoulder, in paler
     fog and a line of light; the names stand at its foot, and it watches the shape go."""
-    bank(B, (0.02, 0.06, 0.2), 0.78, 0.46, 0.2, seed=0.8, deep="accent_pale")
+    bank(B, (0.02, 0.06, 0.2), 0.78, 0.46, 0.2, seed=0.8, deep="accent_light")
     # the shape it is holding: waist, shoulders, neck, a head turned away
     c = Vector((0.08, 0.08, 0.0))
     for p, r, sc in (((0, 0, 0.3), 0.1, (1.1, 0.7, 1.2)), ((0, 0, 0.42), 0.115, (1.25, 0.7, 1.0)), ((0, 0, 0.53), 0.1, (1.75, 0.66, 0.6)), ((0.01, 0, 0.62), 0.045, (1.0, 0.9, 1.3)),
@@ -697,7 +715,8 @@ def plan_trail(B):
         roll(B, (0.05 * math.sin(i * 1.4), -0.26 + 0.86 * t, 0.2 + 0.03 * math.sin(i)), r, (1.1, 1.5, 0.75), "main" if i % 2 else "under")
     head = Vector((0, -0.38, 0.4))
     chain(B, [(0, -0.28, 0.24), (0, -0.35, 0.32), head], 0.1, 0.11, (1, 1, 0.95), ("main", "trim"))
-    deep(B, (0, -0.2, 0.17), 0.09, (1.0, 1.6, 0.6), step="accent_pale")
+    for y in (-0.16, 0.1, 0.36):
+        deep(B, (0.0, y, 0.13), 0.075, (1.5, 1.2, 0.6), step="accent_light")
     e = head + Vector((0, -0.125, 0.012))
     eyes(B, e, 0.05, 0.018, "wide")
     pads, toes = None, None
@@ -707,12 +726,17 @@ def plan_trail(B):
         for dx in (-0.03, 0.0, 0.03):
             toes = g.merge(toes, g.ico(p + Vector((dx, -0.045, 0)), 0.012, sub=0, scale=(1, 1, 0.4)))
     B.move("pulse", "prints", [(g.merge(pads, toes), field("print", 2.8), True)], (0, 0, 0.062))
+    rings = None
+    for i in range(5):
+        rings = g.merge(rings, sk.hoop((0.15 * (1 if i % 2 else -1), -0.51 + 0.22 * i, 0.058), 0.055, 0.07, 0.008, n=10, sides=4))
+    B.add(rings, "accent", True)
     # the waymark at the far end of it, its top stone painted
     cairn = None
     for i, (r, z) in enumerate(((0.085, 0.1), (0.07, 0.19), (0.055, 0.27))):
         cairn = g.merge(cairn, g.ico((0.02 * (-1) ** i, 0.62, z), r, sub=1, scale=(1.2, 1.0, 0.6), rot=(0, 0, i * 1.1)))
     B.add(cairn, "stone_grave", False)
-    B.add(g.ico((0.0, 0.62, 0.335), 0.04, sub=1, scale=(1.1, 1.0, 0.7)), "accent", False)
+    B.add(g.ico((0.0, 0.62, 0.335), 0.05, sub=1, scale=(1.1, 1.0, 0.7)), "accent", False)
+    B.add(g.merge(sk.hoop((0.0, 0.62, 0.19), 0.085, 0.07, 0.008, n=10, sides=4), sk.hoop((0.02, 0.62, 0.1), 0.105, 0.088, 0.008, n=10, sides=4)), "accent_light", False)
     ragged(B, (0.0, 0.3, 0.16), 0.1, 0.3, n=4, L=0.1, w=0.04, arc=(-0.6, 0.6), what="edge")
     hanging(B, [(0.0, -0.4, 0.0), (0.05, 0.1, 0.0), (-0.03, 0.55, 0.0)])
     _done(B, 0.64, -0.5, 0.26, 0.24, e, crown=head + Vector((0, 0, 0.11)))
@@ -741,7 +765,7 @@ def plan_edge(B):
         x = -0.42 + 0.14 * i
         roll(B, (x, 0.02, 0.28), 0.11, (1.0, 0.5, 1.5), "main" if i % 2 else "under")
         roll(B, (x, 0.02, 0.52), 0.1, (1.0, 0.45, 1.3), "trim" if i % 2 else "main")
-    deep(B, (0, 0.0, 0.2), 0.1, (3.6, 0.4, 0.6), step="accent_pale")
+    deep(B, (0, 0.03, 0.17), 0.075, (4.2, 0.5, 0.6), step="accent_light")
     B.add(g.box((0, 0.02, 0.675), (1.0, 0.07, 0.026)), B.trim, False)             # its top, ruled
     stakes, flags = None, None
     for x in (-0.24, 0.2, 0.44):
