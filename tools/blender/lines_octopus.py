@@ -425,7 +425,7 @@ class Octo:
         elif self.skin == "bone":
             self.M.update({"S": "bone_pale", "D": "accent", "L": "bone_mid", "P": "accent_light", "K": "accent"})
         elif self.skin in ("glass", "weather"):
-            self.M.update({"S": "glass_flesh", "D": "accent_light", "L": "accent_pale", "P": "accent", "K": "accent"})
+            self.M.update({"S": "accent_pale", "D": "accent_light", "L": "glass_flesh", "P": "accent", "K": "accent"})
         elif self.skin == "deep":
             self.M.update({"S": "accent_dark", "D": "accent_deep", "L": "accent", "P": "accent_light", "K": "accent_light"})
 
@@ -469,17 +469,17 @@ class Octo:
         self.static.append(band(E + e * re * 0.04, re * 1.12, re * 0.13, field("eye", 2.6), axis=e, n=10, sides=3, u=up))
         d = re * 0.5
         dome = turn([(re, -re * 0.1), (re * 0.95, d * 0.3), (re * 0.72, d * 0.72), (re * 0.36, d * 0.95), (0.0, d)], E, e, "eye_gold", n=8, u=up)
-        wide, tall = (0.92, 0.4) if st != "wide" else (0.7, 0.56)
+        wide, tall = (0.94, 0.52) if st != "wide" else (0.72, 0.64)
         pupil = blob(E + e * d * 0.25, 1.0, "pupil_bar", n=6, m=4, scale=(re * wide, re * tall, d * 0.88), axis=e, u=sv)
         self.mover("blink", "eye", [dome, pupil], E, side=side, rot=Matrix((sv, -e, up)).transposed())
-        lid = {"bar": 0.22, "wide": 0.0, "half": 0.52}.get(st, 0.22) if lid is None else lid
+        lid = {"bar": 0.2, "wide": 0.0, "half": 0.42}.get(st, 0.2) if lid is None else lid
         if lid > 0.0:       # a lid: its own skin, drawn part of the way down
             cut = re * (1.0 - 2.0 * lid)
             a = 0.28 * sg * self.lid_slant
             slant = up * math.cos(a) + sv * math.sin(a)
             vs, fs, tg = spun([(re * 1.13, -re * 0.1), (re * 1.1, d * 0.3), (re * 0.86, d * 0.8), (re * 0.45, d * 1.08), (0.0, d * 1.16)], E, e, n=10, u=up)
             keep = [f for f in fs if (sum((vs[i] for i in f), Vector((0, 0, 0))) / len(f) - E).dot(slant) > cut]
-            self.static.append((vs, keep, self.m("T"), True))
+            self.static.append((vs, keep, self.m("H"), True))
         if brow:            # a small horn of skin over each eye, as an octopus has
             b0 = E + up * re * 1.02 - e * re * 0.5
             self.static.append(turn([(re * 0.4, 0.0), (re * 0.27, re * 0.5), (0.0, re * 1.0)], b0, (up * 0.9 - e * 0.3 + sv * 0.3 * sg).normalized(), self.m("T"), n=5))
@@ -990,10 +990,6 @@ def p_lamp(at, s=1.0, glow="lamp"):
     parts.append(turn([(0.008 * s, 0.0), (0.04 * s, 0.022 * s), (0.047 * s, 0.03 * s), (0.03 * s, 0.032 * s)], o, D, "iron_pot", n=8))
     parts.append(turn([(0.03 * s, 0.03 * s), (0.039 * s, 0.062 * s), (0.03 * s, 0.098 * s)], o, D, field(glow, 3.0), n=8))
     parts.append(turn([(0.033 * s, 0.096 * s), (0.043 * s, 0.102 * s), (0.043 * s, 0.114 * s), (0.0, 0.118 * s)], o, D, "iron_pot", n=8))
-    for k in range(3):
-        a = math.pi / 6 + k * 2 * math.pi / 3
-        p = o + Vector((math.cos(a), math.sin(a), 0)) * 0.04 * s
-        parts.append(rod(p - Z * 0.028 * s, p - Z * 0.1 * s, 0.0045 * s, "iron_pot", n=3))
     return parts
 
 
@@ -1397,7 +1393,7 @@ def _many_hands(O):
     """Round, mottled, every arm full: a lamp, a cup, somebody's coat; and one arm empty, held a little toward you."""
     O.lid_slant = 1.0
     O.body()
-    lamp = O.arm(2, 110, [(0.2, 0, 0), (0.3, 40, -8), (0.2, 25, 0), (0.3, 215, 0)], L=1.3, n=13, suckers=(0.68, 1.0))
+    lamp = O.arm(2, 100, [(0.3, 8, -34), (0.25, 44, 0), (0.15, 20, 0), (0.3, 215, 0)], L=1.3, n=12, suckers=(0.68, 1.0))
     hook = lamp.centre(0.2) - Z * 0.02
     O.mover("sway", "lamp", p_lamp(hook, 1.0), hook, parent=lamp)
     cup = O.arm(3, 106, [(0.5, 30, 14), (0.1, -44, 0), (0.4, 0, 335)], L=1.15, n=13)
@@ -1507,11 +1503,11 @@ def _holdfast(O):
     top = C + Vector((0, 0.03, -0.04))
     O.static.extend(p_post(top, 0.62, 0.062))
     ax = lambda p: Vector((top.x - p.x, top.y - p.y, 0))
-    for i, (sweep, drop) in ((2, (300, 0.36)), (3, (-250, 0.46)), (4, (210, 0.2)), (5, (-230, 0.3)), (6, (170, 0.12)), (7, (-150, 0.54))):
+    for i, (sweep, drop) in ((0, (300, 0.36)), (3, (-250, 0.46)), (4, (210, 0.2)), (5, (-230, 0.3)), (6, (170, 0.12)), (7, (-150, 0.54))):
         a0 = -AZ[i]
         pts = helix(top + Vector((0, 0, -0.05)), -Z, 0.095, a0 + (30 if sweep > 0 else -30), sweep, drop, n=8, u=Vector((0, -1, 0)), r1=0.075)
         O.arm_pts(i, pts, toward=ax, wave=False, n=12, tipr=0.01)
-    O.arm(0, 96, [(0.25, 14, 16), (0.4, 40, -12), (0.35, -64, 0)], L=2.5, r=1.15, n=16, still=0.2, pieces=3, suckers=(0.5, 1.0), tipr=0.014)
+    O.arm(2, 98, [(0.25, 16, -30), (0.4, 34, 14), (0.35, -58, 0)], L=2.4, r=1.15, n=16, still=0.2, pieces=3, suckers=(0.5, 1.0), tipr=0.014)
     O.arm(1, 70, [(0.5, 10, 20), (0.5, 230, 0)], L=0.95, n=10)
 
 
@@ -1522,7 +1518,7 @@ def _upraised(O):
     O.body()
     for q, (i, up, sd) in enumerate(((2, 56, -10), (3, 56, -10), (4, 76, 14), (5, 76, 14))):
         a = O.arm(i, 100, [(0.16, 0, 0), (0.2, up, 0), (0.44, 14, sd), (0.2, -30, 0)], L=1.4 if i < 4 else 1.25, n=12, suckers=(0.45, 0.9))
-        c = a.tip + a.dir * 0.03 + Z * 0.05
+        c = a.tip + a.dir * 0.02 + Z * 0.03
         tiltv = (Z + Vector((0.3 * (1 if q % 2 else -1), 0.2, 0))).normalized()
         O.mover("spin", "ring", [band(c, 0.066, 0.009, field("ring", 3.0), axis=tiltv, n=12)], c, side="r" if q % 2 else "", n=q, parent=a)
     O.arm(0, 52, [(0.45, -20, 20), (0.55, 240, 0)], L=0.95, n=10, suckers=(0.55, 1.0))
@@ -1543,7 +1539,7 @@ def _wheel(O):
         th = math.radians(22.5 + 45 * q)
         d = Vector((math.cos(th), 0.0, math.sin(th)))
         p0, dr = O.root(i)
-        a = O.arm_pts(i, [p0 + dr * 0.07, hub + d * 0.2 + Vector((0, 0.03 if d.z > 0.3 else -0.03, 0)), hub + d * 0.42, hub + d * 0.6 * O.k_arm], n=9, pieces=1, still=0.4, suckers=(0.45, 0.85) if d.z < 0.3 else None,
+        a = O.arm_pts(i, [p0 + dr * 0.07, hub + d * 0.2 + Vector((0, 0.03 if d.z > 0.3 else -0.03, 0)), hub + d * 0.36, hub + d * 0.47 * O.k_arm], n=9, pieces=1, still=0.4, suckers=(0.45, 0.85) if d.z < 0.3 else None,
                       tipr=0.012, o0=Vector((0, 1, 0)))
         at = a.tip - a.dir * 0.02
         if q == 4:
@@ -1701,7 +1697,7 @@ def _key_fan(O):
         th = math.radians(168 - 21 * q)
         d = Vector((math.cos(th), -0.1 + 0.05 * q, math.sin(th))).normalized()
         p0, dr = O.root(i)
-        L = (0.62 + 0.05 * math.sin(q * 1.9)) * O.k_arm / 1.3
+        L = (0.46 + 0.05 * math.sin(q * 1.9)) * O.k_arm / 1.3
         a = O.arm_pts(i, [p0 + dr * 0.08 + Vector((-0.02, 0.02, 0.0)), hub + d * 0.16, hub + d * (0.16 + L * 0.5), hub + d * (0.16 + L)], n=9, pieces=1, still=0.35, tipr=0.011, r=0.9, o0=Vector((0, 1, 0)))
         tip, dd = a.tip, a.dir
         side = dd.cross(Y).normalized()
@@ -1974,7 +1970,7 @@ def _chandelier(O):
     N, ax, R, H = O.mantle_at, O.mantle_axis, O.mantle_R, O.mantle_H
     O.mover("pulse", "thought", [blob(N + ax * H * 0.45, 0.045, field("thought", 3.2), n=8, m=5)], N + ax * H * 0.45, parent="mantle")
     for i in range(8):
-        O.arm(i, 76, [(0.3, -26, 0), (0.42, 142, 0), (0.28, 16, 0)], L=1.05, n=11, pieces=2, still=0.34, tipr=0.011, lit=(0.5, 0.62) if i == 2 else None, suckers=(0.4, 0.75) if i in (0, 1) else None)
+        O.arm(i, 76, [(0.3, -26, 0), (0.42, 142, 0), (0.28, 16, 0)], L=1.05, n=10, pieces=2 if i < 4 else 1, still=0.34, tipr=0.011, lit=(0.5, 0.62) if i == 2 else None, suckers=(0.4, 0.75) if i in (0, 1) else None)
     O.web(to=0.3, sag=0.2)
 
 
@@ -2024,3 +2020,92 @@ def build(form_id, level, spec, base):
 
 def register(builders):
     builders["octopus"] = build
+
+
+# ======================================================================================
+# Its gifts: what a hybrid of another base wears to say it is half this
+# (game/assets/genius/gifts/octopus-<feature>.glb; made at the socket's origin, in the
+# kit's size, a body 0.72 tall; the pieces keep their names, so they move on the wearer too)
+#
+#     python tools/blender/lines_octopus.py gifts
+# ======================================================================================
+
+def _gift(O):
+    """The objects of a thing built with an Octo, where it was built (no ground, no sockets)."""
+    gl = lines()
+    objs, static = [], list(O.static)
+    chains = []
+    for a in O.arms:
+        pcs, has_still = O._arm_parts(a)
+        if has_still or not a.wave:
+            static.extend(pcs[0][2])
+            pcs = pcs[1:]
+        chains.append((a, pcs))
+    objs.append(make("octopus_gift", static))
+    for a, pcs in chains:
+        parent = None
+        for q, (j0, j1, parts) in enumerate(pcs):
+            ob = make("wave_arm%d_%d" % (a.i, q), parts)
+            d, oo, b = a.fr[j0]
+            turned(ob, a.pts[j0], Matrix((b, d, b.cross(d))).transposed())
+            if parent is not None:
+                gl.child_of(ob, parent)
+            parent = ob
+            objs.append(ob)
+    for kind, what, parts, pivot_, side, n_, par, rot in O.movers:
+        ob = make("%s_%s%s" % (kind, what, "_" + side if side else ""), parts)
+        turned(ob, pivot_, rot)
+        objs.append(ob)
+    return objs
+
+
+def gift_many_arms():
+    """Arms that curl and hold: four of an octopus's, out of the back of whatever wears them,
+    their pale suckered sides turned out. They take the wearer's own Path's colour."""
+    O = Octo("gift", 2, {"accent": "marigold", "skin": ["bands", 1.0]})
+    O.root_coat = 0.0
+    O.k_girth = 1.15
+    O.static.append(blob((0, 0.0, -0.01), 0.075, O.m("S"), n=8, m=4, scale=(1.2, 1.0, 0.6)))
+    for i, (x_, az, out, turns, L) in enumerate(((-0.05, -78, 150, [(0.45, -20, 10), (0.55, 250, 0)], 1.0), (0.05, 78, 150, [(0.45, -20, 10), (0.55, 250, 0)], 1.0),
+                                                 (-0.035, -140, 128, [(0.5, 30, 0), (0.5, -230, 20)], 0.85), (0.035, 140, 128, [(0.5, 30, 0), (0.5, -230, 20)], 0.85))):
+        O.arm(i, out, turns, L=L, az=az, root=Vector((x_, 0.02 * (i // 2), 0.0)), n=12, pieces=2, still=0.25, suckers=(0.2, 1.0), tipr=0.008)
+    return _gift(O)
+
+
+def gift_bar_eyes():
+    """Gold eyes with a bar for a pupil: two of them on their turrets, wide of the wearer's own, a ring of the field round each."""
+    O = Octo("gift", 2, {"accent": "marigold"})
+    O.k_head = 1.0
+    for sg, side in ((-1, "r"), (1, "l")):
+        e = Vector((sg * 0.5, -0.84, 0.16)).normalized()
+        E = Vector((sg * 0.062, -0.012, 0.012))
+        O.eye(E, e, 0.036, "bar", side, sg)
+    O.static.append(soft(g.tube([(-0.06, 0.012, 0.03), (-0.03, 0.0, 0.05), (0.03, 0.0, 0.05), (0.06, 0.012, 0.03)], [0.012, 0.016, 0.016, 0.012], n=5), O.m("T")))
+    return _gift(O)
+
+
+GIFTS = {"octopus-many-arms": gift_many_arms, "octopus-bar-eyes": gift_bar_eyes}
+
+
+def gifts():
+    gl = lines()
+    for name, fn in GIFTS.items():
+        gl.accent({"accent": "marigold"})
+        objs = fn()
+        path = os.path.join(kit.OUT, "gifts", name + ".glb")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        bpy.ops.object.select_all(action="DESELECT")
+        for o in objs:
+            o.select_set(True)
+        bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=True, export_yup=True)
+        log("wrote", os.path.relpath(path, kit.ROOT), "%d KB" % (os.path.getsize(path) // 1024))
+
+
+if __name__ == "__main__":
+    if sys.argv[1:] == ["gifts"]:
+        import genius_lines  # noqa: F401  (it registers the families, this one among them)
+        import lines_octopus
+        genius_lines._palette_of("octopus")
+        lines_octopus.gifts()
+    else:
+        print(__doc__)
