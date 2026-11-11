@@ -359,7 +359,7 @@ because `wear` leans and turns with it.
 |---|---|---|
 | Shield | the middle of the grip, behind the boss | the model's own axes: on a hand slot it sits as the weapon kit's shields do (the grip along the fist, the face out of the back of the hand, the top up) |
 | Gauntlet | the middle of the wrist's opening; it is a left hand | as a hand slot is: in the game's axes +Y runs out of the thumb side, +Z out of the back of the hand, −X to the fingertips |
-| Coat | the nape: between the shoulders, at the base of the collar | the wearer's own: up, the wearer's left, the wearer's front. The Starter's clasp hangs a hand's breadth in front of its `wear`, at the throat |
+| Coat | the nape: between the shoulders, at the base of the collar. A Coat is not worn by its `wear` any more: it has a piece for wearing, a mantle, and the empty `worn` is what the game brings to the place (below, "The Coat: the second pass") | the wearer's own: up, the wearer's left, the wearer's front |
 
 **Where each is alive.** A shield: the eye in its boss (or what took the boss's place: a
 mouth, a grille, a pair of eyes). A gauntlet: the pulse of light round its wrist. A coat:
@@ -397,16 +397,139 @@ The Coat:
 
 | Key | What it is | Styles |
 |---|---|---|
-| `kind` | the Starter is only its clasp | `clasp` `coat` |
+| `kind` | the Starter is only its clasp and the two scraps it still holds | `clasp` `coat` |
 | `length` `flare` `chest` `waist` `shoulders` | its cut: shoulders to hem, and how it spreads | numbers |
 | `open` `cut` | how far it stands open down the front; how far it is cut away toward the hem | numbers |
+| `taper` `bend` | its skirts drawn in to a wisp; `[side, front]`, a bow of its whole length | numbers |
 | `wave` `rag` `sweep` | a hem that moves; a hem that has been through things; `[side, back]`, the way the skirt is blown | numbers |
-| `sleeves` | a style, or `[left, right]`; `arm` is how thick | `hang` `flat` `reach` `spread` `back` `none` |
-| `collar` | `[style, size]` | `turned` `stand` `high` `spread` `ear` `hood` `fur` `cape` `whiskers` `frost` `none` |
-| `lining` | what shows where it is turned back (collar, lapels, cuffs); `field` is the field's light at those edges, `storm` is light all through | `plain` `field` `storm` `red` `fur` |
-| `mantle` | what its shoulder cape is made of | `oil` |
-| `clasp` | the size of the clasp at its throat | number |
-| `grown` | what it has grown, carries, or has had done to it | `belt` `buttons` `buttons2` `offices` `pack` `dust` `stamps` `pockets` `items` `pelt` `rime` `pads` `lamp` `smoke` `ghost_sleeve` `knife` `lapels` `eyes` `stars` `wind` `scorch` `epaulettes` `chain` `sash` `stock` `oath` `tug` `hook` `patches` `figure` `tokens` `whiskers` `drops` `current` `mantle` |
+| `lean` `turn` | how it holds itself: `[to its front, to its left]` in degrees, from its hem; and turned about its own height | numbers |
+| `sleeves` | a gesture, or `[left, right]`; `arm` is how thick | `hang` `flat` `trail` `reach` `grab` `spread` `back` `akimbo` `tuck` `raise` `cup` `throat` `point` `hold` `fold` `wrap` `heart` `behind` `low` `fore` `aft` `none` |
+| `hand` | which hand holds what it holds (a lamp, a staff, a candle) | `l` `r` |
+| `collar` | `[style, size]`; `ears` is `[left, right]`, how large each ear of an `ear` collar is | `turned` `stand` `high` `spread` `ear` `hood` `souwester` `fur` `cape` `whiskers` `frost` `none` |
+| `lining` | what shows where it is turned back and where it stands open: its Path's colour (`plain`, `red`); `field` and `storm` put the field's light on its lapels and seams (never on a whole collar or panel: an eighth of a body is the most); `fur` is pelt | `plain` `field` `storm` `red` `fur` |
+| `trim` | where its Path's colour is on its outside | `hem` `hem2` `dags` `facing` `piping` `yoke` `stripe` `spine` `cuffs` `bands` `collar` |
+| `tone` | the step of its Path's colour its broad trims take (the line beside them takes another) | `mid` `dark` `light` `pale` |
+| `mantle` `cape` | what its shoulder cape is made of, where that is not the coat's own stuff; how far the cape stands out at its edge | `oil` `dust` `wool`; number |
+| `clasp` `brow` | the size of the clasp at its throat; how the lid of its eye is set, in degrees | numbers |
+| `grown` | what it has grown, carries, or has had done to it | `belt` `buttons` `buttons2` `offices` `pack` `frame` `dust` `stamps` `pockets` `items` `candle` `pelt` `rime` `pads` `lamp` `handlamp` `smoke` `ghost_sleeve` `knife` `lapels` `spikes` `eyes` `stars` `wind` `scorch` `epaulettes` `chain` `sash` `stock` `oath` `tug` `hook` `patches` `figure` `tokens` `whiskers` `drops` `current` `mantle` `tails` `pool` `train` `fling` `cane` |
+| `worn` | its mantle (below): `cut`; how far it falls (`back` `side` `front`), parts (`gap` `part`) and folds (`fold` `folds` `flare`); a hem in points (`points` `dag`); its own `trim` and `tone`; `ends`, how far a tippet's ends hang; `signs`, what it carries of its form (left out: whatever of `grown` a mantle can carry); `grown`, what only the mantle has | cuts: `capelet` `cowl` `tippet` `yoke` `scarf`; trims: `hem` `hem2` `piping` `facing` `yoke` `points` `ends` |
+
+### The Coat: the second pass (`tools/blender/armors_coat.py`)
+
+**What it is (rule 5).** A magical choice, carried all the way: a garment with nobody in
+it, which holds itself as its wearer would. It stands on its hem, gestures with empty
+sleeves, leans, turns, folds its arms; where a head would be there is the dark of its
+collar or its hood. It looks out of the clasp at its throat: one eye of the field under a
+brass lid, in a dark socket, so that it shows whatever colour the field is. Nothing of it
+pretends to be a body.
+
+**Three Paths: three colours, and three values (rules 1 and 2).** A Path keeps one coat
+shift, so the three are told apart by how dark they are before their colour is seen: a
+brown coat, a black one, a pale one. (A shifted coat is still brought onto the ramps
+leather may wear, `data/style.json`: that is why `frost` comes out a pale tan and not a
+blue.)
+
+| Path | Colour | Coat | Where the colour is | What the Path keeps | Its Advancements' own step of it |
+|---|---|---|---|---|---|
+| Travelling Coat | `marigold` | `hearth` | the lining, a broad band at the hem, deep cuffs | a turned-up collar, a belt, something carried; it is always going somewhere | Oilskin `light`, two bands; Road-coat `pale`, a hem of points and a stripe down each side; Hide-coat bands on its arms |
+| Shadow-coat | `amethyst` | `night` | a bright line along every edge (`piping`: a black coat's outline), the lining | a hood or a collar full of dark; it never stands square | Slip-coat `light`, a stripe down its spine; Night-coat a hem of points and its collar; Turncoat its fronts faced, and its lining flung out |
+| Listening Coat | `peacock` | `frost` | the lining of its ears, the facing down its front, its cuffs | a collar shaped like two ears; it leans toward what it hears | Clerk's Coat `dark`, a yoke; Whisper-collar `light`, bands on its arms; Hand-me-down two bands at its hem |
+
+**Thirty-one outlines (rule 3).** No two coats stand alike, and what tells them apart is
+how each holds itself, which is its form's habit:
+
+| Form | How it stands |
+|---|---|
+| Clasp | a hook and an eye a hand across, the eye open; two scraps of the coat hang from it and two points of a collar stand up from it |
+| Travelling Coat | one sleeve reaching for the latch, a bedroll on its back |
+| Oilskin | a sou'wester and a bell of a cape, its sleeves held out to shake itself |
+| Pilot's Coat | leaning, its hem dragged aside by the current, one sleeve pointing the channel |
+| The Lent Coat | narrow in the shoulder, its sleeves empty and flat, open and bowed round someone who is not there |
+| Road-coat | seen from the side, in mid-stride, its skirts swept back |
+| Thousand-mile Coat | tall under a pack-frame, a staff in its hand |
+| Many Pockets | short and broad, a fist on its hip, a candle end held out |
+| Hide-coat | broad, a pelt over its shoulders, its arms held away from it |
+| Winter Coat | a tent: hooded, wide in the skirt, its arms wrapped round itself |
+| Deep-coat | short and square, stone on its shoulders, a lamp held out level |
+| Shadow-coat | hooded and ragged, bowed aside, one cuff in a pocket |
+| Slip-coat | narrow, bent like an S, its sleeves swept back |
+| Empty Sleeve | one sleeve flat; the other stands apart from it, raised to ward |
+| Knife-coat | open to its lining, its lapels like blades and its shoulders cut to points |
+| Night-coat | long, its hands behind its back, two eyes in its collar, the night in a pool round its hem |
+| Collar-up | a short coat under a collar as large as itself, one cuff holding the collar shut |
+| Nobody's Coat | a hooded wisp with no sleeves and no hem, under a grey cape |
+| Turncoat | one front flung open to its lining |
+| Storm-lined | both fronts flung, and the weather coming out |
+| Scorched Hem | a short stiff jacket, arms folded, leaning away from the fire |
+| Listening Coat | one cuff cupped to an ear of its collar |
+| Clerk's Coat | a tailcoat, one hand behind it and one brushing its breast |
+| Coat of Offices | wide in the shoulder, a fist on its hip, a train behind it |
+| Sworn Cloth | one sleeve raised to swear and one on its breast |
+| Whisper-collar | short, under two ears larger than itself, one of them lifted |
+| The Warning Tug | one sleeve stretched out further than an arm goes |
+| Eavesdropper | hung from a hook, perfectly straight, its collar a dish |
+| Hand-me-down | too large for anyone: its sleeves past its hem, its hem in a heap |
+| Inherited Coat | tall and square, its hands behind its back, a head of light above its collar |
+| Coat of the Cohort | its arms held wide |
+
+**What moves (rule 6).** `blink_eye` (the iris and its slit, in the clasp) and `sway_tag`
+(the tag on the clasp's ring) on every form. A sleeve that only hangs (`hang`, `flat`,
+`trail`) is `sway_sleeve_l|r`. And by form: `sway_belt` (a belt's end), `sway_cup`,
+`sway_pan`, `sway_lamp` (what hangs from it), `sway_scrap_l|r` (the Starter's scraps),
+`sway_ghost` (the sleeve the Empty Sleeve left), `flick_flame` (Many Pockets' candle),
+`blink_eyes` (what looks out of a high collar). On the worn piece: `blink_weye`,
+`sway_wtag`, `sway_hood` (a cowl's hood), `sway_tassel_l|r` (a tippet's ends),
+`sway_scrap_l|r` (the Starter's).
+
+**The worn piece: a mantle (rule 7).** A coat that is worn is not its whole body hung down
+a back. It is the coat's own collar and a short cape over the shoulders, in its Path's cut
+and colour, with its form's sign on it small, and its clasp at the wearer's throat.
+
+- *It is made on the body it is worn on.* `MANTLE_ROWS` is the section of the game's
+  people at each height below the top of the shoulders (measured on `alexandria-m`; the
+  other men are within a finger of him, the women a finger lower at the shoulder and
+  slimmer in the neck, so on them it rides a little high and never cuts in): two fingers
+  off the body up the slope of the neck, flat across the shoulders, round the point of the
+  shoulder, down the blades and the breast. Its folds open toward its hem.
+- *It keeps clear of the arms.* It is longest down the back (never below the bottom of the
+  shoulder blades: 0.34 under the top of the shoulders), shortest over the arms (0.10 to
+  0.16), with its two ends down the breast.
+- *Where it sits.* `worn` stands at the nape of a person at the origin; the game brings it
+  to the chest bone, 0.4 up and 0.05 back (`data/genius-types.json`, `mounts.back`), and it
+  rides that bone.
+
+| Cut | Whose | What it is |
+|---|---|---|
+| `capelet` | the Travelling Coat's | a traveller's shoulder cape, longest down the back, a broad band of marigold at its hem and its collar turned up; the bedroll lies across the top of the back |
+| `cowl` | the Shadow-coat's | a hood thrown back between the shoulders (it stirs), a hem cut in points, a bright line of amethyst on every edge |
+| `tippet` | the Listening Coat's | round and even with a yoke of peacock, two long banded ends down the breast with a tassel on each (they stir), and the ears of its collar standing behind its wearer's own |
+| `yoke` | the Slip-coat's | the least of them: no wider than a collar laid flat |
+| `scarf` | the Starter's | no cape yet: a band of its cloth round the neck, and two scraps down the front from the clasp |
+
+What a mantle carries of its form comes from the form's own `grown`, each sign made small
+for it (`ON_A_MANTLE`; or `worn.signs` says): the Oilskin's is oilcloth with water standing
+on it, the Pilot's has the current round its hem, the Hide-coat's a ruff of pelt, the
+Deep-coat's stone on the shoulders and its lamp at the collar, the Night-coat's a collar to
+the ears with its stars, Nobody's is plain grey, the Coat of Offices' has its epaulettes
+and its chain, the Sworn Cloth's its oath on one end, the Inherited Coat's a hand of light
+on one shoulder, the Cohort's its twelve tokens.
+
+**How it is built.** The game draws a face from its own side only, and inks the other
+(the toon shader culls back faces whatever the model says). So cloth here is made of
+faces that each look one way: `skin` (a shell's outside, and its lining only where the
+lining can be seen), `leaf` (a flat piece seen from both sides: two sheets back to back,
+each the other's ink line), `band_on` (a trim lying on the cloth), `sheet` (anything else
+already turned the right way out). The clasp is one mesh, set in two places: on the coat
+and on its mantle. Every model with its mantle in it is under 120 KB.
+
+**What is still weak.** The mantle is rigid: it rides the chest bone, so an arm lifted
+high passes through the lobe over its shoulder, and a wearer bent far forward carries it
+like a yoke. It is fitted to the men's shoulders. The eye in the clasp is small at a
+distance (it is a thumbnail's width on a sheet): a coat's face is still its whole bearing.
+A great coat's blades of light (the fifth and sixth instars) are placed for the floating
+body: worn, they need moving to the mantle (`genius_body.gd`). On the sheet the Starter is
+drawn smaller than its cell allows (the sheet's first measure misjudges a body under half
+a metre: `--cell=1.6 --only=coat-clasp` draws it right).
 
 All three take `stands` and `coat` (the shift), as above. A style may not be `null` (that
 takes the key off and the line's default comes back): say `none`.
