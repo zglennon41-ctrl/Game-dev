@@ -33,7 +33,7 @@
   {
    "id": "woke",
    "title": "Your field wakes",
-   "text": "Something in you answers. It feels like the floor rising under your feet. Fight back: [b]left click[/b]."
+   "text": "Something in you answers. It feels like the floor rising under your feet. Fight back: {strike}."
   },
   {
    "id": "technique",

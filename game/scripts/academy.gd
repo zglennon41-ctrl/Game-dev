@@ -16,6 +16,9 @@ var world: World
 var hud: Hud
 var sfx: Sfx
 var auto := false            # automated checks: walk to each objective, read each line
+var auto_want := ""          # automated checks: the option the autopilot takes where a choice has it
+var problems: Array = []     # what went wrong that the game stepped round (the soak test reads these)
+var _clock := 0.0            # the Academy's own seconds
 
 var _people: Array = []      # who is in this place: {kind, id, name, pos, fig}
 var _doors: Array = []
@@ -143,10 +146,16 @@ func enter(h: Dictionary) -> void:
 		(gp as GeniusPage).look_changed.connect(_genius_look_changed)
 	visible = true
 	_carrying = false
-	if progress.get("quest", {}) is Dictionary and not progress.get("quest", {}).is_empty():
-		# A posting in hand from last time: the run starts over from the quad.
+	if (progress.get("quest", {}) is Dictionary and not progress.get("quest", {}).is_empty()) or Zones.is_zone(String(progress.get("place", "quad"))) or not Data.academy["places"].has(String(progress.get("place", "quad"))):
+		# A posting in hand from last time: the run starts over from the quad. So does a game left
+		# out on the line in the middle of a lesson's run (the Green, the Examination): the car is
+		# only there for a run, and with no run in hand nobody could ever leave the zone.
 		progress["place"] = "quad"
 		progress["cleared"] = {}
+	# A classmate's trouble left half done goes back on the board: its steps are not kept, and a
+	# trouble "in hand" that can never be finished shuts the board for the rest of the term.
+	if String(progress.get("trouble", "")) != "":
+		progress["trouble"] = ""
 	go(String(progress.get("place", "quad")), not bool(progress["arrived"]))
 	if progress.get("quest", {}) is Dictionary and not progress.get("quest", {}).is_empty():
 		_begin_quest(progress["quest"])
@@ -264,6 +273,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 	if debug:
 		print("GO %s from %s (lesson %s step %d)" % [place_id, from, _lesson.get("id", ""), _step])
 	progress["place"] = place_id
+	_greet_t = 0.0
 	# The shade stays at its hearth.
 	if _shade_node:
 		_shade_node.queue_free()
@@ -704,9 +714,18 @@ func lesson_available(lesson: Dictionary) -> bool:
 	for d in req.get("done", []):
 		if not lesson_done(d):
 			return false
-	if req.has("rested_after") and not rested_on(req["rested_after"]):
+	if req.has("rested_after") and not rested_on(_rest_after(req)):
 		return false
 	return true
+
+## The lesson a night's rest must follow before this one. With advanced standing a lesson is
+## passed over (the line): then the rest that counts is the one after the last lesson done, or
+## the next lesson could never begin.
+func _rest_after(req: Dictionary) -> String:
+	var need := String(req.get("rested_after", ""))
+	if not progress["done"].has(need) and lesson_done(need):
+		return last_done()
+	return need
 
 ## What stands between the hero and the next lesson: "rest", "rite", or "".
 func next_need() -> String:
@@ -718,7 +737,7 @@ func next_need() -> String:
 	if nl.is_empty():
 		for lesson in Data.academy["lessons"]:
 			if not lesson_done(lesson["id"]):
-				return "rest" if lesson.get("requires", {}).has("rested_after") and not rested_on(lesson["requires"]["rested_after"]) else ""
+				return "rest" if lesson.get("requires", {}).has("rested_after") and not rested_on(_rest_after(lesson["requires"])) else ""
 		if not progress["done"].has("gate"):
 			if not gate_ready():
 				return "board"
@@ -971,6 +990,7 @@ func _set_slots(id: String, picked: Array = []) -> void:
 		_set_slots(id, p2))
 
 func update(events: Array, dt: float) -> void:
+	_clock += dt
 	for e in events:
 		if debug and e["type"] in ["wolf-down", "player-down", "second-heart", "foe-down", "ally-down"]:
 			print("EVENT %s at %s (lesson %s step %d)" % [e["type"], str(fight.p_pos), _lesson.get("id", ""), _step])
@@ -1150,7 +1170,12 @@ func auto_move() -> Vector2:
 	elif place == "quad":
 		# Greet two classmates on the way out, the first time.
 		var unmet := _people.filter(func(p): return p["kind"] == "classmate" and not progress["met"].has(p["id"]))
-		if progress["met"].size() < 2 and not unmet.is_empty():
+		_greet_t += get_process_delta_time()
+		if progress["met"].size() < 2 and not unmet.is_empty() and _greet_t < 15.0:
+			# (whoever is unmet and in reach will do: the one aimed at may stand behind another)
+			if _target.get("kind", "") == "classmate" and not progress["met"].has(_target["id"]):
+				interact()
+				return Vector2.ZERO
 			goal = unmet[0]["pos"]
 		else:
 			for d in _doors:
@@ -1202,13 +1227,14 @@ func _leads_out(pid: String, depth: int) -> bool:
 
 var _steer_last_pos := Vector2.INF
 var _steer_stuck_t := 0.0
+var _greet_t := 0.0   # the autopilot gives up on a greeting it cannot reach
 var _unstick_until := 0.0
 var _unstick_dir := Vector2.ZERO
 
 ## Walk round what is in the way: a pillar, a brazier, a person. Boxed in (no ground gained
 ## for a while), take a sidestep for a moment and try again.
 func _steer(dir: Vector2) -> Vector2:
-	var now := Time.get_ticks_msec() / 1000.0
+	var now := _clock
 	if now < _unstick_until:
 		return _unstick_dir
 	if _steer_last_pos != Vector2.INF and fight.p_pos.distance_to(_steer_last_pos) < 0.06:
@@ -1458,7 +1484,9 @@ func _next_step() -> void:
 			world.build_hero(hero)
 			_drill_fight()
 			_choice_done = true)
-	hud.set_prompt("%d/%d · %s" % [_step + 1, steps.size(), fill(s["title"])], fill(String(s.get("text", ""))))
+	# (a trouble's words name the classmate whose trouble it is)
+	var about: Dictionary = _lesson.get("poster", {})
+	hud.set_prompt("%d/%d · %s" % [_step + 1, steps.size(), fill(s["title"], about)], fill(String(s.get("text", "")), about))
 	hud.set_prompt_status("", _progress_text(s))
 
 func _progress_text(s: Dictionary) -> String:
@@ -1899,6 +1927,7 @@ func choose(title: String, options: Array, then: Callable) -> void:
 	else:
 		# nothing to choose: never a wall. Say so in the log and go on with what there is.
 		push_warning("choose(%s): no options" % title)
+		problems.append("a choice with nothing in it: %s" % title)
 		_choice_box.queue_free()
 		_choice_box = null
 		if not auto:
@@ -1906,7 +1935,15 @@ func choose(title: String, options: Array, then: Callable) -> void:
 		then.call("")
 		return
 	if auto:
-		get_tree().create_timer(1.0).timeout.connect(func(): if _choice_box: (first as Button).pressed.emit())
+		var pick: Button = first
+		for i in options.size():
+			if auto_want != "" and String(options[i]["id"]) == auto_want:
+				pick = list.get_child(i)
+		var veil_id := veil.get_instance_id()
+		var pick_id := pick.get_instance_id()
+		get_tree().create_timer(1.0).timeout.connect(func():
+			if _choice_box and _choice_box.get_instance_id() == veil_id and is_instance_id_valid(pick_id):
+				(instance_from_id(pick_id) as Button).pressed.emit())
 
 # --- The line: zones, the post, extraction, the rescue team --------------------------------
 

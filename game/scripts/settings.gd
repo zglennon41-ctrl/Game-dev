@@ -1,8 +1,14 @@
 ## Per-player settings kept between sessions: timing calibration and the beat window.
 extends Node
 
-const PATH := "user://settings.cfg"
+var PATH := "user://settings.cfg"
 var cfg := ConfigFile.new()
+
+## Keep everything in another file (the soak test plays forty characters: not over the player's own).
+func use_file(path: String) -> void:
+	PATH = path
+	cfg = ConfigFile.new()
+	cfg.load(PATH)
 
 func _init() -> void:
 	cfg.load(PATH)

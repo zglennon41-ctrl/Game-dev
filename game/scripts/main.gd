@@ -23,6 +23,9 @@ var mode := "menu"   # menu, creator, prologue, story, tutorial, fight, results
 var fight_end := 0.0
 var _cam_mouse := Vector2.ZERO
 var _last_ticks := 0
+## The soak test (game/tests/soak.gd) runs the game faster than the wall clock: then the frame's
+## own step is the time that passed, not the wall's.
+var fixed_clock := false
 
 var _args := {}
 var _shot_n := 0
@@ -36,7 +39,11 @@ const ACTIONS := {
 }
 const MOUSE := { "attack": MOUSE_BUTTON_LEFT, "block": MOUSE_BUTTON_RIGHT, "lock_on": MOUSE_BUTTON_MIDDLE }
 const PAD := { "attack": JOY_BUTTON_X, "block": JOY_BUTTON_RIGHT_SHOULDER, "dodge": JOY_BUTTON_A, "technique": JOY_BUTTON_Y,
-	"stance": JOY_BUTTON_LEFT_SHOULDER, "pattern": JOY_BUTTON_B, "lock_on": JOY_BUTTON_RIGHT_STICK, "menu": JOY_BUTTON_START, "name_foe": JOY_BUTTON_DPAD_UP, "interact": JOY_BUTTON_X, "order": JOY_BUTTON_DPAD_LEFT, "genius_page": JOY_BUTTON_BACK }
+	"stance": JOY_BUTTON_LEFT_SHOULDER, "pattern": JOY_BUTTON_B, "lock_on": JOY_BUTTON_RIGHT_STICK, "menu": JOY_BUTTON_START, "name_foe": JOY_BUTTON_DPAD_UP, "interact": JOY_BUTTON_X, "order": JOY_BUTTON_DPAD_LEFT, "genius_page": JOY_BUTTON_BACK,
+	"tech1": JOY_BUTTON_DPAD_DOWN, "tech2": JOY_BUTTON_DPAD_RIGHT, "show_step": JOY_BUTTON_LEFT_STICK }
+## The triggers: the school's third technique and the reload (a lesson that asks for them must be
+## playable from the pad too).
+const PAD_AXES := { "tech3": JOY_AXIS_TRIGGER_LEFT, "reload": JOY_AXIS_TRIGGER_RIGHT }
 
 func _ready() -> void:
 	Style.apply_global()
@@ -443,6 +450,11 @@ func _setup_input() -> void:
 			var j := InputEventJoypadButton.new()
 			j.button_index = PAD[action]
 			InputMap.action_add_event(action, j)
+	for action in PAD_AXES:
+		var tm := InputEventJoypadMotion.new()
+		tm.axis = PAD_AXES[action]
+		tm.axis_value = 1.0
+		InputMap.action_add_event(action, tm)
 	for pair in [["move_left", JOY_AXIS_LEFT_X, -1.0], ["move_right", JOY_AXIS_LEFT_X, 1.0], ["move_up", JOY_AXIS_LEFT_Y, -1.0], ["move_down", JOY_AXIS_LEFT_Y, 1.0]]:
 		var m := InputEventJoypadMotion.new()
 		m.axis = pair[1]
@@ -478,7 +490,8 @@ func menu() -> void:
 		var sg := Genius.for_hero(saved)
 		buttons.append(["Your genius: %s" % (sg.name if sg.name != "" else sg.form_name()), func(): page.hero = saved; page.open(sg, World.SHAPE_COLORS.get(saved["shape"], Color.WHITE), 0, int(saved.get("academy", {}).get("record", {}).get("marks", 0)))])
 	buttons.append(["Combat tutorial  (as an Anchor)", func(): hero = {}; start("tutorial")])
-	buttons.append(["Quit", func(): get_tree().quit()])
+	if not OS.has_feature("web"):   # a browser's tab is closed by the browser
+		buttons.append(["Quit", func(): get_tree().quit()])
 	hud.show_screen("WILDLINE", "The Cumberland Cut", body, buttons, "title")
 
 # --- The opening ---------------------------------------------------------------
@@ -514,6 +527,7 @@ func _preview_hero(h: Dictionary) -> void:
 
 func _hero_made(h: Dictionary) -> void:
 	hero = h
+	mode = "story"
 	Settings.save_hero(h)
 	creator.visible = false
 	world.portrait = false
@@ -1092,12 +1106,13 @@ func _academy_frame(delta: float, real_dt: float) -> void:
 						fight.input("lock")
 					if fight.dist() > want_d + 0.5:
 						move = (fight.w_pos - fight.p_pos).normalized()
-					elif fight.dist() < want_d - 0.1:
-						move = -(fight.w_pos - fight.p_pos).normalized()
+					elif fight.dist() < want_d - 0.3:
+						move = _bot_back_off(delta)
 					else:
+						_bot_back_t = 0.0
 						fight.input(academy.bot_action())
 				elif fight.p_state == "free" and fight.dist() < want_d - 0.1:
-					move = -(fight.w_pos - fight.p_pos).normalized()
+					move = _bot_back_off(delta)
 			"fight": move = _bot()
 			_: move = academy.auto_move()
 	fight.update(minf(delta, 0.1), move)
@@ -1121,6 +1136,13 @@ func _academy_frame(delta: float, real_dt: float) -> void:
 		hud.update_play(fight, "", academy.place_label(), true)
 	if _args.has("shots") and not _args.has("tour") and _clock_shots(real_dt):
 		_shot("academy-" + String(academy.progress["place"]))
+
+## Automated checks: step back from the foe; with a wall behind (no ground gained), round it.
+var _bot_back_t := 0.0
+func _bot_back_off(dt: float) -> Vector2:
+	_bot_back_t += dt
+	var away := -(fight.w_pos - fight.p_pos).normalized()
+	return away.rotated([0.0, 1.4, -1.4, 2.4][int(_bot_back_t / 2.0) % 4])
 
 ## Automated checks in a lesson: keep near the genius, face it, and parry each bite.
 func _lesson_bot() -> Vector2:
@@ -1263,7 +1285,83 @@ func _results(reason: String) -> void:
 
 # --- Input ------------------------------------------------------------------
 
+func _input(event: InputEvent) -> void:
+	# The bar and the lessons name the keys of what was last pressed: the keyboard's, or a pad's.
+	if event is InputEventJoypadButton and event.pressed:
+		hud.set_device(true)
+	elif (event is InputEventKey and event.pressed) or (event is InputEventMouseButton and event.pressed):
+		hud.set_device(false)
+	# The pointer was taken back (a browser's Esc, another window): a click takes the game up again.
+	if _hold and event is InputEventMouseButton and event.pressed:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		get_viewport().set_input_as_handled()
+
+## Should the game have the pointer now? In play, with no card, menu or page up.
+func _wants_pointer() -> bool:
+	if _args.has("bot") or DisplayServer.get_name() == "headless" or hud.screen.visible or page.visible or builder.visible:
+		return false
+	if mode == "academy":
+		return not academy._naming and academy._choice_box == null and academy._reading_box == null
+	return mode in ["tutorial", "fight", "prologue"]
+
+var _hold := false
+var _lost_t := 0.0
+var _hold_card: Control = null
+var _hold_paused := false
+
+## The game holds while the pointer is away, and says how to come back.
+func _hold_game(on: bool) -> void:
+	if on == _hold:
+		return
+	_hold = on
+	if on:
+		_hold_paused = not get_tree().paused
+		get_tree().paused = true
+		if _hold_card == null:
+			var veil := ColorRect.new()
+			veil.color = Color(0.02, 0.016, 0.016, 0.6)
+			veil.set_anchors_preset(Control.PRESET_FULL_RECT)
+			veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			var v := VBoxContainer.new()
+			v.set_anchors_preset(Control.PRESET_FULL_RECT)
+			v.alignment = BoxContainer.ALIGNMENT_CENTER
+			v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			veil.add_child(v)
+			var t := Label.new()
+			Style.label(t, 44, Style.GOLD, "title", 6)
+			t.text = "THE GAME IS HOLDING"
+			t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			v.add_child(t)
+			var l := Label.new()
+			Style.label(l, 24, Style.FG, "body", 4)
+			l.text = "Click anywhere to go on.\nEsc again for the menu."
+			l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			v.add_child(l)
+			_hold_card = veil
+			hud.add_child(veil)
+		_hold_card.visible = true
+	else:
+		if _hold_paused:
+			get_tree().paused = false
+		if _hold_card:
+			_hold_card.visible = false
+		_last_ticks = Time.get_ticks_usec()
+
+func _notification(what: int) -> void:
+	# Another window took the keys: let the pointer go, and the game holds until it is back.
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and is_node_ready() and _wants_pointer():
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
 func _unhandled_input(event: InputEvent) -> void:
+	if _hold:
+		if event.is_action_pressed("menu"):
+			_hold_game(false)
+			if mode == "academy":
+				if not academy.busy():
+					academy.pause()
+			else:
+				menu()
+		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_cam_mouse += event.relative
 	if page.visible:
@@ -1316,6 +1414,13 @@ func _process(delta: float) -> void:
 	var t := Time.get_ticks_usec()
 	var real_dt := minf(0.1, (t - _last_ticks) / 1e6)
 	_last_ticks = t
+	# (a moment's grace: a browser gives the pointer a few frames after it is asked for)
+	_lost_t = _lost_t + real_dt if (_wants_pointer() and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED) else 0.0
+	_hold_game(_lost_t > 0.4)
+	if _hold:
+		return
+	if fixed_clock:
+		real_dt = minf(0.1, delta / maxf(0.01, Engine.time_scale))
 	if mode == "academy":
 		if get_tree().paused:
 			world.draw(fight, 0.0, Vector2.ZERO, Vector2.ZERO)
@@ -1498,7 +1603,10 @@ func _bot() -> Vector2:
 		f.input("order")
 	if f.p_state == "draw" and f.p_draw >= f.draw_seconds():
 		f.input("attack-up")
-	if f.pattern_ready():
+	# (ending the night at the station it strikes: a Pattern that mends would be fired for ever)
+	var finishing: bool = mode == "prologue" and prologue != null and prologue.beat < Data.story["beats"].size() and Data.story["beats"][prologue.beat]["id"] == "finish"
+	# (and a Pattern that mends is for when it is hurt: fired whenever ready, nothing would ever fall)
+	if f.pattern_ready() and not finishing and (String(f.pattern_form().get("effect", "")) != "mend" or f.p_hp < 60.0 or mode == "prologue"):
 		f.input("pattern")
 	if f.p_state == "pattern" and not f.chain.is_empty():
 		var c: float = f.chain["cues"][f.chain["next"]]

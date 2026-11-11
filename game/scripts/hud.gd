@@ -46,10 +46,20 @@ var prompt_title := Label.new()
 var prompt_text := RichTextLabel.new()
 var prompt_note := Label.new()
 var prompt_progress := Label.new()
-var hint := Label.new()
+var hint := RichTextLabel.new()
 var objective_title := Label.new()
 var objective_progress := Label.new()
-var _toast_until := 0.0
+var chip := PanelContainer.new()   # the step, folded: its name, the count, the note, and how to read it again
+var chip_note := Label.new()
+var chip_hint := Label.new()
+var prompt_foot := Label.new()
+var pad := false                  # the last thing pressed was a gamepad's: the keys shown are its buttons
+var _prompt_raw := ""             # the step's words as written (for the keyboard)
+var _prompt_min_until := 0.0      # the step's words stay at least this long (time to read them)
+var _prompt_max_until := 0.0      # and fold by themselves at this
+var _prompt_acted := false        # the player has done the first thing the step asks
+var _progress_first := "\n"
+var _hint_until := 0.0
 var screen := Control.new()
 var _veil := ColorRect.new()
 var _center := CenterContainer.new()
@@ -192,8 +202,8 @@ func _ready() -> void:
 
 	var right := VBoxContainer.new()
 	right.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	right.position = Vector2(-300, 18)
-	right.custom_minimum_size = Vector2(272, 0)
+	right.position = Vector2(-364, 18)
+	right.custom_minimum_size = Vector2(340, 0)
 	right.add_theme_constant_override("separation", 0)
 	Style.label(timer_label, 36, FG, "title", 5)
 	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -204,14 +214,36 @@ func _ready() -> void:
 	var ogap := Control.new()
 	ogap.custom_minimum_size = Vector2(0, 6)
 	right.add_child(ogap)
-	Style.label(objective_title, 15, ACCENT, "title", 4)
+	# The step, folded away: a plate that reads over any ground, with the count in the open and
+	# the key that brings the words back.
+	var cs := Style.plate(Color(0.045, 0.038, 0.034, 0.84), Style.BRASS_DIM, 1, 10)
+	cs.border_width_right = 4
+	cs.border_color = Style.BRASS
+	cs.content_margin_right = 16
+	cs.content_margin_left = 14
+	chip.add_theme_stylebox_override("panel", cs)
+	chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chip.visible = false
+	var cv := VBoxContainer.new()
+	cv.add_theme_constant_override("separation", 1)
+	chip.add_child(cv)
+	Style.label(objective_title, 18, ACCENT, "title", 4)
 	objective_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	objective_title.autowrap_mode = TextServer.AUTOWRAP_WORD
-	right.add_child(objective_title)
-	Style.label(objective_progress, 13, DIM, "ui", 3)
+	cv.add_child(objective_title)
+	Style.label(objective_progress, 19, FG, "ui_bold", 4)
 	objective_progress.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	objective_progress.autowrap_mode = TextServer.AUTOWRAP_WORD
-	right.add_child(objective_progress)
+	cv.add_child(objective_progress)
+	Style.label(chip_note, 16, FG, "italic", 3)
+	chip_note.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	chip_note.autowrap_mode = TextServer.AUTOWRAP_WORD
+	chip_note.visible = false
+	cv.add_child(chip_note)
+	Style.label(chip_hint, 14, DIM.lerp(FG, 0.45), "ui", 3)
+	chip_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	cv.add_child(chip_hint)
+	right.add_child(chip)
 	play_ui.add_child(right)
 
 	# The ability bar.
@@ -230,18 +262,25 @@ func _ready() -> void:
 	pattern_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	play_ui.add_child(pattern_banner)
 
-	Style.label(hint, 12, DIM, "ui", 3)
+	# The keys that are on no slot of the bar, under it: large enough and light enough to read.
+	Style.rich(hint, 15, FG.lerp(DIM, 0.25), "ui")
+	hint.bbcode_enabled = true
+	hint.fit_content = true
+	hint.scroll_active = false
+	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
+	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	hint.add_theme_constant_override("outline_size", 4)
 	hint.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	hint.position = Vector2(-500, -20)
-	hint.custom_minimum_size = Vector2(1000, 0)
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.text = "WASD move  ·  mouse look  ·  Tab lock-on  ·  H the step again  ·  N name the foe  ·  Esc menu      pad: X strike · RB block · A dodge · Y technique · LB stance · B Pattern"
+	hint.position = Vector2(-700, -25)
+	hint.custom_minimum_size = Vector2(1400, 0)
 	play_ui.add_child(hint)
+	_write_hint(false, false)
 
 	# The tutorial box: a plate with a brass edge down its left side.
 	prompt.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	prompt.custom_minimum_size = Vector2(600, 0)
-	prompt.position = Vector2(-300, 92)
+	prompt.custom_minimum_size = Vector2(680, 0)
+	prompt.position = Vector2(-340, 92)
 	prompt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var ps := Style.plate(Color(0.045, 0.038, 0.034, 0.9), Style.BRASS, 1, 14)
 	ps.border_width_left = 4
@@ -250,22 +289,25 @@ func _ready() -> void:
 	var pv := VBoxContainer.new()
 	pv.add_theme_constant_override("separation", 6)
 	prompt.add_child(pv)
-	Style.label(prompt_title, 18, ACCENT, "title")
+	Style.label(prompt_title, 20, ACCENT, "title")
 	pv.add_child(prompt_title)
 	prompt_text.bbcode_enabled = true
 	prompt_text.fit_content = true
 	prompt_text.scroll_active = false
-	prompt_text.custom_minimum_size = Vector2(560, 0)
-	Style.rich(prompt_text, 17, FG, "body")
+	prompt_text.custom_minimum_size = Vector2(640, 0)
+	Style.rich(prompt_text, 19, FG, "body")
 	pv.add_child(prompt_text)
 	var row := HBoxContainer.new()
-	Style.label(prompt_note, 15, DIM, "italic")
+	Style.label(prompt_note, 17, FG.lerp(DIM, 0.3), "italic")
 	prompt_note.autowrap_mode = TextServer.AUTOWRAP_WORD
 	prompt_note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(prompt_note)
-	Style.label(prompt_progress, 15, ACCENT, "ui_bold")
+	Style.label(prompt_progress, 19, ACCENT, "ui_bold")
 	row.add_child(prompt_progress)
 	pv.add_child(row)
+	Style.label(prompt_foot, 14, DIM.lerp(FG, 0.3), "ui")
+	prompt_foot.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	pv.add_child(prompt_foot)
 	play_ui.add_child(prompt)
 
 	# Menus, story cards and results.
@@ -399,6 +441,7 @@ func configure(f: Fight, hero_name: String) -> void:
 		if (s["panel"] as PanelContainer).visible:
 			visible_n += 1
 	_place_bar(visible_n)
+	_write_hint(f.ranged and f.p_ammo_max > 0, f.genius != null)
 	_hero_name = hero_name if hero_name != "" else "Anchor"
 	var wname := String(Data.by_id(Data.weapons, f.hero.get("weapon", "saber")).get("name", ""))
 	var gtier := String(f.gear.get("tier", "plain"))
@@ -500,39 +543,121 @@ func hide_screen() -> void:
 	play_ui.visible = true
 	_play_time = 0.0
 
-## The step: its title stays as the objective line (top right); its words show as a toast for
-## a while and fade, so the fight's middle stays clear.
+## The step. Its words stand in the middle top of the screen until they have been read and the
+## first thing they ask has been done (or, for someone standing reading, a good while longer);
+## then they fold into the plate at the top right, which keeps the step's name, the count, what
+## went wrong last, and the key that brings the words back.
 func set_prompt(title: String, text: String) -> void:
-	var changed := prompt_title.text != title or prompt_text.text != text
+	var changed := prompt_title.text != title or _prompt_raw != text
 	objective_title.text = title
 	prompt_title.text = title
-	prompt_text.text = text
+	_prompt_raw = text
+	prompt_text.text = for_device(text)
 	prompt_note.text = ""
+	chip_note.text = ""
+	chip_note.visible = false
 	if title == "":
 		prompt.visible = false
+		chip.visible = false
 		objective_progress.text = ""
 		return
 	if changed:
-		_toast(8.0)
+		_prompt_acted = false
+		_progress_first = "\n"
+		_open_prompt(read_seconds(text), read_seconds(text) * 2.0 + 12.0)
 
 func set_prompt_status(note: String, progress: String) -> void:
+	# the count has moved: the player is doing what the step asks
+	if _progress_first == "\n":
+		_progress_first = progress
+	elif progress != _progress_first:
+		_prompt_acted = true
 	objective_progress.text = progress
+	objective_progress.visible = progress != ""
 	prompt_progress.text = progress
 	if note != prompt_note.text:
 		prompt_note.text = note
-		if note != "" and not note.ends_with("s left."):
-			_toast(4.0)
+		chip_note.text = note
+		chip_note.visible = note != ""
 
+## H: the step's words again, or away if they are up.
 func show_prompt_again() -> void:
-	if prompt_title.text != "":
-		_toast(8.0)
+	if prompt_title.text == "":
+		return
+	_hint_until = Time.get_ticks_msec() / 1000.0 + 12.0
+	if prompt.visible and prompt.modulate.a > 0.9:
+		_prompt_acted = true
+		_prompt_min_until = 0.0
+	else:
+		_prompt_acted = true
+		_open_prompt(read_seconds(_prompt_raw) + 4.0, read_seconds(_prompt_raw) + 4.0)
 
-func _toast(seconds: float) -> void:
-	_toast_until = Time.get_ticks_msec() / 1000.0 + seconds
+## The seconds a person needs to read some words (a little under three words a second, and a
+## moment to find the panel).
+static func read_seconds(text: String) -> float:
+	var words := text.replace("[b]", "").replace("[/b]", "").replace("[i]", "").replace("[/i]", "").split(" ", false).size()
+	return clampf(2.5 + words * 0.4, 6.0, 40.0)
+
+func _open_prompt(least: float, most: float) -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	_prompt_min_until = now + least
+	_prompt_max_until = now + most
 	if not prompt.visible and prompt.is_inside_tree():
 		prompt.modulate.a = 0.0
 		prompt.create_tween().tween_property(prompt, "modulate:a", 1.0, Style.t("quick"))
+	else:
+		prompt.modulate.a = 1.0
 	prompt.visible = true
+	chip.visible = false
+
+## The last thing pressed was a key or the mouse (false), or a gamepad's button (true): the
+## bar, the hint line and the step's words name what is in the hand.
+func set_device(is_pad: bool) -> void:
+	if is_pad == pad:
+		return
+	pad = is_pad
+	for sl in SLOTS:
+		(slots[sl[0]]["key"] as Label).text = String(PAD_KEYS.get(sl[0], sl[1])) if pad else String(sl[1])
+	prompt_text.text = for_device(_prompt_raw)
+	_write_hint(_hint_reload, _hint_genius)
+
+const PAD_KEYS := { "attack": "X", "block": "RB", "dodge": "A", "technique": "Y", "tech1": "D↓", "tech2": "D→", "tech3": "LT", "stance": "LB", "pattern": "B", "genius": "D←" }
+## The words a lesson uses for the keyboard and the mouse, and the gamepad's for the same thing.
+const PAD_WORDS := [["Hold right click", "Hold RB"], ["hold right click", "hold RB"], ["tap right click", "tap RB"], ["Tap right click", "Tap RB"], ["right click", "RB"],
+	["hold left click", "hold X"], ["Hold left click", "Hold X"], ["Left click", "X"], ["left click", "X"], ["the mouse", "the right stick"], ["mouse", "right stick"],
+	["[b]WASD[/b]", "[b]The left stick[/b]"], ["[b]LMB[/b]", "[b]X[/b]"], ["[b]RMB[/b]", "[b]RB[/b]"], ["[b]Space[/b]", "[b]A[/b]"], ["[b]Q[/b]", "[b]Y[/b]"], ["[b]F[/b]", "[b]LB[/b]"],
+	["[b]R[/b]", "[b]B[/b]"], ["[b]Tab[/b]", "[b]R3[/b]"], ["[b]E[/b]", "[b]X[/b]"], ["[b]G[/b]", "[b]D-pad left[/b]"], ["[b]1[/b]", "[b]D-pad down[/b]"], ["[b]2[/b]", "[b]D-pad right[/b]"],
+	["[b]3[/b]", "[b]LT[/b]"], ["[b]H[/b]", "[b]L3[/b]"], ["[b]N[/b]", "[b]D-pad up[/b]"], ["press R ", "press B "], ["press R:", "press B:"], ["press R.", "press B."], ["press R,", "press B,"]]
+
+func for_device(text: String) -> String:
+	if not pad:
+		return text
+	# (X is the reload on the keys and the strike on the pad: keep the reload's aside while the rest change)
+	text = text.replace("[b]X[/b]", "[b]\u0001[/b]")
+	for w in PAD_WORDS:
+		text = text.replace(w[0], w[1])
+	return text.replace("[b]\u0001[/b]", "[b]RT[/b]")
+
+var _hint_reload := false
+var _hint_genius := false
+func _write_hint(reload: bool, has_genius: bool) -> void:
+	_hint_reload = reload
+	_hint_genius = has_genius
+	var k := func(key: String, what: String) -> String: return "[color=#%s][b]%s[/b][/color] %s" % [GOLD.lightened(0.15).to_html(false), key, what]
+	var parts: Array = []
+	if pad:
+		parts = [k.call("Left stick", "move"), k.call("Right stick", "look"), k.call("R3", "lock on"), k.call("L3", "the step again")]
+		if reload:
+			parts.append(k.call("RT", "reload"))
+		parts.append_array([k.call("D-pad up", "name the foe"), k.call("Start", "menu")])
+	else:
+		parts = [k.call("WASD", "move"), k.call("Mouse", "look"), k.call("Tab", "lock on"), k.call("H", "the step again")]
+		if reload:
+			parts.append(k.call("X", "reload"))
+		parts.append_array([k.call("N", "name the foe"), k.call("Esc", "menu")])
+	hint.text = "[center]%s[/center]" % "      ".join(parts)
+	chip_hint.text = ("L3   the step again" if pad else "H   the step again")
+	prompt_foot.text = ("L3  puts this away, and brings it back" if pad else "H  puts this away, and brings it back")
 
 func update_play(f: Fight, timer_text: String, score_text: String, show_target: bool) -> void:
 	var dt := get_process_delta_time()
@@ -636,14 +761,22 @@ func update_play(f: Fight, timer_text: String, score_text: String, show_target: 
 	target_pips.text = "STAGGERED" if stag else ((("BREAK  %d / %d" % [f.w_break, int(Data.room["break"]["needed"])]) if f.breaks_beast() else "") + (("   ·   OPEN: strike now" if f.guard_open() and f.w_state not in ["down", "absent"] else "   ·   GUARDED: see its strike out, then answer") if f.beast.has("guard") else ""))
 	timer_label.text = timer_text
 	score_label.text = score_text
-	hint.modulate.a = clampf(1.0 - (_play_time - 14.0) / 3.0, 0.0, 1.0)
+	var now_s := Time.get_ticks_msec() / 1000.0
+	hint.modulate.a = maxf(clampf(1.0 - (_play_time - 20.0) / 3.0, 0.0, 1.0), clampf(_hint_until - now_s, 0.0, 1.0))
 	hint.visible = hint.modulate.a > 0.01
 	if prompt.visible:
-		var left := _toast_until - Time.get_ticks_msec() / 1000.0
+		# read, and begun: fold. Never begun: fold all the same, after a good while.
+		var until := _prompt_min_until if _prompt_acted else _prompt_max_until
+		var left := until - now_s
 		if left <= 0.0:
 			prompt.visible = false
-		elif left < 0.5:
-			prompt.modulate.a = left / 0.5
+		elif left < 0.4:
+			prompt.modulate.a = minf(prompt.modulate.a, left / 0.4)
+	var folded := prompt_title.text != "" and not prompt.visible
+	if folded and not chip.visible:
+		chip.modulate.a = 0.0
+		chip.create_tween().tween_property(chip, "modulate:a", 1.0, Style.t("arrive"))
+	chip.visible = folded
 
 	# Ability bar state (a lesson can lock some of it).
 	_fight_allowed = f.allowed

@@ -26,7 +26,18 @@ static func fill(text: String, h: Dictionary) -> String:
 	var kit: Dictionary = Data.kits[h["shape"]]
 	var w: Dictionary = Data.by_id(Data.weapons, h["weapon"])
 	var cities := { "columbia": "Outside Columbia", "cahokia": "Below Cahokia", "lunden": "Under Lunden" }
+	# how this weapon strikes: a blade swings, a gun shoots and reloads, a bow is drawn and loosed
+	var st: Dictionary = Data.room["styles"].get(String(w.get("style", "")), {})
+	var strike := "[b]left click[/b]"
+	var strike_short := "Strike ([b]LMB[/b])"
+	if String(st.get("kind", "")) == "ranged" and st.has("draw"):
+		strike = "[b]hold left click[/b] to draw, and let go to loose"
+		strike_short = "Draw and loose (hold [b]LMB[/b], then let go)"
+	elif String(st.get("kind", "")) == "ranged":
+		strike = "[b]left click[/b] to shoot; when it runs dry, [b]X[/b] reloads"
+		strike_short = "Shoot ([b]LMB[/b]; [b]X[/b] reloads)"
 	return text.format({
+		"strike": strike, "strike_short": strike_short,
 		"name": h.get("name", ""), "blood": b.get("name", ""), "shape": String(h["shape"]).capitalize(),
 		"weapon": w["name"].to_lower(), "technique": kit["technique"]["name"], "city": String(h["city"]).capitalize(),
 		"stationcity": cities.get(h["city"], "On the line"), "pattern": Builder.sentence(h["pattern"]),
@@ -126,6 +137,14 @@ func update(events: Array, dt: float, hud: Hud) -> void:
 					_next(hud)
 					return
 		"pattern":
+			# Nobody is kept at the station for want of a Trigger they cannot yet meet (a first
+			# parry is hard): after a minute the night goes on without the Pattern.
+			if _t > 60.0 and fight.p_state != "pattern":
+				note = "It will come, one day. For now, fight."
+				fight.w_floor = 0.0
+				fight.w_hp = minf(fight.w_hp, 30.0)
+				_next(hud)
+				return
 			for e in events:
 				if e["type"] == "pattern-done":
 					# The Pattern lands: the wolf is beaten, near enough.

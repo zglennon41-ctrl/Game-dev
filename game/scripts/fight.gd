@@ -2350,6 +2350,12 @@ func _update_player(dt: float, move: Vector2) -> void:
 				if i < cues.size() and now > float(cues[i]) + float(chain["window"]) / 2.0:
 					_emit({ "type": "pattern-cue", "k": i, "hit": false, "offset_ms": 999.0 })
 					_finish_pattern(false)
+			else:
+				# in the Pattern with no chain to strike: never held there (the hero could not move
+				# again, and the foe stayed pinned)
+				p_state = "free"
+				if w_state == "pinned":
+					_wolf_set("recover", 0.9)
 
 ## The field past the skin: a Projected field (Stage 3) puts more into every technique and
 ## reaches farther with it (rules.json: field.stageOutput, stageReach).
