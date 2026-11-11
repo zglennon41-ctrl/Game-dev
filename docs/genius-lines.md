@@ -226,6 +226,7 @@ told apart at the size of a thumbnail before their shapes can.
 | Bow | Hunting Bow `jade` · War Bow `madder` · Singing Bow `amethyst` |
 | Coat | Travelling Coat `marigold` · Shadow-coat `amethyst` · Listening Coat `peacock` |
 | Drake | Hoard-drake `gold` · Fire-drake `madder` · Sky-drake `lapis` |
+| Elemental | Cornerstone `gold` · Tideling `peacock` · Squall `amethyst` |
 | Ember | Kept Fire `marigold` · Rushlight `peacock` · Wildfire `madder` |
 | Fiend | Flare-up `madder` · Banked Coal `amethyst` · Grate-fiend `marigold` |
 | Fog | Fog-shroud `peacock` · Lingering Mist `gold` · Shifting Fog `amethyst` |
@@ -888,3 +889,103 @@ page.
 - **Light.** The game shows every lit surface at one brightness, so a large lit area glares;
   light is kept to edges and small things except where a form is all light on purpose.
 
+
+## The Elemental (`tools/blender/lines_elemental.py`)
+
+> "one line specifically for elementals with a humanoid form like tiny demigods" (owner, 2026-11-11)
+
+The elements as people: the soul of one who is more a place or a weather than a person.
+Each form is a small god of something, a forearm tall (its silhouette, `aspect-demigod`,
+has `artSize` 0.5: it stays small even grown). The Ember is a fire that is not a person and
+the Fog a weather that is not a person; this is the hill, the tide and the storm with a
+face and hands.
+
+**Its anatomy**, in a sentence: a grown human figure at a small size, sound as a person
+(the small people's body on the people's bones, grounded proportions: a youth at the
+Starter, heroic at the Final), and one magical choice carried all the way: it does not
+stand on the world's ground but brings its own (a slab, a wave, a cloud) and floats on it;
+its hair, its mantle and its crown are the element itself, and its flesh is its partner's
+coat as stone. Two Finals leave the person on purpose: the Spring Tide is a figure to the
+waist in a wave taller than itself, and the Tempest is a turning storm with a face
+(`shape`: `storm`, no rig).
+
+What each Path keeps, down all ten of its forms:
+
+| Path | Its colour | Its coat | What it is at a glance |
+|---|---|---|---|
+| Cornerstone (Earth) | `gold`: ore in its seams, its sash and kilt, lichen, leaves, lava | `sand` | broad, heavy in the limb, planted on a slab of its own ground; a stone of the field breathing in its chest; level brows |
+| Tideling (Sea) | `peacock`: its hair that is water, the band on its chest, fins, its wave | `frost` | a long pale woman's figure, weight on one hip, rising out of water; a soft mouth |
+| Squall (Sky) | `amethyst`: hair and scarf streaming sideways, its cloak | `storm` | slight, windswept, on a cloud; brows up at the outer end, a crooked mouth |
+
+Its nine Advancements are nine small gods, each a different carriage and great part: of
+Earth the Tor (fists on hips, a crown of basalt columns, slates on its shoulders), the Loam
+(hands held out, leaves for hair, roots under its slab) and the Smoulder (seated, cracked,
+a flame for hair); of Sea the Meander (in mid-step, a stole that loops out like a river),
+the Floe (stiff on a raft of ice, a crown of shards) and the Fathom (hanging as in deep
+water, weed standing up for hair); of Sky the Gale (laid along the wind, a cloak that never
+hangs), the Thunderhead (hands behind its back under an anvil of cloud) and the Daybreak
+(arms flung up before a rising disc). A sun in the Sky path is `accent2` (`rose` at
+daybreak, `bone` at noon, `madder` at sundown), so the Path's own colour is still its
+hair and its cloak.
+
+The look's roles are `stone_flesh` (main), `cloth_wrap` (under) and `stone_band` (trim), on
+the `stone` palette: its flesh, its wrap and its belt are its partner's coat. Everything
+else is its own and does not shift (`OWN` in the file: basalt, slag, loam, moss, straw,
+water, ice, cloud). Two coat shifts are its own: `sand` and `storm`. The Starter wears `ash`
+so that it is a pale statue whatever its partner's coat.
+
+| Key | What it is | Styles |
+|---|---|---|
+| `figure` | | `woman` (the Sea's) |
+| `build` | the small people's proportions, and two of its own | `muscle` `weight` (0 to 1) |
+| `stance` | how it holds itself (below) | `attend` `folded` `planted` `column` `seated` `offer` `carry` `guard` `shoulder` `wrath` `flow` `stroll` `pole` `open` `stiff` `stride` `drift` `hang` `yoke` `lean` `fly` `blow` `brood` `throw` `greet` `hieratic` `knee-up` |
+| `flesh` | marks on the body itself | `seams` `cracks` `slag-limbs` `earth-legs` `lava` `glow-hands` `fins` `rime` `deep-limbs` `ribs` `barnacles` `storm-shoulders` |
+| `hair` | the element, as hair | `wisps` `crystals` `leaves` `flame` `water` `weed` `wind` (`forward`) `rays` `spikes` |
+| `crown` | | `columns` `peak` `wheat` `crater` `shards` `lure` `anvil` |
+| `wear` | | `wrap` `band` `sash` `kilt` `mantle` (`stones` `moss`) `apron` `bracers` `pauldrons` `stole` `scarf` `cloak` (`wind` `ice` `dusk`) `menhir` |
+| `under` | what it stands on or rises from | `slab` (`tor` `ridge` `roots` `magma`) `cone` `wave` (`deep`) `surge` `boat` `floe` `berg` `cloud` (`storm` `bank`) |
+| `right` `left` `both` | what it holds | `hammer` `sickle` `bolt`; `sheaf`; `pole` `anchor` `sail` |
+| `chest` `belt` `back` | | `heart` `flower`; `line`; `briars` `disc` (`low` `high` `sunk`) |
+| `around` | what keeps it company | `cloudlet` `stones` `embers` `sparks` `fish` `bubbles` `streams` `breath` |
+| `face` | its temperament: brows and a mouth | `steady` `old` `stern` `soft` `keen`; `beard` |
+| `eyes` | pale, the field in the iris; each shuts | `lit` `dark` |
+
+Three things this line had to learn, which hold for any line of people:
+
+- **A stance.** A form with no clip of its own could only stand as its base body's Idle
+  stood, with whatever it held hanging at its side. Here each form is posed (`STANCES`: a
+  limb is aimed along a direction, or its wrist or ankle brought to a point with the elbow
+  or knee toward a hint) and the pose is baked into the model's rest, less what the
+  borrowed clip will add: the game gives a form its base body's clip as a turn from rest,
+  so in the game it holds its pose and still breathes. What it holds in two hands rides its
+  chest, and the hands are brought to it. The base's own body carries only the Idle clip,
+  so an Elemental glides as it stands and does not pedal the air.
+- **What it stands on is made where it sits.** A stance says how high its lowest part is
+  (`seat`), and its slab or cloud is made there and rides the root, so a seated god sits on
+  its slab.
+- **A dark mass shines.** The style's highlight is the same on a black surface as on a pale
+  one, so a large dark thing (the Caldera's cone, a storm cloud) shows a pale sheen in the
+  lamp. It is kept smooth so that the sheen is one soft shape and not a facet.
+
+**What moves**: its eyes shut (`blink_eye_l`, `blink_eye_r`, each riding the head); hair
+that is water or weed or leaves sways and hair that is wind glides (`sway_hair`,
+`glide_hair_l`); a flame and a held stroke of lightning gutter (`flick_`); the stone in an
+Earth form's chest, a cloud under a Sky form's feet and an anvil of cloud breathe
+(`pulse_`); the curl of a wave, a ring of stones, embers, sparks or fish and the rays of a
+sun turn (`spin_`); a sash, a cloak, a stole, a chain, roots and a ferry's lantern hang and
+sway (`sway_`); a scarf glides; the Starter's wisp of cloud bobs. The Tempest's bands of
+cloud turn each against the next.
+
+**Its gifts** (`python tools/blender/lines_elemental.py gifts`): a crown nobody gave it
+(`elemental-crown`: a ring of basalt columns that stands off the head, a flame of the field
+in it, three small stones going round) and a small weather of its own
+(`elemental-small-weather`, a new feature: a fist of cloud over the head that rains the
+field's light and lets go a stroke; `featureSockets` puts it on the head's socket, above
+the crown).
+
+Still weak: the face is the size of a fingernail on a figure a forearm tall, and at the
+size of a sheet's cell it is two lights and a brow; the Starter is the smallest thing on any
+sheet and is drawn smaller than its cell allows; the waves are a bowl with a curl, not yet
+water; the Berg's block and the Longstone's stone are plain; a figure sitting cross-legged
+is crude at the hip where the wrap does not cover it; the Sundown and the Thunderhead are
+the two the line check reads as another Path by colour (a red sun, a dark cloud).

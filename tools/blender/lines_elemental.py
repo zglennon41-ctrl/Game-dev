@@ -880,9 +880,10 @@ def flesh_barnacles(F, size, word):
 @style("eyes", "lit", "dark")
 def eyes(F, size, word):
     """Eyes with lids. Each eye is its own piece and shuts (blink_eye_l, blink_eye_r); behind it
-    is the lid it shuts to. lit: the field in the iris. dark: wide and dark, a light sunk in."""
+    is the lid it shuts to. lit: the field in the iris, and no more of it than that (a whole eye
+    alight blooms to twice the size of a head this small). dark: wide and dark, a light sunk in."""
     P = F.P
-    k = 1.66 * size * (1.15 if F._style == "dark" else 1.0)
+    k = 1.4 * size * (1.2 if F._style == "dark" else 1.0)
     r = P.eye_r * 1.04 * k
     skin = P.skin
     lids, shut = None, None
@@ -892,7 +893,8 @@ def eyes(F, size, word):
         if F._style == "dark":
             items = [(g.ico(c, r, sub=2), "eye_dark"), (g.ico(f + Vector((sg * r * 0.2, -r * 0.2, r * 0.22)), r * 0.24, sub=0, scale=(1, 0.6, 1)), field("eyes", 4.0))]
         else:
-            items = [(g.ico(c, r, sub=2), field("eyes", 3.4)), (g.ico(f + Vector((0, -r * 0.36, 0)), r * 0.26, sub=1, scale=(1.0, 0.5, 1.0)), "eye_dark")]
+            items = [(g.ico(c, r, sub=2), "eye_white"), (g.ico(f, r * 0.62, sub=2, scale=(1.0, 0.55, 1.0)), field("eyes", 2.6)),
+                     (g.ico(f + Vector((0, -r * 0.3, 0)), r * 0.24, sub=1, scale=(1.0, 0.5, 1.0)), "eye_dark")]
         F.move("blink", "eye", items, c, "head", side=tag, smooth=True)
         shut = g.merge(shut, g.ico(c + Vector((0, r * 0.16, 0)), r * 0.99, sub=2))
         # the upper lid: lower for the steady and the old, lifted at the outer corner for the keen
@@ -907,7 +909,7 @@ def face(F):
     """Brows and a mouth: each Path a temperament you can see."""
     P = F.P
     t = F.temper
-    hr, e, r = P.hr, P.eye, P.eye_r * 1.66
+    hr, e, r = P.hr, P.eye, P.eye_r * 1.4
     # (inner end's lift, outer end's lift, thickness, how far out) in eye radii
     inn, outr, thick, reach = {"steady": (1.5, 1.55, 0.5, 2.3), "old": (1.4, 1.7, 0.62, 2.5), "stern": (1.12, 1.9, 0.5, 2.3), "soft": (1.75, 1.6, 0.3, 2.2),
                                "keen": (1.3, 2.15, 0.34, 2.4)}.get(t, (1.5, 1.6, 0.4, 2.3))
@@ -1259,7 +1261,7 @@ def crown_anvil(F, size, word):
     pale = g.merge(cloud(c + Vector((0, 0, 1.95 * hr * size)), 1.75 * hr * size, n=6, seed=22, flat=0.6), g.ico(c + Vector((0, 0, 2.5 * hr * size)), 3.0 * hr * size, sub=3, scale=(1.0, 0.72, 0.18)))
     bolts = g.merge(bolt(c + Vector((0.5 * hr, -1.0 * hr * size, 1.5 * hr * size)), c + Vector((0.1 * hr, -1.08 * hr * size, 0.4 * hr)), 0.14 * hr, seed=1),
                     bolt(c + Vector((-0.8 * hr, -0.95 * hr * size, 1.25 * hr * size)), c + Vector((-0.5 * hr, -1.0 * hr * size, 0.55 * hr)), 0.1 * hr, seed=2, n=3))
-    F.move("pulse", "anvil", [(dark, "mist_storm"), (pale, "mist_cloud"), (bolts, field("bolt", 3.6))], c, "head", smooth=True)
+    F.move("pulse", "anvil", [(dark, "accent_dark"), (pale, "mist_cloud"), (bolts, field("bolt", 3.6))], c, "head", smooth=True)
 
 
 # --- what it wears ----------------------------------------------------------------------------
@@ -1473,7 +1475,7 @@ def wear_cloak(F, size, word):
         else:
             a_geo = g.merge(a_geo, strip)
     if word == "dusk":
-        F.move("sway", "cloak", [(a_geo, "accent"), (b_geo, "accent2_dark")], (0, by, z0), "chest", smooth=True)
+        F.move("sway", "cloak", [(a_geo, "accent"), (b_geo, "accent_light")], (0, by, z0), "chest", smooth=True)
     else:
         F.move("sway", "cloak", [(a_geo, "accent"), (b_geo, "accent_dark")], (0, by, z0), "chest", smooth=True)
 
@@ -1699,25 +1701,31 @@ def under_cone(F, size, word):
 
 @style("under", "wave")
 def under_wave(F, size, word):
-    """Below the knee it is a wave that never breaks (deep: of dark water)."""
+    """Below the knee it is a wave that never breaks: a spout of water that holds it up, arms of
+    it going round and curling over at its knees (deep: of dark water)."""
     P = F.P
     zk = P.kneez + 0.05
     c = Vector((0, 0.03, 0))
     body_m, crest_m = ("water_deep", "accent_dark") if word == "deep" else ("accent_dark", "accent")
-    prof = [(0.12, zk + 0.04), (0.22, zk - 0.18), (0.36 * size, zk * 0.45), (0.6 * size, 0.06), (0.7 * size, -0.2), (0.5 * size, -0.42), (0.0, -0.55)]
+    prof = [(0.11, zk + 0.07), (0.21, zk - 0.12), (0.33 * size, zk * 0.5), (0.4 * size, 0.08), (0.34 * size, -0.28), (0.18 * size, -0.62), (0.05 * size, -0.9), (0.0, -1.0)]
     F.add("wave_body", g.lathe(prof, n=12, centre=c, caps=False), body_m, "root", smooth=True)
+    collar = None
+    for i in range(7):
+        a = 2 * math.pi * i / 7
+        collar = g.merge(collar, g.ico(c + Vector((math.cos(a) * 0.2, math.sin(a) * 0.2, zk - 0.08 + 0.03 * math.sin(i * 2.0))), 0.055 + 0.02 * rnd(i, 46), sub=1))
+    F.add("wave_collar", collar, "water_foam", "root", smooth=True)
     curl, foam = None, None
     for i in range(3):
         a = 2 * math.pi * i / 3 + 0.4
         pts = []
-        for j in range(6):
-            t = j / 5
-            aa = a + t * 1.9
-            rad = (0.72 - 0.16 * t) * size
-            pts.append(c + Vector((math.cos(aa) * rad, math.sin(aa) * rad, -0.22 + (zk * 0.72 + 0.2) * t ** 0.8)))
-        tip = pts[-1] + Vector((math.cos(a + 2.4) * 0.14, math.sin(a + 2.4) * 0.14, -0.1)) * size
-        curl = g.merge(curl, ribbon(pts + [tip], [0.3 * size, 0.38 * size, 0.36 * size, 0.3 * size, 0.24 * size, 0.16 * size, 0.03], normal=(math.cos(a + 1.0), math.sin(a + 1.0), 0.3), thick=0.3))
-        foam = g.merge(foam, g.ico(tip, 0.07 * size, sub=0), g.ico(pts[-1] + Vector((0, 0, 0.05)), 0.055 * size, sub=0))
+        for j in range(7):
+            t = j / 6
+            aa = a + t * 2.6
+            rad = (0.2 + 0.36 * math.sin(t * math.pi) ** 0.7 + 0.12 * t) * size
+            pts.append(c + Vector((math.cos(aa) * rad, math.sin(aa) * rad, -0.7 + (zk + 0.62) * t ** 0.85)))
+        tip = pts[-1] + Vector((math.cos(a + 3.2) * 0.2, math.sin(a + 3.2) * 0.2, -0.16)) * size
+        curl = g.merge(curl, ribbon(pts + [tip], [0.05, 0.2 * size, 0.3 * size, 0.32 * size, 0.28 * size, 0.24 * size, 0.18 * size, 0.03], normal=(math.cos(a + 1.3), math.sin(a + 1.3), 0.2), thick=0.34))
+        foam = g.merge(foam, g.ico(tip, 0.07 * size, sub=1), g.ico(pts[-1] + Vector((0, 0, 0.06)), 0.06 * size, sub=1), g.ico(pts[-2] + Vector((0, 0, 0.1)), 0.04 * size, sub=1))
     F.move("spin", "wave", [(curl, crest_m), (foam, "water_foam")], c, "root", smooth=True)
 
 
@@ -1809,7 +1817,7 @@ def under_cloud(F, size, word):
         F.move("pulse", "cloud", [(geo, "mist_cloud"), (cloud(c + Vector((0.1, 0.02, -0.14 * size)), 0.52 * size, n=4, seed=43, sub=2), "accent_pale")], c, "root", smooth=True)
         return
     geo = cloud(c, 0.56 * size, n=6, seed=44 + F.level)
-    items = [(geo, "mist_storm" if word == "storm" else "mist_cloud"), (cloud(c + Vector((0.05, 0.02, -0.12 * size)), 0.4 * size, n=4, seed=45, sub=2), "accent_dark" if word == "storm" else "accent_pale")]
+    items = [(geo, "accent_dark" if word == "storm" else "mist_cloud"), (cloud(c + Vector((0.05, 0.02, -0.12 * size)), 0.4 * size, n=4, seed=45, sub=2), "mist_storm" if word == "storm" else "accent_pale")]
     if word == "storm":
         items.append((bolt(c + Vector((0.1, -0.16, -0.2 * size)), c + Vector((-0.12, -0.2, -0.95 * size)), 0.12 * size, seed=7), field("bolt", 3.6)))
     F.move("pulse", "cloud", items, c, "root", smooth=True)

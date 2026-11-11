@@ -84,6 +84,7 @@ var own_body := ""                 # the form whose own body it wears ("" when i
 var nearness := 0.0                # how near its next Reading is (Genius.readiness), 0 to 1
 var molt := 0.0                    # the molt lines showing for it, 0 to 1
 var stands := 0.6                  # how tall it stands now, in metres
+var art_size := 1.0                # and how tall its art body is against that (its silhouette's artSize)
 var age := "grown"                 # young, half-grown, grown, prime, great, apex (by instar)
 var lines := 0.0                   # the steady light along its body at the later instars, 0 to 1
 var mantle: Node3D = null          # the blades of light behind a great one's head
@@ -172,6 +173,7 @@ func _assemble(instar: int) -> void:
 		# An art body carries its own proportions: the data says only how tall it stands
 		# against its instar's size (an otter stands half as tall as a wolf).
 		proportions = Vector3.ONE * float(spec.get("artSize", 1.0))
+		art_size = float(spec.get("artSize", 1.0))
 	proportions *= _apply_proportions()
 	# It grows between Readings: part of the way to the next instar's size as the Reading nears.
 	var prog: Dictionary = Data.genius().get("progression", {})
@@ -651,7 +653,7 @@ func set_molt(k: float) -> void:
 	for r in _rims:
 		(r as ShaderMaterial).set_shader_parameter("molt", molt)
 		# a few seams across the body, whatever its size
-		(r as ShaderMaterial).set_shader_parameter("molt_scale", 0.42 / maxf(0.2, stands))
+		(r as ShaderMaterial).set_shader_parameter("molt_scale", 0.42 / maxf(0.2, stands * art_size))
 
 func set_strength(k: float) -> void:
 	_mat.set_shader_parameter("strength", k)
