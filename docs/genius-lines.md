@@ -72,18 +72,25 @@ On the wolf's rig (`tools/blender/genius_lines.py`):
 
 | Key | What it is | Styles |
 |---|---|---|
-| `build` | proportions against the stage's own, each a multiple of 1 | `legs` `girth` `chest` `waist` `neck` `nape` `head` `muzzle` `jaw` `ears` `tail` `brush` `body` `paws`; `pitch` (radians: more lowers the head); `stance` (how wide it stands) |
+| `build` | proportions against the stage's own, each a multiple of 1 | `legs` `girth` `chest` `waist` `neck` `nape` `head` `muzzle` `jaw` `ears` `tail` `brush` `body` `paws`; `pitch` (radians: more lowers the head); `stance` (how wide it stands); `croup` (its rump carried low; less than nothing, high) |
 | `ears` | | `tunnel` `tall` `back` `split` `torn` `hound` |
 | `eyes` | | `dark` `lamp` `old` `third` `far` `second` |
 | `maw` | | `fangs` `open` `glow` |
-| `ruff` | round the neck | `pup` `quills` `mane` `crown` `slate` `frost` `ember` |
-| `spine` | along the back | `seam` `ridge` `quills` `iron` `plates` `smoke` `frost` `ember` `stars` |
+| `ruff` | round the neck | `pup` `quills` `mane` `crown` `slate` `frost` `ember`; the Wolf's own, as locks of fur with its cheeks: `tuft` `scruff` `fur` `shag` |
+| `spine` | along the back | `seam` `ridge` `quills` `iron` `plates` `smoke` `frost` `ember` `stars`; the Wolf's own: `crest` |
 | `tail` | | `whip` `short` (its shape); `flag` `smoke` `lamp` `rings` `ember` |
 | `flags` | from the shoulders | `fur` `pale` `light` |
 | `armor` | | `brow` `chest` `chain` `harness` `scars` |
-| `carry` | what it has been given | `lamp` `book` `tags` `knots` `post` `cloak` `shroud` `rug` `bell` |
+| `carry` | what it has been given | `lamp` `book` `tags` `knots` `post` `cloak` `shroud` `rug` `bell` `bird` |
 | `paws` | | `set` `grease` `shade` `frost` |
-| `aura` | | `windows` `motes` `cold` `crescent` |
+| `aura` | | `windows` `motes` `cold` `crescent` `followers` |
+| `marks` | where it wears its Path's colour (the second pass, rule 1); a step of the colour after a colon, `bars:light` | the body's own faces painted: `saddle` `blanket` `mask` `muzzle` `blaze` `socks` `stockings` `bands` `tailtip` `ears` `bib` `under`; fur laid on it: `stripe` `bars` `chevrons` `dapple` `rings` `hackles` |
+| `trim` | `accent`: what it has been given takes its Path's colour too (a collar, a cloak and its band, a rug's bands, a lamp's cap, a post's bands, tags, scars, the boss of a plate) | |
+| `face` | its eyes, lids, the mark round them, the corner of its mouth | `young` `open` `fixed` `aside` |
+| `feet` | | `toes` |
+| `fur` | tufts at the ears and a brush to the tail | `coat` |
+| `pose` | how it carries itself, put on last: a list of `[what, radians]` | `crane` (its neck lowered; less raises it) `nod` `turn` (its head to its left) `tilt` `tail` (raised) `curl` `side` |
+| `rest` | what it does when it has stood a while ("How it rests", below) | `sit` `lie` `crouch` `stride` `stalk` `point` |
 | `coat` | how its partner's coat is worn | a shift in `data/genius-looks.json`, `shifts`: `night` `ash` `frost` `ember` `slate` `iron` `hearth` `blood` `moon` |
 
 A slot holds a style, `[style, size]`, or a list of them.
@@ -810,6 +817,82 @@ times as far across as the height its `ref_top` stands it to.
   `clinker` `clinker_light` `pane` `stone_grave` `timber` `mask_pale` `veil` `steam`
   `stubble` `grass_dry`.
 
+## The Wolf (`tools/blender/genius_lines.py`)
+
+The line every other was made after, and the first held to the second pass.
+
+**Its anatomy** is a wolf's, sound: four legs that walk, toes and a claw to each, a real ear
+with a tuft at its root, a ruff and a mane of locks of fur (no two the same length, so its
+edge is broken), a brush to its tail. What it has that no wolf has is said to be given or
+grown, and is carried all the way: a lamp, a book, a rug, a post; slate where fur was; a
+window in a flank; smoke; a crescent.
+
+**What each Path keeps.** One coat shift down each Path, so the three families are three
+values as well as three colours:
+
+| Path | Coat | Colour, and where | Its face | Its Advancements, by what the colour does |
+|---|---|---|---|---|
+| Counting Wolf | `hearth` | `marigold`: the saddle, the inside of the ears, the tail's brush; the cord it counts on | `open`: round eyes that look at who is here, a brow over each, its head turned to you | Pack-runner bars across the back and socks; Hearth-wolf a blanket, dappled pale; Caller a pale bib under the lifted muzzle |
+| Third-day Wolf | `ash` | `madder`: the muzzle as if dipped, a stripe down the spine, socks; its scars | `fixed`: narrowed, the lid lowered toward the nose, a slash over the eye and a tear-line down the muzzle as a courser has | Long-strider stockings; Throat-taker the throat and chest; Grey Shield two bands round each leg |
+| Night-watch | `night` | `lapis`: the belly, throat and inside of the legs pale, bands on the legs, the inside of the ears; its cloak | `aside`: half-lidded, looking over its shoulder and past you, a pale crescent under each eye (it has not slept); dark round the eyes on a pale face | Perimeter Wolf a banded cloak and a blue brush; Moon-reader pale dapples like stars and a crescent; Storm-coat hackles |
+
+A Final adds a step or a second place of the same colour (the Den-keeper's rug is woven in
+bands of it; the Scar-bearer's scars are it; the Still Wolf has a bird of it on its head).
+
+**What each form does** (its `pose`, and its `rest`):
+
+| | Standing | Resting |
+|---|---|---|
+| Wolf pup | head on one side, tail up | sits |
+| Counting Wolf / Pack-runner / Pack-mother / Line-runner | head turned to you / level / high, tail up, three small lights walking in its tracks / stretched forward, a lamp at its tail | (stands) / caught between two steps / (stands) / a forepaw lifted |
+| Hearth-wolf / Den-keeper / Shade-friend | heavy, a lit window in its flank / rug and lamp / lean, smoking, head on one side | lies with its head up / sits up with its lamp / sits |
+| Caller / Voice of the Pack / Oath-wolf | muzzle to the sky, a crown of fur / the same, larger, a chain / head level, a book | (stands) / sits and howls / sits facing you |
+| Third-day Wolf / Long-strider / Name-hunter / Far Courser | nose a hand off the ground / looking back over its shoulder / nose down, tail up, tags / flags of fur streaming | (stands) / (stands) / a forepaw lifted / a long stride |
+| Throat-taker / Red Maw / Quiet Tooth | head low, jaw open / jaws wide, a light in its throat, quills / low, shrouded, smoking | chest down and rump up / (stands) / sunk low, a forepaw off the ground |
+| Grey Shield / Wall-wolf / Scar-bearer | square, slate on its shoulders / a wall, plated / head high and turned, scarred | (stand) |
+| Night-watch / Perimeter Wolf / Post-wolf / Lamp-eyed Wolf | head high, turned away / cloaked / cloaked, a lamp on a post / eyes like lamps | (stands) / a short stride / lies under its lamp / sits |
+| Moon-reader / Omen-wolf / Still Wolf | face to the sky under a crescent / tail straight up and ringed, a third eye / upright, a bird on its head | sits / (stands) / sits |
+| Storm-coat / Frost-ruff / Ember-ruff | head down and aside, smoking / rime on its ruff / coals in its ruff | (stand) / (stands) / lies |
+
+### How it rests
+
+A form's `rest` is one clip of its model's own, named `rest`, made by the builder on that
+form's own bones (so its feet come to the ground whatever the length of its legs). The game
+(`genius_body.gd`) plays it in place of idle once the body has stood still a few seconds
+(`data/style.json`, `motion.rest.after`, 2.5 where it is not given), blends back to the
+borrowed walk the moment it moves, and shows a body first in its rest: so a portrait shows the
+Den-keeper sitting, and in play it sits down beside you when you stop. Its habit is the brief.
+
+What that took: a joint for each paw (`Paw.fl` and the rest: the rig's feet are one piece with
+the leg above them, and a leg laid along the ground would stand its paw on end; no borrowed
+clip moves them, so it walks as it did), and a bone at the hook of each thing that hangs
+(`Hang.<n>`), which the resting pose keeps plumb, so a lamp at the collar of a sitting wolf
+hangs down and not out.
+
+### What moves
+
+Ears, tail and legs by the borrowed clips. By name: the eyes blink (`blink_eye_l`, `_r`:
+each a ball of the field's light with its pupil where it looks); what hangs sways
+(`sway_lamp`, `sway_postlamp`, `sway_taillamp`, `sway_book`, `sway_tags`, `sway_knots`,
+`sway_chain`); a lamp's light, the light in the Red Maw's throat and a cold core breathe
+(`pulse_*`); smoke gutters (`flick_smoke*`); motes, the Pack-mother's followers and the
+crescent rise and fall (`bob_*`); the Still Wolf's bird looks about (`turn_bird`).
+
+### What the second pass found
+
+- **The pale lines like cracks** were the field's own seams: the steady lines of light a
+  Final carries (`data/genius.json`, `presence`, 0.14 at the fourth instar), which the edge
+  shader drew a hair wide and nearly white. They are drawn now with a width of their own and
+  in the field's colour (`genius_body.gd`, `seams`), on every line.
+- **The eyes of the first try were on the ground.** A piece put on a bone was put where the
+  bone stood in the pose the rig is imported in, not at its rest. The Wolf is built at rest
+  (`pose_position`); the kit's own sockets on the wolf's rig still carry that small error for
+  the other animals on it.
+- **Ink.** The game draws a two-pixel line round every separate piece whatever its size, so a
+  face made of small pieces is a blot. An eye is one closed ball whose pupil and glint are
+  its own faces; fur is flat locks lying close; marks are the body's own faces painted where
+  that will do.
+
 ## The wolf's kin: the Fox, the Stag, the Drake
 
 `tools/blender/lines_wolfkin.py`. Each is the wolf's rig reshaped as a species, aged its own
@@ -849,7 +932,13 @@ Said by whoever built each family, after looking at its sheets. None of these fa
 each is a form or a habit of the build that does not yet meet the rule at the top of this
 page.
 
-- **Every line on the wolf's rig** (Wolf, Fox, Stag, Drake, the Hawk's three Harriers):
+- **The Wolf**: its poses of rest are worked out, not drawn: a sitting haunch is a folded
+  standing leg, and creases at the stifle. What hangs is plumb at rest but rides its bone
+  while it walks. A cloak is short on a form that lies down (the Post-wolf), because a long
+  one goes through the floor. The Shade-friend is pale for its Path and is the one form the
+  colour check still puts elsewhere at some sizes. Faces read as eyes and marks; at a
+  thumbnail the lids' angle (which is what makes the three Paths' looks) is two pixels.
+- **Every other line on the wolf's rig** (Fox, Stag, Drake, the Hawk's three Harriers):
   one wolf reshaped. Outlines change by proportion, carriage and what is grown; none has a
   skeleton or clips of its own. The Drake is the weakest for it: its legs and chest are a
   wolf's, so the Sky path can read as a winged hound, and its wings do not beat. The

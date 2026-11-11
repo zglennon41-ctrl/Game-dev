@@ -54,7 +54,10 @@ void vertex() { lp = VERTEX * length(MODEL_MATRIX[0].xyz); }   // the body's own
 // zero crossings drawn as lines that widen and brighten with the molt.
 float seams(vec3 p) {
 	float v = sin(p.x * 9.0 + sin(p.y * 7.0) * 1.7) + sin(p.y * 11.0 + sin(p.z * 6.0) * 1.3) + sin(p.z * 8.0 + sin(p.x * 5.0) * 1.9);
-	return smoothstep(0.08 + 0.2 * molt, 0.0, abs(v));
+	// (a seam has a width of its own and a soft edge: drawn as a hair that only peaked at its
+	// middle, the steady lines of a Final read as pale cracks in its coat)
+	float w = 0.15 + 0.2 * molt;
+	return smoothstep(w, w * 0.4, abs(v));
 }
 void fragment() {
 	// a thin edge only: the field's colour belongs to its eyes, its seams and what it carries
@@ -63,7 +66,7 @@ void fragment() {
 	vec3 col = glow.rgb * rim * 0.85 * strength;
 	if (molt > 0.0) {
 		float breathe = 0.75 + 0.25 * sin(TIME * 2.2 + lp.y * 5.0);
-		col += mix(glow.rgb, vec3(1.0), 0.3) * seams(lp * molt_scale) * molt * breathe * 3.2;
+		col += mix(glow.rgb, vec3(1.0), 0.12) * seams(lp * molt_scale) * molt * breathe * 3.2;
 	}
 	// going from one form to the next it is a shape of light, and nothing else
 	col += mix(glow.rgb, vec3(1.0), 0.6) * flood * (1.2 + 0.5 * flood);

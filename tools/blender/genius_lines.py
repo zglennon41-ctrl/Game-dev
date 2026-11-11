@@ -2015,7 +2015,7 @@ def rest_pose(r, style, size):
             _fold_hindleg(P, s, z_paw, thigh=-c)
             P.turn("FrontUpperLeg." + s, -P.angle("FrontUpperLeg." + s))        # its forelegs as they stand
         P.level(turned)
-        P.tail_down(z=z_paw * 0.8, wrap=0.32)
+        P.tail_down(z=z_paw * 1.5, wrap=0.32)
         # it sits where it stood: between where its feet were
         fore = (P.at("Paw.fl").y - paw0["fl"].y)
         P.everything(Matrix.Translation(Vector((0, -fore * 0.5, 0))))
@@ -2033,7 +2033,7 @@ def rest_pose(r, style, size):
         P.turn("Neck1", -0.22)                                                   # and its head held up: it is awake
         P.turn("Neck2", -0.1)
         P.head_clear(z_paw * 1.5)
-        P.tail_down(z=z_paw * 0.8, wrap=0.3)
+        P.tail_down(z=z_paw * 1.5, wrap=0.3)
     elif style == "crouch":          # its chest down on its forelegs and its rump up: it is about to be somewhere else
         turned = 0.4 * size
         P.turn("Body", turned, pivot=hips)
@@ -2166,8 +2166,8 @@ def ruff_gift():
         a = math.pi * (-0.15 + 1.3 * i / (n - 1))
         d = Vector((math.cos(a), 0, math.sin(a)))
         base = Vector((0.1 * d.x, 0.0, 0.09 + 0.1 * d.z))
-        L = 0.19 * (1.0 + 0.15 * math.sin(i * 2.3))
-        bl = g.blade(base, base + Vector((d.x * L * 0.6, L * 0.75, d.z * L * 0.6)), 0.085, normal=d, belly=0.32)
+        L = 0.2 * (1.0 + 0.3 * math.sin(i * 2.3))
+        bl = _lock(base, d, L, 0.1, lie=0.85, lift=0.3, droop=0.12 * abs(d.x))
         if i % 2:
             geo2 = g.merge(geo2, bl)
         else:
