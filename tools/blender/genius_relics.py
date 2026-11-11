@@ -32,6 +32,8 @@ def register(kit):
         "relic-coat": coat_body,
     })
     kit.PARTS.update({"grip": grip_part, "ledger": ledger_part, "broad-guard": broad_guard_part, "watching-eye": watching_eye_part, "shell": shell_part})
+    # the gifts of the Gauntlet and the Coat (and the Shield's two above), made to be known by
+    kit.PARTS.update({"small-hands": gloved_hands_part, "talon-grip": talon_grip_part, "wing-cloak": wing_cloak_part, "shadow-cloak": shadow_cloak_part})
     kit.KEEPSAKES.update({"collar": collar_keepsake, "ribbon": ribbon_keepsake, "charm": charm_keepsake, "bell": bell_keepsake})
 
 
@@ -381,11 +383,27 @@ def ledger_part():
 
 
 def broad_guard_part():
-    """A broad guarding stance, on its shoulder: a plate of iron rimmed in brass (the left)."""
-    plate = g.ico((0.012, 0, 0.0), 0.075, sub=1, scale=(0.32, 1.0, 0.95))
-    rim = ringtube((0.012, 0, 0.0), 0.076, 0.072, 0.008, n=10, u=Y, v=Z)
-    items = [(plate, gk.mat("metal_iron_light")), (rim, gk.mat("metal_brass")), (g.ico((0.038, 0, 0.0), 0.014, sub=0), gk.field("stud", 3.0)),
-             (g.box((0.03, 0, -0.045), (0.012, 0.11, 0.012)), gk.mat("metal_dark"))]
+    """A broad guarding stance, on its shoulder (the left): a guard the size of a small shield,
+    iron-faced and rimmed in brass, strapped on. It is the Shield's gift: on any body it says
+    whose it is (docs/genius-evolutions.md, "The armors")."""
+    out = [(-0.085, 0.11), (0.085, 0.11), (0.095, 0.0), (0.06, -0.09), (0.0, -0.15), (-0.06, -0.09), (-0.095, 0.0)]
+
+    def ring(x, k=1.0, bow=0.0):
+        return [Vector((x + bow * (1.0 - (y / 0.095) ** 2), y * k, z * k)) for y, z in out]
+    items = [(g.loft([ring(0.018, 1.0, 0.012), ring(0.04, 1.0, 0.03)]), gk.mat("metal_iron_light")),
+             (g.loft([ring(0.036, 0.72, 0.03), ring(0.05, 0.7, 0.032)]), gk.mat("leather"))]
+    edge = ring(0.03, 1.02, 0.022)
+    edge.append(edge[0])
+    items.append((g.tube(edge, [0.011] * len(edge), n=4, caps=False), gk.mat("metal_brass")))
+    items.append((g.lathe([(0.036, 0.0), (0.03, 0.012), (0.012, 0.026)], n=8), gk.mat("metal_brass")))
+    items[-1] = (g.moved(items[-1][0], Matrix.Translation((0.07, 0, 0.0)) @ Matrix.Rotation(math.pi / 2, 4, "Y")), gk.mat("metal_brass"))
+    items += _eye((0.098, 0, 0.0), 0.02, facing=(1, 0, 0), lids=gk.mat("metal_brass"))
+    studs = None
+    for y, z in ((-0.06, 0.08), (0.06, 0.08), (-0.07, -0.02), (0.07, -0.02), (0.0, -0.11)):
+        studs = g.merge(studs, g.ico((0.05 + 0.03 * (1.0 - (y / 0.095) ** 2), y, z), 0.009, sub=0))
+    items.append((studs, gk.mat("metal_dark")))
+    items.append((strap([(0.0, -0.07, 0.05), (0.02, -0.03, 0.06), (0.02, 0.03, 0.06), (0.0, 0.07, 0.05)], 0.022, 0.008, up=Z), gk.mat("leather_dark")))
+    items.append((strap([(0.0, -0.07, -0.04), (0.02, -0.03, -0.05), (0.02, 0.03, -0.05), (0.0, 0.07, -0.04)], 0.022, 0.008, up=Z), gk.mat("leather_dark")))
     return [gk._part("broad-guard", items)]
 
 
@@ -396,12 +414,138 @@ def watching_eye_part():
 
 
 def shell_part():
-    """A shell, on its back: one great scute, ringed, the rest remembered."""
-    items = [(g.ico((0, 0, 0.0), 0.11, sub=1, scale=(1.0, 1.25, 0.34)), gk.mat("stone_plate")),
-             (g.ico((0, 0, 0.022), 0.066, sub=1, scale=(1.0, 1.25, 0.3)), gk.mat("stone_hide")),
-             (g.ico((0, 0, 0.038), 0.03, sub=0, scale=(1.0, 1.25, 0.3)), gk.mat("stone_light")),
-             (ringtube((0, 0, 0.004), 0.108, 0.135, 0.005, n=14), gk.field("seam", 1.6))]
+    """A shell, on its back: a round shield carried there, face up, boards under an iron rim,
+    and an eye open in the boss. The Shield's gift, with the guard at the shoulder."""
+    R = 0.17
+    items = [(g.lathe([(0.0, 0.03), (R * 0.5, 0.026), (R * 0.86, 0.016), (R, 0.0), (R, -0.014), (0.0, -0.014)], n=14), gk.mat("wood")),
+             (ringtube((0, 0, 0.0), R, R, 0.014, n=14, sides=4), gk.mat("metal_iron")),
+             (g.lathe([(0.062, 0.02), (0.054, 0.036), (0.03, 0.052), (0.0, 0.058)], n=10), gk.mat("metal_brass"))]
+    items += _eye((0, 0, 0.056), 0.026, facing=(0, 0, 1), lids=gk.mat("metal_brass"))
+    planks = None
+    for x in (-0.085, 0.0, 0.085):
+        half = math.sqrt(max(0.0, (R * 0.94) ** 2 - x * x))
+        planks = g.merge(planks, g.box((x, 0, 0.024 - 0.012 * abs(x) / 0.085), (0.008, 2 * half, 0.008)))
+    items.append((planks, gk.mat("leather_dark")))
+    studs = None
+    for i in range(8):
+        a = 2 * math.pi * (i + 0.5) / 8
+        studs = g.merge(studs, g.ico((math.cos(a) * R * 0.8, math.sin(a) * R * 0.8, 0.02), 0.01, sub=0))
+    items.append((studs, gk.mat("metal_brass")))
+    items.append((strap([(-R * 0.9, 0.0, -0.01), (-R * 0.5, 0.0, -0.045), (R * 0.5, 0.0, -0.045), (R * 0.9, 0.0, -0.01)], 0.03, 0.008, up=Y), gk.mat("leather_dark")))
     return [gk._part("shell", items)]
+
+
+def gloved_hands_part():
+    """Small clever hands, as the Gauntlet gives them: a work glove on the hand, soft at the
+    palm, its cuff turned back and a pulse of the field round the wrist. Modelled hanging from
+    the wrist as a hand part is: the fingers down, the palm to -X, the thumb to the front."""
+    lea, dark, brass = gk.mat("leather"), gk.mat("leather_dark"), gk.mat("metal_brass")
+    items = []
+    rings = [g.ring((0, 0, z), rx, ry, n=8, u=Y, v=X, phase=math.pi / 8) for z, rx, ry in ((0.004, 0.026, 0.02), (-0.03, 0.034, 0.022), (-0.066, 0.036, 0.02), (-0.074, 0.034, 0.016))]
+    items.append((g.loft(rings), lea))
+    items.append((g.loft([g.ring((0, 0, z), rx, ry, n=8, u=Y, v=X, phase=math.pi / 8) for z, rx, ry in ((0.0, 0.03, 0.024), (0.022, 0.038, 0.03), (0.046, 0.05, 0.04))]), dark))
+    items.append((g.ico((0, 0, 0.047), 0.042, sub=1, scale=(0.8, 1.0, 0.08)), gk.mat("void")))
+    items.append((ringtube((0, 0, 0.0), 0.027, 0.033, 0.0042, n=10, u=X, v=Y), gk.field("pulse", 2.2)))
+    for i, (y, L) in enumerate(((-0.025, 0.05), (-0.008, 0.058), (0.009, 0.054), (0.025, 0.042))):
+        base = Vector((0, y, -0.07))
+        items.append((g.tube([base, base + Vector((-0.004, 0, -L * 0.5)), base + Vector((-0.016, 0, -L * 0.86)), base + Vector((-0.03, 0, -L))], [0.0095, 0.009, 0.008, 0.006], n=5), lea))
+    th = [Vector((0, -0.034, -0.03)), Vector((-0.006, -0.056, -0.05)), Vector((-0.016, -0.064, -0.074))]
+    items.append((g.tube(th, [0.012, 0.01, 0.007], n=5), lea))
+    items.append((g.box((0.0215, 0.0, -0.012), (0.006, 0.02, 0.016)), brass))
+    st = None
+    for y in (-0.016, 0.0, 0.016):
+        st = g.merge(st, g.tube([(0.021, y, -0.026), (0.022, y * 0.8, -0.06)], [0.0022, 0.0022], n=3))
+    items.append((st, gk.mat("thread") if "thread" in gk.PALETTE else gk.mat("paper")))
+    return [gk._part("small_hands", items)]
+
+
+def talon_grip_part():
+    """A foot that grips, as the Gauntlet gives it (the left): lames of iron round the leg
+    above the foot, and three talons and a spur where the toes are."""
+    iron, light, brass = gk.mat("metal_iron"), gk.mat("metal_iron_light"), gk.mat("metal_brass")
+    items = []
+    for i, (z0, z1, r0, r1) in enumerate(((0.0, 0.04, 0.05, 0.044), (0.034, 0.075, 0.046, 0.04), (0.068, 0.11, 0.042, 0.036))):
+        items.append((g.loft([g.ring((0, 0.02, z0), r0, r0, n=8), g.ring((0, 0.02, z1), r1, r1, n=8)]), light if i % 2 == 0 else iron))
+    items.append((ringtube((0, 0.02, 0.0), 0.051, 0.051, 0.006, n=10), brass))
+    items.append((ringtube((0, 0.02, 0.056), 0.045, 0.045, 0.004, n=10), gk.field("pulse", 2.0)))
+    tal = None
+    for dx in (-0.03, 0.0, 0.03):
+        tal = g.merge(tal, g.tube([(dx, -0.02, -0.01), (dx * 1.25, -0.07, -0.03), (dx * 1.4, -0.11, -0.075)], [0.014, 0.011, 0.002], n=5))
+    tal = g.merge(tal, g.tube([(0.0, 0.07, 0.0), (0.0, 0.1, -0.03), (0.0, 0.1, -0.07)], [0.012, 0.009, 0.002], n=5))
+    items.append((tal, gk.mat("talon")))
+    return [gk._part("talon-grip", items)]
+
+
+def wing_cloak_part():
+    """Wings worn as a cloak, on its back: a cloak laid over it and hanging to either side, a
+    collar standing at the front of it, and the clasp it grew from, with its eye. The Coat's
+    gift. (One piece: a cloak hangs; it does not beat.)"""
+    cloth, lining, brass = gk.mat("cloth_wool"), gk.mat("cloth_rag"), gk.mat("metal_brass")
+    rings = []
+    n = 9
+    for y, half, drop, top in ((-0.07, 0.11, 0.1, 0.03), (0.02, 0.15, 0.2, 0.025), (0.14, 0.17, 0.27, 0.02), (0.26, 0.17, 0.3, 0.015), (0.36, 0.15, 0.25, 0.012), (0.42, 0.1, 0.16, 0.01)):
+        outer = []
+        for j in range(n):
+            u = -1.0 + 2.0 * j / (n - 1)
+            a = abs(u)
+            if a <= 0.5:
+                th = (a / 0.5) * math.pi / 2
+                p = Vector((math.copysign(half * math.sin(th), u), y, top - 0.06 + 0.06 * math.cos(th)))
+            else:
+                d = (a - 0.5) / 0.5
+                p = Vector((math.copysign(half + 0.03 * d, u), y, top - 0.06 - d * (drop + 0.03 * math.sin(y * 40.0 + j))))
+            outer.append(p)
+        mid = Vector((0, y, top - 0.12))
+        inner = [p + (mid - p).normalized() * 0.012 for p in outer]
+        rings.append(outer + list(reversed(inner)))
+    ob = g.to_object("wing_cloak_shell", g.loft(rings, caps=True, closed=True), cloth, smooth=True)
+    gk.paint(ob, lambda c, nrm, i: (nrm.x * c.x + nrm.z * (c.z + 0.1)) < -0.2 * math.hypot(c.x, c.z + 0.1), lining)
+    items = []
+    # the collar, standing at the front of it
+    cr = []
+    for z, (rx, ry) in ((0.0, (0.085, 0.06)), (0.05, (0.1, 0.075)), (0.1, (0.125, 0.095))):
+        outer = [Vector((rx * math.sin(a), -0.06 + ry * math.cos(a), z + 0.02 * math.cos(a))) for a in [-2.2 + 4.4 * i / 8 for i in range(9)]]
+        inner = [Vector((p.x * 0.86, -0.06 + (p.y + 0.06) * 0.86, p.z)) for p in outer]
+        cr.append(outer + list(reversed(inner)))
+    items.append((g.loft(cr, caps=True, closed=True), cloth))
+    for s in (1, -1):
+        items.append((g.box((s * 0.024, -0.118, 0.02), (0.034, 0.012, 0.03)), brass))
+    items.append((g.tube([(-0.02, -0.126, 0.02), (0.0, -0.132, 0.024), (0.02, -0.126, 0.02)], [0.005] * 3, n=4), brass))
+    items += _eye((-0.024, -0.126, 0.02), 0.012, lids=brass)
+    hem = [Vector((0.2 * math.sin(a), 0.2 + 0.2 * math.cos(a) * 0.9, -0.33 + 0.02 * math.sin(3 * a))) for a in [-1.4 + 2.8 * i / 8 for i in range(9)]]
+    items.append((g.tube(hem, [0.004] * len(hem), n=3), gk.field("weave", 1.6)))
+    return [g.join("wing-cloak", [ob, g.pieces("wing_cloak_dress", items, smooth=True)])]
+
+
+def shadow_cloak_part():
+    """A cloak of shadow, at its head: a cowl of dark standing behind the head and trailing
+    off down the neck in tatters; where a face would be, nothing. The Coat's gift."""
+    shade, edge = gk.mat("shade"), gk.mat("shade_edge")
+    c = Vector((0, 0.045, -0.02))
+    hood = g.to_object("cowl", g.ico(c, 0.115, sub=2, scale=(0.95, 1.0, 1.05)), shade, smooth=True)
+    # only the back of it: what would cover the face is cut away, and the inside is dark
+    import bmesh
+    bm = bmesh.new()
+    bm.from_mesh(hood.data)
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.y < 0.0 and v.co.z < 0.07], context="VERTS")
+    bm.to_mesh(hood.data)
+    bm.free()
+    inner = g.to_object("cowl_in", g.ico(c + Vector((0, 0.004, -0.002)), 0.106, sub=2, scale=(0.95, 1.0, 1.05)), gk.mat("void"), smooth=True)
+    bm = bmesh.new()
+    bm.from_mesh(inner.data)
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.y < 0.004 and v.co.z < 0.066], context="VERTS")
+    bmesh.ops.reverse_faces(bm, faces=bm.faces[:])
+    bm.to_mesh(inner.data)
+    bm.free()
+    items = []
+    for i in range(7):
+        a = -1.25 + 2.5 * i / 6
+        b0 = c + Vector((0.1 * math.sin(a), 0.085 * math.cos(a) * 0.9, -0.06))
+        k = 0.8 + 0.3 * math.sin(i * 1.9)
+        pts = [b0, b0 + Vector((0.02 * math.sin(a), 0.05, -0.07)) * k, b0 + Vector((0.05 * math.sin(a), 0.11, -0.13)) * k, b0 + Vector((0.03 * math.sin(a), 0.19, -0.16)) * k]
+        items.append((g.tongue(pts, [0.07, 0.06, 0.04, 0.006], thick=0.3, normal=Vector((math.sin(a), math.cos(a), 0.4))), edge if i % 2 else shade))
+    items.append((g.tube([c + Vector((0.11 * math.sin(a), 0.004, 0.105 * math.cos(a) * 1.05)) for a in [-1.5 + 3.0 * i / 10 for i in range(11)]], [0.006] * 11, n=3), edge))
+    return [g.join("shadow-cloak", [hood, inner, g.pieces("shadow_cloak_dress", items, smooth=True)])]
 
 
 # ======================================================================================

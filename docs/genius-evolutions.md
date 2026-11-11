@@ -156,3 +156,83 @@ bash tools/genius-tree-page.sh wolf                 # the page of the whole tree
 4. **How strange a Final may be.** The Wolf's Finals stay wolves (a Wall-wolf is a wolf
    built like a wall). They could go further from the animal: say how far.
 5. **The Baby**: one for everyone, or one that already leans toward what it will be.
+
+## The armors: the Shield, the Gauntlet, the Coat
+
+`tools/blender/lines_armors.py` builds the Shield and loads the Gauntlet
+(`armors_hand.py`) and the Coat (`armors_coat.py`). These are the defensive items: a
+genius that is worn. Each is an object, not a rigged body. It floats at its partner's
+shoulder like any relic, and it can be put on.
+
+**Size.** Every model is made at the size one of the game's people would wear it (a
+person is about 2.4 units tall, a hand 0.26 long, shoulders 0.62 across), its foot at
+z = 0. `ref_top` is set so that, floating, it is as large as its stage says; `stands` in
+a form's `body` is how large it floats against that (a tower shield 1.6 of its stage's
+height, a buckler 0.8), since a thing that is all height reads smaller than a beast.
+
+**`wear`.** Every model carries an empty named `wear` where it meets its partner. To wear
+a piece, give the model a scale of one and bring `wear` onto the place (the model's
+transform is the place's, times the inverse of `wear`'s own in the model). Nothing needs
+to know which form it is: a piece that floats leaning or turned comes square when worn,
+because `wear` leans and turns with it.
+
+| Line | Where `wear` is | How it is turned |
+|---|---|---|
+| Shield | the middle of the grip, behind the boss | the model's own axes: on a hand slot it sits as the weapon kit's shields do (the grip along the fist, the face out of the back of the hand, the top up) |
+| Gauntlet | the middle of the wrist's opening; it is a left hand | as a hand slot is: in the game's axes +Y runs out of the thumb side, +Z out of the back of the hand, −X to the fingertips |
+| Coat | the nape: between the shoulders, at the base of the collar | the wearer's own: up, the wearer's left, the wearer's front. The Starter's clasp hangs a hand's breadth in front of its `wear`, at the throat |
+
+**Where each is alive.** A shield: the eye in its boss (or what took the boss's place: a
+mouth, a grille, a pair of eyes). A gauntlet: the pulse of light round its wrist. A coat:
+the eye in the clasp at its throat, which is the clasp it grew from.
+
+The Shield:
+
+| Key | What it is | Styles |
+|---|---|---|
+| `shape` | `[outline, width, height]` | `round` `oval` `drum` `tower` `door` `rect` `wide` `board` `carriage` `coffin` `heater` `kite` |
+| `curve` `dome` `vee` `thick` | bent round its partner; domed; folded down its middle; how thick | numbers |
+| `face` | what its face is made of | `iron` `leather` `wood` `polish` `glass` `stone` `timber` `black` `hide` `steel` `copper` |
+| `rim` | a style, or `[style, radius]` | `iron` `brass` `stone` `timber` `black` `leather` `polish` `none` |
+| `boss` | `[style, size]` | `eye` `dome` `spike` `ram` `flat` `hound` `ring` `none` |
+| `blazon` | the mark its partner may show, and the studs | `chevron` `bar` `arc` `ring` `none` |
+| `grown` | what it has grown or been given | `dents` `hammered` `patches` `notch` `teeth` `jaws` `strap` `worn` `spine` `bars` `brow` `footbar` `frame` `glints` `ripples` `tines` `vision` `hood` `hinges` `bar` `peep` `foot` `slit` `number` `merlons` `turrets` `wicket` `portcullis` `lintel` `sign` `pane` `feet` `crest` `plumes` `ribbons` `panel` `moss` `chains` `soot` `embers` `lattice` `eyes2` `ribs` `poles` `poles4` `shingles` `flange` `eye_top` `window` `cutwater` `waterline` `mooring` `ears` `torn_ear` `ruff` `scars3` `tokens` `old` `lacing` `beaters` `boards` `mouth` `seam`; and three that are the plate itself: `posts` `tiles` `halves` |
+| `grip` | how far up the grip is, as a part of its height | number |
+| `lean` `yaw` | how it is held, in degrees | numbers |
+
+The Gauntlet:
+
+| Key | What it is | Styles |
+|---|---|---|
+| `bulk` | how broad the hand is (1 is a hand) | number |
+| `stuff` | what it is made of | `leather` `iron` `stone` `bare` `dark` `cloth` |
+| `fingers` | how the fingers lie | `rest` `open` `flat` `spread` `fist` `pinch` `point` `beckon` `sign` `grip` `claw` `cup` `knock` `shake` |
+| `hold` | how the whole hand is held; or `[hold, x, y, z]`, leaned in degrees | `up` `palm_front` `palm_up` `palm_down` `side` `down` `reach` |
+| `cuff` | `[style, length]` | `glove` `flare` `sleeve` `plate` `arm` `wrap` `stone` |
+| `plates` | | `back` `knuckles` `bar` `palm` `pad` |
+| `finger_plates` | lames over the finger joints | `iron` `brass` `dark` |
+| `long_first` `fingers_long` | the first finger's length; all of them | numbers |
+| `grown` | what it has grown, or holds | `loupe` `tools` `gears` `wrench` `pulse_palm` `wire` `wheels` `lever` `worn_tips` `rope` `phial` `lamp` `keys` `ring_wrist` `seams` `sixth` `ember_heel` `face_plate` `split` `scars` `shard` `chain` `roots` `nails` `tuft` `glow` `eye_back` `worn_palm` `loop` `warm` `bands` `tassels` `post` `lens` `pale_palm` `band_light` `ribbon` `cuff_other` `ghost` `wisps` `patch` `stripes` `spur` `rivets` |
+
+The Coat:
+
+| Key | What it is | Styles |
+|---|---|---|
+| `kind` | the Starter is only its clasp | `clasp` `coat` |
+| `length` `flare` `chest` `waist` `shoulders` | its cut: shoulders to hem, and how it spreads | numbers |
+| `open` `cut` | how far it stands open down the front; how far it is cut away toward the hem | numbers |
+| `wave` `rag` `sweep` | a hem that moves; a hem that has been through things; `[side, back]`, the way the skirt is blown | numbers |
+| `sleeves` | a style, or `[left, right]`; `arm` is how thick | `hang` `flat` `reach` `spread` `back` `none` |
+| `collar` | `[style, size]` | `turned` `stand` `high` `spread` `ear` `hood` `fur` `cape` `whiskers` `frost` `none` |
+| `lining` | what shows where it is turned back (collar, lapels, cuffs); `field` is the field's light at those edges, `storm` is light all through | `plain` `field` `storm` `red` `fur` |
+| `mantle` | what its shoulder cape is made of | `oil` |
+| `clasp` | the size of the clasp at its throat | number |
+| `grown` | what it has grown, carries, or has had done to it | `belt` `buttons` `buttons2` `offices` `pack` `dust` `stamps` `pockets` `items` `pelt` `rime` `pads` `lamp` `smoke` `ghost_sleeve` `knife` `lapels` `eyes` `stars` `wind` `scorch` `epaulettes` `chain` `sash` `stock` `oath` `tug` `hook` `patches` `figure` `tokens` `whiskers` `drops` `current` `mantle` |
+
+All three take `stands` and `coat` (the shift), as above. A style may not be `null` (that
+takes the key off and the line's default comes back): say `none`.
+
+**Their gifts** (what a hybrid of another base wears to say it is half armor), as parts in
+`tools/blender/genius_relics.py`: the Shield's `broad-guard` (a small iron shield at the
+shoulder) and `shell` (a round shield across the back); the Gauntlet's `small-hands` (a
+pair of gloved hands) and `talon-grip`; the Coat's `wing-cloak` and `shadow-cloak`.

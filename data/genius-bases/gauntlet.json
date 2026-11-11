@@ -52,6 +52,26 @@
    "small-hands",
    "grip"
   ],
+  "body": {
+   "bulk": 1.0,
+   "stuff": "leather",
+   "fingers": "rest",
+   "hold": [
+    "up",
+    0,
+    8,
+    0
+   ],
+   "cuff": [
+    "glove",
+    0.07
+   ],
+   "plates": [],
+   "grown": [
+    "patch"
+   ],
+   "stands": 0.9
+  },
   "silhouette": "relic-glove"
  },
  "paths": [
@@ -73,6 +93,20 @@
    "features": [
     "sight-glass"
    ],
+   "body": {
+    "bulk": 1.08,
+    "fingers": "pinch",
+    "hold": "up",
+    "cuff": [
+     "flare",
+     0.15
+    ],
+    "grown": [
+     "loupe",
+     "tools"
+    ],
+    "stands": 1.0
+   },
    "prongs": [
     {
      "id": "gauntlet-fitter",
@@ -92,6 +126,29 @@
      "features": [
       "gears"
      ],
+     "body": {
+      "bulk": 1.16,
+      "fingers": "grip",
+      "cuff": [
+       "flare",
+       0.2
+      ],
+      "plates": [
+       "knuckles"
+      ],
+      "grown": [
+       "loupe",
+       [
+        "gears",
+        1.5
+       ],
+       "tools",
+       [
+        "wrench",
+        1.3
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "gauntlet-linemans-hand",
@@ -110,7 +167,28 @@
        },
        "features": [
         "pulse"
-       ]
+       ],
+       "body": {
+        "bulk": 1.22,
+        "fingers": "open",
+        "hold": "palm_front",
+        "cuff": [
+         "flare",
+         0.32
+        ],
+        "plates": [],
+        "grown": [
+         [
+          "pulse_palm",
+          1.2
+         ],
+         "wire",
+         "stripes",
+         "spur"
+        ],
+        "coat": "iron",
+        "stands": 1.1
+       }
       },
       {
        "id": "gauntlet-switch-hand",
@@ -129,7 +207,25 @@
        },
        "features": [
         "wheels"
-       ]
+       ],
+       "body": {
+        "bulk": 1.22,
+        "fingers": "grip",
+        "hold": "side",
+        "cuff": [
+         "flare",
+         0.2
+        ],
+        "grown": [
+         [
+          "gears",
+          1.5
+         ],
+         "lever",
+         "wheels"
+        ],
+        "stands": 1.2
+       }
       }
      ]
     },
@@ -151,6 +247,18 @@
      "features": [
       "talon-grip"
      ],
+     "body": {
+      "bulk": 1.12,
+      "fingers": "claw",
+      "cuff": [
+       "flare",
+       0.2
+      ],
+      "grown": [
+       "worn_tips",
+       "rope"
+      ]
+     },
      "finishes": [
       {
        "id": "gauntlet-careful-hand",
@@ -170,6 +278,26 @@
        "features": [
         "old-eyes"
        ],
+       "body": {
+        "bulk": 1.2,
+        "fingers": "cup",
+        "hold": [
+         "palm_up",
+         18
+        ],
+        "cuff": [
+         "flare",
+         0.22
+        ],
+        "grown": [
+         [
+          "worn_tips",
+          0.4
+         ],
+         "phial"
+        ],
+        "stands": 1.0
+       },
        "silhouette": "relic-glove"
       },
       {
@@ -189,7 +317,31 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "bulk": 1.2,
+        "fingers": "knock",
+        "hold": [
+         "side",
+         0,
+         16,
+         0
+        ],
+        "cuff": [
+         "flare",
+         0.22
+        ],
+        "grown": [
+         "worn_tips",
+         [
+          "lamp",
+          1.6
+         ],
+         "keys",
+         "rope"
+        ],
+        "stands": 1.0
+       }
       }
      ]
     },
@@ -209,6 +361,21 @@
      "features": [
       "ring"
      ],
+     "body": {
+      "bulk": 1.2,
+      "fingers": "spread",
+      "hold": [
+       "palm_down",
+       34
+      ],
+      "cuff": [
+       "plate",
+       0.18
+      ],
+      "grown": [
+       "ring_wrist"
+      ]
+     },
      "finishes": [
       {
        "id": "gauntlet-masons-fist",
@@ -227,7 +394,31 @@
        },
        "features": [
         "stone-skin"
-       ]
+       ],
+       "body": {
+        "bulk": 1.8,
+        "stuff": "stone",
+        "fingers": "fist",
+        "hold": [
+         "down",
+         -10,
+         0,
+         180
+        ],
+        "cuff": [
+         "stone",
+         0.1
+        ],
+        "grown": [
+         "seams",
+         [
+          "ring_wrist",
+          0.72
+         ]
+        ],
+        "coat": "slate",
+        "stands": 1.1
+       }
       },
       {
        "id": "gauntlet-sixth-finger",
@@ -246,7 +437,22 @@
        },
        "features": [
         "brush"
-       ]
+       ],
+       "body": {
+        "bulk": 1.16,
+        "fingers": "spread",
+        "hold": "up",
+        "cuff": [
+         "flare",
+         0.18
+        ],
+        "grown": [
+         "sixth",
+         "ring_wrist",
+         "bands"
+        ],
+        "stands": 1.1
+       }
       }
      ]
     }
@@ -270,6 +476,24 @@
    "features": [
     "plated"
    ],
+   "body": {
+    "bulk": 1.25,
+    "fingers": "fist",
+    "hold": [
+     "palm_down",
+     35
+    ],
+    "cuff": [
+     "plate",
+     0.18
+    ],
+    "plates": [
+     "back",
+     "knuckles"
+    ],
+    "grown": [],
+    "stands": 1.0
+   },
    "prongs": [
     {
      "id": "gauntlet-knuckle-duster",
@@ -289,6 +513,22 @@
      "features": [
       "brass-plate"
      ],
+     "body": {
+      "bulk": 1.32,
+      "hold": [
+       "side",
+       0,
+       20,
+       0
+      ],
+      "plates": [
+       "back",
+       [
+        "bar",
+        1.3
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "gauntlet-hammer-hand",
@@ -307,7 +547,31 @@
        },
        "features": [
         "ember"
-       ]
+       ],
+       "body": {
+        "bulk": 1.9,
+        "hold": [
+         "up",
+         14
+        ],
+        "cuff": [
+         "arm",
+         0.3
+        ],
+        "finger_plates": "dark",
+        "grown": [
+         [
+          "ember_heel",
+          1.2
+         ],
+         [
+          "face_plate",
+          1.2
+         ]
+        ],
+        "coat": "ember",
+        "stands": 1.25
+       }
       },
       {
        "id": "gauntlet-bare-knuckle",
@@ -327,6 +591,24 @@
        "features": [
         "scorched"
        ],
+       "body": {
+        "bulk": 1.08,
+        "stuff": "bare",
+        "hold": [
+         "palm_down",
+         35
+        ],
+        "cuff": [
+         "wrap",
+         0.2
+        ],
+        "plates": [],
+        "grown": [
+         "split"
+        ],
+        "coat": "ash",
+        "stands": 0.95
+       },
        "silhouette": "relic-glove"
       }
      ]
@@ -347,6 +629,18 @@
      "features": [
       "broad-guard"
      ],
+     "body": {
+      "bulk": 1.4,
+      "fingers": "open",
+      "hold": "palm_front",
+      "cuff": [
+       "plate",
+       0.2
+      ],
+      "plates": [
+       "pad"
+      ]
+     },
      "finishes": [
       {
        "id": "gauntlet-blade-catcher",
@@ -365,7 +659,17 @@
        },
        "features": [
         "talon-grip"
-       ]
+       ],
+       "body": {
+        "bulk": 1.4,
+        "fingers": "grip",
+        "finger_plates": "iron",
+        "grown": [
+         "shard",
+         "scars"
+        ],
+        "stands": 1.1
+       }
       },
       {
        "id": "gauntlet-iron-palm",
@@ -384,7 +688,30 @@
        },
        "features": [
         "iron-hide"
-       ]
+       ],
+       "body": {
+        "bulk": 1.55,
+        "stuff": "iron",
+        "fingers": "flat",
+        "cuff": [
+         "plate",
+         0.24
+        ],
+        "plates": [
+         [
+          "palm",
+          1.45
+         ]
+        ],
+        "grown": [
+         [
+          "rivets",
+          1.45
+         ]
+        ],
+        "coat": "iron",
+        "stands": 1.15
+       }
       }
      ]
     },
@@ -406,6 +733,30 @@
      "features": [
       "chain"
      ],
+     "body": {
+      "bulk": 1.45,
+      "fingers": "grip",
+      "hold": [
+       "up",
+       0,
+       10,
+       0
+      ],
+      "cuff": [
+       "arm",
+       0.3
+      ],
+      "plates": [
+       "back"
+      ],
+      "grown": [
+       [
+        "chain",
+        1.6
+       ]
+      ],
+      "stands": 1.15
+     },
      "finishes": [
       {
        "id": "gauntlet-long-hold",
@@ -424,7 +775,28 @@
        },
        "features": [
         "roots"
-       ]
+       ],
+       "body": {
+        "bulk": 1.4,
+        "fingers": "claw",
+        "hold": [
+         "down",
+         0,
+         0,
+         180
+        ],
+        "grown": [
+         [
+          "chain",
+          1.6
+         ],
+         [
+          "roots",
+          1.3
+         ]
+        ],
+        "stands": 1.2
+       }
       },
       {
        "id": "gauntlet-scruff-hand",
@@ -443,7 +815,24 @@
        },
        "features": [
         "talons"
-       ]
+       ],
+       "body": {
+        "bulk": 1.45,
+        "fingers": "claw",
+        "hold": [
+         "palm_down",
+         50
+        ],
+        "cuff": [
+         "arm",
+         0.36
+        ],
+        "grown": [
+         "nails",
+         "tuft"
+        ],
+        "stands": 1.1
+       }
       }
      ]
     }
@@ -467,6 +856,23 @@
    "features": [
     "glow"
    ],
+   "body": {
+    "bulk": 1.05,
+    "fingers": "open",
+    "hold": [
+     "palm_up",
+     22
+    ],
+    "cuff": [
+     "flare",
+     0.14
+    ],
+    "plates": [],
+    "grown": [
+     "glow"
+    ],
+    "stands": 1.0
+   },
    "prongs": [
     {
      "id": "gauntlet-helping-hand",
@@ -486,6 +892,23 @@
      "features": [
       "watching-eye"
      ],
+     "body": {
+      "bulk": 1.15,
+      "hold": [
+       "palm_down",
+       40
+      ],
+      "cuff": [
+       "flare",
+       0.16
+      ],
+      "grown": [
+       [
+        "eye_back",
+        1.2
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "gauntlet-hand-up",
@@ -504,7 +927,28 @@
        },
        "features": [
         "long-legs"
-       ]
+       ],
+       "body": {
+        "bulk": 1.25,
+        "fingers": "shake",
+        "hold": [
+         "palm_down",
+         56
+        ],
+        "cuff": [
+         "arm",
+         0.55
+        ],
+        "grown": [
+         [
+          "eye_back",
+          1.2
+         ],
+         "worn_palm",
+         "loop"
+        ],
+        "stands": 1.2
+       }
       },
       {
        "id": "gauntlet-steadying-hand",
@@ -523,7 +967,27 @@
        },
        "features": [
         "ember"
-       ]
+       ],
+       "body": {
+        "bulk": 1.45,
+        "hold": [
+         "palm_down",
+         26
+        ],
+        "cuff": [
+         "sleeve",
+         0.24
+        ],
+        "grown": [
+         [
+          "eye_back",
+          1.2
+         ],
+         "warm"
+        ],
+        "coat": "hearth",
+        "stands": 1.05
+       }
       }
      ]
     },
@@ -545,6 +1009,19 @@
      "features": [
       "far-eyes"
      ],
+     "body": {
+      "bulk": 1.1,
+      "fingers": "sign",
+      "hold": "palm_front",
+      "cuff": [
+       "flare",
+       0.18
+      ],
+      "grown": [
+       "bands",
+       "tassels"
+      ]
+     },
      "finishes": [
       {
        "id": "gauntlet-fingerpost",
@@ -563,7 +1040,23 @@
        },
        "features": [
         "sight-glass"
-       ]
+       ],
+       "body": {
+        "bulk": 1.2,
+        "fingers": "point",
+        "hold": "side",
+        "long_first": 1.8,
+        "cuff": [
+         "flare",
+         0.16
+        ],
+        "grown": [
+         "bands",
+         "post",
+         "lens"
+        ],
+        "stands": 1.25
+       }
       },
       {
        "id": "gauntlet-beckoner",
@@ -582,7 +1075,21 @@
        },
        "features": [
         "dark-eyed"
-       ]
+       ],
+       "body": {
+        "bulk": 1.2,
+        "stuff": "dark",
+        "fingers": "beckon",
+        "cuff": [
+         "flare",
+         0.3
+        ],
+        "grown": [
+         "pale_palm",
+         "tassels"
+        ],
+        "stands": 1.1
+       }
       }
      ]
     },
@@ -604,6 +1111,19 @@
      "features": [
       "ring"
      ],
+     "body": {
+      "bulk": 1.15,
+      "fingers": "flat",
+      "hold": "palm_front",
+      "cuff": [
+       "flare",
+       0.2
+      ],
+      "grown": [
+       "band_light",
+       "ribbon"
+      ]
+     },
      "finishes": [
       {
        "id": "gauntlet-handfast",
@@ -622,7 +1142,25 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "bulk": 1.25,
+        "fingers": "shake",
+        "hold": "side",
+        "cuff": [
+         "flare",
+         0.22
+        ],
+        "grown": [
+         [
+          "band_light",
+          1.3
+         ],
+         "ribbon",
+         "cuff_other"
+        ],
+        "stands": 1.1
+       }
       },
       {
        "id": "gauntlet-shades-glove",
@@ -642,6 +1180,27 @@
        "features": [
         "old-eyes"
        ],
+       "body": {
+        "bulk": 1.1,
+        "fingers": "open",
+        "hold": [
+         "up",
+         0,
+         -6,
+         0
+        ],
+        "cuff": [
+         "glove",
+         0.12
+        ],
+        "grown": [
+         "ghost",
+         "wisps",
+         "patch"
+        ],
+        "coat": "ash",
+        "stands": 1.05
+       },
        "silhouette": "relic-glove"
       }
      ]
