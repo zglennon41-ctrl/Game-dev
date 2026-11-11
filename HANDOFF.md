@@ -642,6 +642,17 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
 - Whether the Unfounded has a face.
 
 ---
+- **The owner on the 28 lines** (owner, 2026-11-12, on the tree page): "Some of the trees
+  are stronger than others. The wolf tree is incredible, the drake tree is weak, the
+  humanoid shaped designs are better for the new ones. The winged shield is goofy. The
+  other hybrids look incredible. I love the moth and the octopus as well. Maybe instead of
+  coats living armors that are a tank type companion and keep equipment type genius in the
+  hand." Read as: the Wolf is the standard a line is held to; the Drake is rebuilt to it;
+  the Winged Shield is redesigned; **the Coat line is replaced by the Living Armor**, a
+  companion that stands on its own feet and is a Bulwark; and no genius is worn: a weapon
+  or an item genius is in the hand (or carried), a companion walks beside. The "maybe" is
+  the owner's: the Living Armor is built to be looked at, and the Coat's data is kept in
+  git history if it is not liked.
 
 ## 10. What good looks like
 
