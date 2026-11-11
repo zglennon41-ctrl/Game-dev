@@ -55,13 +55,16 @@
    "ruff"
   ],
   "body": {
+   "build": {
+    "pitch": 0.0
+   },
    "ruff": [
-    "pup",
+    "tuft",
     1.0
    ],
    "maw": [
     "fangs",
-    0.6
+    0.5
    ],
    "face": [
     "young",
@@ -70,6 +73,20 @@
    "feet": [
     "toes",
     1.0
+   ],
+   "fur": [
+    "coat",
+    0.8
+   ],
+   "pose": [
+    [
+     "tilt",
+     0.22
+    ],
+    [
+     "tail",
+     0.5
+    ]
    ]
   }
  },
@@ -106,8 +123,8 @@
      1.0
     ],
     "ruff": [
-     "quills",
-     0.8
+     "fur",
+     0.85
     ],
     "carry": [
      "knots",
@@ -115,15 +132,19 @@
     ],
     "maw": [
      "fangs",
-     0.8
+     0.6
     ],
     "accent": "marigold",
+    "coat": "hearth",
+    "trim": "accent",
     "face": [
      "open",
      1.0
     ],
-    "coat": "hearth",
-    "trim": "accent",
+    "fur": [
+     "coat",
+     1.0
+    ],
     "marks": [
      [
       "saddle",
@@ -136,6 +157,16 @@
      [
       "tailtip",
       1.0
+     ]
+    ],
+    "pose": [
+     [
+      "turn",
+      -0.45
+     ],
+     [
+      "tail",
+      0.15
      ]
     ]
    },
@@ -163,10 +194,12 @@
        "chest": 1.08,
        "neck": 1.05,
        "legs": 1.14,
-       "tail": 1.2
+       "tail": 1.2,
+       "waist": 0.9,
+       "pitch": 0.12
       },
       "ruff": [
-       "quills",
+       "fur",
        1.0
       ],
       "paws": [
@@ -176,6 +209,34 @@
       "spine": [
        "ridge",
        0.9
+      ],
+      "marks": [
+       [
+        "bars",
+        1.0
+       ],
+       [
+        "ears",
+        1.0
+       ],
+       [
+        "tailtip",
+        1.0
+       ],
+       [
+        "socks",
+        0.9
+       ]
+      ],
+      "rest": [
+       "trot",
+       1.0
+      ],
+      "pose": [
+       [
+        "tail",
+        -0.1
+       ]
       ]
      },
      "finishes": [
@@ -200,27 +261,58 @@
        "body": {
         "build": {
          "chest": 1.22,
-         "neck": 1.08,
+         "neck": 1.12,
          "legs": 1.08,
          "tail": 1.25,
          "brush": 1.25,
-         "head": 1.04
+         "head": 1.04,
+         "waist": 1.0,
+         "pitch": -0.3
         },
         "ruff": [
-         "mane",
-         1.25
+         "shag",
+         1.2
         ],
         "tail": [
          "flag",
          1.2
         ],
         "aura": [
-         "motes",
-         1.5
+         "followers",
+         1.0
         ],
         "eyes": [
          "old",
          0.8
+        ],
+        "marks": [
+         [
+          "bars",
+          1.0
+         ],
+         [
+          "ears",
+          1.0
+         ],
+         [
+          "tailtip",
+          1.3
+         ],
+         [
+          "socks",
+          0.9
+         ],
+         [
+          "bib:light",
+          1.0
+         ]
+        ],
+        "rest": null,
+        "pose": [
+         [
+          "tail",
+          0.55
+         ]
         ]
        }
       },
@@ -246,18 +338,19 @@
        "body": {
         "build": {
          "chest": 0.98,
-         "waist": 0.84,
+         "waist": 0.8,
          "legs": 1.3,
          "girth": 0.9,
-         "neck": 1.1,
-         "tail": 1.3
+         "neck": 1.16,
+         "tail": 1.3,
+         "pitch": 0.36
         },
         "ears": [
          "back",
          1.0
         ],
         "ruff": [
-         "quills",
+         "fur",
          0.7
         ],
         "paws": [
@@ -276,7 +369,39 @@
          "harness",
          1.0
         ],
-        "carry": null
+        "carry": null,
+        "marks": [
+         [
+          "bars:light",
+          0.75
+         ],
+         [
+          "ears",
+          1.0
+         ],
+         [
+          "chevrons",
+          0.9
+         ]
+        ],
+        "rest": [
+         "point",
+         1.0
+        ],
+        "pose": [
+         [
+          "crane",
+          0.06
+         ],
+         [
+          "nod",
+          -0.2
+         ],
+         [
+          "tail",
+          -0.25
+         ]
+        ]
        }
       }
      ]
@@ -306,17 +431,49 @@
        "legs": 0.9,
        "girth": 1.2,
        "brush": 1.4,
-       "neck": 0.95
+       "neck": 0.95,
+       "pitch": 0.05
       },
       "ruff": [
-       "mane",
+       "shag",
        0.8
       ],
       "aura": [
        "windows",
        1.0
       ],
-      "coat": "hearth"
+      "marks": [
+       [
+        "blanket",
+        1.0
+       ],
+       [
+        "dapple:pale",
+        1.0
+       ],
+       [
+        "ears",
+        1.0
+       ],
+       [
+        "tailtip",
+        1.0
+       ]
+      ],
+      "rest": [
+       "sit",
+       1.0
+      ],
+      "pose": [
+       [
+        "turn",
+        -0.3
+       ],
+       [
+        "tail",
+        -0.45
+       ]
+      ]
      },
      "finishes": [
       {
@@ -345,11 +502,12 @@
          "girth": 1.4,
          "brush": 1.5,
          "head": 1.08,
-         "nape": 1.2
+         "nape": 1.2,
+         "pitch": 0.05
         },
         "ruff": [
-         "mane",
-         1.2
+         "shag",
+         1.15
         ],
         "aura": [
          "windows",
@@ -368,6 +526,38 @@
         "paws": [
          "set",
          0.8
+        ],
+        "marks": [
+         [
+          "ears",
+          1.0
+         ],
+         [
+          "tailtip",
+          1.3
+         ],
+         [
+          "socks:light",
+          1.0
+         ],
+         [
+          "bib:light",
+          1.0
+         ]
+        ],
+        "rest": [
+         "lie",
+         1.0
+        ],
+        "pose": [
+         [
+          "turn",
+          -0.3
+         ],
+         [
+          "tail",
+          -0.45
+         ]
         ]
        }
       },
@@ -392,12 +582,13 @@
          "waist": 0.86,
          "legs": 1.14,
          "girth": 0.85,
-         "neck": 1.18,
-         "brush": 0.8
+         "neck": 1.2,
+         "brush": 0.8,
+         "pitch": -0.35
         },
         "ruff": [
-         "quills",
-         0.9
+         "fur",
+         0.8
         ],
         "eyes": [
          "old",
@@ -425,8 +616,43 @@
          "shade",
          0.8
         ],
-        "coat": "ash",
-        "carry": null
+        "carry": null,
+        "marks": [
+         [
+          "blanket:pale",
+          1.0
+         ],
+         [
+          "ears:pale",
+          1.0
+         ],
+         [
+          "mask:pale",
+          1.0
+         ]
+        ],
+        "rest": [
+         "sit",
+         1.0
+        ],
+        "pose": [
+         [
+          "nod",
+          -0.15
+         ],
+         [
+          "turn",
+          0.5
+         ],
+         [
+          "tilt",
+          0.3
+         ],
+         [
+          "tail",
+          0.2
+         ]
+        ]
        }
       }
      ]
@@ -453,8 +679,8 @@
       "build": {
        "chest": 1.12,
        "neck": 1.22,
-       "pitch": -0.3,
-       "muzzle": 1.08
+       "muzzle": 1.08,
+       "pitch": -0.36
       },
       "ruff": [
        "crown",
@@ -464,7 +690,43 @@
        "back",
        0.6
       ],
-      "carry": null
+      "carry": null,
+      "maw": [
+       "open",
+       0.5
+      ],
+      "marks": [
+       [
+        "saddle",
+        1.0
+       ],
+       [
+        "bib:light",
+        1.2
+       ],
+       [
+        "ears",
+        1.0
+       ],
+       [
+        "tailtip",
+        1.0
+       ]
+      ],
+      "pose": [
+       [
+        "crane",
+        -0.44
+       ],
+       [
+        "nod",
+        -0.5
+       ],
+       [
+        "tail",
+        -0.3
+       ]
+      ]
      },
      "finishes": [
       {
@@ -490,9 +752,9 @@
          "chest": 1.3,
          "neck": 1.28,
          "nape": 1.2,
-         "pitch": -0.36,
          "muzzle": 1.1,
-         "girth": 1.15
+         "girth": 1.15,
+         "pitch": -0.36
         },
         "ruff": [
          "crown",
@@ -504,11 +766,51 @@
         ],
         "maw": [
          "open",
-         0.8
+         0.9
         ],
         "spine": [
          "ridge",
          1.2
+        ],
+        "marks": [
+         [
+          "saddle:dark",
+          1.0
+         ],
+         [
+          "bib:light",
+          1.3
+         ],
+         [
+          "ears",
+          1.0
+         ],
+         [
+          "tailtip",
+          1.3
+         ],
+         [
+          "stockings",
+          0.8
+         ]
+        ],
+        "rest": [
+         "sit",
+         1.0
+        ],
+        "pose": [
+         [
+          "crane",
+          -0.64
+         ],
+         [
+          "nod",
+          -0.6
+         ],
+         [
+          "tail",
+          -0.3
+         ]
         ]
        }
       },
@@ -531,9 +833,9 @@
         "build": {
          "chest": 1.14,
          "neck": 1.3,
-         "pitch": -0.2,
          "legs": 1.08,
-         "waist": 0.9
+         "waist": 0.9,
+         "pitch": -0.25
         },
         "ruff": [
          "crown",
@@ -547,10 +849,49 @@
          "far",
          1.0
         ],
-        "coat": "night",
         "tail": [
          "rings",
          1.0
+        ],
+        "maw": [
+         "fangs",
+         0.6
+        ],
+        "marks": [
+         [
+          "saddle",
+          1.0
+         ],
+         [
+          "bib",
+          1.0
+         ],
+         [
+          "ears",
+          1.0
+         ],
+         [
+          "socks",
+          1.0
+         ]
+        ],
+        "rest": [
+         "sit",
+         1.0
+        ],
+        "pose": [
+         [
+          "nod",
+          0.3
+         ],
+         [
+          "turn",
+          -0.35
+         ],
+         [
+          "tail",
+          -0.3
+         ]
         ]
        }
       }
@@ -586,10 +927,13 @@
      "chest": 0.94,
      "waist": 0.82,
      "muzzle": 1.14,
-     "pitch": 0.34,
-     "tail": 1.1
+     "tail": 1.1,
+     "pitch": 0.36
     },
-    "ruff": null,
+    "ruff": [
+     "scruff",
+     0.8
+    ],
     "spine": [
      "ridge",
      0.7
@@ -599,12 +943,16 @@
      1.0
     ],
     "accent": "madder",
+    "coat": "ash",
+    "trim": "accent",
     "face": [
      "fixed",
      1.0
     ],
-    "coat": "ash",
-    "trim": "accent",
+    "fur": [
+     "coat",
+     1.0
+    ],
     "marks": [
      [
       "muzzle",
@@ -617,6 +965,20 @@
      [
       "socks",
       1.0
+     ]
+    ],
+    "pose": [
+     [
+      "crane",
+      0.24
+     ],
+     [
+      "nod",
+      0.1
+     ],
+     [
+      "tail",
+      -0.25
      ]
     ]
    },
@@ -646,9 +1008,9 @@
        "chest": 0.94,
        "waist": 0.76,
        "muzzle": 1.16,
-       "pitch": 0.3,
        "tail": 1.35,
-       "neck": 1.12
+       "neck": 1.14,
+       "pitch": -0.2
       },
       "ears": [
        "split",
@@ -657,6 +1019,30 @@
       "spine": [
        "ridge",
        0.8
+      ],
+      "marks": [
+       [
+        "muzzle",
+        1.0
+       ],
+       [
+        "stripe",
+        1.0
+       ],
+       [
+        "stockings",
+        1.0
+       ]
+      ],
+      "pose": [
+       [
+        "turn",
+        -1.5
+       ],
+       [
+        "tail",
+        -0.4
+       ]
       ]
      },
      "finishes": [
@@ -685,10 +1071,10 @@
          "chest": 1.02,
          "waist": 0.8,
          "muzzle": 1.24,
-         "pitch": 0.42,
          "tail": 1.2,
          "neck": 1.1,
-         "jaw": 1.1
+         "jaw": 1.1,
+         "pitch": 0.36
         },
         "ears": [
          "hound",
@@ -709,6 +1095,38 @@
         "spine": [
          "ridge",
          0.8
+        ],
+        "marks": [
+         [
+          "stripe",
+          1.0
+         ],
+         [
+          "stockings",
+          1.0
+         ],
+         [
+          "tailtip",
+          1.0
+         ]
+        ],
+        "rest": [
+         "point",
+         1.0
+        ],
+        "pose": [
+         [
+          "crane",
+          0.49
+         ],
+         [
+          "nod",
+          0.25
+         ],
+         [
+          "tail",
+          0.7
+         ]
         ]
        }
       },
@@ -737,10 +1155,10 @@
          "chest": 1.12,
          "waist": 0.66,
          "muzzle": 1.2,
-         "pitch": 0.16,
          "tail": 1.5,
          "neck": 1.2,
-         "brush": 0.7
+         "brush": 0.7,
+         "pitch": 0.3
         },
         "ears": [
          "back",
@@ -754,7 +1172,39 @@
          "flag",
          1.0
         ],
-        "spine": null
+        "spine": null,
+        "marks": [
+         [
+          "muzzle",
+          1.0
+         ],
+         [
+          "stockings",
+          1.0
+         ],
+         [
+          "chevrons",
+          1.0
+         ],
+         [
+          "tailtip",
+          1.0
+         ]
+        ],
+        "rest": [
+         "gallop",
+         1.0
+        ],
+        "pose": [
+         [
+          "nod",
+          -0.25
+         ],
+         [
+          "tail",
+          -0.3
+         ]
+        ]
        }
       }
      ]
@@ -786,7 +1236,7 @@
        "head": 1.14,
        "jaw": 1.3,
        "nape": 1.25,
-       "pitch": 0.22
+       "pitch": 0.36
       },
       "maw": [
        "open",
@@ -799,6 +1249,42 @@
       "eyes": [
        "dark",
        0.8
+      ],
+      "ruff": [
+       "scruff",
+       1.0
+      ],
+      "marks": [
+       [
+        "muzzle",
+        1.5
+       ],
+       [
+        "bib",
+        1.1
+       ],
+       [
+        "socks",
+        1.0
+       ]
+      ],
+      "rest": [
+       "crouch",
+       1.0
+      ],
+      "pose": [
+       [
+        "crane",
+        0.09
+       ],
+       [
+        "nod",
+        -0.2
+       ],
+       [
+        "tail",
+        -0.25
+       ]
       ]
      },
      "finishes": [
@@ -829,8 +1315,8 @@
          "head": 1.26,
          "jaw": 1.45,
          "nape": 1.4,
-         "pitch": 0.26,
-         "stance": 0.08
+         "stance": 0.08,
+         "pitch": 0.36
         },
         "maw": [
          "glow",
@@ -852,7 +1338,35 @@
          "dark",
          1.0
         ],
-        "coat": "blood"
+        "marks": [
+         [
+          "muzzle",
+          1.5
+         ],
+         [
+          "under",
+          1.0
+         ],
+         [
+          "stockings",
+          0.8
+         ]
+        ],
+        "rest": null,
+        "pose": [
+         [
+          "crane",
+          0.14
+         ],
+         [
+          "nod",
+          -0.35
+         ],
+         [
+          "tail",
+          0.5
+         ]
+        ]
        }
       },
       {
@@ -881,9 +1395,10 @@
          "waist": 0.78,
          "head": 1.04,
          "jaw": 1.1,
-         "pitch": 0.5,
          "neck": 1.15,
-         "body": 1.08
+         "body": 1.08,
+         "croup": 0.12,
+         "pitch": 0.36
         },
         "maw": [
          "fangs",
@@ -915,10 +1430,37 @@
          "far",
          0.9
         ],
-        "coat": "night",
         "carry": [
          "shroud",
          1.2
+        ],
+        "marks": [
+         [
+          "muzzle",
+          1.0
+         ],
+         [
+          "stripe",
+          0.8
+         ]
+        ],
+        "rest": [
+         "stalk",
+         1.0
+        ],
+        "pose": [
+         [
+          "crane",
+          0.26
+         ],
+         [
+          "nod",
+          -0.1
+         ],
+         [
+          "tail",
+          -0.5
+         ]
         ]
        }
       }
@@ -949,8 +1491,9 @@
        "chest": 1.32,
        "waist": 1.0,
        "nape": 1.3,
-       "pitch": 0.3,
-       "head": 1.06
+       "head": 1.06,
+       "stance": 0.05,
+       "pitch": 0.35
       },
       "ruff": [
        "slate",
@@ -960,6 +1503,30 @@
       "paws": [
        "set",
        0.9
+      ],
+      "marks": [
+       [
+        "muzzle",
+        1.0
+       ],
+       [
+        "bands",
+        1.0
+       ],
+       [
+        "bib",
+        0.8
+       ]
+      ],
+      "pose": [
+       [
+        "nod",
+        -0.1
+       ],
+       [
+        "tail",
+        -0.5
+       ]
       ]
      },
      "finishes": [
@@ -988,11 +1555,11 @@
          "chest": 1.5,
          "waist": 1.2,
          "nape": 1.5,
-         "pitch": 0.3,
          "head": 1.14,
          "stance": 0.12,
          "tail": 0.7,
-         "muzzle": 0.92
+         "muzzle": 0.92,
+         "pitch": 0.3
         },
         "ruff": [
          "slate",
@@ -1020,7 +1587,30 @@
          "short",
          1.0
         ],
-        "coat": "slate"
+        "marks": [
+         [
+          "muzzle",
+          1.0
+         ],
+         [
+          "bands",
+          1.2
+         ],
+         [
+          "saddle:dark",
+          1.0
+         ]
+        ],
+        "pose": [
+         [
+          "nod",
+          -0.05
+         ],
+         [
+          "tail",
+          -0.5
+         ]
+        ]
        }
       },
       {
@@ -1045,9 +1635,9 @@
          "chest": 1.36,
          "waist": 0.92,
          "nape": 1.3,
-         "pitch": 0.2,
          "head": 1.1,
-         "jaw": 1.15
+         "jaw": 1.15,
+         "pitch": -0.05
         },
         "ruff": [
          "slate",
@@ -1069,7 +1659,30 @@
          "fangs",
          1.4
         ],
-        "coat": "iron"
+        "marks": [
+         [
+          "muzzle",
+          1.0
+         ],
+         [
+          "bands",
+          1.0
+         ],
+         [
+          "blaze",
+          1.0
+         ]
+        ],
+        "pose": [
+         [
+          "turn",
+          -0.45
+         ],
+         [
+          "tail",
+          0.2
+         ]
+        ]
        }
       }
      ]
@@ -1100,10 +1713,10 @@
    "body": {
     "build": {
      "neck": 1.2,
-     "pitch": -0.22,
      "legs": 1.08,
      "chest": 1.0,
-     "waist": 0.9
+     "waist": 0.9,
+     "pitch": -0.25
     },
     "eyes": [
      "dark",
@@ -1114,16 +1727,20 @@
      0.5
     ],
     "ruff": [
-     "quills",
+     "fur",
      0.6
     ],
-    "coat": "night",
     "accent": "lapis",
+    "coat": "night",
+    "trim": "accent",
     "face": [
      "aside",
      1.0
     ],
-    "trim": "accent",
+    "fur": [
+     "coat",
+     1.0
+    ],
     "marks": [
      [
       "under:pale",
@@ -1136,6 +1753,16 @@
      [
       "ears:light",
       1.0
+     ]
+    ],
+    "pose": [
+     [
+      "turn",
+      0.5
+     ],
+     [
+      "tail",
+      -0.4
      ]
     ]
    },
@@ -1161,10 +1788,10 @@
      "body": {
       "build": {
        "neck": 1.14,
-       "pitch": -0.12,
        "legs": 1.04,
        "girth": 1.2,
-       "chest": 1.18
+       "chest": 1.18,
+       "pitch": 0.1
       },
       "paws": [
        "set",
@@ -1174,7 +1801,35 @@
        "cloak",
        1.0
       ],
-      "spine": null
+      "spine": null,
+      "marks": [
+       [
+        "under:pale",
+        1.0
+       ],
+       [
+        "socks:light",
+        1.0
+       ],
+       [
+        "ears:light",
+        1.0
+       ],
+       [
+        "tailtip:light",
+        1.0
+       ]
+      ],
+      "rest": [
+       "walk",
+       1.0
+      ],
+      "pose": [
+       [
+        "tail",
+        -0.1
+       ]
+      ]
      },
      "finishes": [
       {
@@ -1201,11 +1856,11 @@
        "body": {
         "build": {
          "neck": 1.26,
-         "pitch": -0.26,
          "legs": 1.1,
          "girth": 1.25,
          "chest": 1.26,
-         "nape": 1.15
+         "nape": 1.15,
+         "pitch": -0.3
         },
         "carry": [
          [
@@ -1224,6 +1879,20 @@
         "eyes": [
          "dark",
          1.1
+        ],
+        "rest": [
+         "lie",
+         1.0
+        ],
+        "pose": [
+         [
+          "turn",
+          0.3
+         ],
+         [
+          "tail",
+          -0.1
+         ]
         ]
        }
       },
@@ -1248,13 +1917,13 @@
        "body": {
         "build": {
          "neck": 1.24,
-         "pitch": -0.1,
          "legs": 1.26,
          "girth": 0.9,
          "chest": 1.0,
          "waist": 0.8,
          "head": 1.1,
-         "muzzle": 0.94
+         "muzzle": 0.94,
+         "pitch": 0.25
         },
         "eyes": [
          "lamp",
@@ -1273,6 +1942,38 @@
         "tail": [
          "ember",
          0.8
+        ],
+        "marks": [
+         [
+          "under:pale",
+          1.0
+         ],
+         [
+          "bands:light",
+          1.0
+         ],
+         [
+          "ears:light",
+          1.0
+         ],
+         [
+          "blaze:light",
+          1.0
+         ]
+        ],
+        "rest": [
+         "sit",
+         1.0
+        ],
+        "pose": [
+         [
+          "nod",
+          -0.15
+         ],
+         [
+          "tail",
+          -0.2
+         ]
         ]
        }
       }
@@ -1299,11 +2000,11 @@
      "body": {
       "build": {
        "neck": 1.24,
-       "pitch": -0.3,
        "legs": 1.14,
        "chest": 0.98,
        "waist": 0.84,
-       "muzzle": 1.1
+       "muzzle": 1.1,
+       "pitch": -0.36
       },
       "ears": [
        "tall",
@@ -1317,8 +2018,46 @@
        "crescent",
        0.8
       ],
-      "ruff": null,
-      "coat": "moon"
+      "ruff": [
+       "scruff",
+       0.8
+      ],
+      "marks": [
+       [
+        "under:pale",
+        1.0
+       ],
+       [
+        "dapple:pale",
+        1.0
+       ],
+       [
+        "ears:light",
+        1.0
+       ],
+       [
+        "bib:pale",
+        1.0
+       ]
+      ],
+      "rest": [
+       "sit",
+       1.0
+      ],
+      "pose": [
+       [
+        "crane",
+        -0.24
+       ],
+       [
+        "nod",
+        -0.4
+       ],
+       [
+        "tail",
+        -0.5
+       ]
+      ]
      },
      "finishes": [
       {
@@ -1342,12 +2081,12 @@
        "body": {
         "build": {
          "neck": 1.3,
-         "pitch": -0.34,
          "legs": 1.2,
          "chest": 1.08,
          "waist": 0.8,
          "muzzle": 1.12,
-         "tail": 1.3
+         "tail": 1.3,
+         "pitch": -0.2
         },
         "ears": [
          "tall",
@@ -1369,7 +2108,25 @@
          "rings",
          1.0
         ],
-        "coat": "night"
+        "rest": null,
+        "pose": [
+         [
+          "nod",
+          0.1
+         ],
+         [
+          "turn",
+          -0.55
+         ],
+         [
+          "tail",
+          1.0
+         ],
+         [
+          "curl",
+          0.14
+         ]
+        ]
        }
       },
       {
@@ -1393,13 +2150,13 @@
        "body": {
         "build": {
          "neck": 1.34,
-         "pitch": -0.14,
          "legs": 1.2,
          "girth": 0.92,
          "chest": 1.04,
          "waist": 0.86,
          "brush": 0.6,
-         "tail": 1.2
+         "tail": 1.2,
+         "pitch": -0.35
         },
         "ears": [
          "tall",
@@ -1417,7 +2174,34 @@
          "frost",
          0.9
         ],
-        "coat": "frost"
+        "carry": [
+         "bird",
+         1.0
+        ],
+        "marks": [
+         [
+          "under:pale",
+          1.0
+         ],
+         [
+          "stockings:pale",
+          0.9
+         ],
+         [
+          "ears:light",
+          1.0
+         ]
+        ],
+        "pose": [
+         [
+          "nod",
+          0.3
+         ],
+         [
+          "tail",
+          -0.5
+         ]
+        ]
        }
       }
      ]
@@ -1443,14 +2227,14 @@
      "body": {
       "build": {
        "neck": 1.1,
-       "pitch": 0.06,
        "legs": 1.0,
        "girth": 1.15,
        "chest": 1.22,
-       "brush": 1.3
+       "brush": 1.3,
+       "pitch": 0.3
       },
       "ruff": [
-       "mane",
+       "shag",
        0.9
       ],
       "spine": [
@@ -1464,6 +2248,34 @@
       "eyes": [
        "dark",
        1.0
+      ],
+      "marks": [
+       [
+        "under:pale",
+        1.0
+       ],
+       [
+        "bands:light",
+        1.0
+       ],
+       [
+        "hackles:light",
+        1.0
+       ]
+      ],
+      "pose": [
+       [
+        "turn",
+        -0.3
+       ],
+       [
+        "tilt",
+        0.4
+       ],
+       [
+        "tail",
+        0.6
+       ]
       ]
      },
      "finishes": [
@@ -1489,12 +2301,12 @@
        "body": {
         "build": {
          "neck": 1.1,
-         "pitch": 0.0,
          "legs": 1.04,
          "girth": 1.2,
          "chest": 1.3,
          "brush": 1.3,
-         "head": 1.05
+         "head": 1.05,
+         "pitch": 0.2
         },
         "ruff": [
          "frost",
@@ -1512,7 +2324,26 @@
          "cold",
          0.8
         ],
-        "coat": "frost"
+        "marks": [
+         [
+          "under:pale",
+          1.0
+         ],
+         [
+          "stockings:pale",
+          0.8
+         ],
+         [
+          "mask:pale",
+          1.0
+         ]
+        ],
+        "pose": [
+         [
+          "tail",
+          -0.5
+         ]
+        ]
        }
       },
       {
@@ -1536,12 +2367,12 @@
        "body": {
         "build": {
          "neck": 1.1,
-         "pitch": 0.04,
          "legs": 1.04,
          "girth": 1.2,
          "chest": 1.3,
          "brush": 1.2,
-         "head": 1.05
+         "head": 1.05,
+         "pitch": -0.1
         },
         "ruff": [
          "ember",
@@ -1555,7 +2386,30 @@
          "ember",
          1.2
         ],
-        "coat": "ember"
+        "marks": [
+         [
+          "under",
+          1.0
+         ],
+         [
+          "bands",
+          1.0
+         ]
+        ],
+        "rest": [
+         "lie",
+         1.0
+        ],
+        "pose": [
+         [
+          "turn",
+          -0.25
+         ],
+         [
+          "tail",
+          0.3
+         ]
+        ]
        }
       }
      ]

@@ -34,6 +34,7 @@ import os
 import sys
 
 import bpy
+import bmesh  # noqa: I001  (bpy brings it)
 from mathutils import Matrix, Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -257,22 +258,42 @@ def build(r, b):
             r.shift(r.legs(tag), (s * b["stance"], 0, 0))
     if "paws" in b:
         _feet(r, b["paws"])
-    # how it carries itself (the second pass: a different black shape). The clips it borrows
-    # move it from wherever it stands, so the head and the tail may be carried anyhow; the
-    # legs may not be folded (it must still walk).
-    if "headturn" in b:              # its head turned to its left (or, negative, its right)
-        r.rotate(list(bk.NECK) + head, r.bone("Neck1"), Z, b["headturn"])
-    if "headtilt" in b:              # its head on one side
-        r.rotate(head, r.bone("Head"), Y, b["headtilt"])
-    if "nod" in b:                   # its muzzle down (or, negative, up) at the top of its neck
-        r.rotate(head, r.bone("Head"), X, b["nod"])
-    if "tailup" in b:                # its tail raised from the root (negative: tucked)
-        r.rotate(r.family("Tail1"), r.bone("Tail1"), X, b["tailup"])
-    if "tailcurl" in b:              # and curled, each joint a little more than the last
-        for i in range(2, 9):
-            r.rotate(r.family("Tail%d" % i), r.bone("Tail%d" % i), X, b["tailcurl"])
-    if "tailside" in b:              # its tail carried to one side
-        r.rotate(r.family("Tail1"), r.bone("Tail1"), Z, b["tailside"])
+    if "croup" in b:                 # its rump carried low (or, negative, high): all behind the shoulders, more the further back
+        ys, yh, k = r.bone("Torso3").y, r.bone("Back").y, b["croup"]
+        r.deform([], lambda p: Vector((p.x, p.y, 0.3 + (p.z - 0.3) * (1.0 - k * max(0.0, min(1.25, (p.y - ys) / (yh - ys)))))) if p.z > 0.3 else p, spatial=True)
+
+
+def carriage(r, spec):
+    """How it carries itself (the second pass: a different black shape), put on last, so that
+    everything it has grown goes with it and nothing is measured on a turned head. Its `pose`
+    is a list of [what, radians]: crane (its neck lowered; less than nothing raises it), nod
+    (its muzzle down at the top of its neck; less lifts it), turn (its head to its left; less,
+    to its right: a share at each joint of the neck), tilt (its head on one side), tail (its
+    tail raised from the root; less, tucked), curl (each joint of its tail a little more than
+    the last), side (its tail carried to one side). The clips it borrows move it from wherever
+    it stands, so the head and the tail may be carried anyhow; its legs are left as they are
+    (it must still walk)."""
+    head = _head(r)
+    chain = list(bk.NECK) + head
+    for what, a in each(spec.get("pose")):
+        if what == "crane":
+            for i, (bone, share) in enumerate((("Neck1", 0.5), ("Neck2", 0.3), ("Neck3", 0.2))):
+                r.rotate(chain[i:], r.bone(bone), X, a * share)
+        elif what == "nod":
+            r.rotate(head, r.bone("Head"), X, a)
+        elif what == "turn":
+            for i, (bone, share) in enumerate((("Neck1", 0.3), ("Neck2", 0.25), ("Neck3", 0.2), ("Head", 0.25))):
+                r.rotate(chain[i:], r.bone(bone), Z, a * share)
+        elif what == "tilt":
+            fwd = (r.bone("Head") - r.bone("Neck3")).normalized()
+            r.rotate(head, r.bone("Head"), fwd, a)
+        elif what == "tail":
+            r.rotate(r.family("Tail1"), r.bone("Tail1"), X, a)
+        elif what == "curl":
+            for i in range(2, 9):
+                r.rotate(r.family("Tail%d" % i), r.bone("Tail%d" % i), X, a)
+        elif what == "side":
+            r.rotate(r.family("Tail1"), r.bone("Tail1"), Z, a)
 
 
 # --- small builders ---------------------------------------------------------------------
@@ -346,10 +367,39 @@ def _has(r, slot, *styles):
     return any(st.partition(":")[0] in styles for st, _ in each(getattr(r, "_spec", {}).get(slot)))
 
 
-def _later(r, kind, what, items, pivot, bone, side="", n=None):
+def _later(r, kind, what, items, pivot, bone, side="", n=None, solid=None, under=None):
     """A piece that moves by its name (docs/genius-lines.md, "What moves"): it is made as the
-    body is, and put on its bone once the body has been brought to size."""
-    r._late.append({"kind": kind, "what": what, "items": items, "pivot": Vector(pivot), "bone": bone, "side": side, "n": n})
+    body is, and put on its bone once the body has been brought to size. items are
+    [(geometry, material), ...]; or solid is (geometry, [the material of each face]), for a
+    thing of one closed skin and several materials (an eye). under: the name of a piece made
+    before it that it rides (a lamp's light breathes inside the lamp that sways)."""
+    if not hasattr(r, "_late"):
+        return
+    r._late.append({"kind": kind, "what": what, "items": items, "pivot": Vector(pivot), "bone": bone, "side": side, "n": n, "solid": solid, "under": under})
+
+
+def _solid(name, geo, mats, smooth=True):
+    """One mesh of several materials: mats[i] is the material of face i."""
+    verts, faces = geo
+    me = bpy.data.meshes.new(name)
+    me.from_pydata([tuple(p) for p in verts], [], [tuple(f) for f in faces])
+    names = []
+    for m in mats:
+        if m.name not in names:
+            names.append(m.name)
+            me.materials.append(m)
+    for p, m in zip(me.polygons, mats):
+        p.material_index = names.index(m.name)
+        p.use_smooth = smooth
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(me)
+    bm.free()
+    me.update()
+    ob = bpy.data.objects.new(name, me)
+    bpy.context.collection.objects.link(ob)
+    return ob
 
 
 def _ring_blades(r, name, ring, bone, n, L, width, material, a0=0.02, a1=0.98, sweep=0.9, out=0.42, lift=0.05, belly=0.3, grow=1.0, alt=None, wobble=0.0):
@@ -371,6 +421,48 @@ def _ring_blades(r, name, ring, bone, n, L, width, material, a0=0.02, a1=0.98, s
     _add(r, name, geo, bone, material)
     if geo2:
         _add(r, name + "_b", geo2, bone, alt)
+
+
+def _lock(base, out, L, width, lie=0.9, lift=0.2, droop=0.2, back=Y):
+    """One lock of fur: it stands out a little from where it grows (out), lies back along the
+    body, and falls at its tip."""
+    base, out = V(base), V(out).normalized()
+    mid = base + out * (L * lift) + V(back) * (L * lie * 0.5)
+    tip = base + out * (L * lift * 0.45) + V(back) * (L * lie) - Z * (L * droop)
+    return g.tongue([base, mid, tip], [width * 0.8, width, width * 0.1], thick=0.45, normal=out)
+
+
+def _locks(r, name, ring, bone, n, L, width, material, a0=0.04, a1=0.96, lie=0.9, lift=0.2, droop=0.2, grow=1.0, alt=None, wobble=0.3, seed=0.0):
+    """Fur round a section of the neck (ring = y, centre z, half-width, half-height), from angle
+    a0 to a1 (in half-turns: 0 is its left side, 0.5 the top, 1 its right): locks, no two the
+    same length, so that its edge is broken as fur's is (the second pass, rule 4)."""
+    y, zc, rx, rz = ring
+    geo, geo2 = None, None
+    for i in range(n):
+        a = math.pi * (a0 + (a1 - a0) * (i + 0.22 * math.sin(i * 5.1 + seed)) / max(1, n - 1))
+        d = Vector((math.cos(a), 0, math.sin(a)))
+        Li = L * (1.0 + wobble * math.sin(i * 2.4 + 0.7 + seed))
+        base = Vector((rx * 0.84 * grow * d.x, y - 0.04, zc + rz * 0.84 * grow * d.z))
+        lock = _lock(base, d, Li, width * (1.0 + 0.25 * math.sin(i * 3.7 + seed)), lie=lie, lift=lift, droop=droop * (0.35 + 0.65 * abs(d.x)))
+        if alt is not None and i % 2 == 1:
+            geo2 = g.merge(geo2, lock)
+        else:
+            geo = g.merge(geo, lock)
+    _add(r, name, geo, bone, material)
+    if geo2:
+        _add(r, name + "_b", geo2, bone, alt)
+
+
+def _cheeks(r, A, size, material):
+    """The fur of its cheeks: a wolf's face is broad under the ears."""
+    e = A.eye
+    geo = None
+    for s in (1, -1):
+        for i, (dy, dz, L) in enumerate(((0.2, -0.16, 0.3), (0.26, -0.04, 0.26), (0.14, -0.27, 0.24))):
+            y, z = e.y + dy, e.z + dz
+            b0 = Vector((s * (r.side(y, z, window=0.08) - 0.03), y, z))
+            geo = g.merge(geo, _lock(b0, Vector((s, 0, -0.25)), L * size, 0.17 * size, lie=0.75, lift=0.42, droop=0.3 + 0.12 * i))
+    _add(r, "cheeks", geo, "Head", material)
 
 
 def _sheet(r, name, ys, section, material, thick=0.035):
@@ -478,7 +570,10 @@ def grow_maw(r, A, style, size):
         _add(r, "tongue", g.tongue([t0, (t0 + tip) / 2 + Vector((0, 0, 0.03)), tip], [0.2, 0.18, 0.1], thick=0.3, normal=Z), head, mat("hide_tongue"))
         if style == "glow":
             c = Vector((0, hinge.y - 0.12, zcut - 0.02))
-            _add(r, "throat_light", g.ico(c, 0.13 * size, sub=1, scale=(1.0, 1.3, 0.8)), head, field("throat", 3.6))
+            if _own(r):
+                _later(r, "pulse", "throat", [(g.ico(c, 0.13 * size, sub=2, scale=(1.0, 1.3, 0.8)), field("throat", 3.6))], c, "Head")
+            else:
+                _add(r, "throat_light", g.ico(c, 0.13 * size, sub=1, scale=(1.0, 1.3, 0.8)), head, field("throat", 3.6))
         # the lower fangs
         low = None
         for s in (1, -1):
@@ -520,12 +615,13 @@ def grow_eyes(r, A, style, size):
             for i in range(2):
                 b0 = Vector((s * (e.x - 0.01 + 0.03 * i), e.y - 0.02 + 0.08 * i, e.z + 0.07))
                 geo = g.merge(geo, g.blade(b0, b0 + Vector((s * (0.08 + 0.04 * i), 0.2 + 0.05 * i, 0.07 + 0.03 * i)) * size, 0.07, normal=Vector((s, 0, 0.6))))
-        _add(r, "brows", geo, "Head", mat("fur_pale"))
+        if not _has(r, "face", *FACES):       # (a face's own mark over the eye goes pale and long)
+            _add(r, "brows", geo, "Head", mat("fur_pale"))
         _paint(r, lambda c, n: c.y < A.nose.y + 0.34, mat("fur_grey"))
     elif style == "third":           # a third eye-mark, pale, in the fur of its brow
         c = Vector((0, e.y + 0.02, e.z + 0.2))
         up = Vector((0, 0.42, 0.9)).normalized()
-        _add(r, "third_mark", g.blade(c - up * 0.2 * size, c + up * 0.26 * size, 0.2 * size, normal=Vector((0, -0.9, 0.42)), belly=0.45), "Head", mat("fur_pale"))
+        _add(r, "third_mark", g.blade(c - up * 0.2 * size, c + up * 0.26 * size, 0.2 * size, normal=Vector((0, -0.9, 0.42)), belly=0.45), "Head", _trim(r, "fur_pale", "pale"))
         _add(r, "third_eye", g.ico(c + Vector((0, -0.05, 0.02)), 0.065 * size, sub=1, scale=(0.75, 0.6, 1.25)), "Head", field("eyes", 4.0))
     elif style == "far":             # bright, long, under a dark brow
         geo, vis = None, None
@@ -533,9 +629,9 @@ def grow_eyes(r, A, style, size):
             c = Vector((s * (e.x + 0.02), e.y - 0.02, e.z))
             geo = g.merge(geo, g.ico(c, 0.085 * size, sub=1, scale=(0.6, 1.7, 0.7)))
             vis = g.merge(vis, g.box(c + Vector((s * 0.02, 0.0, 0.11)), (0.2, 0.42, 0.05), rot=(0.25, s * -0.5, 0)))
-        if not _has(r, "face", *FACES):
+        if not _has(r, "face", *FACES):       # (a face makes its eyes long and lowers its lids)
             _add(r, "far_eyes", geo, "Head", field("eyes", 4.0))
-        _add(r, "brow_shade", vis, "Head", mat("horn"))
+            _add(r, "brow_shade", vis, "Head", mat("horn"))
     elif style == "second":          # a second pair, small, above and behind the first
         geo = None
         for s in (1, -1):
@@ -544,7 +640,30 @@ def grow_eyes(r, A, style, size):
 
 
 def grow_ruff(r, A, style, size):
-    if style == "pup":
+    # the Wolf's own ruffs, as fur with a broken edge (the second pass): tuft, fur, shag
+    if style == "tuft":              # a pup's: one soft row
+        _locks(r, "ruff", A.neck["Neck2"], "Neck2", 8, 0.34 * size, 0.24, mat("fur_ruff"), lift=0.34, lie=0.7, droop=0.12, seed=1.0)
+        _cheeks(r, A, 0.8 * size, mat("fur_light"))
+    elif style == "scruff":          # a lean one's: a short row at the root of its neck, and its cheeks
+        _locks(r, "ruff", A.neck["Neck1"], "Neck1", 9, 0.36 * size, 0.22, mat("fur_ruff"), a0=0.0, a1=1.0, lift=0.24, droop=0.2, seed=0.6)
+        _cheeks(r, A, 0.9 * size, mat("fur_light"))
+    elif style == "fur":             # a grown wolf's ruff: three rows of locks, and its cheeks
+        for row, (bone, n, L) in enumerate((("Neck1", 10, 0.56), ("Neck2", 9, 0.48), ("Neck3", 8, 0.38))):
+            _locks(r, "ruff_%d" % row, A.neck[bone], bone, n, L * size, 0.25, mat("fur_ruff") if row != 1 else mat("fur_light"),
+                   a0=0.0, a1=1.0, lift=0.26, droop=0.24, seed=row * 1.7)
+        _cheeks(r, A, size, mat("fur_light"))
+    elif style == "shag":            # a full mane of it, down to the shoulders and under the throat
+        rows = (("Neck3", 9, 0.5, 0.0), ("Neck2", 11, 0.66, -0.16), ("Neck1", 12, 0.8, -0.26), ("Torso3", 12, 0.78, -0.2))
+        for row, (bone, n, L, under) in enumerate(rows):
+            _locks(r, "mane_%d" % row, A.neck[bone], bone, n, L * size, 0.3, mat("fur_ruff"), a0=under, a1=1.0 - under,
+                   lift=0.3, droop=0.34, alt=mat("fur_light") if row % 2 else None, wobble=0.34, seed=row * 2.3)
+        _cheeks(r, A, 1.25 * size, mat("fur_ruff"))
+        fl = None                     # the forelock, between the ears
+        for i, x in enumerate((-0.1, 0.02, 0.12)):
+            b0 = Vector((x, A.head.y - 0.06, A.skull - 0.04))
+            fl = g.merge(fl, _lock(b0, Vector((x * 2, -0.2, 1)), (0.34 + 0.06 * i) * size, 0.18, lie=0.8, lift=0.4, droop=0.0))
+        _add(r, "forelock", fl, "Head", mat("fur_ruff"))
+    elif style == "pup":
         _ring_blades(r, "ruff", A.neck["Neck2"], "Neck2", 9, 0.3 * size, 0.2, mat("fur_ruff"), sweep=0.7, out=0.6)
     elif style == "quills":
         for row, (bone, n, L) in enumerate((("Neck1", 13, 0.5), ("Neck2", 12, 0.44), ("Neck3", 11, 0.36))):
@@ -563,7 +682,8 @@ def grow_ruff(r, A, style, size):
     elif style == "crown":           # a pale ring of fur standing up round its head
         y = A.head.y + 0.16
         ring = (y, A.skull - 0.36, 0.36, 0.36)
-        _ring_blades(r, "crown", ring, "Head", 15, 0.5 * size, 0.2, mat("fur_pale"), a0=-0.12, a1=1.12, sweep=0.22, out=1.0, lift=0.0, belly=0.36, wobble=0.1)
+        _ring_blades(r, "crown", ring, "Head", 15, 0.5 * size, 0.2, mat("fur_pale"), a0=-0.12, a1=1.12, sweep=0.22, out=1.0, lift=0.0, belly=0.36, wobble=0.1,
+                     alt=_am("light") if _own(r) and r._spec.get("trim") else None)
         if size > 1.15:               # a second, longer ring behind the first
             _ring_blades(r, "crown2", (y + 0.16, ring[1], 0.38, 0.38), "Neck3", 13, 0.72 * size, 0.24, mat("fur_cream"), a0=-0.1, a1=1.1, sweep=0.34, out=1.0, lift=0.0, belly=0.36, wobble=0.14)
     elif style == "slate":           # the fur over its shoulders gone grey and hard as slate
@@ -687,7 +807,7 @@ def grow_tail(r, A, style, size):
             b0 = tb[i] + Vector((0, 0, -0.04))
             L = (0.42 + 0.12 * math.sin(i * 1.3)) * size
             geo = g.blade(b0, b0 + Vector((0, 0.16, -L)), 0.3, normal=X, belly=0.4)
-            _add(r, "tailflag_%d" % i, geo, "Tail%d" % (i + 1), mat("fur_pale") if i >= 5 else mat("fur_light"))
+            _add(r, "tailflag_%d" % i, geo, "Tail%d" % (i + 1), _trim(r, "fur_pale", "light") if i >= 5 else mat("fur_light"))
     elif style == "smoke":           # it goes to smoke at the end
         for i in range(4, 8):
             b0 = tb[i]
@@ -698,13 +818,20 @@ def grow_tail(r, A, style, size):
         tip = tb[7]
         post = [tip, tip + Vector((0, 0.1, 0.28 * size)), tip + Vector((0, 0.3, 0.36 * size))]
         _add(r, "taillamp_arm", g.tube(post, 0.035, n=5), "Tail8", mat("metal_iron"))
-        _add_items(r, "taillamp", _lantern(post[-1], 0.17 * size, "lamp", 3.4), "Tail8")
+        _hang_lamp(r, "taillamp", post[-1], 0.17 * size, "Tail8")
     elif style == "rings":           # pale rings round it
         for i in (2, 4, 6):
             c = tb[i]
             rad = max(0.08, r.top(c.y, half_width=0.2, window=0.1) - c.z) + 0.035
-            geo = g.loft([g.ring(c + Vector((0, -0.07, 0)), rad, rad, n=8, u=X, v=Z), g.ring(c + Vector((0, 0.07, 0)), rad, rad, n=8, u=X, v=Z)], caps=True)
-            _add(r, "tailring_%d" % i, geo, "Tail%d" % (i + 1), mat("fur_pale"))
+            d = (tb[min(7, i + 1)] - tb[i - 1]).normalized() if _own(r) else Y      # (the Wolf's lie across its tail however it is carried)
+            u = X if abs(d.dot(X)) < 0.9 else Z
+            v = d.cross(u).normalized()
+            u = v.cross(d).normalized()
+            if _own(r):
+                rad = 0.115 + 0.012 * (6 - i)
+            nn = 12 if _own(r) else 8
+            geo = g.loft([g.ring(c - d * 0.07, rad, rad, n=nn, u=u, v=v), g.ring(c + d * 0.07, rad, rad, n=nn, u=u, v=v)], caps=True)
+            _add(r, "tailring_%d" % i, geo, "Tail%d" % (i + 1), _trim(r, "fur_pale", "pale"))
     elif style == "ember":           # a coal at the end of it
         tip = tb[7]
         _add(r, "tail_coal", g.ico(tip + Vector((0, 0.05, 0)), 0.15 * size, sub=1, scale=(0.9, 1.3, 0.9)), "Tail8", field("ember", 2.6))
@@ -732,7 +859,7 @@ def grow_flags(r, A, style, size):
             else:
                 geo = g.merge(geo, bl)
         _add(r, "flag_" + tag, geo, _spine_w(r, geo), m)
-        _add(r, "flag2_" + tag, under, _spine_w(r, under), mat("fur_ruff") if style != "light" else m)
+        _add(r, "flag2_" + tag, under, _spine_w(r, under), _trim(r, "fur_ruff") if style != "light" else m)
 
 
 def grow_armor(r, A, style, size):
@@ -740,7 +867,7 @@ def grow_armor(r, A, style, size):
     if style == "brow":              # a flat plate across the brow
         c = Vector((0, e.y + 0.08, e.z + 0.2))
         _add(r, "brow_plate", g.box(c, (0.56 * size, 0.56, 0.08), rot=(0.5, 0, 0)), "Head", mat("slate_light"))
-        _add(r, "brow_ridge", g.box(c + Vector((0, -0.02, 0.05)), (0.1, 0.6, 0.08), rot=(0.5, 0, 0)), "Head", mat("slate"))
+        _add(r, "brow_ridge", g.box(c + Vector((0, -0.02, 0.05)), (0.1, 0.6, 0.08), rot=(0.5, 0, 0)), "Head", _trim(r, "slate"))
         geo = None
         for s in (1, -1):
             geo = g.merge(geo, g.box(c + Vector((s * 0.3, 0.1, -0.12)), (0.08, 0.4, 0.3), rot=(0.5, 0, s * 0.1)))
@@ -748,7 +875,7 @@ def grow_armor(r, A, style, size):
     elif style == "chest":           # a flat plate across the chest
         c = Vector((0, A.chest_y - 0.05, A.sh.z + 0.12))
         _add(r, "chest_plate", g.box(c, (0.74 * size, 0.09, 0.66 * size), rot=(-0.22, 0, 0)), "Torso3", mat("slate_light"))
-        _add(r, "chest_boss", g.box(c + Vector((0, -0.06, 0.0)), (0.2, 0.08, 0.5 * size), rot=(-0.22, 0, 0)), "Torso3", mat("slate"))
+        _add(r, "chest_boss", g.box(c + Vector((0, -0.06, 0.0)), (0.2, 0.08, 0.5 * size), rot=(-0.22, 0, 0)), "Torso3", _trim(r, "slate"))
         geo = None
         for s in (1, -1):
             geo = g.merge(geo, g.box(c + Vector((s * 0.43 * size, 0.16, 0.04)), (0.09, 0.44, 0.56 * size), rot=(-0.1, 0, s * -0.5)))
@@ -761,21 +888,27 @@ def grow_armor(r, A, style, size):
             a = 2 * math.pi * i / n
             c = Vector((math.cos(a) * (rx + 0.03), y, zc + math.sin(a) * (rz + 0.03)))
             geo = g.merge(geo, g.ico(c, 0.075 * size, sub=1, scale=(1.0, 0.5, 1.0) if i % 2 else (0.55, 1.0, 1.0)))
-        p = Vector((0, y - 0.03, zc - rz - 0.03))
+        p = p0 = Vector((0, y - 0.03, zc - rz - 0.03))
+        hang = None
         for i in range(5):
             p = p + Vector((0, 0.0, -0.12 * size))
-            geo = g.merge(geo, g.ico(p, 0.07 * size, sub=1, scale=(1.0, 0.5, 1.0) if i % 2 else (0.5, 1.0, 1.0)))
-        _add(r, "chain", geo, "Neck2", mat("metal_iron"))
-        _add(r, "chain_weight", g.lathe([(0.02, 0.1), (0.1, 0.02), (0.13, -0.1), (0.05, -0.16)], n=6, centre=p + Vector((0, 0, -0.14 * size))), "Neck2", mat("metal_iron_light"))
+            hang = g.merge(hang, g.ico(p, 0.07 * size, sub=1, scale=(1.0, 0.5, 1.0) if i % 2 else (0.5, 1.0, 1.0)))
+        weight = g.lathe([(0.02, 0.1), (0.1, 0.02), (0.13, -0.1), (0.05, -0.16)], n=8 if _own(r) else 6, centre=p + Vector((0, 0, -0.14 * size)))
+        if _own(r):                  # what hangs of it swings, and rings on the low note
+            _add(r, "chain", geo, "Neck2", mat("metal_iron"))
+            _later(r, "sway", "chain", [(hang, mat("metal_iron")), (weight, _trim(r, "metal_iron_light"))], p0, "Neck2")
+        else:
+            _add(r, "chain", g.merge(geo, hang), "Neck2", mat("metal_iron"))
+            _add(r, "chain_weight", weight, "Neck2", mat("metal_iron_light"))
     elif style == "harness":         # a strap round the chest and a tag
         y = A.t3.y + 0.3
         zt, zb = r.top(y), r.bottom(y, half_width=0.1)
         zc, rz, rx = (zt + zb) / 2, (zt - zb) / 2 + 0.035, r.side(y, (zt + zb) / 2) + 0.035
         geo = g.loft([g.ring((0, y - 0.07, zc), rx, rz, n=12, u=X, v=Z), g.ring((0, y + 0.07, zc), rx, rz, n=12, u=X, v=Z)], caps=False)
-        _add(r, "harness", geo, "Torso3", mat("leather"))
+        _add(r, "harness", geo, "Torso3", _trim(r, "leather"))
         _add(r, "harness_tag", g.ico((0, A.chest_y - 0.04, A.sh.z + 0.2), 0.09, sub=1, scale=(1.0, 0.4, 1.2)), "Torso3", mat("metal_brass"))
     elif style == "scars":           # healed lines across the coat
-        m = mat("hide_scar")
+        m = _trim(r, "hide_scar")
         for i, (side, ya, yb, za, zb) in enumerate(((1, -0.6, 0.5, 0.25, -0.1), (1, -0.3, 0.7, -0.05, 0.2), (-1, -0.7, 0.2, 0.05, 0.3), (-1, -0.1, 0.8, 0.3, -0.05), (1, 0.2, 0.9, -0.2, -0.3))):
             zmid = (A.withers + A.belly) / 2
             r.flank_line("scar_%d" % i, A.t3.y + ya + 0.6, A.t3.y + yb + 0.6, lambda t, za=za, zb=zb, zmid=zmid: zmid + 0.25 + za + (zb - za) * t, m, height=0.05 * size, depth=0.06, side=side)
@@ -783,26 +916,71 @@ def grow_armor(r, A, style, size):
         _add(r, "scar_muzzle", geo, "Head", m)
 
 
+def _own(r):
+    """Whether the body being built is the Wolf's own (another animal on its rig is built
+    through here too, and what its styles do for it is not changed)."""
+    return getattr(r, "_own", False)
+
+
+def _hang_lamp(r, name, at, s, bone, strength=3.4, glow_name="lamp"):
+    """A lamp hung on the body. The Wolf's own sways on its hook, its light breathes, and its
+    cap is enamelled in its Path's colour; another animal's hangs as it always did."""
+    if not _own(r):
+        _add_items(r, name, _lantern(at, s, glow_name, strength), bone)
+        return
+    at = V(at)
+    c = at + Vector((0, 0, -s * 1.5))
+    cap, iron, brass = _trim(r, "metal_brass"), mat("metal_iron"), mat("metal_brass")
+    items = [
+        (g.tube([at, at + Vector((0, 0, -s * 0.55))], s * 0.07, n=5), iron),
+        (g.lathe([(s * 0.12, s * 0.95), (s * 0.5, s * 0.6), (s * 0.56, s * 0.52)], n=8, centre=c), cap),
+        (g.lathe([(s * 0.52, -s * 0.62), (s * 0.3, -s * 0.8)], n=8, centre=c), brass),
+    ]
+    for k in range(4):
+        a = math.pi / 4 + k * math.pi / 2
+        p = c + Vector((math.cos(a) * s * 0.5, math.sin(a) * s * 0.5, 0))
+        items.append((g.tube([p + Vector((0, 0, -s * 0.62)), p + Vector((0, 0, s * 0.55))], s * 0.05, n=4), iron))
+    _later(r, "sway", name, items, at, bone)
+    _later(r, "pulse", name + "_light", [(g.ico(c, s * 0.36, sub=2, scale=(1, 1, 1.25)), field(glow_name, strength))], c, bone, under="sway_" + name)
+
+
+def _hung(r, name, items, pivot, bone):
+    """Things that hang from the body: on the Wolf's own they sway about where they hang from."""
+    if _own(r):
+        _later(r, "sway", name, items, pivot, bone)
+    else:
+        _add_items(r, name, items, bone)
+
+
 def grow_carry(r, A, style, size):
     y, zc, rx, rz = A.neck["Neck1"]
     throat = Vector((0, (A.n1.y + A.n2.y) / 2, r.bottom((A.n1.y + A.n2.y) / 2, half_width=0.08)))
     if style == "lamp":              # a lamp riding at its collar
-        _collar(r, A, mat("leather"))
-        _add_items(r, "lamp", _lantern(throat + Vector((0, -0.02, 0.02)), 0.2 * size, "lamp", 3.4), "Neck1")
+        _collar(r, A, _trim(r, "leather", "dark"))
+        _hang_lamp(r, "lamp", throat + Vector((0, -0.02, 0.02)), 0.2 * size, "Neck1")
     elif style == "book":            # a closed book hanging at its neck
-        _collar(r, A, mat("leather_dark"))
+        _collar(r, A, _trim(r, "leather_dark", "dark"))
         c = Vector((0, A.chest_y - 0.1, A.sh.z + 0.22))
         s = size
-        _add(r, "book", g.box(c, (0.42 * s, 0.14 * s, 0.52 * s), rot=(-0.18, 0, 0)), "Torso3", mat("leather_dark"))
-        _add(r, "book_pages", g.box(c + Vector((0, 0.0, -0.02 * s)), (0.36 * s, 0.1 * s, 0.53 * s), rot=(-0.18, 0, 0)), "Torso3", mat("paper"))
-        _add(r, "book_clasp", g.box(c + Vector((0, -0.075 * s, 0.0)), (0.46 * s, 0.03, 0.09 * s), rot=(-0.18, 0, 0)), "Torso3", mat("metal_brass"))
-        _add(r, "book_seal", g.ico(c + Vector((0, -0.09 * s, 0.0)), 0.07 * s, sub=1, scale=(1, 0.5, 1)), "Torso3", field("seal", 1.8))
+        items = [(g.box(c, (0.42 * s, 0.14 * s, 0.52 * s), rot=(-0.18, 0, 0)), mat("leather_dark")),
+                 (g.box(c + Vector((0, 0.0, -0.02 * s)), (0.36 * s, 0.1 * s, 0.53 * s), rot=(-0.18, 0, 0)), mat("paper")),
+                 (g.box(c + Vector((0, -0.075 * s, 0.0)), (0.46 * s, 0.03, 0.09 * s), rot=(-0.18, 0, 0)), _trim(r, "metal_brass", "light")),
+                 (g.ico(c + Vector((0, -0.09 * s, 0.0)), 0.07 * s, sub=1, scale=(1, 0.5, 1)), field("seal", 1.8))]
+        if _own(r):                  # and a ribbon to mark its place
+            p0 = c + Vector((0.1 * s, 0.0, -0.26 * s))
+            items.append((g.tongue([p0, p0 + Vector((0.02, -0.02, -0.14 * s)), p0 + Vector((-0.02, -0.03, -0.3 * s))], [0.07 * s, 0.07 * s, 0.05 * s], thick=0.3, normal=-Y), _am("")))
         geo = None
         for sx in (1, -1):
             geo = g.merge(geo, g.tube([c + Vector((sx * 0.17 * s, 0.02, 0.26 * s)), Vector((sx * (rx + 0.02), y - 0.04, zc - rz * 0.4))], 0.03, n=5))
-        _add(r, "book_straps", geo, "Neck1", mat("leather"))
+        if _own(r):                  # the straps swing with the book
+            items.append((geo, mat("leather")))
+            _later(r, "sway", "book", items, Vector((0, y - 0.04, zc - rz * 0.4)), "Torso3")
+        else:
+            for i, (ig, im) in enumerate(items):
+                _add(r, ("book", "book_pages", "book_clasp", "book_seal")[i], ig, "Torso3", im)
+            _add(r, "book_straps", geo, "Neck1", mat("leather"))
     elif style in ("tags", "knots"):  # a cord of tokens, or of knots
-        _collar(r, A, mat("cord"))
+        _collar(r, A, _trim(r, "cord", "dark"))
         geo, geo2 = None, None
         n = 9 if style == "tags" else 5
         for i in range(n):
@@ -819,32 +997,63 @@ def grow_carry(r, A, style, size):
                 geo = g.merge(geo, g.tube([b0, b0 + Vector((0, -0.02, -L))], 0.022, n=4))
                 for k in range(1, 3 + i % 2):
                     geo2 = g.merge(geo2, g.ico(b0 + Vector((0, -0.02, -L * k / (2.5 + i % 2))), 0.045, sub=0))
-        _add(r, style, geo, "Neck1", mat("bone") if style == "tags" else mat("cord"))
-        _add(r, style + "_b", geo2, "Neck1", mat("metal_brass") if style == "tags" else mat("fur_pale"))
+        if _own(r):                  # each hangs from the cord, and they swing together
+            m1 = mat("bone") if style == "tags" else _am("dark")
+            m2 = _am("") if style == "tags" else _am("light")
+            _later(r, "sway", style, [(geo, m1), (geo2, m2)], Vector((0, y, zc - rz * 0.3)), "Neck1")
+        else:
+            _add(r, style, geo, "Neck1", mat("bone") if style == "tags" else mat("cord"))
+            _add(r, style + "_b", geo2, "Neck1", mat("metal_brass") if style == "tags" else mat("fur_pale"))
     elif style == "post":            # a lamp on a post, carried on its back
         foot = Vector((0, A.t3.y + 0.12, A.withers - 0.08))
         topp = foot + Vector((0, 0.16, 1.5 * size))
         arm = topp + Vector((0, -0.4 * size, 0.12 * size))
-        _add(r, "post", g.tube([foot, topp, arm], [0.055, 0.045, 0.035], n=6), "Torso3", mat("wood"))
-        _add(r, "post_foot", g.lathe([(0.16, 0.0), (0.1, 0.1), (0.06, 0.16)], n=6, centre=foot), "Torso3", mat("metal_brass"))
-        _add_items(r, "postlamp", _lantern(arm, 0.24 * size, "lamp", 3.8), "Torso3")
+        _add(r, "post", g.tube([foot, topp, arm], [0.055, 0.045, 0.035], n=8 if _own(r) else 6), "Torso3", mat("wood"))
+        _add(r, "post_foot", g.lathe([(0.16, 0.0), (0.1, 0.1), (0.06, 0.16)], n=8 if _own(r) else 6, centre=foot), "Torso3", mat("metal_brass"))
+        if _own(r):                  # a band of its Path's colour round the post, as a post on the line is painted
+            for i, h in enumerate((0.42, 0.56)):
+                c = foot + (topp - foot) * h
+                _add(r, "post_band_%d" % i, g.lathe([(0.062, -0.06), (0.062, 0.06)], n=8, centre=c), "Torso3", _am("light" if i else ""))
+        _hang_lamp(r, "postlamp", arm, 0.24 * size, "Torso3", strength=3.8)
     elif style == "cloak":           # a watch-cloak over the shoulders and back
-        _cape(r, A, "cloak", A.n1.y, (A.t1.y if size < 1.2 else A.back.y + 0.1), 0.5 * size, mat("cloth_watch"))
+        y1 = A.t1.y if size < 1.2 else A.back.y + 0.1
+        _cape(r, A, "cloak", A.n1.y, y1, 0.5 * size, _trim(r, "cloth_watch", "dark"))
+        if _own(r):                  # banded at its hem
+            _cape(r, A, "cloak_band", y1 - 0.3, y1 - 0.1, 0.5 * size, _am("light"), steps=3, off=0.062)
         _add(r, "cloak_clasp", g.ico(Vector((0, A.chest_y - 0.02, A.sh.z + 0.42)), 0.08, sub=1, scale=(1, 0.5, 1)), "Torso3", mat("metal_brass"))
     elif style == "shroud":          # a cloak of shadow, tattered at the hem
         _cape(r, A, "shroud", A.n1.y, A.back.y + 0.2, 0.62 * size, mat("shade_edge"), hem=0.14, flare=0.14)
     elif style == "rug":             # a woven rug across its back
         _cape(r, A, "rug", A.t3.y + 0.12, A.t1.y + 0.3, 0.4 * size, mat("cloth_wool"), hem=0.0, flare=0.03)
-        _cape(r, A, "rug_stripe", A.t3.y + 0.42, A.t1.y + 0.0, 0.34 * size, mat("cloth_stripe"), steps=5, hem=0.0, flare=0.04, off=0.07)
+        if _own(r):                  # woven in bands of its Path's colour
+            y0, span = A.t3.y + 0.12, A.t1.y + 0.3 - (A.t3.y + 0.12)
+            for i, (ta, tb, step) in enumerate(((0.14, 0.3, ""), (0.44, 0.56, "light"), (0.7, 0.86, ""))):
+                _cape(r, A, "rug_stripe_%d" % i, y0 + span * ta, y0 + span * tb, 0.385 * size, _am(step), steps=2, hem=0.0, flare=0.034, off=0.066)
+        else:
+            _cape(r, A, "rug_stripe", A.t3.y + 0.42, A.t1.y + 0.0, 0.34 * size, mat("cloth_stripe"), steps=5, hem=0.0, flare=0.04, off=0.07)
     elif style == "bell":            # a bell at its throat
-        _collar(r, A, mat("leather"))
+        _collar(r, A, _trim(r, "leather", "dark"))
         c = throat + Vector((0, -0.02, -0.16 * size))
-        _add(r, "bell", g.lathe([(0.03, 0.14), (0.09, 0.1), (0.13, -0.04), (0.17, -0.12)], n=7, centre=c), "Neck1", mat("metal_brass"))
+        _hung(r, "bell", [(g.lathe([(0.03, 0.14), (0.09, 0.1), (0.13, -0.04), (0.17, -0.12)], n=7, centre=c), mat("metal_brass"))], throat, "Neck1")
+    elif style == "bird":            # a small bird that has taken it for a stone, in its Path's colour: it looks about
+        s = size
+        c = Vector((0.0, A.head.y + 0.04, A.skull + 0.1 * s))
+        hc = c + Vector((0, -0.11 * s, 0.1 * s))
+        items = [(g.ico(c, 0.115 * s, sub=2, scale=(0.82, 1.25, 0.85)), _am("")),
+                 (g.ico(c + Vector((0, -0.05 * s, -0.03 * s)), 0.09 * s, sub=1, scale=(0.75, 1.0, 0.8)), _am("pale")),
+                 (g.ico(hc, 0.07 * s, sub=2), _am("")),
+                 (g.cone(hc + Vector((0, -0.055 * s, -0.005)), hc + Vector((0, -0.14 * s, -0.02 * s)), 0.024 * s, n=5), mat("beak")),
+                 (g.blade(c + Vector((0, 0.1 * s, 0.03 * s)), c + Vector((0, 0.34 * s, 0.1 * s)), 0.1 * s, normal=Z), _am("dark"))]
+        for sx in (1, -1):
+            items.append((g.blade(c + Vector((sx * 0.085 * s, -0.06 * s, 0.03 * s)), c + Vector((sx * 0.1 * s, 0.2 * s, 0.0)), 0.12 * s, normal=Vector((sx, 0, 0.3))), _am("dark")))
+            items.append((g.ico(hc + Vector((sx * 0.045 * s, -0.035 * s, 0.015 * s)), 0.016 * s, sub=0), mat("eye_dark")))
+        _later(r, "turn", "bird", items, c + Vector((0, 0, -0.09 * s)), "Head")
 
 
 def _collar(r, A, material):
     y, zc, rx, rz = A.neck["Neck1"]
-    geo = g.loft([g.ring((0, y - 0.05, zc), rx + 0.04, rz + 0.04, n=12, u=X, v=Z), g.ring((0, y + 0.05, zc), rx + 0.05, rz + 0.05, n=12, u=X, v=Z)], caps=False)
+    n = 16 if _own(r) else 12
+    geo = g.loft([g.ring((0, y - 0.05, zc), rx + 0.04, rz + 0.04, n=n, u=X, v=Z), g.ring((0, y + 0.05, zc), rx + 0.05, rz + 0.05, n=n, u=X, v=Z)], caps=False)
     _add(r, "collar", geo, "Neck1", material)
 
 
@@ -903,12 +1112,29 @@ def grow_aura(r, A, style, size):
         spots = ((0.5, A.n2.y + 0.1, A.skull + 0.3), (-0.42, A.t3.y + 0.2, A.withers + 0.5), (0.3, A.t2.y + 0.2, A.withers + 0.36))
         for i, c in enumerate(spots[: max(1, int(round(2 * size)))]):
             c = Vector(c)
-            _add(r, "mote_%d" % i, g.ico(c, 0.09, sub=1), "Torso3" if i else "Neck2", field("mote", 3.0))
             tail = g.tongue([c + Vector((0, 0.06, 0)), c + Vector((0.03, 0.26, -0.06)), c + Vector((-0.02, 0.46, -0.02))], [0.13, 0.09, 0.02], thick=0.4, normal=X)
+            if _own(r):
+                _later(r, "bob", "mote", [(g.ico(c, 0.09, sub=2), field("mote", 3.0)), (tail, mat("shade_edge"))], c, "Torso3" if i else "Neck2", n=i)
+                continue
+            _add(r, "mote_%d" % i, g.ico(c, 0.09, sub=1), "Torso3" if i else "Neck2", field("mote", 3.0))
             _add(r, "mote_tail_%d" % i, tail, "Torso3" if i else "Neck2", mat("shade_edge"))
+    elif style == "followers":       # smaller lights that walk in its tracks, one behind another
+        y0 = A.tail[3].y
+        for i in range(max(1, int(round(3 * size)))):
+            rad = 0.2 - 0.03 * i
+            c = Vector((0.14 * math.sin(i * 2.2 + 0.5), y0 + 0.5 * i, rad * 1.05))
+            items = [(g.ico(c, rad, sub=2, scale=(0.9, 1.1, 0.9)), field("mote", 3.0))]
+            for sx in (1, -1):       # each with the ears of what it will be
+                b0 = c + Vector((sx * rad * 0.45, -rad * 0.5, rad * 0.62))
+                items.append((g.blade(b0, b0 + Vector((sx * rad * 0.3, -rad * 0.1, rad * 0.75)), rad * 0.6, normal=-Y), mat("shade_edge")))
+            items.append((g.tongue([c + Vector((0, rad * 0.8, 0)), c + Vector((0.03, rad * 1.6, rad * 0.3)), c + Vector((-0.02, rad * 2.1, rad * 0.9))], [rad * 0.7, rad * 0.5, rad * 0.1], thick=0.5, normal=X), mat("shade_edge")))
+            _later(r, "bob", "follower", items, c, "Body", n=i)
     elif style == "cold":            # a cold light in its chest, and ice where its breath should be
         c = Vector((0, A.chest_y - 0.02, A.sh.z + 0.16))
-        _add(r, "cold_core", g.ico(c, 0.14 * size, sub=1, scale=(0.6, 0.5, 1.5)), "Torso3", field("core", 3.0))
+        if _own(r):                  # (the Wolf's breathes)
+            _later(r, "pulse", "core", [(g.ico(c, 0.14 * size, sub=2, scale=(0.6, 0.5, 1.5)), field("core", 3.0))], c, "Torso3")
+        else:
+            _add(r, "cold_core", g.ico(c, 0.14 * size, sub=1, scale=(0.6, 0.5, 1.5)), "Torso3", field("core", 3.0))
         geo = None
         for i in range(7):
             y = A.t3.y + 0.2 + 0.24 * i
@@ -930,8 +1156,11 @@ def grow_aura(r, A, style, size):
             d = Vector((math.cos(a), 0, math.sin(a)))
             w = 0.16 * math.sin(math.pi * (i + 0.5) / n) + 0.03
             geo = g.merge(geo, g.box(c + d * 0.42 * size + Vector((0, 0, -0.25 * size)), (0.2 * size, 0.07, w), rot=(0, -(a - math.pi / 2), 0)))
-        _add(r, "crescent", geo, "Head", mat("fur_pale"))
-        _add(r, "crescent_light", g.ico(c + Vector((0, 0, 0.02)), 0.07 * size, sub=1), "Head", field("moon", 3.0))
+        if _own(r):
+            _later(r, "bob", "crescent", [(geo, _trim(r, "fur_pale", "pale")), (g.ico(c + Vector((0, 0, 0.02)), 0.07 * size, sub=2), field("moon", 3.0))], c, "Head")
+        else:
+            _add(r, "crescent", geo, "Head", mat("fur_pale"))
+            _add(r, "crescent_light", g.ico(c + Vector((0, 0, 0.02)), 0.07 * size, sub=1), "Head", field("moon", 3.0))
 
 
 # --- its Path's colour on its body, a face, and feet (the second pass) ----------------------
@@ -1035,39 +1264,29 @@ def grow_marks(r, A, style, size):
         _add(r, "mark_hackles", geo, ws, m, smooth=True)
 
 
-# how each face looks. r: the ball of the eye against the eye it was born with. sunk: how much
-# of the ball is in the head. gaze: where it looks (out to its own side, ahead, up). pupil: the
-# pupil's half-angle on the ball, in degrees. lid: how much of the eye its upper lid covers, and
-# how the lid leans (more lowers its inner end, as a frown does; less, its outer). under: how
-# much its lower lid covers. brow: how high over the eye, its lean (as the lid's), its length
-# and its weight (None: none). glint: the light in it, against the pupil. smile: how much the
-# corner of its mouth turns up.
+# How each face looks (the second pass, rule 4). The game draws an ink line two pixels wide
+# round every piece of a body, whatever its size, so a face is made of few pieces and large ones:
+# an eye is one ball (its pupil and the light on it are its own faces, not pieces laid on it),
+# and what is said round it is said by its lids and by a mark in its Path's colour.
+#   r      the ball of its eye against the eye it was born with
+#   sunk   how much of the ball is in the head
+#   gaze   where it looks: out to its own side, ahead, up
+#   pupil  the pupil's half-angle on the ball, in degrees
+#   lid    how much of the eye its upper lid covers, and how the lid leans (more lowers its
+#          inner end, as a frown does; less, its outer)
+#   under  the same of its lower lid
+#   mark   what its Path's colour does round the eye: "pips" over it, as a hound has (it looks
+#          at who is here); a "slash" over it and a tear-line down the muzzle, as a courser has
+#          (it looks at one thing); a crescent "under" it (it has not slept, and does not look
+#          at you)
+#   smile  how much the corner of its mouth turns up
 FACES = {
-    "young": {"r": 2.1, "sunk": 0.4, "gaze": (0.5, 0.82, 0.28), "pupil": 42, "lid": (0.0, 0.0), "under": 0.0, "brow": None, "glint": 0.3, "smile": 0.07},
-    "open": {"r": 1.9, "sunk": 0.48, "gaze": (0.55, 0.8, 0.12), "pupil": 32, "lid": (0.1, -0.15), "under": 0.0, "brow": (1.0, -0.25, 2.4, 1.0), "glint": 0.22, "smile": 0.06},
-    "fixed": {"r": 1.9, "sunk": 0.52, "gaze": (0.18, 0.98, -0.03), "pupil": 23, "lid": (0.3, 0.42), "under": 0.14, "brow": (0.5, 0.55, 2.8, 1.3), "glint": 0.16, "smile": 0.0},
-    "aside": {"r": 1.9, "sunk": 0.5, "gaze": (0.62, -0.55, 0.32), "pupil": 28, "lid": (0.36, -0.22), "under": 0.0, "brow": (1.2, -0.1, 2.4, 0.85), "glint": 0.18, "smile": 0.02},
+    "young": {"r": 2.0, "sunk": 0.5, "gaze": (0.62, 0.74, 0.2), "pupil": 30, "lid": (0.0, 0.0), "under": (0.0, 0.0), "mark": None, "smile": 0.05},
+    "open": {"r": 1.75, "sunk": 0.56, "gaze": (0.68, 0.7, 0.1), "pupil": 24, "lid": (0.14, -0.22), "under": (0.0, 0.0), "mark": "pips", "smile": 0.05},
+    "fixed": {"r": 1.75, "sunk": 0.58, "gaze": (0.25, 0.96, -0.06), "pupil": 19, "lid": (0.36, 0.5), "under": (0.2, 0.2), "mark": "slash", "smile": -0.03},
+    "aside": {"r": 1.75, "sunk": 0.58, "gaze": (0.78, -0.42, 0.34), "pupil": 22, "lid": (0.42, -0.08), "under": (0.0, 0.0), "mark": "under", "smile": 0.0},
 }
-DARK_COATS = ("night", "blood", "iron", "slate", "ash")
-
-
-def _cap(c, axis, radius, angle, n=12, rings=3):
-    """The part of a ball about c that lies within `angle` of `axis`: a lid, a pupil, a glint."""
-    c, axis = V(c), V(axis).normalized()
-    u, v = g._frame(axis)
-    verts, faces = [c + axis * radius], []
-    for i in range(1, rings + 1):
-        th = angle * i / rings
-        for k in range(n):
-            a = 2 * math.pi * k / n
-            verts.append(c + (axis * math.cos(th) + (u * math.cos(a) + v * math.sin(a)) * math.sin(th)) * radius)
-    for k in range(n):
-        faces.append((0, 1 + k, 1 + (k + 1) % n))
-    for i in range(rings - 1):
-        for k in range(n):
-            a, b = 1 + i * n + k, 1 + i * n + (k + 1) % n
-            faces.append((a, a + n, b + n, b))
-    return verts, faces
+DARK_COATS = ("night", "blood", "iron", "slate", "ember")
 
 
 def _lens(c, n, u, v, a, b, t, sub=1):
@@ -1079,21 +1298,61 @@ def _lens(c, n, u, v, a, b, t, sub=1):
     return [c + u * (p.x * a) + v * (p.y * b) + n * (p.z * t) for p in vs], fs
 
 
+def _eyeball(c, R, d, toward, pa, n=12):
+    """The ball of an eye with its pole where it looks: (geometry, what each face is: "pupil",
+    "glint" (the light on it, toward `toward`) or "iris"). One closed skin."""
+    c, d = V(c), V(d).normalized()
+    u, v = g._frame(d)
+    rest = math.pi - 1.3 * pa
+    ths = [0.4 * pa, 0.75 * pa, pa, 1.3 * pa, 1.3 * pa + rest * 0.3, 1.3 * pa + rest * 0.62]
+    at = lambda th, k: d * math.cos(th) + (u * math.cos(2 * math.pi * k / n) + v * math.sin(2 * math.pi * k / n)) * math.sin(th)  # noqa: E731
+    verts = [c + d * R] + [c + at(th, k) * R for th in ths for k in range(n)] + [c - d * R]
+    t = V(toward) - d * V(toward).dot(d)
+    spark = (d * math.cos(0.8 * pa) + t.normalized() * math.sin(0.8 * pa)).normalized() if t.length > 1e-6 else d
+
+    def kind(th, k):
+        way = at(th, k).normalized()
+        return "glint" if way.angle(spark) < 0.5 * pa else ("pupil" if th < pa else "iris")
+
+    faces, kinds = [], []
+    for k in range(n):
+        faces.append((0, 1 + k, 1 + (k + 1) % n))
+        kinds.append("pupil")
+    for i in range(len(ths) - 1):
+        for k in range(n):
+            a, b = 1 + i * n + k, 1 + i * n + (k + 1) % n
+            faces.append((a, a + n, b + n, b))
+            kinds.append(kind((ths[i] + ths[i + 1]) / 2, k + 0.5))
+    last = 1 + (len(ths) - 1) * n
+    for k in range(n):
+        faces.append((last + k, len(verts) - 1, last + (k + 1) % n))
+        kinds.append("iris")
+    return (verts, faces), kinds
+
+
+def _lid(c, R, axis, angle, n=12):
+    """A lid: the part of a ball that lies within `angle` of `axis`, closed underneath, so that
+    its edge is a shelf over the eye."""
+    eps = R * 0.02
+    prof = [(eps, R)] + [(R * math.sin(angle * i / 3), R * math.cos(angle * i / 3)) for i in (1, 2, 3)] + [(eps, R * math.cos(angle))]
+    turn = Z.rotation_difference(V(axis).normalized()).to_matrix().to_4x4()
+    return g.moved(g.lathe(prof, n=n, caps=True), Matrix.Translation(V(c)) @ turn)
+
+
 def grow_face(r, A, style, size):
     """Its face (the second pass, rule 4). Each eye is a ball of the field's light set in the
-    head, a piece of its own so that it blinks, and its pupil is on the ball where it is
-    looking: open looks at who is here, fixed at one thing ahead of it, aside over its
-    shoulder and past you; young is all eye. Its lids and the brow over them, in its Path's
-    colour, say the rest. Then the line of its mouth, the pad of its nose, and whiskers."""
+    head, a piece of its own so that it blinks, with its pupil where it is looking: open looks
+    at who is here, fixed at one thing ahead of it, aside over its shoulder and past you; young
+    is all eye. Its lids and a mark in its Path's colour say the rest. Then the corner of its
+    mouth and the pad of its nose."""
     f = FACES[style]
-    e = A.eye
+    e, er, n0 = A.eye, A.eye_r, A.eye_n
+    spec = getattr(r, "_spec", {})
     me = r.mesh.data
     names = [m.name for m in me.materials]
     dark = mat("fur_mask")
-    # the eye it was born with becomes the dark of its socket; its size and the way it faces
-    # are the measure of the new one
+    # the eye it was born with becomes the dark of its socket: what is seen when it shuts
     slot = next((i for i, nm in enumerate(names) if nm.startswith("field_eyes")), None)
-    er, n0 = A.eye_r, A.eye_n
     if slot is not None:
         if dark.name not in names:
             me.materials.append(dark)
@@ -1101,76 +1360,86 @@ def grow_face(r, A, style, size):
         for p in me.polygons:
             if p.material_index == slot:
                 p.material_index = di
-    lamp, far = _has(r, "eyes", "lamp"), _has(r, "eyes", "far")
+    lamp, far, old = _has(r, "eyes", "lamp"), _has(r, "eyes", "far"), _has(r, "eyes", "old")
     R = er * f["r"] * size * (1.3 if lamp else 1.0)
-    sunk = f["sunk"]
+    sunk = 0.42 if lamp else f["sunk"]
     vis = math.sqrt(max(0.0, 1.0 - sunk * sunk))          # what shows of the ball, in radii
     log("face", style, "born %.3f ball %.3f faces (%.2f %.2f %.2f) at (%.2f %.2f %.2f)" % (er, R, n0.x, n0.y, n0.z, e.x, e.y, e.z))
-    brow_m = _am("light" if getattr(r, "_spec", {}).get("coat") in DARK_COATS else "")
+    am = mat("fur_pale") if old else _am("light" if spec.get("coat") in DARK_COATS else "")
+    eye_m = {"iris": field("eyes", 4.4 if lamp else 3.4), "pupil": mat("eye_dark"), "glint": mat("eye_white")}
+
+    def on_skin(p, lift=0.005):
+        """A point at the side of the head, brought out to its skin."""
+        return Vector(((1 if p.x > 0 else -1) * (r.side(p.y, p.z, window=0.05) + lift), p.y, p.z))
+
     for sgn, tag in ((1, "l"), (-1, "r")):
         n = Vector((sgn * n0.x, n0.y, n0.z))
         fw = (-Y - n * (-Y).dot(n)).normalized()          # toward the nose, along the head
         up = (Z - n * Z.dot(n) - fw * Z.dot(fw)).normalized()
         s = Vector((sgn * e.x, e.y, e.z))                 # on its skin
         c = s - n * (R * sunk)
-        ball = g.ico(c, R, sub=2)
         # where it looks; a pupil keeps most of itself in what shows of the ball
         gx, gy, gz = f["gaze"]
         d = Vector((sgn * gx, -gy, gz)).normalized()
-        pa = math.radians(f["pupil"] * (0.75 if lamp else 1.0))
-        lim = math.acos(sunk) - pa * 0.4
+        pa = math.radians(f["pupil"] * (0.8 if lamp else 1.0))
+        lim = max(0.05, math.acos(sunk) - pa * 0.8)
         if d.angle(n) > lim:
             d = Matrix.Rotation(lim, 3, n.cross(d).normalized()) @ n
-        pupil = _cap(c, d, R * 1.04, pa, n=12, rings=2)
-        d2 = (d + (up * 0.8 + fw * 0.45) * math.sin(pa)).normalized()
-        glint = _cap(c, d2, R * 1.08, pa * f["glint"] * 1.5, n=6, rings=1)
-        _later(r, "blink", "eye", [(ball, field("eyes", 4.4 if lamp else 3.4)), (pupil, mat("eye_dark")), (glint, mat("eye_white"))], c, "Head", side=tag)
-        # the dark it is set in, which is what is seen when it shuts
-        _add(r, "socket_" + tag, _lens(s - n * (R * 0.03), n, fw, up, R * vis * 1.3, R * vis * 1.2, R * 0.1), "Head", dark, smooth=True)
+        ball, kinds = _eyeball(c, R, d, up * 0.8 + fw * 0.5, pa)
+        if far:                                           # long, as one that looks a long way
+            ball = ([c + fw * ((p - c).dot(fw) * 1.3) + up * ((p - c).dot(up) * 0.78) + n * (p - c).dot(n) for p in ball[0]], ball[1])
+        _later(r, "blink", "eye", None, c, "Head", side=tag, solid=(ball, [eye_m[k] for k in kinds]))
         q, lean = f["lid"]
-        q, under = (q + 0.1, f["under"] + 0.1) if far else (q, f["under"])
-        if q > 0.0 and not lamp:
-            lu = (up * math.cos(lean) + fw * math.sin(lean)).normalized()
-            _add(r, "lid_" + tag, _cap(c, lu, R * 1.09, math.acos(max(-0.9, min(0.95, vis * (1.0 - 2.0 * q)))), n=14, rings=3), "Head", dark, smooth=True)
-        if under > 0.0 and not lamp:
-            ld = (-up * math.cos(lean * 0.4) + fw * math.sin(lean * 0.4)).normalized()
-            _add(r, "lid_under_" + tag, _cap(c, ld, R * 1.07, math.acos(max(-0.9, min(0.95, vis * (1.0 - 2.0 * under)))), n=14, rings=3), "Head", dark, smooth=True)
-        if f["brow"] and not far:
-            lift, lean, length, weight = f["brow"]
-            along = (fw * math.cos(lean) - up * math.sin(lean)).normalized()
-            mid = s + up * (R * vis + er * (0.55 + 0.7 * lift)) + fw * (er * 0.2)
-            ends = []
-            for k in (1, -1):                              # its inner end, toward the nose, and its outer
-                p = mid + along * (k * er * length * 0.5)
-                ends.append(Vector((sgn * (r.side(p.y, p.z, window=0.05) + 0.004), p.y, p.z)))
-            _add(r, "brow_" + tag, g.blade(ends[1], ends[0], er * 1.25 * weight, normal=(n + up * 0.6).normalized(), belly=0.55), "Head", brow_m, smooth=True)
+        q2, lean2 = f["under"]
+        if far:
+            q, q2 = q + 0.1, q2 + 0.08
+        if lamp:                                          # a lamp's eye has a rim and no lid
+            a0, a1, rim = R * vis * 1.02, R * vis * 1.3, None
+            rings = [g.ring(s + n * h, rad, rad, n=14, u=fw, v=up * sgn) for h, rad in ((-0.02, a1), (R * 0.2, a1 * 0.96), (R * 0.2, a0), (-0.02, a0))]
+            rim = g.loft(rings + [rings[0]], caps=False)
+            _add(r, "eye_rim_" + tag, rim, "Head", _trim(r, "metal_brass", "light"), smooth=False)
+        else:
+            Rl = R * 1.1
+            if q > 0.0:
+                lu = (up * math.cos(lean) + fw * math.sin(lean) + n * 0.12).normalized()
+                _add(r, "lid_" + tag, _lid(c, Rl, lu, math.acos(max(-0.6, min(0.97, R * vis * (1.0 - 2.0 * q) / Rl)))), "Head", dark, smooth=True)
+            if q2 > 0.0:
+                ld = (-up * math.cos(lean2) + fw * math.sin(lean2) + n * 0.12).normalized()
+                _add(r, "lid_under_" + tag, _lid(c, Rl * 0.99, ld, math.acos(max(-0.6, min(0.97, R * vis * (1.0 - 2.0 * q2) / Rl)))), "Head", dark, smooth=True)
+        # its Path's colour round the eye
+        mk = None if lamp else f["mark"]
+        skin_n = (n + up * 0.6).normalized()
+        if mk == "pips":
+            p = on_skin(s + up * (R * vis + er * (1.15 if old else 0.95)) + fw * (er * 0.4))
+            along = (fw * math.cos(0.3) + up * math.sin(0.3)).normalized()
+            _add(r, "pip_" + tag, _lens(p, skin_n, along, skin_n.cross(along), er * (1.25 if old else 0.9), er * 0.55, er * 0.24), "Head", am, smooth=True)
+        elif mk == "slash":
+            a0 = on_skin(s + up * (R * vis + er * 0.75) - fw * (R * 0.9), 0.008)
+            a1 = on_skin(s + up * (R * vis * 0.55) + fw * (R * vis + er * 0.9), 0.008)
+            _add(r, "slash_" + tag, g.blade(a0, a1, er * 1.0, normal=skin_n, belly=0.42), "Head", am, smooth=True)
+            b0 = on_skin(s - up * (R * vis * 0.35) + fw * (R * vis + er * 0.35), 0.008)
+            b1 = on_skin(Vector((s.x, A.nose.y + 0.24, b0.z - (b0.z - (A.nose.z - 0.02)) * 0.8)), 0.008)
+            _add(r, "tear_" + tag, g.blade(b0, b1, er * 0.7, normal=n, belly=0.3), "Head", am, smooth=True)
+        elif mk == "under":
+            p = on_skin(s - up * (R * vis + er * 0.6) + fw * (er * 0.2))
+            nn = (n - up * 0.25).normalized()
+            _add(r, "undereye_" + tag, _lens(p, nn, fw, nn.cross(fw), R * 1.05, er * 0.5, er * 0.22), "Head", am, smooth=True)
     zb, zt = _jaw_line(r, A)
-    # the line of its mouth (a jaw that hangs open has drawn its own)
+    # the corner of its mouth (a jaw that hangs open has drawn its own)
     if not _has(r, "maw", "open", "glow"):
         zj = zb + 0.42 * (zt - zb)
         geo = None
         for sgn in (1, -1):
             pts = []
-            for t in (0.06, 0.36, 0.66, 0.86):
+            for t in (0.4, 0.6, 0.78, 0.92):
                 y = A.nose.y + 0.03 + (e.y - 0.02 - A.nose.y) * t
-                zz = zj + f["smile"] * t * t - (0.02 if t < 0.1 else 0.0)
-                pts.append(Vector((sgn * (r.side(y, zz, window=0.08) + 0.002) * (0.55 if t < 0.1 else 1.0), y, zz)))
-            geo = g.merge(geo, g.tube(pts, [0.007, 0.01, 0.009, 0.004], n=4, caps=True))
+                zz = zj + f["smile"] * ((t - 0.4) / 0.52) ** 2
+                pts.append(Vector((sgn * (r.side(y, zz, window=0.08) + 0.003), y, zz)))
+            geo = g.merge(geo, g.tube(pts, [0.004, 0.008, 0.008, 0.003], n=4, caps=True))
         _add(r, "mouth", geo, "Head", mat("nose"), smooth=True)
     # the pad of its nose
     nw = max(0.035, r.side(A.nose.y + 0.03, A.nose.z, window=0.05))
-    _add(r, "nose_pad", g.ico(A.nose + Vector((0, 0.012, 0.012)), 1.0, sub=1, scale=(nw * 0.95, 0.05, nw * 0.72)), "Head", mat("nose"), smooth=True)
-    # whiskers, where it is at ease
-    if style in ("open", "young", "aside"):
-        geo = None
-        for sgn in (1, -1):
-            for i in range(3):
-                y = A.nose.y + 0.13 + 0.05 * i
-                zz = zb + (0.5 + 0.1 * i) * (zt - zb)
-                b0 = Vector((sgn * (r.side(y, zz, window=0.08) - 0.01), y, zz))
-                tip = b0 + Vector((sgn * (0.26 - 0.03 * i), 0.1 + 0.05 * i, 0.07 * (i - 1))) * (0.75 if style == "aside" else 1.0)
-                geo = g.merge(geo, g.blade(b0, tip, 0.016, normal=Z, belly=0.3))
-        _add(r, "whiskers", geo, "Head", mat("whisker"), smooth=False)
+    _add(r, "nose_pad", g.ico(A.nose + Vector((0, 0.014, 0.01)), 1.0, sub=1, scale=(nw * 0.82, 0.04, nw * 0.62)), "Head", mat("nose"), smooth=False)
 
 
 def grow_feet(r, A, style, size):
@@ -1193,6 +1462,38 @@ def grow_feet(r, A, style, size):
         _add(r, "toeclaws_" + tag, claws, bone, mat("claw"), smooth=True)
 
 
+def grow_fur(r, A, style, size):
+    """Its coat as fur (the second pass, rule 4): tufts at the root of its ears, and a brush to
+    its tail, fullest past the middle, in the colour its tail-tip is marked with."""
+    if style != "coat":
+        return
+    for s, ear in ((1, "Ear1.L"), (-1, "Ear1.R")):
+        eb = r.bone(ear)
+        geo = None
+        for i, (dx, L) in enumerate(((-0.06, 0.2), (0.02, 0.27), (0.1, 0.19))):
+            b0 = eb + Vector((s * dx, -0.06, 0.0))
+            geo = g.merge(geo, _lock(b0, Vector((s * (0.2 + dx * 3), -0.7, 0.3)), L * size, 0.085, lie=0.9, lift=0.3, droop=0.0, back=Z))
+        _add(r, "eartuft_" + ("l" if s > 0 else "r"), geo, ear, mat("fur_light"))
+    if _has(r, "tail", "whip", "short", "smoke"):
+        return
+    tip = None
+    for st, _ in each(getattr(r, "_spec", {}).get("marks")):
+        if st.partition(":")[0] == "tailtip":
+            tip = _am(st.partition(":")[2])
+    tb = A.tail
+    for i in range(2, 8):
+        c = tb[i]
+        d = (tb[min(7, i + 1)] - tb[i - 1]).normalized()
+        u, v = g._frame(d)
+        full = 0.62 + 0.38 * math.sin(math.pi * (i - 1.5) / 6.0)
+        geo = None
+        for k in range(3):
+            a = k * 2 * math.pi / 3 + i * 1.1
+            out = u * math.cos(a) + v * math.sin(a)
+            geo = g.merge(geo, _lock(c + out * 0.06, out, 0.4 * full * size, 0.22 * full, lie=0.92, lift=0.34, droop=0.0, back=d))
+        _add(r, "brush_%d" % i, geo, "Tail%d" % (i + 1), tip if (tip is not None and i >= 4) else mat("fur_ruff"))
+
+
 # A family of lines may add styles of its own without touching the ones here (lines_*.py):
 #   GROWS[(slot, style)] = fn(r, A, size)      grown on the body once it has its shape
 #   SHAPES[(slot, style)] = fn(r, size)        part of its shape, before it is measured
@@ -1202,7 +1503,7 @@ SHAPES = {}
 # what is grown on a body once it has its shape, in this order (ears and the tail's own length
 # are part of its shape, and come before it is measured)
 # (marks first: they are the body's own faces, painted before anything is joined to it)
-SLOTS = (("marks", grow_marks), ("maw", grow_maw), ("eyes", grow_eyes), ("face", grow_face), ("paws", grow_paws), ("feet", grow_feet),
+SLOTS = (("marks", grow_marks), ("maw", grow_maw), ("eyes", grow_eyes), ("face", grow_face), ("paws", grow_paws), ("feet", grow_feet), ("fur", grow_fur),
          ("armor", grow_armor), ("spine", grow_spine), ("ruff", grow_ruff), ("tail", grow_tail), ("flags", grow_flags), ("carry", grow_carry),
          ("aura", grow_aura))
 
@@ -1243,6 +1544,7 @@ def wolf_form(form_id, level, spec, species=None, coat=("fur_dark", "fur_light")
     measure(r, A) to correct what is read of a body the wolf's readings do not fit."""
     _, r = kit._wolf()
     r._spec, r._late = spec, []      # what it is being built to, and the pieces put on its bones at the end
+    r._own = species is None         # the Wolf itself: what is new in the second pass is its own
     _weld(r)
     c = PALETTE
     r.recolor("Main", coat[0], c.get(coat[0], c["fur_dark"])[0], rough=0.92)
@@ -1286,16 +1588,27 @@ def wolf_form(form_id, level, spec, species=None, coat=("fur_dark", "fur_light")
     sockets["ref_top"] = kit.free_socket("ref_top", (0, 0, STAND))
     # what moves by its name rides its bone, and goes out with the body (export takes whatever
     # is in sockets)
+    made = {}
     for i, piece in enumerate(r._late):
-        sockets["piece_%d" % i] = _on_bone(r, piece, k)
+        ob = _on_bone(r, piece, k, made)
+        made[ob.name] = ob
+        sockets["piece_%d" % i] = ob
     return r, sockets
 
 
-def _on_bone(r, piece, k):
+def _on_bone(r, piece, k, made=None):
     """A piece made with the body, now that the body is its size: a mesh of its own on a bone."""
-    items = [(([Vector(v) * k for v in geo[0]], geo[1]), m) for geo, m in piece["items"]]
-    ob = moving(piece["kind"], piece["what"], items, piece["pivot"] * k, side=piece["side"], n=piece["n"])
-    at = ob.matrix_world.copy()
+    if piece.get("solid"):
+        geo, mats = piece["solid"]
+        assert piece["kind"] in MOVES, piece["kind"]
+        name = "%s_%s%s%s" % (piece["kind"], piece["what"], "_" + piece["side"] if piece["side"] else "", "_%d" % piece["n"] if piece["n"] is not None else "")
+        ob = set_origin(_solid(name, ([Vector(v) * k for v in geo[0]], geo[1]), mats), piece["pivot"] * k)
+    else:
+        items = [(([Vector(v) * k for v in geo[0]], geo[1]), m) for geo, m in piece["items"]]
+        ob = moving(piece["kind"], piece["what"], items, piece["pivot"] * k, side=piece["side"], n=piece["n"])
+    if piece.get("under") and made and piece["under"] in made:
+        return child_of(ob, made[piece["under"]])
+    at = Matrix.Translation(piece["pivot"] * k)      # where set_origin has just stood it
     ob.parent = r.arm
     ob.parent_type = "BONE"
     ob.parent_bone = piece["bone"]
@@ -1450,6 +1763,7 @@ GIFTS = {"fangs": fangs_gift, "ruff": ruff_gift}
 
 def build_wolf(form_id, level, spec, base):
     r, sockets = wolf_form(form_id, level, spec)
+    carriage(r, spec)
     export(r, sockets, os.path.join(OUT, form_id + ".glb"))
 
 
