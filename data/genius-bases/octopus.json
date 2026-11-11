@@ -1,0 +1,1217 @@
+{
+ "id": "octopus",
+ "name": "Octopus",
+ "class": "monster",
+ "expression": "beast",
+ "silhouette": "beast-octopus",
+ "toBuild": [
+  "beast-octopus"
+ ],
+ "soul": "The soul of one who is holding more than anyone knows, and still has a hand free for you.",
+ "spark": "The mote is in your pocket, then your sleeve, then the drawer you locked. Twice it has undone your bootlaces to see how they were done.",
+ "nature": {
+  "orders": {
+   "guard": 0.9
+  },
+  "shape": {
+   "make": 0.6
+  },
+  "ground": {
+   "water": 0.6
+  },
+  "bonds": {
+   "classmate": 0.4
+  }
+ },
+ "calls": {
+  "seed": {
+   "i-can-hold": 0.8,
+   "remembers": 0.4,
+   "stands-between": 0.3
+  },
+  "shape": {
+   "make": 0.6,
+   "bind": 0.5,
+   "read": 0.3
+  },
+  "blood": {
+   "tidewater": 0.8,
+   "reads-currents": 0.6,
+   "shapechanger": 0.4
+  }
+ },
+ "hybrid": {
+  "adj": "Many-armed",
+  "gift": [
+   "many-arms",
+   "bar-eyes"
+  ],
+  "text": "It has an arm on everything in the room, and one of them is on your shoulder."
+ },
+ "settled": {
+  "id": "octopus-inkling",
+  "name": "Inkling",
+  "text": "An octopus the size of your thumb, in your cup, your boot, your inkwell. It has not chosen a colour, and tries all of yours in an evening.",
+  "sign": "No bigger than a thumb and nearly clear, with two gold eyes that are already working something out.",
+  "habit": "It climbs into whatever you have just put down, and looks out of it.",
+  "features": [
+   "many-arms",
+   "bar-eyes"
+  ],
+  "body": {
+   "mantle": [
+    "round",
+    0.82
+   ],
+   "skin": [
+    "plain",
+    0.0
+   ],
+   "eyes": [
+    "bar",
+    1.45
+   ],
+   "arms": "inkling",
+   "build": {
+    "arm": 0.62,
+    "girth": 1.25,
+    "head": 1.2
+   }
+  }
+ },
+ "paths": [
+  {
+   "id": "octopus-many-hands",
+   "name": "Many-hands",
+   "of": "one who is holding everyone's things and has not put one of them down",
+   "text": "It learned from you that somebody has to carry it all. It has the lamp, the cup, the coats and your hand, and an arm to spare.",
+   "sign": "Round and warm-coloured, with every arm full: a lamp, a cup, somebody's coat. One arm is always empty, held a little toward you.",
+   "habit": "It takes things out of people's hands before they know they are tired of holding them.",
+   "features": [
+    "lantern"
+   ],
+   "leans": {
+    "orders": {
+     "guard": 1.0
+    },
+    "company": {
+     "party": 0.7
+    },
+    "fights": {
+     "hurts": 0.4
+    }
+   },
+   "body": {
+    "accent": "marigold",
+    "mantle": [
+     "round",
+     1.0
+    ],
+    "skin": [
+     "mottle",
+     1.0
+    ],
+    "eyes": [
+     "bar",
+     1.0
+    ],
+    "arms": "many-hands",
+    "holds": [
+     "lamp",
+     "cup",
+     "coat"
+    ],
+    "build": {
+     "arm": 1.0,
+     "girth": 1.0,
+     "head": 1.0
+    }
+   },
+   "prongs": [
+    {
+     "id": "octopus-cup-bearer",
+     "name": "Cup-bearer",
+     "of": "one who has the cup in your hand before you have asked for it",
+     "text": "You are hurt, and there is a cup in your hand. It was holding it ready before the blow landed.",
+     "sign": "It holds a steaming cup level in one raised arm whatever the other seven are doing, and never spills it.",
+     "habit": "It warms a cup against its own skin and leaves it where you will reach next.",
+     "features": [
+      "glow"
+     ],
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      }
+     },
+     "body": {
+      "arms": "cup-bearer",
+      "holds": [
+       "cup"
+      ],
+      "skin": [
+       "mottle",
+       0.7
+      ],
+      "build": {
+       "arm": 0.95
+      }
+     },
+     "finishes": [
+      {
+       "id": "octopus-splint-and-sling",
+       "name": "Splint-and-Sling",
+       "of": "one who sets what is broken and stays until it has knit",
+       "text": "It winds an arm round what is broken in you and holds it still, and does not let go until it will bear weight.",
+       "sign": "Two of its arms are bound straight as splints and it stands on them. A third hangs in a sling it tied itself.",
+       "habit": "It straightens pictures, collars, and the blankets of the sick.",
+       "features": [
+        "coat-weave"
+       ],
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        }
+       },
+       "body": {
+        "arms": "splints",
+        "holds": [
+         "splint",
+         "splint",
+         "sling"
+        ],
+        "mantle": [
+         "tall",
+         1.0
+        ],
+        "skin": [
+         "bands",
+         1.0
+        ]
+       }
+      },
+      {
+       "id": "octopus-last-served",
+       "name": "The Last Served",
+       "of": "one who feeds the whole table and eats what is left, standing",
+       "text": "It serves eight at once and has never sat down to a meal. After a fight it is already going round with the bowl.",
+       "sign": "A ladle in one arm, bowls stacked down three more, and a pot it carries by the rim against its own skin.",
+       "habit": "It counts the bowls back in, and frets over the one that comes back full.",
+       "features": [
+        "small-hands"
+       ],
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "quests": {
+         "linework": 0.4
+        }
+       },
+       "body": {
+        "arms": "last-served",
+        "holds": [
+         "pot",
+         "ladle",
+         "bowls"
+        ],
+        "mantle": [
+         "round",
+         1.12
+        ],
+        "build": {
+         "girth": 1.18
+        }
+       }
+      }
+     ]
+    },
+    {
+     "id": "octopus-hand-in-the-dark",
+     "name": "Hand-in-the-dark",
+     "of": "one who takes your hand where you cannot see, and says nothing about it",
+     "text": "In the dark there is a cool hand in yours. It has one for each of the party, and has not lost anybody yet.",
+     "sign": "It goes pale in the dark so that it can be found, and keeps an arm stretched out to each side, feeling for a shoulder.",
+     "habit": "At lights-out it touches each bed in the dormitory once, in order, with the tip of one arm.",
+     "features": [
+      "dark-eyed"
+     ],
+     "leans": {
+      "ground": {
+       "night": 1.0
+      }
+     },
+     "body": {
+      "arms": "outstretched",
+      "holds": [],
+      "skin": [
+       "pale",
+       1.0
+      ],
+      "eyes": [
+       "wide",
+       1.15
+      ],
+      "mantle": [
+       "egg",
+       0.95
+      ]
+     },
+     "finishes": [
+      {
+       "id": "octopus-lifeline",
+       "name": "Lifeline",
+       "of": "one who makes of everyone a chain that nothing drops out of",
+       "text": "It links the party arm to arm through the worst of the deep places. Nobody has yet let go, because it will not.",
+       "sign": "Its arms are knotted to one another end to end in one long line, with a loop left open at each end for a hand.",
+       "habit": "On stairs it goes last, with an arm on the rail and an arm on each of you.",
+       "features": [
+        "chain"
+       ],
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        }
+       },
+       "body": {
+        "arms": "lifeline",
+        "holds": [
+         "loops"
+        ],
+        "skin": [
+         "bands",
+         1.0
+        ],
+        "mantle": [
+         "egg",
+         0.9
+        ]
+       }
+      },
+      {
+       "id": "octopus-holdfast",
+       "name": "Holdfast",
+       "of": "one who held on to somebody past the point of sense, and was right to",
+       "text": "It has had hold of each of your classmates once when they would have fallen. It remembers which arm.",
+       "sign": "One arm is far longer than the rest and ringed with old grip-marks, and that is the one it offers.",
+       "habit": "It will not let go of a hand first. People have learned to say when.",
+       "features": [
+        "long-legged"
+       ],
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        }
+       },
+       "body": {
+        "arms": "holdfast",
+        "holds": [
+         "post"
+        ],
+        "skin": [
+         "rings",
+         1.0
+        ],
+        "build": {
+         "girth": 1.15
+        }
+       }
+      }
+     ]
+    },
+    {
+     "id": "octopus-plate-spinner",
+     "name": "Plate-spinner",
+     "of": "one who keeps eight things in the air and lets no one see the effort",
+     "text": "It learned your Pattern's beat and keeps it with whatever is to hand. Nothing it has thrown has yet come down wrong.",
+     "sign": "Rings of light turn above its lifted arms, one over each, and its eyes are on none of them.",
+     "habit": "It keeps small things turning in the air while it thinks: buttons, coins, your keys.",
+     "features": [
+      "ring"
+     ],
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      }
+     },
+     "body": {
+      "arms": "upraised",
+      "holds": [
+       "ring",
+       "ring",
+       "ring",
+       "ring"
+      ],
+      "mantle": [
+       "flat",
+       0.95
+      ],
+      "skin": [
+       "stripes",
+       1.0
+      ]
+     },
+     "finishes": [
+      {
+       "id": "octopus-eight-at-once",
+       "name": "Eight-at-once",
+       "of": "one who does eight things at once and all of them properly",
+       "text": "Each arm is at a different piece of work and none waits on another. When your Pattern fires it has already laid out what comes next.",
+       "sign": "Every arm holds a different tool and works at it, spread wide like the spokes of a wheel.",
+       "habit": "It writes, stirs, mends and turns a page at once, and gets cross if watched.",
+       "features": [
+        "gears"
+       ],
+       "leans": {
+        "shape": {
+         "make": 1.0
+        },
+        "pattern": {
+         "fires": 0.5
+        }
+       },
+       "body": {
+        "arms": "wheel",
+        "holds": [
+         "hammer",
+         "quill",
+         "needle",
+         "spoon",
+         "key",
+         "book",
+         "brush",
+         "lamp"
+        ],
+        "mantle": [
+         "round",
+         1.0
+        ],
+        "build": {
+         "arm": 1.12
+        }
+       }
+      },
+      {
+       "id": "octopus-mended-plate",
+       "name": "Mended Plate",
+       "of": "one who let one thing fall, once, and has never forgiven it",
+       "text": "It dropped something once that mattered. Now one arm does nothing but hold a mended plate, and the other seven work twice as hard.",
+       "sign": "One arm holds up a plate with a bright seam where it was mended. It will not put it down or let anyone take it.",
+       "habit": "It checks its hold on everything, twice, starting with the plate.",
+       "features": [
+        "pulse"
+       ],
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        }
+       },
+       "body": {
+        "arms": "mended-plate",
+        "holds": [
+         "plate"
+        ],
+        "mantle": [
+         "round",
+         1.05
+        ],
+        "skin": [
+         "mottle",
+         0.6
+        ],
+        "eyes": [
+         "half",
+         1.0
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "octopus-latch-lifter",
+   "name": "Latch-lifter",
+   "of": "one who cannot leave a closed thing closed, or stay in one",
+   "text": "It learned from you that every shut thing is a question. It has been out of its jar since the first night, and into everything else.",
+   "sign": "Long thin arms with tips as fine as wire, always feeling along an edge. A ring of keys hangs on one, none of them yours.",
+   "habit": "It undoes every knot and buckle within reach and does most of them up again, differently.",
+   "features": [
+    "small-hands"
+   ],
+   "leans": {
+    "ground": {
+     "ruin": 1.0
+    },
+    "fights": {
+     "dodges": 0.7
+    },
+    "shape": {
+     "make": 0.4
+    }
+   },
+   "body": {
+    "accent": "peacock",
+    "mantle": [
+     "tall",
+     0.86
+    ],
+    "skin": [
+     "stripes",
+     1.0
+    ],
+    "eyes": [
+     "bar",
+     1.1
+    ],
+    "arms": "latch-lifter",
+    "holds": [
+     "keyring"
+    ],
+    "build": {
+     "arm": 1.3,
+     "girth": 0.72,
+     "head": 0.92
+    }
+   },
+   "prongs": [
+    {
+     "id": "octopus-bottle-dweller",
+     "name": "Bottle-dweller",
+     "of": "one who can fit themselves into whatever room they are given",
+     "text": "It goes into a bottle, a boot, a gap under a door. The blow meant for it finds the place it was, and glass.",
+     "sign": "It lives in a bottle a third its size, with one eye at the neck and its arms folded in like letters.",
+     "habit": "It tries every vessel in the room for size, and sleeps in the smallest.",
+     "features": [
+      "bottle"
+     ],
+     "leans": {
+      "fights": {
+       "dodges": 1.0
+      }
+     },
+     "body": {
+      "arms": "bottled",
+      "house": [
+       "bottle",
+       1.0
+      ],
+      "holds": [],
+      "mantle": [
+       "tall",
+       0.7
+      ],
+      "skin": [
+       "plain",
+       0.0
+      ]
+     },
+     "finishes": [
+      {
+       "id": "octopus-bottle-post",
+       "name": "Bottle-post",
+       "of": "one who gets word out of anywhere they are shut in",
+       "text": "Shut it in and the word still gets out: a note on the tide, in a corked bottle, in its own hand.",
+       "sign": "A corked bottle with a rolled paper in it rides high in one arm, and another arm is always writing the next.",
+       "habit": "It leaves notes in corked bottles in the wash-basins, addressed to nobody.",
+       "features": [
+        "pages"
+       ],
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        }
+       },
+       "body": {
+        "arms": "bottle-post",
+        "house": null,
+        "holds": [
+         "corked-bottle",
+         "quill",
+         "paper"
+        ],
+        "mantle": [
+         "tall",
+         0.9
+        ],
+        "skin": [
+         "stripes",
+         0.8
+        ]
+       }
+      },
+      {
+       "id": "octopus-ship-in-the-bottle",
+       "name": "Ship-in-the-bottle",
+       "of": "one who builds something whole in the small room they were given",
+       "text": "It built a ship inside its bottle, mast by mast, through the neck. It lives in the hold and is entirely content.",
+       "sign": "It carries a great bottle on its back with a ship in it, every sail set, and a gold eye at the stern window.",
+       "habit": "It rigs things: thread between bedposts, string across the washstand, all of it taut.",
+       "features": [
+        "sight-glass"
+       ],
+       "leans": {
+        "shape": {
+         "make": 1.0
+        },
+        "ground": {
+         "quiet": 0.5
+        }
+       },
+       "body": {
+        "arms": "ship-bearer",
+        "house": [
+         "ship-bottle",
+         1.0
+        ],
+        "holds": [],
+        "mantle": [
+         "tall",
+         0.8
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "octopus-key-turner",
+     "name": "Key-turner",
+     "of": "one who has to see how a thing was fastened before they can leave it",
+     "text": "Every lock on the line is a small argument, and it has won them all. It carries the answers on its arms.",
+     "sign": "Each arm ends in a different key, grown that way, and it holds them fanned like a hand of cards.",
+     "habit": "It locks and unlocks the same door until it is satisfied with the sound.",
+     "features": [
+      "gears"
+     ],
+     "leans": {
+      "quests": {
+       "linework": 1.0
+      }
+     },
+     "body": {
+      "arms": "key-fan",
+      "holds": [
+       "key",
+       "key",
+       "key",
+       "key",
+       "key"
+      ],
+      "skin": [
+       "bands",
+       1.0
+      ],
+      "mantle": [
+       "tall",
+       0.9
+      ]
+     },
+     "finishes": [
+      {
+       "id": "octopus-points-turner",
+       "name": "Points-turner",
+       "of": "one who throws the switch that sends the trouble down another track",
+       "text": "It works the points of a junction with eight arms and sends what was coming for you down the siding.",
+       "sign": "It sits atop a signal lever with an arm on each of the others, under a small lamp that shows the field's colour.",
+       "habit": "It rearranges your boots by the door into the order it thinks they will be needed.",
+       "features": [
+        "lantern"
+       ],
+       "leans": {
+        "ground": {
+         "line": 1.0
+        }
+       },
+       "body": {
+        "arms": "signalman",
+        "house": [
+         "levers",
+         1.0
+        ],
+        "holds": [
+         "lamp"
+        ],
+        "mantle": [
+         "round",
+         0.85
+        ],
+        "build": {
+         "arm": 1.1
+        }
+       }
+      },
+      {
+       "id": "octopus-skeleton-key",
+       "name": "Skeleton Key",
+       "of": "one before whom no door stays shut, and who is trusted with that",
+       "text": "There is nothing it cannot open, and it has been told so. It opens what you ask and has never once gone further.",
+       "sign": "Thin as wire and pale as bone, with one long arm let straight down that ends in a single plain key.",
+       "habit": "It tries the door of every room it passes, finds it locked, and nods.",
+       "features": [
+        "long-legs"
+       ],
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        }
+       },
+       "body": {
+        "arms": "skeleton-key",
+        "holds": [
+         "bit"
+        ],
+        "mantle": [
+         "tall",
+         0.72
+        ],
+        "skin": [
+         "bone",
+         1.0
+        ],
+        "build": {
+         "girth": 0.5,
+         "arm": 1.5
+        }
+       }
+      }
+     ]
+    },
+    {
+     "id": "octopus-shell-carrier",
+     "name": "Shell-carrier",
+     "of": "one who makes a house of whatever is lying about, wherever they are put down",
+     "text": "It walks on two arms and carries two halves of a shell in the rest. When the blow comes it is inside, and the shell is shut.",
+     "sign": "It carries the two halves of a great shell, one either side, and tiptoes on the tips of two arms like someone late.",
+     "habit": "It collects lids. Any two things that might shut together are tried, and kept if they do.",
+     "features": [
+      "shell"
+     ],
+     "leans": {
+      "fights": {
+       "blocks": 1.0
+      }
+     },
+     "body": {
+      "arms": "shell-carrier",
+      "holds": [
+       "shell-half",
+       "shell-half"
+      ],
+      "mantle": [
+       "round",
+       0.9
+      ],
+      "skin": [
+       "mottle",
+       0.8
+      ],
+      "build": {
+       "girth": 0.9,
+       "arm": 1.05
+      }
+     },
+     "finishes": [
+      {
+       "id": "octopus-wall-gardener",
+       "name": "Wall-gardener",
+       "of": "one who builds a low wall round what they love and tends what grows there",
+       "text": "It has walled its ground with shells and stones, one at a time, and something is growing inside. It will show you if you ask twice.",
+       "sign": "A low ring of shells and bright stones goes round it like a wall, and a small green thing grows in the middle.",
+       "habit": "It brings back one stone from every place you go, and each has its place in the wall.",
+       "features": [
+        "roots"
+       ],
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "ground": {
+         "wild": 0.4
+        }
+       },
+       "body": {
+        "arms": "gardener",
+        "house": [
+         "wall",
+         1.0
+        ],
+        "holds": [
+         "stone",
+         "sprig"
+        ],
+        "mantle": [
+         "round",
+         0.95
+        ]
+       }
+      },
+      {
+       "id": "octopus-borrowed-helm",
+       "name": "Borrowed Helm",
+       "of": "one who goes into the worst of it wearing whatever was to hand",
+       "text": "It found a soldier's helmet in a ruin and has worn it since. What comes down on the two of you rings on iron.",
+       "sign": "An old dented helmet sits on it like a house, with two gold eyes under the brim and its arms below like a beard.",
+       "habit": "It tries on hats. Yours, the Instructors', the cook's. It has opinions about all of them.",
+       "features": [
+        "plated"
+       ],
+       "leans": {
+        "ground": {
+         "ruin": 1.0
+        },
+        "fights": {
+         "blocks": 0.5
+        }
+       },
+       "body": {
+        "arms": "beard",
+        "house": [
+         "helm",
+         1.0
+        ],
+        "holds": [],
+        "mantle": [
+         "flat",
+         0.9
+        ],
+        "eyes": [
+         "bar",
+         1.25
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "octopus-sleeps-on-it",
+   "name": "Sleeps-on-it",
+   "of": "one who works a thing out asleep, and wakes knowing",
+   "text": "It learned from you that some things are only solved by leaving them. Colours cross its skin as it sleeps, and in the morning it knows.",
+   "sign": "Its eyes are half shut and slow bands of colour pass down it, like thought seen from outside. Two small fins beat above its eyes.",
+   "habit": "It sleeps on your open book, and the page it has moved to is the one you needed.",
+   "features": [
+    "ear-fins"
+   ],
+   "leans": {
+    "shape": {
+     "read": 1.0
+    },
+    "ground": {
+     "water": 0.7
+    },
+    "company": {
+     "alone": 0.4
+    }
+   },
+   "body": {
+    "accent": "amethyst",
+    "mantle": [
+     "bell",
+     1.0
+    ],
+    "skin": [
+     "bands",
+     1.0
+    ],
+    "eyes": [
+     "half",
+     1.2
+    ],
+    "fins": [
+     "ear",
+     1.0
+    ],
+    "web": [
+     "skirt",
+     0.5
+    ],
+    "arms": "dozing",
+    "holds": [
+     "open-book"
+    ],
+    "build": {
+     "arm": 0.78,
+     "girth": 1.1,
+     "head": 1.05
+    }
+   },
+   "prongs": [
+    {
+     "id": "octopus-tide-teller",
+     "name": "Tide-teller",
+     "of": "one who knows when a thing will turn, having watched it turn before",
+     "text": "It has the foe's rhythm the way it has the tide's. Its skin goes pale a breath before the strike: guard when it does.",
+     "sign": "It hangs like a bell with its arms let straight down in a row, and pale marks light down each in turn like the hours.",
+     "habit": "It taps out the hours on the window with one arm, and is never wrong.",
+     "features": [
+      "dial"
+     ],
+     "leans": {
+      "fights": {
+       "parries": 1.0
+      }
+     },
+     "body": {
+      "arms": "comb",
+      "holds": [],
+      "skin": [
+       "hours",
+       1.0
+      ],
+      "mantle": [
+       "bell",
+       1.1
+      ],
+      "web": [
+       "skirt",
+       0.35
+      ]
+     },
+     "finishes": [
+      {
+       "id": "octopus-slack-water",
+       "name": "Slack-water",
+       "of": "one who waits for the still moment between two tides, and acts in it",
+       "text": "Between the foe's blow and its next there is a stillness. It lives there, and holds the moment open for you.",
+       "sign": "It hangs perfectly still, its web spread between its arms like a parasol, and the air round it does not move.",
+       "habit": "It stops, entirely, for a breath at the top of every hour.",
+       "features": [
+        "standing-air"
+       ],
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "fights": {
+         "parries": 0.5
+        }
+       },
+       "body": {
+        "arms": "parasol",
+        "web": [
+         "parasol",
+         1.0
+        ],
+        "skin": [
+         "plain",
+         0.0
+        ],
+        "mantle": [
+         "bell",
+         0.95
+        ],
+        "fins": [
+         "ear",
+         1.2
+        ]
+       }
+      },
+      {
+       "id": "octopus-storm-glass",
+       "name": "Storm-glass",
+       "of": "one who feels the weather of a room change before anyone has spoken",
+       "text": "It clouds before trouble like a storm-glass. When it goes dark from the arms upward, something is coming that you have not seen.",
+       "sign": "It has drawn itself up tall and gone clear as glass, and something like weather moves inside: cloud, and a small light.",
+       "habit": "It clouds over before a quarrel, and goes and sits by whoever is about to start it.",
+       "features": [
+        "mist"
+       ],
+       "leans": {
+        "ground": {
+         "wild": 1.0
+        },
+        "shape": {
+         "read": 0.5
+        }
+       },
+       "body": {
+        "arms": "tucked",
+        "mantle": [
+         "glass",
+         1.5
+        ],
+        "web": null,
+        "skin": [
+         "weather",
+         1.0
+        ],
+        "fins": [
+         "ear",
+         0.7
+        ],
+        "eyes": [
+         "wide",
+         1.0
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "octopus-ink-hand",
+     "name": "Ink-hand",
+     "of": "one who must write a thing down before they know what they think",
+     "text": "What it worked out in the night it writes on the air in its own ink, and the ink hangs there long enough to read.",
+     "sign": "A slow cloud of ink hangs by it in the shape of the last thing it thought, and one arm is black to the elbow.",
+     "habit": "It writes on fogged windows, in spilt salt, in the dust on a shelf. Mostly sums.",
+     "features": [
+      "ink"
+     ],
+     "leans": {
+      "shape": {
+       "cast": 1.0
+      }
+     },
+     "body": {
+      "arms": "writer",
+      "holds": [
+       "ink-cloud"
+      ],
+      "skin": [
+       "inked",
+       1.0
+      ],
+      "mantle": [
+       "bell",
+       0.95
+      ],
+      "eyes": [
+       "bar",
+       1.1
+      ]
+     },
+     "finishes": [
+      {
+       "id": "octopus-ink-blot",
+       "name": "Ink-blot",
+       "of": "one who knows the one true thing and cannot make it plainer than a blot",
+       "text": "It knows where the foe will be and can only show you in a blot. Learn to read its blots: they have not been wrong.",
+       "sign": "The ink round it never clears. Two eyes look out of the cloud, and sometimes the outline of a thing that has not happened yet.",
+       "habit": "It leaves a blot on your pillow most mornings, and waits to see what you make of it.",
+       "features": [
+        "smoke"
+       ],
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "shape": {
+         "cast": 0.4
+        }
+       },
+       "body": {
+        "arms": "in-the-blot",
+        "house": [
+         "blot",
+         1.0
+        ],
+        "holds": [],
+        "mantle": [
+         "bell",
+         0.85
+        ],
+        "eyes": [
+         "wide",
+         1.3
+        ]
+       }
+      },
+      {
+       "id": "octopus-fair-copy",
+       "name": "Fair Copy",
+       "of": "one who gets a thing exactly right and then writes it out clean",
+       "text": "It has written out everything it knows about each beast you have felled, fair, in eight hands. The book is nearly full.",
+       "sign": "It holds a thick book open across four arms and writes in it with two more, very small and very straight.",
+       "habit": "It copies out your notes at night in a better hand, and corrects them.",
+       "features": [
+        "ledger"
+       ],
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        }
+       },
+       "body": {
+        "arms": "copyist",
+        "holds": [
+         "great-book",
+         "quill",
+         "quill"
+        ],
+        "skin": [
+         "stripes",
+         0.8
+        ],
+        "mantle": [
+         "bell",
+         1.0
+        ],
+        "web": null
+       }
+      }
+     ]
+    },
+    {
+     "id": "octopus-glass-thinker",
+     "name": "Glass Thinker",
+     "of": "one in whom you can see the thought happen, and who does not mind",
+     "text": "It has gone clear as glass with thinking. You can watch the idea form in it, a light moving from arm to arm, before it knows itself.",
+     "sign": "Clear as glass, its arms turned up like a chandelier, with a small light inside that travels down one and then another.",
+     "habit": "It hangs in the window at night with the lamp behind it, so that you can see it is thinking.",
+     "features": [
+      "cold-core"
+     ],
+     "leans": {
+      "ground": {
+       "quiet": 1.0
+      }
+     },
+     "body": {
+      "arms": "chandelier",
+      "holds": [],
+      "skin": [
+       "glass",
+       1.0
+      ],
+      "mantle": [
+       "glass",
+       1.0
+      ],
+      "eyes": [
+       "wide",
+       1.1
+      ],
+      "web": [
+       "skirt",
+       0.3
+      ],
+      "fins": [
+       "ear",
+       0.8
+      ]
+     },
+     "finishes": [
+      {
+       "id": "octopus-eight-minds",
+       "name": "Eight Minds",
+       "of": "one who is of several minds and has learned to let them all speak",
+       "text": "Each of its arms has thought the matter through on its own. They do not agree, and it has learned to hear all eight before you move.",
+       "sign": "A separate small light burns at the tip of each arm, held out in a ring, and they dim in turn as if speaking.",
+       "habit": "Its arms play one another at knucklebones while its eyes read.",
+       "features": [
+        "second-face"
+       ],
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "shape": {
+         "read": 0.4
+        }
+       },
+       "body": {
+        "arms": "ring-of-lights",
+        "holds": [
+         "mind",
+         "mind",
+         "mind",
+         "mind",
+         "mind",
+         "mind",
+         "mind",
+         "mind"
+        ],
+        "mantle": [
+         "glass",
+         0.8
+        ],
+        "build": {
+         "arm": 1.15
+        }
+       }
+      },
+      {
+       "id": "octopus-deep-sleeper",
+       "name": "Deep Sleeper",
+       "of": "one who goes very far down into a thing and is gone a long while",
+       "text": "It goes down into the cold to think and is gone for days. What it brings up is always worth the wait, and it does not hurry.",
+       "sign": "Dark as deep water, with a web drawn round its arms like a cloak, great fins, and a single cold light where they meet.",
+       "habit": "It goes to the bottom of the rain-butt for days at a time and comes up with something solved.",
+       "features": [
+        "web"
+       ],
+       "leans": {
+        "company": {
+         "alone": 1.0
+        },
+        "quests": {
+         "deep-run": 0.5
+        }
+       },
+       "body": {
+        "arms": "cloaked",
+        "web": [
+         "cloak",
+         1.0
+        ],
+        "fins": [
+         "great",
+         1.5
+        ],
+        "skin": [
+         "deep",
+         1.0
+        ],
+        "coat": "night",
+        "mantle": [
+         "bell",
+         1.05
+        ],
+        "eyes": [
+         "half",
+         1.3
+        ],
+        "holds": [
+         "cold-light"
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "newFeatures": [
+  {
+   "id": "many-arms",
+   "slot": "arms",
+   "label": "arms that curl and hold"
+  },
+  {
+   "id": "bar-eyes",
+   "slot": "eyes",
+   "label": "gold eyes with a bar for a pupil"
+  },
+  {
+   "id": "bottle",
+   "slot": "body",
+   "label": "a bottle it lives in"
+  },
+  {
+   "id": "ear-fins",
+   "slot": "head",
+   "label": "fins like ears"
+  },
+  {
+   "id": "ink",
+   "slot": "surface",
+   "label": "ink it lets go on the air"
+  },
+  {
+   "id": "web",
+   "slot": "body",
+   "label": "a web between its arms"
+  }
+ ]
+}

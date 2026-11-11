@@ -247,6 +247,7 @@ told apart at the size of a thumbnail before their shapes can.
 | Lantern | Wayfinder `peacock` · Watch-lamp `marigold` · Kept Flame `amethyst` |
 | Lurker | Back-stander `amethyst` · The One Who Sits Up `gold` · The Unremarked `lapis` |
 | Moth | Candle-moth `marigold` · Emperor `amethyst` · Moon-moth `jade` |
+| Octopus | Many-hands `marigold` · Latch-lifter `peacock` · Sleeps-on-it `amethyst` |
 | Shield | Wall-shield `lapis` · Gate-shield `madder` · Shelter-shield `jade` |
 | Sprite | Hob `marigold` · Lore-sprite `lapis` · Pixy `jade` |
 | Stag | Tilter `madder` · Wood-walker `jade` · Watch-hart `gold` |
@@ -1168,6 +1169,70 @@ Fox and the Drake (whose ridge, wings and tail-tip are its markings), `hide_red`
 **Their gifts** (`python tools/blender/lines_wolfkin.py gifts`): the Fox's brush and its
 foxfire (`fox-tail`, `fox-glow`), the Stag's crown and its long legs (`stag-horn-brow`,
 `stag-long-legs`), the Drake's horns and its tail (`drake-horns`, `drake-tail`).
+
+## The Octopus (`tools/blender/lines_octopus.py`)
+
+A companion of the monsters' class, a keeper: the most intelligent animal that is nothing
+like us. It thinks with every arm, gets out of anything, takes things apart to see how they
+work, and holds eight things at once.
+
+**Its anatomy** is an octopus's, kept whole on every form: a mantle (the sack behind the head,
+which breathes), a head with two large eyes on turrets and a bar for a pupil, a small horn of
+skin over each eye, a siphon under the right eye, and a crown of eight arms round a mouth
+underneath, each arm pale and suckered on the side that faces the mouth. **The magical choice,
+made on purpose:** it swims in the field, in the air. Nothing of it stands on anything; its arms
+trail, curl and wave as in water that is not there; and what a form lives on or in (a book, a
+mooring post, a bottle, a lever frame, a bed of earth with a wall round it) floats with it as
+part of its body. No rig: a body is pieces, under 120 KB a form.
+
+**Its colours.** Its skin is its Path's colour: it changes colour, and here that is the story
+(the Starter "has not chosen a colour"; a Path is the colour it chose). The mantle and the backs
+of the arms are the accent, patterned in the accent's own steps. Its partner's coat is its
+face, the roots and pale undersides of its arms and the rims of its eyes (`hide_octopus` main,
+`hide_octopus_pale` under, `hide_octopus_dark` trim: `data/genius-looks.json`, `beast-octopus`),
+and the Starter is that coat and nothing else. The field is a ring round each eye, and what a
+form holds: a lamp, a cup, rings, a mended seam, a light at an arm's tip.
+
+| Path | Colour | The animal it is | What it keeps | Its nine |
+|---|---|---|---|---|
+| Many-hands | `marigold` | the round common octopus, mottled, kind-eyed | round and warm; arms full, and one free | a cup held high and still; stilts and a sling; a pot, a ladle and bowls; a pale cross of two reaching arms; a knotted line with a loop at each end; a mooring post and one long ringed arm; four lifted arms with rings of light; a wheel of eight tools; a mended plate over seven fists |
+| Latch-lifter | `peacock` | the long-armed mimic, banded, keen-eyed | a tall narrow mantle; arms long and fine as wire at the tips | in a bottle, an eye at its neck; a corked bottle held high, a quill and a page; a great bottle on its back with a ship in it; five keys fanned; a lever frame under a lamp; itself the shape of a key; two shell halves and two tiptoe arms; a walled bed with a sprig; an old helm and a beard of arms |
+| Sleeps-on-it | `amethyst` | the dumbo: a bell with ear-fins and a web, half-lidded | the bell, the fins, the web between the arms | asleep on a book; a comb of arms with an hour lit on each; a still parasol; a tall glass with weather in it; an inked arm and a thought in ink; a blot with eyes and an omen; a great book and two quills; a glass chandelier with one light; eight lights in a ring; a dark cloak, great fins, a cold light |
+
+| Key | What it is | Styles |
+|---|---|---|
+| `mantle` | its shape, `[style, size]` | `round` `tall` `egg` `flat` `bell` `glass` |
+| `skin` | the pattern, in the accent's steps | `plain` `mottle` `bands` `stripes` `rings` `pale` `bone` `hours` `weather` `inked` `glass` `deep` |
+| `eyes` | | `bar` `wide` (a round dark pupil, no lid) `half` (the lid half down) |
+| `arms` | its pose: where all eight go and what is in them. One a form | `inkling`; `many-hands` `cup-bearer` `splints` `last-served` `outstretched` `lifeline` `holdfast` `upraised` `wheel` `mended-plate`; `latch-lifter` `bottled` `bottle-post` `ship-bearer` `key-fan` `signalman` `skeleton-key` `shell-carrier` `gardener` `beard`; `dozing` `comb` `parasol` `tucked` `writer` `in-the-blot` `copyist` `chandelier` `ring-of-lights` `cloaked` |
+| `holds` `house` | what is in its arms; what it lives in or on. Said for the reader: the pose builds them | |
+| `fins` `web` | ear-fins on the mantle; a web between the arms | `ear` `great`; `skirt` `parasol` `cloak` |
+| `build` | `arm` `girth` `head`, multiples of 1 | |
+
+**What moves.** `pulse_mantle` breathes; `blink_eye_l`, `blink_eye_r` shut along their own up;
+each arm is still for its first third (that share is part of the body, and carries the web)
+and then one to three pieces `wave_arm<n>_<k>`, each the child of the one before, each turned
+so that it nods across itself: an arm lifts and falls in the plane it curls in, and the wave
+runs down it. What an arm holds rides its last piece. `glide_fin_l`, `glide_fin_r` are the
+ear-fins; `sway_lamp`, `sway_keys`, `sway_steam` hang; `spin_ring_<n>` are the Plate-spinner's
+rings and `spin_weather` the Storm-glass's cloud; `pulse_mind<n>`, `pulse_thought`,
+`pulse_cold`, `pulse_light` are its small lights; `bob_ink` is the Ink-hand's thought. An arm
+that carries something by more than one hold, or holds a thing level, is still on purpose:
+the Cup-bearer's cup never moves, and Slack-water moves nothing but its eyes.
+
+**Its gifts** (`python tools/blender/lines_octopus.py gifts`): `octopus-many-arms`, four arms
+out of the wearer's back, suckered sides out, in the wearer's own Path's colour (the back,
+`socket_back`); `octopus-bar-eyes`, two gold eyes with a bar on turrets wide of the wearer's
+own, a ring of the field round each (`socket_eyes`). Both keep their moving names, so the
+arms wave and the eyes blink on a wolf.
+
+**Still weak.** Bottle-dweller's neck is lost behind its own eye and arm, so the bottle reads
+as a jar. Key-turner and Eight-at-once are wide, so the game stands their bodies smaller than
+their neighbours'. Ink-blot is a crowd of lobes and its drawn omen (a door) is small. The
+Storm-glass, Glass Thinker and Eight Minds are "glass" by being pale and opened at the front
+(nothing in the style is see-through). The comb's lit hours are small. An arm that grips a
+thing does not wave, so Holdfast, Points-turner, Shell-carrier and Fair Copy move little.
+Deep Sleeper alone on its Path wears a coat shift (`night`).
 
 ## What is still weak
 
