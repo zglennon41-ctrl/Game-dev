@@ -4233,6 +4233,9 @@ func _update_form(f: Fight, dt: float) -> void:
 		# turn the kit's own take in the hand.
 		var grip := _held_at("grip")
 		if grip:
+			# (one that will not sit in a hand as it floats, a gun on its legs, has a piece for the
+			# hand: docs/genius-lines.md, "A worn piece")
+			_g_body.set_worn(true)
 			var g := _g_body._local_xf(grip)
 			var made := 1.0 / maxf(0.001, _g_body._model.scale.y)
 			var quarter := Basis(Vector3.UP, PI / 2.0) if String(f.g_weapon.get("style", "")) in ["gun", "bow"] else Basis.IDENTITY
