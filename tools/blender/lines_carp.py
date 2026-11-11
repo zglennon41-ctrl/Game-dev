@@ -5,15 +5,18 @@ in the field, as if the field were water (docs/genius-lines.md, "The Carp").
     python tools/blender/genius_lines.py carp carp-past-the-gate carp-brocade
     python tools/blender/lines_carp.py gifts        # what a hybrid wears of it: a fin, a tail
 
-A carp is built along its spine. The spine is a pose (level, bent like a bow, climbing,
-coiled); the body is a skin of rings about it, shaped by what kind of fish it is; and it is
-cut into pieces that the game moves by their names, so that it swims where it hangs: the
-head is still, and behind it `wag_body_0`, `wag_body_1` and the tail `wag_body_2` each turn
-on the one before. Its shoulder fins are `glide_fin_l` and `_r`, its whiskers `sway_*`, its
-eyes `blink_eye_*`, its gill-covers `pulse_gill_*`.
+A carp is built along its spine. The spine is a pose (level, bent like a bow, climbing, in
+two slow waves); the body is a skin of rings about it, shaped by what kind of fish it is and
+laid in scales; and it is cut into pieces that the game moves by their names, so that it
+swims where it hangs: the head is still, and behind it `wag_body_0`, `wag_body_1` and the
+tail `wag_body_2` each turn on the one before. Its shoulder fins are `glide_fin_l` and `_r`,
+its whiskers `sway_*`, its eyes `blink_eye_*` (a fish does not blink; this one is a soul),
+its gill-covers `pulse_gill_*`.
 
 A form's `body` is read as every line's is (a form wears what its parent wears; a key
-replaces its parent's; `build` merges). The keys and their styles are in the docs.
+replaces its parent's; `build` merges). The keys and their styles are in the docs. Its
+Path's colour is in the same kind of place down the whole Path, and that place is the
+Path's own: the rays of its fins, their roots, or their margins (`finmark`).
 """
 import json
 import math
@@ -54,11 +57,9 @@ PALETTE.update({
     "eye_pupil": ((0.008, 0.008, 0.012), 0.15, 0.0), "eye_white": ((0.82, 0.8, 0.72), 0.3, 0.0),
     "bone_barbel": ((0.74, 0.66, 0.54), 0.6, 0.0), "bone_white": ((0.86, 0.85, 0.8), 0.6, 0.0), "bone_horn": ((0.6, 0.52, 0.38), 0.5, 0.0),
     "bone_bud": ((0.62, 0.48, 0.4), 0.9, 0.0), "stone_key": ((0.2, 0.2, 0.215), 0.95, 0.0), "stone_plate": ((0.17, 0.18, 0.2), 0.8, 0.0),
-    "stone_silt": ((0.2, 0.19, 0.2), 1.0, 0.0), "stone_silt_dark": ((0.06, 0.055, 0.065), 1.0, 0.0),
-    "stone_barnacle": ((0.56, 0.53, 0.46), 0.95, 0.0), "cord_rope": ((0.44, 0.34, 0.2), 0.95, 0.0), "cloth_ribbon": ((0.4, 0.1, 0.08), 0.9, 0.0),
+    "stone_silt": ((0.2, 0.19, 0.2), 1.0, 0.0), "stone_barnacle": ((0.56, 0.53, 0.46), 0.95, 0.0), "cord_rope": ((0.44, 0.34, 0.2), 0.95, 0.0),
     "glass_ice": ((0.1, 0.17, 0.22), 0.12, 0.0), "glass_frost": ((0.45, 0.58, 0.66), 0.15, 0.0), "glass_spray": ((0.8, 0.87, 0.9), 0.3, 0.0), "iron_lamp": ((0.1, 0.1, 0.115), 0.5, 0.8),
     "brass_lamp": ((0.52, 0.4, 0.15), 0.4, 0.8), "iron_chain": ((0.16, 0.16, 0.18), 0.5, 0.8), "moss_weed": ((0.12, 0.2, 0.1), 0.9, 0.0),
-    "earth_mud": ((0.22, 0.165, 0.11), 1.0, 0.0), "earth_crack": ((0.07, 0.05, 0.035), 1.0, 0.0),
 })
 
 
@@ -94,7 +95,6 @@ POSES = {
     "rear": (lambda t: -1.05 * (1 - t) ** 1.6, _c(-0.2), 0.0),                          # the head lifted, the rest level
     "rise": (lambda t: -0.8 + 0.35 * t, _c(-0.15), 0.0),                                # mouth first, to a hand
     "dart": (_c(0.03), lambda t: 0.14 * math.sin(2 * math.pi * t), 0.0),
-    "glide": (lambda t: -0.2 + 0.1 * t, _c(-0.1), 0.0),
     "broadside": (_c(0.0), _c(-0.67), 0.0),                                             # across the way it is going
     "turn": (_c(0.04), lambda t: -0.2 - 1.15 * t ** 1.3, 0.12),                         # the turn at the end of a length
     "sway": (lambda t: 0.1 * math.sin(2 * math.pi * t), lambda t: -0.35 + 0.55 * math.sin(2 * math.pi * t + 0.4), 0.0),
@@ -105,11 +105,9 @@ POSES = {
     "thrash": (lambda t: 0.12 * math.sin(4 * math.pi * t), lambda t: -0.2 + 0.95 * math.sin(2.3 * math.pi * t), 0.0),
     "lean": (_c(0.0), _c(-0.45), 0.36),
     "curl": (lambda t: 0.3 * t, lambda t: -0.5 - 2.6 * t, 0.0),
-    "coil": (lambda t: -0.95 * math.cos(2.5 * math.pi * t), lambda t: -0.25 + 0.8 * math.sin(1.9 * math.pi * t), 0.0),
     # a dragon holding station: its head level and high, and the length of it in two slow waves behind
     "dragon": (lambda t: -1.2 * math.sin(2 * math.pi * 1.5 * max(0.0, t - 0.05) / 0.95), lambda t: 0.28 * math.sin(2 * math.pi * 0.9 * t), 0.0),
     "present": (lambda t: 0.85 * (1 - t) ** 2 - 0.12, _c(-0.2), 0.0),                   # a bow: the crown of the head shown
-    "stand": (lambda t: -1.25 + 0.5 * t * t, lambda t: 0.25 * math.sin(2 * math.pi * t), 0.0),
     "bank": (lambda t: -0.12 + 0.1 * t, _c(-0.15), 0.6),                                # the top of a long low arc: banked, its back to whoever watches
     "crescent": (lambda t: 0.06 * math.sin(2 * math.pi * t), lambda t: -0.75 + 1.5 * t, 0.0),        # bent round whoever it lies against
 }
@@ -600,8 +598,7 @@ def dorsal_fin(fish, style, size, spec, t0, t1):
                 h = H * (0.5 if style == "ridge" else 0.85) * (1.0 - 0.5 * abs(j / count - 0.35))
                 items.append((g.blade(root - d * (h * 0.3), root + up * h + d * (h * 0.35), h * 0.55, thick=h * 0.12, normal=side, belly=0.2), (b if j % 2 else mat("accent_dark")) if style == "ridge" else mat("bone_horn"), style == "ridge"))
         return items
-    out = [base[0]] + tips + [base[-1]]
-    # close it along the back: the outline runs up the front, along the tips, and down the back
+    # the membrane between each pair of rays: a slab from the back to the tips
     geos = []
     side = fish.at((lo + hi) / 2)[2]
     mark = spec.get("finmark", "rays") if style not in ("foam",) else "foam"
@@ -629,7 +626,6 @@ def anal_fin(fish, style, size, spec, t):
     w, u, dn = fish.girth(t)
     root = p - up * dn * 0.88
     Lf = fish.L * (0.2 if style == "veil" else 0.125) * size
-    a, b = _fin_mats(style, spec)
     out = [root - d * Lf * 0.45]
     for j in range(6):
         th = -0.25 + 1.3 * j / 5
@@ -804,16 +800,6 @@ def gill_cover(fish, sg, spec):
     return [(g.loft(rings, caps=True), mat("accent" if "cheek" in marks else "scale_pale" if "pale-cheek" in marks else "scale"), True)], pivot
 
 
-def taper(n, keys):
-    """n values run evenly through the keys."""
-    out = []
-    for i in range(n):
-        x = i / max(1, n - 1) * (len(keys) - 1)
-        j = min(int(x), len(keys) - 2)
-        out.append(lerp(keys[j], keys[j + 1], x - j))
-    return out
-
-
 def mud_ball(fish):
     """The ball of dried silt a Mud-sleeper has shut itself in: (its middle, its radius, the way its crack faces)."""
     c = sum((fish.at(t)[0] for t in (0.1, 0.3, 0.5, 0.7)), Vector((0, 0, 0))) / 4.0
@@ -943,11 +929,11 @@ def carried(fish, spec, pieces):
                 out.append(obj("eddy_%d" % j, [(tori(p, d, max(w, u) * 1.75, L * 0.008, n=20, sides=4, arc=0.62, start=0.5 + j * 2.4), mat("glass_spray"), True)],
                                frame=fish.frame(t), parent=None))
         elif style == "wake":
-            # the wave it pushes before it: a horseshoe of white water round its head, trailing back along both sides
+            # the wave it pushes before it: a crescent of white water round its head, its ends trailing back past the shoulders
             p0, d0, s0, u0 = fish.at(0.0)
             w0 = fish.girth(0.06)[0]
             arm = []
-            for t, off in ((0.66, 0.3), (0.36, 0.2), (0.13, 0.13)):
+            for t, off in ((0.5, 0.3), (0.3, 0.19), (0.12, 0.12)):
                 pp, d, side, up = fish.at(t)
                 arm.append((pp, side, fish.girth(t)[0] + L * off * size))
             pts = [pp + side * r for pp, side, r in arm]
@@ -957,8 +943,6 @@ def carried(fish, spec, pieces):
             n = len(pts)
             radii = [L * (0.004 + 0.013 * math.sin(math.pi * j / (n - 1)) ** 2) * math.sqrt(size) for j in range(n)]
             out.append(obj("wake", [(g.tube(pts, radii, n=6, flat=1.7, up=Z), mat("glass_spray"), True)]))
-        elif style == "lee":
-            pass        # the still water behind it is what its two waves leave between them
         elif style == "fry":
             # the small ones: a line of them along its near side from under its fin to past its tail, and one or two over its back
             groups = {0: [], 1: [], 2: []}
@@ -1127,16 +1111,6 @@ def carried(fish, spec, pieces):
             c = p + up * (u + L * 0.34) - d * L * 0.06
             out.append(obj("bob_coin", [(g.ico(c, L * 0.17, sub=2, scale=(1, 1, 0.1)), field("coin", 2.0), True),
                                         (tori(c, Z, L * 0.2, L * 0.012, n=20, sides=4), mat("accent"), True)], frame=at_point(c)))
-        elif style == "ribbons":
-            for j in range(5):
-                sg = 1 if j % 2 else -1
-                t = 0.34 + 0.11 * j
-                root = fish.skin(t, 0.1 if sg > 0 else math.pi - 0.1, out=1.0)
-                p, d, side, up = fish.at(t)
-                o = side * sg
-                h = L * 0.5
-                geo = g.tongue([root, root + (o * 0.25 + d * 0.5 - up * 0.1) * h, root + (o * 0.2 + d * 1.0 + up * 0.08) * h, root + (o * 0.3 + d * 1.5 - up * 0.1) * h], [L * 0.05, L * 0.055, L * 0.04, 0.004], thick=0.16, normal=up)
-                out.append(obj("sway_ribbon_%d" % j, [(geo, mat("accent2_light") if j % 2 else mat("accent_pale"), True)], frame=at_point(root), parent=pieces["b0" if t < 0.62 else "b1"]))
         elif style == "pearl":
             p, d, side, up = fish.at(0.0)
             c = p - d * L * 0.1 - up * L * 0.07

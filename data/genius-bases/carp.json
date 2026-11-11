@@ -419,7 +419,6 @@
           1.0
          ]
         ],
-        "coat": "frost",
         "brow": "calm"
        }
       },
@@ -578,8 +577,7 @@
           "wake",
           1.4
          ]
-        ],
-        "coat": "slate"
+        ]
        }
       },
       {
@@ -691,7 +689,7 @@
      ]
     ],
     "carry": [],
-    "coat": "moon",
+    "coat": "frost",
     "accent": "madder",
     "brow": "calm",
     "finmark": "roots"
@@ -776,7 +774,6 @@
         ],
         "scales": "none",
         "carry": [],
-        "coat": "frost",
         "finmark": "plain",
         "head": [
          [
@@ -1042,7 +1039,6 @@
         1.0
        ]
       ],
-      "coat": "frost",
       "brow": "sleepy"
      },
      "finishes": [
@@ -1136,7 +1132,6 @@
           1.0
          ]
         ],
-        "coat": "moon",
         "eyes": "round",
         "brow": "mild"
        }
