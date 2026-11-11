@@ -53,7 +53,10 @@
   "habit": "It drifts to whatever you are looking at and scorches it slightly.",
   "features": [
    "ember"
-  ]
+  ],
+  "body": {
+   "plan": "spark"
+  }
  },
  "paths": [
   {
@@ -77,6 +80,19 @@
    "features": [
     "glow"
    ],
+   "body": {
+    "plan": "flame",
+    "build": {
+     "r": 0.085,
+     "h": 0.34,
+     "n": 5
+    },
+    "eyes": "dark",
+    "bed": [
+     "coals",
+     1.0
+    ]
+   },
    "prongs": [
     {
      "id": "ember-camp-fire",
@@ -93,6 +109,26 @@
      "features": [
       "ring"
      ],
+     "body": {
+      "build": {
+       "r": 0.1,
+       "h": 0.42
+      },
+      "bed": [
+       [
+        "stones",
+        1.0
+       ],
+       [
+        "logs",
+        1.0
+       ]
+      ],
+      "has": [
+       "cinders",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "ember-cohort-fire",
@@ -108,7 +144,28 @@
        },
        "features": [
         "crown"
-       ]
+       ],
+       "body": {
+        "build": {
+         "r": 0.11,
+         "h": 0.6,
+         "n": 6
+        },
+        "bed": [
+         [
+          "stones",
+          1.3
+         ],
+         [
+          "logs",
+          1.2
+         ]
+        ],
+        "crown": [
+         "twelve",
+         1.15
+        ]
+       }
       },
       {
        "id": "ember-travellers-fire",
@@ -124,7 +181,20 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "build": {
+         "r": 0.08,
+         "h": 0.42,
+         "lift": 0.2
+        },
+        "bed": [
+         "pot",
+         1.0
+        ],
+        "has": null,
+        "eyes": "none"
+       }
       }
      ]
     },
@@ -143,6 +213,18 @@
      "features": [
       "far-eyes"
      ],
+     "body": {
+      "build": {
+       "r": 0.075,
+       "h": 0.46,
+       "n": 4
+      },
+      "eyes": "pale",
+      "ring": [
+       "ground",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "ember-the-fire-that-stayed",
@@ -161,7 +243,33 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "build": {
+         "r": 0.15,
+         "h": 0.24,
+         "n": 7
+        },
+        "eyes": "old",
+        "bed": [
+         "coals",
+         1.6
+        ],
+        "has": [
+         [
+          "andirons",
+          1.0
+         ],
+         [
+          "fireback",
+          1.0
+         ]
+        ],
+        "ring": [
+         "ground",
+         1.15
+        ]
+       }
       },
       {
        "id": "ember-window-ember",
@@ -177,7 +285,10 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "plan": "window"
+       }
       }
      ]
     },
@@ -196,6 +307,16 @@
      "features": [
       "iron-hide"
      ],
+     "body": {
+      "build": {
+       "r": 0.09,
+       "h": 0.46
+      },
+      "shell": [
+       "scale",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "ember-twice-lit",
@@ -211,7 +332,22 @@
        },
        "features": [
         "wings"
-       ]
+       ],
+       "body": {
+        "build": {
+         "r": 0.085,
+         "h": 0.56,
+         "n": 4
+        },
+        "shell": [
+         "petals",
+         1.0
+        ],
+        "wings": [
+         "thin",
+         1.0
+        ]
+       }
       },
       {
        "id": "ember-slow-coal",
@@ -227,7 +363,22 @@
        },
        "features": [
         "plated"
-       ]
+       ],
+       "body": {
+        "build": {
+         "r": 0.09,
+         "h": 0.2
+        },
+        "shell": [
+         "clinker",
+         1.0
+        ],
+        "has": [
+         "shimmer",
+         1.0
+        ],
+        "bed": null
+       }
       }
      ]
     }
@@ -254,6 +405,21 @@
    "features": [
     "watching-eye"
    ],
+   "body": {
+    "plan": "flame",
+    "build": {
+     "r": 0.034,
+     "h": 0.3,
+     "n": 3,
+     "lift": 0.32
+    },
+    "eyes": "one",
+    "bed": [
+     "rush",
+     1.0
+    ],
+    "coat": "moon"
+   },
    "prongs": [
     {
      "id": "ember-cold-flame",
@@ -270,6 +436,9 @@
      "features": [
       "quiet-place"
      ],
+     "body": {
+      "plan": "hollow"
+     },
      "finishes": [
       {
        "id": "ember-mast-fire",
@@ -285,7 +454,10 @@
        },
        "features": [
         "current"
-       ]
+       ],
+       "body": {
+        "plan": "mast"
+       }
       },
       {
        "id": "ember-deep-ember",
@@ -301,7 +473,27 @@
        },
        "features": [
         "far-eyes"
-       ]
+       ],
+       "body": {
+        "plan": "flame",
+        "build": {
+         "r": 0.05,
+         "h": 0.2,
+         "n": 3,
+         "lift": 0.3,
+         "lean": 0.35,
+         "side": 0.2
+        },
+        "eyes": "pale",
+        "bed": [
+         "coals",
+         0.5
+        ],
+        "has": [
+         "gimbal",
+         1.0
+        ]
+       }
       }
      ]
     },
@@ -320,6 +512,21 @@
      "features": [
       "pages"
      ],
+     "body": {
+      "plan": "flame",
+      "build": {
+       "r": 0.045,
+       "h": 0.24,
+       "n": 3,
+       "lift": 0.2,
+       "lean": 0.2
+      },
+      "eyes": "dark",
+      "bed": [
+       "book",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "ember-palimpsest-fire",
@@ -338,7 +545,26 @@
        },
        "features": [
         "dial"
-       ]
+       ],
+       "body": {
+        "build": {
+         "r": 0.055,
+         "h": 0.3,
+         "lift": 0.24
+        },
+        "bed": [
+         "book",
+         1.15
+        ],
+        "ring": [
+         "dial",
+         1.0
+        ],
+        "has": [
+         "pages",
+         1.0
+        ]
+       }
       },
       {
        "id": "ember-seal-wax-flame",
@@ -354,7 +580,10 @@
        },
        "features": [
         "ledger"
-       ]
+       ],
+       "body": {
+        "plan": "wax"
+       }
       }
      ]
     },
@@ -373,6 +602,25 @@
      "features": [
       "voice"
      ],
+     "body": {
+      "plan": "flame",
+      "build": {
+       "r": 0.05,
+       "h": 0.2,
+       "n": 3,
+       "lift": 0.14,
+       "lean": 0.0
+      },
+      "eyes": "pale",
+      "bed": [
+       "lamp",
+       1.0
+      ],
+      "has": [
+       "flashes",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "ember-oath-fire",
@@ -388,7 +636,30 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "build": {
+         "r": 0.095,
+         "h": 0.56,
+         "n": 5,
+         "lift": 0.14
+        },
+        "eyes": "dark",
+        "bed": [
+         "bowl",
+         1.0
+        ],
+        "has": [
+         [
+          "chain",
+          1.0
+         ],
+         [
+          "hand",
+          1.2
+         ]
+        ]
+       }
       },
       {
        "id": "ember-running-fire",
@@ -404,7 +675,10 @@
        },
        "features": [
         "ring"
-       ]
+       ],
+       "body": {
+        "plan": "wheel"
+       }
       }
      ]
     }
@@ -431,6 +705,30 @@
    "features": [
     "smoke"
    ],
+   "body": {
+    "plan": "flame",
+    "build": {
+     "r": 0.1,
+     "h": 0.52,
+     "n": 6,
+     "lean": 0.4,
+     "side": -0.15,
+     "ragged": 0.18
+    },
+    "eyes": "dark",
+    "bed": [
+     "sticks",
+     1.0
+    ],
+    "smoke": [
+     "stream",
+     1.0
+    ],
+    "has": [
+     "cinders",
+     1.0
+    ]
+   },
    "prongs": [
     {
      "id": "ember-lash-of-flame",
@@ -447,6 +745,9 @@
      "features": [
       "edge"
      ],
+     "body": {
+      "plan": "lash"
+     },
      "finishes": [
       {
        "id": "ember-white-ember",
@@ -465,7 +766,10 @@
        },
        "features": [
         "scorched"
-       ]
+       ],
+       "body": {
+        "plan": "star"
+       }
       },
       {
        "id": "ember-kiln-breath",
@@ -481,7 +785,26 @@
        },
        "features": [
         "gears"
-       ]
+       ],
+       "body": {
+        "plan": "flame",
+        "build": {
+         "r": 0.07,
+         "h": 0.2,
+         "n": 3,
+         "lean": 0.0,
+         "side": 0.0,
+         "lift": 0.14,
+         "ragged": 0.0
+        },
+        "bed": null,
+        "smoke": null,
+        "has": null,
+        "shell": [
+         "cage",
+         1.0
+        ]
+       }
       }
      ]
     },
@@ -500,6 +823,12 @@
      "features": [
       "wings"
      ],
+     "body": {
+      "plan": "dart",
+      "build": {
+       "long": 1.0
+      }
+     },
      "finishes": [
       {
        "id": "ember-comet",
@@ -515,7 +844,16 @@
        },
        "features": [
         "ring"
-       ]
+       ],
+       "body": {
+        "build": {
+         "long": 2.0
+        },
+        "ring": [
+         "impact",
+         1.0
+        ]
+       }
       },
       {
        "id": "ember-hill-fire",
@@ -534,7 +872,29 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "plan": "flame",
+        "build": {
+         "r": 0.1,
+         "h": 0.56,
+         "n": 5,
+         "lean": 0.0,
+         "side": 0.0,
+         "lift": 0.5,
+         "ragged": 0.0
+        },
+        "bed": [
+         "basket",
+         1.0
+        ],
+        "smoke": [
+         "thread",
+         1.0
+        ],
+        "has": null,
+        "eyes": "dark"
+       }
       }
      ]
     },
@@ -553,6 +913,9 @@
      "features": [
       "roots"
      ],
+     "body": {
+      "plan": "line"
+     },
      "finishes": [
       {
        "id": "ember-burn-off",
@@ -568,7 +931,10 @@
        },
        "features": [
         "maw"
-       ]
+       ],
+       "body": {
+        "plan": "mouth"
+       }
       },
       {
        "id": "ember-fire-whirl",
@@ -588,6 +954,9 @@
        "features": [
         "standing-air"
        ],
+       "body": {
+        "plan": "whirl"
+       },
        "silhouette": "aspect-whirl"
       }
      ]

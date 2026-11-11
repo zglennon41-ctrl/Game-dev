@@ -53,7 +53,10 @@
   "habit": "It sits in the candlestick and leans toward anything on the table that would burn.",
   "features": [
    "ember"
-  ]
+  ],
+  "body": {
+   "plan": "wick"
+  }
  },
  "paths": [
   {
@@ -77,6 +80,24 @@
    "features": [
     "maw"
    ],
+   "body": {
+    "plan": "imp",
+    "build": {
+     "belly": 1.1,
+     "head": 1.2,
+     "lean": 0.12
+    },
+    "mouth": "maw",
+    "crown": [
+     "flare",
+     1.0
+    ],
+    "arms": "out",
+    "horns": [
+     "curved",
+     1.1
+    ]
+   },
    "prongs": [
     {
      "id": "fiend-blade-rider",
@@ -93,6 +114,32 @@
      "features": [
       "short-blade"
      ],
+     "body": {
+      "build": {
+       "belly": 0.75,
+       "tall": 0.75,
+       "head": 1.0,
+       "lean": -0.35,
+       "lift": 0.23
+      },
+      "legs": "ride",
+      "arms": "ride",
+      "tail": "none",
+      "eyes": "white",
+      "mouth": "grin",
+      "crown": [
+       "flare",
+       0.7
+      ],
+      "chest": [
+       "cracks",
+       1.2
+      ],
+      "rides": [
+       "blade",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "fiend-slag-fiend",
@@ -111,7 +158,37 @@
        },
        "features": [
         "iron-hide"
-       ]
+       ],
+       "body": {
+        "build": {
+         "belly": 1.4,
+         "tall": 1.05,
+         "head": 0.95,
+         "lean": 0.1,
+         "legs": 0.85,
+         "lift": 0.0
+        },
+        "legs": "bowed",
+        "arms": "low",
+        "tail": "flame",
+        "hands": "fists",
+        "horns": [
+         "stub",
+         1.3
+        ],
+        "skin": [
+         "iron",
+         1.0
+        ],
+        "crown": [
+         "candle",
+         0.8
+        ],
+        "chest": null,
+        "rides": null,
+        "eyes": "scowl",
+        "mouth": "scowl"
+       }
       },
       {
        "id": "fiend-pyre-dancer",
@@ -127,7 +204,36 @@
        },
        "features": [
         "long-legs"
-       ]
+       ],
+       "body": {
+        "build": {
+         "belly": 0.8,
+         "tall": 0.95,
+         "head": 1.0,
+         "lean": 0.0,
+         "legs": 2.3,
+         "lift": 0.0
+        },
+        "legs": "long",
+        "arms": "out",
+        "tail": "flame",
+        "eyes": "wide",
+        "mouth": "grin",
+        "crown": [
+         "flare",
+         1.2
+        ],
+        "chest": null,
+        "rides": null,
+        "ground": [
+         "fires",
+         1.0
+        ],
+        "horns": [
+         "long",
+         0.8
+        ]
+       }
       }
      ]
     },
@@ -149,6 +255,16 @@
      "features": [
       "talons"
      ],
+     "body": {
+      "plan": "ball",
+      "build": {
+       "ball": 1.0
+      },
+      "ground": [
+       "sling",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "fiend-falling-coal",
@@ -164,7 +280,19 @@
        },
        "features": [
         "wings"
-       ]
+       ],
+       "body": {
+        "build": {
+         "ball": 0.95,
+         "lift": 0.35,
+         "dive": 0.5
+        },
+        "ground": null,
+        "aura": [
+         "wings",
+         1.0
+        ]
+       }
       },
       {
        "id": "fiend-on-the-hill",
@@ -180,7 +308,35 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "plan": "imp",
+        "build": {
+         "belly": 0.95,
+         "tall": 1.15,
+         "head": 1.0,
+         "lean": 0.0,
+         "lift": 0.0,
+         "legs": 1.0
+        },
+        "legs": "bowed",
+        "arms": "raise/hips",
+        "mouth": "grin",
+        "eyes": "scowl",
+        "crown": "bare",
+        "holds": [
+         "flame",
+         1.3
+        ],
+        "ground": [
+         "hill",
+         1.0
+        ],
+        "horns": [
+         "long",
+         1.0
+        ]
+       }
       }
      ]
     },
@@ -202,6 +358,29 @@
      "features": [
       "scorched"
      ],
+     "body": {
+      "build": {
+       "belly": 1.5,
+       "tall": 0.85,
+       "head": 1.05,
+       "lean": 0.0,
+       "legs": 0.75
+      },
+      "arms": "crossed",
+      "mouth": "scowl",
+      "crown": [
+       "fuse",
+       1.0
+      ],
+      "skin": [
+       "soot",
+       1.0
+      ],
+      "horns": [
+       "stub",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "fiend-brush-burner",
@@ -220,7 +399,24 @@
        },
        "features": [
         "smoke"
-       ]
+       ],
+       "body": {
+        "build": {
+         "belly": 1.2,
+         "tall": 0.95,
+         "legs": 0.9
+        },
+        "arms": "out",
+        "mouth": "maw",
+        "aura": [
+         "smokes",
+         1.0
+        ],
+        "skin": [
+         "soot",
+         1.2
+        ]
+       }
       },
       {
        "id": "fiend-toll-fire",
@@ -236,7 +432,24 @@
        },
        "features": [
         "ring"
-       ]
+       ],
+       "body": {
+        "build": {
+         "belly": 1.3,
+         "tall": 1.0,
+         "legs": 0.9
+        },
+        "arms": "up",
+        "mouth": "grin",
+        "crown": [
+         "fuse",
+         1.5
+        ],
+        "ground": [
+         "ring",
+         1.0
+        ]
+       }
       }
      ]
     }
@@ -263,6 +476,36 @@
    "features": [
     "ledger"
    ],
+   "body": {
+    "plan": "imp",
+    "build": {
+     "belly": 1.15,
+     "head": 1.1,
+     "tall": 0.9
+    },
+    "legs": "sit",
+    "arms": "wrap",
+    "eyes": "sleepy",
+    "mouth": "scowl",
+    "crown": "bare",
+    "skin": [
+     "ash",
+     1.0
+    ],
+    "chest": [
+     "cracks",
+     0.8
+    ],
+    "holds": [
+     "list",
+     1.0
+    ],
+    "ground": [
+     "heap",
+     1.0
+    ],
+    "coat": "ash"
+   },
    "prongs": [
     {
      "id": "fiend-oath-scorch",
@@ -279,6 +522,26 @@
      "features": [
       "crown"
      ],
+     "body": {
+      "build": {
+       "belly": 1.0,
+       "head": 1.0,
+       "tall": 1.05
+      },
+      "legs": "bowed",
+      "arms": "hang/up",
+      "eyes": "scowl",
+      "crown": [
+       "letters",
+       1.0
+      ],
+      "holds": [
+       "snuffers",
+       1.0
+      ],
+      "ground": null,
+      "chest": null
+     },
      "finishes": [
       {
        "id": "fiend-mark-of-the-sworn",
@@ -294,7 +557,23 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "build": {
+         "tall": 1.2,
+         "belly": 0.95
+        },
+        "arms": "forward/hips",
+        "wears": [
+         "bracelet",
+         1.0
+        ],
+        "holds": null,
+        "horns": [
+         "long",
+         0.9
+        ]
+       }
       },
       {
        "id": "fiend-vendetta",
@@ -310,7 +589,31 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "build": {
+         "tall": 1.0,
+         "belly": 1.1,
+         "lean": 0.25
+        },
+        "arms": "cup",
+        "wears": [
+         "necklace",
+         1.0
+        ],
+        "holds": [
+         "coal",
+         1.0
+        ],
+        "horns": [
+         "swept",
+         1.3
+        ],
+        "crown": [
+         "letters",
+         0.8
+        ]
+       }
       }
      ]
     },
@@ -329,6 +632,12 @@
      "features": [
       "sheath"
      ],
+     "body": {
+      "plan": "bottle",
+      "build": {
+       "big": 1.0
+      }
+     },
      "finishes": [
       {
        "id": "fiend-of-the-stopped-bottle",
@@ -347,7 +656,16 @@
        },
        "features": [
         "brass-plate"
-       ]
+       ],
+       "body": {
+        "build": {
+         "big": 1.2
+        },
+        "bottle": [
+         "bound",
+         1.0
+        ]
+       }
       },
       {
        "id": "fiend-seal-burner",
@@ -363,7 +681,39 @@
        },
        "features": [
         "small-hands"
-       ]
+       ],
+       "body": {
+        "plan": "imp",
+        "build": {
+         "belly": 0.85,
+         "head": 1.05,
+         "tall": 1.0,
+         "lean": 0.1
+        },
+        "legs": "bowed",
+        "arms": "forward",
+        "hands": "small",
+        "eyes": "wide",
+        "mouth": "grin",
+        "crown": [
+         "candle",
+         0.8
+        ],
+        "wears": [
+         "bottle",
+         1.0
+        ],
+        "holds": [
+         "writ",
+         1.0
+        ],
+        "skin": [
+         "ash",
+         0.6
+        ],
+        "ground": null,
+        "chest": null
+       }
       }
      ]
     },
@@ -382,6 +732,24 @@
      "features": [
       "smoke"
      ],
+     "body": {
+      "build": {
+       "belly": 1.0,
+       "head": 1.1,
+       "tall": 0.95
+      },
+      "legs": "sit",
+      "arms": "knees",
+      "eyes": "wide",
+      "mouth": "scowl",
+      "crown": [
+       "thread",
+       1.0
+      ],
+      "holds": null,
+      "ground": null,
+      "chest": null
+     },
      "finishes": [
       {
        "id": "fiend-ash-reader",
@@ -397,7 +765,28 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "build": {
+         "belly": 1.05,
+         "head": 1.05,
+         "tall": 1.0,
+         "lean": 0.3,
+         "ear": 1.5
+        },
+        "legs": "kneel",
+        "arms": "down",
+        "hands": "ash",
+        "eyes": "old",
+        "crown": [
+         "thread",
+         0.6
+        ],
+        "ground": [
+         "sift",
+         1.0
+        ]
+       }
       },
       {
        "id": "fiend-last-red-coal",
@@ -413,7 +802,37 @@
        },
        "features": [
         "quiet-place"
-       ]
+       ],
+       "body": {
+        "build": {
+         "belly": 0.85,
+         "head": 0.95,
+         "tall": 1.3,
+         "lean": 0.0
+        },
+        "legs": "bowed",
+        "arms": "wrap",
+        "eyes": "shut",
+        "mouth": "none",
+        "crown": "bare",
+        "skin": [
+         "still",
+         1.0
+        ],
+        "chest": [
+         "core",
+         1.2
+        ],
+        "ground": [
+         "quiet",
+         1.0
+        ],
+        "horns": [
+         "swept",
+         1.0
+        ],
+        "tail": "dark"
+       }
       }
      ]
     }
@@ -440,6 +859,26 @@
    "features": [
     "glow"
    ],
+   "body": {
+    "plan": "imp",
+    "build": {
+     "belly": 1.3,
+     "head": 1.05,
+     "tall": 0.95
+    },
+    "arms": "crossed",
+    "mouth": "grin",
+    "eyes": "sleepy",
+    "crown": [
+     "candle",
+     0.6
+    ],
+    "chest": [
+     "grate",
+     1.0
+    ],
+    "coat": "hearth"
+   },
    "prongs": [
     {
      "id": "fiend-stove-devil",
@@ -456,6 +895,14 @@
      "features": [
       "broad-chest"
      ],
+     "body": {
+      "plan": "stove",
+      "build": {
+       "tall": 1.0,
+       "legs": 1.0,
+       "wide": 1.0
+      }
+     },
      "silhouette": "engine-stove",
      "finishes": [
       {
@@ -472,7 +919,23 @@
        },
        "features": [
         "gears"
-       ]
+       ],
+       "body": {
+        "build": {
+         "tall": 0.95,
+         "wide": 0.95
+        },
+        "stove": [
+         [
+          "walker",
+          1.0
+         ],
+         [
+          "pot",
+          1.0
+         ]
+        ]
+       }
       },
       {
        "id": "fiend-watchfire-fiend",
@@ -488,7 +951,18 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "build": {
+         "tall": 1.35,
+         "wide": 1.05,
+         "legs": 1.2
+        },
+        "stove": [
+         "watchfire",
+         1.0
+        ]
+       }
       }
      ]
     },
@@ -507,6 +981,26 @@
      "features": [
       "small-hands"
      ],
+     "body": {
+      "build": {
+       "belly": 0.85,
+       "head": 1.0,
+       "tall": 1.2
+      },
+      "arms": "up",
+      "hands": "small",
+      "eyes": "scowl",
+      "mouth": "scowl",
+      "crown": [
+       "candle",
+       0.8
+      ],
+      "chest": null,
+      "wears": [
+       "apron",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "fiend-scar-smith",
@@ -522,7 +1016,31 @@
        },
        "features": [
         "brass-plate"
-       ]
+       ],
+       "body": {
+        "build": {
+         "belly": 1.2,
+         "tall": 1.1
+        },
+        "arms": "hang/up",
+        "hands": "plated",
+        "holds": [
+         "hammer",
+         1.0
+        ],
+        "ground": [
+         "anvil",
+         1.0
+        ],
+        "chest": [
+         "grate",
+         0.7
+        ],
+        "horns": [
+         "stub",
+         1.2
+        ]
+       }
       },
       {
        "id": "fiend-ward-flame",
@@ -538,7 +1056,23 @@
        },
        "features": [
         "ring"
-       ]
+       ],
+       "body": {
+        "build": {
+         "belly": 0.9,
+         "tall": 1.3
+        },
+        "arms": "low",
+        "crown": [
+         "candle",
+         1.8
+        ],
+        "ground": [
+         "ward",
+         1.0
+        ],
+        "eyes": "shut"
+       }
       }
      ]
     },
@@ -557,6 +1091,26 @@
      "features": [
       "lantern-jaw"
      ],
+     "body": {
+      "build": {
+       "belly": 1.15,
+       "head": 1.2,
+       "tall": 0.85
+      },
+      "legs": "sit",
+      "arms": "knees",
+      "eyes": "sleepy",
+      "mouth": "lamp",
+      "crown": [
+       "candle",
+       0.5
+      ],
+      "chest": null,
+      "ground": [
+       "stick",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "fiend-wake-candle",
@@ -572,7 +1126,10 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "plan": "candle"
+       }
       },
       {
        "id": "fiend-thaw-fiend",
@@ -588,7 +1145,30 @@
        },
        "features": [
         "current"
-       ]
+       ],
+       "body": {
+        "build": {
+         "belly": 1.0,
+         "head": 1.05,
+         "tall": 1.05
+        },
+        "legs": "tiptoe",
+        "arms": "out",
+        "eyes": "scowl",
+        "mouth": "lamp",
+        "crown": [
+         "candle",
+         1.0
+        ],
+        "ground": [
+         "puddle",
+         1.0
+        ],
+        "aura": [
+         "steam",
+         1.0
+        ]
+       }
       }
      ]
     }

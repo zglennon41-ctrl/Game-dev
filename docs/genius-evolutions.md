@@ -156,3 +156,58 @@ bash tools/genius-tree-page.sh wolf                 # the page of the whole tree
 4. **How strange a Final may be.** The Wolf's Finals stay wolves (a Wall-wolf is a wolf
    built like a wall). They could go further from the animal: say how far.
 5. **The Baby**: one for everyone, or one that already leans toward what it will be.
+
+## The things with no flesh: the Lurker, the Fiend, the Ember, the Fog
+
+`tools/blender/lines_spirits.py` (one file a line: `spirits_lurker.py`, `spirits_fiend.py`,
+`spirits_ember.py`, `spirits_fog.py`; what they share is `spirits_kit.py`). None has a rig: a
+body is built as pieces and written as one object with sockets. Each has a `plan` (what kind
+of thing the form is), and round the plan the slots below. A child with a new `plan` restates
+its `build`.
+
+What each line keeps from its Starter, and what each path adds and carries:
+
+| Line | It keeps | The three paths |
+|---|---|---|
+| Lurker | a hood of ink and two eyes in it | broad and behind, a mantle (the Back-stander's); bent and sitting, a chair and a lamp, coat `ash` (the One Who Sits Up); narrow, its collar up, coat `iron` (the Unremarked) |
+| Fiend | two horns, a scowl, the candle on its skull | the fire let out: a maw, a mane of flame (Flare-up's); banked: ash-grey, letters, bottles and smoke, coat `ash` (Banked Coal's); a hearth: a grate, stoves and candles, coat `hearth` (the Grate-fiend's) |
+| Ember | the coal it began as, at the foot of its flame, with its eyes lit in the coal | kept: a bed, a ring, a shell (Kept Fire's); small and stubborn: thin, pale, with the things of study and signal, coat `moon` (the Rushlight's); spent at once: ragged, thrown, running (Wildfire's) |
+| Fog | rolls of grey and two eyes | the cowl: the hood of a coat with nobody in it (the Fog-shroud's); square edges, pale bands and a stone, coat `moon` (Lingering Mist's); the curl: a tail that is already leaving, coat `iron` (Shifting Fog's) |
+
+| Line | Key | Styles |
+|---|---|---|
+| Lurker | `plan` | `blot` (the Starter) `figure` `seated` `robed` `door` `gate` `hatch` `human` `streak` `corner` `monolith` `tree` |
+| | `build` | `tall` `broad` `hood` `skirt` `lean` `hem` `turn` `reach` `thick` `tatters` `deep` |
+| | `eyes` | `slit` `dim` `old` `one` `wide` `holes` `closed` `none` |
+| | `arms` | `hang` `broad` `spread` `guard` `long` `apart` `reach` `lap` `cup` `hold` `mantis` `up` `back` `wings` `whisper` `blade` `floor` `none` |
+| | `legs` `ground` | `stilts` `back` `roots`; `long` `cohort` `ring` `wall` |
+| | `wears` `chest` `face` | `mantle` `collar` `script` `cape` `shawl` `rime`; `maw` `cold-hand` `core`; `mask` |
+| | `shoulder` `head` `back` | `face` `face-crowned`; `ear` `prow`; `chair` |
+| | `holds` `aura` | `lamp` `lamp-low` `dark-lamp` `glow` `book` `chain` `blade`; `veils` `breath` `stubs` |
+| Fiend | `plan` | `wick` (the Starter) `imp` `ball` `bottle` `stove` `candle` |
+| | `build` | `belly` `tall` `head` `legs` `lean` `dive` `lift` `horn` `ear` |
+| | `eyes` `mouth` `horns` | `scowl` `wide` `old` `sleepy` `shut` `white`; `grin` `maw` `scowl` `lamp` `none`; `curved` `stub` `long` `swept` `ram` |
+| | `arms` | `hang` `hips` `crossed` `out` `low` `up` `raise` `forward` `down` `wrap` `knees` `cup` `grip` `ride`; `raise/hips` gives each its own |
+| | `hands` `legs` `tail` | `claws` `small` `plated` `ash` `fists`; `bowed` `long` `tiptoe` `sit` `crouch` `kneel` `ride`; `flame` `dark` `none` |
+| | `crown` `skin` `chest` | `candle` `flare` `fuse` `letters` `thread` `bare` `none`; `ash` `iron` `soot` `still`; `grate` `core` `cracks` |
+| | `wears` `holds` `rides` | `apron` `necklace` `bracelet` `bottle`; `flame` `hammer` `writ` `snuffers` `coal` `list`; `blade` |
+| | `ground` `aura` | `hill` `sling` `fires` `ring` `ward` `puddle` `heap` `sift` `stick` `quiet` `anvil`; `mane` `smokes` `steam` `wings` |
+| | `bottle` `stove` | `bound`; `walker` `pot` `watchfire` |
+| Ember | `plan` | `spark` (the Starter) `flame` `window` `hollow` `mast` `wax` `wheel` `lash` `star` `dart` `line` `mouth` `whirl` |
+| | `build` | `r` `h` `n` (how wide, how tall, how many tongues) `lean` `side` `lift` `ragged`; `long` (a dart's) |
+| | `eyes` `bed` | `dark` `pale` `old` `one` `none`; `coals` `stones` `logs` `sticks` `rush` `bowl` `basket` `pot` `book` `lamp` `frost` |
+| | `shell` `crown` `wings` `ring` | `scale` `petals` `clinker` `cage`; `twelve`; `thin`; `ground` `dial` `impact` |
+| | `has` `smoke` | `andirons` `fireback` `gimbal` `pages` `flashes` `chain` `hand` `shimmer` `cinders`; `thread` `stream` |
+| Fog | `plan` | every form is its own: `wisp` (the Starter); `coat` `layer` `mask` `horseshoe` `folds` `douse` `pall` `maw` `pool` `thick`; `pillar` `wall` `drift` `streamers` `graves` `bust` `trail` `hoops` `edge` `curtain`; `swirl` `echo` `faces` `signpost` `frost` `hoar` `blackice` `hound` `flood` `storm` |
+| all four | `coat` | a shift, as on the wolf's rig |
+
+Two things these bodies need that a beast's does not. A flame, a shadow and a fog have no
+face of their own, so each line is given one that carries: eyes in a hood, in a coal, in a
+cowl. And a thing that is low and long (a streak, a line of fire, a pool) is not stood by
+its crown, or it would fill the room: `spirits_kit.py` never lets a body be more than 1.7
+times as far across as the height its `ref_top` stands it to.
+
+Their gifts are parts (`tools/blender/parts_spirits.py`): the Lurker's `shadow-cloak` and
+`watching-eye`, the Fiend's `ember` and `horns`, the Ember's `ember` and `glow`, the Fog's
+`mist` and `glow`. The cloak and the mist are surfaces; they hang because
+`data/genius-bodies.json` (`featureSockets`) gives them a place: the back, and the breast.

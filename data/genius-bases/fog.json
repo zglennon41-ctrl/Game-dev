@@ -52,7 +52,10 @@
   "habit": "It gathers on your shoulder when you are still, and the page you are reading goes slightly soft.",
   "features": [
    "mist"
-  ]
+  ],
+  "body": {
+   "plan": "wisp"
+  }
  },
  "paths": [
   {
@@ -76,6 +79,9 @@
    "features": [
     "shadow-cloak"
    ],
+   "body": {
+    "plan": "coat"
+   },
    "prongs": [
     {
      "id": "fog-ground-veil",
@@ -92,6 +98,9 @@
      "features": [
       "standing-air"
      ],
+     "body": {
+      "plan": "layer"
+     },
      "finishes": [
       {
        "id": "fog-smugglers-weather",
@@ -107,7 +116,10 @@
        },
        "features": [
         "mask"
-       ]
+       ],
+       "body": {
+        "plan": "mask"
+       }
       },
       {
        "id": "fog-harbour-fog",
@@ -123,7 +135,10 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "plan": "horseshoe"
+       }
       }
      ]
     },
@@ -142,6 +157,9 @@
      "features": [
       "current"
      ],
+     "body": {
+      "plan": "folds"
+     },
      "finishes": [
       {
        "id": "fog-dousing-mist",
@@ -157,7 +175,10 @@
        },
        "features": [
         "rime"
-       ]
+       ],
+       "body": {
+        "plan": "douse"
+       }
       },
       {
        "id": "fog-grey-pall",
@@ -176,7 +197,10 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "plan": "pall"
+       }
       }
      ]
     },
@@ -195,6 +219,10 @@
      "features": [
       "maw"
      ],
+     "body": {
+      "plan": "maw",
+      "coat": "slate"
+     },
      "finishes": [
       {
        "id": "fog-black-damp",
@@ -210,7 +238,11 @@
        },
        "features": [
         "dark-eyed"
-       ]
+       ],
+       "body": {
+        "plan": "pool",
+        "coat": "night"
+       }
       },
       {
        "id": "fog-drowning-air",
@@ -226,7 +258,10 @@
        },
        "features": [
         "webbed"
-       ]
+       ],
+       "body": {
+        "plan": "thick"
+       }
       }
      ]
     }
@@ -253,6 +288,10 @@
    "features": [
     "tunnel-ear"
    ],
+   "body": {
+    "plan": "pillar",
+    "coat": "moon"
+   },
    "prongs": [
     {
      "id": "fog-standing-fog",
@@ -269,6 +308,9 @@
      "features": [
       "door"
      ],
+     "body": {
+      "plan": "wall"
+     },
      "finishes": [
       {
        "id": "fog-bank",
@@ -287,7 +329,10 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "plan": "drift"
+       }
       },
       {
        "id": "fog-sea-fret",
@@ -303,7 +348,10 @@
        },
        "features": [
         "fins"
-       ]
+       ],
+       "body": {
+        "plan": "streamers"
+       }
       }
      ]
     },
@@ -322,6 +370,9 @@
      "features": [
       "old-eyes"
      ],
+     "body": {
+      "plan": "graves"
+     },
      "finishes": [
       {
        "id": "fog-mist-of-the-named-dead",
@@ -337,7 +388,10 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "plan": "bust"
+       }
       },
       {
        "id": "fog-trail-keeper",
@@ -353,7 +407,10 @@
        },
        "features": [
         "far-eyes"
-       ]
+       ],
+       "body": {
+        "plan": "trail"
+       }
       }
      ]
     },
@@ -372,6 +429,9 @@
      "features": [
       "quiet-place"
      ],
+     "body": {
+      "plan": "hoops"
+     },
      "finishes": [
       {
        "id": "fog-the-quiets-edge",
@@ -387,7 +447,10 @@
        },
        "features": [
         "standing-air"
-       ]
+       ],
+       "body": {
+        "plan": "edge"
+       }
       },
       {
        "id": "fog-sudden-clearing",
@@ -403,7 +466,10 @@
        },
        "features": [
         "watching-eye"
-       ]
+       ],
+       "body": {
+        "plan": "curtain"
+       }
       }
      ]
     }
@@ -428,6 +494,10 @@
    "features": [
     "smoke"
    ],
+   "body": {
+    "plan": "swirl",
+    "coat": "iron"
+   },
    "prongs": [
     {
      "id": "fog-echo",
@@ -444,6 +514,9 @@
      "features": [
       "voice"
      ],
+     "body": {
+      "plan": "echo"
+     },
      "finishes": [
       {
        "id": "fog-calling-mist",
@@ -462,7 +535,10 @@
        },
        "features": [
         "second-face"
-       ]
+       ],
+       "body": {
+        "plan": "faces"
+       }
       },
       {
        "id": "fog-lost-road",
@@ -478,7 +554,10 @@
        },
        "features": [
         "ledger"
-       ]
+       ],
+       "body": {
+        "plan": "signpost"
+       }
       }
      ]
     },
@@ -497,6 +576,10 @@
      "features": [
       "rime"
      ],
+     "body": {
+      "plan": "frost",
+      "coat": "frost"
+     },
      "silhouette": "aspect-frost",
      "finishes": [
       {
@@ -513,7 +596,10 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "plan": "hoar"
+       }
       },
       {
        "id": "fog-black-ice",
@@ -529,7 +615,11 @@
        },
        "features": [
         "sleek-coat"
-       ]
+       ],
+       "body": {
+        "plan": "blackice",
+        "coat": "night"
+       }
       }
      ]
     },
@@ -551,6 +641,9 @@
      "features": [
       "long-legged"
      ],
+     "body": {
+      "plan": "hound"
+     },
      "finishes": [
       {
        "id": "fog-rising-water",
@@ -567,6 +660,10 @@
        "features": [
         "roots"
        ],
+       "body": {
+        "plan": "flood",
+        "coat": "hearth"
+       },
        "silhouette": "aspect-flood"
       },
       {
@@ -586,7 +683,10 @@
        },
        "features": [
         "ring"
-       ]
+       ],
+       "body": {
+        "plan": "storm"
+       }
       }
      ]
     }
