@@ -489,6 +489,8 @@ func fill(t: String, c: Dictionary = {}) -> String:
 	var arch := Marks.archetype_for(hero["shape"], hero.get("discipline", ""))
 	t = t.replace("{archetype}", arch.get("name", "Journeyman")).replace("{marks}", str(int(progress["record"].get("marks", 0))))
 	t = t.replace("{weekday}", weekday()).replace("{season}", String(Data.academy.get("calendar", {}).get("season", "the Thaw")))
+	# what G does is the genius's type's: its order, the hand, its use (docs/genius-types.md)
+	t = t.replace("{genius_key}", GeniusTypes.key_words(genius))
 	t = t.replace("{discipline_rite}", String(Data.discipline_kits.get(hero.get("discipline", ""), {}).get("rite", "the Instructor's test")))
 	var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
 	if not dk.is_empty():

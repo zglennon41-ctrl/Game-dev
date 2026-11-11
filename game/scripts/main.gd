@@ -365,6 +365,27 @@ func _ready() -> void:
 	elif _args.has("fight"):
 		if _args.has("saved"):
 			hero = Settings.hero()
+		# --fight --genius=<form id>[:instar] (and --weapon=<weapon id>): the practice yard beside
+		# a genius standing at that form, to try what its type does (docs/genius-types.md). The
+		# form is a base's, or a hybrid's (wolf+blade:wolf-counting-wolf).
+		if _args.has("genius"):
+			var spec := str(_args["genius"])
+			var at := spec.rfind(":")
+			var form_id := spec
+			var instar := 0
+			if at > 0 and spec.substr(at + 1).is_valid_int():
+				form_id = spec.substr(0, at)
+				instar = int(spec.substr(at + 1))
+			var tg := Genius.at_form(form_id, instar)
+			if tg.is_born():
+				hero = Fight.default_hero().duplicate(true)
+				hero["name"] = "Test"
+				if _args.has("weapon") and not Data.by_id(Data.weapons, str(_args["weapon"])).is_empty():
+					hero["weapon"] = str(_args["weapon"])
+				tg.look = GeniusLook.born(4711)
+				tg.save_to(hero)
+			else:
+				push_warning("--genius: no form %s on any tree" % form_id)
 		start("fight")
 	else:
 		menu()

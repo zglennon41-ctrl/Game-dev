@@ -37,13 +37,18 @@
       "name",
       "classes",
       "key",
-      "says"
+      "says",
+      "keySays"
      ],
      "additionalProperties": false,
      "properties": {
       "name": {
        "type": "string",
        "minLength": 1
+      },
+      "keySays": {
+       "type": "string",
+       "minLength": 5
       },
       "classes": {
        "type": "array",
@@ -80,13 +85,18 @@
       "name",
       "classes",
       "key",
-      "says"
+      "says",
+      "keySays"
      ],
      "additionalProperties": false,
      "properties": {
       "name": {
        "type": "string",
        "minLength": 1
+      },
+      "keySays": {
+       "type": "string",
+       "minLength": 5
       },
       "classes": {
        "type": "array",
@@ -123,13 +133,18 @@
       "name",
       "classes",
       "key",
-      "says"
+      "says",
+      "keySays"
      ],
      "additionalProperties": false,
      "properties": {
       "name": {
        "type": "string",
        "minLength": 1
+      },
+      "keySays": {
+       "type": "string",
+       "minLength": 5
       },
       "classes": {
        "type": "array",
@@ -166,13 +181,18 @@
       "name",
       "classes",
       "key",
-      "says"
+      "says",
+      "keySays"
      ],
      "additionalProperties": false,
      "properties": {
       "name": {
        "type": "string",
        "minLength": 1
+      },
+      "keySays": {
+       "type": "string",
+       "minLength": 5
       },
       "classes": {
        "type": "array",

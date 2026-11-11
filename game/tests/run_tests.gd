@@ -3224,6 +3224,13 @@ func test_types_data() -> void:
 	# the tests' own
 	check(GeniusTypes.of_form(Data.form("tedge-small"))["type"] == "weapon" and GeniusTypes.of_form(Data.form("tlamp-a"))["type"] == "ritual" and GeniusTypes.of_form(Data.form("trun-b1"))["path"] == "trun-b", "a form knows its type and the path it is on")
 	check(is_equal_approx(GeniusTypes.at_worth(1.5, 0.6), 1.3) and is_equal_approx(GeniusTypes.at_worth(0.5, 1.0), 0.5), "what is always true is worth more as it ages")
+	check(GeniusTypes.key_words(_genius_at("tedge-small")).contains("hand") and GeniusTypes.key_words(_genius_at("tlamp-small")).contains("Set it down") and GeniusTypes.key_words(_genius_at("trun-small")).contains("order") and GeniusTypes.key_words(null).contains("order"), "a lesson can say what the key does for the genius a student has")
+	var unsaid: Array = []
+	for l in Data.academy["lessons"]:
+		for st in l["steps"]:
+			if String(st.get("text", "")).contains("gives your genius its order") or String(st.get("text", "")).contains("to change its order"):
+				unsaid.append(String(l["id"]))
+	check(unsaid.is_empty(), "no lesson tells a student with a weapon or an item that G gives an order (%s)" % ", ".join(unsaid))
 	var ages_up := true
 	var last := 0.0
 	for a2 in GeniusTypes.AGES:
@@ -3750,10 +3757,51 @@ func test_types_roles() -> void:
 	h._update_wolf(DT)
 	var held_evs := types(h.drain())
 	check(held_evs.has("genius-held-blow") and is_equal_approx(h.p_hp, 100.0) and is_equal_approx(h.g_will, hw - float(h.w_attack["damage"]) * float(hold["takes"])), "its strike lands on the genius, out of its Will, and its partner is untouched")
+	# the hold's time runs out while a strike wound up at the genius is still being thrown
+	h.w_hit_done = false
+	hw = h.g_will
 	h.now = h.g_held_until + 0.1
-	check(not h._held() and h._tpos().is_equal_approx(h.p_pos), "when the hold ends the foe is its partner's again")
+	check(not h._held() and h._holds() and h._tpos().is_equal_approx(h.g_pos), "a strike wound up at the genius is the genius's, though the hold's time ends before it is thrown")
+	h._update_wolf(DT)
+	check(types(h.drain()).has("genius-held-blow") and is_equal_approx(h.p_hp, 100.0) and h.g_will < hw, "it lands on the genius, not on a partner who could not have read it")
+	h.w_state = "recover"
+	h.w_timer = 0.0
+	h.w_duration = 1.0
+	h._update_wolf(DT)
+	check(not h._holds() and h.w_target == -1 and h._tpos().is_equal_approx(h.p_pos), "when the hold ends the foe is its partner's again")
 	h._choose_attack()
 	check(h.w_target != Fight.HELD, "and chooses as it did")
+	# a genius of another role with a Bulwark's shade comes forward to hold
+	var comes := _role_fight("lookout", "guard", "cut-wolf", "bulwark")
+	comes.passive = true
+	comes.w_state = "approach"
+	comes.w_attack = comes.beast["attacks"][0]
+	comes.w_pos = comes.p_pos + Vector2(6.0, 0.0)
+	comes.w_target = Fight.HELD
+	comes.g_held_until = comes.now + 30.0
+	for i in 120:
+		comes._update_genius(DT)
+		comes.now += DT
+	check((comes.g_pos - comes.p_pos).x > 1.0, "whatever its role, while it holds the foe it stands between the foe and its partner (%.1f)" % (comes.g_pos - comes.p_pos).x)
+	# a strike it holds is thrown at the genius: its partner, in the way, is not bitten in passing
+	var passing: Array = []
+	for is_held in [true, false]:
+		var by := _role_fight("bulwark", "guard")
+		by.passive = true
+		by.g_pos = by.p_pos + Vector2(0.0, 6.0)
+		if is_held:
+			by.w_target = Fight.HELD
+			by.g_held_until = by.now + 30.0
+		by.w_attack = by.beast["attacks"][0]
+		by.w_pos = by.p_pos + Vector2(1.2, 0.0)
+		by.w_facing = PI
+		by.w_state = "strike"
+		by.w_timer = 0.0
+		by.w_duration = float(by.w_attack["active"])
+		by.w_hit_done = false
+		by._update_wolf(DT)
+		passing.append(by.w_hit_done)
+	check(passing == [false, true], "a strike it holds is the genius's: its partner, standing in the way, is not bitten in passing (%s)" % str(passing))
 	# --- a Hunter goes for the opening
 	var into := float(R["hunter"]["own"]["damage"])
 	var hu := _role_fight("hunter", "hunt")

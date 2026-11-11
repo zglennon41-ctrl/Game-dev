@@ -614,6 +614,9 @@ func _update_genius(dt: float) -> void:
 	var side := p_pos + Vector2.from_angle(p_facing + 2.2) * 1.1
 	# its role's place beside its partner: a Bulwark between them and the foe, a Lookout behind
 	var stands := String(g_role.get("stands", ""))
+	# whatever its role, while it holds the foe it stands between the foe and its partner
+	if _holds():
+		stands = "front"
 	var toward := (w_pos - p_pos).normalized() if foe_up and dist() > 0.2 else Vector2.from_angle(p_facing)
 	if stands == "front" and foe_up:
 		side = p_pos + toward * 1.6
@@ -1582,6 +1585,14 @@ func _update_typed(_dt: float) -> void:
 
 func _held() -> bool:
 	return genius != null and not genius.fallen and now < g_held_until
+
+## Is the foe the genius's still: held, or throwing a strike it wound up at the genius while it
+## was held? A strike begun at the genius is the genius's: it is never turned on its partner
+## half thrown, when nobody could read it.
+func _holds() -> bool:
+	if genius == null or genius.fallen or w_target != HELD:
+		return false
+	return now < g_held_until or w_state in ["windup", "strike"]
 
 func _role_move(o: Dictionary, at: Vector2) -> void:
 	var cost := float(o.get("will", 0.0))
@@ -2605,7 +2616,7 @@ func _tpos() -> Vector2:
 	if w_target >= 0 and w_target < allies.size() and not allies[w_target]["down"]:
 		return allies[w_target]["pos"]
 	# held by a Bulwark, it goes for the genius
-	if w_target == HELD and _held():
+	if _holds():
 		return g_pos
 	return p_pos
 
@@ -2642,8 +2653,9 @@ func _choose_attack() -> void:
 func _update_wolf(dt: float) -> void:
 	w_timer += dt
 	var b := beast
-	# a Bulwark's hold has ended (or it has fallen): the foe is after its partner again
-	if w_target == HELD and not _held():
+	# a Bulwark's hold has ended (or it has fallen): the foe is after its partner again. A
+	# strike already wound up at the genius is thrown at the genius first (_holds).
+	if w_target == HELD and not _holds():
 		w_target = -1
 	match w_state:
 		"absent":
@@ -2695,10 +2707,12 @@ func _update_wolf(dt: float) -> void:
 				w_pos = _clamp_in(w_pos + Vector2.from_angle(w_facing) * lunge)
 			if not w_hit_done:
 				var mouth := w_pos + Vector2.from_angle(w_facing) * (float(b["radius"]) + 0.4)
-				if w_target == HELD and _held() and mouth.distance_to(g_pos) <= 1.4:
-					# the strike a Bulwark called onto itself lands on it
-					w_hit_done = true
-					_genius_held_blow(float(w_attack["damage"]))
+				if _holds():
+					# the strike a Bulwark called onto itself is the genius's: it lands on it, or
+					# on nobody (its partner, striking from beside it, is not bitten in passing)
+					if mouth.distance_to(g_pos) <= 1.4:
+						w_hit_done = true
+						_genius_held_blow(float(w_attack["damage"]))
 				elif mouth.distance_to(p_pos) <= float(room["player"]["radius"]) + 1.0:
 					w_hit_done = true
 					_resolve_bite()

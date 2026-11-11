@@ -1,13 +1,14 @@
 {
   "$comment": "The three types of genius (docs/genius-types.md; HANDOFF.md §9, 'Three types of genius'). A base's class says what a genius does beside its partner: a weapon is taken in hand, a defensive item and a ritual item are worn or carried and used, a companion fights at its partner's side in a role. types: which classes are which, and what the genius's key (G) means for each. ages: how much of its function a genius has at each age (worth) and how long its waits are (wait); an always-true multiplier m is 1 + (m - 1) x worth at that age. weapon, items, roles, companions: one block each, below. A base is named by its id, and a path by the id of the path's form in data/genius-bases (a hybrid is its first base's type, and its paths are that base's). Every number here is a designer's knob; the rules that read them are in game/scripts/fight.gd ('the genius's type') and game/scripts/genius/genius_types.gd.",
   "types": {
-    "$comment": "key: what G does. take: take it in hand or let it go. use: use it (its function). order: step through its orders. says: one line for the genius's page.",
+    "$comment": "key: what G does. take: take it in hand or let it go. use: use it (its function). order: step through its orders. says: one line for the genius's page. keySays: what a lesson says G does ({use}: the item's use, by name).",
     "weapon": {
       "name": "Weapon",
       "classes": [
         "weapon"
       ],
       "key": "take",
+      "keySays": "takes it in hand, and lets it go again",
       "says": "It is a weapon of its own. You take it in hand in place of the weapon you carry, and let it go again; out of your hand it floats at your shoulder and strikes with you."
     },
     "defense": {
@@ -16,6 +17,7 @@
         "armor"
       ],
       "key": "use",
+      "keySays": "uses it: {use}",
       "says": "You wear it. Something is always true of you while you do, and there is one thing you do with it."
     },
     "ritual": {
@@ -24,6 +26,7 @@
         "item"
       ],
       "key": "use",
+      "keySays": "uses it: {use}",
       "says": "You carry it and use it. Something is always true of you while you do, and there is one thing you do with it."
     },
     "companion": {
@@ -34,6 +37,7 @@
         "creature"
       ],
       "key": "order",
+      "keySays": "gives it its order",
       "says": "It fights at your side and takes your orders, in a role that supplies what you lack."
     }
   },

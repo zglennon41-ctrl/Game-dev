@@ -2361,7 +2361,7 @@
         },
         {
           "title": "The ladder",
-          "text": "Your cohort, one at a time. Strike ([b]LMB[/b]), guard and parry ([b]RMB[/b]), dodge ([b]Space[/b]), your technique ([b]Q[/b]), your stance ([b]F[/b]), your Pattern ([b]R[/b]) when its Trigger is met, and your genius ([b]G[/b] to change its order). A bout ends when one of you drops; the wards catch whoever it is. Win [b]two bouts[/b].",
+          "text": "Your cohort, one at a time. Strike ([b]LMB[/b]), guard and parry ([b]RMB[/b]), dodge ([b]Space[/b]), your technique ([b]Q[/b]), your stance ([b]F[/b]), your Pattern ([b]R[/b]) when its Trigger is met, and your genius ([b]G[/b] {genius_key}). A bout ends when one of you drops; the wards catch whoever it is. Win [b]two bouts[/b].",
           "setup": {
             "spar": true
           },
@@ -2544,7 +2544,7 @@
         {
           "title": "The cutting",
           "place": "green/cutting",
-          "text": "Fell [b]two[/b] of what hunts here. Your party fights beside you; [b]Tab[/b] locks on, [b]G[/b] gives your genius its order. Classmates who fall stay down until the post.",
+          "text": "Fell [b]two[/b] of what hunts here. Your party fights beside you; [b]Tab[/b] locks on, and for your genius [b]G[/b] {genius_key}. Classmates who fall stay down until the post.",
           "goal": {
             "type": "fell",
             "count": 2

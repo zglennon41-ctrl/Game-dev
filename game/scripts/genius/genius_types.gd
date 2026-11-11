@@ -244,6 +244,16 @@ static func says(g: Genius, hero: Dictionary = {}) -> Dictionary:
 				lines.append(need_words(float(needs(hero, g).get(String(r["id"]), 0.0))))
 	return { "type": type, "title": title, "lines": lines }
 
+## What a lesson says the genius's key does, for the genius a student has: "gives it its
+## order", "takes it in hand, and lets it go again", "uses it: Set the shield".
+static func key_words(g: Genius) -> String:
+	var what := of(g)
+	var T := data()
+	var words := String(T.get("types", {}).get(String(what["type"]), {}).get("keySays", "gives it its order"))
+	if words.contains("{use}"):
+		words = words.replace("{use}", String(T.get("items", {}).get(String(what["base"]), {}).get("use", {}).get("name", "its use")))
+	return words
+
 ## One line for a table: what a base's key does and what is always true ("" for a companion).
 static func key_line(base: String) -> String:
 	var T := data()
