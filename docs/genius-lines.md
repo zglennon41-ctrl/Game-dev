@@ -107,7 +107,8 @@ What every model keeps to, whatever builds it:
 - What is soft is shaded round (fur, cloth, smoke, light); what is hard keeps its planes
   (plate, ice, horn, brass). The body is one welded skin.
 - No clips. A rigged form moves by its base body's, which the game fits to its
-  proportions. No textures. A rigged form under 200 KB, an object under 80 KB.
+  proportions. No textures. A rigged form under 300 KB, an object under 120 KB (the
+  second pass raised both by half: rule 4).
 - Colours from the kit's palette: muted earths, stone and metal, a value apart. The kit puts
   every colour on the style's ramps as it makes the material (`docs/style.md`).
 - **A family's colours are its own.** Two families may each call a colour `moss` or `glaze`
