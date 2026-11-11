@@ -66,7 +66,7 @@ PALETTE.update({
     "leaf": ((0.15, 0.21, 0.1), 0.9, 0.0), "leaf_dry": ((0.24, 0.17, 0.09), 0.9, 0.0), "bark": ((0.13, 0.095, 0.065), 0.95, 0.0),
     "mask_pale": ((0.82, 0.78, 0.68), 0.5, 0.0), "mask_red": ((0.4, 0.09, 0.07), 0.6, 0.0), "cape_red": ((0.3, 0.085, 0.07), 0.95, 0.0),
     "fin": ((0.19, 0.25, 0.27), 0.4, 0.0), "ash": ((0.5, 0.49, 0.47), 1.0, 0.0), "soot": ((0.03, 0.028, 0.032), 1.0, 0.0),
-    "earth": ((0.1, 0.075, 0.055), 1.0, 0.0), "fur_grey": ((0.4, 0.39, 0.38), 0.9, 0.0),
+    "earth": ((0.1, 0.075, 0.055), 1.0, 0.0), "fur_grey": ((0.4, 0.39, 0.38), 0.9, 0.0), "fang": ((0.86, 0.82, 0.72), 0.35, 0.0),
     # a fox's stockings, the backs of its ears and the line round its eye: nearly black, and warm
     "fur_stocking": ((0.055, 0.045, 0.045), 0.9, 0.0), "fur_liner": ((0.03, 0.026, 0.028), 0.7, 0.0),
 })
@@ -263,9 +263,9 @@ def _has(slot, *styles):
 KINDS = {
     "red": dict(legs=1.0, body=1.0, neck=1.0, nape=1.0, girth=1.0, depth=1.0, wide=1.0, head=1.0, muzzle=1.0, skull=1.0, ears=1.0, earw=1.0, cheeks=1.0,
                 brush=1.0, fat=1.0, tail="level", stance="alert", ruff=0.0),
-    "den": dict(legs=0.74, body=0.94, neck=0.8, nape=1.3, girth=1.3, depth=1.2, wide=1.24, head=1.08, muzzle=0.7, skull=1.14, ears=0.56, earw=1.5, cheeks=1.5,
-                brush=0.86, fat=1.36, tail="hook", stance="level", ruff=1.0),
-    "silver": dict(legs=1.08, body=1.0, neck=1.14, nape=0.88, girth=0.88, depth=0.9, wide=0.9, head=0.96, muzzle=1.1, skull=0.94, ears=1.3, earw=0.86, cheeks=0.8,
+    "den": dict(legs=0.8, body=0.94, neck=0.8, nape=1.3, girth=1.3, depth=1.2, wide=1.24, head=1.08, muzzle=0.7, skull=1.14, ears=0.56, earw=1.5, cheeks=1.5,
+                brush=0.96, fat=1.36, tail="plume", stance="level", ruff=1.0),
+    "silver": dict(legs=1.03, body=1.0, neck=1.14, nape=0.88, girth=0.88, depth=0.9, wide=0.9, head=0.96, muzzle=1.1, skull=0.94, ears=1.3, earw=0.86, cheeks=0.8,
                    brush=1.22, fat=0.96, tail="up", stance="proud", ruff=0.0),
 }
 
@@ -281,7 +281,7 @@ CRANES = {
 TAILS = {
     "level": ((-4, 4, 10, 15, 18, 19, 16), 0), "hook": ((-24, -8, 14, 36, 56, 72, 82), 0), "low": ((-64, -60, -50, -38, -24, -9, 6), 0), "up": ((40, 56, 68, 76, 80, 76, 64), 0),
     "over": ((64, 88, 110, 130, 148, 162, 172), 0), "flag": ((76, 84, 88, 90, 90, 87, 82), 0), "s": ((66, 86, 100, 86, 64, 52, 66), 0),
-    "wrap": ((-46, -36, -22, -10, -4, 0, 4), -24), "tuck": ((-80, -92, -104, -118, -132, -146, -156), 0),
+    "wrap": ((-40, -30, -18, -8, 0, 6, 10), 25), "plume": ((24, 38, 48, 52, 50, 42, 30), 0), "tuck": ((-80, -92, -104, -118, -132, -146, -156), 0),
 }
 
 # its age, by its stage: the kit is more tail than fox
@@ -817,7 +817,7 @@ def _tail(r, A):
     elif many == "many":          # nine, fanned behind it like a hand of cards
         for i, a in enumerate((0.0, 0.3, -0.3, 0.6, -0.6, 0.9, -0.9, 1.2, -1.2)):
             lean = Matrix.Rotation(-0.1 * abs(a), 3, X)
-            _brush(r, "brush_%d" % i, lean @ Matrix.Rotation(a, 3, ax) if a else None, fat=0.74, long=1.0 - 0.1 * abs(a), shag=i < 5)
+            _brush(r, "brush_%d" % i, lean @ Matrix.Rotation(a, 3, ax) if a else None, fat=0.74, long=1.0 - 0.1 * abs(a), shag=i < 3)
     else:
         _brush(r, "brush_0")
 
@@ -1015,12 +1015,12 @@ def grow_ruff(r, A, style, size):
             t = s[8]
             if not 0.06 < t < 0.9 or i % 2:
                 continue
-            for k, deg in enumerate((200, 232, 258, 282, 308, 340)):
-                p, n = _on(s, deg + 8 * math.sin(i * 1.3), -0.012)
-                L = 0.24 * size * (0.7 + 0.6 * (1.0 - t)) * (1.0 + 0.25 * math.sin(i * 2.3 + k * 1.9))
-                mid = p + n * (0.5 * L) - Z * (0.3 * L) + s[1] * (0.2 * L)
-                tip = p + n * (0.55 * L) - Z * (0.8 * L) + s[1] * (0.5 * L)
-                lk = g.tongue([p, mid, tip], [0.17 * (0.7 + 0.3 * size), 0.15 * (0.7 + 0.3 * size), 0.02], thick=0.3, normal=n)
+            for k, deg in enumerate((196, 216, 236, 254, 270, 286, 304, 324, 344)):
+                p, n = _on(s, deg + 6 * math.sin(i * 1.3), -0.012)
+                L = 0.3 * size * (0.7 + 0.6 * (1.0 - t)) * (1.0 + 0.3 * math.sin(i * 2.3 + k * 1.9))
+                mid = p + n * (0.3 * L) - Z * (0.3 * L) + s[1] * (0.35 * L)
+                tip = p + n * (0.26 * L) - Z * (0.62 * L) + s[1] * (0.8 * L)
+                lk = g.tongue([p, mid, tip], [0.085 * (0.7 + 0.3 * size), 0.075 * (0.7 + 0.3 * size), 0.012], thick=0.45, normal=n)
                 if (i // 2 + k) % 2:
                     g2, w2 = g.merge(g2, lk), w2 + [s[6]] * len(lk[0])
                 else:
