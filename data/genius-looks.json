@@ -213,6 +213,14 @@
       { "id": "slate", "name": "slate", "main": "#5c626a", "under": "#b4b6b4", "trim": "#3e4349", "mark": "#c98a3c" },
       { "id": "rust", "name": "rust", "main": "#9a5234", "under": "#e2d2b8", "trim": "#6c3824", "mark": "#2c2826" }
     ],
+    "octopus": [
+      { "id": "terracotta", "name": "terracotta", "main": "#9E593F", "under": "#D6CAB4", "trim": "#4D2A1D", "mark": "#1C1815" },
+      { "id": "sand", "name": "sand", "main": "#C7AA6F", "under": "#F2E8D6", "trim": "#664E3B", "mark": "#753F3B" },
+      { "id": "pearl", "name": "pearl", "main": "#D6CAB4", "under": "#F2E8D6", "trim": "#706B65", "mark": "#A87B54" },
+      { "id": "slate", "name": "slate", "main": "#646975", "under": "#91979E", "trim": "#2C2F38", "mark": "#C7AA6F" },
+      { "id": "wine", "name": "wine", "main": "#753F3B", "under": "#CC746E", "trim": "#291615", "mark": "#D6CAB4" },
+      { "id": "kelp", "name": "kelp", "main": "#4B5E3C", "under": "#AD9F71", "trim": "#1C2416", "mark": "#D6CAB4" }
+    ],
     "crane": [
       { "id": "white", "name": "white", "main": "#dedbd2", "under": "#b9b6ae", "trim": "#2a2a2d", "mark": "#8c3a2c" },
       { "id": "grey", "name": "grey", "main": "#a3a5a6", "under": "#c9cac8", "trim": "#3a3b3f", "mark": "#7c382c" },
@@ -315,6 +323,7 @@
     "beast-horse": { "coats": "horse", "roles": { "fur_dark": "main", "fur_light": "under", "fur_ruff": "trim" }, "marks": { "socks": { "name": "stockings", "on": "main" }, "mask": { "name": "a blaze", "on": "main" }, "saddle": { "name": "a dark back", "on": "main" } }, "shapes": ["lean", "heavy"] },
     "beast-camel": { "coats": "sand", "roles": { "fur_dark": "main", "fur_light": "under", "fur_ruff": "trim" }, "marks": { "socks": { "name": "pale feet", "on": "main" }, "saddle": { "name": "a saddle", "on": "main" } }, "shapes": ["lean", "heavy"] },
     "beast-carp": { "coats": "carp", "roles": { "scale": "main", "scale_pale": "under", "fin": "trim" }, "marks": { "patches": { "name": "patches", "on": "main" }, "tips": { "name": "a tipped fin", "on": "trim" } }, "shapes": ["heavy", "lean"] },
+    "beast-octopus": { "coats": "octopus", "roles": { "hide_octopus": "main", "hide_octopus_pale": "under", "hide_octopus_dark": "trim" } },
     "beast-crane": { "coats": "crane", "roles": { "plume": "main", "plume_dark": "trim" }, "marks": { "crown": { "name": "a bare crown", "on": "main" }, "throat": { "name": "a dark throat", "on": "main" }, "tips": { "name": "pale wing-tips", "on": "trim" } } },
     "engine-handcar": { "coats": "iron", "roles": { "metal_iron": "main", "metal_iron_light": "under", "metal_brass": "trim" }, "marks": { "band": { "name": "painted sides", "on": "under" } } },
     "engine-buoy": { "coats": "iron", "roles": { "metal_iron": "main", "metal_iron_light": "under", "metal_brass": "trim" }, "marks": { "band": { "name": "a painted band", "on": "under" } } },

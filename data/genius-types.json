@@ -1087,6 +1087,23 @@
           "text": "It cannot be pinned: the guard is down longer."
         }
       }
+    },
+    "octopus": {
+      "role": "keeper",
+      "paths": {
+        "octopus-many-hands": {
+          "shade": "keeper",
+          "text": "It has an arm for everyone: it mends more."
+        },
+        "octopus-latch-lifter": {
+          "shade": "harrier",
+          "text": "It finds where the foe is fastened: it worries the guard open."
+        },
+        "octopus-sleeps-on-it": {
+          "shade": "lookout",
+          "text": "It has dreamed the foe already: it calls the strike."
+        }
+      }
     }
   },
   "need": {
