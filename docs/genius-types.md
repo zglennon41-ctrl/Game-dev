@@ -206,8 +206,15 @@ there (`tally` in the data):
 
 - **The HUD**: the G slot and the genius's line, as above. With a weapon genius in hand,
   the attack slot is named for it.
-- **In the world**: a weapon genius in the hand is drawn in the hand, at a hand's length
-  for its base, and the carried weapon is not drawn. A set shield, a caught strike, a slip,
+- **In the world**: a weapon genius in the hand is drawn in the hand, seated where its own
+  model says the hand closes on it (an empty named `grip`), and the carried weapon is not
+  drawn. An item is drawn where it is worn (`mounts` in the data, by its base's `worn`):
+  a shield on the forearm and a gauntlet on the hand, each by its own `wear`; a coat down
+  the back; a lantern at the hip, a bell at the belt and an astrolabe afloat at the
+  shoulder, each hung by its own ring (`carry`), upright whatever its partner's body does,
+  at the height its form says it has in the hand (`held`) times the mount's `scale`.
+  `godot --path . -- --fight --genius=<form id>:3 --near` (or `--near=back`) brings the
+  camera close to see it. A set shield, a caught strike, a slip,
   a toll, a sight and a mend each show their name over the place and a ring or a flash; a
   lantern set down lights a warm disc on the ground; a gate-shield draws its door as a ring.
 - **The genius's page** (J): the section "What it does beside you". Orders are listed only
@@ -346,10 +353,11 @@ yours to change.
 
 ## What is not done
 
-- **Bodies.** A weapon in the hand is placed by a length and a grip point per base, which
-  is approximate on the present bodies. Items are not drawn worn: they float at their
-  partner's side as before. Where each is worn is in the data (`worn`: arm, hand, back,
-  side, shoulder, belt) for the new bodies to use.
+- **Worn items are small.** A lantern at the hip is a hand tall and an astrolabe at the
+  shoulder smaller, as they would be; from the fight's camera they read as a shape and a
+  light, not as the form they are. They are drawn a third larger than life for that
+  (`mounts.*.scale`); how large they should be is the owner's call. Set down, each stands
+  at its own full height.
 - **No animation of its own.** Every new thing is marked by a name, a ring, a flash or a
   light, not by a movement of the genius or its partner.
 - **Classmates' genii have no types in a fight.** Only the player's genius does.

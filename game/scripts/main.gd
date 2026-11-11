@@ -1280,8 +1280,8 @@ func _process(delta: float) -> void:
 	if _args.has("near"):
 		var turn := fight.p_facing + (2.5 if str(_args["near"]) == "back" else 0.6)
 		world.cine = true
-		world.cine_look = world._v3(fight.p_pos, 1.0)
-		world.cine_pos = world._v3(fight.p_pos + Vector2.from_angle(turn) * 2.3, 1.5)
+		world.cine_look = world._v3(fight.p_pos, 1.05)
+		world.cine_pos = world._v3(fight.p_pos + Vector2.from_angle(turn) * 2.9, 1.45)
 	world.draw(fight, real_dt, cam, move)
 	var timer := ""
 	var score := "the old station" if mode == "prologue" else "the yard"

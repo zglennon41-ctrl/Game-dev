@@ -678,40 +678,40 @@
       "bone": "hips",
       "by": "carry",
       "at": [
-        0.26,
+        0.25,
         0.02,
-        0.02
+        -0.1
       ],
       "turn": [
         0,
         0,
         0
       ],
-      "scale": 1.0,
+      "scale": 1.3,
       "plumb": true
     },
     "belt": {
       "bone": "hips",
       "by": "carry",
       "at": [
-        -0.24,
+        -0.25,
         0.0,
-        0.06
+        -0.08
       ],
       "turn": [
         0,
         0,
         0
       ],
-      "scale": 1.0,
+      "scale": 1.3,
       "plumb": true
     },
     "shoulder": {
       "bone": "chest",
       "by": "carry",
       "at": [
-        0.34,
-        0.42,
+        0.36,
+        0.44,
         0.0
       ],
       "turn": [
@@ -719,7 +719,7 @@
         0,
         0
       ],
-      "scale": 1.0,
+      "scale": 1.4,
       "plumb": true
     }
   },
