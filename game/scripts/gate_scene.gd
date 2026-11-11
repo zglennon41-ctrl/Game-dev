@@ -81,6 +81,11 @@ func _becomes(g: Genius, c: Dictionary, i: int, old_name: String, col: Color, at
 	sfx.play("heavy", 0.6)
 	world.build_hero(hero)
 	var now: GeniusBody = world._g_body
+	# its Path's colour comes out with it (docs/genius-lines.md, "A Path's colour")
+	var path_col := GeniusBody.accent_of(String(c.get("form", "")), "accent_light")
+	if path_col.a > 0.0:
+		world._ring_wave(at, path_col, 4.2)
+		world.burst(at + Vector3(0, 0.6, 0), path_col, 70, 5.0)
 	if now and is_instance_valid(now):
 		var rest := now.lines
 		now.set_flood(1.0)

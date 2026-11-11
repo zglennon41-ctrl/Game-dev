@@ -111,6 +111,12 @@ def main():
         baby = True
 
     kinds = load('data/genius-types.json')
+    ramps = load('data/style.json')['ramps']
+
+    def path_colour(node):
+        """A Path's own colour (docs/genius-lines.md, "A Path's colour"), as the page shows it."""
+        r = (node.get('body') or {}).get('accent')
+        return ramps[r][3] if r in ramps else ''
     kind_of = {c: k for k, v in kinds['types'].items() if isinstance(v, dict) for c in v['classes']}
     worn = {}
     if args.worn and os.path.isdir(args.worn):
@@ -171,10 +177,10 @@ def main():
         return ('<div class="form l%d" data-s="%s">%s<div class="txt"><%s class="fname">%s</%s>%s%s%s%s</div></div>'
                 % (level, e(words), pic(base_id, n['id'], n['name']), tag, e(n['name']), tag, of, ln, fight, detail(n)))
 
-    def node(base_id, n, level, col, span, pos, kids):
-        cls = 'node n%d %s%s' % (level, pos, ' kids' if kids else '')
-        return ('<div class="%s" style="grid-column:%d/span %d;grid-row:%d">%s<span>%s</span>%s</div>'
-                % (cls, col + 1, span, level + 1, pic(base_id, n['id'], n['name']), e(n['name']), '<i></i>' if kids else ''))
+    def node(base_id, n, level, col, span, pos, kids, pc=''):
+        cls = 'node n%d %s%s%s' % (level, pos, ' kids' if kids else '', ' pc' if pc else '')
+        return ('<div class="%s" style="grid-column:%d/span %d;grid-row:%d%s">%s<span>%s</span>%s</div>'
+                % (cls, col + 1, span, level + 1, ';--pc:' + pc if pc else '', pic(base_id, n['id'], n['name']), e(n['name']), '<i></i>' if kids else ''))
 
     def chart(b):
         """The whole line at a glance, as a chart of its stages: one column a Final."""
@@ -186,11 +192,12 @@ def main():
         cells.append(node(bid, b['settled'], 1, 1, 18, 'solo', True))
         where = ('first', 'mid', 'last')
         for pi, p in enumerate(b['paths']):
-            cells.append(node(bid, p, 2, 1 + 6 * pi, 6, where[pi], True))
+            pc = path_colour(p)
+            cells.append(node(bid, p, 2, 1 + 6 * pi, 6, where[pi], True, pc))
             for qi, q in enumerate(p['prongs']):
-                cells.append(node(bid, q, 3, 1 + 6 * pi + 2 * qi, 2, where[qi], True))
+                cells.append(node(bid, q, 3, 1 + 6 * pi + 2 * qi, 2, where[qi], True, pc))
                 for fi, f in enumerate(q['finishes']):
-                    cells.append(node(bid, f, 4, 1 + 6 * pi + 2 * qi + fi, 1, ('first', 'last')[fi], False))
+                    cells.append(node(bid, f, 4, 1 + 6 * pi + 2 * qi + fi, 1, ('first', 'last')[fi], False, pc))
         return '<div class="chartwrap"><div class="chart" role="group" aria-label="The %s line, from its Starter to its Finals">%s</div></div>' % (e(b['name']), ''.join(cells))
 
     nav, out, css = [], [], []
@@ -229,7 +236,8 @@ def main():
                 sec.append(chart(b))
             sec.append('<div class="paths">')
             for p in b['paths']:
-                sec.append('<div class="path">' + form(bid, p, 2, 'h3', in_fight(b, p)))
+                pc = path_colour(p)
+                sec.append('<div class="path"%s>' % (' style="--pc:%s"' % pc if pc else '') + form(bid, p, 2, 'h3', in_fight(b, p)))
                 for q in p['prongs']:
                     sec.append('<div class="prong">' + form(bid, q, 3, 'h4') + '<div class="finishes">')
                     sec.append(''.join(form(bid, f, 4, 'h5') for f in q['finishes']))
