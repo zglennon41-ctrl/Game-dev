@@ -873,6 +873,9 @@ def robe(P, spec):
         skirt(P, "smock", waist, P.footz + 0.42 * (P.kneez - P.footz), 0.2 * P.t, main, pleats=5, hem=lining)
         sleeve_bells(P, main, lining, 0.12, long=0.12)
         collar_ring(P, lining, 0.05)
+        # tied at the waist with a cord the colour its hair will be
+        hw, hd, yo = P.ring(waist)
+        P.add("smock_cord", _hoop((0, yo, waist), hw + 0.06, hd + 0.06, 0.03 * P.t, u=X, v=Y, n=12, sides=4), P.material("trim"), "hips", smooth=True)
     elif kind == "tunic":
         P.wear(P.trunk(P.hipz - 0.05, P.neckz + 0.0) | P.sleeves(0.0, P.ex + 0.02), main, 0.04)
         skirt(P, "tunic", waist, P.kneez + 0.06 - 0.3 * (size - 1.0), 0.1 * P.t, main, hem=hem or lining)
