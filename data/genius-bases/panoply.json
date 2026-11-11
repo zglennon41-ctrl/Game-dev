@@ -948,7 +948,7 @@
        "body": {
         "helm": [
          "lamp",
-         1.0
+         1.3
         ],
         "right": [
          "staff",
@@ -979,6 +979,9 @@
         "dark-eyed"
        ],
        "body": {
+        "build": {
+         "bow": 0.1
+        },
         "helm": [
          "sallet",
          1.0
@@ -990,7 +993,7 @@
         ],
         "right": [
          "dark-lamp",
-         1.0
+         1.2
         ],
         "over": null,
         "pauldrons": null

@@ -162,6 +162,7 @@ class Armor(la.Angel):
         are joined by nothing that can be seen and close at their ends on the dark inside."""
         v0, J = self.v0, self.J
         rest = ~self.kept
+        self.dead = rest[self.fa].all(axis=1)       # the faces that are nothing at all: they are not made
 
         def to_line(mask, pts, k):
             idx = np.nonzero(mask)[0]
@@ -182,11 +183,21 @@ class Armor(la.Angel):
                     best[m], bd[m] = q[m], dist[m]
             self.v[idx] = best + (p - best) * k
         for s in ("l", "r"):
-            to_line(rest & self.arm & self.side[s], [J["upperarm." + s], J["lowerarm." + s], J["wrist." + s], J["handslot." + s]], 0.05)
+            to_line(rest & self.arm & self.side[s], [J["upperarm." + s], J["lowerarm." + s], J["wrist." + s], J["handslot." + s]], 0.004)
             f = J["foot." + s]
-            to_line(rest & self.leg & self.side[s], [J["upperleg." + s], J["lowerleg." + s], f, (f.x, f.y - 0.1, 0.03)], 0.05)
-        to_line(rest & self.headv, [(0, self.yc, self.neckz - 0.08), (0, self.yc, self.neckz - 0.04)], 0.02)
-        to_line(rest & self.trunkv, [(0, self.yc, self.hipz - 0.1), (0, self.yc, self.neckz - 0.06)], 0.05)
+            to_line(rest & self.leg & self.side[s], [J["upperleg." + s], J["lowerleg." + s], f, (f.x, f.y - 0.1, 0.03)], 0.004)
+        to_line(rest & self.headv, [(0, self.yc, self.neckz - 0.08), (0, self.yc, self.neckz - 0.04)], 0.004)
+        to_line(rest & self.trunkv, [(0, self.yc, self.hipz - 0.1), (0, self.yc, self.neckz - 0.06)], 0.004)
+
+    def finish(self, path, clips=False):
+        hb = self.hb
+        faces, keep = hb.faces, ~self.dead
+        hb.faces = [f for f, k in zip(faces, keep) if k]
+        self.fmat = self.fmat[keep]
+        try:
+            la.Angel.finish(self, path, clips=clips)
+        finally:
+            hb.faces = faces
 
     def yf(self, z, x=0.0):
         """The front of its plate at a height."""
@@ -204,10 +215,10 @@ def plates(P, spec):
     main, light = P.material("main"), P.material("under")
     ax, z = np.abs(v[:, 0]), v[:, 2]
     P.thick = thick = {"child": 0.05, "full": 0.06, "heavy": 0.1, "lamellar": 0.05}.get(kind, 0.06) * size
-    low = P.waist + (0.12 * t if kind == "child" else 0.0)
-    P.plate(P.trunkv & (z > low), main, thick)
-    P.plate(P.hand, light if kind == "child" else main, 0.025 if kind != "heavy" else 0.05)
-    P.plate(P.leg & (z < P.footz + 0.04 * t), light if kind == "child" else main, 0.04 if kind != "heavy" else 0.07)
+    low = P.waist + (0.03 * t if kind == "child" else 0.0)
+    P.plate(P.trunkv & (z > low), light if kind == "child" else main, thick * (1.5 if kind == "child" else 1.0))
+    P.plate(P.hand, light if kind == "child" else main, {"child": 0.05, "heavy": 0.05}.get(kind, 0.025))
+    P.plate(P.leg & (z < P.footz + (0.16 if kind == "child" else 0.04) * t), light if kind == "child" else main, {"child": 0.06, "heavy": 0.07}.get(kind, 0.04))
     if kind != "child":
         arm = P.arm & ~P.hand
         P.plate(arm & (ax > P.sx + 0.1 * t) & (ax < P.ex - 0.06 * t), main, thick * 0.7)
@@ -265,9 +276,9 @@ def helm(P, spec):
         put("helm_band", pd.drape((c.x, c.y, 0), lambda t_: (rx * k, ry * k), [c.z + z1, c.z + z0], -pi * open_, pi * open_, thick=0.05 * hr, n=11), material or main)
     eyes_at = None
     if kind == "none":          # no helm: two lights over an empty collar
-        eyes_at = (c.y - ry * 0.5, e.z, 1.25)
+        eyes_at = (c.y - ry * 0.5, e.z, 1.7)
     elif kind == "lamp":        # a lantern where its helm was: six panes of the field in a frame of brass
-        R, Hh = rx * 1.05, rz * 0.78
+        R, Hh = rx * 1.05 * size, rz * 0.78 * size
         ph = pi / 6
         panes = g.lathe([(R * 0.86, -Hh), (R * 0.98, -Hh * 0.2), (R * 0.98, Hh * 0.5), (R * 0.84, Hh)], n=6, centre=c, phase=ph)
         bars = None
@@ -395,8 +406,8 @@ def crest(P, spec, H):
         elif kind == "ram":         # a ram's horns, curled at the sides of the helm
             geo = None
             for s in (1, -1):
-                pts = g.spiral(c + Vector((s * rx * 1.02, 0.1 * hr, 0.25 * hr)), 0.62 * hr * size, 0.2 * hr * size, 1.15, s * 0.5 * hr * size, n=12, axis=X * s, start=pi * 0.55)
-                geo = g.merge(geo, g.tube(pts, [0.26 * hr * size * (1.0 - 0.8 * i / 12) for i in range(13)], n=6))
+                pts = g.spiral(c + Vector((s * (rx + 0.3 * hr), 0.25 * hr, 0.0)), 0.8 * hr * size, 0.3 * hr * size, 1.2, s * 0.6 * hr * size, n=12, axis=X * s, start=pi * 0.5)
+                geo = g.merge(geo, g.tube(pts, [0.34 * hr * size * (1.0 - 0.85 * i / 12) for i in range(13)], n=6))
             P.add("horns", geo, mat("horn_ram"), "head", smooth=True)
         elif kind == "horns":       # great horns, swung forward
             geo = None
@@ -442,7 +453,7 @@ def chest(P, spec):
     elif kind == "prow":        # a wedge of iron standing from the breastplate
         w = 0.55 * t * size
         pts = [(0, P.yf(z1) - w * 0.1, z1 + 0.05 * t), (0, P.yf(zm) - w * 0.42, zm + 0.12 * t), (0, P.yf(z0) - w * 0.3, z0 - 0.05 * t), (0, P.yf(z0) + 0.0, z0 - 0.3 * t)]
-        P.add("prow", g.tongue(pts, [w * 0.4, w, w * 0.8, w * 0.1], thick=0.34, normal=X), main, "chest", smooth=False)
+        P.add("prow", g.tongue(pts, [w * 0.4, w, w * 0.8, w * 0.1], thick=0.8, normal=X), main, "chest", smooth=False)
         edge = [Vector(p) + Vector((0, -w * (0.2, 0.47, 0.37, 0.05)[i], 0)) for i, p in enumerate(pts)]
         P.add("prow_edge", g.tube(edge, [0.03 * t, 0.05 * t, 0.045 * t, 0.02 * t], n=4), mat("accent"), "chest", smooth=False)
         for i, zz in enumerate((z0 + 0.03 * t, z1 - 0.06 * t)):
@@ -572,11 +583,12 @@ def pauldrons(P, spec):
         elif kind in ("slab", "slab-one", "spikes"):
             if kind == "slab-one" and s < 0:
                 continue
-            R = Matrix.Rotation(s * 0.22, 3, "Y")
-            b = cs + Vector((s * 0.08 * t, 0, 0.0))
-            P.add("pauldron_" + tag, g.box(b, (0.5 * t * size, 0.58 * t * size, 0.24 * t * size), rot=R), main, "chest", smooth=False)
-            P.add("pauldron_rim_" + tag, g.box(b + R @ Vector((s * 0.24 * t * size, 0, 0)), (0.07 * t, 0.62 * t * size, 0.28 * t * size), rot=R), mat("accent"), "chest", smooth=False)
-            P.add("pauldron_rivets_" + tag, g.merge(*[g.ico(b + R @ Vector((s * 0.02 * t, dy * t * size, 0.13 * t * size)), 0.035 * t, sub=0) for dy in (-0.2, 0.0, 0.2)]), trim, "chest", smooth=False)
+            R = Matrix.Rotation(s * 0.5, 3, "Y")
+            b = cs + Vector((s * 0.0 * t, 0, 0.0))
+            rr = 0.33 * t * size
+            P.add("pauldron_" + tag, g.ico(b, rr, sub=1, scale=(1.05, 1.2, 0.86), rot=(0, s * 0.5, 0)), main, "chest", smooth=False)
+            P.add("pauldron_rim_" + tag, _hoop(b + R @ Vector((s * 0.06 * t, 0, -0.1 * t)), rr * 1.16, rr * 1.0, 0.05 * t, u=Y, v=R @ Vector((s * 0.55, 0, -0.84)), n=10, sides=4), mat("accent"), "chest", smooth=False)
+            P.add("pauldron_rivets_" + tag, g.merge(*[g.ico(b + R @ Vector((s * 0.1 * t, dy * t * size, rr * 0.74)), 0.045 * t, sub=0) for dy in (-0.16, 0.0, 0.16)]), trim, "chest", smooth=False)
             if kind == "spikes":
                 P.add("spike_" + tag, g.cone(b + R @ Vector((0, 0, 0.1 * t)), b + R @ Vector((s * 0.12 * t, 0, 0.62 * t * size)), 0.13 * t, n=5), light, "chest", smooth=False)
         elif kind == "towers":      # a round turret on each shoulder
@@ -598,10 +610,10 @@ def pauldrons(P, spec):
             P.add("tiles_ridge_" + tag, g.tube([cs + Vector((s * -0.1 * t, -0.34 * t * size, 0.2 * t)), cs + Vector((s * -0.1 * t, 0.34 * t * size, 0.2 * t))], 0.06 * t, n=5), mat("accent_dark"), "chest", smooth=False)
         elif kind == "lames":       # flat laced plates, hung from the shoulder
             for i in range(3):
-                R = Matrix.Rotation(s * -(0.55 + 0.22 * i), 3, "Y")
-                b = cs + Vector((s * (0.0 + 0.11 * i) * t * size, 0, (0.08 - 0.15 * i) * t * size))
-                P.add("lame_%s_%d" % (tag, i), g.box(b, (0.36 * t * size, (0.5 + 0.03 * i) * t * size, 0.05 * t), rot=R), light if i % 2 else main, "chest", smooth=False)
-                P.add("lame_lace_%s_%d" % (tag, i), g.box(b + R @ Vector((s * 0.17 * t * size, 0, 0.0)), (0.05 * t, (0.52 + 0.03 * i) * t * size, 0.06 * t), rot=R), mat("accent" if i % 2 == 0 else "accent_light"), "chest", smooth=False)
+                R = Matrix.Rotation(s * (0.75 + 0.22 * i), 3, "Y")
+                b = cs + Vector((s * (-0.02 + 0.09 * i) * t * size, 0, (0.06 - 0.16 * i) * t * size))
+                P.add("lame_%s_%d" % (tag, i), g.box(b, (0.3 * t * size, (0.46 + 0.03 * i) * t * size, 0.05 * t), rot=R), light if i % 2 else main, "chest", smooth=False)
+                P.add("lame_lace_%s_%d" % (tag, i), g.box(b + R @ Vector((s * 0.14 * t * size, 0, 0.0)), (0.05 * t, (0.48 + 0.03 * i) * t * size, 0.06 * t), rot=R), mat("accent" if i % 2 == 0 else "accent_light"), "chest", smooth=False)
 
 
 # ======================================================================================
@@ -622,10 +634,54 @@ def hands(P, spec):
         acc, pale, dark = "accent", "accent_pale", "accent_dark"
         main, light, trim = P.material("main"), P.material("under"), P.material("trim")
         if kind == "lid":           # a pot-lid for a shield
-            c = Vector((-0.12 * k, -0.3 * k, 0.12 * k))
-            P.grip(side, kind, [(_disc(c, 0.56 * k, normal=Y, thick=0.06 * k, n=12), "wood_shield", False), (_hoop(c + Y * -0.02 * k, 0.56 * k, 0.56 * k, 0.045 * k, u=X, v=Z, n=12, sides=4), light, False),
+            c = Vector((0.1 * k, -0.3 * k, 0.1 * k))
+            P.grip(side, kind, [(_disc(c, 0.46 * k, normal=Y, thick=0.06 * k, n=12), "wood_shield", False), (_hoop(c + Y * -0.02 * k, 0.46 * k, 0.46 * k, 0.045 * k, u=X, v=Z, n=12, sides=4), light, False),
                                 (g.ico(c + Y * -0.07 * k, 0.12 * k, sub=1, scale=(1, 0.7, 1)), trim, False)])
-        elif kind in ("heater", "tower", "wall", "door"):
+        elif kind == "door":
+            # half an oak door before each arm: it stands on the ground, painted its Path's colour between straps of iron
+            s = 1.0 if side == "l" else -1.0
+            th = 0.1 * k
+            zt = P.armz + 0.12 * t
+            y = min(P.yf(P.chestz), P.yf(P.waist)) - 0.4 * t
+            x0, x1 = 0.012 * t, P.sx + 0.62 * t
+            cx, w = s * (x0 + x1) / 2, x1 - x0
+            P.add("door_" + side, g.box((cx, y, zt / 2 + 0.015), (w, th, zt - 0.03)), mat("wood_door"), "chest", smooth=False)
+            P.add("door_paint_" + side, g.box((cx, y - th / 2 - 0.012 * k, zt / 2 + 0.015), (w * 0.86, 0.03 * k, zt * 0.9)), mat(acc), "chest", smooth=False)
+            iron = None
+            for zz in (0.14 * zt, 0.5 * zt, 0.86 * zt):
+                iron = g.merge(iron, g.box((cx, y - th / 2 - 0.03 * k, zz), (w * 1.02, 0.05 * k, 0.13 * k)))
+            P.add("door_iron_" + side, iron, mat("iron_plate_dark"), "chest", smooth=False)
+            P.add("door_ring_" + side, _hoop((s * (x0 + 0.2 * t), y - th / 2 - 0.07 * k, zt * 0.42), 0.09 * k, 0.09 * k, 0.022 * k, u=X, v=Z, n=8, sides=3), trim, "chest", smooth=False)
+        elif kind in ("tower", "wall"):
+            # a shield taller than itself, planted before it: it stands on the ground, and the hand rests on its rim
+            s = 1.0 if side == "l" else -1.0
+            th = 0.08 * k
+            zt = P.armz + (0.1 if kind == "tower" else 0.3) * t
+            y = min(P.yf(P.chestz), P.yf(P.waist)) - 0.42 * t
+            if kind == "tower":
+                x0, x1 = 0.02 * t, P.sx + 0.62 * t
+                out = [(x0, 0.03), (x1, 0.03), (x1, zt - 0.22 * t), (x1 - 0.25 * t, zt), (x0 + 0.25 * t, zt), (x0, zt - 0.22 * t)]
+            else:
+                x0, x1 = 0.012 * t, P.sx + 0.7 * t
+                out = [(x0, 0.03), (x1, 0.03), (x1, zt), (x0 + 0.3 * t, zt), (x0 + 0.3 * t, zt - 0.42 * t), (x0, zt - 0.42 * t)]
+            out = [(s * a, b) for a, b in out]
+            cx = sum(a for a, b in out) / len(out)
+            P.add(kind + "_" + side, slab(out, (0, y, 0), X, Z, -Y, th), light, "chest", smooth=False)
+            P.add(kind + "_face_" + side, slab(shrunk(out, 0.8), (0, y - th, 0), X, Z, -Y, 0.02 * k), mat(acc), "chest", smooth=False)
+            if kind == "tower":     # a stripe down the middle of its face
+                P.add("tower_stripe", g.box((cx, y - th - 0.025 * k, zt / 2), (0.2 * k, 0.02 * k, zt * 0.7)), mat(pale), "chest", smooth=False)
+                P.add("tower_boss", g.ico((cx, y - th - 0.04 * k, zt * 0.6), 0.14 * k, sub=1, scale=(1, 0.6, 1)), trim, "chest", smooth=False)
+            else:                   # bands across both leaves, and battlements along the top
+                geo = None
+                for zz in (zt * 0.3, zt * 0.62):
+                    geo = g.merge(geo, g.box((cx, y - th - 0.025 * k, zz), (abs(x1 - x0) * 0.8, 0.02 * k, 0.14 * k)))
+                P.add("wall_bands_" + side, geo, mat(pale), "chest", smooth=False)
+                cr = None
+                w = x1 - x0 - 0.3 * t
+                for i in range(3):
+                    cr = g.merge(cr, g.box((s * (x0 + 0.3 * t + w * (i + 0.5) / 3), y - th / 2, zt + 0.1 * k), (w / 5, th, 0.2 * k)))
+                P.add("wall_crenels_" + side, cr, light, "chest", smooth=False)
+        elif kind == "heater":
             y = -0.34 * k
             if kind == "heater":
                 out = [(-0.72, 0.62), (0.4, 0.62), (0.42, 0.05), (0.22, -0.55), (-0.16, -0.95), (-0.54, -0.55), (-0.74, 0.05)]
@@ -680,7 +736,7 @@ def hands(P, spec):
                      (g.tongue([g0 + flat * 0.014, g0 + flat * 0.014 + d * L * 0.6], [0.06 * k, 0.02 * k], thick=0.3, normal=flat), acc)]
             P.grip(side, kind, items)
         elif kind in ("staff", "crook", "lamp-staff", "spear", "glaive", "standard"):
-            H = {"staff": 2.0, "crook": 2.2, "lamp-staff": 2.5, "spear": 2.9, "glaive": 3.1, "standard": 3.7}[kind] * k
+            H = {"staff": 2.0, "crook": 2.2, "lamp-staff": 2.5, "spear": 2.9, "glaive": 3.1, "standard": 3.0}[kind] * k
             foot = Vector((0, -0.12 * k, gz))
             top = Vector((0, -0.12 * k, H))
             items = [(g.tube([foot, top], 0.04 * k, n=5), "wood_pole", False), (g.tube([foot, foot + Z * 0.14 * k], 0.05 * k, n=5), trim, False)]
@@ -709,18 +765,21 @@ def hands(P, spec):
             if kind == "standard":      # a long flag with two tails, and no device on it
                 p0 = top - Z * 0.5 * k
                 w = 0.9 * k
-                out = [(0.0, w / 2), (1.5 * k, w / 2 - 0.06 * k), (2.3 * k, w / 2 - 0.02 * k), (1.75 * k, 0.0), (2.3 * k, -w / 2 + 0.02 * k), (1.5 * k, -w / 2 + 0.06 * k), (0.0, -w / 2)]
-                flag = [(slab(out, p0 + Y * 0.01, X, Z, Y, 0.03 * k), acc, True), (g.box(p0 + Vector((0.8 * k, 0.02 * k, 0)), (1.5 * k, 0.045 * k, 0.16 * k)), pale, True)]
+                out = [(0.0, w / 2), (1.0 * k, w / 2 - 0.06 * k), (1.6 * k, w / 2 - 0.02 * k), (1.2 * k, 0.0), (1.6 * k, -w / 2 + 0.02 * k), (1.0 * k, -w / 2 + 0.06 * k), (0.0, -w / 2)]
+                flag = [(slab(out, p0 + Y * 0.01, X, Z, Y, 0.03 * k), acc, True), (g.box(p0 + Vector((0.55 * k, 0.02 * k, 0)), (1.0 * k, 0.045 * k, 0.16 * k)), pale, True)]
                 P.hold_move(side, "sway", "flag", flag, p0)
                 items.append((g.blade(top, top + Z * 0.3 * k, 0.14 * k, normal=Y, belly=0.4, thick=0.03 * k), trim, False))
             P.grip(side, kind, items)
-        elif kind == "dark-lamp":   # a shuttered lamp, held low: one slit of light
-            hook = Vector((0, -0.05 * k, -0.02 * k))
+        elif kind == "dark-lamp":   # a shuttered lamp, held out from under its cloak: one slit of light
+            s = 1.0 if side == "l" else -1.0
+            hook = Vector((s * (P.sx + 0.5 * t), min(P.yf(P.chestz), P.yf(P.waist)) - 0.3 * t, P.waist + 0.1 * t))
             lc = hook + Z * -0.42 * k
+            P.add("lamp_arm", g.tube([hook + Vector((-s * 0.5 * t, 0.3 * t, 0.05 * t)), hook], 0.07 * t, n=5), light, "chest", smooth=False)
+            P.add("lamp_fist", g.ico(hook, 0.11 * t, sub=1), main, "chest", smooth=False)
             lamp = [(g.tube([hook, lc + Z * 0.24 * k], 0.014 * k, n=3), trim, False), (g.lathe([(0.17 * k, -0.2 * k), (0.2 * k, -0.14 * k), (0.2 * k, 0.14 * k), (0.15 * k, 0.2 * k)], n=6, centre=lc), "iron_plate_dark", False),
                     (g.lathe([(0.23 * k, 0.19 * k), (0.07 * k, 0.34 * k), (0.0, 0.36 * k)], n=6, centre=lc), acc, False),
                     (g.box(lc + Vector((0, -0.19 * k, 0)), (0.07 * k, 0.05 * k, 0.24 * k)), field("lamp", 3.2), False)]
-            P.hold_move(side, "sway", "lamp", lamp, hook)
+            P.move("sway", "lamp", lamp, hook, "chest")
 
 
 # ======================================================================================
@@ -860,8 +919,8 @@ def over(P, spec):
             P.add("scarf", _hoop((c.x, c.y, P.neckz + 0.0), rr, rr, 0.085 * t, u=X, v=Y, n=10, sides=5), mat("accent_light"), "chest", smooth=True)
             k0 = Vector((-0.1 * t, c.y + rr, P.neckz))
             L = 0.6 * t * size
-            pts = [k0, k0 + Vector((-0.35, 0.3, -0.1)) * L, k0 + Vector((-0.8, 0.5, 0.08)) * L, k0 + Vector((-1.3, 0.62, -0.1)) * L]
-            P.move("sway", "scarf", [(g.tongue(pts, [0.16 * t, 0.2 * t, 0.18 * t, 0.1 * t], thick=0.18, normal=Y), mat("accent_light"), True)], k0, "chest")
+            pts = [k0, k0 + Vector((-0.3, 0.35, -0.2)) * L, k0 + Vector((-0.62, 0.6, -0.62)) * L, k0 + Vector((-1.05, 0.75, -0.9)) * L, k0 + Vector((-1.3, 0.8, -1.4)) * L]
+            P.move("sway", "scarf", [(g.tongue(pts, [0.16 * t, 0.22 * t, 0.22 * t, 0.2 * t, 0.06 * t], thick=0.18, normal=Y), mat("accent_light"), True)], k0, "chest")
         elif kind == "ribbons":     # tied at each elbow
             for s, tag in ((1, "l"), (-1, "r")):
                 e = P.J["lowerarm." + tag]
