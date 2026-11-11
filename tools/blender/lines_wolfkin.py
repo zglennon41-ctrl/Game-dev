@@ -3097,9 +3097,7 @@ def register(builders):
     _stag_styles()
     _drake_styles()
     builders["fox"] = _builder(fox_species, fox_ages, ("fur_dark", "fur_light"), ("socks", "mask", "saddle", "tailtip"), {"fur_ruff": "fur_dark"})
-    # a stag's head stands a fifth under the height it is stood to: its crown is above that
-    builders["stag"] = _builder(stag_species, stag_ages, ("hide_red", "fur_cream"), ("socks", "mask", "saddle", "tailtip"),
-                                {"fur_dark": "hide_red", "fur_light": "fur_cream", "fur_ruff": "hide_red"}, ref_k=1.2)
+    # (the Stag is built by lines_stag.py: a deer's body of its own)
     builders["drake"] = drake_build
 
 

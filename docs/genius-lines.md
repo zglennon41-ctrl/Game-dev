@@ -317,6 +317,9 @@ one animal wearing another's parts by accident. Each family's section says which
 line, in a sentence. The known cases: the Drake (was a hound with wings; rebuilt on
 2026-11-11 as a true drake, and again on 2026-11-12 to the Wolf's standard: standing on
 thick legs, a larger head, wings that are an event, rooted at the shoulder); the Hawk's Harriers (griffins by accident: to be griffins on purpose, or birds
+2026-11-11 as a true drake, long in the neck and the tail, low and splayed, its wings
+rooted at the shoulder); the Stag (was a wolf on stilts with antlers; rebuilt on 2026-11-12
+as three deer: "The Stag"); the Hawk's Harriers (griffins by accident: to be griffins on purpose, or birds
 on foot); what floats and should lie (a pool, black ice, a grass-fire); a fish and an
 octopus in the air (a choice: they swim in the field, and everything about them says so).
 
@@ -1100,12 +1103,14 @@ crescent rise and fall (`bob_*`); the Still Wolf's bird looks about (`turn_bird`
   its own faces; fur is flat locks lying close; marks are the body's own faces painted where
   that will do.
 
-## The wolf's kin: the Fox, the Stag, the Drake
+## The wolf's kin: the Fox, the Drake (and once the Stag)
 
 `tools/blender/lines_wolfkin.py`. Each is the wolf's rig reshaped as a species, aged its own
-way (a fawn is all leg where a pup is all paw), and then grown from its `body`. Underneath,
+way (a kit is all ear where a pup is all paw), and then grown from its `body`. Underneath,
 every form is one wolf reshaped: outlines change through proportion, carriage and what is
-grown, and none has a skeleton of its own. The wolf's slots still work on them (`build`,
+grown, and none has a skeleton of its own. (The Stag was built here until 2026-11-12; it has
+a deer's body of its own now, in a file of its own: "The Stag", below. What this file still
+holds of it is its two gifts and its old styles, which nothing calls.) The wolf's slots still work on them (`build`,
 `ears`, `eyes`, `maw`, `spine`, `paws`, `armor`, `carry`, `aura`); what is theirs alone:
 
 | Line | Keys | What they are |
@@ -1124,14 +1129,86 @@ Wood-walker a red hide and branch antlers with moss, the Watch-hart one ear turn
 head over its shoulder; of the Drake, the Hoard is low and long and plated in gold, the
 Fire stands up before, blood-red, its throat lit and its wings folded above its back, the Sky
 is a wyvern, all wing.
+| Drake | `crane` `tail` `horns` `frill` `ridge` `wings` `membrane` `flight` `belly` `scales` `throat` `tailend` `shell` `lies` `hide` `jaw` `gape` `fangs` `breath` `nostrils` `claws` `feet` `eye` `lid` `head` | a body of its own on the wolf's bones: see "The Drake" below |
+
+What each Path keeps: of the Fox, the Gone-away is lean and looks elsewhere, the Cache-fox
+is hearth-brown with something in its mouth, the Fire-tail carries its tail high with a
+light at the tip; of the Drake, the Hoard is low and long and plated in brass, the
+Fire blood-red with a row of flame down its back, the Sky taller on the leg with its wings
+up.
 
 The look's roles are kept, so the partner's coat goes on: `fur_dark` and `fur_light` on the
-Fox and the Drake (whose ridge, wings and tail-tip are its markings), `hide_red` and
-`fur_cream` on the Stag. Two coat shifts are theirs: `russet` and `brass`.
+Fox and the Drake (whose ridge, wings and tail-tip are its markings). Two coat shifts are theirs: `russet` and `brass`.
 
 **Their gifts** (`python tools/blender/lines_wolfkin.py gifts`): the Fox's brush and its
 foxfire (`fox-tail`, `fox-glow`), the Stag's crown and its long legs (`stag-horn-brow`,
 `stag-long-legs`), the Drake's horns and its tail (`drake-horns`, `drake-tail`).
+
+## The Stag (`tools/blender/lines_stag.py`)
+
+> "some of the figures are just poorly adapted wolf figures. The stag is the most glaring
+> example especially at the higher levels." (owner, 2026-11-12)
+
+**Its anatomy** is a deer's, sound, and nothing of the wolf's is left on it but the bones and
+the clips. The frame is stood as a deer stands before any flesh is laid: the legs lengthened,
+the hind feet brought forward under the hip and the fore feet under the elbow (a wolf stands
+with its hocks out behind it), a narrower track, a longer trunk, a long neck carried at the
+pitch its `stance` names. Then every part is its own: one skin from the back of the skull to
+the rump (a neck deep where it leaves the chest and fine under the jaw, withers, a chest as
+deep as the elbow, a waist tucked up behind it, a croup as high as the withers, falling to
+the tail); a narrow wedge of a head, deep at the jaw and fine at the muzzle, with a dark pad
+to the nose, a pale chin and a pale band behind the nose; eyes at the sides of the head, large
+and dark in a rim of the field's light, each with a lid, a pale ring and a tear-line; great
+cupped ears laid on the wolf's ear bones, so that they flick as its did; legs with a forearm
+and a gaskin, a knee and a hock that show, long cannon bones, a fetlock, a pastern, a cloven
+hoof and dew-claws; a short tail. It is stood by the height a plain deer of its legs carries
+its head at, so a lowered head does not make a larger deer, and its antlers stand above its
+stage's height.
+
+**Three Paths are three deer** (a form's `deer`), in outline as in colour:
+
+| Path | Its deer | Coat | Colour, and where | Its antlers | Its Advancements, and their Finals |
+|---|---|---|---|---|---|
+| Tilter | `red`: the red stag. Heavy before, a maned neck, its head carried low | `russet` | `madder`: its neck darkened as for the rut, its mane, its lower legs | beams swept out, back and up, a brow tine over the face, a crown of points | Locked-horn (thick, wide, a mane; bands on its legs): the Twelve-point, a great stag with the field at every point, and the Scarred Royal, one beam broken off. Long Charge (lean and long in the leg, its antlers laid back, caught in its stride; a stripe down its spine): the Break-line Stag, two broad shovels before its face, and the Ghost-runner, ash-grey and trailing. Belling Stag (a wapiti, its muzzle lifted and its mouth open, long beams with dagger points; its throat): the Oath-crowned, two tall pillars ringed with writing and hung with ribbons, and the Thunder-beller, the widest rack on the line, the air ringing round it |
+| Wood-walker | `wood`: the forest giant. High withers and a sloping back, a long face with a heavy nose, a short thick neck carried level | `moss` | `jade`: moss along its back (a saddle, then a blanket), its lower legs, moss in its antlers | palmate: a palm and its points | Ward-hart (a fallow buck's tall palms, a ring of light hung between them, ivy): the Garden-crowned, a tree of a crown in leaf and flower, and the Bridge-hart, a moose, its palms a room wide and hung with weed, wet to the chest. White Hart (slim, pale as milk, looking somewhere else; dapples of jade): the Hart of Omens, its beams closed round an eye of light, and the Quiet Hart, lying down under antlers that droop like a willow. Thorn-hide (bark in plates along its flank, a knotted crown): the Bramble King, briar and birds in its crown, and the Winter Hart, a frost-white palm hung with ice |
+| Watch-hart | `white`: the white-tail. Slender, a long upright neck, great ears (one turned behind), a flag of a tail carried up | `sand` | `gold`: its breast, its flag and the patch round it, the inside of its ears | beams that come forward round the face like the ribs of a basket, their points standing up | Herd-hart (a shepherd's crook to each beam, a bell, fawn's dapples in gold): the Hart of the Cohort, ribbons at every point, and the Fawn-minder, its head bowed, a roof of antler before it and a small deer of light walking under it. Post-hart (one brow tine long, a lamp hung from it; bands at its knees): the Lamp-crowned, a flame cradled in velvet, and the Stone Hart, slate-grey, its beams thick as stone. Grave Hart (a night coat, grazing, a candle at each point): the Trophy-rack, hung with tokens, and the Hearth Hart, old, maned, a rug on its back |
+
+The Starter is a fawn: all leg, ear and eye, dappled, two buttons where the crown will be.
+
+Five forms leave their Path's coat because their sign is a coat: the Ghost-runner (`ash`),
+the White Hart and the Winter Hart (`frost`), the Hart of Omens (`moon`), the Stone Hart
+(`slate`); and the Grave Hart's three wear `night`. Each still wears its Path's colour.
+
+**Its slots** (`data/genius-bases/stag.json`; the wolf's `spine`, `paws`, `carry` and `aura`
+still grow on it):
+
+| Key | What it is | Styles |
+|---|---|---|
+| `deer` | which deer | `red` `wood` `white` |
+| `stance` | how it carries its neck, made before its flesh is laid, so the neck is round however it is carried | `alert` `proud` `watch` `level` `tilt` `low` `bell` `graze` `sky` `bow` `reach` |
+| `build` | the frame: `legs` `neck` `body`; the flesh: `chest` `girth` `waist` `nape` `head` `muzzle` `ears` `withers` `croup` `hooves` `antlers` | |
+| `crown` | the shape of its antlers (the table `ANTLERS`: a beam, its tines, a palm, a break); a Path's is three fifths the size, an Advancement's five sixths | `bumps` and the racks of the table |
+| `horn` | what they are made of | `bone` `velvet` `stone` `ice` `dark` `wood` `pale` |
+| `hung` | what is in them | `points` `moss` `leaves` `flowers` `weed` `briar` `birds` `lamp` `flame` `ring` `halo` `script` `ribbons` `tokens` `icicles` `lichen` `candles` `eye` `cloth` `fawnlight` |
+| `marks` | where it wears its Path's colour (a step of it after a colon) | its own skin painted: `neck` `nape` `throat` `bib` `saddle` `blanket` `dorsal` `stripes` `rump` `belly` `stockings` `socks` `bands` `blaze` `mask` `ears` `tail` `tines` `palms`; laid on it: `dapple` `burrs`; `mane` (its mane takes the colour) |
+| `ears` `eyes` `tail` `maw` | | `one` `laid` `droop` `torn`; `far` `old` `third` `shut`; `flag` `down` `stub`; `open` |
+| `neck` `throat` `breath` `hide` `back` `legs` `flank` `armor` | | `mane` `bell` `ivy` `garland` `teeth`; `sac`; `wisp` `trail`; `bark`; `moss` `spots`; `mould` `knees` `wet` `feather`; `hands`; `brow` `scars` |
+| `pose` | a turn of the head, put on last | `low` `high` `nod` `back` `aside` `tilt` |
+| `rest` | the Wolf's ways of resting that a deer has | `stride` `point` `lie` |
+
+The look's roles are kept, so the partner's coat goes on: `hide_red` and `fur_cream` (its
+underside, the inside of its legs, the patch round its tail, its throat, its chin), and the
+four markings (`mark_socks` below the knee and hock, `mark_mask` down the face, `mark_saddle`
+along the back, `mark_tailtip`).
+
+**What moves**: its ears, tail and legs by the borrowed clips. By name: its eyes blink; a lamp
+and a bell sway on a hook of their own (plumb when it lies down); ribbons sway; a flame, the
+candles and its breath gutter; a ring of light and the small deer of light rise and fall; a
+swollen throat, the eye in a crown and the third eye breathe; the birds in the Bramble King's
+crown look about.
+
+**Its gifts** are still made by `lines_wolfkin.py gifts` (`stag-horn-brow`, `stag-long-legs`),
+from the old antler table there.
 
 ## The Octopus (`tools/blender/lines_octopus.py`)
 
@@ -1291,12 +1368,22 @@ page.
   one goes through the floor. The Shade-friend is pale for its Path and is the one form the
   colour check still puts elsewhere at some sizes. Faces read as eyes and marks; at a
   thumbnail the lids' angle (which is what makes the three Paths' looks) is two pixels.
-- **Every other line on the wolf's rig** (Fox, Stag, the Hawk's three Harriers; the Drake
-  has had a body of its own since 2026-11-11, so what is said of it here is the old one):
+- **Every other line on the wolf's rig** (Fox, the Hawk's three Harriers; the Drake has had a
+  body of its own since 2026-11-11, so what is said of it here is the old one, and the Stag
+  since 2026-11-12: "The Stag"):
   one wolf reshaped. Outlines change by proportion, carriage and what is grown; none has a
   skeleton or clips of its own. The Drake is the weakest for it: its legs and chest are a
   wolf's, so the Sky path can read as a winged hound, and its wings do not beat. The
   Harriers read as small griffins, not hawks on foot.
+- **The Stag** (after its rebuild): it still walks by the wolf's clips, and a deer's foreleg
+  on them is one stiff piece from the elbow down (the knee is modelled and does not bend). Its
+  lying down (the Quiet Hart) is a dog's, forelegs out in front, where a deer folds them under.
+  The kit's old base body for the silhouette (`beast-crowned`, in `genius_kit.py`) is still the
+  wolf reshaped: it is the donor of the clips and is what a form with no model would wear.
+  The Break-line Stag is the smallest Final in its cell (its shovels are forward of it). The
+  bark of the Thorn-hide reads as shards, not bark. Manes are locks in two colours and are
+  heavy at a thumbnail. Antler shapes were tuned from one camera; from behind, the racks that
+  come forward (the Watch-hart's) hide the head.
 - **Dark on dark.** A night coat on a dark ground: the Imp's
   Night-clerk, Lights-out Imp, Bondsman and Whipping-imp; the Drake's Lamp-hoarder,
   Slag-jaw, Smoke-drake, Chimney-wyrm and Wing-shadow; bows and the Smoke-pole branch at night.
@@ -1304,7 +1391,7 @@ page.
   Road-shield is plain. Gauntlet: Catching Hand and Iron Palm. Hawk: the eleven of the
   High Circler's path, all on the wing. Sprite and Homunculus: Shoulder-mender, Clay
   Stand-in, Ward-builder, Weather-sprite. Fox: Gone-away, Listening Fox, Snow-pouncer;
-  Marsh-light beside Fire-tail. Stag: Tilter, Long Charge, the Watch-hart. Fiend:
+  Marsh-light beside Fire-tail. Fiend:
   Flare-up, Pyre-dancer and Brush-burner are one imp in three moods; Oath-scorch, Mark of
   the Sworn and Vendetta differ by what they wear. Ember: Kept Fire, Circle-flame,
   Tempering Flame. Bow: Omen-bow, The Twitch, Oath-bow.
