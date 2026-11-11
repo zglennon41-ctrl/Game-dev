@@ -232,7 +232,7 @@ func _build_chamber() -> void:
 		bm.size = Vector3(0.3, 0.12, 2.4)
 		b.mesh = bm
 		b.position = Vector3(tx, 0.1, 0)
-		b.material_override = tie
+		_made(b, "wood_timber", Color(0.22, 0.15, 0.1))
 		_place_root.add_child(b)
 		tx += 0.8
 	for rz in [-0.72, 0.72]:
@@ -241,7 +241,7 @@ func _build_chamber() -> void:
 		rm.size = Vector3(hw * 2.0, 0.12, 0.1)
 		r.mesh = rm
 		r.position = Vector3(0, 0.2, rz)
-		r.material_override = rail
+		_made(r, "iron_metal", Color(0.42, 0.4, 0.38))
 		_place_root.add_child(r)
 	# Walls on the long sides, with pillars, arches, and torches.
 	var kinds := ["wall", "wall_pillar", "wall_cracked", "wall_arched", "wall", "wall_broken", "wall_pillar"]
@@ -1739,6 +1739,15 @@ func impact(at: Vector3, color: Color, size := 0.7) -> void:
 	tw.set_parallel(true)
 	tw.tween_property(mi, "scale", Vector3.ONE * size, secs).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	tw.tween_property(m, "albedo_color:a", 0.0, secs * 1.1)
+	# the blow lights what is about it for as long as its star lasts
+	var lit := OmniLight3D.new()
+	lit.light_color = color
+	lit.light_energy = 2.2 * size
+	lit.omni_range = 3.2 + size
+	lit.omni_attenuation = 1.6
+	lit.shadow_enabled = false
+	mi.add_child(lit)
+	tw.tween_property(lit, "light_energy", 0.0, secs * 1.6).set_ease(Tween.EASE_OUT)
 	tw.chain().tween_callback(mi.queue_free)
 
 ## Dust kicked up: a few soft blots, in the dust's colour, that swell and thin.
@@ -3642,6 +3651,15 @@ func _update_cutaway() -> void:
 			hide = hide or rel.dot(w["out2"]) > -1.4
 		(w["upper"] as Node3D).visible = not hide
 
+## A piece the game makes itself (a tie, a rail), given the same look as the kits': a named
+## material, so that it is of its class, on its ramp, banded and grained like everything else.
+func _made(mi: MeshInstance3D, material: String, color: Color) -> void:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = color
+	m.resource_name = material
+	(mi.mesh as PrimitiveMesh).material = m
+	toonify(mi, true)
+
 ## The line itself: ties and two rails across the place.
 func _rails(hw: float, from := -INF) -> void:
 	var tie := _mat(Color(0.22, 0.15, 0.1))
@@ -3656,7 +3674,7 @@ func _rails(hw: float, from := -INF) -> void:
 		var b := MeshInstance3D.new()
 		b.mesh = bm
 		b.position = Vector3(tx, 0.1, 0)
-		b.material_override = tie
+		_made(b, "wood_timber", Color(0.22, 0.15, 0.1))
 		_place_root.add_child(b)
 		tx += 0.8
 	for rz in [-0.72, 0.72]:
@@ -3665,7 +3683,7 @@ func _rails(hw: float, from := -INF) -> void:
 		var r := MeshInstance3D.new()
 		r.mesh = rm
 		r.position = Vector3((hw + x0) / 2.0, 0.2, rz)
-		r.material_override = rail
+		_made(r, "iron_metal", Color(0.42, 0.4, 0.38))
 		_place_root.add_child(r)
 
 func _torch(at: Vector3, rot: float) -> void:

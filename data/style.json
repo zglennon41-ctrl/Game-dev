@@ -134,7 +134,7 @@
     "occlusion": 0.8,
     "keyRim": 0.45,
     "place": { "macro": 0.3, "macroScale": 0.09, "macroGrain": "fog", "foot": 0.32, "footHeight": 0.7, "sway": 0.035 },
-    "contact": { "people": 0.5, "props": 0.42 },
+    "contact": { "people": 0.58, "props": 0.45 },
     "smooth": { "living": true, "made": false }
   },
   "ink": {
