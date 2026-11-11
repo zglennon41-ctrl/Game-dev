@@ -1060,4 +1060,4 @@ is most of it. Whiskers are thin, and at a distance the ink makes dark lines of 
 Skimmer's wings are flat, so it is posed banking; level, from in front, they are edge-on. The
 wave at the Shoal-head's head can read as a hoop. A great carp's mantle of light stands off
 its back: the game sets it by height, and a fish is long and low. Its face is its lids: the
-eyes do not turn to look at anything. Scales are two tones of the coat, not a texture.
+eyes do not turn to look at anything. The game's grain lays round scales on the fins as on the body (a fin is the coat's trim, and is named for it). By colour the Under-the-Ice reads as a Silt-reader: its floe is the largest thing in its picture, and it is slate.
