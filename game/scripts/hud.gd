@@ -327,6 +327,10 @@ func _ready() -> void:
 	_left.add_theme_constant_override("margin_top", 60)
 	_left.add_theme_constant_override("margin_bottom", 60)
 	screen.add_child(_left)
+	# Both holders fill the screen and one lies over the other: neither may take the mouse, or
+	# the buttons of whichever is underneath cannot be clicked.
+	_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	screen_box.custom_minimum_size = Vector2(640, 0)
 	screen_box.add_theme_constant_override("separation", 10)
 	_center.add_child(screen_box)

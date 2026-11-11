@@ -10,6 +10,9 @@ config_version=5
 
 [application]
 
+boot_splash/show_image=false
+boot_splash/bg_color=Color(0.027, 0.024, 0.02, 1)
+
 config/name="WILDLINE"
 config/description="The pulse room: an Anchor, a cut-wolf, the beat."
 run/main_scene="res://game/scenes/main.tscn"
