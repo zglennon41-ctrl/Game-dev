@@ -98,7 +98,7 @@
     ],
     "hold": "v",
     "flap": "beat",
-    "pitch": 34,
+    "pitch": 52,
     "pattern": [
      "bars",
      "singe"
@@ -119,6 +119,7 @@
      "big",
      1.0
     ],
+    "brow": "keen",
     "aura": [
      "dust",
      1.0
@@ -153,7 +154,7 @@
        "l",
        1.0
       ],
-      "pitch": 22,
+      "pitch": 44,
       "pattern": [
        "bars",
        "singe",
@@ -194,7 +195,7 @@
         ],
         "hold": "flat",
         "flap": "glide",
-        "pitch": 62,
+        "pitch": 66,
         "burn": null,
         "pattern": [
          "ash",
@@ -322,7 +323,7 @@
         ],
         "hold": "flat",
         "flap": "glide",
-        "pitch": 66,
+        "pitch": 68,
         "pattern": [
          "tiger"
         ],
@@ -405,7 +406,7 @@
       ],
       "hold": "v",
       "flap": "beat",
-      "pitch": 8,
+      "pitch": 24,
       "pattern": [
        "bars"
       ],
@@ -449,7 +450,7 @@
        "body": {
         "hold": "back",
         "flap": "still",
-        "pitch": 40,
+        "pitch": 48,
         "pattern": [
          "bars",
          "skull"
@@ -459,7 +460,7 @@
          "bee",
          1.5
         ],
-        "perch": [
+        "carry": [
          "comb",
          1.0
         ],
@@ -547,7 +548,7 @@
     ],
     "hold": "flat",
     "flap": "glide",
-    "pitch": 68,
+    "pitch": 70,
     "pattern": [
      "rings",
      "eyes"
@@ -568,6 +569,7 @@
      "big",
      1.0
     ],
+    "brow": "stern",
     "accent": "amethyst",
     "coat": "slate",
     "build": {
@@ -671,19 +673,14 @@
        },
        "body": {
         "wings": [
-         "owl",
+         "lintel",
          1.0
         ],
         "hold": "spread",
         "flap": "still",
         "pitch": 90,
         "pattern": [
-         "owl",
          "ward"
-        ],
-        "perch": [
-         "lintel",
-         1.0
         ],
         "build": {
          "span": 1.25,
@@ -715,7 +712,7 @@
       ],
       "hold": "shut",
       "flap": "still",
-      "pitch": 76,
+      "pitch": 62,
       "pattern": [
        "bark",
        "peek"
@@ -759,7 +756,7 @@
        "body": {
         "hold": "flash",
         "flap": "glide",
-        "pitch": 60,
+        "pitch": 64,
         "pattern": [
          "bark",
          "flash"
@@ -794,15 +791,16 @@
         }
        },
        "body": {
-        "hold": "press",
-        "pitch": 90,
-        "pattern": [
-         "wall"
-        ],
-        "perch": [
+        "wings": [
          "wall",
          1.0
         ],
+        "hold": "press",
+        "pitch": 88,
+        "pattern": [
+         "wall"
+        ],
+        "perch": null,
         "feelers": [
          "thread",
          1.4
@@ -866,7 +864,7 @@
        },
        "body": {
         "hold": "offer",
-        "pitch": 64,
+        "pitch": 66,
         "pattern": [
          "rings",
          "windows",
@@ -900,7 +898,7 @@
         ],
         "hold": "droop",
         "flap": "still",
-        "pitch": 88,
+        "pitch": 86,
         "pattern": [
          "rings",
          "worn"
@@ -958,7 +956,7 @@
     ],
     "hold": "v",
     "flap": "glide",
-    "pitch": 26,
+    "pitch": 56,
     "pattern": [
      "moon",
      "costa"
@@ -983,6 +981,7 @@
      "big",
      1.0
     ],
+    "brow": "calm",
     "accent": "jade",
     "coat": "moon",
     "build": {
@@ -1013,7 +1012,7 @@
       ],
       "hold": "hang",
       "flap": "glide",
-      "pitch": 90,
+      "pitch": 88,
       "pattern": [
        "white",
        "hem"
@@ -1096,7 +1095,7 @@
        },
        "body": {
         "hold": "v",
-        "pitch": 30,
+        "pitch": 40,
         "pattern": [
          "white",
          "edge"
@@ -1131,7 +1130,7 @@
      },
      "body": {
       "hold": "swept",
-      "pitch": 6,
+      "pitch": 22,
       "tails": [
        "stream",
        3.4
@@ -1162,7 +1161,7 @@
        },
        "body": {
         "hold": "dart",
-        "pitch": -34,
+        "pitch": -30,
         "tails": [
          "burn",
          2.6
@@ -1198,7 +1197,7 @@
        },
        "body": {
         "hold": "flat",
-        "pitch": 78,
+        "pitch": 76,
         "tails": [
          "twist",
          0.8
@@ -1244,7 +1243,7 @@
       ],
       "hold": "tee",
       "flap": "glide",
-      "pitch": 82,
+      "pitch": 80,
       "pattern": [
        "ink"
       ],
@@ -1322,15 +1321,11 @@
          "chart",
          1.0
         ],
-        "hold": "table",
+        "hold": "spread",
         "flap": "still",
-        "pitch": 0,
+        "pitch": 62,
         "pattern": [
          "chart"
-        ],
-        "perch": [
-         "table",
-         1.0
         ],
         "carry": [
          "dividers",
