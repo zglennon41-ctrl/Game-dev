@@ -51,7 +51,25 @@
   "features": [
    "dial",
    "sight-glass"
-  ]
+  ],
+  "body": {
+   "plate": [
+    "disc",
+    0.8
+   ],
+   "rete": "ticks",
+   "arms": [
+    "rule"
+   ],
+   "face": [
+    "eye",
+    1.5
+   ],
+   "carry": [
+    "fob"
+   ],
+   "held": 0.14
+  }
  },
  "paths": [
   {
@@ -72,6 +90,26 @@
    "features": [
     "far-eyes"
    ],
+   "body": {
+    "plate": [
+     "disc",
+     0.9
+    ],
+    "rete": "fret",
+    "arms": [
+     [
+      "lens",
+      1.0
+     ],
+     "tube"
+    ],
+    "carry": null,
+    "face": [
+     "eye",
+     1.1
+    ],
+    "held": 0.22
+   },
    "prongs": [
     {
      "id": "astrolabe-rangefinder",
@@ -91,6 +129,24 @@
      "features": [
       "gears"
      ],
+     "body": {
+      "plate": [
+       "sector",
+       1.0
+      ],
+      "rete": null,
+      "arms": [
+       [
+        "pointer",
+        1.0
+       ],
+       "tube"
+      ],
+      "carry": [
+       "gears"
+      ],
+      "held": 0.3
+     },
      "finishes": [
       {
        "id": "astrolabe-dead-reckoner",
@@ -109,7 +165,30 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "plate": [
+         "sector",
+         1.15
+        ],
+        "arms": [
+         [
+          "pointer",
+          1.0
+         ],
+         "tube",
+         "dividers"
+        ],
+        "carry": [
+         "gears",
+         "dial2"
+        ],
+        "face": [
+         "lids",
+         1.2
+        ],
+        "held": 0.42
+       }
       },
       {
        "id": "astrolabe-long-sight",
@@ -128,7 +207,25 @@
        },
        "features": [
         "wings"
-       ]
+       ],
+       "body": {
+        "arms": [
+         [
+          "long-tube",
+          1.25
+         ],
+         [
+          "pointer",
+          1.0
+         ]
+        ],
+        "wings": [
+         "vanes",
+         1.2
+        ],
+        "carry": null,
+        "held": 0.42
+       }
       }
      ]
     },
@@ -150,6 +247,21 @@
      "features": [
       "ring"
      ],
+     "body": {
+      "plate": [
+       "rings",
+       1.0
+      ],
+      "rete": null,
+      "arms": [
+       [
+        "lens",
+        0.9
+       ],
+       "bead"
+      ],
+      "held": 0.28
+     },
      "finishes": [
       {
        "id": "astrolabe-chain-plotter",
@@ -168,7 +280,24 @@
        },
        "features": [
         "pulse"
-       ]
+       ],
+       "body": {
+        "plate": [
+         "rings",
+         1.15
+        ],
+        "arms": [
+         "bead",
+         "pantograph"
+        ],
+        "carry": [
+         [
+          "lines",
+          1.2
+         ]
+        ],
+        "held": 0.4
+       }
       },
       {
        "id": "astrolabe-windage",
@@ -187,7 +316,19 @@
        },
        "features": [
         "standing-air"
-       ]
+       ],
+       "body": {
+        "plate": [
+         "rings",
+         1.1
+        ],
+        "carry": [
+         "vane",
+         "cups",
+         "telltales"
+        ],
+        "held": 0.42
+       }
       }
      ]
     },
@@ -209,6 +350,28 @@
      "features": [
       "wings"
      ],
+     "body": {
+      "plate": [
+       "disc",
+       0.9
+      ],
+      "rete": "fret",
+      "arms": [
+       [
+        "lens",
+        0.9
+       ]
+      ],
+      "wings": [
+       "leaves",
+       1.0
+      ],
+      "face": [
+       "eye",
+       1.3
+      ],
+      "held": 0.28
+     },
      "silhouette": "engine-flier",
      "finishes": [
       {
@@ -229,6 +392,18 @@
        "features": [
         "voice"
        ],
+       "body": {
+        "wings": [
+         "leaves",
+         1.4
+        ],
+        "arms": null,
+        "carry": [
+         "eyes3",
+         "trumpet"
+        ],
+        "held": 0.4
+       },
        "silhouette": "engine-flier"
       },
       {
@@ -249,6 +424,19 @@
        "features": [
         "lantern"
        ],
+       "body": {
+        "wings": [
+         "glider",
+         1.3
+        ],
+        "arms": [
+         "long-tube"
+        ],
+        "carry": [
+         "headlamp"
+        ],
+        "held": 0.4
+       },
        "silhouette": "engine-flier"
       }
      ]
@@ -276,6 +464,25 @@
    "features": [
     "ring"
    ],
+   "body": {
+    "plate": [
+     "sphere",
+     0.85
+    ],
+    "rete": null,
+    "arms": null,
+    "rings": [
+     "orbit",
+     0.9
+    ],
+    "face": [
+     "eye",
+     1.2
+    ],
+    "carry": null,
+    "held": 0.24,
+    "coat": "moon"
+   },
    "prongs": [
     {
      "id": "astrolabe-tell-reader",
@@ -295,6 +502,27 @@
      "features": [
       "watching-eye"
      ],
+     "body": {
+      "plate": [
+       "sphere",
+       1.05
+      ],
+      "rings": [
+       "orbit",
+       0.72
+      ],
+      "arms": [
+       [
+        "needle",
+        1.1
+       ]
+      ],
+      "face": [
+       "lids",
+       1.3
+      ],
+      "held": 0.32
+     },
      "finishes": [
       {
        "id": "astrolabe-half-beat",
@@ -313,7 +541,18 @@
        },
        "features": [
         "pulse"
-       ]
+       ],
+       "body": {
+        "rings": [
+         "orbit",
+         1.0
+        ],
+        "arms": null,
+        "carry": [
+         "escapement"
+        ],
+        "held": 0.42
+       }
       },
       {
        "id": "astrolabe-slow-circle",
@@ -332,7 +571,21 @@
        },
        "features": [
         "gears"
-       ]
+       ],
+       "body": {
+        "rings": [
+         [
+          "orbit",
+          0.8
+         ],
+         [
+          "ellipse",
+          1.3
+         ]
+        ],
+        "arms": null,
+        "held": 0.45
+       }
       }
      ]
     },
@@ -354,6 +607,25 @@
      "features": [
       "broad-guard"
      ],
+     "body": {
+      "plate": [
+       "shield",
+       1.0
+      ],
+      "rete": "hours",
+      "rings": null,
+      "arms": [
+       "hands"
+      ],
+      "carry": [
+       "foot"
+      ],
+      "face": [
+       "eye",
+       1.2
+      ],
+      "held": 0.3
+     },
      "finishes": [
       {
        "id": "astrolabe-armillary",
@@ -372,7 +644,21 @@
        },
        "features": [
         "shell"
-       ]
+       ],
+       "body": {
+        "plate": [
+         "sphere",
+         1.15
+        ],
+        "rete": null,
+        "rings": [
+         "cage",
+         1.2
+        ],
+        "arms": null,
+        "carry": null,
+        "held": 0.5
+       }
       },
       {
        "id": "astrolabe-sentry-sphere",
@@ -391,7 +677,27 @@
        },
        "features": [
         "dark-eyed"
-       ]
+       ],
+       "body": {
+        "plate": [
+         "globe",
+         1.1
+        ],
+        "rete": null,
+        "rings": [
+         "horizon",
+         1.2
+        ],
+        "arms": null,
+        "carry": [
+         "striker"
+        ],
+        "face": [
+         "dark",
+         1.3
+        ],
+        "held": 0.45
+       }
       }
      ]
     },
@@ -413,6 +719,25 @@
      "features": [
       "current"
      ],
+     "body": {
+      "plate": [
+       "wave",
+       1.0
+      ],
+      "rete": "fret",
+      "rings": null,
+      "arms": [
+       "rule"
+      ],
+      "carry": [
+       "moon"
+      ],
+      "face": [
+       "eye",
+       1.1
+      ],
+      "held": 0.3
+     },
      "finishes": [
       {
        "id": "astrolabe-eclipse",
@@ -431,7 +756,22 @@
        },
        "features": [
         "shadow-cloak"
-       ]
+       ],
+       "body": {
+        "plate": [
+         "eclipse",
+         1.15
+        ],
+        "rete": null,
+        "arms": null,
+        "carry": null,
+        "coat": "night",
+        "face": [
+         "dark",
+         1.0
+        ],
+        "held": 0.4
+       }
       },
       {
        "id": "astrolabe-tide-clock",
@@ -450,7 +790,28 @@
        },
        "features": [
         "fins"
-       ]
+       ],
+       "body": {
+        "plate": [
+         "wave",
+         1.2
+        ],
+        "rete": "hours",
+        "arms": [
+         "tide-hands"
+        ],
+        "wings": [
+         "fins",
+         1.0
+        ],
+        "carry": [
+         [
+          "moon",
+          1.2
+         ]
+        ],
+        "held": 0.45
+       }
       }
      ]
     }
@@ -474,6 +835,21 @@
    "features": [
     "pages"
    ],
+   "body": {
+    "plate": [
+     "book",
+     1.0
+    ],
+    "rete": null,
+    "arms": null,
+    "face": [
+     "eye",
+     1.1
+    ],
+    "carry": null,
+    "held": 0.24,
+    "coat": "hearth"
+   },
    "prongs": [
     {
      "id": "astrolabe-line-almanac",
@@ -493,6 +869,13 @@
      "features": [
       "ledger"
      ],
+     "body": {
+      "plate": [
+       "strip",
+       1.0
+      ],
+      "held": 0.34
+     },
      "finishes": [
       {
        "id": "astrolabe-timetable",
@@ -511,7 +894,17 @@
        },
        "features": [
         "gears"
-       ]
+       ],
+       "body": {
+        "plate": [
+         "board",
+         1.0
+        ],
+        "carry": [
+         "gears"
+        ],
+        "held": 0.5
+       }
       },
       {
        "id": "astrolabe-surveyors-disc",
@@ -530,7 +923,17 @@
        },
        "features": [
         "set-feet"
-       ]
+       ],
+       "body": {
+        "plate": [
+         "table",
+         1.0
+        ],
+        "carry": [
+         "plumb"
+        ],
+        "held": 0.5
+       }
       }
      ]
     },
@@ -552,6 +955,13 @@
      "features": [
       "ledger-closed"
      ],
+     "body": {
+      "plate": [
+       "case",
+       1.0
+      ],
+      "held": 0.28
+     },
      "finishes": [
       {
        "id": "astrolabe-notarys-sphere",
@@ -570,7 +980,17 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "plate": [
+         "ball",
+         1.0
+        ],
+        "carry": [
+         "stamp"
+        ],
+        "held": 0.4
+       }
       },
       {
        "id": "astrolabe-fixed-star",
@@ -589,7 +1009,18 @@
        },
        "features": [
         "crown"
-       ]
+       ],
+       "body": {
+        "plate": [
+         "rose",
+         1.1
+        ],
+        "carry": [
+         "star",
+         "crown"
+        ],
+        "held": 0.42
+       }
       }
      ]
     },
@@ -611,6 +1042,24 @@
      "features": [
       "old-eyes"
      ],
+     "body": {
+      "plate": [
+       "worn",
+       1.0
+      ],
+      "arms": [
+       "broken-hand"
+      ],
+      "face": [
+       "lids",
+       1.3
+      ],
+      "carry": [
+       "cord"
+      ],
+      "coat": "ash",
+      "held": 0.3
+     },
      "finishes": [
       {
        "id": "astrolabe-old-sky",
@@ -629,7 +1078,17 @@
        },
        "features": [
         "quiet-place"
-       ]
+       ],
+       "body": {
+        "plate": [
+         "dome",
+         1.2
+        ],
+        "coat": "night",
+        "arms": null,
+        "carry": null,
+        "held": 0.5
+       }
       },
       {
        "id": "astrolabe-deep-chart",
@@ -648,7 +1107,21 @@
        },
        "features": [
         "tunnel-ear"
-       ]
+       ],
+       "body": {
+        "plate": [
+         "chart",
+         1.2
+        ],
+        "arms": [
+         "dividers"
+        ],
+        "carry": [
+         "plumb"
+        ],
+        "coat": "hearth",
+        "held": 0.5
+       }
       }
      ]
     }

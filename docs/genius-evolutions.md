@@ -379,3 +379,95 @@ afterglow and its small hands in cuffs of petals; the Homunculus's maker's hands
 than the arm they are on, and its brush. A hybrid's form that wears a body of the base it
 turned toward is not hung with that base's gift: the body has it already.
 
+
+## The items of power: the Lantern, the Astrolabe, the Bell
+
+`tools/blender/lines_items.py`. An item is an instrument, and every form of it is a
+different instrument: a hand-lamp, a miner's lamp, a lamp on a post, a stove; a pocket disc,
+a frame with a scale along its rim, a cage of hoops, a fan of plates; a hand-bell, a bell
+in a frame, a clock with a bell on it, a horn. Each of a base's three Paths has a look of
+its own that the forms below it keep: the Lantern's are the round dark-lantern with one
+great lens (Wayfinder), the low lamp under a brim that sits up late (Watch-lamp) and the
+cup with a canopy over its flame (Kept Flame); the Astrolabe's are the disc with an arm
+and a glass (Sighting-glass), rings inside rings (Orrery) and plates fanned like pages
+(Almanac); the Bell's are the bell on a stock and a rope (Rally-bell), the bell on a clock
+(Hour-bell) and the bell turned mouth-forward, with teeth (Alarm-bell).
+
+**It is alive.** Every form has an eye of the field set in its metal, lidded in its own
+stuff (a heavy lid for one that is old or sits up late; two, either side of the mouth, on a
+bell turned mouth-forward). The Lantern walks on legs it has grown.
+
+**Its coat.** The metals are its partner's coat (the roles of the silhouette the form is
+drawn as, in `data/genius-looks.json`). A lantern's and an astrolabe's main metal is the
+coat's first; a bell is cast in the coat's *third* (the brass of an iron-and-brass coat,
+the copper of a blued one) and hung in ironwork of its first. Glass, enamel, wax, rope,
+wood, cloth and a bell's teeth keep colours of their own, so that they read on any coat. A
+turned thing is shaded round with crisp rims; a cut or forged thing keeps its planes; cloth
+(a cape, a hood) is a sheet with a thickness, so that it has two faces.
+
+**Each Path wears the coat its own way** (`coat`, a shift), so that a line can be told by
+its colour before its shape: of the Lantern, the Wayfinder keeps the coat as it was born
+(its water forms and the Deep-light in blue steel, `iron`), the Watch-lamp wears it as
+copper (`hearth`), the Kept Flame as silver (`moon`); of the Astrolabe, the Sighting-glass
+as born, the Orrery pale (`moon`), the Almanac the brown of a bound book (`hearth`); of the
+Bell, the Rally-bell bronze as born, the Hour-bell silver (`frost`), the Alarm-bell red
+(`blood`). A final form may still wear its own where its sign says so (the Watch-bell is a
+dark bronze that shows no shine at night; the Passing-bell is one cold note).
+
+**It can be carried.** Every model has an empty named `carry` where a hand or a hook takes
+it: the lantern's ring, the ring on the astrolabe's throne, the bell's handle or the ring
+on its stock. `carry` is never turned and the instrument always hangs *below* it, upright,
+facing the way the body faces; so the game hangs any form of any of the three from a hand,
+a belt or a bracket by putting `carry` there, without knowing which form it is. How tall
+it is in the hand is the form's `held` (metres, in its `body`: a pocket astrolabe 0.14, a
+Tenor 0.55); as a body in the world it stands at its stage's height by `ref_top` like any
+other.
+
+**The Lantern's body** (a lamp, and how it holds itself up):
+
+| Key | What it is | Styles |
+|---|---|---|
+| `vessel` | the lamp's own frame | `box` `hex` `oct` `drum` (closed behind) `safety` (glass in a guard, gauze above) `globe` `font` (an oil lamp) `dome` `cup` `glasshouse` `belly` (a stove) `column` `pyramid` |
+| `roof` | | `cap` `vent` `hood` `gauze` `brim` `pagoda` `dome` `crown` `battlement` `ball` `chimney` `canopy` `spike` `rays` `none` |
+| `glass` | what stands between you and the flame | `bars` `cage` `lens` `shutter` `portholes` `pierced` `gem` `hood` `signals` (a green glass and a red) |
+| `flame` | | `candle` `heart` `low` `tall` `clear` `star` `cold` `root` `points` `coal` `flat` |
+| `stand` | how it holds itself up | `legs` `stride` `four` `stilts` `crab` `fold` `bow`; `arm` `neck` `post` `mast` `stem` `float`; `keeper` (it grew one to carry it); `none` (it left its glass behind) |
+| `feet` | | `claw` `flat` `web` `ball` |
+| `keeper` | how the keeper holds it | `plain` `veiled` (high, and a little behind) `both` |
+| `face` | where it is alive | `eye` `lids` `lens` (its lens is its eye) `gauge` `none` |
+| `carry` | what it has been given | `ring` `hoops` `halo` `lens-arm` `scale` `reflector` `rods` `cloak` `rag` `mirror` `scroll` `seals` `pilot` `book` `shade` `wide-shade` `kettle` `door` `gallery` `semaphore` `chain` `paddles` `reeds` `pendulum` `clock` `taper` `yoke` |
+| `build` | | `w` `h` (the lamp's width and height) `head` (the whole lamp) `legs` `girth` `float` `tower` `curious` (how far its flame leans to what it is looking at) |
+
+**The Astrolabe's body** (a plate about a pin, and what it measures with):
+
+| Key | What it is | Styles |
+|---|---|---|
+| `plate` | the instrument's own body | `disc` `sector` `rings` `sphere` `globe` `shield` `wave` `eclipse` `book` `strip` `board` `table` `case` `ball` `rose` `worn` `dome` `chart` |
+| `rete` | what lies over a disc | `ticks` `fret` `hours` |
+| `arms` | | `rule` `lens` `tube` `long-tube` `pointer` `bead` `needle` `hands` `tide-hands` `dividers` `pantograph` `broken-hand` |
+| `rings` | what turns round it | `orbit` `cage` `ellipse` `horizon` |
+| `wings` | | `leaves` and `glider` (they beat) `vanes` `fins` |
+| `face` | | `eye` `lids` `dark` `none` |
+| `carry` | | `fob` `gears` `dial2` `plumb` `lines` `vane` `cups` `telltales` `eyes3` `trumpet` `headlamp` `escapement` `foot` `striker` `moon` `stamp` `star` `crown` `cord` |
+
+**The Bell's body** (a bell, how it is hung, what it is rung with):
+
+| Key | What it is | Styles |
+|---|---|---|
+| `bell` | its casting | `hand` `ship` `pot` `tower` `great` `gong` `flare` `barrel` `long` `tall`; `horn` (it is a horn now) |
+| `pose` | how it is turned | `hang` `swing` (an angle); `forward` (its mouth to the front: 1 is level) |
+| `hang` | what holds it | `handle` `yoke` `frame` `cradle` `hook` `crane` `wheel` `beam` (eight small bells along it) `headstock` `clock` `belfry` `post` `float` `tower` `none` |
+| `tongue` | | `trembling` `ball` `fist` `long` `row` `none` |
+| `face` | | `eye` `lids` `none` |
+| `carry` | | on the bell: `teeth` `band` `bumps` `dent` `marks` `brow` `horns` `studs` `inscription` `plaques` `verdigris` `drops` `icicles` `ribbons` `doors` `sight` `fin` `chains` `selector`; with it: `rope` `foot` `lamp` `pennons` `scroll` `abacus` `ladle` `sound` `cushion` `mallet` `tags` `taper` `soot` `hourglass` `cowl` `post-lamp` `fork` `damper` `dish` `line` `hammers` `topmark` `chain` `ghosts` `hammer` `anvil` `smiths` `cloud` `bolts` |
+| `build` | | `tilt` (it rides a swell that is not there) |
+
+**Their gifts** (what a hybrid of one of them wears, `python tools/blender/lines_items.py
+gifts`): the Lantern's is a caged lamp a hand tall, hung at the light's socket; the Bell's a
+bell at the throat (the `bell` feature hangs at `socket_throat`, `data/genius-bodies.json`)
+with rings of sound going out before it (`voice`); the Astrolabe's a band of brass across
+the brow with a great lens (`far-eyes`) and its works worn at the breast (`gears`).
+
+`godot --headless --path . -s res://game/tests/check_items.gd` holds all ninety-three to
+this: a model of its own, `ref_top`, `carry`, the usual sockets, a light of the field, its
+feet on the ground, a `held` size, under 80 KB; it ends "items: 93 forms, all good".

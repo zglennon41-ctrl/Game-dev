@@ -51,7 +51,27 @@
   "features": [
    "bell",
    "voice"
-  ]
+  ],
+  "body": {
+   "bell": [
+    "hand",
+    1.0
+   ],
+   "pose": [
+    "hang",
+    -0.1
+   ],
+   "hang": "handle",
+   "tongue": [
+    "trembling",
+    1.0
+   ],
+   "face": [
+    "eye",
+    1.3
+   ],
+   "held": 0.2
+  }
  },
  "paths": [
   {
@@ -75,6 +95,29 @@
    "features": [
     "ring"
    ],
+   "body": {
+    "bell": [
+     "ship",
+     1.0
+    ],
+    "pose": [
+     "swing",
+     0.3
+    ],
+    "hang": "yoke",
+    "tongue": [
+     "ball",
+     1.0
+    ],
+    "carry": [
+     "rope"
+    ],
+    "face": [
+     "eye",
+     1.0
+    ],
+    "held": 0.3
+   },
    "prongs": [
     {
      "id": "bell-muster-bell",
@@ -94,6 +137,22 @@
      "features": [
       "set-feet"
      ],
+     "body": {
+      "hang": "frame",
+      "pose": [
+       "hang",
+       0.0
+      ],
+      "bell": [
+       "ship",
+       1.1
+      ],
+      "carry": [
+       "rope",
+       "foot"
+      ],
+      "held": 0.4
+     },
      "finishes": [
       {
        "id": "bell-convoy-bell",
@@ -112,7 +171,24 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "hang": "cradle",
+        "pose": [
+         "swing",
+         0.3
+        ],
+        "bell": [
+         "tower",
+         1.1
+        ],
+        "carry": [
+         "rope",
+         "lamp",
+         "pennons"
+        ],
+        "held": 0.5
+       }
       },
       {
        "id": "bell-roll-call",
@@ -131,7 +207,20 @@
        },
        "features": [
         "ledger"
-       ]
+       ],
+       "body": {
+        "bell": [
+         "ship",
+         1.2
+        ],
+        "carry": [
+         "rope",
+         "foot",
+         "scroll",
+         "abacus"
+        ],
+        "held": 0.5
+       }
       }
      ]
     },
@@ -153,6 +242,24 @@
      "features": [
       "glow"
      ],
+     "body": {
+      "bell": [
+       "pot",
+       1.0
+      ],
+      "hang": "hook",
+      "pose": [
+       "hang",
+       -0.08
+      ],
+      "tongue": "none",
+      "carry": [
+       "ladle",
+       "dent"
+      ],
+      "coat": "hearth",
+      "held": 0.3
+     },
      "finishes": [
       {
        "id": "bell-mending-peal",
@@ -171,7 +278,23 @@
        },
        "features": [
         "pulse"
-       ]
+       ],
+       "body": {
+        "bell": [
+         "pot",
+         1.3
+        ],
+        "carry": [
+         "sound",
+         "cushion",
+         "mallet"
+        ],
+        "tongue": [
+         "ball",
+         1.2
+        ],
+        "held": 0.42
+       }
       },
       {
        "id": "bell-hearth-bell",
@@ -190,7 +313,28 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "bell": [
+         "ship",
+         1.15
+        ],
+        "hang": "crane",
+        "tongue": [
+         "ball",
+         1.0
+        ],
+        "carry": [
+         "tags",
+         "taper",
+         "soot"
+        ],
+        "face": [
+         "lids",
+         1.2
+        ],
+        "held": 0.45
+       }
       }
      ]
     },
@@ -210,6 +354,24 @@
      "features": [
       "gears"
      ],
+     "body": {
+      "hang": "wheel",
+      "bell": [
+       "tower",
+       1.0
+      ],
+      "pose": [
+       "swing",
+       0.45
+      ],
+      "carry": [
+       [
+        "rope",
+        0.55
+       ]
+      ],
+      "held": 0.42
+     },
      "finishes": [
       {
        "id": "bell-peal-of-eight",
@@ -228,7 +390,18 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "hang": "beam",
+        "pose": [
+         "hang",
+         0.0
+        ],
+        "carry": [
+         "rope"
+        ],
+        "held": 0.5
+       }
       },
       {
        "id": "bell-tenor",
@@ -247,7 +420,27 @@
        },
        "features": [
         "crown"
-       ]
+       ],
+       "body": {
+        "hang": "headstock",
+        "bell": [
+         "great",
+         1.25
+        ],
+        "pose": [
+         "hang",
+         0.0
+        ],
+        "tongue": [
+         "fist",
+         1.4
+        ],
+        "carry": [
+         "inscription"
+        ],
+        "coat": "night",
+        "held": 0.55
+       }
       }
      ]
     }
@@ -271,6 +464,22 @@
    "features": [
     "dial"
    ],
+   "body": {
+    "bell": [
+     "gong",
+     1.0
+    ],
+    "hang": "clock",
+    "pose": [
+     "hang",
+     0.0
+    ],
+    "tongue": "none",
+    "face": "none",
+    "carry": null,
+    "held": 0.28,
+    "coat": "frost"
+   },
    "prongs": [
     {
      "id": "bell-watch-bell",
@@ -290,6 +499,26 @@
      "features": [
       "dark-eyed"
      ],
+     "body": {
+      "bell": [
+       "ship",
+       1.0
+      ],
+      "hang": "belfry",
+      "tongue": [
+       "ball",
+       1.0
+      ],
+      "face": [
+       "eye",
+       1.0
+      ],
+      "carry": [
+       "hourglass"
+      ],
+      "coat": "night",
+      "held": 0.36
+     },
      "finishes": [
       {
        "id": "bell-curfew",
@@ -308,7 +537,24 @@
        },
        "features": [
         "shadow-cloak"
-       ]
+       ],
+       "body": {
+        "bell": [
+         "tall",
+         1.2
+        ],
+        "hang": "yoke",
+        "tongue": [
+         "long",
+         1.2
+        ],
+        "carry": [
+         "cowl",
+         "doors"
+        ],
+        "held": 0.5,
+        "coat": "frost"
+       }
       },
       {
        "id": "bell-post-bell",
@@ -327,7 +573,19 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "hang": "post",
+        "carry": [
+         "post-lamp",
+         "rope"
+        ],
+        "held": 0.5,
+        "bell": [
+         "ship",
+         1.3
+        ]
+       }
       }
      ]
     },
@@ -349,6 +607,26 @@
      "features": [
       "tunnel-ear"
      ],
+     "body": {
+      "bell": [
+       "flare",
+       1.0
+      ],
+      "hang": "yoke",
+      "pose": [
+       "forward",
+       0.85
+      ],
+      "tongue": [
+       "ball",
+       0.8
+      ],
+      "face": [
+       "eye",
+       1.0
+      ],
+      "held": 0.34
+     },
      "finishes": [
       {
        "id": "bell-strike-note",
@@ -367,7 +645,25 @@
        },
        "features": [
         "pulse"
-       ]
+       ],
+       "body": {
+        "bell": [
+         "flare",
+         0.9
+        ],
+        "pose": [
+         "hang",
+         0.0
+        ],
+        "hang": "none",
+        "tongue": "none",
+        "carry": [
+         "hammer",
+         "fork",
+         "damper"
+        ],
+        "held": 0.45
+       }
       },
       {
        "id": "bell-sounding-bell",
@@ -386,7 +682,22 @@
        },
        "features": [
         "far-eyes"
-       ]
+       ],
+       "body": {
+        "bell": [
+         "flare",
+         0.8
+        ],
+        "pose": [
+         "forward",
+         0.8
+        ],
+        "carry": [
+         "dish",
+         "line"
+        ],
+        "held": 0.48
+       }
       }
      ]
     },
@@ -408,6 +719,28 @@
      "features": [
       "mist"
      ],
+     "body": {
+      "bell": [
+       "ship",
+       0.95
+      ],
+      "hang": "float",
+      "pose": [
+       "hang",
+       0.0
+      ],
+      "tongue": "none",
+      "face": [
+       "eye",
+       1.0
+      ],
+      "carry": [
+       "verdigris",
+       "drops",
+       "hammers"
+      ],
+      "held": 0.4
+     },
      "finishes": [
       {
        "id": "bell-channel-bell",
@@ -426,7 +759,24 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "hang": "tower",
+        "carry": [
+         "verdigris",
+         "hammers",
+         "topmark",
+         "chain"
+        ],
+        "build": {
+         "tilt": 0.12
+        },
+        "held": 0.55,
+        "bell": [
+         "ship",
+         1.12
+        ]
+       }
       },
       {
        "id": "bell-lost-bell",
@@ -445,7 +795,19 @@
        },
        "features": [
         "standing-air"
-       ]
+       ],
+       "body": {
+        "hang": "none",
+        "tongue": [
+         "ball",
+         1.0
+        ],
+        "carry": [
+         "ghosts"
+        ],
+        "coat": "ash",
+        "held": 0.4
+       }
       }
      ]
     }
@@ -469,6 +831,32 @@
    "features": [
     "maw"
    ],
+   "body": {
+    "bell": [
+     "ship",
+     1.0
+    ],
+    "pose": [
+     "forward",
+     1.0
+    ],
+    "hang": "yoke",
+    "tongue": [
+     "ball",
+     1.0
+    ],
+    "face": [
+     "eye",
+     1.0
+    ],
+    "carry": [
+     "teeth",
+     "band",
+     "hammer"
+    ],
+    "held": 0.3,
+    "coat": "blood"
+   },
    "prongs": [
     {
      "id": "bell-stun-bell",
@@ -488,6 +876,25 @@
      "features": [
       "broad-chest"
      ],
+     "body": {
+      "bell": [
+       "barrel",
+       1.1
+      ],
+      "pose": [
+       "forward",
+       0.65
+      ],
+      "tongue": [
+       "fist",
+       1.2
+      ],
+      "carry": [
+       "teeth",
+       "bumps"
+      ],
+      "held": 0.38
+     },
      "finishes": [
       {
        "id": "bell-anvil-bell",
@@ -506,7 +913,29 @@
        },
        "features": [
         "iron-hide"
-       ]
+       ],
+       "body": {
+        "bell": [
+         "barrel",
+         1.2
+        ],
+        "pose": [
+         "hang",
+         0.0
+        ],
+        "hang": "none",
+        "tongue": [
+         "fist",
+         1.0
+        ],
+        "carry": [
+         "anvil",
+         "marks",
+         "smiths"
+        ],
+        "coat": "iron",
+        "held": 0.48
+       }
       },
       {
        "id": "bell-skull-ringer",
@@ -525,7 +954,28 @@
        },
        "features": [
         "horn-brow"
-       ]
+       ],
+       "body": {
+        "bell": [
+         "barrel",
+         1.25
+        ],
+        "pose": [
+         "forward",
+         0.8
+        ],
+        "tongue": [
+         "fist",
+         1.6
+        ],
+        "carry": [
+         "teeth",
+         "brow",
+         "horns",
+         "studs"
+        ],
+        "held": 0.48
+       }
       }
      ]
     },
@@ -547,6 +997,22 @@
      "features": [
       "far-eyes"
      ],
+     "body": {
+      "bell": [
+       "long",
+       1.0
+      ],
+      "pose": [
+       "forward",
+       1.1
+      ],
+      "carry": [
+       "teeth",
+       "sight",
+       "fin"
+      ],
+      "held": 0.4
+     },
      "finishes": [
       {
        "id": "bell-far-caller",
@@ -566,6 +1032,10 @@
        "features": [
         "crest"
        ],
+       "body": {
+        "bell": "horn",
+        "held": 0.5
+       },
        "silhouette": "relic-horn"
       },
       {
@@ -583,7 +1053,24 @@
        },
        "features": [
         "smoke"
-       ]
+       ],
+       "body": {
+        "bell": [
+         "long",
+         1.15
+        ],
+        "pose": [
+         "forward",
+         0.85
+        ],
+        "carry": [
+         "teeth",
+         "cloud",
+         "bolts"
+        ],
+        "coat": "slate",
+        "held": 0.5
+       }
       }
      ]
     },
@@ -605,6 +1092,21 @@
      "features": [
       "chain"
      ],
+     "body": {
+      "bell": [
+       "ship",
+       1.05
+      ],
+      "pose": [
+       "forward",
+       0.5
+      ],
+      "carry": [
+       "teeth",
+       "chains"
+      ],
+      "held": 0.38
+     },
      "finishes": [
       {
        "id": "bell-name-bell",
@@ -623,7 +1125,26 @@
        },
        "features": [
         "ledger"
-       ]
+       ],
+       "body": {
+        "bell": [
+         "pot",
+         1.25
+        ],
+        "pose": [
+         "forward",
+         0.7
+        ],
+        "tongue": [
+         "row",
+         1.0
+        ],
+        "carry": [
+         "plaques",
+         "selector"
+        ],
+        "held": 0.48
+       }
       },
       {
        "id": "bell-passing-bell",
@@ -642,7 +1163,27 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "bell": [
+         "tall",
+         1.3
+        ],
+        "pose": [
+         "hang",
+         0.0
+        ],
+        "tongue": [
+         "long",
+         1.6
+        ],
+        "carry": [
+         "ribbons",
+         "icicles"
+        ],
+        "coat": "frost",
+        "held": 0.52
+       }
       }
      ]
     }

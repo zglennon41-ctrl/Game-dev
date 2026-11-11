@@ -52,7 +52,35 @@
   "features": [
    "lantern",
    "long-legs"
-  ]
+  ],
+  "body": {
+   "vessel": [
+    "box",
+    0.9
+   ],
+   "roof": [
+    "cap",
+    1.0
+   ],
+   "flame": [
+    "candle",
+    1.0
+   ],
+   "stand": [
+    "legs",
+    0.62
+   ],
+   "feet": "ball",
+   "face": [
+    "eye",
+    1.25
+   ],
+   "build": {
+    "girth": 0.62,
+    "curious": 0.35
+   },
+   "held": 0.22
+  }
  },
  "paths": [
   {
@@ -73,6 +101,38 @@
    "features": [
     "far-eyes"
    ],
+   "body": {
+    "vessel": [
+     "drum",
+     1.0
+    ],
+    "roof": [
+     "hood",
+     1.0
+    ],
+    "glass": [
+     [
+      "lens",
+      1.0
+     ],
+     "shutter"
+    ],
+    "flame": [
+     "heart",
+     0.9
+    ],
+    "stand": [
+     "legs",
+     1.0
+    ],
+    "feet": "claw",
+    "face": "lens",
+    "build": {
+     "girth": 0.85,
+     "curious": 0.0
+    },
+    "held": 0.3
+   },
    "prongs": [
     {
      "id": "lantern-tunnel-lamp",
@@ -92,6 +152,31 @@
      "features": [
       "tunnel-ear"
      ],
+     "body": {
+      "vessel": [
+       "safety",
+       1.0
+      ],
+      "roof": [
+       "gauze",
+       1.0
+      ],
+      "glass": [
+       [
+        "lens",
+        0.75
+       ],
+       "cage"
+      ],
+      "stand": [
+       "crab",
+       1.0
+      ],
+      "build": {
+       "girth": 0.9
+      },
+      "held": 0.32
+     },
      "finishes": [
       {
        "id": "lantern-deep-light",
@@ -110,7 +195,30 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "vessel": [
+         "globe",
+         1.25
+        ],
+        "roof": "none",
+        "glass": [
+         "portholes"
+        ],
+        "stand": [
+         "crab",
+         1.2
+        ],
+        "flame": [
+         "cold",
+         1.2
+        ],
+        "coat": "iron",
+        "build": {
+         "girth": 2.0
+        },
+        "held": 0.45
+       }
       },
       {
        "id": "lantern-finders-lamp",
@@ -129,7 +237,31 @@
        },
        "features": [
         "sight-glass"
-       ]
+       ],
+       "body": {
+        "vessel": [
+         "safety",
+         1.15
+        ],
+        "stand": [
+         "legs",
+         1.35
+        ],
+        "carry": [
+         [
+          "lens-arm",
+          1.3
+         ],
+         [
+          "scale",
+          1.0
+         ]
+        ],
+        "build": {
+         "girth": 0.8
+        },
+        "held": 0.4
+       }
       }
      ]
     },
@@ -151,6 +283,32 @@
      "features": [
       "set-feet"
      ],
+     "body": {
+      "vessel": [
+       "box",
+       1.15
+      ],
+      "roof": [
+       "vent",
+       1.0
+      ],
+      "glass": [
+       [
+        "lens",
+        1.15
+       ],
+       "bars"
+      ],
+      "stand": [
+       "stride",
+       1.15
+      ],
+      "feet": "flat",
+      "build": {
+       "girth": 1.1
+      },
+      "held": 0.34
+     },
      "finishes": [
       {
        "id": "lantern-post-flame",
@@ -169,7 +327,36 @@
        },
        "features": [
         "ring"
-       ]
+       ],
+       "body": {
+        "stand": [
+         "post",
+         1.0
+        ],
+        "vessel": [
+         "hex",
+         1.0
+        ],
+        "roof": [
+         "pagoda",
+         1.0
+        ],
+        "glass": [
+         "bars"
+        ],
+        "flame": [
+         "root",
+         1.2
+        ],
+        "carry": [
+         "halo"
+        ],
+        "face": [
+         "eye",
+         1.0
+        ],
+        "held": 0.5
+       }
       },
       {
        "id": "lantern-signal-lamp",
@@ -188,7 +375,36 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "stand": [
+         "mast",
+         1.0
+        ],
+        "vessel": [
+         "drum",
+         1.1
+        ],
+        "roof": [
+         "hood",
+         1.0
+        ],
+        "glass": [
+         "signals"
+        ],
+        "flame": [
+         "heart",
+         0.8
+        ],
+        "carry": [
+         "semaphore"
+        ],
+        "face": [
+         "eye",
+         1.0
+        ],
+        "held": 0.5
+       }
       }
      ]
     },
@@ -208,6 +424,33 @@
      "features": [
       "webbed"
      ],
+     "body": {
+      "stand": [
+       "float",
+       0.9
+      ],
+      "vessel": [
+       "drum",
+       0.9
+      ],
+      "roof": [
+       "brim",
+       0.8
+      ],
+      "glass": [
+       [
+        "lens",
+        0.9
+       ]
+      ],
+      "carry": [
+       "paddles",
+       "reeds"
+      ],
+      "feet": "web",
+      "held": 0.34,
+      "coat": "iron"
+     },
      "silhouette": "engine-buoy",
      "finishes": [
       {
@@ -228,6 +471,42 @@
        "features": [
         "chain"
        ],
+       "body": {
+        "stand": [
+         "float",
+         1.0
+        ],
+        "vessel": [
+         "hex",
+         1.0
+        ],
+        "roof": [
+         "ball",
+         1.0
+        ],
+        "glass": [
+         "bars"
+        ],
+        "carry": [
+         [
+          "chain",
+          0.8
+         ]
+        ],
+        "flame": [
+         "tall",
+         0.7
+        ],
+        "face": [
+         "eye",
+         1.0
+        ],
+        "build": {
+         "float": 1.35,
+         "tower": 2.6
+        },
+        "held": 0.5
+       },
        "silhouette": "engine-buoy"
       },
       {
@@ -248,6 +527,10 @@
        "features": [
         "mist"
        ],
+       "body": {
+        "stand": "none",
+        "held": 0.3
+       },
        "silhouette": "aspect-wisps"
       }
      ]
@@ -272,6 +555,37 @@
    "features": [
     "watching-eye"
    ],
+   "body": {
+    "vessel": [
+     "font",
+     1.05
+    ],
+    "roof": [
+     "brim",
+     1.0
+    ],
+    "flame": [
+     "low",
+     1.3
+    ],
+    "stand": [
+     "fold",
+     1.0
+    ],
+    "feet": "claw",
+    "face": [
+     "eye",
+     1.6
+    ],
+    "build": {
+     "girth": 1.15,
+     "curious": 0.0,
+     "w": 1.1,
+     "h": 0.8
+    },
+    "held": 0.28,
+    "coat": "hearth"
+   },
    "prongs": [
     {
      "id": "lantern-night-light",
@@ -291,6 +605,29 @@
      "features": [
       "old-eyes"
      ],
+     "body": {
+      "vessel": [
+       "dome",
+       1.0
+      ],
+      "roof": "none",
+      "glass": [
+       "pierced"
+      ],
+      "flame": [
+       "low",
+       1.0
+      ],
+      "stand": [
+       "fold",
+       0.9
+      ],
+      "face": [
+       "lids",
+       1.6
+      ],
+      "held": 0.24
+     },
      "finishes": [
       {
        "id": "lantern-lit-circle",
@@ -309,7 +646,42 @@
        },
        "features": [
         "ring"
-       ]
+       ],
+       "body": {
+        "vessel": [
+         "dome",
+         1.35
+        ],
+        "glass": [
+         [
+          "pierced",
+          1.3
+         ]
+        ],
+        "stand": [
+         "four",
+         0.45
+        ],
+        "feet": "flat",
+        "carry": [
+         [
+          "ring",
+          1.5
+         ]
+        ],
+        "flame": [
+         "heart",
+         0.9
+        ],
+        "face": [
+         "lids",
+         1.8
+        ],
+        "build": {
+         "girth": 1.3
+        },
+        "held": 0.4
+       }
       },
       {
        "id": "lantern-dark-hour-lamp",
@@ -328,7 +700,39 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "vessel": [
+         "font",
+         1.2
+        ],
+        "roof": [
+         "rays",
+         1.3
+        ],
+        "glass": null,
+        "flame": [
+         "tall",
+         1.25
+        ],
+        "stand": [
+         "legs",
+         1.3
+        ],
+        "carry": [
+         "clock"
+        ],
+        "face": [
+         "eye",
+         1.5
+        ],
+        "build": {
+         "h": 1.5,
+         "w": 1.0,
+         "girth": 1.0
+        },
+        "held": 0.45
+       }
       }
      ]
     },
@@ -350,6 +754,41 @@
      "features": [
       "lantern-jaw"
      ],
+     "body": {
+      "vessel": [
+       "box",
+       0.8
+      ],
+      "roof": [
+       "cap",
+       0.8
+      ],
+      "flame": [
+       "heart",
+       0.9
+      ],
+      "stand": [
+       "arm",
+       1.0
+      ],
+      "carry": [
+       [
+        "reflector",
+        1.2
+       ]
+      ],
+      "face": [
+       "eye",
+       1.1
+      ],
+      "build": {
+       "w": 1.0,
+       "h": 1.0,
+       "girth": 0.9,
+       "head": 1.3
+      },
+      "held": 0.34
+     },
      "finishes": [
       {
        "id": "lantern-white-flare",
@@ -368,7 +807,33 @@
        },
        "features": [
         "ember"
-       ]
+       ],
+       "body": {
+        "vessel": [
+         "oct",
+         0.9
+        ],
+        "roof": [
+         "spike",
+         0.8
+        ],
+        "stand": [
+         "arm",
+         1.15
+        ],
+        "flame": [
+         "star",
+         1.7
+        ],
+        "carry": [
+         [
+          "reflector",
+          1.5
+         ],
+         "rods"
+        ],
+        "held": 0.45
+       }
       },
       {
        "id": "lantern-duelists-lamp",
@@ -387,7 +852,40 @@
        },
        "features": [
         "shadow-cloak"
-       ]
+       ],
+       "body": {
+        "vessel": [
+         "column",
+         0.9
+        ],
+        "roof": [
+         "spike",
+         1.3
+        ],
+        "glass": [
+         "hood"
+        ],
+        "stand": [
+         "stride",
+         1.25
+        ],
+        "feet": "claw",
+        "flame": [
+         "tall",
+         0.8
+        ],
+        "carry": [
+         [
+          "cloak",
+          1.15
+         ]
+        ],
+        "build": {
+         "girth": 0.75
+        },
+        "held": 0.45,
+        "coat": "slate"
+       }
       }
      ]
     },
@@ -409,6 +907,38 @@
      "features": [
       "set-feet"
      ],
+     "body": {
+      "vessel": [
+       "box",
+       1.25
+      ],
+      "roof": [
+       "battlement",
+       1.0
+      ],
+      "glass": [
+       "bars"
+      ],
+      "flame": [
+       "heart",
+       1.0
+      ],
+      "stand": [
+       "four",
+       0.7
+      ],
+      "feet": "flat",
+      "face": [
+       "eye",
+       1.5
+      ],
+      "build": {
+       "girth": 1.4,
+       "w": 1.0,
+       "h": 1.0
+      },
+      "held": 0.34
+     },
      "finishes": [
       {
        "id": "lantern-hearth-lamp",
@@ -428,6 +958,38 @@
        "features": [
         "hall-fat"
        ],
+       "body": {
+        "vessel": [
+         "belly",
+         1.15
+        ],
+        "roof": [
+         "chimney",
+         1.0
+        ],
+        "glass": null,
+        "flame": [
+         "coal",
+         1.2
+        ],
+        "stand": [
+         "bow",
+         1.0
+        ],
+        "feet": "ball",
+        "carry": [
+         "door",
+         "kettle"
+        ],
+        "face": [
+         "eye",
+         1.3
+        ],
+        "build": {
+         "girth": 1.5
+        },
+        "held": 0.45
+       },
        "silhouette": "engine-stove"
       },
       {
@@ -445,7 +1007,31 @@
        },
        "features": [
         "wall-plate"
-       ]
+       ],
+       "body": {
+        "vessel": [
+         "glasshouse",
+         1.0
+        ],
+        "roof": [
+         "dome",
+         0.8
+        ],
+        "glass": null,
+        "stand": [
+         "four",
+         0.8
+        ],
+        "carry": [
+         "gallery",
+         "rag"
+        ],
+        "flame": [
+         "heart",
+         1.2
+        ],
+        "held": 0.5
+       }
       }
      ]
     }
@@ -469,6 +1055,38 @@
    "features": [
     "glow"
    ],
+   "body": {
+    "vessel": [
+     "cup",
+     1.0
+    ],
+    "roof": [
+     "canopy",
+     1.0
+    ],
+    "flame": [
+     "candle",
+     1.1
+    ],
+    "stand": [
+     "legs",
+     0.8
+    ],
+    "feet": "claw",
+    "face": [
+     "eye",
+     1.2
+    ],
+    "carry": [
+     "pilot"
+    ],
+    "build": {
+     "girth": 0.9,
+     "curious": 0.0
+    },
+    "held": 0.3,
+    "coat": "moon"
+   },
    "prongs": [
     {
      "id": "lantern-lamplighter",
@@ -486,6 +1104,31 @@
      "features": [
       "small-hands"
      ],
+     "body": {
+      "stand": "keeper",
+      "keeper": [
+       "plain",
+       1.0
+      ],
+      "vessel": [
+       "cup",
+       0.75
+      ],
+      "roof": [
+       "canopy",
+       0.8
+      ],
+      "flame": [
+       "candle",
+       1.0
+      ],
+      "carry": null,
+      "face": "none",
+      "held": 0.3,
+      "build": {
+       "head": 0.62
+      }
+     },
      "silhouette": "kith-lamplighter",
      "finishes": [
       {
@@ -506,6 +1149,26 @@
        "features": [
         "old-eyes"
        ],
+       "body": {
+        "keeper": [
+         "veiled",
+         1.3
+        ],
+        "vessel": [
+         "cup",
+         0.9
+        ],
+        "roof": [
+         "brim",
+         0.9
+        ],
+        "flame": [
+         "heart",
+         0.9
+        ],
+        "coat": "ash",
+        "held": 0.34
+       },
        "silhouette": "kith-lamplighter"
       },
       {
@@ -526,6 +1189,21 @@
        "features": [
         "brush"
        ],
+       "body": {
+        "keeper": [
+         "both",
+         1.15
+        ],
+        "vessel": [
+         "cup",
+         0.85
+        ],
+        "carry": [
+         "taper",
+         "yoke"
+        ],
+        "held": 0.32
+       },
        "silhouette": "kith-lamplighter"
       }
      ]
@@ -546,6 +1224,28 @@
      "features": [
       "pulse"
      ],
+     "body": {
+      "stand": [
+       "stem",
+       1.0
+      ],
+      "vessel": [
+       "cup",
+       0.9
+      ],
+      "roof": [
+       "canopy",
+       0.9
+      ],
+      "glass": [
+       "gem"
+      ],
+      "flame": "gem",
+      "carry": [
+       "scroll"
+      ],
+      "held": 0.36
+     },
      "finishes": [
       {
        "id": "lantern-oath-flame",
@@ -564,7 +1264,28 @@
        },
        "features": [
         "crown"
-       ]
+       ],
+       "body": {
+        "stand": [
+         "stem",
+         1.5
+        ],
+        "roof": [
+         "crown",
+         1.3
+        ],
+        "carry": [
+         [
+          "scroll",
+          1.0
+         ],
+         [
+          "seals",
+          1.5
+         ]
+        ],
+        "held": 0.48
+       }
       },
       {
        "id": "lantern-beat-keeper",
@@ -583,7 +1304,29 @@
        },
        "features": [
         "ring"
-       ]
+       ],
+       "body": {
+        "stand": [
+         "four",
+         0.3
+        ],
+        "feet": "flat",
+        "vessel": [
+         "pyramid",
+         1.0
+        ],
+        "roof": "none",
+        "glass": null,
+        "flame": "none",
+        "carry": [
+         "pendulum",
+         [
+          "hoops",
+          1.0
+         ]
+        ],
+        "held": 0.45
+       }
       }
      ]
     },
@@ -605,6 +1348,39 @@
      "features": [
       "pages"
      ],
+     "body": {
+      "stand": [
+       "neck",
+       1.0
+      ],
+      "vessel": [
+       "box",
+       0.7
+      ],
+      "roof": [
+       "cap",
+       0.9
+      ],
+      "flame": [
+       "heart",
+       0.8
+      ],
+      "carry": [
+       [
+        "shade",
+        1.0
+       ],
+       [
+        "book",
+        1.0
+       ]
+      ],
+      "face": [
+       "eye",
+       1.0
+      ],
+      "held": 0.36
+     },
      "finishes": [
       {
        "id": "lantern-clerks-flame",
@@ -623,7 +1399,33 @@
        },
        "features": [
         "ledger"
-       ]
+       ],
+       "body": {
+        "stand": [
+         "neck",
+         1.15
+        ],
+        "vessel": [
+         "box",
+         0.6
+        ],
+        "flame": "none",
+        "carry": [
+         [
+          "wide-shade",
+          1.0
+         ],
+         [
+          "book",
+          1.2
+         ],
+         [
+          "seals",
+          1.0
+         ]
+        ],
+        "held": 0.42
+       }
       },
       {
        "id": "lantern-truth-lamp",
@@ -642,7 +1444,36 @@
        },
        "features": [
         "quiet-place"
-       ]
+       ],
+       "body": {
+        "stand": [
+         "stilts",
+         1.3
+        ],
+        "vessel": [
+         "column",
+         1.0
+        ],
+        "roof": [
+         "cap",
+         0.6
+        ],
+        "flame": [
+         "clear",
+         1.2
+        ],
+        "carry": [
+         [
+          "mirror",
+          1.0
+         ]
+        ],
+        "build": {
+         "girth": 0.8
+        },
+        "held": 0.5,
+        "coat": "frost"
+       }
       }
      ]
     }
