@@ -461,5 +461,5 @@ func _finish() -> void:
 			print("SOAK FAILED %02d %s" % [r["n"], r["who"]])
 			for f in r["fails"]:
 				print("    - %s" % f)
-	print("SOAK: %d characters, %d reached Commencement, %d of them with nothing wrong; %d failed" % [_results.size(), through, clean, _results.size() - clean])
+	print("SOAK: %d characters, %d %s, %d of them with nothing wrong; %d failed" % [_results.size(), through, "reached Commencement" if args.has("gate") else "came through the six lessons and the Field Examination", clean, _results.size() - clean])
 	get_tree().quit(0 if clean == _results.size() else 1)
