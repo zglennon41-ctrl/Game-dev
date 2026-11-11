@@ -1555,5 +1555,7 @@ Still weak: the face is the size of a fingernail on a figure a forearm tall, and
 size of a sheet's cell it is two lights and a brow; the Starter is the smallest thing on any
 sheet and is drawn smaller than its cell allows; the waves are a bowl with a curl, not yet
 water; the Berg's block and the Longstone's stone are plain; a figure sitting cross-legged
-is crude at the hip where the wrap does not cover it; the Sundown and the Thunderhead are
-the two the line check reads as another Path by colour (a red sun, a dark cloud).
+is crude at the hip where the wrap does not cover it; the Sundown is
+the one the line check reads as another Path by colour (a red sun); a great or apex
+Elemental is lit from inside by the light the game puts under the great, which sits at its
+waist, not its feet.
