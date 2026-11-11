@@ -44,13 +44,16 @@
       ["beam", "wood"], ["door", "wood"], ["bark", "wood"], ["trunk", "wood"], ["crate", "wood"], ["barrel", "wood"], ["root", "wood"],
       ["stone", "stone"], ["rock", "stone"], ["brick", "stone"], ["floor", "stone"], ["wall", "stone"], ["tile", "stone"], ["slate", "stone"],
       ["pillar", "stone"], ["plaster", "stone"], ["roof", "stone"], ["ruin", "stone"], ["clay", "stone"], ["bone", "bone"], ["horn", "bone"],
-      ["antler", "bone"], ["fang", "bone"], ["tooth", "bone"], ["claw", "bone"], ["talon", "bone"], ["beak", "bone"], ["wax", "bone"],
+      ["antler", "bone"], ["fang", "bone"], ["tooth", "bone"], ["claw", "bone"], ["talon", "bone"], ["beak", "bone"], ["seal", "cloth"], ["wax", "bone"],
       ["paper", "bone"], ["grass", "growth"], ["leaf", "growth"], ["moss", "growth"], ["reed", "growth"], ["straw", "growth"], ["petal", "growth"],
       ["earth", "earth"], ["dirt", "earth"], ["ground", "earth"], ["mud", "earth"], ["sand", "earth"], ["dust", "earth"], ["coal", "earth"],
       ["water", "water"], ["mist", "water"], ["current", "water"], ["fur", "coat"], ["hair", "coat"], ["feather", "coat"], ["plume", "coat"],
       ["bristle", "coat"], ["whisker", "coat"], ["hide", "coat"], ["scale", "coat"], ["fin", "coat"], ["nose", "coat"], ["bare", "coat"],
       ["mark", "coat"], ["echo", "coat"], ["brow", "coat"], ["beard", "coat"], ["shadow", "ink"], ["void", "ink"], ["shade", "ink"], ["ink", "ink"],
-      ["dress", "cloth"], ["home_", "cloth"], ["banner", "cloth"], ["main", "coat"], ["tin", "iron"], ["texture", "mixed"]
+      ["dress", "cloth"], ["home_", "cloth"], ["banner", "cloth"], ["main", "coat"], ["tin", "iron"], ["texture", "mixed"],
+      ["homespun", "cloth"], ["robe", "cloth"], ["thread", "cloth"], ["pelt", "coat"], ["moth", "coat"], ["beetle", "coat"], ["maw", "coat"],
+      ["tongue", "coat"], ["welt", "coat"], ["scar", "coat"], ["soot", "earth"], ["chalk", "stone"], ["fired", "stone"], ["acorn", "wood"],
+      ["weed", "growth"], ["verdigris", "growth"], ["glaze", "glass"], ["frost", "glass"], ["visor", "iron"], ["smoke", "ink"], ["paint", "mixed"]
     ],
     "classes": {
       "field": {"glows": true, "ramps": [], "bands": 1, "shadowTint": "#FFFFFF", "spec": [0.0, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
