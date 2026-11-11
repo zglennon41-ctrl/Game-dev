@@ -89,6 +89,7 @@
     "relic-blade": { "kind": "object", "build": "blade", "hover": true, "artSize": 1.1, "carries": ["edge", "grip", "short-blade"] },
     "relic-shield": { "kind": "object", "build": "shield", "hover": true, "carries": ["tower-shield", "broad-chest", "fangs", "bastion", "grip"] },
     "relic-gauntlet": { "kind": "object", "build": "gauntlet", "hover": true, "artSize": 0.9, "carries": ["talon-grip", "grip", "small-hands"] },
+    "relic-panoply": { "kind": "humanoid", "scale": [0.9, 0.9, 0.9], "artSize": 0.92, "carries": ["helm", "pauldrons", "iron-hide"] },
     "relic-coat": { "kind": "object", "build": "coat", "hover": true, "artSize": 1.1, "carries": ["grip"] },
     "relic-mask": { "kind": "object", "build": "mask", "hover": true },
     "relic-gate": { "kind": "construct", "build": "gate" },
