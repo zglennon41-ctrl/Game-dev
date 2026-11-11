@@ -58,7 +58,29 @@
   "features": [
    "broad-guard",
    "grip"
-  ]
+  ],
+  "body": {
+   "shape": [
+    "round",
+    0.4,
+    0.4
+   ],
+   "dome": 0.06,
+   "face": "iron",
+   "rim": "iron",
+   "boss": [
+    "eye",
+    1.0
+   ],
+   "blazon": "ring",
+   "grown": [
+    [
+     "dents",
+     0.7
+    ]
+   ],
+   "stands": 0.8
+  }
  },
  "paths": [
   {
@@ -79,6 +101,21 @@
    "features": [
     "tower-shield"
    ],
+   "body": {
+    "shape": [
+     "tower",
+     0.8,
+     2.0
+    ],
+    "dome": 0,
+    "curve": 0.14,
+    "face": "leather",
+    "blazon": "chevron",
+    "grown": [
+     "spine"
+    ],
+    "stands": 1.45
+   },
    "prongs": [
     {
      "id": "shield-battered",
@@ -98,6 +135,19 @@
      "features": [
       "iron-hide"
      ],
+     "body": {
+      "face": "iron",
+      "grown": [
+       "spine",
+       [
+        "hammered",
+        1.0
+       ],
+       "patches",
+       "notch"
+      ],
+      "lean": 6
+     },
      "finishes": [
       {
        "id": "shield-shield-biter",
@@ -116,7 +166,25 @@
        },
        "features": [
         "fangs"
-       ]
+       ],
+       "body": {
+        "boss": "none",
+        "grown": [
+         [
+          "hammered",
+          0.6
+         ],
+         [
+          "jaws",
+          1.0
+         ],
+         [
+          "teeth",
+          1.0
+         ]
+        ],
+        "lean": 8
+       }
       },
       {
        "id": "shield-lone-round",
@@ -135,7 +203,31 @@
        },
        "features": [
         "long-legs"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "round",
+         0.7,
+         0.7
+        ],
+        "curve": 0,
+        "dome": -0.08,
+        "boss": [
+         "eye",
+         0.7
+        ],
+        "blazon": "ring",
+        "grown": [
+         "worn",
+         "strap",
+         [
+          "dents",
+          0.7
+         ]
+        ],
+        "lean": 0,
+        "stands": 0.72
+       }
       }
      ]
     },
@@ -157,6 +249,22 @@
      "features": [
       "spiked-boss"
      ],
+     "body": {
+      "shape": [
+       "kite",
+       0.82,
+       1.75
+      ],
+      "curve": 0.16,
+      "boss": [
+       "spike",
+       1.1
+      ],
+      "grown": [
+       "bars"
+      ],
+      "stands": 1.4
+     },
      "finishes": [
       {
        "id": "shield-rams-head",
@@ -175,7 +283,23 @@
        },
        "features": [
         "horns"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "kite",
+         0.92,
+         1.75
+        ],
+        "boss": [
+         "ram",
+         1.3
+        ],
+        "grown": [
+         "bars",
+         "brow"
+        ],
+        "coat": "hearth"
+       }
       },
       {
        "id": "shield-last-word",
@@ -194,7 +318,32 @@
        },
        "features": [
         "horn-brow"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "tower",
+         0.9,
+         1.7
+        ],
+        "thick": 0.07,
+        "curve": 0.06,
+        "face": "steel",
+        "boss": [
+         "flat",
+         1.25
+        ],
+        "grown": [
+         "footbar",
+         "brow",
+         [
+          "dents",
+          0.7
+         ]
+        ],
+        "lean": 10,
+        "stands": 1.45,
+        "coat": "iron"
+       }
       }
      ]
     },
@@ -216,6 +365,28 @@
      "features": [
       "glow"
      ],
+     "body": {
+      "shape": [
+       "oval",
+       0.82,
+       1.4
+      ],
+      "curve": 0,
+      "dome": 0.07,
+      "face": "polish",
+      "rim": [
+       "brass",
+       0.045
+      ],
+      "boss": "none",
+      "blazon": "ring",
+      "grown": [
+       "frame",
+       "glints"
+      ],
+      "stands": 1.3,
+      "coat": "moon"
+     },
      "finishes": [
       {
        "id": "shield-turned-blow",
@@ -234,7 +405,17 @@
        },
        "features": [
         "pulse"
-       ]
+       ],
+       "body": {
+        "grown": [
+         "frame",
+         [
+          "ripples",
+          1.0
+         ],
+         "tines"
+        ]
+       }
       },
       {
        "id": "shield-scrying-face",
@@ -253,7 +434,21 @@
        },
        "features": [
         "sight-glass"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "door",
+         0.86,
+         1.45
+        ],
+        "face": "glass",
+        "grown": [
+         "frame",
+         "vision",
+         "hood"
+        ],
+        "coat": "night"
+       }
       }
      ]
     }
@@ -277,6 +472,24 @@
    "features": [
     "door"
    ],
+   "body": {
+    "shape": [
+     "door",
+     0.9,
+     1.8
+    ],
+    "dome": 0,
+    "curve": 0.05,
+    "face": "wood",
+    "boss": "none",
+    "blazon": "bar",
+    "grown": [
+     "hinges",
+     "bar",
+     "peep"
+    ],
+    "stands": 1.4
+   },
    "prongs": [
     {
      "id": "shield-tower",
@@ -296,6 +509,21 @@
      "features": [
       "set-feet"
      ],
+     "body": {
+      "shape": [
+       "rect",
+       0.95,
+       2.5
+      ],
+      "curve": 0.18,
+      "grown": [
+       "hinges",
+       "bar",
+       "slit",
+       "foot"
+      ],
+      "stands": 1.6
+     },
      "finishes": [
       {
        "id": "shield-post-wall",
@@ -314,7 +542,27 @@
        },
        "features": [
         "wall-plate"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "rect",
+         1.15,
+         2.4
+        ],
+        "curve": 0.1,
+        "face": "timber",
+        "rim": "none",
+        "blazon": "none",
+        "grown": [
+         "posts",
+         "number",
+         [
+          "foot",
+          0.8
+         ]
+        ],
+        "coat": "ash"
+       }
       },
       {
        "id": "shield-gatehouse",
@@ -333,7 +581,24 @@
        },
        "features": [
         "bastion"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "rect",
+         1.1,
+         2.2
+        ],
+        "curve": 0.1,
+        "face": "stone",
+        "rim": "stone",
+        "grown": [
+         "merlons",
+         "turrets",
+         "wicket",
+         "portcullis"
+        ],
+        "coat": "slate"
+       }
       }
      ]
     },
@@ -355,6 +620,16 @@
      "features": [
       "ring"
      ],
+     "body": {
+      "grown": [
+       "hinges",
+       "lintel",
+       [
+        "sign",
+        1.0
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "shield-standing-ward",
@@ -371,7 +646,19 @@
        },
        "features": [
         "standing-air"
-       ]
+       ],
+       "body": {
+        "grown": [
+         "hinges",
+         "lintel",
+         [
+          "sign",
+          1.25
+         ],
+         "pane",
+         "feet"
+        ]
+       }
       },
       {
        "id": "shield-sworn-shield",
@@ -390,7 +677,31 @@
        },
        "features": [
         "crest"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "heater",
+         1.1,
+         1.65
+        ],
+        "curve": 0.14,
+        "face": "leather",
+        "rim": "brass",
+        "boss": [
+         "eye",
+         0.55
+        ],
+        "blazon": "none",
+        "grown": [
+         [
+          "crest",
+          1.2
+         ],
+         "plumes",
+         "ribbons"
+        ],
+        "grip": 0.7
+       }
       }
      ]
     },
@@ -412,6 +723,27 @@
      "features": [
       "stone-skin"
      ],
+     "body": {
+      "shape": [
+       "coffin",
+       0.95,
+       1.9
+      ],
+      "curve": 0,
+      "face": "stone",
+      "rim": "stone",
+      "boss": [
+       "ring",
+       1.0
+      ],
+      "blazon": "none",
+      "grown": [
+       "panel",
+       "moss"
+      ],
+      "stands": 1.35,
+      "coat": "slate"
+     },
      "finishes": [
       {
        "id": "shield-hearth-board",
@@ -430,7 +762,28 @@
        },
        "features": [
         "ember"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "board",
+         1.5,
+         0.8
+        ],
+        "face": "wood",
+        "rim": "iron",
+        "boss": [
+         "eye",
+         0.8
+        ],
+        "blazon": "bar",
+        "grown": [
+         "chains",
+         "soot",
+         "embers"
+        ],
+        "stands": 1.0,
+        "coat": "ember"
+       }
       },
       {
        "id": "shield-night-gate",
@@ -447,7 +800,27 @@
        },
        "features": [
         "dark-eyed"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "door",
+         1.0,
+         2.1
+        ],
+        "face": "black",
+        "rim": "black",
+        "boss": "none",
+        "grown": [
+         "lattice",
+         "portcullis",
+         [
+          "eyes2",
+          1.3
+         ]
+        ],
+        "stands": 1.5,
+        "coat": "night"
+       }
       }
      ]
     }
@@ -471,6 +844,27 @@
    "features": [
     "broad-chest"
    ],
+   "body": {
+    "shape": [
+     "wide",
+     1.35,
+     0.85
+    ],
+    "dome": 0,
+    "curve": 0.32,
+    "face": "leather",
+    "rim": "brass",
+    "boss": [
+     "eye",
+     0.8
+    ],
+    "blazon": "arc",
+    "grown": [
+     "ribs"
+    ],
+    "lean": 24,
+    "stands": 1.0
+   },
    "prongs": [
     {
      "id": "shield-roof",
@@ -490,6 +884,24 @@
      "features": [
       "wing-cloak"
      ],
+     "body": {
+      "shape": [
+       "wide",
+       1.6,
+       1.05
+      ],
+      "curve": 0.3,
+      "face": "wood",
+      "grown": [
+       "shingles",
+       [
+        "poles",
+        1.0
+       ]
+      ],
+      "lean": 50,
+      "stands": 1.25
+     },
      "finishes": [
       {
        "id": "shield-roof-of-shields",
@@ -508,7 +920,27 @@
        },
        "features": [
         "shell"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "wide",
+         2.3,
+         1.25
+        ],
+        "curve": 0.5,
+        "boss": "none",
+        "rim": "none",
+        "blazon": "none",
+        "grown": [
+         "tiles",
+         [
+          "poles4",
+          1.0
+         ]
+        ],
+        "lean": 46,
+        "stands": 1.4
+       }
       },
       {
        "id": "shield-half-share",
@@ -527,7 +959,25 @@
        },
        "features": [
         "pulse"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "wide",
+         1.5,
+         0.95
+        ],
+        "curve": 0.3,
+        "face": "leather",
+        "boss": "none",
+        "rim": "brass",
+        "blazon": "none",
+        "grown": [
+         "halves",
+         "seam"
+        ],
+        "lean": 22,
+        "stands": 1.05
+       }
       }
      ]
     },
@@ -549,6 +999,24 @@
      "features": [
       "watching-eye"
      ],
+     "body": {
+      "shape": [
+       "kite",
+       0.8,
+       1.8
+      ],
+      "curve": 0.2,
+      "rim": "iron",
+      "boss": "none",
+      "blazon": "chevron",
+      "grown": [
+       "flange",
+       "eye_top"
+      ],
+      "lean": 4,
+      "yaw": -14,
+      "stands": 1.3
+     },
      "finishes": [
       {
        "id": "shield-passengers-door",
@@ -567,7 +1035,23 @@
        },
        "features": [
         "far-eyes"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "carriage",
+         0.95,
+         1.9
+        ],
+        "curve": 0.12,
+        "face": "wood",
+        "rim": "brass",
+        "blazon": "none",
+        "grown": [
+         "window"
+        ],
+        "stands": 1.4,
+        "coat": "blood"
+       }
       },
       {
        "id": "shield-breakwater",
@@ -586,7 +1070,30 @@
        },
        "features": [
         "current"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "kite",
+         1.0,
+         2.0
+        ],
+        "curve": 0,
+        "vee": 0.45,
+        "face": "copper",
+        "blazon": "none",
+        "grown": [
+         "cutwater",
+         [
+          "waterline",
+          1.2
+         ],
+         "mooring"
+        ],
+        "yaw": 0,
+        "lean": 5,
+        "stands": 1.5,
+        "coat": "iron"
+       }
       }
      ]
     },
@@ -608,6 +1115,27 @@
      "features": [
       "ruff"
      ],
+     "body": {
+      "shape": [
+       "heater",
+       0.95,
+       1.05
+      ],
+      "curve": 0.16,
+      "rim": "iron",
+      "boss": [
+       "hound",
+       1.0
+      ],
+      "blazon": "none",
+      "grown": [
+       "ears",
+       "ruff"
+      ],
+      "lean": 22,
+      "stands": 1.1,
+      "coat": "hearth"
+     },
      "finishes": [
       {
        "id": "shield-old-acquaintance",
@@ -626,7 +1154,32 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "heater",
+         1.05,
+         1.2
+        ],
+        "boss": [
+         "hound",
+         1.1
+        ],
+        "grown": [
+         "ears",
+         "torn_ear",
+         [
+          "ruff",
+          0.8
+         ],
+         "scars3",
+         "tokens",
+         "old"
+        ],
+        "lean": 14,
+        "stands": 1.2,
+        "coat": "ash"
+       }
       },
       {
        "id": "shield-beaters-shield",
@@ -645,7 +1198,28 @@
        },
        "features": [
         "voice"
-       ]
+       ],
+       "body": {
+        "shape": [
+         "drum",
+         1.15,
+         1.15
+        ],
+        "curve": 0,
+        "thick": 0.22,
+        "face": "hide",
+        "rim": "none",
+        "boss": "none",
+        "blazon": "ring",
+        "grown": [
+         "lacing",
+         "mouth",
+         "beaters",
+         "boards"
+        ],
+        "lean": 10,
+        "stands": 1.2
+       }
       }
      ]
     }
