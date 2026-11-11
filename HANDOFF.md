@@ -486,7 +486,7 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   the rite), **Starter** (three offered at the rite; the tree's settled form), **Path**
   (three from each starter, and the hybrid lines), **Advancement** (three from each path),
   **Final** (from each advancement), and then it grows great and to its apex. The reading
-  taken, and the calls it leaves, are in `docs/genius-evolutions.md`.
+  taken, and the calls it leaves, are in `docs/genius-lines.md`.
 - **Three types of genius** (owner, 2026-11-10): "I also want to create distinct types of
   genius: weapon genius should be their own weapon usable on a switch with their main
   weapon, defensive and ritual items should have functions in combat, companion genius

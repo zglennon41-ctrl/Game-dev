@@ -1,4 +1,4 @@
-"""WILDLINE genius kit: the gifts of the four lines with no flesh (docs/genius-evolutions.md).
+"""WILDLINE genius kit: the gifts of the four lines with no flesh (docs/genius-lines.md).
 
 A hybrid wears its other base's gift on a body that is not that base's: a wolf under a Lurker's
 cloak, a hawk with a Fiend's horns. So each gift is made to say whose it is from across a room:

@@ -1,5 +1,5 @@
 """WILDLINE genius lines, the items of power: the Lantern, the Astrolabe and the Bell
-(docs/genius-evolutions.md, "The items of power"). genius_lines.py loads this file
+(docs/genius-lines.md, "The items of power"). genius_lines.py loads this file
 (register()) and builds one model a form from the `body` of its node in
 data/genius-bases/<base>.json.
 

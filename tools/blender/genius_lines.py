@@ -1,7 +1,7 @@
-"""WILDLINE genius lines: a body of its own for every form on a tree (docs/genius-evolutions.md).
+"""WILDLINE genius lines: a body of its own for every form on a tree (docs/genius-lines.md).
 
-A line is an evolution: the Starter, its three Paths, their Advancements and the Finals are
-each a different creature to look at. What a form looks like is data, the `body` of its node
+A line is a thing that changes: the Starter, its three Paths, their Advancements and the
+Finals are each a different creature to look at. What a form looks like is data, the `body` of its node
 in data/genius-bases/<base>.json; a form wears everything its parent wears unless it says
 otherwise, so something of each stage is carried into the next. This file reads those and
 builds one model a form, in Blender, where the game looks for it:
@@ -15,7 +15,7 @@ body (game/scripts/genius/genius_body.gd); a form without one wears its base's b
 parts as before.
 
 A body's `body`, on the wolf's rig (the keys every builder here understands are in
-docs/genius-evolutions.md, "A body, as data"):
+docs/genius-lines.md, "A body, as data"):
     build   proportions against the stage's own (legs, girth, chest, waist, neck, nape, head,
             muzzle, jaw, ears, tail, brush, body, pitch, stance)
     ears, eyes, maw, ruff, spine, tail, flags, armor, carry, paws, aura
@@ -55,6 +55,12 @@ PALETTE.update({
     "shade_smoke": ((0.1, 0.095, 0.11), 1.0, 0.0), "hide_scar": ((0.6, 0.48, 0.44), 0.6, 0.0), "iron_bristle": ((0.15, 0.15, 0.17), 0.4, 0.8),
     "hide_baby": ((0.2, 0.185, 0.18), 0.8, 0.0), "hide_baby_dark": ((0.09, 0.082, 0.08), 0.8, 0.0), "hide_baby_pale": ((0.56, 0.52, 0.46), 0.8, 0.0),
     "cloth_stripe": ((0.34, 0.12, 0.08), 0.95, 0.0), "cloth_watch": ((0.17, 0.2, 0.3), 0.95, 0.0),
+})
+# The Wolf's first names for five of these, which the other families' files still ask for
+# (the Wolf itself wears the names above: each says what it is made of, docs/style.md).
+PALETTE.update({
+    "smoke": ((0.1, 0.095, 0.11), 1.0, 0.0), "maw": ((0.13, 0.025, 0.025), 0.6, 0.0), "tongue": ((0.42, 0.12, 0.11), 0.5, 0.0),
+    "scar": ((0.6, 0.48, 0.44), 0.6, 0.0), "star": ((0.8, 0.78, 0.7), 0.4, 0.0), "wool_stripe": ((0.34, 0.12, 0.08), 0.95, 0.0),
 })
 
 
@@ -245,7 +251,7 @@ def build(r, b):
 # --- small builders ---------------------------------------------------------------------
 
 # what is soft is shaded round (fur, cloth, smoke, light); what is hard keeps its planes
-SOFT = ("fur", "cloth", "shade", "hide", "field", "cord", "leather")
+SOFT = ("fur", "cloth", "shade", "hide", "field", "cord", "leather", "wool", "smoke", "tongue", "maw", "scar")
 
 
 def _add(r, name, geo, weights, material, smooth=None):
@@ -1037,12 +1043,45 @@ def build_wolf(form_id, level, spec, base):
 BUILDERS = {"wolf": build_wolf}
 
 
+_BASE = {}        # the palette every family starts from: the kit's and the Wolf's
+_OWN = {}         # family file -> what it adds to the palette or makes its own shade of
+_FAMILY = {}      # base id -> its family file
+
+
 def _families():
     """Every other family of lines is a file of its own beside this one, lines_<family>.py,
     with register(builders): it adds its bases to BUILDERS (and its styles to GROWS and
-    SHAPES). One file a family, so the families can be worked on at once."""
+    SHAPES). One file a family, so the families can be worked on at once.
+
+    A family's colours are its own. Two families may each call a colour "moss" or "glaze" and
+    mean different things by it, so what a family puts in the palette is kept apart, and a
+    base is built on the kit's palette and its own family's and nobody else's (_palette_of)."""
+    _BASE.update(PALETTE)
     for name in sorted(f[:-3] for f in os.listdir(HERE) if f.startswith("lines_") and f.endswith(".py")):
+        PALETTE.clear()
+        PALETTE.update(_BASE)
+        before = set(BUILDERS)
         __import__(name).register(BUILDERS)
+        _OWN[name] = {k: v for k, v in PALETTE.items() if _BASE.get(k) != v}
+        for b in set(BUILDERS) - before:
+            _FAMILY[b] = name
+    for own in _OWN.values():       # outside a build, every name can be looked up
+        PALETTE.update(own)
+
+
+def _palette_of(base_id):
+    """The palette a base is built on: the kit's, the Wolf's, and its own family's."""
+    PALETTE.clear()
+    PALETTE.update(_BASE)
+    PALETTE.update(_OWN.get(_FAMILY.get(base_id), {}))
+
+
+def _palette_kept(base_id):
+    """What a family put in the palette while building (a file of its own, read when first
+    needed) is its own from then on."""
+    fam = _FAMILY.get(base_id)
+    if fam:
+        _OWN[fam].update({k: v for k, v in PALETTE.items() if _BASE.get(k) != v})
 
 
 def merged(parent, own):
@@ -1081,10 +1120,12 @@ def build_base(base_id, only=None):
     if base_id not in BUILDERS:
         log("no builder yet for", base_id)
         return
+    _palette_of(base_id)
     for form_id, level, spec in forms_of(base):
         if only and form_id not in only:
             continue
         BUILDERS[base_id](form_id, level, spec, base)
+    _palette_kept(base_id)
 
 
 _families()

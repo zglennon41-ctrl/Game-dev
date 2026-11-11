@@ -1,4 +1,4 @@
-"""WILDLINE genius lines, the weapons: the Blade, the Gun and the Bow (docs/genius-evolutions.md,
+"""WILDLINE genius lines, the weapons: the Blade, the Gun and the Bow (docs/genius-lines.md,
 "The weapons"). Every form of these three lines is a different weapon to look at and to
 hold. genius_lines.py loads this file (register()); what a form looks like is the `body` of
 its node in data/genius-bases/<base>.json.

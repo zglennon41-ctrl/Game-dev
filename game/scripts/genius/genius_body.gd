@@ -13,7 +13,7 @@ extends Node3D
 
 const BODY_DIR := "res://game/assets/genius/bodies/%s.glb"
 const PART_DIR := "res://game/assets/genius/parts/%s.glb"
-const FORM_DIR := "res://game/assets/genius/forms/%s.glb"      # a body of a form's own (docs/genius-evolutions.md)
+const FORM_DIR := "res://game/assets/genius/forms/%s.glb"      # a body of a form's own (docs/genius-lines.md)
 const GIFT_DIR := "res://game/assets/genius/gifts/%s-%s.glb"   # a base's own part for what it gives a hybrid: <base>-<feature>
 const KEEP_DIR := "res://game/assets/genius/keepsakes/%s.glb"
 const TRAP_DIR := "res://game/assets/genius/trappings/%s.glb"

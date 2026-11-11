@@ -1,5 +1,5 @@
 """WILDLINE genius lines, the things with no flesh: what the four lines share
-(lines_spirits.py: the Lurker, the Fiend, the Ember, the Fog; docs/genius-evolutions.md).
+(lines_spirits.py: the Lurker, the Fiend, the Ember, the Fog; docs/genius-lines.md).
 
 A body here has no rig. It is built as a list of pieces, each a geometry and a material, in
 the genius kit's space (Z up, facing -Y, left is +X, about 0.7 units tall), and written as one

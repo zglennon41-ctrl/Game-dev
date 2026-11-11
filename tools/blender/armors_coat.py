@@ -1,4 +1,4 @@
-"""WILDLINE genius lines, the armors: the Coat (docs/genius-evolutions.md, "The armors").
+"""WILDLINE genius lines, the armors: the Coat (docs/genius-lines.md, "The armors").
 lines_armors.py loads this file; what the conventions are, and what `wear` means, is said there.
 
 A coat stands as if one of the game's people wore it and no one does: its hem at z = 0, the

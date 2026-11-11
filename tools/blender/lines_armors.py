@@ -1,5 +1,5 @@
 """WILDLINE genius lines, the armors: the Shield, the Gauntlet and the Coat, a body of its own
-for every form (docs/genius-evolutions.md, "The armors"). genius_lines.py loads this file
+for every form (docs/genius-lines.md, "The armors"). genius_lines.py loads this file
 (register()) and builds a form from the `body` of its node in data/genius-bases/<base>.json:
 
     python tools/blender/genius_lines.py shield

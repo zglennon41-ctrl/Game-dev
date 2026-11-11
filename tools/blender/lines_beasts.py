@@ -1,5 +1,5 @@
 """WILDLINE genius lines, the beasts with bodies of their own: the Tortoise and the Hawk
-(docs/genius-evolutions.md, "The Hawk and the Tortoise"). Neither is on the wolf's rig: a
+(docs/genius-lines.md, "The Hawk and the Tortoise"). Neither is on the wolf's rig: a
 tortoise is its shell, built here plate by plate; a hawk is built along its spine in the
 pose it holds (on the wing, hovering, stooping, on a perch it carries), with two wings the
 game beats. The three forms of the Hawk that came down to run (the Harrier and its Finals)

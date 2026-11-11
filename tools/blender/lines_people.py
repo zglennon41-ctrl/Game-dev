@@ -1,5 +1,5 @@
 """WILDLINE genius lines, the small people: the Imp, the Sprite and the Homunculus
-(docs/genius-evolutions.md, "The small people").
+(docs/genius-lines.md, "The small people").
 
 Each form is a small person of its own: its stature and proportions from its stage and its
 `build`, its attire cut from its own skin, and what it has grown, wears and carries. They

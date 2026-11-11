@@ -337,7 +337,7 @@ played the arc); barks stay as floating text. Still to be played rather than dec
     play fills a line of the Tally (twenty blows, ten runs, six postings, a hundred Pattern
     fires, which a week at the Academy does not reach).
 80. **A line as an evolution** (owner's direction, 2026-11-10; mine to build;
-    `docs/genius-evolutions.md`): (a) the reading taken of "Baby, three starters, three
+    `docs/genius-lines.md`): (a) the reading taken of "Baby, three starters, three
     paths from each starter and hybrid lines, three advancements from there, final
     advancement": the Baby is everyone's before the rite, the three starters are the rite's
     three offers, and the tree keeps its shape; the other reading is one more tier on every
@@ -351,3 +351,40 @@ played the arc); barks stay as floating text. Still to be played rather than dec
     Gate is a scene of about three seconds. (i) Seventy-one painted cards of forms the tree
     replaced were removed to make room; whether every form of the tree is to have a painted
     card again (682) is open: the game draws the living body on a card today.
+
+81. **The three types of genius** (owner's direction, 2026-11-10; mine to build;
+    `docs/genius-types.md`, "The calls that are the owner's", thirteen of them). The ones
+    that change what the game is: (a) the five roles of a companion, their names, and which
+    base has which; (b) a weapon or an item no longer takes the blow you did not see, so a
+    learner with a blade is no safer than one with no genius; (c) a weapon in the hand
+    spends the genius's own Will and leaves the hand when it is spent; (d) a gun genius has
+    no magazine; (e) a disarmed partner cannot take their genius in hand; (f) a caught,
+    tolled or shielded strike is not a parry; (g) whether the rite should lean toward the
+    role its partner lacks (the measure exists and nothing uses it); (h) a hybrid has only
+    its first base's type; (i) no type touches the Pattern; (j) four items have no great
+    move; (k) every number.
+82. **One style** (owner's direction, 2026-11-10; mine to build; `docs/style.md`, "Calls
+    that are the owner's"): (a) how muted, the cap at 0.5; (b) smooth for the living and
+    cut for the made, or facets as the field's hand; (c) how much of a genius may glow (an
+    eighth); (d) how dark the night; (e) the Library's glass banked down; (f) red hair held
+    to rust; (g) the slow breath every idle is played at.
+83. **How a genius is carried** (mine, 2026-11-11; `docs/genius-types.md`, "How it reads";
+    `data/genius-types.json`, `mounts`): (a) a Shield that is a genius is the shield in the
+    left hand, and a carried shield is not drawn under it; (b) a lantern at the hip, a bell
+    at the belt and an astrolabe at the shoulder are drawn a third larger than life so they
+    can be seen from the fight's camera, and are still small; (c) a Standing Gun taken in
+    hand brings its legs, its shield and its walls with it: it may want to be manned where
+    it stands instead; (d) a bow is edge-on from in front and behind, by the stance its
+    base was given.
+84. **The bodies of the twenty-two lines** (mine and seven workers', 2026-11-11;
+    `docs/genius-lines.md`, a section a family): what each Path keeps and how each form
+    differs was written from the form's sign, by the same rule as the Wolf's. The calls
+    that came up: (a) each Path of an armor and of an item wears its partner's coat its own
+    way (copper, silver, red), so a line is told by colour before shape; (b) the Fox, the
+    Stag and the Drake are the wolf's rig reshaped, none with a skeleton of its own, and
+    the Drake's wings do not beat; (c) the Lurker, the Ember and the Fog float at the
+    shoulder with whatever they stand on, where a pool, black ice or a grass-fire would sit
+    better on the ground; (d) every Ember keeps its face in the coal at the foot of its
+    flame; (e) a family's weak forms are listed at the end of its section; (f) the kin's
+    grey of age is paler than the Wolf's.
+

@@ -1,4 +1,4 @@
-"""WILDLINE genius lines: the Fog (docs/genius-evolutions.md, "The spirits").
+"""WILDLINE genius lines: the Fog (docs/genius-lines.md, "The spirits").
 
 Weather that came indoors and stayed. The Starter is a breath of it with two soft eyes; from
 there each path gives it a different habit, and a mark of that habit that every form on the

@@ -47,8 +47,8 @@ func _take(i: int) -> void:
 	ac.save()
 	var col: Color = World.SHAPE_COLORS.get(hero["shape"], Color.WHITE)
 	# The old body goes into light: its seams open, it becomes a shape of light and nothing
-	# else, and the light draws in. Then the new body comes out of it. (An evolution is a
-	# thing to watch, not a flash: docs/genius-evolutions.md.)
+	# else, and the light draws in. Then the new body comes out of it. (A Reading is a thing
+	# to watch, not a flash: docs/genius-lines.md.)
 	var p := Vector3(ac.fight.p_pos.x, 0, ac.fight.p_pos.y)
 	var body: GeniusBody = world._g_body
 	var at: Vector3 = body.global_position if body and is_instance_valid(body) else p + Vector3(0.6, 0, 0)

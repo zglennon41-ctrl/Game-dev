@@ -1,4 +1,4 @@
-"""WILDLINE genius lines: the Lurker (docs/genius-evolutions.md, "The spirits").
+"""WILDLINE genius lines: the Lurker (docs/genius-lines.md, "The spirits").
 
 A shadow that stands behind. The Starter is a blot with eyes; from there it is a hooded
 figure of ink, and each path gives the figure a different way to stand: broad and behind

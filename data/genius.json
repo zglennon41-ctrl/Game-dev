@@ -146,7 +146,7 @@
     "mid": 7.0
   },
   "stages": {
-    "$comment": "Where a genius is on its line, in the player's words (docs/genius-evolutions.md), by its form's level on the tree: the Baby is everyone's before the rite; a Starter is a base's settled form, a Path one of its three paths, an Advancement a prong, a Final a finish. plural is how the page counts what comes next.",
+    "$comment": "Where a genius is on its line, in the player's words (docs/genius-lines.md), by its form's level on the tree: the Baby is everyone's before the rite; a Starter is a base's settled form, a Path one of its three paths, an Advancement a prong, a Final a finish. plural is how the page counts what comes next.",
     "0": { "name": "Baby", "plural": "Babies" },
     "1": { "name": "Starter", "plural": "Starters" },
     "2": { "name": "Path", "plural": "Paths" },

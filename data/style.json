@@ -54,7 +54,9 @@
       ["homespun", "cloth"], ["robe", "cloth"], ["thread", "cloth"], ["pelt", "coat"], ["moth", "coat"], ["beetle", "coat"], ["maw", "coat"],
       ["tongue", "coat"], ["welt", "coat"], ["scar", "coat"], ["soot", "earth"], ["chalk", "stone"], ["fired", "stone"], ["acorn", "wood"],
       ["weed", "growth"], ["verdigris", "growth"], ["glaze", "glass"], ["frost", "glass"], ["visor", "iron"], ["smoke", "ink"], ["paint", "mixed"],
-      ["enamel", "mixed"], ["dial", "bone"], ["white", "bone"], ["ribbon", "cloth"], ["crepe", "cloth"], ["night", "iron"]
+      ["enamel", "mixed"], ["dial", "bone"], ["white", "bone"], ["ribbon", "cloth"], ["crepe", "cloth"], ["night", "iron"],
+      ["eggshell", "bone"], ["lichen", "growth"], ["stubble", "growth"], ["velvet", "coat"], ["crow", "coat"], ["knee", "coat"], ["rust", "coat"],
+      ["slag", "stone"], ["steam", "stone"], ["ash", "stone"], ["veil", "cloth"], ["mask", "mixed"], ["pane", "glass"], ["wet", "earth"]
     ],
     "classes": {
       "field": {"glows": true, "ramps": [], "bands": 1, "shadowTint": "#FFFFFF", "spec": [0.0, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0},

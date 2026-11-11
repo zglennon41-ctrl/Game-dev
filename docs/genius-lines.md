@@ -1,4 +1,4 @@
-# A line is an evolution
+# The lines: a body of its own for every form
 
 > "I want these to be distinct like Pokémon evolutions or digivolutions. Right now it just
 > looks very clunky. Baby, three starters, three paths from each starter and hybrid lines,
@@ -108,7 +108,13 @@ What every model keeps to, whatever builds it:
   (plate, ice, horn, brass). The body is one welded skin.
 - No clips. A rigged form moves by its base body's, which the game fits to its
   proportions. No textures. A rigged form under 200 KB, an object under 80 KB.
-- Colours from the kit's palette: muted earths, stone and metal, a value apart.
+- Colours from the kit's palette: muted earths, stone and metal, a value apart. The kit puts
+  every colour on the style's ramps as it makes the material (`docs/style.md`).
+- **A family's colours are its own.** Two families may each call a colour `moss` or `glaze`
+  and mean different things by it (eleven names are shared so today). What a family's file
+  adds to the palette is kept apart, and a base is built on the kit's palette, the Wolf's,
+  and its own family's (`_families`, `_palette_of` in `genius_lines.py`). Building one line
+  never repaints another.
 
 ## How the game wears it
 
@@ -125,10 +131,21 @@ body of the form it came from, in a coat of its second base's, with the second's
 hung on it as parts. So each base's gift (`hybrid.gift`) must be a part bold enough to say
 whose it is.
 
+A gift is the giver's own make of the part: `game/assets/genius/gifts/<base>-<feature>.glb`
+(the Fox's `fox-tail` is a brush and the Drake's `drake-tail` a ridged whip, and both are "a
+tail"). The game hangs that file for that base's gift and for nothing else; where a base has
+made none, or the feature comes some other way (heritage, an adaptation, a graft), it hangs
+the part every base shares, `parts/<feature>.glb`. A gift hangs where its feature hangs
+(`data/genius-bodies.json`, `featureSockets`), unless that table gives the giver's own make
+a place of its own under `<base>-<feature>` (the Lurker's cloak down the back, where the
+Coat's is on the head). A form carried into a hybrid's line from its second base wears the
+first base's body in its place (`wears`), and a body never wears its own base's gift.
+
 ## Looking at a line
 
 ```
 python tools/blender/genius_lines.py wolf          # build the Wolf's thirty-one
+python tools/blender/genius_lines.py --all         # every line and the Baby (about eight minutes)
 godot --headless --path . --import                  # let the game take them in
 godot --path . --resolution 3200x1800 -- --sheet=wolf --shots=DIR     # every form, a cell each
 python3 tools/genius-sheet.py DIR out.png --line 2  # one path's line, large and named
@@ -139,8 +156,8 @@ bash tools/genius-tree-page.sh wolf                 # the page of the whole tree
 
 | Line | Bodies |
 |---|---|
-| Wolf | all thirty-one (the proof) |
-| the other twenty-one | their base's body and parts, until built |
+| All twenty-two | all thirty-one each: 682 models, one a form |
+| Hybrids | each wears its first base's bodies and its second's gift (43 gift parts, two a base bar the Lantern, whose glow is the shared one) |
 | Baby | built: a small round thing of pale matter with a face, the field in its eyes, its belly and the tip of its tail (`python tools/blender/genius_lines.py baby`); it rides where the orb did until the rite |
 
 ## Calls that are the owner's
@@ -630,3 +647,82 @@ times as far across as the height its `ref_top` stands it to.
   and not yet drawn from a ramp: `ash` `ash_dark` `ash_pale` `brick` `wax_red` `rust` `soot`
   `clinker` `clinker_light` `pane` `stone_grave` `timber` `mask_pale` `veil` `steam`
   `stubble` `grass_dry`.
+
+## The wolf's kin: the Fox, the Stag, the Drake
+
+`tools/blender/lines_wolfkin.py`. Each is the wolf's rig reshaped as a species, aged its own
+way (a fawn is all leg where a pup is all paw), and then grown from its `body`. Underneath,
+every form is one wolf reshaped: outlines change through proportion, carriage and what is
+grown, and none has a skeleton of its own. The wolf's slots still work on them (`build`,
+`ears`, `eyes`, `maw`, `spine`, `paws`, `armor`, `carry`, `aura`); what is theirs alone:
+
+| Line | Keys | What they are |
+|---|---|---|
+| all three | `pose` | how it carries its head, put on last so that everything it has grown goes with it: `low` `high` `nod` `back` (over its shoulder) `aside` `tilt` |
+| | `tail` | `up` `over` (arched over its back) `wrap` `low` `loop` |
+| | `neck` | what is worn round a neck as it lies: `mane` `bell` `lamp` `ivy` `garland` `teeth` `chains` `ash` `bands` |
+| Fox | `whiskers` `mouth` `tails` `tip` `mask` `face` `back` `feet` `fins` `claws` | what it carries in its mouth; two tails or many; what its tail-tips carry (`light` `white` `ring` `coal` `flame` `wisp`); a mask and the face under it. In `carry`: `panniers` `pole` `cape`; in `ruff`: `courtier` |
+| Stag | `crown` `horn` `hung` `throat` `breath` `hide` `legs` `flank` `chest` | the shape of its antlers, what they are made of, and what is in them |
+| Drake | `horns` `frill` `ridge` `wings` `belly` `throat` `tailend` `shell` `jaw` `breath` `nostrils` `claws` `eye` | wings are fixed at the shoulder and do not beat |
+
+What each Path keeps: of the Fox, the Gone-away is lean and looks elsewhere, the Cache-fox
+is hearth-brown with something in its mouth, the Fire-tail carries its tail high with a
+light at the tip; of the Stag, the Tilter has a plated brow and its head down, the
+Wood-walker a red hide and branch antlers with moss, the Watch-hart one ear turned and its
+head over its shoulder; of the Drake, the Hoard is low and long and plated in brass, the
+Fire blood-red with a row of flame down its back, the Sky taller on the leg with its wings
+up.
+
+The look's roles are kept, so the partner's coat goes on: `fur_dark` and `fur_light` on the
+Fox and the Drake (whose ridge, wings and tail-tip are its markings), `hide_red` and
+`fur_cream` on the Stag. Two coat shifts are theirs: `russet` and `brass`.
+
+**Their gifts** (`python tools/blender/lines_wolfkin.py gifts`): the Fox's brush and its
+foxfire (`fox-tail`, `fox-glow`), the Stag's crown and its long legs (`stag-horn-brow`,
+`stag-long-legs`), the Drake's horns and its tail (`drake-horns`, `drake-tail`).
+
+## What is still weak
+
+Said by whoever built each family, after looking at its sheets. None of these fails a check;
+each is a form or a habit of the build that does not yet meet the rule at the top of this
+page.
+
+- **Every line on the wolf's rig** (Wolf, Fox, Stag, Drake, the Hawk's three Harriers):
+  one wolf reshaped. Outlines change by proportion, carriage and what is grown; none has a
+  skeleton or clips of its own. The Drake is the weakest for it: its legs and chest are a
+  wolf's, so the Sky path can read as a winged hound, and its wings do not beat. The
+  Harriers read as small griffins, not hawks on foot.
+- **Dark on dark.** A night coat on a dark ground: the Lurker by nature; the Imp's
+  Night-clerk, Lights-out Imp, Bondsman and Whipping-imp; the Drake's Lamp-hoarder,
+  Slag-jaw, Smoke-drake, Chimney-wyrm and Wing-shadow; the Coat's Shadow and Listening
+  paths on a black sample coat; bows and the Smoke-pole branch at night.
+- **Told apart by what they carry, not by outline.** Coat: the nine of the Listening path
+  (Whisper-collar and Warning Tug nearest). Shield: Wall-shield to Battered Shield; the
+  Road-shield is plain. Gauntlet: Catching Hand and Iron Palm. Hawk: the eleven of the
+  High Circler's path, all on the wing. Sprite and Homunculus: Shoulder-mender, Clay
+  Stand-in, Ward-builder, Weather-sprite. Fox: Gone-away, Listening Fox, Snow-pouncer;
+  Marsh-light beside Fire-tail. Stag: Tilter, Long Charge, the Watch-hart. Fiend:
+  Flare-up, Pyre-dancer and Brush-burner are one imp in three moods; Oath-scorch, Mark of
+  the Sworn and Vendetta differ by what they wear. Ember: Kept Fire, Circle-flame,
+  Tempering Flame. Bow: Omen-bow, The Twitch, Oath-bow.
+- **Reads as something else.** Fog: Mist of the Named Dead (a boulder), Sea-fret (fish),
+  Hoar (a white plant), and its rolls are faceted, so fog looks a little like rock.
+  Hawk: the Passenger's shoulder reads as a draped stand. Sprite: the Collar-rider's face is
+  lost between hair and collar. Drake: Kiln-throat's glazed jaw reads as big teeth.
+- **A face you cannot see.** The Hollow Behind's and the Writ-riddler's second faces are at
+  the back of the head; Hill-fire has none in view; the Whipping-imp's welts are on its
+  back.
+- **Small in its cell or in the world.** The Clasp (the Coat's Starter) is the weakest of
+  the armors. The Mud-lier and the Bog-lure are low. Flight forms are scaled by their wings.
+  The Salvor's ear-trumpet is near the ground.
+- **Leaves its Path's look.** Gun: Smoke-pole, Hot Barrel and Tinker's Piece have no wheel.
+  Blade: Grave-blade, Heirloom and Night-edge are straight; the Wooden Sword branch is wood,
+  point up.
+- **No pose of its own.** The small people move by their base body's clips, so what is in a
+  hand hangs at the side. A bow is edge-on from in front and behind. A Standing Gun in the
+  hand brings its legs, its shield and its walls with it.
+- **Floats where it should lie.** Ground-veil, Black Damp, Black Ice and Grass-fire float at
+  the shoulder with their ground, because their bases float.
+- **Light.** The game shows every lit surface at one brightness, so a large lit area glares;
+  light is kept to edges and small things except where a form is all light on purpose.
+

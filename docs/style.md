@@ -271,10 +271,13 @@ the colours the data names (hair, a zone's night, the creator's lights).
 
 ## Not done
 
-- Beasts and genii are still faceted (call 2; the bodies are being rebuilt).
+- Every genius form now has a body of its own, built on the ramps, soft where it is living
+  and cut where it is made (`docs/genius-lines.md`); the beasts are welded smooth. Fog is
+  the exception: its rolls are still faceted, as its first body was.
 - The people's art was not rebuilt on the ramps: the game moves 25 of their 64 colours as
   it makes them. The weapons, the wild and the Academy's kits were rebuilt.
 - The CC0 dungeon tiles of the Cut are still toy shapes in the right colours. The Cut
   wants a kit of its own, like the Academy's.
-- A genius's hover and glow follow the rules above only once its body does.
+- The game shows every lit surface of a genius at one brightness whatever its model asks,
+  so a large lit area glares; the bodies keep light to edges and small things for it.
 - Sound.

@@ -1,6 +1,6 @@
 ## A check on the bodies of the items of power (the Lantern, the Astrolabe, the Bell): every
 ## form of the three must have a model of its own in game/assets/genius/forms, and the model
-## must carry what the game and the contract rely on (docs/genius-evolutions.md): `ref_top`
+## must carry what the game and the contract rely on (docs/genius-lines.md): `ref_top`
 ## at the kit's height, `carry` (where a hand or a hook takes it), the usual sockets, a light
 ## of the field somewhere on it; it must stand on the ground and weigh under 80 KB.
 ## Run: godot --headless --path . -s res://game/tests/check_items.gd

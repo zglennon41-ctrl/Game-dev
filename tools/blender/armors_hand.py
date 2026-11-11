@@ -1,4 +1,4 @@
-"""WILDLINE genius lines, the armors: the Gauntlet (docs/genius-evolutions.md, "The armors").
+"""WILDLINE genius lines, the armors: the Gauntlet (docs/genius-lines.md, "The armors").
 lines_armors.py loads this file; what the conventions are, and what `wear` means, is said there.
 
 A gauntlet is a left hand in its own space: the middle of the wrist at the origin, the fingers

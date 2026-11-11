@@ -87,7 +87,7 @@ func _run() -> void:
 	test_homes_hand()
 	test_homes_lean()
 	test_genius_fight()
-	test_evolutions()
+	test_lines()
 	# the three types of genius: the tests' own bases are given types for these, and no others
 	var game_types := Data.genius_types()
 	_all_types()
@@ -3091,9 +3091,9 @@ func test_genius_fight() -> void:
 		runs.append("%.3f %.3f %.3f %s" % [d.w_hp, d.g_will, d.p_hp, str(d.g_pos)])
 	check(runs[0] == runs[1], "seeded, a fight with a genius plays out the same")
 
-## A line is an evolution (docs/genius-evolutions.md): a form wears what its parent wears, a
+## The lines (docs/genius-lines.md): a form wears what its parent wears, a
 ## form with a model of its own wears it, and the stages have the player's names.
-func test_evolutions() -> void:
+func test_lines() -> void:
 	_all_bases()
 	# what a form wears of its body: its parent's, unless it says otherwise
 	var parent := { "ruff": ["quills", 1.0], "build": { "legs": 1.1, "chest": 1.2 }, "carry": "lamp", "coat": "night" }

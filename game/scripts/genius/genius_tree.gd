@@ -27,7 +27,7 @@ static func _round(x: float, places: int) -> float:
 	var k := pow(10.0, places)
 	return roundf(x * k) / k
 
-## What a form wears of its body (docs/genius-evolutions.md): everything its parent wears,
+## What a form wears of its body (docs/genius-lines.md): everything its parent wears,
 ## unless it says otherwise; null takes a thing off.
 static func wear(parent: Dictionary, own: Dictionary) -> Dictionary:
 	var out := parent.duplicate(true)

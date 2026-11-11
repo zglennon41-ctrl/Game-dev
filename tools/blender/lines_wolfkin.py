@@ -1,5 +1,5 @@
 """WILDLINE genius lines, the wolf's kin: the Fox, the Stag and the Drake, each form a body of
-its own on the wolf's rig (docs/genius-evolutions.md; genius_lines.py builds the Wolf and
+its own on the wolf's rig (docs/genius-lines.md; genius_lines.py builds the Wolf and
 calls this file's register).
 
     python tools/blender/genius_lines.py fox
@@ -55,6 +55,7 @@ PALETTE.update({
     "ash_dark": ((0.26, 0.25, 0.25), 1.0, 0.0), "soot": ((0.03, 0.028, 0.032), 1.0, 0.0), "eggshell": ((0.8, 0.76, 0.66), 0.45, 0.0), "lichen": ((0.56, 0.6, 0.46), 0.9, 0.0),
     "ribbon_a": ((0.32, 0.1, 0.08), 0.9, 0.0), "ribbon_b": ((0.13, 0.19, 0.3), 0.9, 0.0), "ribbon_c": ((0.33, 0.27, 0.09), 0.9, 0.0), "tongue_ink": ((0.018, 0.018, 0.026), 0.4, 0.0),
     "earth": ((0.1, 0.075, 0.055), 1.0, 0.0), "wet": ((0.06, 0.055, 0.05), 0.25, 0.0), "knee": ((0.42, 0.41, 0.4), 0.9, 0.0),
+    "fur_grey": ((0.4, 0.39, 0.38), 0.9, 0.0),       # the grey of these three's age (a beard, a ghost): paler than the Wolf's
 })
 
 NECK = ("Neck1", "Neck2", "Neck3")
@@ -178,7 +179,7 @@ def _paint_coat(r, pick, material):
 # what is round is shaded round, whatever it is made of (a beam, a cane, a link, a bead):
 # only what has planes keeps them (plate, slate, ice, a book, a mask). It is also what keeps
 # a body with a great deal on it inside its size.
-ROUND = ("scar", "glaze", "slag", "bark", "bone", "metal_iron", "wax", "coal", "claw", "moss", "leaf", "weed", "petal", "lichen", "ash", "horn", "mark_ridge", "mark_wings",
+ROUND = ("scar", "hide_scar", "glaze", "slag", "bark", "bone", "metal_iron", "wax", "coal", "claw", "moss", "leaf", "weed", "petal", "lichen", "ash", "horn", "mark_ridge", "mark_wings",
          "mark_tailtip", "wood", "velvet", "brass_old", "whisker", "feather", "crow", "beak", "earth", "knee", "wet", "soot", "ribbon", "drake_horn", "wing")
 
 
@@ -1992,7 +1993,7 @@ def register(builders):
 
 
 # ======================================================================================
-# The gifts: what a hybrid wears of these three (docs/genius-evolutions.md, "Hybrids")
+# The gifts: what a hybrid wears of these three (docs/genius-lines.md, "Hybrids")
 # ======================================================================================
 #
 # A hybrid's form wears the body of the form it came from and its second base's gift as

@@ -2306,7 +2306,7 @@ var genius_visible := true
 var _genius := Node3D.new()
 var _g_core := MeshInstance3D.new()
 var _g_core_mat := StandardMaterial3D.new()
-var _g_baby: Node3D = null         # the Baby: the body it has before the rite (docs/genius-evolutions.md)
+var _g_baby: Node3D = null         # the Baby: the body it has before the rite (docs/genius-lines.md)
 var _g_baby_lit: Array = []        # its materials of the field, which take the partner's colour
 var _g_baby_was := Vector3.ZERO
 var _g_halo := MeshInstance3D.new()
@@ -4227,7 +4227,7 @@ func _update_form(f: Fight, dt: float) -> void:
 		_g_form.global_transform = Transform3D(hb * Basis.from_scale(Vector3.ONE * k), at)
 		# A weapon with a model of its own says where the hand closes on it (an empty named
 		# grip, turned as a weapon is turned in the hand): it is seated there, whatever its form.
-		# Such a model is made in the weapon kit's frame and at its size (docs/genius-evolutions.md,
+		# Such a model is made in the weapon kit's frame and at its size (docs/genius-lines.md,
 		# "The weapons"): the size it floats at is undone, and a gun or a bow takes the quarter
 		# turn the kit's own take in the hand.
 		var grip := _held_at("grip")

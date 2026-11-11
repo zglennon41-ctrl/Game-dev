@@ -385,7 +385,7 @@ def ledger_part():
 def broad_guard_part():
     """A broad guarding stance, on its shoulder (the left): a guard the size of a small shield,
     iron-faced and rimmed in brass, strapped on. It is the Shield's gift: on any body it says
-    whose it is (docs/genius-evolutions.md, "The armors")."""
+    whose it is (docs/genius-lines.md, "The armors")."""
     out = [(-0.085, 0.11), (0.085, 0.11), (0.095, 0.0), (0.06, -0.09), (0.0, -0.15), (-0.06, -0.09), (-0.095, 0.0)]
 
     def ring(x, k=1.0, bow=0.0):
