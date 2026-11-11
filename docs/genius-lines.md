@@ -164,7 +164,7 @@ bash tools/genius-tree-page.sh wolf                 # the page of the whole tree
 
 | Line | Bodies |
 |---|---|
-| All twenty-two | all thirty-one each: 682 models, one a form |
+| All twenty-eight | all thirty-one each: 868 models, one a form (the Moth, the Carp, the Octopus, the Angel, the Demon and the Elemental joined on 2026-11-11) |
 | Hybrids | each wears its first base's bodies and its second's gift (43 gift parts, two a base bar the Lantern, whose glow is the shared one) |
 | Baby | built: a small round thing of pale matter with a face, the field in its eyes, its belly and the tip of its tail (`python tools/blender/genius_lines.py baby`); it rides where the orb did until the rite |
 
@@ -288,9 +288,9 @@ grain the style lays on by what a thing is made of). The sizes: a rigged body un
 A body is either what it says it is, with the joints and the weight of that animal or
 thing, or it is a magical choice made on purpose and carried all the way. Nothing may be
 one animal wearing another's parts by accident. Each family's section says which for each
-line, in a sentence. The known cases: the Drake (a hound with wings: it is to be a true
-drake, long in the neck and the tail, low and splayed, its wings rooted at the shoulder and
-beating); the Hawk's Harriers (griffins by accident: to be griffins on purpose, or birds
+line, in a sentence. The known cases: the Drake (was a hound with wings; rebuilt on
+2026-11-11 as a true drake, long in the neck and the tail, low and splayed, its wings
+rooted at the shoulder); the Hawk's Harriers (griffins by accident: to be griffins on purpose, or birds
 on foot); what floats and should lie (a pool, black ice, a grass-fire); a fish and an
 octopus in the air (a choice: they swim in the field, and everything about them says so).
 
@@ -1308,7 +1308,8 @@ page.
   one goes through the floor. The Shade-friend is pale for its Path and is the one form the
   colour check still puts elsewhere at some sizes. Faces read as eyes and marks; at a
   thumbnail the lids' angle (which is what makes the three Paths' looks) is two pixels.
-- **Every other line on the wolf's rig** (Fox, Stag, Drake, the Hawk's three Harriers):
+- **Every other line on the wolf's rig** (Fox, Stag, the Hawk's three Harriers; the Drake
+  has had a body of its own since 2026-11-11, so what is said of it here is the old one):
   one wolf reshaped. Outlines change by proportion, carriage and what is grown; none has a
   skeleton or clips of its own. The Drake is the weakest for it: its legs and chest are a
   wolf's, so the Sky path can read as a winged hound, and its wings do not beat. The
