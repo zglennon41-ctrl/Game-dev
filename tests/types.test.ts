@@ -19,7 +19,7 @@ function withTypes(change: (t: any) => void) {
 
 describe('the three types of genius, as data', () => {
   const T = read('data/genius-types.json');
-  const bases = ['wolf', 'hawk', 'stag', 'tortoise', 'fox', 'imp', 'lurker', 'fiend', 'drake', 'sprite', 'homunculus', 'ember', 'fog', 'lantern', 'astrolabe', 'bell', 'blade', 'gun', 'bow', 'shield', 'gauntlet', 'coat', 'moth', 'octopus', 'carp', 'angel', 'demon', 'elemental']
+  const bases = ['wolf', 'hawk', 'stag', 'tortoise', 'fox', 'imp', 'lurker', 'fiend', 'drake', 'sprite', 'homunculus', 'ember', 'fog', 'lantern', 'astrolabe', 'bell', 'blade', 'gun', 'bow', 'shield', 'gauntlet', 'panoply', 'moth', 'octopus', 'carp', 'angel', 'demon', 'elemental']
     .map((id) => read(`data/genius-bases/${id}.json`));
 
   it('gives every class of base one type', () => {

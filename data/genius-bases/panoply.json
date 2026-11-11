@@ -104,14 +104,14 @@
    "sign": "A knight's harness standing very straight, a gold plume on the helm and a plain gold shield. The visor is dark, with two steady lights.",
    "habit": "When a stranger comes up to you it is already between, and it does not explain itself.",
    "leans": {
+    "bonds": {
+     "named": 1.0
+    },
     "fights": {
-     "blocks": 1.0
+     "blocks": 0.8
     },
     "orders": {
-     "guard": 0.7
-    },
-    "bonds": {
-     "classmate": 0.5
+     "guard": 0.5
     }
    },
    "features": [
@@ -188,8 +188,8 @@
      },
      "finishes": [
       {
-       "id": "panoply-wall-of-one",
-       "name": "Wall of One",
+       "id": "panoply-twin-wall",
+       "name": "Twin Wall",
        "of": "one who is a whole line of defence, and does not mention it",
        "text": "It carries a shield on each arm now, and closed together they are a wall with a slot to look through. It has not been gone round yet.",
        "sign": "Two tower shields shut edge to edge, crenellated along the top, gold bands across both. Two lights look out through the gap.",
@@ -505,11 +505,11 @@
     "fights": {
      "hurts": 1.0
     },
-    "range": {
-     "close": 0.7
-    },
     "orders": {
-     "hold": 0.5
+     "hold": 0.7
+    },
+    "range": {
+     "close": 0.5
     }
    },
    "features": [
@@ -647,8 +647,8 @@
      ]
     },
     {
-     "id": "panoply-mantlet",
-     "name": "Mantlet",
+     "id": "panoply-door-bearer",
+     "name": "Door-bearer",
      "of": "one who brings the wall along",
      "text": "Half a door has grown on each of its forearms, oak and iron. When it brings its arms together there is a door in the road, and it is shut.",
      "sign": "Two tall leaves of an oak door, one on each arm, banded with iron and painted red. The helm looks over the top of them.",
@@ -677,8 +677,8 @@
      },
      "finishes": [
       {
-       "id": "panoply-gatehouse",
-       "name": "Gatehouse",
+       "id": "panoply-barbican",
+       "name": "Barbican",
        "of": "one who decides who comes in, and is rarely asked twice",
        "text": "It has grown turrets on its shoulders and battlements round its helm. It is a gate with a keep behind it, and it looks at everyone who passes under.",
        "sign": "A round turret on each shoulder, a ring of battlements on the helm, a small red flag on one turret, and the two door-leaves below.",
@@ -853,11 +853,11 @@
    "sign": "A wide-brimmed iron hat over an empty dark, a blue-green cape and scarf, rows of small laced plates, and a staff.",
    "habit": "It stands nearest the way out of any room, and it has always already seen where that is.",
    "leans": {
-    "orders": {
-     "free": 1.0
-    },
     "quests": {
-     "deep-run": 0.7
+     "deep-run": 1.0
+    },
+    "orders": {
+     "free": 0.7
     },
     "company": {
      "alone": 0.4

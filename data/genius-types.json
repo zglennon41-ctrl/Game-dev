@@ -255,7 +255,7 @@
     }
   },
   "items": {
-    "$comment": "A defensive item (shield, gauntlet, coat) or a ritual item (lantern, astrolabe, bell). always: what is true of its partner while it is theirs (each multiplier is 1 + (m - 1) x the worth of its age). use: what its partner does with the key: an effect, its wait in seconds (longer or shorter by age), the Will it costs the item, and the numbers of the effect; the keys named in `grows` are multiplied by the worth of its age. feeds: the line of the Tally's orders that using it counts toward (guard, hunt, hold, free). paths: what a path lays over always and use (a key there replaces the base's). An item does not guard or hunt as a companion does and it does not fall: with too little Will, the key does nothing. The effects: set (the shield takes the next `blows` blows whole for `seconds`; ground { radius, seconds }: it stands as a door on that ground instead, and takes blows at whoever stands by it; allies: metres within which a classmate is covered too), catch (within `reach` of a foe that is winding up: the strike is caught and the foe flinches for `flinch`; open: its guard is down and it takes `exposed` more for that long; strike: the catch is a blow of that many Hunts and throws it back; allyReach: it reaches that far for a strike wound up at a classmate; a miss costs missWill and missWait), slip (an instant step of `distance` dodges' length, untouchable for `iframes` seconds, out of anything but the Pattern; willBack and haste { seconds, speed }; punish { seconds, damage }: the next blow after a blow slipped; late { seconds, back }: made that soon after a blow lands, it takes that share of the blow back), light (lit ground of `radius` for `seconds` where its partner stands, or at the foe's feet with at: foe; inside it the moment to parry is parryWindow and a parry staggers `stagger` seconds longer; found: a guarded foe in it lets that much more through its guard; shelter: blows at those inside land for that; burn: Hunts a second on foes inside; willRegen: its partner's Will inside), sight (the locked foe is sighted for `seconds`: blows in its weak moment, staggered or recovering from its own strike, land for `damage`; far { from, damage }: from that far, at any moment; parryWindow and stagger: against the sighted foe's strikes), toll (every foe within `radius` that is winding up is broken out of it and flinches for `flinch`; its partner gets `willBack` Will; mend: health to its partner and every classmate in hearing; stagger: what it breaks is staggered that long instead; strike: and struck for that many Hunts).",
+    "$comment": "A defensive item (shield, gauntlet) or a ritual item (lantern, astrolabe, bell). always: what is true of its partner while it is theirs (each multiplier is 1 + (m - 1) x the worth of its age). use: what its partner does with the key: an effect, its wait in seconds (longer or shorter by age), the Will it costs the item, and the numbers of the effect; the keys named in `grows` are multiplied by the worth of its age. feeds: the line of the Tally's orders that using it counts toward (guard, hunt, hold, free). paths: what a path lays over always and use (a key there replaces the base's). An item does not guard or hunt as a companion does and it does not fall: with too little Will, the key does nothing. The effects: set (the shield takes the next `blows` blows whole for `seconds`; ground { radius, seconds }: it stands as a door on that ground instead, and takes blows at whoever stands by it; allies: metres within which a classmate is covered too), catch (within `reach` of a foe that is winding up: the strike is caught and the foe flinches for `flinch`; open: its guard is down and it takes `exposed` more for that long; strike: the catch is a blow of that many Hunts and throws it back; allyReach: it reaches that far for a strike wound up at a classmate; a miss costs missWill and missWait), slip (an instant step of `distance` dodges' length, untouchable for `iframes` seconds, out of anything but the Pattern; willBack and haste { seconds, speed }; punish { seconds, damage }: the next blow after a blow slipped; late { seconds, back }: made that soon after a blow lands, it takes that share of the blow back), light (lit ground of `radius` for `seconds` where its partner stands, or at the foe's feet with at: foe; inside it the moment to parry is parryWindow and a parry staggers `stagger` seconds longer; found: a guarded foe in it lets that much more through its guard; shelter: blows at those inside land for that; burn: Hunts a second on foes inside; willRegen: its partner's Will inside), sight (the locked foe is sighted for `seconds`: blows in its weak moment, staggered or recovering from its own strike, land for `damage`; far { from, damage }: from that far, at any moment; parryWindow and stagger: against the sighted foe's strikes), toll (every foe within `radius` that is winding up is broken out of it and flinches for `flinch`; its partner gets `willBack` Will; mend: health to its partner and every classmate in hearing; stagger: what it breaks is staggered that long instead; strike: and struck for that many Hunts).",
     "shield": {
       "type": "defense",
       "worn": "arm",
@@ -378,68 +378,6 @@
           },
           "always": {
             "catchFall": 1
-          }
-        }
-      }
-    },
-    "coat": {
-      "type": "defense",
-      "worn": "back",
-      "wornAs": "On your back",
-      "always": {
-        "name": "It hangs loose",
-        "text": "A dodge costs you less Will, and you are untouchable in it a moment longer.",
-        "feeds": "free",
-        "dodge": {
-          "will": 0.7,
-          "iframes": 0.06
-        }
-      },
-      "use": {
-        "name": "Slip",
-        "short": "Slip",
-        "effect": "slip",
-        "feeds": "free",
-        "text": "The coat pulls you out: an instant step the way you steer, or round the foe if you steer nowhere, untouchable, out of a swing, a reload or a flinch. It costs you no Will.",
-        "wait": 8.0,
-        "will": 8.0,
-        "distance": 1.0,
-        "iframes": 0.42,
-        "grows": [
-          "iframes"
-        ]
-      },
-      "paths": {
-        "coat-travelling": {
-          "name": "Travelling Coat",
-          "text": "The slip carries you nearly half as far again, gives you back Will, and you run faster for two and a half seconds after.",
-          "use": {
-            "distance": 1.4,
-            "willBack": 8.0,
-            "haste": {
-              "seconds": 2.5,
-              "speed": 1.25
-            }
-          }
-        },
-        "coat-shadow": {
-          "name": "Shadow-coat",
-          "text": "A blow you slip lands where you were, and the foe is left looking there: your next blow within two seconds lands half again as hard.",
-          "use": {
-            "punish": {
-              "seconds": 2.2,
-              "damage": 1.5
-            }
-          }
-        },
-        "coat-listening": {
-          "name": "Listening Coat",
-          "text": "It heard it coming. Slip within a third of a second after a blow lands, and most of that blow is taken back.",
-          "use": {
-            "late": {
-              "seconds": 0.33,
-              "back": 0.7
-            }
           }
         }
       }
@@ -652,21 +590,6 @@
         0.0,
         0.0,
         0.0
-      ],
-      "turn": [
-        0,
-        0,
-        0
-      ],
-      "scale": 1.0
-    },
-    "back": {
-      "bone": "chest",
-      "by": "wear",
-      "at": [
-        0.0,
-        0.4,
-        -0.05
       ],
       "turn": [
         0,
@@ -1187,6 +1110,23 @@
         "angel-weigher": {
           "shade": "hunter",
           "text": "It believes in what is deserved: heavier into every opening."
+        }
+      }
+    },
+    "panoply": {
+      "role": "bulwark",
+      "paths": {
+        "panoply-sworn-plate": {
+          "shade": "bulwark",
+          "text": "It has chosen its few and stands before them: it holds the foe longer."
+        },
+        "panoply-siege-plate": {
+          "shade": "harrier",
+          "text": "It goes through what is shut: it breaks the foe's guard."
+        },
+        "panoply-wayfarer": {
+          "shade": "lookout",
+          "text": "It keeps the watch at the edge: it calls the strike."
         }
       }
     }

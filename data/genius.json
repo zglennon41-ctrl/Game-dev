@@ -661,5 +661,48 @@
         }
       }
     }
+  },
+  "renamed": {
+    "$comment": "A base that was taken out of the tree and what stands in its place (the Coat became the Living Armor on 2026-11-12: nothing is worn any more). A saved genius of the old base is read as the new one (Genius.from_dict): bases maps a base's id, forms each form's id (a hybrid's two bases and its form alike), silhouettes the body it wore. It keeps its name, its look, its age, its Seed-mark and what it had kept; what it is made of is the new form's.",
+    "bases": {
+      "coat": "panoply"
+    },
+    "forms": {
+      "coat-clasp": "panoply-squire",
+      "coat-travelling": "panoply-wayfarer",
+      "coat-oilskin": "panoply-lantern-watch",
+      "coat-pilots-coat": "panoply-last-lamp",
+      "coat-lent-coat": "panoply-dark-lantern",
+      "coat-road-coat": "panoply-outrider",
+      "coat-thousand-mile": "panoply-long-patrol",
+      "coat-many-pockets": "panoply-pathfinder",
+      "coat-hide-coat": "panoply-hermit-plate",
+      "coat-winter-coat": "panoply-waystone",
+      "coat-deep-coat": "panoply-empty-road",
+      "coat-shadow": "panoply-siege-plate",
+      "coat-slip-coat": "panoply-ram",
+      "coat-empty-sleeve": "panoply-breach",
+      "coat-knife-coat": "panoply-hundred-dent",
+      "coat-night-coat": "panoply-door-bearer",
+      "coat-collar-up": "panoply-barbican",
+      "coat-nobodys-coat": "panoply-lock-and-bar",
+      "coat-turncoat": "panoply-furnace-plate",
+      "coat-storm-lined": "panoply-kiln",
+      "coat-scorched-hem": "panoply-banked",
+      "coat-listening": "panoply-sworn-plate",
+      "coat-clerks-coat": "panoply-pavise",
+      "coat-coat-of-offices": "panoply-twin-wall",
+      "coat-sworn-cloth": "panoply-open-guard",
+      "coat-whisper-collar": "panoply-oath-plate",
+      "coat-warning-tug": "panoply-vigil",
+      "coat-eavesdropper": "panoply-champion",
+      "coat-hand-me-down": "panoply-banner-harness",
+      "coat-inherited-coat": "panoply-standard",
+      "coat-coat-of-the-cohort": "panoply-cohorts-plate"
+    },
+    "silhouettes": {
+      "relic-coat": "relic-panoply",
+      "relic-buckle": "relic-panoply"
+    }
   }
 }

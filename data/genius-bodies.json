@@ -36,7 +36,8 @@
     "fletching": ["socket_back"],
     "mist": ["socket_body"], "lurker-shadow-cloak": ["socket_back"],
     "carp-fins": ["socket_back"],
-    "many-arms": ["socket_back"]
+    "many-arms": ["socket_back"],
+    "pauldrons": ["socket_back"]
   },
   "kinds": {
     "quadruped": { "model": "res://game/assets/quaternius/Wolf.glb", "anim": { "idle": "AnimalArmature|Idle", "walk": "AnimalArmature|Walk", "run": "AnimalArmature|Gallop" },
@@ -90,7 +91,6 @@
     "relic-shield": { "kind": "object", "build": "shield", "hover": true, "carries": ["tower-shield", "broad-chest", "fangs", "bastion", "grip"] },
     "relic-gauntlet": { "kind": "object", "build": "gauntlet", "hover": true, "artSize": 0.9, "carries": ["talon-grip", "grip", "small-hands"] },
     "relic-panoply": { "kind": "humanoid", "scale": [0.9, 0.9, 0.9], "artSize": 0.92, "carries": ["helm", "pauldrons", "iron-hide"] },
-    "relic-coat": { "kind": "object", "build": "coat", "hover": true, "artSize": 1.1, "carries": ["grip"] },
     "relic-mask": { "kind": "object", "build": "mask", "hover": true },
     "relic-gate": { "kind": "construct", "build": "gate" },
     "aspect-flame": { "kind": "aspect", "build": "flame", "hover": true },
@@ -109,7 +109,6 @@
     "daemon-whisper": { "kind": "humanoid", "scale": [0.8, 0.8, 0.8], "hover": true, "artSize": 0.8, "carries": ["second-face"] },
     "aspect-frost": { "kind": "aspect", "build": "flame", "hover": true, "carries": ["cold-core"] },
     "aspect-wisps": { "kind": "aspect", "build": "flame", "hover": true, "carries": ["ember", "lantern"] },
-    "relic-buckle": { "kind": "object", "build": "shield", "hover": true, "artSize": 0.8, "carries": ["watching-eye", "grip"] },
     "relic-knife": { "kind": "object", "build": "blade", "hover": true, "artSize": 0.85, "carries": ["short-blade", "watching-eye", "grip", "edge"] },
     "relic-glove": { "kind": "object", "build": "gauntlet", "hover": true, "artSize": 0.8, "carries": ["small-hands", "grip", "talon-grip"] },
     "beast-cat": { "kind": "quadruped", "artSize": 0.6, "carries": ["ground-claws", "tail"] },

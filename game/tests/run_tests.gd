@@ -84,6 +84,7 @@ func _run() -> void:
 	test_ages()
 	test_refinement_and_turning()
 	test_old_saves()
+	test_renamed_saves()
 	test_homes_hand()
 	test_homes_lean()
 	test_genius_fight()
@@ -2649,6 +2650,45 @@ func test_refinement_and_turning() -> void:
 	check(text.contains("comes of sending it to Hunt") and text.contains("one who is like Test Runner Path B") and text.contains("WHOSE SOUL") and text.contains("ITS HABIT") and text.contains("ITS SIGN") and text.contains("THE PICTURE OF"), "each form says what play leads to it and what it is the picture of; the page says whose soul it is, its sign and its habit")
 	page.queue_free()
 	_all_bases()
+
+## A base taken out of the tree (data/genius.json, renamed: the Coat became the Living Armor): a
+## saved genius of it loads as the base that stands in its place, form for form.
+func test_renamed_saves() -> void:
+	_all_bases()
+	var r: Dictionary = Data.genius().get("renamed", {})
+	var bases: Dictionary = r.get("bases", {})
+	var forms: Dictionary = r.get("forms", {})
+	check(String(bases.get("coat", "")) == "panoply" and forms.size() == 31, "the Coat is read as the Living Armor, all thirty-one forms of it (%d)" % forms.size())
+	var lost: Array = []
+	for old in forms:
+		var f := Data.form(String(forms[old]))
+		if f.is_empty() or not Data.form(String(old)).is_empty() or bases.get(String(old).get_slice("-", 0), "") != f["base"]:
+			lost.append(old)
+	check(lost.is_empty(), "every form of a base that is gone has a form that stands in its place, and is itself gone (lost: %s)" % str(lost))
+	var saved := { "name": "Hem", "instar": 3, "day": 70, "order": "guard", "look": { "seed": 99, "coat": 5, "marks": {}, "keepsake": "bell", "keepsakeColor": "" },
+		"body": { "form": "coat-night-coat", "base": "coat", "expression": "relic", "silhouette": "relic-coat", "coatOf": "relic-coat", "own": ["watching-eye", "coat-weave", "shadow-cloak", "dark-eyed"],
+			"heritage": ["set-feet", "high-collar"], "seedMark": "far-eyes", "grafts": [{ "id": "shade:x", "feature": "lantern", "source": "shade:x" }], "adaptations": [] },
+		"history": [{ "instar": 1, "form": "coat-clasp", "name": "Clasp", "day": 0, "by": "rite", "settled": true }] }
+	var g := Genius.from_dict(saved.duplicate(true))
+	var want := String(forms["coat-night-coat"])
+	check(g.body["form"] == want and g.body["base"] == "panoply" and g.body["silhouette"] == "relic-panoply" and g.level() == 3, "a saved Night-coat loads as the form in its place (%s)" % g.body["form"])
+	check(g.name == "Hem" and g.instar == 3 and g.day == 70 and g.body["seedMark"] == "far-eyes" and int(g.look["seed"]) == 99 and g.look["keepsake"] == "bell", "it keeps its name, its age, its Seed-mark and its look")
+	check((g.body["heritage"] as Array) == ["set-feet"] and g.features().has("lantern") and not g.features().has("coat-weave") and (g.body["own"] as Array) == (Data.form(want)["features"] as Array),
+		"what it had adapted and its grafts stay; it is made of what the new form is made of")
+	check(g.history.size() == 2 and g.history[-1].get("renamed", "") == "coat-night-coat", "and its history says what it was")
+	var body := GeniusBody.build({ "form": g.body["form"], "silhouette": g.body["silhouette"], "expression": g.body["expression"], "features": g.features(), "instar": g.instar, "look": g.look }, Color.ORANGE, g.instar)
+	check(body != null and body.find_children("*", "MeshInstance3D", true, false).size() > 0, "and it can be drawn")
+	body.free()
+	var again := Genius.from_dict(g.to_dict())
+	check(again.body["form"] == want and again.history.size() == 2, "it is renamed once only")
+	# a hybrid whose second base was the Coat, and one whose first was
+	var first := String(Data.base("wolf")["paths"][0]["id"])
+	var hy := Genius.from_dict({ "name": "Burr", "instar": 2, "body": { "form": "wolf+coat:" + first, "base": "wolf+coat", "expression": "beast", "silhouette": "beast-runner", "coatOf": "relic-coat",
+		"own": [], "heritage": [], "seedMark": "", "grafts": [], "adaptations": [] } })
+	check(hy.body["form"] == "wolf+panoply:" + first and hy.body["coatOf"] == "relic-panoply" and hy.features().has("helm"), "a Wolf turned toward the Coat is a Wolf turned toward the Living Armor (%s)" % hy.body["form"])
+	var yh := Genius.from_dict({ "name": "Nap", "instar": 2, "body": { "form": "coat+wolf:coat-shadow", "base": "coat+wolf", "expression": "relic", "silhouette": "relic-coat", "coatOf": "beast-runner",
+		"own": [], "heritage": [], "seedMark": "", "grafts": [], "adaptations": [] } })
+	check(yh.body["form"] == "panoply+wolf:" + String(forms["coat-shadow"]) and yh.body["silhouette"] == "relic-panoply", "and a Coat turned toward the Wolf a Living Armor turned toward it (%s)" % yh.body["form"])
 
 ## A genius saved before the tree is a form no tree has (docs/genius-tree.md). It settles again
 ## as the base nearest the body it wore, keeping its name, its look, its Seed-mark and its age.
