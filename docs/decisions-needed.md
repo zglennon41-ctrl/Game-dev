@@ -411,3 +411,29 @@ played the arc); barks stay as floating text. Still to be played rather than dec
     to numbers (`tools/genius-line-check.py`): outlines too alike, forms too dark, Paths
     told apart by colour; the thresholds are mine.
 
+86. **The Angel, the Demon and the Elemental** (owner's direction, 2026-11-11: "Add three
+    more one angel line, one demon line, and one line specifically for elementals with a
+    humanoid form like tiny demigods"; mine to build). The readings taken, each yours to
+    overrule: (a) all three are **companions built as small people**: a forearm tall,
+    adult and heroic in proportion, not chibi. "Tiny demigods" is read as the scale of all
+    three and the subject of the Elemental. (b) The **Angel** is a magical creature and a
+    **Keeper**: the soul of one who answers to something larger than themselves, and is
+    hard to live with for it; the picture of conscience. Its three Paths are three ways of
+    that: the one who stands at a shoulder, the one who brings the word whether or not it
+    is wanted, the one who believes in what is deserved. Its halo is the field's light, so
+    it is the colour of its partner's Shape. (c) The **Demon** is a monster and a
+    **Hunter**: a prince in exile, the soul of one who will not be told and would rather
+    be wrong on their own account than right on another's. It is not evil (pride, appetite
+    and refusal are in everyone) and it is loyal to its partner and to no one else. Its
+    Paths: the proud exile, the advocate who can make the case for anything, the ravager
+    who settles it by being larger. (d) The **Elemental** is a magical creature and a
+    **Harrier** (weather breaks a stance): the soul of one who is more a place or a
+    weather than a person. Its three Paths are **Earth, Sea and Sky**, not the four
+    elements: four does not divide by three, and fire is not left out, being the earth's
+    (magma, the forge under the hill) and the sky's (lightning, the sun). Its nine
+    Advancements are nine small gods. (e) **No real religion's names or symbols** in any
+    of the three. (f) That makes **nineteen companions** (four Bulwarks, four Hunters,
+    four Harriers, four Keepers, three Lookouts) and twenty-eight lines. (g) The names of
+    their Paths and forms, and what play earns each, are first drafts until you have read
+    them on the tree page.
+
