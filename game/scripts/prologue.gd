@@ -15,6 +15,12 @@ var fizzles := 0
 var _t := 0.0
 var _hold_until := 0
 var note := ""
+var sfx: Sfx = null
+var music: Music = null
+var _walked := 0.0
+var _last_pos := Vector2.ZERO
+var _wake_left := 0.0      # the camera stays on the hero this long while the field wakes
+var _won := false
 
 func _init(f: Fight, w: World, h: Dictionary) -> void:
 	fight = f
@@ -62,7 +68,40 @@ func start(hud: Hud) -> void:
 	world.genius_visible = false   # the genius is born when the field wakes
 	fight.p_lock = false
 	world.lock_on = false
+	_last_pos = fight.p_pos
 	_enter(hud)
+
+## A word of the night's own (data/story.json, notes).
+func _note(id: String) -> String:
+	return fill(String(Data.story.get("notes", {}).get(id, "")), hero)
+
+## The field wakes: the game's first great moment. Time slows, the camera comes in on the
+## hero, the lamps of the platform catch one after another, the genius is born, and the wolf
+## is thrown back and left open.
+func _wake(hud: Hud, how: String) -> void:
+	note = _note("wake_" + how)
+	world.field_wakes(fight, hero)
+	world.set_lamps(1.0, 2.6)
+	var m: Dictionary = Data.story.get("moments", {}).get("wake", {})
+	hud.banner(fill(String(m.get("title", "YOUR FIELD WAKES")), hero), fill(String(m.get("sub", "")), hero), World.SHAPE_COLORS.get(hero.get("shape", "anchor"), Color.WHITE), 2.4)
+	if sfx:
+		sfx.play("wake")
+	if music:
+		music.sting("rite")
+	var away := fight.w_pos - fight.p_pos
+	away = away.normalized() if away.length() > 0.01 else Vector2.RIGHT
+	fight.w_pos = fight._clamp_in(fight.p_pos + away * maxf(3.4, fight.dist()))
+	fight._wolf_set("recover", 1.8)
+	# the camera comes in from where it is, low, and is given back
+	var p3 := world._v3(fight.p_pos)
+	var from := world._cam_pos - p3
+	from.y = 0.0
+	from = from.normalized() if from.length() > 0.1 else Vector3(0, 0, 1)
+	world.cine = true
+	world.cine_speed = 3.2
+	world.cine_pos = p3 + from * 3.4 + Vector3(0, 1.0, 0)
+	world.cine_look = p3 + Vector3(0, 1.45, 0)
+	_wake_left = 1.9
 
 func _enter(hud: Hud) -> void:
 	var b := _beat_data()
@@ -91,16 +130,23 @@ func _next(hud: Hud) -> void:
 	_enter(hud)
 
 func update(events: Array, dt: float, hud: Hud) -> void:
+	if _wake_left > 0.0:
+		_wake_left -= dt
+		if _wake_left <= 0.0:
+			world.cine = false
 	if beat >= Data.story["beats"].size():
 		return
 	_t += dt
 	var id: String = _beat_data()["id"]
+	var progress := ""
 	# The Pattern can come early, on instinct: then the story goes straight to the end.
 	if id != "pattern" and id != "finish":
 		for e in events:
 			if e["type"] == "pattern-done":
-				fight.w_floor = 0.0
-				fight.w_hp = minf(fight.w_hp, 30.0)
+				if not world.genius_visible:
+					world.field_wakes(fight, hero)
+					world.set_lamps(1.0, 2.6)
+				_pattern_landed(hud)
 				beat = _beat_index("finish")
 				_enter(hud)
 				return
@@ -109,38 +155,54 @@ func update(events: Array, dt: float, hud: Hud) -> void:
 		return
 	match id:
 		"quiet":
-			# The wolf comes out of the tunnel after a few seconds.
-			if _t > 4.0:
+			# The wolf comes out of the tunnel once the player has found their feet (or has
+			# stood long enough reading).
+			_walked += (fight.p_pos - _last_pos).length()
+			_last_pos = fight.p_pos
+			var b := _beat_data()
+			if (_walked >= float(b.get("walk", 2.5)) and _t > float(b.get("least", 3.0))) or _t > float(b.get("most", 12.0)):
 				fight.respawn_from_arch = true
 				fight._spawn_wolf()
 				fight._choose_attack()
 				world.show_wolf = true
 				fight.p_lock = true
 				world.lock_on = true
+				if sfx:
+					sfx.play("growl", 0.8, 2.0)
+				if music:
+					music.set_fight(true)
 				_next(hud)
 		"hold":
 			for e in events:
 				if e["type"] in ["parry", "block", "hurt", "evade", "turned"]:
-					note = "You caught it clean." if e["type"] == "parry" else ""
-					world.field_wakes(fight, hero)
+					_wake(hud, String(e["type"]))
 					_next(hud)
 					return
 		"woke":
+			var need := int(_beat_data().get("hits", 3))
 			for e in events:
 				if e["type"] == "hit" and not e["pattern"]:
 					hits += 1
-			if hits >= 3:
+				if e["type"] == "whiff":
+					note = _note("whiff")
+			progress = "%d / %d" % [mini(hits, need), need]
+			if hits >= need:
 				_next(hud)
+				return
 		"technique":
 			for e in events:
 				if e["type"] == "technique":
 					_next(hud)
 					return
+				if e["type"] == "no-will":
+					note = _note("no_will")
+				if e["type"] == "not-ready":
+					note = _note("not_ready")
 		"pattern":
 			# Nobody is kept at the station for want of a Trigger they cannot yet meet (a first
 			# parry is hard): after a minute the night goes on without the Pattern.
-			if _t > 60.0 and fight.p_state != "pattern":
-				note = "It will come, one day. For now, fight."
+			if _t > float(_beat_data().get("most", 60.0)) and fight.p_state != "pattern":
+				note = _note("pattern_later")
 				fight.w_floor = 0.0
 				fight.w_hp = minf(fight.w_hp, 30.0)
 				_next(hud)
@@ -148,30 +210,39 @@ func update(events: Array, dt: float, hud: Hud) -> void:
 			for e in events:
 				if e["type"] == "pattern-done":
 					# The Pattern lands: the wolf is beaten, near enough.
-					fight.w_floor = 0.0
-					fight.w_hp = minf(fight.w_hp, 30.0)
+					_pattern_landed(hud)
 					_next(hud)
 					return
 				if e["type"] == "pattern-fizzle":
 					fizzles += 1
-					note = "It slipped away from you. Meet the Trigger again and strike as the ring closes." if fizzles < 2 else "It will come, one day. For now, fight."
+					note = _note("pattern_slipped") if fizzles < 2 else _note("pattern_later")
 					if fizzles >= 2:
 						fight.w_floor = 0.0
 						fight.w_hp = minf(fight.w_hp, 30.0)
 						_next(hud)
 						return
 				if e["type"] == "bar-warning":
-					note = "Your Bar forbids it, here and now. Make it so it does not."
+					note = _note("pattern_bar")
 				if e["type"] == "pattern-locked":
-					note = "Not yet: %s." % String(e.get("trigger", "")).to_lower()
+					note = _note("pattern_locked").replace("{trigger}", String(e.get("trigger", "")).to_lower())
 		"finish":
 			if fight.w_state == "down":
-				finished.emit()
-				beat = 99
-				return
+				_won = true
 			for e in events:
 				if e["type"] == "wolf-down":
-					finished.emit()
-					beat = 99
-					return
-	hud.set_prompt_status(note, "")
+					_won = true
+			if _won:
+				beat = 99
+				hud.set_prompt("", "")
+				finished.emit()
+				return
+	hud.set_prompt_status(note, progress)
+
+## The Pattern lands for the first time: its name across the screen, a held beat, the wolf all
+## but beaten.
+func _pattern_landed(hud: Hud) -> void:
+	fight.w_floor = 0.0
+	fight.w_hp = minf(fight.w_hp, 30.0)
+	var m: Dictionary = Data.story.get("moments", {}).get("pattern", {})
+	hud.banner(fill(String(m.get("title", "{pattern_name}")), hero).to_upper(), fill(String(m.get("sub", "")), hero), Style.GOLD, 2.0)
+	world.slowmo(1.1, 0.3)

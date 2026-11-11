@@ -135,6 +135,8 @@ func _build() -> void:
 	b = _buf(0.4); _tone(b, 0, 200, 0.35, 0.25, "saw", 90); _sfx["fizzle"] = _wav(b)
 	b = _buf(1.2); _tone(b, 0, 55, 1.1, 0.8, "sine", 30); _noise(b, 0, 1.0, 0.5, 0.06, 23); _tone(b, 0.05, 440, 0.9, 0.12, "tri"); _tone(b, 0.05, 660, 0.9, 0.08, "tri"); _sfx["pattern"] = _wav(b)
 	b = _buf(0.15); _tone(b, 0, 150, 0.1, 0.12, "square"); _sfx["deny"] = _wav(b)
+	# The field wakes: a low swell with a chord opening over it.
+	b = _buf(2.4); _tone(b, 0, 49, 2.2, 0.8, "sine", 73); _noise(b, 0, 1.6, 0.4, 0.04, 31); _tone(b, 0.1, 294, 2.0, 0.14, "tri"); _tone(b, 0.25, 440, 1.9, 0.12, "tri"); _tone(b, 0.4, 587, 1.8, 0.1, "tri"); _tone(b, 0.55, 880, 1.6, 0.06, "sine"); _sfx["wake"] = _wav(b)
 	# The interface: a soft brass tick when the choice moves, a fuller one when it is taken.
 	b = _buf(0.08); _tone(b, 0, 2100, 0.05, 0.05, "sine"); _noise(b, 0, 0.02, 0.05, 0.85, 25); _sfx["ui-move"] = _wav(b)
 	b = _buf(0.3); _tone(b, 0, 660, 0.22, 0.12, "tri"); _tone(b, 0.03, 990, 0.2, 0.08, "sine"); _noise(b, 0, 0.03, 0.08, 0.8, 27); _sfx["ui-take"] = _wav(b)

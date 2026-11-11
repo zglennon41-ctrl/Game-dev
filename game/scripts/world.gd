@@ -1701,9 +1701,9 @@ func _halo_n(key: String, fallback := 0.0) -> float:
 	return float(Style.data()["lights"].get("halo", {}).get(key, fallback))
 
 ## A pool of light lying on the ground (under a lamp, before a lit window).
-func _pool(at: Vector3, size: Vector2, color: Color, strength: float, rot_deg := 0.0) -> void:
+func _pool(at: Vector3, size: Vector2, color: Color, strength: float, rot_deg := 0.0) -> ShaderMaterial:
 	if strength <= 0.0:
-		return
+		return null
 	var pm := MeshInstance3D.new()
 	var plane := PlaneMesh.new()
 	plane.size = size
@@ -1718,6 +1718,7 @@ func _pool(at: Vector3, size: Vector2, color: Color, strength: float, rot_deg :=
 	pm.position = Vector3(at.x, 0.1, at.z)
 	pm.rotation_degrees.y = rot_deg
 	_place_root.add_child(pm)
+	return gm
 
 ## Text that stands in the world, drawn from a picture three times the size it was, with its
 ## smaller copies: sharp close to and on a large screen, and still at a distance.
@@ -2136,8 +2137,9 @@ func field_wakes(f: Fight, hero: Dictionary) -> void:
 	flash_screen(c, 0.7)
 	genius_born()
 	_motes.amount = 260
-	floater(_v3(f.p_pos, 3.0), "YOUR FIELD WAKES", c, 96, 2.2, 0.4)
-	slowmo(0.6, 0.25)
+	_shake = maxf(_shake, 0.18)
+	hitstop(0.12)
+	slowmo(1.5, 0.2)
 
 ## Freeze time for a moment: the weight of a hit.
 func hitstop(seconds: float, scale := 0.05) -> void:
@@ -2567,12 +2569,16 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 		var l: OmniLight3D = _torches[idx]
 		l.light_energy = 1.4 * Style.light_energy("fire") * (1.0 + 2.0 * fd * (0.6 * sin(_clock * fw + idx * 1.7) + 0.4 * sin(_clock * fw * 2.6 + idx)))
 	# The Academy's lamps and fires, each about its own level; the rite dims them.
+	lamps_lit = move_toward(lamps_lit, _lamps_want, dt * _lamps_rate)
 	for idx in _lamps.size():
 		var lm: Dictionary = _lamps[idx]
 		var fl := 1.0 if lm["steady"] else 1.0 + fd * (0.65 * sin(_clock * fw + idx * 1.9) + 0.35 * sin(_clock * fw * 2.6 + idx))
-		(lm["light"] as OmniLight3D).light_energy = float(lm["base"]) * fl * lerpf(1.0, 0.1, _torch_dim)
+		var lit := lamp_level(lamps_lit, idx, _lamps.size())
+		(lm["light"] as OmniLight3D).light_energy = float(lm["base"]) * fl * lerpf(1.0, 0.1, _torch_dim) * lit
 		if lm.has("halo"):
-			(lm["halo"] as ShaderMaterial).set_shader_parameter("strength", float(lm["halo_base"]) * (1.0 + (fl - 1.0) * 2.0) * lerpf(1.0, 0.15, _torch_dim))
+			(lm["halo"] as ShaderMaterial).set_shader_parameter("strength", float(lm["halo_base"]) * (1.0 + (fl - 1.0) * 2.0) * lerpf(1.0, 0.15, _torch_dim) * lit)
+	for lg in _lamp_glows:
+		(lg["mat"] as ShaderMaterial).set_shader_parameter(String(lg.get("key", "strength")), float(lg["base"]) * lamps_lit)
 	_update_cutaway()
 
 	# Floaters rise and fade (in real time, so they read during hit-stop).
@@ -2769,6 +2775,12 @@ func snap_camera(f: Fight) -> void:
 	cam_yaw = atan2(-(f.w_pos - f.p_pos).normalized().x, -(f.w_pos - f.p_pos).normalized().y)
 	_cam_pos = _v3(f.p_pos) + Vector3(sin(cam_yaw), 0, cos(cam_yaw)) * 6.0 + Vector3(0, 3.2, 0)
 	_cam_look = _v3(f.p_pos, 1.2)
+
+## The words standing in the world go at once (a scene begins).
+func clear_floaters() -> void:
+	for fl in _floaters:
+		(fl["l"] as Node).queue_free()
+	_floaters.clear()
 
 func reset_feedback() -> void:
 	Engine.time_scale = 1.0
@@ -3144,7 +3156,13 @@ func set_place(id: String, spec: Dictionary = {}) -> void:
 	_sky_dome = null
 	_ambient_lit = 0.0
 	_env.ambient_light_source = _ambient_default
-	if id == "cut":
+	_lamp_glows.clear()
+	_portrait_lights.clear()
+	lamps_lit = 1.0
+	_lamps_want = 1.0
+	if id == "station":
+		_build_station()
+	elif id == "cut":
 		_build_chamber()
 		_moonlight([[Vector3(-5.5, 0, -2.6), 1.3], [Vector3(3.2, 0, 3.4), 0.9], [Vector3(8.6, 0, -4.4), 1.1]])
 		_light_place("cut")
@@ -3162,19 +3180,10 @@ var _stage_glow: MeshInstance3D = null
 var _stage_k := 0.0
 var _stage_flare := 0.0
 
-## Where the figure stands on the stage.
-func stage_spot() -> Vector2:
-	var sp: Array = Data.creation.get("stage", {}).get("spawn", [0, 0])
-	return Vector2(float(sp[0]), float(sp[1]))
-
-## The stage of the character creator, built from the Academy's kit: a wayside platform under a
-## lamp, the line behind. Three lights of its own make a face read: a warm key from the lamp's
-## side, a cool fill, a cool rim from behind. The field gathers where the figure will stand.
-func _build_stage() -> void:
-	var spec: Dictionary = Data.creation["stage"]
-	_build_academy_place(spec)
-	var at := _v3(stage_spot())
-	var L: Dictionary = spec.get("lights", {})
+## The lights that make a standing figure read (a place's "lights": a key, a fill, a rim), placed
+## from where it stands. Returns them.
+func _spot_lights(L: Dictionary, at: Vector3) -> Array:
+	var made: Array = []
 	for id in L:
 		var d: Dictionary = L[id]
 		var from := at + Vector3(d["from"][0], d["from"][1], d["from"][2])
@@ -3199,6 +3208,64 @@ func _build_stage() -> void:
 		light.position = from
 		if light is SpotLight3D:
 			light.look_at(at + Vector3(0, float(d.get("aim", 1.3)), 0), Vector3.UP)
+		made.append(light)
+	return made
+
+# --- The old station: behind the title, and the night the field wakes (data/story.json, station)
+
+var _portrait_lights: Array = []   # the key, fill and rim on the figure of the title
+var lamps_lit := 1.0               # the place's lamps: 1 alight, 0 out
+var _lamps_want := 1.0
+var _lamps_rate := 1.0
+var _lamp_glows: Array = []        # {mat, base}: the lit dust and the pools under the lamps on posts
+
+## Where the figure of the title stands, and where the night at the station begins.
+func station_spot() -> Vector2:
+	var sp: Array = Data.story.get("station", {}).get("spawn", [0, 0])
+	return Vector2(float(sp[0]), float(sp[1]))
+
+## The old station on the line, built from the Academy's kit like the creator's platform, and
+## walled all round: a fight is fought here.
+func _build_station() -> void:
+	var spec: Dictionary = Data.story["station"]
+	_build_academy_place(spec)
+	_portrait_lights = _spot_lights(spec.get("lights", {}), _v3(station_spot()))
+	_moonlight([[Vector3(-6.0, 0, -3.6), 1.2], [Vector3(5.5, 0, 3.8), 1.0]])
+
+## The figure's own lights, for the title's shot; a fight is lit by the place alone.
+func portrait_lights(on: bool) -> void:
+	for l in _portrait_lights:
+		if is_instance_valid(l):
+			(l as Light3D).visible = on
+
+## The lamps of the place go out or come alight: at once, or over some seconds, one after another.
+func set_lamps(level: float, seconds := 0.0) -> void:
+	_lamps_want = clampf(level, 0.0, 1.0)
+	if seconds <= 0.0:
+		lamps_lit = _lamps_want
+	else:
+		_lamps_rate = absf(_lamps_want - lamps_lit) / seconds
+
+## How far one lamp of several is alight while they catch one after another.
+static func lamp_level(lit: float, idx: int, count: int) -> float:
+	if lit >= 1.0:
+		return 1.0
+	var o := float(idx) / float(maxi(1, count))
+	return smoothstep(o * 0.75, o * 0.75 + 0.25, lit)
+
+## Where the figure stands on the stage.
+func stage_spot() -> Vector2:
+	var sp: Array = Data.creation.get("stage", {}).get("spawn", [0, 0])
+	return Vector2(float(sp[0]), float(sp[1]))
+
+## The stage of the character creator, built from the Academy's kit: a wayside platform under a
+## lamp, the line behind. Three lights of its own make a face read: a warm key from the lamp's
+## side, a cool fill, a cool rim from behind. The field gathers where the figure will stand.
+func _build_stage() -> void:
+	var spec: Dictionary = Data.creation["stage"]
+	_build_academy_place(spec)
+	var at := _v3(stage_spot())
+	_spot_lights(spec.get("lights", {}), at)
 	# the field: a light and a soft glow at the spot, in the colour the answers lean
 	_stage_light = OmniLight3D.new()
 	_stage_light.omni_range = 5.5
@@ -3513,6 +3580,14 @@ func _kit_piece(name: String, pos: Vector3, rot_deg := 0.0, scale := Vector3.ONE
 			if name in ["lamp_post", "signal_lamp"]:
 				_lamp_cone(c as Node3D, Style.light("lamp", "color"))
 		_lamps.append(entry)
+	if name in ["lamp_post", "signal_lamp"]:
+		# the lit glass of a lamp on a post goes out with it
+		for m in n.find_children("*", "MeshInstance3D", true, false):
+			var mi: MeshInstance3D = m
+			for i in (mi.mesh.get_surface_count() if mi.mesh != null else 0):
+				var sm := mi.get_surface_override_material(i) as ShaderMaterial
+				if sm != null and sm.get_shader_parameter("emission_energy") != null and float(sm.get_shader_parameter("emission_energy")) > 0.0:
+					_lamp_glows.append({ "mat": sm, "base": float(sm.get_shader_parameter("emission_energy")), "key": "emission_energy" })
 	return n
 
 ## Under a lamp on a post: the lit dust in its cone, and its pool on the ground.
@@ -3540,7 +3615,10 @@ func _lamp_cone(at_node: Node3D, color: Color) -> void:
 		cone.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		cone.position = Vector3(top.x, top.y / 2.0, top.z)
 		_place_root.add_child(cone)
-	_pool(top, Vector2(top.y * 2.2, top.y * 2.2), color, _halo_n("pool"))
+		_lamp_glows.append({ "mat": sm, "base": _halo_n("shaft") })
+	var pool := _pool(top, Vector2(top.y * 2.2, top.y * 2.2), color, _halo_n("pool"))
+	if pool != null:
+		_lamp_glows.append({ "mat": pool, "base": _halo_n("pool") })
 
 ## A place built from the Academy's kit by its style (data/academy.json): a floor, four sides
 ## of wall bays with a door piece at every door, corners, trusses indoors, and the furniture.

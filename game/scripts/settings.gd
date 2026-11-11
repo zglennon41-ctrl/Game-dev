@@ -84,3 +84,12 @@ func hero() -> Dictionary:
 func save_hero(h: Dictionary) -> void:
 	cfg.set_value("hero", "hero", h)
 	cfg.save(PATH)
+
+# --- The player's settings (the title's Settings screen) ---------------------------
+
+func option(key: String, fallback: float) -> float:
+	return float(cfg.get_value("options", key, fallback))
+
+func set_option(key: String, value: float) -> void:
+	cfg.set_value("options", key, value)
+	cfg.save(PATH)
