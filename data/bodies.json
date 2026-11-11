@@ -815,7 +815,7 @@
       "dress": {
         "culture": "The engine-works: a rust shirt with the sleeves rolled, a heavy black leather apron, gauntlets to the elbow, one shoulder guarded, a tool roll slung across the back and a hammer at the belt, a leather cap with goggles. The women wear the smock, a short apron and the tool bag, the hair tied in a red kerchief. A Foreman wears the waistcoat with brass buttons, the long shop coat and the chain.",
         "silhouette": "a slab of apron, big gauntlets, one heavy shoulder, a roll across the back",
-        "chord": "rust, black leather, steel",
+        "chord": "brick rust, black leather, steel",
         "chordColors": [
           "main",
           "apron",
@@ -823,7 +823,7 @@
         ],
         "signature": "the tool roll on the back and the hammer at the belt",
         "colors": {
-          "main": "saffron:1.4",
+          "main": "oxblood:1.7",
           "apron": "umber:0.45",
           "dark": "stone:0.9",
           "cream": "bone:2.5",
@@ -1975,7 +1975,8 @@
             "cuffs": "main",
             "trim": "main",
             "front": "cross",
-            "sex": "f"
+            "sex": "f",
+            "grow": 0.045
           },
           {
             "type": "wrapskirt",

@@ -299,7 +299,7 @@ a signature piece that says what the home does. `data/bodies.json` (`dress`) is 
 | Columbia (Marshal) | a broad flat hat over a long coat flaring to the calf (women: short jacket, long split skirt) | navy, cream, brass | the star, and the gun slung low on the thigh |
 | Cahokia (Pilot) | a short rain cape, long sash-ends, boots flaring at the thigh (women: the woven shawl) | river green, woven ochre and red, copper | the sounding line coiled at the hip |
 | Lunden (Aeronaut) | heavy fleece collar, flared breeches bound at the calf, a scarf's two ends down the back (women: the long flying coat) | charcoal, a red scarf, steel | goggles pushed up; the rigger's harness |
-| Colonia (Engineer) | a slab of apron, gauntlets, one heavy shoulder, a roll across the back (women: smock, short apron, kerchief) | rust, black leather, steel | the tool roll and the hammer |
+| Colonia (Engineer) | a slab of apron, gauntlets, one heavy shoulder, a roll across the back (women: smock, short apron, kerchief) | brick rust, black leather, steel | the tool roll and the hammer |
 | Tiber (Legionary) | plated shoulders, a skirt of straps, a cloak behind, a crest above | legion red, bronze, white | layered shoulder plate; the crest (across, for a Centurion) |
 | Khemet (Grower) | bare arms, a head-cloth's two lappets, a kilt with a stiff panel (women: the long sheath) | white linen, field green, gold | the growers' broad collar |
 | Baghdad (Geometer) | a great turban over a robe worn open; wide trousers gathered at the ankle (women: knee coat, veil) | deep teal, cream, gold | the brass astrolabe at the sash |

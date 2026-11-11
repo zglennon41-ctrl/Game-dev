@@ -99,6 +99,7 @@ func _run() -> void:
 			for i in ins.size():
 				var d: Dictionary = ins[i]
 				var look: Dictionary = world.look_for(String(d["name"]))
+				look.merge({ "dress": "master", "headgear": true, "cape": false }, true)      # as academy.gd dresses them
 				if d.has("look"):
 					look.merge(d["look"], true)
 				for r in 2:
