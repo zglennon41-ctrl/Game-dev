@@ -684,7 +684,7 @@ func _leaf_dress(v: VBoxContainer) -> void:
 	# the ways the home's dress is worn: its working colours, a second dye, the formal dress
 	var opts: Array = home.get("dress", {}).get("options", [])
 	if opts.size() > 1:
-		var now: Dictionary = World.dress_option(String(hero.get("body", "")).get_slice("-", 0), look)
+		var now: Dictionary = World.dress_option(String(hero.get("city", "")), look)
 		_section(v, "WORN AS", String(now.get("name", "")))
 		var orow := _flow(v, "")
 		for o in opts:
@@ -724,7 +724,7 @@ func _headgear() -> Dictionary:
 	if not (hgs is Array):
 		return {}
 	var body := String(hero.get("body", ""))
-	var wear := String(World.dress_option(body.get_slice("-", 0), hero.get("look", {})).get("wear", "plain"))
+	var wear := String(World.dress_option(String(hero.get("city", "")), hero.get("look", {})).get("wear", "plain"))
 	for h in hgs:
 		if String(h.get("sex", body.get_slice("-", 1))) == body.get_slice("-", 1) and (not h.has("in") or (h["in"] as Array).has(wear)):
 			return h

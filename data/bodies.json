@@ -29,6 +29,11 @@
         "culture": "The Academy's grey, the same on everyone who passes through: a high-collared tunic under a tabard bordered in brass thread, the cohort's brass tag at the breast, boots for the line. An Instructor wears it long, with the shoulder cape and the chain.",
         "silhouette": "a tabard hanging square before and behind over a high collar",
         "chord": "slate grey, ink, brass",
+        "chordColors": [
+          "main",
+          "dark",
+          "brass"
+        ],
         "signature": "the cohort's brass tag; the Instructor's chain of office",
         "colors": {
           "main": "slate:2.3",
@@ -203,6 +208,11 @@
         "culture": "The marshals' city: a long dark-blue coat open over the gun belt, cream at collar, cuff and facing, brass buttons in two rows and a star at the breast, a red neckerchief, tall boots, and the broad hat. The women ride in a short jacket and a long split skirt. A Captain adds the epaulettes, the red sash and the cavalry cape.",
         "silhouette": "a broad flat hat over a long coat that flares to the calf",
         "chord": "navy, cream, brass",
+        "chordColors": [
+          "main",
+          "cream",
+          "brass"
+        ],
         "signature": "the marshal's star and the gun slung low on the thigh",
         "colors": {
           "main": "indigo:1.25",
@@ -400,6 +410,11 @@
         "culture": "The river: a pilot's green oilcloth coat to the knee under a rain cape, a woven sash in ochre and red knotted and left long, boots to the thigh against the water, a coiled sounding line at the hip, and a knit cap. The women wear the woven shawl over a short coat and skirt. A Pilot of the school adds the long cape and the woven baldric.",
         "silhouette": "a short cape over the shoulders, long sash-ends, boots flaring at the thigh",
         "chord": "river green, woven ochre and red, copper",
+        "chordColors": [
+          "main",
+          "ochre",
+          "red"
+        ],
         "signature": "the sounding line coiled at the hip; the sash left long to be seen from the far bank",
         "colors": {
           "main": "moss:1.8",
@@ -600,6 +615,11 @@
         "culture": "Fog and docks and the airship rigging: a short charcoal jacket with a fleece collar under a rigger's harness, a red scarf thrown long down the back, flared breeches bound at the calf, gauntlets, and a flat cap with goggles pushed up. The women fly in a long belted coat and a leather cap. A Dockmaster adds the greatcoat's cape and the steel chain.",
         "silhouette": "heavy at the collar and narrow at the calf, a scarf's two ends down the back",
         "chord": "charcoal, a red scarf, steel",
+        "chordColors": [
+          "main",
+          "red",
+          "steel"
+        ],
         "signature": "goggles pushed up, and the rigger's harness",
         "colors": {
           "main": "iron:1.4",
@@ -796,6 +816,11 @@
         "culture": "The engine-works: a rust shirt with the sleeves rolled, a heavy black leather apron, gauntlets to the elbow, one shoulder guarded, a tool roll slung across the back and a hammer at the belt, a leather cap with goggles. The women wear the smock, a short apron and the tool bag, the hair tied in a red kerchief. A Foreman wears the waistcoat with brass buttons, the long shop coat and the chain.",
         "silhouette": "a slab of apron, big gauntlets, one heavy shoulder, a roll across the back",
         "chord": "rust, black leather, steel",
+        "chordColors": [
+          "main",
+          "apron",
+          "steel"
+        ],
         "signature": "the tool roll on the back and the hammer at the belt",
         "colors": {
           "main": "saffron:1.4",
@@ -1025,6 +1050,11 @@
         "culture": "The old walls: a legionary's red tunic under a bronze cuirass with layered shoulders, studded straps at the waist, greaves, sandals, the red cloak pinned at the shoulder, and a crested helm. The women wear the tunic long under a leather breast-band and one bronze shoulder. A Centurion wears the crest across, the medals on the harness and the armlets.",
         "silhouette": "plated shoulders, a skirt of straps, a cloak behind, a crest above",
         "chord": "legion red, bronze, white",
+        "chordColors": [
+          "main",
+          "white",
+          "bronze"
+        ],
         "signature": "the layered plate at the shoulders and the crest: fore and aft for the ranks, across for a Centurion",
         "colors": {
           "main": "oxblood:2.8",
@@ -1242,6 +1272,11 @@
         "culture": "The black fields: white linen, the men bare-chested in a pleated kilt with its stiff front panel, the women in a long straight sheath; a sash of green banded in gold hanging before, the broad gold collar of the growers, gold at the arms, sandals, and the banded head-cloth with its two lappets. A Keeper adds the pleated shoulder cape and the green mantle.",
         "silhouette": "bare arms, a head-cloth's two lappets, a kilt with a stiff panel before",
         "chord": "white linen, field green, gold",
+        "chordColors": [
+          "main",
+          "green",
+          "gold"
+        ],
         "signature": "the growers' broad collar",
         "colors": {
           "main": "bone:3.7",
@@ -1429,6 +1464,11 @@
         "culture": "The house of figures: a deep teal robe worn open over cream, gold in two bands at hem and cuff, wide trousers gathered at the ankle, an ochre sash with a brass astrolabe hung from it, and a great folded turban with a jewel at the brow. The women wear the knee-length coat over the same wide trousers, and a veil down the back under a gold band. A Master wears the figured square on the breast, the dark mantle and the chain.",
         "silhouette": "a great round turban over a column of robe; wide trousers gathered at the ankle",
         "chord": "deep teal, cream, gold",
+        "chordColors": [
+          "main",
+          "cream",
+          "gold"
+        ],
         "signature": "the brass astrolabe at the sash",
         "colors": {
           "main": "verdigris:1.35",
@@ -1608,6 +1648,11 @@
         "culture": "The steps: saffron cloth and little else. The men go bare-chested in a cloth wrapped to the shin with its pleats falling before, another thrown across one shoulder, prayer beads at the neck and the arm, barefoot. The women wear it to the ankle with the end drawn across the breast and down the back. An Elder adds the white shawl, a second string of beads and the veil.",
         "silhouette": "bare shoulders and feet, a cloth across one shoulder and down the back",
         "chord": "saffron, ash white, dark beads",
+        "chordColors": [
+          "main",
+          "white",
+          "beads"
+        ],
         "signature": "the prayer beads",
         "colors": {
           "main": "saffron:3.4",
@@ -1870,6 +1915,11 @@
         "culture": "The examination halls: a long plum robe crossed at the breast, its great sleeves cuffed in white, a jade belt with a jade ring and tassel hung from it, and the scholar's black cap. The women wear a white crossed jacket and a plum skirt tied high under the arms with long jade ribbons. Those who have passed wear the figured square on breast and back and the cap with two wings; an Examiner adds the cloud collar.",
         "silhouette": "great hanging sleeves, a straight fall to the floor, and for the passed a cap with two wings",
         "chord": "plum, white, jade",
+        "chordColors": [
+          "main",
+          "white",
+          "jade"
+        ],
         "signature": "the jade ring and tassel at the belt; the square of rank",
         "colors": {
           "main": "plum:1.6",
@@ -2068,6 +2118,11 @@
         "culture": "The steppe: a gold-ochre riding coat crossed at the breast and flaring from a red sash to the knee, dark fur at its collar, cuffs and hem, tall boots with felt tops, a quiver across the back, and a fur hat with a pointed red crown. The women wear it to the calf under a red sleeveless jacket, the hat with its flaps down. A Khan's Rider adds the string of brass coins and the red cloak edged in fur.",
         "silhouette": "a coat flaring like a bell from the sash, thick fur at every edge, a pointed hat, a quiver behind",
         "chord": "gold ochre, dark fur, red",
+        "chordColors": [
+          "main",
+          "fur",
+          "red"
+        ],
         "signature": "the quiver across the back",
         "colors": {
           "main": "ochre:2.3",
@@ -2267,6 +2322,11 @@
         "culture": "The library: a wide indigo robe with sleeves like wings, gold at the neck and in two bands at the hem, a leather satchel on its strap for the one page, sandals, and the white cloth wound high on the head and under the chin. The women wear it to the knee over a dark wrapper, and the tall head-tie. A Librarian carries the scroll case on the back and wears the white shawl.",
         "silhouette": "the widest of the homes: sleeves like wings, and a high-wound head",
         "chord": "indigo, white, gold",
+        "chordColors": [
+          "main",
+          "white",
+          "gold"
+        ],
         "signature": "the satchel for one page; the Librarian's scroll case",
         "colors": {
           "main": "indigo:2.6",
@@ -2437,6 +2497,11 @@
         "culture": "The sword schools: a white jacket crossed at the breast, black pleated hakama to the ankle, and the red blade-sash knotted at the hip. The men wear the stiff grey shoulders that stand out past the arms; the women tie their sleeves back with a red cord crossed behind and the sash in a great bow at the back. No hat, the hair tied; a Master wears the black over-coat and the broad straw hat of the road.",
         "silhouette": "wide stiff shoulders over wide pleated legs; from behind, a crossed cord and a great bow",
         "chord": "white over black, a red sash",
+        "chordColors": [
+          "hakama",
+          "top",
+          "red"
+        ],
         "signature": "the blade-sash",
         "colors": {
           "top": "bone:3.5",

@@ -2107,7 +2107,9 @@ func test_look() -> void:
 		check(vis.size() >= 11, "%s carries the hair and beard pieces (%d)" % [body, vis.size()])
 		var hooded := String(body).contains("Hooded")
 		check(vis.get("Hair_long_fall", false) == (not hooded), "%s: the long fall hangs under the helmet, unless hooded" % body)
-		var has_gear: bool = w._player.find_child("*Helmet*", true, false) != null or w._player.find_child("*Hat*", true, false) != null or w._player.find_child("Headgear_*", true, false) != null
+		var has_gear: bool = w._player.find_child("*Helmet*", true, false) != null or w._player.find_child("*Hat*", true, false) != null
+		for hgn in w._player.find_children("Headgear_*", "BoneAttachment3D", true, false):
+			has_gear = has_gear or World.dress_worn(String(hgn.name), "plain")      # not what only a master wears
 		# a headband is headgear that leaves the crown bare (look.openHeadgear)
 		var open_gear: bool = w._player.find_child("Headgear_headband*", true, false) != null
 		check(vis.get("Hair_long_cap", true) == (not has_gear or open_gear), "%s: the cap hides under headgear that covers the crown, when the body has any" % body)
@@ -2378,10 +2380,14 @@ func test_creator() -> void:
 	check(c._headgear_name() == "", "a home that wears nothing on the head offers no headgear")
 	c.hero["city"] = "columbia"
 	check(c._headgear_name() == "Hat", "Columbia's is named a hat")
-	c.hero["city"] = "khemet"
-	check(c._headgear_name() == "Headband" and not c._headgear_covers(), "Khemet's headband leaves the crown bare")
+	c.hero["city"] = "varanasi"
+	c.hero["body"] = "varanasi-m"
+	check(c._headgear_name() == "Headband" and not c._headgear_covers(), "Varanasi's headband leaves the crown bare")
+	c.hero["look"]["dress"] = "formal"
+	check(String(World.dress_option("varanasi", c.hero["look"]).get("wear", "")) == "formal" and World.dress_worn("Dress_some__in_formal_master", "formal") and not World.dress_worn("Dress_some__in_master", "formal") and World.dress_worn("Dress_all", "plain"), "a home's dress is worn plain, formal, or as a master")
+	c.hero["look"].erase("dress")
 	var kh := Fight.default_hero()
-	kh["body"] = "khemet-f"
+	kh["body"] = "varanasi-m"
 	kh["look"] = { "headgear": true, "hair": "crop" }
 	w.build_hero(kh)
 	var cap: Node3D = null

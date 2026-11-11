@@ -479,16 +479,12 @@ func _wear_trapping() -> void:
 	var lin := func(key: String, fallback: Color) -> Color:
 		if not cols.has(key):
 			return fallback
-		var c: Array = cols[key]
-		return Color(c[0], c[1], c[2]).linear_to_srgb()
-	var main: Color = lin.call("main", Color(0.4, 0.4, 0.45))
-	var second: Color = lin.call("second", main.lightened(0.4))
-	var third := second
-	for k in cols:
-		if k not in ["main", "second"]:
-			third = lin.call(String(k), second)
-			if k == "metal":
-				break
+		return World.dress_color(cols[key])
+	# the home's chord (dress.chordColors): its two colours and its metal
+	var chord: Array = dress.get("chordColors", ["main", "second", "metal"])
+	var main: Color = lin.call(String(chord[0]), Color(0.4, 0.4, 0.45))
+	var second: Color = lin.call(String(chord[1]), main.lightened(0.4))
+	var third: Color = lin.call(String(chord[2]), second)
 	var paint := func(n: Node3D) -> void:
 		for m in n.find_children("*", "MeshInstance3D", true, false):
 			var mi := m as MeshInstance3D
