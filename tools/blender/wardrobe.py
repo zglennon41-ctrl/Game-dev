@@ -170,6 +170,8 @@ def _merge(name, bms):
     bm = bmesh.new()
     for part, slot in bms:
         tmp = bpy.data.meshes.new("tmp")
+        for _ in range(8):
+            tmp.materials.append(None)
         for f in part.faces:
             f.material_index = slot
             f.smooth = True
@@ -206,6 +208,17 @@ def _arc_panel(name, table, a0, a1, narrow=None, cols=None, trim_rows=()):
     if sum(f.normal.dot(Vector((f.calc_center_median().x, f.calc_center_median().y - yo_mid, 0))) for f in bm.faces) < 0:
         bmesh.ops.reverse_faces(bm, faces=bm.faces[:])
     return _ob(name, bm)
+
+
+def _slots(ob, mats):
+    """A mesh's materials set slot by slot (clearing them would put every face back in the first)."""
+    me = ob.data
+    while len(me.materials) < len(mats):
+        me.materials.append(None)
+    for i, m in enumerate(mats):
+        me.materials[i] = m
+    while len(me.materials) > len(mats):
+        me.materials.pop(index=len(me.materials) - 1)
 
 
 def _thicken(ob, t=0.012):
@@ -331,12 +344,8 @@ def dress_pieces(body, objs, build, slot):
     def put(name, ob, chain, cname, trim=None, fit=True, weights=None, finish=None, third=None):
         name += sfx
         ob.name = name
-        ob.data.materials.clear()
         base = mats.get(cname, body.mats["tunic"])
-        ob.data.materials.append(base)
-        ob.data.materials.append(mats.get(trim, base))
-        if third:
-            ob.data.materials.append(mats.get(third, base))
+        _slots(ob, [base, mats.get(trim, base)] + ([mats.get(third, base)] if third else []))
         objs[name] = ob
         body.chains[name] = chain
         if weights is not None:
@@ -485,11 +494,6 @@ def dress_pieces(body, objs, build, slot):
                     _folds(ob, top[0][0] + 0.04, hem, float(piece.get("folds", 0.014)), int(piece.get("pleats", 7)), 0.6, yo_w)
                 if frontband == "placket":
                     _band(ob, lambda c, nr: nr.y < -0.2 and abs(c.x) < 0.03)
-                elif frontband == "cross":
-                    def xline(z):
-                        u = min(1.0, max(0.0, (z_neck - z) / (z_neck - z_waist)))
-                        return 0.07 - 0.2 * u
-                    _band(ob, lambda c, nr: nr.y < -0.1 and c.z < z_neck + 0.02 and abs(c.x - xline(c.z)) < 0.032)
                 if open_w > 0.0 or vent > 0.0:
                     def gap(z):
                         return open_w * (0.25 + 0.75 * _ease((z_open - z) / max(1e-6, z_open - hem)))
@@ -502,9 +506,14 @@ def dress_pieces(body, objs, build, slot):
                         return True
                     if not hasattr(body, "dress_cuts"):
                         body.dress_cuts = {}
-                    _cut(ob, keep, (lambda c, nr: c.y < yo_w and c.z < z_open + 0.03 and abs(c.x) < gap(c.z) + 0.045) if (trim and open_w > 0.0) else None,
+                    _cut(ob, keep, None,
                          memo=body.dress_cuts.setdefault(ob.name, {}))
             put(nm, ob, "trunk", cname, trim, finish=finish)
+            if frontband == "cross":
+                cb = bmesh.new()
+                strip(cb, [(0.1 - 0.25 * (i / 8.0), (z_neck - 0.02) * (1 - i / 8.0) + z_waist * (i / 8.0)) for i in range(9)], 0.055, False, grow + 0.016)
+                bmesh.ops.solidify(cb, geom=cb.faces[:], thickness=0.01)
+                put(nm + "_cross", _ob(nm + "_cross", cb), "trunk", trim or cname, fit=False)
             if t != "vest":
                 sleeves(piece.get("sleeves", 6 if long else 2), cname, piece, trim if piece.get("cuffTrim", True) else None)
         elif t in ("kilt", "wrapskirt"):
@@ -584,13 +593,13 @@ def dress_pieces(body, objs, build, slot):
             rings = [(z7 - drop + 0.012, x_sh + reach - 0.03, hd6 + 0.035, yo6),
                      (z7 - drop, x_sh + reach, hd6 + 0.065, yo6),
                      (z7 - drop * 0.45, x_sh + reach * 0.75, hd6 + 0.055, yo6 * 0.5 + yo7 * 0.5),
-                     (z7 + 0.02, hw7 + 0.035, hd7 + 0.05, yo7),
-                     (tr[8][0] + 0.01, tr[8][1] + 0.03, tr[8][2] + 0.04, tr[8][3]),
-                     (z9, hw9 + 0.03, hd9 * 0.85 + 0.03, yo9 * 0.7 + tr[8][3] * 0.3)]
+                     (z7 + 0.03, hw7 + 0.05, hd7 + 0.07, yo7),
+                     (tr[8][0] + 0.03, tr[8][1] + 0.045, tr[8][2] + 0.06, tr[8][3]),
+                     (z9 + 0.01, hw9 + 0.035, hd9 * 0.85 + 0.035, yo9 * 0.7 + tr[8][3] * 0.3)]
             ob = band_loft("Dress_%d_mantle" % n, bk.rings_z(rings), (0, 1) if trim else ())
-            put("Dress_%d_mantle" % n, ob, "trunk", cname, trim,
+            put("Dress_%d_mantle" % n, ob, "trunk", cname, trim, fit=False,
                 weights=("mantle", float(piece.get("lift", 0.3))),
-                finish=lambda ob, z7=z7, drop=drop, yo6=yo6: _folds(ob, z7, z7 - drop, 0.012, 9, 0.4, yo6))
+                finish=lambda ob, z7=z7, drop=drop, yo6=yo6: (human.refine(ob), _folds(ob, z7 - 0.02, z7 - drop, 0.014, 9, 0.4, yo6)))
         elif t in ("hakama", "trousers"):
             cut = piece.get("cut", "wide" if t == "hakama" else "loose")
             prof = {"wide": [0.03, 0.05, 0.09, 0.12, 0.15, 0.17],
@@ -906,20 +915,21 @@ def dress_pieces(body, objs, build, slot):
             z7 = tr[7][0]
             reach = float(piece.get("reach", 0.14))
             bms = []
+            zt, zb = z7 + 0.075, tr[3][0] + 0.03
             for sign in (1, -1):
-                rot = Matrix.Rotation(-sign * 0.2, 3, "Y")
-                lo, hi = (0.05, tr[7][3] - tr[7][2] - 0.05, z7 + 0.035), (x_sh + reach, tr[7][3] + tr[7][2] + 0.03, z7 + 0.055)
-                if sign < 0:
-                    lo, hi = (-hi[0], lo[1], lo[2]), (-lo[0], hi[1], hi[2])
-                bms.append((_box(lo, hi, rot=rot, about=Vector((sign * 0.05, 0, z7 + 0.04))), 0))
-                # the band down the front, narrowing to the sash
-                sb = bmesh.new()
-                strip(sb, [(sign * (0.15 * (1 - i / 6.0) + 0.045 * (i / 6.0)), (z7 + 0.02) * (1 - i / 6.0) + (tr[3][0] + 0.02) * (i / 6.0)) for i in range(7)], 0.09, False, 0.04)
-                bmesh.ops.solidify(sb, geom=sb.faces[:], thickness=0.012)
-                bms.append((sb, 0))
-            # and the board behind
-            yb = rear(0.0, tr[6][0], 0.02)
-            bms.append((_box((-0.16, yb, tr[3][0]), (0.16, yb + 0.02, z7 + 0.05), taper=(0.45, 1.0)), 0))
+                for behind in (False, True):
+                    y = (rear(0.0, tr[6][0], 0.045) if behind else front(0.0, tr[6][0], 0.05))
+                    bm = bmesh.new()
+                    vs = [bm.verts.new(Vector((sign * 0.045, y, zt))), bm.verts.new(Vector((sign * (x_sh + reach), y + (0.03 if not behind else -0.03), z7 + 0.06))),
+                          bm.verts.new(Vector((sign * (x_sh + reach * 0.5), y, z7 - 0.14))), bm.verts.new(Vector((sign * 0.07, y, zb))), bm.verts.new(Vector((sign * 0.02, y, zb)))]
+                    f = bm.faces.new(vs)
+                    bmesh.ops.solidify(bm, geom=[f], thickness=0.016)
+                    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+                    bms.append((bm, 0))
+                # and the ridge over the shoulder that joins them
+                yf, yb = front(0.0, tr[6][0], 0.05), rear(0.0, tr[6][0], 0.045)
+                bms.append((_box((min(sign * 0.045, sign * (x_sh + reach)), yf + 0.02, z7 + 0.05), (max(sign * 0.045, sign * (x_sh + reach)), yb - 0.02, z7 + 0.07),
+                                 rot=Matrix.Rotation(-sign * 0.06, 3, "Y")), 0))
             hard("Dress_%d_wings" % n, bms, "chest", cname, trim)
         elif t == "brooch":
             x, z = float(piece.get("x", 0.14)), tr[8][0] - 0.03
@@ -1188,7 +1198,5 @@ def _headgear(body, D, hg):
             parts.append((_ring_bm(Vector((cx + sg * hw * 0.45, y0 - 0.016, z0 + hh * 0.78)), 0.034, 0.01), J))
     name = "Headgear_%s%s" % (t, suffix(hg))
     ob = _merge(name, parts)
-    ob.data.materials.clear()
-    for nme in names:
-        ob.data.materials.append(material(home, D, nme))
+    _slots(ob, [material(home, D, nme) for nme in names])
     return ob

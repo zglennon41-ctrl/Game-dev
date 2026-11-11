@@ -89,6 +89,320 @@
                 }
               }
             }
+          },
+          "dress": {
+            "type": "object",
+            "required": [
+              "culture",
+              "colors",
+              "pieces"
+            ],
+            "properties": {
+              "culture": {
+                "type": "string"
+              },
+              "silhouette": {
+                "type": "string"
+              },
+              "chord": {
+                "type": "string"
+              },
+              "signature": {
+                "type": "string"
+              },
+              "colors": {
+                "type": "object",
+                "additionalProperties": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[a-z]+:[0-4](\\.[0-9]+)?$"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 3,
+                      "maxItems": 3
+                    }
+                  ]
+                }
+              },
+              "stuff": {
+                "type": "object",
+                "additionalProperties": {
+                  "enum": [
+                    "wool",
+                    "linen",
+                    "robe",
+                    "homespun",
+                    "oilcloth",
+                    "felt",
+                    "rope",
+                    "leather"
+                  ]
+                }
+              },
+              "under": {
+                "type": "object"
+              },
+              "pieces": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "color"
+                  ],
+                  "properties": {
+                    "type": {
+                      "enum": [
+                        "tunic",
+                        "vest",
+                        "jacket",
+                        "coat",
+                        "robe",
+                        "kaftan",
+                        "kilt",
+                        "wrapskirt",
+                        "cuirass",
+                        "apron",
+                        "panel",
+                        "tabard",
+                        "cloak",
+                        "mantle",
+                        "hakama",
+                        "trousers",
+                        "greaves",
+                        "boots",
+                        "sandals",
+                        "puttees",
+                        "belt",
+                        "sash",
+                        "obi",
+                        "collar",
+                        "scarf",
+                        "wrap",
+                        "strap",
+                        "patch",
+                        "gloves",
+                        "buttons",
+                        "badge",
+                        "sashknot",
+                        "toolloop",
+                        "pauldrons",
+                        "pteruges",
+                        "holster",
+                        "coil",
+                        "roll",
+                        "armlets",
+                        "beads",
+                        "chain",
+                        "disc",
+                        "satchel",
+                        "bow",
+                        "tassel",
+                        "furcollar",
+                        "wings",
+                        "brooch"
+                      ]
+                    },
+                    "color": {
+                      "type": "string"
+                    },
+                    "trim": {
+                      "type": "string"
+                    },
+                    "sex": {
+                      "enum": [
+                        "m",
+                        "f"
+                      ]
+                    },
+                    "in": {
+                      "type": "array",
+                      "items": {
+                        "enum": [
+                          "plain",
+                          "formal",
+                          "master"
+                        ]
+                      },
+                      "minItems": 1
+                    }
+                  }
+                }
+              },
+              "headgear": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": [
+                      "type",
+                      "color"
+                    ],
+                    "properties": {
+                      "type": {
+                        "enum": [
+                          "cap",
+                          "hat",
+                          "kasa",
+                          "turban",
+                          "tagelmust",
+                          "gele",
+                          "furhat",
+                          "scholarcap",
+                          "wingcap",
+                          "hood",
+                          "veil",
+                          "kerchief",
+                          "headcloth",
+                          "headband",
+                          "helm",
+                          "flightcap"
+                        ]
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "color": {
+                        "type": "string"
+                      },
+                      "trim": {
+                        "type": "string"
+                      },
+                      "sex": {
+                        "enum": [
+                          "m",
+                          "f"
+                        ]
+                      },
+                      "in": {
+                        "type": "array",
+                        "items": {
+                          "enum": [
+                            "plain",
+                            "formal",
+                            "master"
+                          ]
+                        },
+                        "minItems": 1
+                      }
+                    }
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "type",
+                        "color"
+                      ],
+                      "properties": {
+                        "type": {
+                          "enum": [
+                            "cap",
+                            "hat",
+                            "kasa",
+                            "turban",
+                            "tagelmust",
+                            "gele",
+                            "furhat",
+                            "scholarcap",
+                            "wingcap",
+                            "hood",
+                            "veil",
+                            "kerchief",
+                            "headcloth",
+                            "headband",
+                            "helm",
+                            "flightcap"
+                          ]
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "color": {
+                          "type": "string"
+                        },
+                        "trim": {
+                          "type": "string"
+                        },
+                        "sex": {
+                          "enum": [
+                            "m",
+                            "f"
+                          ]
+                        },
+                        "in": {
+                          "type": "array",
+                          "items": {
+                            "enum": [
+                              "plain",
+                              "formal",
+                              "master"
+                            ]
+                          },
+                          "minItems": 1
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "name",
+                    "wear"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "wear": {
+                      "enum": [
+                        "plain",
+                        "formal"
+                      ]
+                    },
+                    "colors": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[a-z]+:[0-4](\\.[0-9]+)?$"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "trapping": {
+                "type": "object"
+              }
+            }
           }
         }
       }
