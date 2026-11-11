@@ -2090,7 +2090,7 @@ func test_weapon_balance() -> void:
 ## classmates drawn with the cohort each have a look of their own.
 func test_look() -> void:
 	var L: Dictionary = Data.creation["look"]
-	check(L["hair"].size() == 6 and L["beards"].size() == 3 and L["hairColors"].size() == 7, "six hair styles, three beards, seven colours in the data")
+	check(L["hair"].size() >= 12 and L["beards"].size() >= 5 and L["hairColors"].size() == 7 and L["faces"].size() >= 7 and L["eyeColors"].size() >= 6, "a dozen hair styles, five beards, seven colours, six face shapes beside the home's own and six eye colours in the data")
 	var w := World.new()
 	add_child(w)
 	var seen := {}
