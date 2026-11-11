@@ -2168,6 +2168,14 @@ func _reading_card(row: Control, c: Dictionary, n: int, look: Dictionary, col: C
 	info["instar"] = maxi(1, n)
 	info["name"] = Genius.form_name_at(String(c["form"]), maxi(1, n))
 	info["look"] = look
+	# its Path's colour, over the card: the three that are offered are three colours
+	var path_col := GeniusBody.accent_of(String(c["form"]), "accent_light")
+	if path_col.a > 0.0:
+		var band := ColorRect.new()
+		band.color = path_col
+		band.custom_minimum_size = Vector2(0, 5)
+		band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		col_v.add_child(band)
 	col_v.add_child(GeniusCard.make(info, col, title, true, _reading_art))
 	var why := RichTextLabel.new()
 	why.bbcode_enabled = true

@@ -620,6 +620,19 @@ func _sheet(what: String) -> void:
 	var ground := StandardMaterial3D.new()
 	ground.albedo_color = Color(0.2, 0.17, 0.14)
 	ground.roughness = 1.0
+	var glow_g := Gradient.new()
+	glow_g.set_color(0, Color(0.215, 0.18, 0.15))
+	glow_g.set_color(1, Color(0.009, 0.007, 0.0055))
+	var glow_t := GradientTexture2D.new()
+	glow_t.gradient = glow_g
+	glow_t.fill = GradientTexture2D.FILL_RADIAL
+	glow_t.fill_from = Vector2(0.5, 0.56)
+	glow_t.fill_to = Vector2(0.5, 0.02)
+	glow_t.width = 128
+	glow_t.height = 128
+	var backdrop := StandardMaterial3D.new()
+	backdrop.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	backdrop.albedo_texture = glow_t
 	# one partner's genius all the way down: the colour of the Shape this base comes to most, and
 	# one coat, so that what differs between two cells is the form and nothing else
 	var col: Color = World.SHAPE_COLORS["anchor"]
@@ -683,6 +696,16 @@ func _sheet(what: String) -> void:
 				disc.position = at - Vector3(0, dm.height / 2.0, 0)
 				world.add_child(disc)
 				discs.append(disc)
+				# and a wall behind it with a lamp's light on it, so that a dark form has
+				# something to be dark against (a portrait is staged; the life row is not)
+				var wall := MeshInstance3D.new()
+				var wm := QuadMesh.new()
+				wm.size = Vector2(cell_w * 0.98, cell_h * 0.98)
+				wall.mesh = wm
+				wall.material_override = backdrop
+				wall.position = at + Vector3(0, cell_h * (0.5 - FLOOR) - cell_h * 0.02, -cell_w * 0.55)
+				world.add_child(wall)
+				discs.append(wall)
 		var mid := Vector3(0, HIGH - (ROWS - 1) / 2.0 * cell_h + cell_h * (0.5 - FLOOR), 0)
 		world.camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 		world.camera.size = ROWS * cell_h * cos(pitch)
