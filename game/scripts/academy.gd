@@ -1246,7 +1246,6 @@ func _start_lesson(lesson0: Dictionary) -> void:
 		var dk: Dictionary = Data.discipline_kits.get(hero.get("discipline", ""), {})
 		hero["techniques"] = dk.get("techniques", []).slice(0, 3).map(func(t): return t["id"])
 	var spec: Dictionary = place_spec(lesson["place"])
-	var ins: Dictionary = Data.by_id(Data.academy["instructors"], lesson["instructor"])
 	_drill_fight()
 	hud.play_ui.visible = true
 	hud.target.visible = false
@@ -1445,11 +1444,11 @@ func _next_step() -> void:
 	if String(s["goal"]["type"]) == "choose-weapon":
 		_choice_done = false
 		var opts: Array = []
-		for w in Data.weapons:
-			if w["city"] == hero["city"]:
-				opts.append({ "id": w["id"], "label": w["name"], "text": w["text"], "on": w["id"] == hero["weapon"] })
+		for w in Creation.school_weapons(hero):
+			opts.append({ "id": w["id"], "label": w["name"], "text": w["text"], "on": w["id"] == hero["weapon"] })
 		choose("Your weapon", opts, func(id: String):
-			hero["weapon"] = id
+			if id != "":
+				hero["weapon"] = id
 			world.build_hero(hero)
 			_drill_fight()
 			_choice_done = true)
@@ -1891,6 +1890,15 @@ func choose(title: String, options: Array, then: Callable) -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	if first:
 		first.call_deferred("grab_focus")
+	else:
+		# nothing to choose: never a wall. Say so in the log and go on with what there is.
+		push_warning("choose(%s): no options" % title)
+		_choice_box.queue_free()
+		_choice_box = null
+		if not auto:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		then.call("")
+		return
 	if auto:
 		get_tree().create_timer(1.0).timeout.connect(func(): if _choice_box: (first as Button).pressed.emit())
 

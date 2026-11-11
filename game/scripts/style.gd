@@ -111,6 +111,104 @@ static func material_class(name: String, color := Color(-1, -1, -1)) -> String:
 static func class_spec(cls: String) -> Dictionary:
 	return data()["materials"]["classes"].get(cls, data()["materials"]["classes"]["cloth"])
 
+## What a body's surface is covered in (data/style.json, materials.grains): the first row that
+## fits its material, or else its class's own grain. A row fits by a word in the material's
+## name; by @<base>, for the coat-class surfaces of a genius of that base (kind) whatever they
+## are named; by @<base>:<word>; by #<class>; or by #<class>:<word>.
+## Returns { grain, scale, strength } (a texture of game/assets/textures/detail, its repeats to
+## a metre on a body one metre across, how strongly it shows); {} for none; and { beside: true, ... } where
+## it is to take the grain of what lies beside it (the rest is what it takes with no neighbour,
+## and may be absent).
+static var _grains: Dictionary = {}       # material name|class|kind -> what it is covered in
+
+static func grain_for(name: String, cls: String, kind := "") -> Dictionary:
+	var spec := class_spec(cls)
+	if String(spec.get("grain", "")) == "none":
+		return {}      # light, an eye, glass: never
+	var lname := name.to_lower()
+	var key := "%s|%s|%s" % [lname, cls, kind]
+	if _grains.has(key):
+		return _grains[key]
+	var out := {}
+	var fitted := false
+	for row in data()["materials"].get("grains", []):
+		var what := String(row[0])
+		var word := what
+		if what.begins_with("@") or what.begins_with("#"):
+			var who := what.substr(1).get_slice(":", 0)
+			word = what.substr(1).get_slice(":", 1) if what.contains(":") else ""
+			if what.begins_with("@"):
+				if kind != who or (word == "" and cls != "coat"):
+					continue
+			elif cls != who:
+				continue
+		if word != "" and not lname.contains(word):
+			continue
+		fitted = true
+		var g := String(row[1])
+		if g.begins_with("beside"):
+			out = { "beside": true }
+			g = g.get_slice(":", 1) if g.contains(":") else ""
+		if g != "" and float(row[3]) > 0.0:
+			out["grain"] = g
+			out["scale"] = float(row[2])
+			out["strength"] = float(row[3])
+		break
+	if not fitted and String(spec.get("grain", "")) != "" and float(spec.get("wear", 0.0)) > 0.0:
+		out = { "grain": String(spec["grain"]), "scale": float(spec.get("grainScale", 4.0)), "strength": float(spec["wear"]) }
+	_grains[key] = out
+	return out
+
+## Every texture the style's grains name: the classes' own and the table's (for the check).
+static func grain_names() -> Array:
+	var out: Array = []
+	for cn in data()["materials"]["classes"]:
+		var g := String(data()["materials"]["classes"][cn].get("grain", ""))
+		if g != "" and g != "none" and not out.has(g):
+			out.append(g)
+	for row in data()["materials"].get("grains", []):
+		var g := String(row[1])
+		if g.begins_with("beside"):
+			g = g.get_slice(":", 1) if g.contains(":") else ""
+		if g != "" and not out.has(g):
+			out.append(g)
+	for row in data()["materials"].get("places", []):
+		if String(row[1]) != "" and not out.has(String(row[1])):
+			out.append(String(row[1]))
+	return out
+
+## What a PLACE's surface is built of (data/style.json, materials.places): the first row whose
+## word is in the material's name (or #<class>; or <kit>:<word>, for the pieces of that kit
+## only), or else its class's own grain.
+## { grain, scale, strength }; {} for none (light, an eye, glass, a row that says none).
+static var _place_grains: Dictionary = {}
+
+static func place_grain(name: String, cls: String, kit := "") -> Dictionary:
+	var spec := class_spec(cls)
+	if String(spec.get("grain", "")) == "none":
+		return {}
+	var lname := name.to_lower()
+	var key := "%s|%s|%s" % [lname, cls, kit]
+	if _place_grains.has(key):
+		return _place_grains[key]
+	var out := {}
+	var fitted := false
+	for row in data()["materials"].get("places", []):
+		var what := String(row[0])
+		if what.contains(":"):
+			if what.get_slice(":", 0) != kit:
+				continue
+			what = what.get_slice(":", 1)
+		if (what.begins_with("#") and what.substr(1) == cls) or (not what.begins_with("#") and lname.contains(what)):
+			fitted = true
+			if String(row[1]) != "" and float(row[3]) > 0.0:
+				out = { "grain": String(row[1]), "scale": float(row[2]), "strength": float(row[3]) }
+			break
+	if not fitted and String(spec.get("grain", "")) != "" and float(spec.get("wear", 0.0)) > 0.0:
+		out = { "grain": String(spec["grain"]), "scale": float(spec.get("grainScale", 4.0)), "strength": float(spec["wear"]) }
+	_place_grains[key] = out
+	return out
+
 ## The nearest point to a colour on the ramps a class allows, and how far it is: [Color, distance].
 static func _nearest(c: Color, cls: String) -> Array:
 	var names: Array = class_spec(cls).get("ramps", [])
@@ -333,6 +431,7 @@ static func font(kind: String) -> Font:
 		_: path = "%s-Regular.ttf" % ty["ui"]
 	# Loaded as an imported resource, so it is packed into every export (the web too).
 	var ff: FontFile = load("res://game/assets/fonts/" + path)
+	ff.generate_mipmaps = true      # a name over a head across a yard is drawn small from a large picture
 	ff.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
 	ff.hinting = TextServer.HINTING_LIGHT
 	var f: Font = ff

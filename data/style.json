@@ -43,7 +43,7 @@
     "unshaped": "#9EF2B3"
   },
   "materials": {
-    "$comment": "What a material may be. words: a material is of the class of the first word in this list that is in its name (a class written a|b is whichever of the two its colour is nearer). classes: the ten of the made and worn world (skin, cloth, leather, wood, stone, iron, brass, bone, glass, and the field's light), four of the land and the living (coat: hair, fur, feather, hide and a genius's markings; growth; earth; water), and three the game needs (lit: a lamp, a flame, a lit pane; eye; ink: shadow and void), with mixed for a kit's painted texture. glows: whether it may shine with a light of its own (the field, the lit, and the moon on water; nothing else). ramps: the ramps its colour may lie on ([] for a class that is not moved: skin keeps the tones of data/creation.json, light keeps its light). bands: steps of light. shadowTint: what its shadow side is multiplied by. spec: the two-band highlight (strength, gloss). grain: the tileable texture laid over it (game/assets/textures/detail/<name>.png) at grainScale; wear: how strongly that grain shows, 0 to 1 (nothing is new).",
+    "$comment": "What a material may be. words: a material is of the class of the first word in this list that is in its name (a class written a|b is whichever of the two its colour is nearer). classes: the ten of the made and worn world (skin, cloth, leather, wood, stone, iron, brass, bone, glass, and the field's light), four of the land and the living (coat: hair, fur, feather, hide and a genius's markings; growth; earth; water), and three the game needs (lit: a lamp, a flame, a lit pane; eye; ink: shadow and void), with mixed for a kit's painted texture. glows: whether it may shine with a light of its own (the field, the lit, and the moon on water; nothing else). ramps: the ramps its colour may lie on ([] for a class that is not moved: skin keeps the tones of data/creation.json, light keeps its light). bands: steps of light. shadowTint: what its shadow side is multiplied by. spec: the two-band highlight (strength, gloss). grain: the tileable texture laid over it (game/assets/textures/detail/<name>.png) at grainScale repeats a metre, or none for what never takes one (light, an eye, glass); wear: how strongly that grain shows, 0 to 1 (nothing is new). grains: what a BODY is covered in (whatever lives or is carried: a person, a beast, a genius, a weapon; a place takes its class's grain and nothing here), more finely than its class says: rows of [what fits, the grain, repeats to a metre on a body one metre across (grainFit fits it to others), how strongly it shows, 0 to 0.7]; the first row that fits wins, and a material that fits none takes its class's. What fits is a word in the material's name (mind a word inside another: steel holds eel); or @<base> for the coat-class surfaces (fur, hide, feather) of a genius of that base, whatever they are named (a drake wears the wolf's names and is scaled); or @<base>:<word>; or #<class>, or #<class>:<word>. The grain is a texture's name; \"\" for none; or beside:<grain> for a marking or a Path's colour, which takes the grain of the largest surface beside it (the fur under a stripe) and <grain> where it has no neighbour. A body's grain is laid in the body's own space, so it stays on the body as it moves; down the picture is toward the tail along its back and sides and toward the ground on its front (fur lies back; scales and feathers overlap toward the tail). places: what a PLACE is built of (a floor, a wall, a roof, a prop that stands), more finely than its class says: rows of [what fits, the grain, repeats to a metre, how strongly it shows, 0 to 0.7], the first row that fits wins and a material that fits none takes its class's; what fits is a word in the material's name, or #<class>, or <kit>:<word> for the pieces of one kit only (wild: a boulder is not a wall). A place's grain is laid in the world's space, so the courses of two wall pieces meet.",
     "words": [
       ["accent", "accent"],
       ["field_lamp", "lit"], ["field", "field"], ["echo_glow", "field"], ["glow", "field"], ["_lit", "lit"], ["lamp", "lit"], ["flame", "lit"], ["eye", "eye"],
@@ -69,10 +69,45 @@
       ["eggshell", "bone"], ["lichen", "growth"], ["stubble", "growth"], ["velvet", "coat"], ["crow", "coat"], ["knee", "coat"], ["rust", "coat"],
       ["slag", "stone"], ["steam", "stone"], ["ash", "stone"], ["veil", "cloth"], ["mask", "mixed"], ["pane", "glass"], ["wet", "earth"]
     ],
+    "grains": [
+      ["accent", "beside:wool", 7.0, 0.3], ["mark_", "beside:wool", 7.0, 0.3],
+      ["eggshell", "", 0, 0], ["whisker", "", 0, 0], ["nose", "", 0, 0], ["maw", "", 0, 0], ["tongue", "", 0, 0],
+      ["antler", "horn", 9.0, 0.5], ["thorn", "horn", 12.0, 0.4], ["horn", "horn", 9.0, 0.5], ["claw", "horn", 12.0, 0.45], ["talon", "horn", 12.0, 0.45], ["beak", "horn", 10.0, 0.4],
+      ["tooth", "horn", 14.0, 0.3], ["fang", "horn", 14.0, 0.3], ["hoof", "horn", 10.0, 0.45], ["beetle", "horn", 8.0, 0.45], ["chitin", "horn", 8.0, 0.45],
+      ["stone_plate", "horn", 4.0, 0.55], ["stone_hide", "pebble", 5.0, 0.55], ["@tortoise:stone", "pebble", 5.0, 0.55], ["shell", "horn", 5.0, 0.5],
+      ["plate", "hammered", 5.0, 0.55], ["bark", "bark", 3.0, 0.6], ["moss", "wool", 6.0, 0.5], ["lichen", "wool", 8.0, 0.4],
+      ["hide_scar", "pebble", 10.0, 0.3], ["scar_", "pebble", 10.0, 0.3], ["hide_baby", "skin", 6.0, 0.25],
+      ["feather", "feathers", 5.0, 0.6], ["plume", "feathers", 6.0, 0.5],
+      ["@drake", "scales", 4.5, 0.6], ["@carp", "scales", 6.5, 0.55], ["@hawk", "feathers", 5.0, 0.6], ["@stag", "fur", 4.0, 0.55],
+      ["@octopus", "pebble", 6.0, 0.4], ["@moth", "fur", 6.0, 0.4],
+      ["eel_hide", "pebble", 7.0, 0.4], ["river_hide", "pebble", 5.0, 0.4], ["apron", "creased", 4.0, 0.45], ["drum", "creased", 5.0, 0.4],
+      ["membrane", "creased", 5.0, 0.4], ["wing", "feathers", 4.0, 0.5], ["scale", "scales", 6.0, 0.6],
+      ["fur", "fur", 3.2, 0.6], ["pelt", "fur", 3.2, 0.6], ["mane", "fur", 2.4, 0.6], ["ruff", "fur", 2.4, 0.6], ["bristle", "fur", 4.5, 0.5],
+      ["hair", "fur", 5.0, 0.45], ["beard", "fur", 6.0, 0.45], ["#coat:moth", "fur", 6.0, 0.4], ["#coat:main", "fur", 3.2, 0.5], ["hide", "fur", 5.0, 0.4],
+      ["wool", "wool", 7.0, 0.4], ["robe", "twill", 2.5, 0.4], ["cloak", "twill", 2.5, 0.4], ["cape", "twill", 2.5, 0.4], ["mantle", "twill", 2.5, 0.4], ["homespun", "twill", 3.5, 0.35],
+      ["cloth", "linen", 9.0, 0.3], ["rope", "twill", 9.0, 0.4], ["cord", "twill", 11.0, 0.4], ["leather", "creased", 3.5, 0.45], ["#leather", "creased", 4.5, 0.4],
+      ["mist", "fog", 2.6, 0.65], ["fog", "fog", 2.6, 0.65], ["steam", "fog", 3.0, 0.55], ["smoke", "fog", 2.6, 0.6], ["shade", "fog", 2.4, 0.55],
+      ["bone", "rock", 6.0, 0.3], ["slate", "rock", 3.0, 0.5], ["clay", "rock", 4.0, 0.4], ["coal", "rock", 4.0, 0.5], ["clinker", "rock", 4.0, 0.5],
+      ["stone", "rock", 3.0, 0.45], ["#stone", "rock", 3.0, 0.4], ["#earth", "rock", 3.0, 0.35],
+      ["steel", "brushed", 5.0, 0.4], ["iron", "hammered", 5.0, 0.45], ["#iron", "brushed", 5.0, 0.4], ["#brass", "brushed", 5.0, 0.4],
+      ["#wood", "timber", 3.0, 0.5], ["#cloth", "linen", 9.0, 0.28],
+      ["#ink", "fog", 2.4, 0.55]
+    ],
+    "places": [
+      ["wild:stone", "rock", 0.6, 0.55], ["wild:earth", "earth", 0.4, 0.55], ["wild:ruin", "ashlar", 0.5, 0.55],
+      ["stone_floor", "flagstone", 0.45, 0.4], ["stone_dress", "flagstone", 0.7, 0.4], ["stone_course", "cobble", 0.9, 0.4],
+      ["plaster", "plaster", 0.35, 0.38], ["brick", "brick", 0.5, 0.5], ["slate", "slate", 0.5, 0.5], ["roof", "slate", 0.5, 0.5],
+      ["wood_plank", "planks", 0.6, 0.5], ["dirt", "earth", 0.4, 0.55], ["grass", "grass", 0.5, 0.5], ["moss", "grass", 0.7, 0.5],
+      ["bark", "bark", 0.8, 0.55], ["leaf", "wool", 1.5, 0.3], ["straw", "twill", 2.0, 0.4], ["rope", "twill", 6.0, 0.4],
+      ["stone", "ashlar", 0.5, 0.42], ["#stone", "flagstone", 0.5, 0.45], ["#earth", "earth", 0.4, 0.5], ["#growth", "grass", 0.7, 0.45],
+      ["#wood", "timber", 1.2, 0.5], ["#iron", "hammered", 3.0, 0.4], ["#brass", "brushed", 4.0, 0.4], ["#leather", "creased", 3.0, 0.4],
+      ["#bone", "rock", 3.0, 0.3], ["#mixed", "flagstone", 0.5, 0.3]
+    ],
+    "grainFit": { "$comment": "How a body's grain is fitted to it. show: every body's grain this much stronger or weaker at once (1 is as the table says; no row times this may pass 0.7). size, power, least, most: a grain is so many repeats to a metre, which on a hatchling would be two scales and on an apex a thousand; so a body smaller than size (metres, across its longest side) takes its grains finer and a larger one coarser, by (size / across) to the power, held between least and most. Power 0 is the same grain on everything; 1 is the same count of scales on every body. sharp: how sharply the grain laid from the side gives way to the grain laid from above and from the front (1 is a soft blend, and smears a pattern that has a direction). along: the grains that follow the length of the piece they are on (up a bow, along a blade, down a door's planks) and not the body's nose to tail.", "show": 1.0, "size": 1.0, "power": 0.75, "least": 0.4, "most": 1.6, "sharp": 4.0, "along": ["timber", "brushed", "bark", "horn", "wood", "bronze"] },
     "classes": {
-      "field": {"glows": true, "ramps": [], "bands": 1, "shadowTint": "#FFFFFF", "spec": [0.0, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
-      "lit": {"glows": true, "ramps": [], "bands": 1, "shadowTint": "#FFFFFF", "spec": [0.0, 8.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
-      "eye": {"ramps": [], "bands": 2, "shadowTint": "#A9A6B4", "spec": [0.8, 60.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
+      "field": {"glows": true, "ramps": [], "bands": 1, "shadowTint": "#FFFFFF", "spec": [0.0, 8.0], "grain": "none", "grainScale": 1.0, "wear": 0.0},
+      "lit": {"glows": true, "ramps": [], "bands": 1, "shadowTint": "#FFFFFF", "spec": [0.0, 8.0], "grain": "none", "grainScale": 1.0, "wear": 0.0},
+      "eye": {"ramps": [], "bands": 2, "shadowTint": "#A9A6B4", "spec": [0.8, 60.0], "grain": "none", "grainScale": 1.0, "wear": 0.0},
       "skin": {"ramps": [], "bands": 3, "shadowTint": "#B58F92", "spec": [0.1, 10.0], "grain": "skin", "grainScale": 5.0, "wear": 0.2},
       "coat": {"ramps": ["rust", "ink", "umber", "leather", "earth", "ochre", "reed", "oxblood", "saffron", "slate", "iron", "steel", "stone", "bone", "moss", "verdigris", "water", "indigo", "plum"], "bands": 3, "shadowTint": "#9A94A6", "spec": [0.22, 14.0], "grain": "wool", "grainScale": 7.0, "wear": 0.4},
       "cloth": {"ramps": ["bone", "stone", "slate", "ink", "iron", "oxblood", "ochre", "saffron", "moss", "verdigris", "indigo", "plum", "umber", "earth", "reed", "leather", "steel"], "bands": 3, "shadowTint": "#9A96A8", "spec": [0.05, 8.0], "grain": "linen", "grainScale": 4.0, "wear": 0.25},
@@ -82,7 +117,7 @@
       "iron": {"ramps": ["iron", "steel", "slate", "ink"], "bands": 3, "shadowTint": "#9496A6", "spec": [0.55, 44.0], "grain": "bronze", "grainScale": 4.0, "wear": 0.3},
       "brass": {"ramps": ["brass", "ochre"], "bands": 3, "shadowTint": "#8C8494", "spec": [0.6, 48.0], "grain": "bronze", "grainScale": 4.0, "wear": 0.35},
       "bone": {"ramps": ["bone", "stone", "ink", "umber", "earth", "ochre"], "bands": 3, "shadowTint": "#A29BA8", "spec": [0.12, 12.0], "grain": "stone", "grainScale": 3.0, "wear": 0.25},
-      "glass": {"ramps": ["slate", "water", "steel", "verdigris"], "bands": 2, "shadowTint": "#A4A7B8", "spec": [0.7, 56.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
+      "glass": {"ramps": ["slate", "water", "steel", "verdigris"], "bands": 2, "shadowTint": "#A4A7B8", "spec": [0.7, 56.0], "grain": "none", "grainScale": 1.0, "wear": 0.0},
       "growth": {"ramps": ["moss", "reed", "verdigris", "earth"], "bands": 3, "shadowTint": "#9699A8", "spec": [0.04, 8.0], "grain": "linen", "grainScale": 3.0, "wear": 0.2},
       "earth": {"ramps": ["earth", "stone", "reed", "ink", "umber", "bone"], "bands": 3, "shadowTint": "#9590A2", "spec": [0.05, 6.0], "grain": "stone", "grainScale": 0.7, "wear": 0.3},
       "water": {"glows": true, "ramps": ["water", "slate", "steel"], "bands": 2, "shadowTint": "#9DA1B0", "spec": [0.5, 40.0], "grain": "", "grainScale": 1.0, "wear": 0.0},
@@ -92,33 +127,39 @@
     }
   },
   "shading": {
-    "$comment": "The cel look (the art bible, 11): light in bands with a tinted shadow side. rim is the light along a form's edge. occlusion scales the baked cavity darkening. smooth: the living are smooth-shaded and the made keep their cut edges (the kits read this).",
+    "$comment": "The cel look (the art bible, 11): light in bands with a tinted shadow side. rim is the light along a form's edge. occlusion scales the baked cavity darkening. keyRim is the key light along a body's edge on the side the light is (the lamp's amber, the moon's pale), so that a dark figure stands off a dark ground. place is what every place is given over its grain: macro, broad patches of lighter and darker over the whole of it so that no wall or floor is one flat colour (macroGrain is the soft picture they are read from, macroScale its repeats to a metre); foot, the dark at the foot of whatever stands, footHeight metres up; sway, the metres the wind moves what grows and what hangs. contact is the soft dark under whatever stands on the ground (people and beasts; props), 0 to 1. smooth: the living are smooth-shaded and the made keep their cut edges (the kits read this).",
     "cel": true,
     "sky": true,
     "rim": { "strength": 0.28, "color": "#D2D8EC", "power": 3.2 },
     "occlusion": 0.8,
+    "keyRim": 0.45,
+    "place": { "macro": 0.16, "macroScale": 0.09, "macroGrain": "fog", "foot": 0.32, "footHeight": 0.7, "sway": 0.035 },
+    "contact": { "people": 0.58, "props": 0.45 },
     "smooth": { "living": true, "made": false }
   },
   "ink": {
-    "$comment": "Ink on the living (the art bible, rule 4). width is in pixels on a screen `screen` pixels tall, by what carries it; 0 is no line. Places carry none.",
+    "$comment": "Ink on the living (the art bible, rule 4). width is in pixels on a screen `screen` pixels tall, by what carries it; 0 is no line. Places carry none. Beyond thinFrom metres the line thins with the figure it is on, to no less than thinLeast of itself.",
     "color": "#0B0807",
     "screen": 900,
+    "thinFrom": 10.0,
+    "thinLeast": 0.5,
     "width": { "people": 2.0, "beasts": 2.0, "genii": 2.0, "weapons": 0.0, "places": 0.0 }
   },
   "lights": {
-    "$comment": "The three lights. color is the light as you see its source (a flame, the moon's disc, a lit pane); cast is what it throws on a surface, paler, so that a wall in moonlight is not blue paint. energy scales every light of that name. kinds: what each kind of place is lit by: sky (the dark behind everything), ambient and its energy, fog, how strong the moon stands (0 indoors), and which light keys it (`key`) with which it fills (`fill`); every place has a warm light and a cool one. window is a lit pane; stain is the Library's glass, the Shapes' own colours banked down.",
+    "$comment": "The three lights. color is the light as you see its source (a flame, the moon's disc, a lit pane); cast is what it throws on a surface, paler, so that a wall in moonlight is not blue paint. energy scales every light of that name. kinds: what each kind of place is lit by: sky (the dark behind everything), ambient and its energy, fog, how strong the moon stands (0 indoors), and which light keys it (`key`) with which it fills (`fill`); every place has a warm light and a cool one. window is a lit pane; stain is the Library's glass, the Shapes' own colours banked down. fog is what the far side of a place fades toward (paler and bluer than its dark out of doors, a warm haze in a hall), fogDensity how soon. halo is the glow about a lamp or a flame (this renderer has no bloom: each is one soft quad): its strength, its size in metres for a lamp of the common reach, shaft the lit dust in the cone under a lamp on a post, pool the pool of light on the ground under it, window the light a lit window lays on the ground before it. sky is the dome over a place out of doors: night at the top, the horizon, the last ember of the day in the west, stars, the moon and its ring, cloud.",
     "lamp": { "color": "#FF9A4D", "cast": "#FFB57A", "energy": 1.0 },
     "fire": { "color": "#FF8A3D", "cast": "#FFA763", "energy": 1.0 },
     "moon": { "color": "#8C9EF2", "cast": "#B3BDE6", "energy": 1.0 },
     "window": { "color": "#FFAE5C", "energy": 0.7 },
     "stain": { "cast": "#B9A6D9", "energy": 0.4, "darken": 0.38 },
     "kinds": {
-      "hall": { "key": "lamp", "fill": "moon", "sky": "#040303", "ambient": "#A88A76", "ambientEnergy": 0.3, "fog": "#0D0907", "fogDensity": 0.016, "moon": 0.0 },
-      "court": { "key": "moon", "fill": "lamp", "sky": "#06070B", "ambient": "#8F94A6", "ambientEnergy": 0.5, "fog": "#0C0D12", "fogDensity": 0.006, "moon": 0.4 },
-      "wild": { "key": "moon", "fill": "lamp", "sky": "#07090C", "ambient": "#8C93A3", "ambientEnergy": 0.4, "fog": "#0B0D11", "fogDensity": 0.018, "moon": 0.8 },
-      "cut": { "key": "moon", "fill": "fire", "sky": "#050505", "ambient": "#8A8490", "ambientEnergy": 0.2, "fog": "#0F0D0F", "fogDensity": 0.022, "moon": 0.28 }
+      "hall": { "key": "lamp", "fill": "moon", "sky": "#040303", "ambient": "#A88A76", "ambientEnergy": 0.3, "fog": "#1C130D", "fogDensity": 0.018, "moon": 0.0 },
+      "court": { "key": "moon", "fill": "lamp", "sky": "#06070B", "ambient": "#8F94A6", "ambientEnergy": 0.5, "fog": "#1B202D", "fogDensity": 0.011, "moon": 0.55 },
+      "wild": { "key": "moon", "fill": "lamp", "sky": "#07090C", "ambient": "#8C93A3", "ambientEnergy": 0.4, "fog": "#171D29", "fogDensity": 0.018, "moon": 0.8 },
+      "cut": { "key": "moon", "fill": "fire", "sky": "#050505", "ambient": "#8A8490", "ambientEnergy": 0.2, "fog": "#15131B", "fogDensity": 0.022, "moon": 0.28 }
     },
-    "sky": { "top": "#131824", "mid": "#222938", "low": "#39343F", "ember": "#7A4A32", "stars": "#CCD4EA", "moon": "#DDE2F2", "halo": "#3A4260" }
+    "halo": { "strength": 0.42, "size": 2.6, "shaft": 0.1, "pool": 0.16, "window": 0.2 },
+    "sky": { "top": "#0E1320", "mid": "#1E2638", "low": "#3A3644", "ember": "#8A5236", "stars": "#CCD4EA", "moon": "#E6E9F5", "halo": "#3A4260", "cloud": "#2A3042" }
   },
   "film": {
     "$comment": "The film the game is shot on: one grade over the whole world and never over the interface. shadows and highlights are what the dark and the light of the picture are multiplied by; saturation, contrast and exposure are the picture's; vignette is how far the frame's edge falls into dark; grain is the grain.",

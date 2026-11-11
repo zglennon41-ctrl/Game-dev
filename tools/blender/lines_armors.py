@@ -18,7 +18,10 @@ meets its partner:
                out of the thumb side and its +Z out of the back of the hand, as a hand slot's
                do, and its -X runs to the fingertips.
     coat       the nape: between the shoulders, at the base of the collar. Its axes are the
-               wearer's own (up, the wearer's left, the wearer's front as the model's).
+               wearer's own (up, the wearer's left, the wearer's front as the model's). A coat
+               is no longer worn by its `wear`: it has a piece made for wearing, a mantle,
+               under an empty named `worn`, and the game shows that and brings it to the
+               place (armors_coat.py; docs/genius-lines.md, "A worn piece").
 
 To wear one: give the model a scale of one and bring `wear` onto the place. As a body at its
 partner's shoulder it is stood by `ref_top` like any other form, which is set so that the

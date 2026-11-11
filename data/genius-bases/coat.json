@@ -61,7 +61,11 @@
   ],
   "body": {
    "kind": "clasp",
-   "stands": 0.75
+   "stands": 1.1,
+   "worn": {
+    "cut": "scarf"
+   },
+   "brow": -4
   },
   "silhouette": "relic-buckle"
  },
@@ -87,20 +91,37 @@
    "body": {
     "kind": "coat",
     "length": 1.5,
-    "flare": 0.12,
+    "flare": 0.14,
+    "cut": 0.2,
+    "sweep": [
+     0,
+     0.1
+    ],
     "collar": [
      "turned",
-     1.0
+     1.1
     ],
-    "sleeves": "hang",
+    "sleeves": [
+     "reach",
+     "hang"
+    ],
     "grown": [
      "belt",
      "buttons",
      "dust",
      "pack"
     ],
+    "trim": [
+     "hem",
+     "cuffs"
+    ],
+    "coat": "hearth",
     "stands": 1.3,
-    "accent": "marigold"
+    "accent": "marigold",
+    "worn": {
+     "cut": "capelet"
+    },
+    "brow": 6
    },
    "prongs": [
     {
@@ -123,21 +144,40 @@
      ],
      "body": {
       "length": 1.45,
-      "flare": 0.16,
+      "flare": 0.26,
+      "wave": 0.16,
+      "cut": 0,
+      "sweep": [
+       0,
+       0
+      ],
       "collar": [
-       "cape",
+       "souwester",
        1.0
       ],
       "mantle": "oil",
+      "cape": 1.5,
+      "sleeves": "low",
       "grown": [
        [
         "mantle",
-        1.0
+        1.25
        ],
        "buttons",
        "drops"
       ],
-      "coat": "night"
+      "trim": [
+       "hem2",
+       "cuffs"
+      ],
+      "tone": "light",
+      "worn": {
+       "trim": [
+        "hem2",
+        "piping"
+       ]
+      },
+      "brow": 12
      },
      "finishes": [
       {
@@ -162,20 +202,38 @@
         "length": 1.6,
         "flare": 0.2,
         "sweep": [
-         0.22,
-         0.04
+         0.34,
+         0.06
         ],
         "wave": 0.14,
+        "collar": [
+         "cape",
+         1.0
+        ],
+        "cape": 1.0,
+        "lean": [
+         0,
+         8
+        ],
+        "sleeves": [
+         "point",
+         "back"
+        ],
         "grown": [
          [
           "mantle",
-          1.0
+          0.9
          ],
          "buttons2",
          "belt",
          "current"
         ],
-        "coat": "iron"
+        "trim": [
+         "hem2",
+         "cuffs",
+         "stripe"
+        ],
+        "brow": 10
        }
       },
       {
@@ -197,21 +255,42 @@
         "wing-cloak"
        ],
        "body": {
-        "length": 1.35,
-        "flare": 0.3,
-        "shoulders": 0.8,
+        "length": 1.3,
+        "flare": 0.4,
+        "shoulders": 0.72,
         "chest": 0.9,
-        "open": 0.3,
+        "open": 0.6,
+        "cut": 0.3,
+        "wave": 0,
+        "collar": [
+         "turned",
+         0.9
+        ],
+        "mantle": null,
+        "cape": null,
         "sleeves": "flat",
         "lining": "red",
         "grown": [
-         [
-          "mantle",
-          1.3
-         ],
-         "drops"
+         "drops",
+         "buttons"
         ],
-        "stands": 1.2
+        "trim": [
+         "hem",
+         "facing"
+        ],
+        "stands": 1.2,
+        "lean": [
+         10,
+         0
+        ],
+        "tone": "pale",
+        "worn": {
+         "trim": [
+          "hem",
+          "facing"
+         ]
+        },
+        "brow": -8
        }
       }
      ]
@@ -236,12 +315,19 @@
      ],
      "body": {
       "length": 1.55,
-      "cut": 0.5,
+      "cut": 0.55,
       "sweep": [
        0,
-       0.28
+       0.42
       ],
-      "sleeves": "back",
+      "sleeves": [
+       "aft",
+       "fore"
+      ],
+      "lean": [
+       13,
+       0
+      ],
       "grown": [
        "belt",
        [
@@ -250,7 +336,21 @@
        ],
        "pack"
       ],
-      "coat": "ash"
+      "trim": [
+       "dags",
+       "cuffs",
+       "stripe"
+      ],
+      "tone": "pale",
+      "worn": {
+       "trim": [
+        "hem",
+        "points"
+       ],
+       "points": 9,
+       "dag": 0.16
+      },
+      "brow": 4
      },
      "finishes": [
       {
@@ -273,16 +373,42 @@
        ],
        "body": {
         "length": 1.65,
-        "cut": 0.4,
+        "cut": 0.2,
         "sweep": [
          0,
-         0.2
+         0.08
+        ],
+        "sleeves": [
+         "hang",
+         "hold"
+        ],
+        "lean": [
+         0,
+         0
+        ],
+        "collar": [
+         "turned",
+         1.3
         ],
         "grown": [
          "belt",
          "stamps",
-         "pack"
-        ]
+         "frame",
+         [
+          "cane",
+          2.0
+         ]
+        ],
+        "trim": [
+         "hem",
+         "cuffs"
+        ],
+        "worn": {
+         "grown": [
+          "pack"
+         ]
+        },
+        "brow": 0
        }
       },
       {
@@ -304,23 +430,37 @@
         "pockets"
        ],
        "body": {
-        "length": 1.35,
+        "length": 1.15,
         "cut": 0,
         "sweep": [
          0,
          0
         ],
-        "flare": 0.22,
-        "chest": 1.1,
-        "sleeves": "hang",
+        "flare": 0.3,
+        "chest": 1.15,
+        "waist": 1.15,
+        "lean": [
+         0,
+         0
+        ],
+        "sleeves": [
+         "hold",
+         "akimbo"
+        ],
         "grown": [
          [
           "pockets",
           1.5
          ],
          "items",
-         "belt"
-        ]
+         "belt",
+         "candle"
+        ],
+        "trim": [
+         "hem2",
+         "cuffs"
+        ],
+        "brow": -6
        }
       }
      ]
@@ -344,21 +484,45 @@
       "ruff"
      ],
      "body": {
-      "length": 1.3,
-      "flare": 0.14,
-      "chest": 1.08,
+      "length": 1.25,
+      "flare": 0.1,
+      "chest": 1.2,
+      "shoulders": 1.25,
+      "waist": 0.95,
+      "cut": 0.3,
+      "sweep": [
+       0,
+       0
+      ],
       "collar": [
        "fur",
-       1.0
+       1.3
+      ],
+      "sleeves": "low",
+      "arm": 1.2,
+      "lean": [
+       6,
+       0
       ],
       "grown": [
        [
         "pelt",
-        1.0
+        1.5
        ],
        "belt"
       ],
-      "coat": "hearth"
+      "trim": [
+       "hem",
+       "cuffs",
+       "bands"
+      ],
+      "worn": {
+       "trim": [
+        "hem",
+        "yoke"
+       ]
+      },
+      "brow": 14
      },
      "finishes": [
       {
@@ -381,22 +545,35 @@
        ],
        "body": {
         "length": 1.5,
-        "flare": 0.4,
+        "flare": 0.55,
         "chest": 1.2,
-        "arm": 1.25,
+        "shoulders": 1.0,
+        "waist": 1.2,
+        "cut": 0,
+        "arm": 1.3,
         "collar": [
          "hood",
-         1.15
+         1.2
         ],
         "lining": "fur",
+        "sleeves": "wrap",
+        "lean": [
+         0,
+         0
+        ],
         "grown": [
          [
           "pelt",
-          1.4
+          1.2
          ],
          "rime"
         ],
-        "coat": "frost"
+        "trim": [
+         "hem",
+         "cuffs"
+        ],
+        "tone": "pale",
+        "brow": 6
        }
       },
       {
@@ -418,19 +595,46 @@
         "stone-skin"
        ],
        "body": {
-        "length": 1.0,
-        "flare": 0.1,
-        "chest": 1.15,
+        "length": 0.95,
+        "flare": 0.06,
+        "chest": 1.2,
+        "waist": 1.15,
+        "shoulders": 1.15,
+        "cut": 0,
         "collar": [
          "stand",
-         1.0
+         1.2
         ],
+        "sleeves": [
+         "point",
+         "hang"
+        ],
+        "arm": 1.15,
+        "lean": [
+         0,
+         0
+        ],
+        "hand": "l",
         "grown": [
-         "pads",
-         "lamp",
+         [
+          "pads",
+          1.2
+         ],
+         "handlamp",
          "belt"
         ],
-        "coat": "slate"
+        "trim": [
+         "hem2",
+         "cuffs",
+         "bands"
+        ],
+        "tone": "light",
+        "worn": {
+         "grown": [
+          "lamp"
+         ]
+        },
+        "brow": 12
        }
       }
      ]
@@ -457,23 +661,41 @@
    ],
    "body": {
     "kind": "coat",
-    "length": 1.15,
-    "flare": 0.18,
+    "length": 1.2,
+    "flare": 0.2,
     "rag": 1.0,
     "collar": [
      "hood",
      1.0
     ],
-    "sleeves": "hang",
+    "sleeves": [
+     "tuck",
+     "hang"
+    ],
+    "bend": [
+     0.1,
+     0
+    ],
+    "lean": [
+     0,
+     -5
+    ],
     "grown": [
      [
       "smoke",
-      0.7
+      0.8
      ]
+    ],
+    "trim": [
+     "piping"
     ],
     "coat": "night",
     "stands": 1.3,
-    "accent": "amethyst"
+    "accent": "amethyst",
+    "worn": {
+     "cut": "cowl"
+    },
+    "brow": 16
    },
    "prongs": [
     {
@@ -495,17 +717,36 @@
       "sleek-coat"
      ],
      "body": {
-      "length": 1.3,
-      "flare": 0.02,
-      "waist": 0.86,
-      "chest": 0.92,
-      "shoulders": 0.9,
+      "length": 1.4,
+      "flare": 0.0,
+      "waist": 0.8,
+      "chest": 0.9,
+      "shoulders": 0.86,
       "rag": 0,
+      "taper": 0.25,
+      "bend": [
+       0.22,
+       0
+      ],
+      "lean": [
+       0,
+       10
+      ],
       "collar": [
        "stand",
        1.0
       ],
-      "grown": []
+      "sleeves": "back",
+      "grown": [],
+      "trim": [
+       "piping",
+       "spine"
+      ],
+      "tone": "light",
+      "worn": {
+       "cut": "yoke"
+      },
+      "brow": 18
      },
      "finishes": [
       {
@@ -528,16 +769,26 @@
        ],
        "body": {
         "sleeves": [
-         "hang",
-         "flat"
+         "flat",
+         "none"
         ],
+        "bend": [
+         0.1,
+         0
+        ],
+        "lean": [
+         0,
+         4
+        ],
+        "turn": -20,
         "grown": [
          "ghost_sleeve",
          [
           "smoke",
           0.5
          ]
-        ]
+        ],
+        "brow": 10
        }
       },
       {
@@ -560,16 +811,47 @@
        ],
        "body": {
         "length": 1.35,
-        "open": 0.55,
-        "shoulders": 1.05,
+        "open": 0.7,
+        "cut": 0.3,
+        "shoulders": 1.12,
+        "waist": 0.78,
+        "flare": 0.22,
+        "taper": 0,
+        "bend": [
+         0,
+         0
+        ],
+        "lean": [
+         0,
+         0
+        ],
         "lining": "red",
+        "sleeves": [
+         "behind",
+         "tuck"
+        ],
         "grown": [
          "knife",
          [
           "lapels",
-          1.2
+          1.4
+         ],
+         [
+          "spikes",
+          1.0
          ]
-        ]
+        ],
+        "trim": [
+         "piping",
+         "facing"
+        ],
+        "tone": "mid",
+        "worn": {
+         "cut": "cowl",
+         "points": 5,
+         "dag": 0.4
+        },
+        "brow": 22
        }
       }
      ]
@@ -593,20 +875,46 @@
       "dark-eyed"
      ],
      "body": {
-      "length": 1.6,
-      "flare": 0.14,
+      "length": 1.75,
+      "flare": 0.2,
       "rag": 0,
+      "wave": 0.1,
+      "bend": [
+       0,
+       0
+      ],
+      "lean": [
+       0,
+       0
+      ],
+      "shoulders": 1.1,
       "collar": [
        "high",
-       0.6
+       0.9
       ],
+      "sleeves": "behind",
       "grown": [
        [
         "eyes",
-        0.9
+        1.0
        ],
-       "stars"
-      ]
+       "stars",
+       "pool"
+      ],
+      "trim": [
+       "piping",
+       "dags",
+       "collar"
+      ],
+      "tone": "mid",
+      "worn": {
+       "points": 0,
+       "trim": [
+        "piping",
+        "hem2"
+       ]
+      },
+      "brow": 12
      },
      "finishes": [
       {
@@ -628,18 +936,38 @@
         "high-collar"
        ],
        "body": {
-        "shoulders": 1.1,
+        "length": 1.15,
+        "flare": 0.1,
+        "wave": 0,
+        "shoulders": 1.15,
         "collar": [
          "high",
-         1.2
+         1.5
+        ],
+        "sleeves": [
+         "throat",
+         "tuck"
+        ],
+        "turn": -16,
+        "lean": [
+         -4,
+         0
         ],
         "grown": [
          [
           "eyes",
-          1.15
+          1.2
          ],
          "stars"
-        ]
+        ],
+        "trim": [
+         "piping",
+         "collar",
+         "cuffs",
+         "hem2"
+        ],
+        "tone": "light",
+        "brow": 20
        }
       },
       {
@@ -661,15 +989,46 @@
         "quiet-place"
        ],
        "body": {
-        "flare": 0.3,
+        "length": 1.6,
+        "flare": 0.1,
+        "taper": 0.8,
+        "sweep": [
+         0.3,
+         0.1
+        ],
+        "wave": 0,
+        "shoulders": 0.85,
         "collar": [
          "hood",
-         1.1
+         1.05
         ],
         "sleeves": "none",
-        "grown": [],
-        "coat": "ash",
-        "clasp": 0.6
+        "lean": [
+         0,
+         0
+        ],
+        "mantle": "dust",
+        "grown": [
+         [
+          "mantle",
+          1.3
+         ],
+         [
+          "smoke",
+          0.8
+         ]
+        ],
+        "clasp": 0.7,
+        "trim": [
+         "piping"
+        ],
+        "worn": {
+         "points": 0,
+         "trim": [
+          "piping"
+         ]
+        },
+        "brow": 0
        }
       }
      ]
@@ -694,21 +1053,48 @@
      ],
      "body": {
       "length": 1.3,
-      "flare": 0.14,
+      "flare": 0.16,
       "rag": 0,
-      "open": 0.4,
+      "open": 0.45,
+      "bend": [
+       0,
+       0
+      ],
+      "lean": [
+       0,
+       0
+      ],
       "collar": [
        "turned",
        1.0
       ],
       "lining": "field",
+      "sleeves": [
+       "low",
+       "hang"
+      ],
       "grown": [
        [
         "lapels",
         1.0
+       ],
+       [
+        "fling",
+        1.0
        ]
       ],
-      "coat": null
+      "trim": [
+       "piping",
+       "facing"
+      ],
+      "worn": {
+       "points": 0,
+       "trim": [
+        "piping",
+        "facing"
+       ]
+      },
+      "brow": 16
      },
      "finishes": [
       {
@@ -731,20 +1117,34 @@
        ],
        "body": {
         "length": 1.4,
-        "open": 0.85,
+        "open": 0.9,
+        "cut": 0.2,
         "flare": 0.4,
         "wave": 0.2,
         "lining": "storm",
+        "sleeves": "back",
+        "sweep": [
+         0,
+         0.25
+        ],
         "grown": [
          [
-          "lapels",
-          1.2
+          "fling",
+          1.25
+         ],
+         [
+          "fling",
+          -1.25
          ],
          [
           "wind",
           1.3
          ]
-        ]
+        ],
+        "trim": [
+         "piping"
+        ],
+        "brow": 14
        }
       },
       {
@@ -766,15 +1166,34 @@
         "scorched"
        ],
        "body": {
-        "length": 0.8,
-        "open": 0.25,
-        "flare": 0.1,
-        "rag": 0.9,
+        "length": 0.85,
+        "open": 0.3,
+        "flare": 0.3,
+        "rag": 1.0,
+        "wave": 0.1,
         "lining": "plain",
+        "collar": [
+         "turned",
+         0.8
+        ],
+        "sleeves": "fold",
+        "lean": [
+         -8,
+         0
+        ],
         "grown": [
          "scorch"
         ],
-        "coat": "ember"
+        "trim": [
+         "piping"
+        ],
+        "worn": {
+         "points": 9,
+         "dag": 0.45,
+         "back": 0.22,
+         "front": 0.2
+        },
+        "brow": 20
        }
       }
      ]
@@ -810,12 +1229,29 @@
      "ear",
      1.0
     ],
-    "sleeves": "hang",
+    "sleeves": [
+     "cup",
+     "hang"
+    ],
+    "lean": [
+     0,
+     6
+    ],
     "grown": [
      "buttons"
     ],
+    "trim": [
+     "facing",
+     "cuffs",
+     "collar"
+    ],
+    "coat": "frost",
     "stands": 1.3,
-    "accent": "peacock"
+    "accent": "peacock",
+    "worn": {
+     "cut": "tippet"
+    },
+    "brow": 2
    },
    "prongs": [
     {
@@ -837,18 +1273,38 @@
       "brass-plate"
      ],
      "body": {
-      "length": 1.35,
-      "cut": 0.55,
-      "waist": 0.88,
+      "length": 1.2,
+      "cut": 1.1,
+      "waist": 0.82,
+      "flare": 0.05,
       "collar": [
        "ear",
-       0.7
+       0.6
+      ],
+      "sleeves": [
+       "behind",
+       "heart"
+      ],
+      "lean": [
+       -3,
+       0
       ],
       "grown": [
        "buttons2",
-       "stock"
+       "stock",
+       [
+        "tails",
+        1.0
+       ]
       ],
-      "coat": "night"
+      "trim": [
+       "facing",
+       "cuffs",
+       "collar",
+       "yoke"
+      ],
+      "tone": "dark",
+      "brow": 10
      },
      "finishes": [
       {
@@ -870,16 +1326,41 @@
         "ledger"
        ],
        "body": {
-        "length": 1.65,
-        "cut": 0.2,
-        "shoulders": 1.12,
+        "length": 1.7,
+        "cut": 0.1,
+        "shoulders": 1.3,
+        "chest": 1.2,
+        "waist": 1.0,
+        "flare": 0.22,
+        "collar": [
+         "ear",
+         0.7
+        ],
+        "sleeves": [
+         "akimbo",
+         "throat"
+        ],
+        "lean": [
+         0,
+         0
+        ],
         "grown": [
          "offices",
          "epaulettes",
          "chain",
          "sash",
-         "stock"
-        ]
+         "stock",
+         [
+          "train",
+          1.0
+         ]
+        ],
+        "trim": [
+         "facing",
+         "cuffs",
+         "collar"
+        ],
+        "brow": 6
        }
       },
       {
@@ -903,19 +1384,32 @@
        "body": {
         "length": 1.4,
         "cut": 0,
-        "open": 0.45,
+        "open": 0.5,
+        "flare": 0.12,
+        "waist": 0.9,
         "collar": [
          "ear",
          0.55
+        ],
+        "sleeves": [
+         "heart",
+         "raise"
         ],
         "grown": [
          "oath",
          [
           "lapels",
-          0.7
+          0.8
          ],
          "stock"
-        ]
+        ],
+        "trim": [
+         "facing",
+         "cuffs",
+         "collar"
+        ],
+        "tone": "light",
+        "brow": 0
        }
       }
      ]
@@ -939,16 +1433,40 @@
       "whiskers"
      ],
      "body": {
-      "length": 1.3,
-      "flare": 0.12,
+      "length": 1.05,
+      "flare": 0.16,
       "collar": [
        "ear",
-       1.15
+       1.5
+      ],
+      "ears": [
+       1.25,
+       0.8
+      ],
+      "sleeves": [
+       "tuck",
+       "tuck"
+      ],
+      "lean": [
+       0,
+       12
+      ],
+      "bend": [
+       -0.08,
+       0
       ],
       "grown": [
        "buttons",
        "whiskers"
-      ]
+      ],
+      "trim": [
+       "facing",
+       "cuffs",
+       "collar",
+       "bands"
+      ],
+      "tone": "light",
+      "brow": -4
      },
      "finishes": [
       {
@@ -971,15 +1489,33 @@
        ],
        "body": {
         "length": 1.35,
+        "flare": 0.12,
+        "collar": [
+         "ear",
+         1.1
+        ],
+        "ears": [
+         1,
+         1
+        ],
         "sleeves": [
-         "reach",
-         "hang"
+         "grab",
+         "back"
+        ],
+        "lean": [
+         0,
+         -8
+        ],
+        "bend": [
+         0,
+         0
         ],
         "grown": [
          "buttons",
          "whiskers",
          "tug"
-        ]
+        ],
+        "brow": -8
        }
       },
       {
@@ -1001,17 +1537,39 @@
         "voice"
        ],
        "body": {
-        "length": 1.45,
-        "flare": 0.04,
+        "length": 1.5,
+        "flare": 0.0,
+        "waist": 0.9,
+        "shoulders": 0.9,
         "collar": [
          "spread",
          1.0
         ],
+        "ears": [
+         1,
+         1
+        ],
         "sleeves": "flat",
+        "lean": [
+         0,
+         0
+        ],
+        "bend": [
+         0,
+         0
+        ],
+        "turn": -20,
         "grown": [
          "hook",
          "whiskers"
-        ]
+        ],
+        "trim": [
+         "facing",
+         "collar",
+         "stripe"
+        ],
+        "tone": "pale",
+        "brow": 4
        }
       }
      ]
@@ -1033,18 +1591,40 @@
       "old-eyes"
      ],
      "body": {
-      "length": 1.4,
-      "shoulders": 1.1,
+      "length": 1.5,
+      "shoulders": 1.2,
+      "chest": 1.1,
+      "flare": 0.2,
       "collar": [
        "ear",
        0.85
       ],
+      "ears": [
+       1.15,
+       0.7
+      ],
+      "sleeves": [
+       "trail",
+       "trail"
+      ],
+      "lean": [
+       5,
+       -4
+      ],
       "grown": [
        [
         "patches",
-        1.0
-       ]
-      ]
+        1.2
+       ],
+       "pool"
+      ],
+      "trim": [
+       "facing",
+       "cuffs",
+       "collar",
+       "hem2"
+      ],
+      "brow": -6
      },
      "finishes": [
       {
@@ -1066,9 +1646,26 @@
         "glow"
        ],
        "body": {
-        "length": 1.7,
-        "shoulders": 1.25,
-        "chest": 1.12,
+        "length": 1.75,
+        "shoulders": 1.3,
+        "chest": 1.15,
+        "flare": 0.1,
+        "ears": [
+         1,
+         1
+        ],
+        "collar": [
+         "ear",
+         0.8
+        ],
+        "sleeves": [
+         "behind",
+         "behind"
+        ],
+        "lean": [
+         -3,
+         0
+        ],
         "grown": [
          [
           "mantle",
@@ -1079,7 +1676,15 @@
           0.6
          ],
          "figure"
-        ]
+        ],
+        "trim": [
+         "facing",
+         "cuffs",
+         "collar",
+         "yoke"
+        ],
+        "tone": "light",
+        "brow": 8
        }
       },
       {
@@ -1102,10 +1707,19 @@
        ],
        "body": {
         "length": 1.45,
-        "flare": 0.36,
-        "open": 0.4,
+        "flare": 0.4,
+        "open": 0.45,
+        "shoulders": 1.1,
+        "ears": [
+         1,
+         1
+        ],
         "sleeves": "spread",
         "lining": "field",
+        "lean": [
+         4,
+         0
+        ],
         "grown": [
          "tokens",
          [
@@ -1113,7 +1727,14 @@
           0.8
          ]
         ],
-        "coat": "hearth"
+        "trim": [
+         "facing",
+         "cuffs",
+         "collar",
+         "dags"
+        ],
+        "tone": "pale",
+        "brow": -10
        }
       }
      ]
