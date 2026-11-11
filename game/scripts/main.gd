@@ -23,6 +23,9 @@ var mode := "menu"   # menu, creator, prologue, story, tutorial, fight, results
 var fight_end := 0.0
 var _cam_mouse := Vector2.ZERO
 var _last_ticks := 0
+## The soak test (game/tests/soak.gd) runs the game faster than the wall clock: then the frame's
+## own step is the time that passed, not the wall's.
+var fixed_clock := false
 
 var _args := {}
 var _shot_n := 0
@@ -1284,6 +1287,8 @@ func _process(delta: float) -> void:
 	var t := Time.get_ticks_usec()
 	var real_dt := minf(0.1, (t - _last_ticks) / 1e6)
 	_last_ticks = t
+	if fixed_clock:
+		real_dt = minf(0.1, delta / maxf(0.01, Engine.time_scale))
 	if mode == "academy":
 		if get_tree().paused:
 			world.draw(fight, 0.0, Vector2.ZERO, Vector2.ZERO)

@@ -16,6 +16,9 @@ var world: World
 var hud: Hud
 var sfx: Sfx
 var auto := false            # automated checks: walk to each objective, read each line
+var auto_want := ""          # automated checks: the option the autopilot takes where a choice has it
+var problems: Array = []     # what went wrong that the game stepped round (the soak test reads these)
+var _clock := 0.0            # the Academy's own seconds
 
 var _people: Array = []      # who is in this place: {kind, id, name, pos, fig}
 var _doors: Array = []
@@ -143,10 +146,16 @@ func enter(h: Dictionary) -> void:
 		(gp as GeniusPage).look_changed.connect(_genius_look_changed)
 	visible = true
 	_carrying = false
-	if progress.get("quest", {}) is Dictionary and not progress.get("quest", {}).is_empty():
-		# A posting in hand from last time: the run starts over from the quad.
+	if (progress.get("quest", {}) is Dictionary and not progress.get("quest", {}).is_empty()) or Zones.is_zone(String(progress.get("place", "quad"))) or not Data.academy["places"].has(String(progress.get("place", "quad"))):
+		# A posting in hand from last time: the run starts over from the quad. So does a game left
+		# out on the line in the middle of a lesson's run (the Green, the Examination): the car is
+		# only there for a run, and with no run in hand nobody could ever leave the zone.
 		progress["place"] = "quad"
 		progress["cleared"] = {}
+	# A classmate's trouble left half done goes back on the board: its steps are not kept, and a
+	# trouble "in hand" that can never be finished shuts the board for the rest of the term.
+	if String(progress.get("trouble", "")) != "":
+		progress["trouble"] = ""
 	go(String(progress.get("place", "quad")), not bool(progress["arrived"]))
 	if progress.get("quest", {}) is Dictionary and not progress.get("quest", {}).is_empty():
 		_begin_quest(progress["quest"])
@@ -965,6 +974,7 @@ func _set_slots(id: String, picked: Array = []) -> void:
 		_set_slots(id, p2))
 
 func update(events: Array, dt: float) -> void:
+	_clock += dt
 	for e in events:
 		if debug and e["type"] in ["wolf-down", "player-down", "second-heart", "foe-down", "ally-down"]:
 			print("EVENT %s at %s (lesson %s step %d)" % [e["type"], str(fight.p_pos), _lesson.get("id", ""), _step])
@@ -1202,7 +1212,7 @@ var _unstick_dir := Vector2.ZERO
 ## Walk round what is in the way: a pillar, a brazier, a person. Boxed in (no ground gained
 ## for a while), take a sidestep for a moment and try again.
 func _steer(dir: Vector2) -> Vector2:
-	var now := Time.get_ticks_msec() / 1000.0
+	var now := _clock
 	if now < _unstick_until:
 		return _unstick_dir
 	if _steer_last_pos != Vector2.INF and fight.p_pos.distance_to(_steer_last_pos) < 0.06:
@@ -1893,6 +1903,7 @@ func choose(title: String, options: Array, then: Callable) -> void:
 	else:
 		# nothing to choose: never a wall. Say so in the log and go on with what there is.
 		push_warning("choose(%s): no options" % title)
+		problems.append("a choice with nothing in it: %s" % title)
 		_choice_box.queue_free()
 		_choice_box = null
 		if not auto:
@@ -1900,7 +1911,11 @@ func choose(title: String, options: Array, then: Callable) -> void:
 		then.call("")
 		return
 	if auto:
-		get_tree().create_timer(1.0).timeout.connect(func(): if _choice_box: (first as Button).pressed.emit())
+		var pick: Button = first
+		for i in options.size():
+			if auto_want != "" and String(options[i]["id"]) == auto_want:
+				pick = list.get_child(i)
+		get_tree().create_timer(1.0).timeout.connect(func(): if _choice_box == veil and is_instance_valid(pick): pick.pressed.emit())
 
 # --- The line: zones, the post, extraction, the rescue team --------------------------------
 
