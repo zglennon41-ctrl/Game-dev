@@ -62,6 +62,14 @@
    "maw": [
     "fangs",
     0.6
+   ],
+   "face": [
+    "young",
+    1.0
+   ],
+   "feet": [
+    "toes",
+    1.0
    ]
   }
  },
@@ -109,7 +117,27 @@
      "fangs",
      0.8
     ],
-    "accent": "marigold"
+    "accent": "marigold",
+    "face": [
+     "open",
+     1.0
+    ],
+    "coat": "hearth",
+    "trim": "accent",
+    "marks": [
+     [
+      "saddle",
+      1.0
+     ],
+     [
+      "ears",
+      1.0
+     ],
+     [
+      "tailtip",
+      1.0
+     ]
+    ]
    },
    "prongs": [
     {
@@ -570,7 +598,27 @@
      "fangs",
      1.0
     ],
-    "accent": "madder"
+    "accent": "madder",
+    "face": [
+     "fixed",
+     1.0
+    ],
+    "coat": "ash",
+    "trim": "accent",
+    "marks": [
+     [
+      "muzzle",
+      1.0
+     ],
+     [
+      "stripe",
+      1.0
+     ],
+     [
+      "socks",
+      1.0
+     ]
+    ]
    },
    "prongs": [
     {
@@ -1070,7 +1118,26 @@
      0.6
     ],
     "coat": "night",
-    "accent": "lapis"
+    "accent": "lapis",
+    "face": [
+     "aside",
+     1.0
+    ],
+    "trim": "accent",
+    "marks": [
+     [
+      "under:pale",
+      1.0
+     ],
+     [
+      "bands:light",
+      1.0
+     ],
+     [
+      "ears:light",
+      1.0
+     ]
+    ]
    },
    "prongs": [
     {
