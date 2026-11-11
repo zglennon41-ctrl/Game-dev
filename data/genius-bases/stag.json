@@ -155,7 +155,7 @@
       "stance": "low",
       "marks": [
        "neck:dark",
-       "mane",
+       "mane:dark",
        "bands"
       ]
      },
@@ -201,7 +201,7 @@
         "armor": null,
         "marks": [
          "neck:dark",
-         "mane",
+         "mane:dark",
          "bands",
          "burrs"
         ]
@@ -253,7 +253,7 @@
         ],
         "marks": [
          "neck:deep",
-         "mane",
+         "mane:dark",
          "bands",
          "dorsal:dark"
         ]
@@ -300,7 +300,8 @@
       ],
       "marks": [
        "dorsal",
-       "stockings"
+       "socks",
+       "blaze"
       ],
       "rest": [
        "stride",
@@ -328,10 +329,6 @@
          "plough",
          1.0
         ],
-        "chest": [
-         "plough",
-         1.0
-        ],
         "legs": [
          "feather",
          1.0
@@ -345,10 +342,16 @@
         },
         "stance": "tilt",
         "ears": null,
+        "neck": [
+         "mane",
+         1.0
+        ],
         "marks": [
          "dorsal",
-         "stockings",
-         "blaze"
+         "socks",
+         "blaze",
+         "mane:dark",
+         "palms:dark"
         ],
         "rest": null
        }
@@ -400,7 +403,7 @@
         },
         "marks": [
          "dorsal:light",
-         "stockings:dark"
+         "socks:dark"
         ]
        }
       }
@@ -446,7 +449,7 @@
       "armor": null,
       "marks": [
        "throat",
-       "mane",
+       "mane:dark",
        "socks"
       ]
      },
@@ -489,7 +492,7 @@
         "throat": null,
         "marks": [
          "throat:dark",
-         "mane",
+         "mane:dark",
          "socks",
          "burrs"
         ]
@@ -544,7 +547,7 @@
         "stance": "sky",
         "marks": [
          "throat",
-         "mane",
+         "mane:dark",
          "socks",
          "bib:dark"
         ]
@@ -594,8 +597,8 @@
     "back": null,
     "pose": null,
     "marks": [
-     "saddle",
-     "stockings:dark"
+     "saddle:dark",
+     "socks"
     ]
    },
    "prongs": [
@@ -637,8 +640,8 @@
        "chest": 1.1
       },
       "marks": [
-       "blanket",
-       "stockings:dark"
+       "blanket:dark",
+       "socks"
       ]
      },
      "finishes": [
@@ -697,8 +700,8 @@
         ],
         "stance": "alert",
         "marks": [
-         "blanket",
-         "stockings:dark",
+         "blanket:dark",
+         "socks",
          "dapple:light"
         ]
        }
@@ -749,8 +752,9 @@
          "hooves": 1.3
         },
         "marks": [
-         "blanket:dark",
-         "palms:light"
+         "blanket:deep",
+         "bands",
+         "blaze:dark"
         ]
        }
       }
@@ -809,7 +813,7 @@
       "marks": [
        "dapple",
        "ears",
-       "stockings:light"
+       "socks"
       ]
      },
      "finishes": [
@@ -860,7 +864,7 @@
         "marks": [
          "dapple",
          "ears",
-         "stockings:light",
+         "socks",
          "dorsal"
         ]
        }
@@ -951,7 +955,7 @@
       },
       "marks": [
        "saddle:dark",
-       "stockings:dark",
+       "socks",
        "tines"
       ]
      },
@@ -1001,7 +1005,7 @@
         "stance": "alert",
         "marks": [
          "saddle:dark",
-         "stockings:dark",
+         "socks",
          "tines"
         ]
        }
@@ -1062,7 +1066,8 @@
         },
         "marks": [
          "saddle:light",
-         "stockings"
+         "socks",
+         "mane:light"
         ]
        }
       }
@@ -1450,7 +1455,8 @@
       "marks": [
        "dorsal",
        "rump",
-       "stockings:light"
+       "socks",
+       "ears"
       ]
      },
      "finishes": [
@@ -1499,8 +1505,9 @@
         "marks": [
          "dorsal",
          "rump",
-         "stockings:light",
-         "bib"
+         "socks",
+         "ears",
+         "bib:dark"
         ]
        }
       },
@@ -1557,8 +1564,9 @@
         "marks": [
          "dorsal",
          "rump",
-         "stockings:light",
-         "ears"
+         "socks",
+         "ears",
+         "mane:dark"
         ]
        }
       }

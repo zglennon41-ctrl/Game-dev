@@ -254,13 +254,13 @@ def _flank(y, z):
 KINDS = {
     "red": dict(neck=1.5, nape=1.12, withers=0.0, croup=0.0, slope=0.0, girth=1.0, legs=1.0, muzzle=1.0, nose=1.0, ears=1.0, bell=0.0, tail="down", stance="alert"),
     "wood": dict(neck=1.3, nape=1.3, withers=0.2, croup=-0.12, slope=0.1, girth=1.08, legs=1.1, muzzle=1.22, nose=1.6, ears=0.95, bell=1.0, tail="stub", stance="level"),
-    "white": dict(neck=1.72, nape=0.86, withers=-0.04, croup=0.03, slope=0.0, girth=0.88, legs=1.02, muzzle=0.95, nose=0.9, ears=1.3, bell=0.0, tail="flag", stance="watch"),
+    "white": dict(neck=1.5, nape=0.86, withers=-0.04, croup=0.03, slope=0.0, girth=0.88, legs=1.02, muzzle=0.95, nose=0.9, ears=1.3, bell=0.0, tail="flag", stance="watch"),
 }
 
 # how it carries its neck: how steeply each of its three lengths rises, and how far its face
 # falls below the level (degrees)
 CRANES = {
-    "alert": (50, 60, 64, 26), "proud": (62, 74, 80, 34), "watch": (64, 76, 82, 18), "level": (28, 34, 38, 24),
+    "alert": (48, 58, 62, 26), "proud": (56, 68, 76, 32), "watch": (60, 70, 76, 18), "level": (28, 34, 38, 24),
     "tilt": (6, -4, -12, 66), "low": (20, 14, 8, 40), "bell": (52, 46, 36, -16), "graze": (-22, -40, -52, 72),
     "sky": (58, 70, 80, -34), "bow": (40, 30, 10, 58), "reach": (34, 26, 18, 8),
 }
@@ -352,7 +352,7 @@ def _body(r, A):
     tuck = (0.3 + 0.5 * (1.0 - waist)) * age["depth"]
     # the trunk: (y, its top, its underside, its half-breadth, crest, keel, egg)
     TR = [
-        (ysh + 0.06, W, B + 0.02, 0.33 * cw, 0.3, 0.22, 0.12),
+        (ysh + 0.06, W, B + 0.02, 0.34 * cw, 0.14, 0.22, 0.12),
         (ysh + 0.5, W - 0.08 - 0.5 * K["withers"], B, 0.44 * cw * gw ** 0.5, 0.1, 0.1, 0.1),
         (mid + 0.12, W - 0.11 - 0.9 * K["withers"] + 0.3 * cr, B + 0.12 * tuck / 0.3, 0.47 * gw, 0.04, 0.0, 0.1),
         (yhip - 0.38, W - 0.13 - K["withers"] + 0.7 * cr, B + tuck, 0.39 * gw * waist ** 0.6, 0.05, 0.0, 0.0),
@@ -366,12 +366,12 @@ def _body(r, A):
     # where the neck leaves the chest: from before the withers down to the breast
     wf = Vector((0, ysh - 0.14, W - 0.1 - 0.3 * K["withers"]))
     br = Vector((0, ysh - 0.44 * (1.0 + 0.2 * (chest - 1.0)), B + 0.3))
-    base = ((wf + br) / 2, 0.25 * cw * nape ** 0.3, (wf - br).length / 2, 0.0, 0.12, 0.0)
+    base = ((wf + br) / 2, 0.29 * cw * nape ** 0.3, (wf - br).length / 2, 0.0, 0.12, 0.0)
     # the neck: its joints
     J = [r.bone(nm) for nm in N_CHAIN[1:]]
     fj = _frames([base[0]] + J[1:])
     neck = []
-    for (p, d, u, v), a, bb, off in zip(fj[1:], (0.19, 0.155, 0.135), (0.3, 0.225, 0.19), (0.3, 0.2, 0.1)):
+    for (p, d, u, v), a, bb, off in zip(fj[1:], (0.215, 0.175, 0.145), (0.34, 0.25, 0.2), (0.3, 0.2, 0.1)):
         k = nape if bb > 0.2 else nape ** 0.5
         neck.append((p - v * (off * bb * k), a * k ** 0.6, bb * k, 0.05, 0.0, 0.0))
     inn = (J[3] + (J[3] - J[2]).normalized() * 0.14 - fj[-1][3] * 0.02, 0.1, 0.12, 0.0, 0.0, 0.0)
@@ -442,7 +442,7 @@ def _legs(r, A):
     """Four legs of a deer: the forearm and the gaskin lean, a knee and a hock that show, long
     cannon bones, a fetlock, a pastern sloping to a small cloven hoof."""
     sp, K, age = _S["spec"], _S["K"], _S["age"]
-    gk = 1.16 * float(sp.get("build", {}).get("girth", 1.0)) ** 0.7 * K["girth"] ** 0.5 * age["girth"]
+    gk = 1.3 * float(sp.get("build", {}).get("girth", 1.0)) ** 0.7 * K["girth"] ** 0.5 * age["girth"]
     kn = age["knee"]
     hoofk = float(sp.get("build", {}).get("hooves", 1.0))
     splay = 1.5 if _has("legs", "feather") or hoofk > 1.2 else 1.0
@@ -661,12 +661,12 @@ ANTLERS = {
     "spikes": dict(beam=[(0.1, 0.06, 0.3), (0.26, 0.02, 0.62), (0.34, -0.14, 0.92)], tines=[(0.22, (0.25, -1, 0.5), 0.34)], thick=1.25),
     "lock": dict(beam=[(0.22, 0.1, 0.34), (0.56, 0.2, 0.72), (0.8, 0.12, 1.2), (0.82, -0.14, 1.58)],
                  tines=[(0.08, (0.15, -1, 0.3), 0.6, 0.5), (0.3, (0.5, -0.9, 0.35), 0.5, 0.5), (0.58, (0.7, -0.6, 0.5), 0.46, 0.4), (0.84, (-0.3, -0.5, 0.9), 0.4)], thick=1.5),
-    "royal": dict(beam=[(0.2, 0.16, 0.46), (0.56, 0.4, 0.98), (0.8, 0.44, 1.62), (0.78, 0.26, 2.2), (0.62, 0.02, 2.62)],
-                  tines=[(0.05, (0.2, -1, 0.35), 0.66, 0.6), (0.17, (0.4, -1, 0.3), 0.5, 0.6), (0.4, (0.5, -0.9, 0.5), 0.6, 0.5),
-                         (0.8, (0.9, -0.2, 0.7), 0.46), (0.9, (0.1, 0.7, 0.9), 0.44), (0.97, (-0.6, -0.4, 1), 0.4)], thick=1.2),
-    "broken": dict(beam=[(0.2, 0.16, 0.46), (0.56, 0.4, 0.98), (0.8, 0.44, 1.62), (0.78, 0.26, 2.2), (0.62, 0.02, 2.62)],
-                   tines=[(0.05, (0.2, -1, 0.35), 0.66, 0.6), (0.17, (0.4, -1, 0.3), 0.5, 0.6), (0.4, (0.5, -0.9, 0.5), 0.6, 0.5),
-                          (0.8, (0.9, -0.2, 0.7), 0.46), (0.9, (0.1, 0.7, 0.9), 0.44), (0.97, (-0.6, -0.4, 1), 0.4)], thick=1.4, cut={-1: 0.36}),
+    "royal": dict(beam=[(0.26, 0.12, 0.44), (0.72, 0.34, 0.94), (1.04, 0.44, 1.56), (1.06, 0.26, 2.16), (0.84, -0.06, 2.6)],
+                  tines=[(0.05, (0.3, -1, 0.45), 0.74, 0.6), (0.17, (0.6, -1, 0.4), 0.56, 0.6), (0.42, (0.8, -0.7, 0.6), 0.62, 0.5),
+                         (0.8, (0.9, -0.2, 0.7), 0.5), (0.9, (0.3, 0.7, 0.9), 0.46), (0.97, (-0.6, -0.4, 1), 0.44)], thick=1.25),
+    "broken": dict(beam=[(0.26, 0.12, 0.44), (0.72, 0.34, 0.94), (1.04, 0.44, 1.56), (1.06, 0.26, 2.16), (0.84, -0.06, 2.6)],
+                   tines=[(0.05, (0.3, -1, 0.45), 0.74, 0.6), (0.17, (0.6, -1, 0.4), 0.56, 0.6), (0.42, (0.8, -0.7, 0.6), 0.62, 0.5),
+                          (0.8, (0.9, -0.2, 0.7), 0.5), (0.9, (0.3, 0.7, 0.9), 0.46), (0.97, (-0.6, -0.4, 1), 0.44)], thick=1.45, cut={1: 0.4}),
     "swept": dict(beam=[(0.14, 0.3, 0.26), (0.34, 0.9, 0.52), (0.46, 1.6, 0.66), (0.44, 2.2, 0.62)],
                   tines=[(0.1, (0.2, -0.6, 0.8), 0.3), (0.42, (0.4, 0.5, 0.9), 0.4), (0.68, (0.3, 0.6, 0.8), 0.36), (0.88, (0.5, 0.7, 0.6), 0.28)], thick=1.0),
     "plough": dict(beam=[(0.4, -0.05, 0.3), (0.95, -0.2, 0.5), (1.5, -0.5, 0.56), (1.9, -0.95, 0.46)],
@@ -762,8 +762,8 @@ def _antler(sg, base, P, size, F):
         tip = a + d * (L * size) + F(0, 0, 1) * (curl * L * size * 0.5)
         mid = a + d * (L * size * 0.55) - F(0, 0, 1) * (curl * L * size * 0.08)
         rt = max(0.016, radius(t) * 0.78)
-        pts = _cr([a, mid, tip], 3)
-        tgeo = g.merge(tgeo, g.tube(pts, [rt * (1.0 - 0.9 * (i / (len(pts) - 1)) ** 1.3) + 0.004 for i in range(len(pts))], n=6))
+        pts = _cr([a, mid, tip], 2)
+        tgeo = g.merge(tgeo, g.tube(pts, [rt * (1.0 - 0.9 * (i / (len(pts) - 1)) ** 1.3) + 0.004 for i in range(len(pts))], n=5))
         tines.append((a, tip))
     if cut is not None:
         m = max(2, int(cut * (n - 1)) + 1)
@@ -773,7 +773,7 @@ def _antler(sg, base, P, size, F):
         radii[-1] *= 1.2
     # the burr: a rough ring where the antler leaves the pedicle
     d0 = (beam[1] - beam[0]).normalized()
-    bgeo = g.merge(g.tube(beam, radii, n=7), g.tube([beam[0] + d0 * 0.01, beam[0] + d0 * 0.05, beam[0] + d0 * 0.09], [rb * 1.2, rb * 1.5, rb * 1.1], n=8))
+    bgeo = g.merge(g.tube(beam, radii, n=6), g.tube([beam[0] + d0 * 0.01, beam[0] + d0 * 0.05, beam[0] + d0 * 0.09], [rb * 1.2, rb * 1.5, rb * 1.1], n=8))
     tips = [] if cut is not None else [beam[-1]]
     tips += [b for _, b in tines]
     pgeo = None
@@ -879,7 +879,7 @@ def grow_marks(r, A, style, size):
     elif what == "throat":
         bd(lambda c, n: st(c)[7] == "neck" and st(c)[8] > 0.1 and n.dot(st(c)[3]) < -0.15)
     elif what == "bib":           # the breast and the foot of the neck
-        bd(lambda c, n: (st(c)[7] == "neck" and st(c)[8] < 0.5 and n.dot(st(c)[3]) < 0.25) or (st(c)[7] == "back" and st(c)[8] < 0.1 and n.y < -0.2))
+        bd(lambda c, n: (st(c)[7] == "neck" and st(c)[8] < 0.42 and n.dot(st(c)[3]) < 0.0) or (st(c)[7] == "back" and st(c)[8] < 0.1 and n.y < -0.2))
     elif what == "saddle":
         bd(lambda c, n: st(c)[7] == "back" and 0.04 < st(c)[8] < 0.74 and n.dot(st(c)[3]) > 0.35)
     elif what == "blanket":
@@ -956,9 +956,9 @@ def _collar(s, wide=0.04, lift=0.02, n=14):
 def grow_neck(r, A, style, size):
     nl = _S["neckline"]
     if style == "mane":           # a stag's mane: long hair under the throat and round the foot of the neck
-        own = _has("marks", "mane")
-        m1 = _am("dark") if own else mat("hide_red")
-        m2 = _am("deep") if own else mat("fur_cream")
+        step = next((st.partition(":")[2] for st, _ in gl.each(_S["spec"].get("marks")) if st.partition(":")[0] == "mane"), None)
+        m1 = _am(step or "dark") if step is not None else mat("hide_red")
+        m2 = _am({"": "deep", "dark": "deep", "light": "pale", "pale": "light", "deep": "dark"}.get(step or "dark", "deep")) if step is not None else mat("fur_cream")
         g1, g2, w1, w2 = None, None, [], []
         for i, s in enumerate(nl):
             t = s[8]
@@ -1200,8 +1200,8 @@ def grow_throat(r, A, style, size):
     p, n = _on(s, 270, -0.08 * size)
     c = p
     acc = bool(_S["spec"].get("accent"))
-    gl._later(r, "pulse", "throat", [(g.ico(c, 0.25 * size, sub=2, scale=(0.9, 0.9, 1.25)), _am("light") if acc else mat("fur_cream"))], c, s[6][0][0])
-    q = c + n * 0.24 * size
+    gl._later(r, "pulse", "throat", [(g.ico(c, 0.19 * size, sub=2, scale=(0.9, 0.9, 1.3)), _am("light") if acc else mat("fur_cream"))], c, s[6][0][0])
+    q = c + n * 0.18 * size
     _add(r, "throat_seam", g.blade(q + Z * 0.2 * size, q - Z * 0.22 * size, 0.07, normal=n, belly=0.5), [s[6]] * 6, field("voice", 2.2), smooth=True)
 
 
@@ -1220,23 +1220,23 @@ def grow_breath(r, A, style, size):
 
 
 def grow_hide(r, A, style, size):
-    """Its hide stands in thick overlapping plates along the flank, like bark."""
+    """Its hide stands in thick plates lapped along the flank, like bark."""
     acc = bool(_S["spec"].get("accent"))
-    ysh, yhip, W, B = _S["ysh"], _S["yhip"], _S["W"], _S["B"]
-    zmid = (W + B) / 2 + 0.12
+    back = [s for s in _S["body"] if s[7] == "back" and 0.02 < s[8] < 0.9]
     dark, pale, wd, wp = None, None, [], []
-    n = 6
-    for row, (dz, sc) in enumerate(((0.36, 1.0), (0.02, 1.14), (-0.32, 0.92))):
-        for i in range(n):
-            y = ysh - 0.12 + (yhip - ysh + 0.34) * i / (n - 1) + 0.12 * (row % 2)
-            z = zmid + dz
-            for sg in (1, -1):
-                c = Vector((sg * (_flank(y, z) + 0.03), y, z))
-                geo = g.ico(c, 1.0, sub=0, scale=(0.1 * size, 0.27 * sc, 0.25 * sc), rot=(0.0, 0.0, sg * -0.16))
-                if (i + row) % 2:
-                    dark, wd = g.merge(dark, geo), wd + [r.spine_weights(y)] * len(geo[0])
+    for i, s in enumerate(back):
+        for row, deg in enumerate((66, 38, 10, -18)):
+            if (i + row) % 2:
+                continue
+            for dg in (deg, 180 - deg):
+                p, n = _on(s, dg, 0.025)
+                d = s[1] * 0.45 - s[3] * 0.9
+                d = (d - n * d.dot(n)).normalized()
+                bl = g.blade(p - d * 0.14 * size, p + d * 0.34 * size, 0.34 * size, thick=0.05 * size, normal=n, belly=0.42)
+                if (i // 2 + row) % 2:
+                    dark, wd = g.merge(dark, bl), wd + [s[6]] * len(bl[0])
                 else:
-                    pale, wp = g.merge(pale, geo), wp + [r.spine_weights(y)] * len(geo[0])
+                    pale, wp = g.merge(pale, bl), wp + [s[6]] * len(bl[0])
     _add(r, "bark", dark, wd, _am("deep") if acc else mat("bark"), smooth=False)
     _add(r, "bark_b", pale, wp, mat("bark_light"), smooth=False)
 
