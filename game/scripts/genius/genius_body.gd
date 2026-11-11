@@ -206,7 +206,11 @@ func _assemble(instar: int) -> void:
 		if ResourceLoader.exists(part_path):
 			# A part made for a paired slot (limbs, arms) goes on every socket the body has for it;
 			# some features name their own sockets (a beak at the mouth, hands at the wrists).
-			var named: Array = cfg.get("featureSockets", {}).get(f, []).filter(func(sn): return sockets.has(sn))
+			# (a giver's own make of a part may hang somewhere of its own: the Lurker's cloak down
+			# the back where the Coat's is on the head; featureSockets, "<giver>-<feature>")
+			var place_of: Dictionary = cfg.get("featureSockets", {})
+			var own_key := "%s-%s" % [giver, f]
+			var named: Array = place_of.get(own_key if part_path != PART_DIR % f and place_of.has(own_key) else f, []).filter(func(sn): return sockets.has(sn))
 			var targets: Array = named if not named.is_empty() else (socks.filter(func(sn): return sockets.has(sn)) if socks.size() > 1 else [socks[0]])
 			if targets.is_empty():
 				targets = [socks[i % socks.size()]]

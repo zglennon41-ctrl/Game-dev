@@ -54,7 +54,11 @@
   "habit": "When you sit, it pools under the chair. When you look, it is behind the chair.",
   "features": [
    "shadow-cloak"
-  ]
+  ],
+  "body": {
+   "plan": "blot",
+   "eyes": "dim"
+  }
  },
  "paths": [
   {
@@ -78,6 +82,22 @@
    "features": [
     "broad-guard"
    ],
+   "body": {
+    "plan": "figure",
+    "build": {
+     "broad": 1.4,
+     "tall": 0.82,
+     "hood": 1.0,
+     "turn": 0.55,
+     "thick": 1.1
+    },
+    "eyes": "slit",
+    "arms": "broad",
+    "wears": [
+     "mantle",
+     1.0
+    ]
+   },
    "prongs": [
     {
      "id": "lurker-long-shadow",
@@ -94,6 +114,18 @@
      "features": [
       "old-eyes"
      ],
+     "body": {
+      "build": {
+       "broad": 1.34,
+       "tall": 0.95,
+       "turn": 0.3
+      },
+      "eyes": "old",
+      "ground": [
+       "long",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "lurker-the-last-in-line",
@@ -109,7 +141,32 @@
        },
        "features": [
         "long-legged"
-       ]
+       ],
+       "body": {
+        "build": {
+         "broad": 0.82,
+         "tall": 1.5,
+         "skirt": 0.7,
+         "hood": 0.82,
+         "turn": 0.0,
+         "thick": 0.7,
+         "reach": 1.3
+        },
+        "arms": "hang",
+        "wears": null,
+        "legs": [
+         "stilts",
+         1.0
+        ],
+        "ground": [
+         "long",
+         0.5
+        ],
+        "holds": [
+         "dark-lamp",
+         1.2
+        ]
+       }
       },
       {
        "id": "lurker-shadow-of-the-cohort",
@@ -125,7 +182,26 @@
        },
        "features": [
         "watching-eye"
-       ]
+       ],
+       "body": {
+        "build": {
+         "broad": 1.6,
+         "tall": 1.02,
+         "hood": 1.2,
+         "turn": 0.0,
+         "skirt": 1.5
+        },
+        "eyes": "one",
+        "arms": "spread",
+        "wears": [
+         "mantle",
+         1.4
+        ],
+        "ground": [
+         "cohort",
+         1.0
+        ]
+       }
       }
      ]
     },
@@ -144,6 +220,19 @@
      "features": [
       "maw"
      ],
+     "body": {
+      "build": {
+       "broad": 1.45,
+       "tall": 0.98,
+       "turn": 0.0,
+       "deep": 1.2
+      },
+      "arms": "spread",
+      "chest": [
+       "maw",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "lurker-the-hollow-behind",
@@ -159,7 +248,13 @@
        },
        "features": [
         "second-face"
-       ]
+       ],
+       "body": {
+        "plan": "human",
+        "build": {
+         "tall": 1.0
+        }
+       }
       },
       {
        "id": "lurker-dark-parry",
@@ -175,7 +270,24 @@
        },
        "features": [
         "mask"
-       ]
+       ],
+       "body": {
+        "build": {
+         "broad": 1.5,
+         "tall": 1.06,
+         "thick": 1.3
+        },
+        "arms": "guard",
+        "face": [
+         "mask",
+         1.1
+        ],
+        "chest": null,
+        "wears": [
+         "mantle",
+         1.2
+        ]
+       }
       }
      ]
     },
@@ -194,6 +306,13 @@
      "features": [
       "door"
      ],
+     "body": {
+      "plan": "door",
+      "build": {
+       "tall": 1.0,
+       "wide": 1.0
+      }
+     },
      "finishes": [
       {
        "id": "lurker-dark-threshold",
@@ -212,7 +331,18 @@
        },
        "features": [
         "standing-air"
-       ]
+       ],
+       "body": {
+        "plan": "gate",
+        "build": {
+         "tall": 1.1,
+         "wide": 1.15
+        },
+        "aura": [
+         "veils",
+         1.0
+        ]
+       }
       },
       {
        "id": "lurker-cellar-keeper",
@@ -228,7 +358,21 @@
        },
        "features": [
         "dark-eyed"
-       ]
+       ],
+       "body": {
+        "plan": "hatch",
+        "build": {
+         "tall": 0.62,
+         "hem": 0.12,
+         "broad": 1.3,
+         "hood": 1.05,
+         "lean": 0.1,
+         "skirt": 1.6,
+         "turn": 0.0
+        },
+        "eyes": "holes",
+        "wears": null
+       }
       }
      ]
     }
@@ -255,6 +399,20 @@
    "features": [
     "voice"
    ],
+   "body": {
+    "plan": "seated",
+    "build": {
+     "tall": 0.62,
+     "hem": 0.36,
+     "lean": 0.5,
+     "hood": 1.1,
+     "broad": 0.95,
+     "tatters": 0.0,
+     "chair": 1.0
+    },
+    "eyes": "slit",
+    "coat": "ash"
+   },
    "prongs": [
     {
      "id": "lurker-vigil-shadow",
@@ -271,6 +429,21 @@
      "features": [
       "lantern"
      ],
+     "body": {
+      "plan": "robed",
+      "build": {
+       "tall": 0.55,
+       "hood": 1.0,
+       "wide": 1.0,
+       "bent": 0.1
+      },
+      "eyes": "single",
+      "arms": "lap",
+      "holds": [
+       "lamp",
+       1.0
+      ]
+     },
      "silhouette": "daemon-vigil",
      "finishes": [
       {
@@ -287,7 +460,32 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "build": {
+         "tall": 0.62,
+         "wide": 1.25,
+         "hood": 1.1,
+         "bent": 0.06
+        },
+        "eyes": "old",
+        "holds": [
+         "lamp-low",
+         1.0
+        ],
+        "back": [
+         "chair",
+         1.0
+        ],
+        "wears": [
+         "shawl",
+         1.0
+        ],
+        "aura": [
+         "stubs",
+         1.0
+        ]
+       }
       },
       {
        "id": "lurker-sickroom-shadow",
@@ -306,7 +504,24 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "build": {
+         "tall": 0.6,
+         "wide": 1.1,
+         "hood": 1.05,
+         "bent": 0.16
+        },
+        "arms": "cup",
+        "holds": [
+         "glow",
+         1.2
+        ],
+        "wears": [
+         "shawl",
+         0.8
+        ]
+       }
       }
      ]
     },
@@ -325,6 +540,25 @@
      "features": [
       "second-face"
      ],
+     "body": {
+      "plan": "figure",
+      "build": {
+       "tall": 1.15,
+       "broad": 0.85,
+       "hood": 1.0,
+       "lean": 0.1,
+       "side": 0.08,
+       "hem": 0.2,
+       "tatters": 1.0,
+       "skirt": 0.9
+      },
+      "eyes": "slit",
+      "arms": "whisper",
+      "shoulder": [
+       "face",
+       1.0
+      ]
+     },
      "silhouette": "daemon-whisper",
      "finishes": [
       {
@@ -341,7 +575,22 @@
        },
        "features": [
         "ledger"
-       ]
+       ],
+       "body": {
+        "build": {
+         "tall": 1.25,
+         "broad": 0.9
+        },
+        "arms": "hold",
+        "holds": [
+         "book",
+         1.1
+        ],
+        "wears": [
+         "script",
+         1.0
+        ]
+       }
       },
       {
        "id": "lurker-the-voice-at-the-shoulder",
@@ -360,7 +609,23 @@
        },
        "features": [
         "crown"
-       ]
+       ],
+       "body": {
+        "build": {
+         "tall": 1.2,
+         "broad": 1.05,
+         "hood": 0.9
+        },
+        "arms": "none",
+        "shoulder": [
+         "face-crowned",
+         1.25
+        ],
+        "wears": [
+         "mantle",
+         1.3
+        ]
+       }
       }
      ]
     },
@@ -379,6 +644,24 @@
      "features": [
       "long-legged"
      ],
+     "body": {
+      "plan": "figure",
+      "build": {
+       "tall": 1.1,
+       "broad": 0.85,
+       "hood": 1.0,
+       "lean": 0.12,
+       "hem": 0.42,
+       "tatters": 1.2,
+       "skirt": 0.85,
+       "reach": 1.0
+      },
+      "eyes": "slit",
+      "arms": [
+       "floor",
+       1.2
+      ]
+     },
      "finishes": [
       {
        "id": "lurker-shot-shadow",
@@ -394,7 +677,10 @@
        },
        "features": [
         "talons"
-       ]
+       ],
+       "body": {
+        "plan": "streak"
+       }
       },
       {
        "id": "lurker-name-stalker",
@@ -410,7 +696,28 @@
        },
        "features": [
         "tunnel-ear"
-       ]
+       ],
+       "body": {
+        "build": {
+         "tall": 0.72,
+         "broad": 1.0,
+         "lean": 0.32,
+         "hem": 0.3,
+         "hood": 1.1
+        },
+        "arms": [
+         "floor",
+         1.1
+        ],
+        "head": [
+         "ear",
+         1.0
+        ],
+        "ground": [
+         "wall",
+         1.0
+        ]
+       }
       }
      ]
     }
@@ -437,6 +744,23 @@
    "features": [
     "high-collar"
    ],
+   "body": {
+    "plan": "figure",
+    "build": {
+     "tall": 1.02,
+     "broad": 0.8,
+     "skirt": 0.78,
+     "hood": 0.92,
+     "thick": 0.8
+    },
+    "eyes": "slit",
+    "arms": "none",
+    "wears": [
+     "collar",
+     1.0
+    ],
+    "coat": "iron"
+   },
    "prongs": [
     {
      "id": "lurker-garrotter",
@@ -453,6 +777,17 @@
      "features": [
       "chain"
      ],
+     "body": {
+      "build": {
+       "tall": 1.16,
+       "broad": 0.92
+      },
+      "arms": "apart",
+      "holds": [
+       "chain",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "lurker-second-assailant",
@@ -468,7 +803,29 @@
        },
        "features": [
         "short-blade"
-       ]
+       ],
+       "body": {
+        "build": {
+         "tall": 1.12,
+         "broad": 0.95,
+         "lean": 0.32
+        },
+        "arms": "blade",
+        "holds": [
+         "blade",
+         1.2
+        ],
+        "wears": [
+         [
+          "collar",
+          1.0
+         ],
+         [
+          "cape",
+          1.0
+         ]
+        ]
+       }
       },
       {
        "id": "lurker-the-thing-in-the-corner",
@@ -484,7 +841,10 @@
        },
        "features": [
         "watching-eye"
-       ]
+       ],
+       "body": {
+        "plan": "corner"
+       }
       }
      ]
     },
@@ -503,6 +863,16 @@
      "features": [
       "far-eyes"
      ],
+     "body": {
+      "build": {
+       "tall": 1.28,
+       "broad": 0.76,
+       "lean": 0.36,
+       "hood": 1.08
+      },
+      "eyes": "wide",
+      "arms": "back"
+     },
      "finishes": [
       {
        "id": "lurker-cold-premonition",
@@ -521,7 +891,34 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "build": {
+         "tall": 1.3,
+         "broad": 0.85,
+         "lean": 0.2
+        },
+        "arms": "reach",
+        "chest": [
+         "cold-hand",
+         1.3
+        ],
+        "wears": [
+         [
+          "collar",
+          1.0
+         ],
+         [
+          "rime",
+          1.0
+         ]
+        ],
+        "aura": [
+         "breath",
+         1.0
+        ],
+        "coat": "ash"
+       }
       },
       {
        "id": "lurker-the-quiet-at-your-back",
@@ -537,7 +934,17 @@
        },
        "features": [
         "quiet-place"
-       ]
+       ],
+       "body": {
+        "plan": "monolith",
+        "build": {
+         "tall": 1.0
+        },
+        "ground": [
+         "ring",
+         1.0
+        ]
+       }
       }
      ]
     },
@@ -556,6 +963,19 @@
      "features": [
       "long-legs"
      ],
+     "body": {
+      "build": {
+       "tall": 0.8,
+       "broad": 0.9,
+       "lean": 0.3,
+       "hem": 0.2
+      },
+      "arms": "mantis",
+      "legs": [
+       "back",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "lurker-the-count-one-short",
@@ -574,7 +994,10 @@
        },
        "features": [
         "dark-eyed"
-       ]
+       ],
+       "body": {
+        "plan": "tree"
+       }
       },
       {
        "id": "lurker-the-dark-ahead",
@@ -590,7 +1013,37 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "build": {
+         "tall": 0.98,
+         "broad": 1.3,
+         "lean": 0.42
+        },
+        "arms": "wings",
+        "legs": [
+         "back",
+         1.15
+        ],
+        "chest": [
+         "core",
+         1.2
+        ],
+        "head": [
+         "prow",
+         1.0
+        ],
+        "wears": [
+         [
+          "collar",
+          0.8
+         ],
+         [
+          "cape",
+          0.9
+         ]
+        ]
+       }
       }
      ]
     }
