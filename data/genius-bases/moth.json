@@ -1,0 +1,1434 @@
+{
+ "id": "moth",
+ "name": "Moth",
+ "class": "creature",
+ "expression": "beast",
+ "silhouette": "beast-moth",
+ "soul": "The soul of one who goes toward whatever is brightest in the room, has learned what that costs, and goes anyway.",
+ "spark": "The mote keeps to the far side of the room from you and the near side of every lamp. Put the lamp out, and it comes and sits on your hand.",
+ "nature": {
+  "ground": {
+   "night": 0.9
+  },
+  "pattern": {
+   "fires": 0.7
+  },
+  "shape": {
+   "read": 0.5
+  },
+  "company": {
+   "alone": 0.3
+  }
+ },
+ "calls": {
+  "seed": {
+   "that-burns": 0.8,
+   "watches-from-above": 0.4,
+   "remembers": 0.3
+  },
+  "shape": {
+   "read": 0.7,
+   "cast": 0.4,
+   "turn": 0.2
+  },
+  "blood": {
+   "lamplighters": 0.7,
+   "nightfolk": 0.6,
+   "winged": 0.4
+  }
+ },
+ "hybrid": {
+  "adj": "Dusk-winged",
+  "gift": [
+   "dust-wings",
+   "antennae"
+  ],
+  "text": "It comes out at dusk, it knows what is in the air before you do, and it cannot leave a light alone."
+ },
+ "settled": {
+  "id": "moth-case-grub",
+  "name": "Case-grub",
+  "text": "A grub in a case it has spun from whatever was nearest: thread, a page corner, lamp-soot. It hangs by one strand and looks at your lamp.",
+  "sign": "A case of silk and scraps the length of a thumb, hanging by one thread from nothing. A round head and six feet come out of the end.",
+  "habit": "It lets itself down a little nearer the lamp each evening, and winds back up when you look.",
+  "features": [
+   "silk-case"
+  ],
+  "body": {
+   "kind": "grub",
+   "case": [
+    "scraps",
+    1.0
+   ],
+   "eyes": [
+    "big",
+    1.0
+   ]
+  }
+ },
+ "paths": [
+  {
+   "id": "moth-candle",
+   "name": "Candle-moth",
+   "of": "one who goes toward whoever is burning brightest",
+   "text": "It learned from you where the light in a room is, and that it is usually a person. It keeps close to them. A little too close.",
+   "sign": "Tawny wings barred the colour of a lamp flame, their edges singed dark. It never quite turns its back on the light.",
+   "habit": "It circles whoever is speaking, and settles on whoever was right.",
+   "features": [
+    "dust-wings",
+    "antennae",
+    "scorched"
+   ],
+   "leans": {
+    "pattern": {
+     "fires": 1.0
+    },
+    "company": {
+     "party": 0.7
+    },
+    "bonds": {
+     "classmate": 0.4
+    }
+   },
+   "body": {
+    "kind": "moth",
+    "wings": [
+     "delta",
+     1.0
+    ],
+    "hold": "v",
+    "flap": "beat",
+    "pitch": 58,
+    "pattern": [
+     "bars",
+     "singe"
+    ],
+    "feelers": [
+     "comb",
+     1.0
+    ],
+    "fur": [
+     "plain",
+     1.0
+    ],
+    "abdomen": [
+     "stout",
+     1.0
+    ],
+    "eyes": [
+     "big",
+     1.0
+    ],
+    "brow": "keen",
+    "aura": [
+     "dust",
+     1.0
+    ],
+    "accent": "marigold",
+    "build": {
+     "span": 1.08,
+     "body": 1.0
+    }
+   },
+   "prongs": [
+    {
+     "id": "moth-singed",
+     "name": "Singed Moth",
+     "of": "one who was burned once and came back the next night",
+     "text": "It went into your Pattern's fire once, with you. It came out with a wing the worse for it, and went back the next night.",
+     "sign": "A bite burned out of one forewing, its edge still glowing. It flies a wider circle than it did, and no further off.",
+     "habit": "It holds its whole wing to the fire and its burned one away.",
+     "features": [
+      "ember"
+     ],
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      },
+      "pattern": {
+       "fires": 0.5
+      }
+     },
+     "body": {
+      "burn": [
+       "r",
+       1.0
+      ],
+      "pitch": 44,
+      "pattern": [
+       "bars",
+       "singe",
+       "scar"
+      ],
+      "aura": [
+       "smoke",
+       1.0
+      ],
+      "build": {
+       "span": 1.12,
+       "body": 1.05
+      }
+     },
+     "finishes": [
+      {
+       "id": "moth-ash-wing",
+       "name": "Ash-wing",
+       "of": "one who has been through the fire and has nothing left to fear from it",
+       "text": "There is nothing left on it to burn. It goes through your Pattern's fire as you would go through a doorway.",
+       "sign": "Wings the grey of cold ash, worn through in places, veined with cracks that light when it beats them.",
+       "habit": "It sleeps in the grate, on the warm side of the ashes.",
+       "features": [
+        "smoke"
+       ],
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "pattern": {
+         "sworn": 0.6
+        }
+       },
+       "body": {
+        "wings": [
+         "ragged",
+         1.0
+        ],
+        "hold": "flat",
+        "flap": "glide",
+        "pitch": 66,
+        "burn": null,
+        "pattern": [
+         "ash",
+         "cracks",
+         "holes"
+        ],
+        "aura": [
+         "embers",
+         1.0
+        ],
+        "fur": [
+         "ash",
+         1.0
+        ],
+        "build": {
+         "span": 1.3,
+         "body": 1.1
+        }
+       }
+      },
+      {
+       "id": "moth-wick-trimmer",
+       "name": "Wick-trimmer",
+       "of": "one who tends the flame that burned them",
+       "text": "It keeps your lamp now: trims the wick, turns it down at night, and will not let anyone else touch it.",
+       "sign": "It sits over a candle of its own with snuffers the size of a seed, and its wing-edges are trimmed neat where the fire left them ragged.",
+       "habit": "It trims every wick in the room to the same height, and yours a little higher.",
+       "features": [
+        "small-hands"
+       ],
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "ground": {
+         "line": 0.5
+        }
+       },
+       "body": {
+        "hold": "tent",
+        "flap": "still",
+        "pitch": 58,
+        "burn": null,
+        "pattern": [
+         "bars",
+         "neat"
+        ],
+        "perch": [
+         "lamp",
+         1.0
+        ],
+        "carry": [
+         "snuffers",
+         1.0
+        ],
+        "aura": null,
+        "build": {
+         "span": 0.95,
+         "body": 1.0
+        }
+       }
+      }
+     ]
+    },
+    {
+     "id": "moth-ermine",
+     "name": "Ermine",
+     "of": "one who is always found beside whoever the room is listening to",
+     "text": "It took to sitting on the shoulder of whoever is being listened to. It is usually your shoulder now, and it dresses for it.",
+     "sign": "White wings spotted black like a judge's fur, a thick white ruff, and a collar the colour of a lamp flame. It sits very upright.",
+     "habit": "It grooms its ruff before anyone important comes in, and it knows before you do that they are coming.",
+     "features": [
+      "ruff"
+     ],
+     "leans": {
+      "bonds": {
+       "classmate": 1.0
+      }
+     },
+     "body": {
+      "hold": "cape",
+      "flap": "still",
+      "pitch": 80,
+      "pattern": [
+       "ermine",
+       "hem"
+      ],
+      "fur": [
+       "ermine",
+       1.5
+      ],
+      "feelers": [
+       "thread",
+       1.0
+      ],
+      "aura": null,
+      "build": {
+       "span": 1.05,
+       "body": 1.1
+      }
+     },
+     "finishes": [
+      {
+       "id": "moth-tiger-wing",
+       "name": "Tiger-wing",
+       "of": "one who stopped hiding and dressed to be seen",
+       "text": "Black and flame-coloured, and loud about it. It learned from you that what nobody can miss, nobody tries.",
+       "sign": "Black forewings barred cream, and hindwings the colour of a lamp flame that it shows when it is pleased.",
+       "habit": "It sits in the middle of the table, where the light is best.",
+       "features": [
+        "tiger-bars"
+       ],
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "range": {
+         "close": 0.6
+        }
+       },
+       "body": {
+        "wings": [
+         "tiger",
+         1.0
+        ],
+        "hold": "flat",
+        "flap": "glide",
+        "pitch": 68,
+        "pattern": [
+         "tiger"
+        ],
+        "fur": [
+         "mane",
+         1.2
+        ],
+        "abdomen": [
+         "banded",
+         1.3
+        ],
+        "build": {
+         "span": 1.3,
+         "body": 1.15
+        }
+       }
+      },
+      {
+       "id": "moth-link",
+       "name": "Link-moth",
+       "of": "one who would rather carry the light for someone than stand in it",
+       "text": "It goes a pace ahead of whoever you are seeing home, with a taper as long as itself, and looks back to see they follow.",
+       "sign": "A lit taper as long as its own body, carried upright in four feet, and a way of flying that is mostly looking back.",
+       "habit": "It lights the stair for the last one to bed, and waits at the top.",
+       "features": [
+        "lantern"
+       ],
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        }
+       },
+       "body": {
+        "hold": "v",
+        "flap": "beat",
+        "pitch": 72,
+        "pattern": [
+         "ermine",
+         "hem"
+        ],
+        "carry": [
+         "taper",
+         1.0
+        ],
+        "look": "back",
+        "fur": [
+         "ermine",
+         1.0
+        ],
+        "build": {
+         "span": 1.0,
+         "body": 1.05
+        }
+       }
+      }
+     ]
+    },
+    {
+     "id": "moth-hover",
+     "name": "Hover-moth",
+     "of": "one who must taste everything once and cannot settle",
+     "text": "It will not land. It hangs in front of each thing in turn with its tongue out, tastes it, and goes on to the next.",
+     "sign": "Narrow wings that never stop, a long tongue half unrolled, and a fan of tail it steers with.",
+     "habit": "It visits every cup on the table, in order, and yours twice.",
+     "features": [
+      "long-tongue"
+     ],
+     "leans": {
+      "orders": {
+       "free": 1.0
+      },
+      "fights": {
+       "dodges": 0.5
+      }
+     },
+     "body": {
+      "wings": [
+       "swept",
+       1.0
+      ],
+      "hold": "high",
+      "flap": "beat",
+      "pitch": 30,
+      "pattern": [
+       "bars"
+      ],
+      "tongue": [
+       "out",
+       1.0
+      ],
+      "abdomen": [
+       "fan",
+       1.0
+      ],
+      "feelers": [
+       "club",
+       1.0
+      ],
+      "aura": null,
+      "build": {
+       "span": 1.05,
+       "body": 1.25
+      }
+     },
+     "finishes": [
+      {
+       "id": "moth-honey-thief",
+       "name": "Honey-thief",
+       "of": "one who walks in as if they belonged there, and is given a plate",
+       "text": "It goes into any hall by the front door, smelling of whoever lives there, and comes out fed. The mark on its back is a joke.",
+       "sign": "A pale mark like a skull on its back, a body banded like a bee's, a piece of someone else's comb in its feet, and a squeak when it is touched.",
+       "habit": "It is found in the larder, and it is never the one who is blamed.",
+       "features": [
+        "death-mark"
+       ],
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        },
+        "ground": {
+         "night": 0.5
+        }
+       },
+       "body": {
+        "hold": "back",
+        "flap": "still",
+        "pitch": 48,
+        "pattern": [
+         "bars",
+         "skull"
+        ],
+        "tongue": null,
+        "abdomen": [
+         "bee",
+         1.5
+        ],
+        "carry": [
+         "comb",
+         1.0
+        ],
+        "fur": [
+         "mane",
+         1.0
+        ],
+        "build": {
+         "span": 1.1,
+         "body": 1.45
+        }
+       }
+      },
+      {
+       "id": "moth-deep-drinker",
+       "name": "Deep-drinker",
+       "of": "one who made themselves the only one who can reach it",
+       "text": "There is a thing at the bottom of every deep place that only it can reach. It grew the tongue for it, and has been right twice.",
+       "sign": "A tongue three times its own length, carried coiled like a watch-spring, and a habit of looking down narrow things.",
+       "habit": "It puts its tongue down every keyhole and bottle-neck, to see how far they go.",
+       "features": [
+        "far-eyes"
+       ],
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        },
+        "ground": {
+         "ruin": 0.5
+        }
+       },
+       "body": {
+        "hold": "high",
+        "pitch": 54,
+        "tongue": [
+         "deep",
+         1.0
+        ],
+        "abdomen": [
+         "slim",
+         1.1
+        ],
+        "eyes": [
+         "far",
+         1.2
+        ],
+        "build": {
+         "span": 1.2,
+         "body": 1.2
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "moth-emperor",
+   "name": "Emperor",
+   "of": "one who learned to look fiercer than they are, so that nobody tries them",
+   "text": "It learned from you that most trouble can be stared down. It grew the eyes to do it with, and keeps them on its wings.",
+   "sign": "Broad wings with a great eye on each, ringed violet, that it opens all at once at whatever comes too near.",
+   "habit": "It practises its stare on the cat, on the door, and on you.",
+   "features": [
+    "dust-wings",
+    "antennae",
+    "eye-spots"
+   ],
+   "leans": {
+    "orders": {
+     "guard": 1.0
+    },
+    "fights": {
+     "dodges": 0.7
+    },
+    "ground": {
+     "wild": 0.3
+    }
+   },
+   "body": {
+    "kind": "moth",
+    "wings": [
+     "broad",
+     1.0
+    ],
+    "hold": "flat",
+    "flap": "glide",
+    "pitch": 70,
+    "pattern": [
+     "rings",
+     "eyes"
+    ],
+    "feelers": [
+     "feather",
+     1.2
+    ],
+    "fur": [
+     "plain",
+     1.2
+    ],
+    "abdomen": [
+     "stout",
+     0.9
+    ],
+    "eyes": [
+     "big",
+     1.0
+    ],
+    "brow": "stern",
+    "accent": "amethyst",
+    "coat": "slate",
+    "build": {
+     "span": 1.1,
+     "body": 1.05
+    }
+   },
+   "prongs": [
+    {
+     "id": "moth-owl-wing",
+     "name": "Owl-wing",
+     "of": "one who makes themselves look like the thing their enemy is afraid of",
+     "text": "Open, its wings are an owl's face, brows and all. It learned whose face to wear by watching what your foes ran from.",
+     "sign": "Spread, its wings are the face of an owl with two round eyes. From the side it is a small tired moth.",
+     "habit": "It turns its wings toward whoever comes into the room, before it turns its head.",
+     "features": [
+      "watching-eye"
+     ],
+     "leans": {
+      "fights": {
+       "blocks": 1.0
+      },
+      "orders": {
+       "guard": 0.5
+      }
+     },
+     "body": {
+      "wings": [
+       "owl",
+       1.0
+      ],
+      "pitch": 84,
+      "pattern": [
+       "owl"
+      ],
+      "build": {
+       "span": 1.2,
+       "body": 0.95
+      }
+     },
+     "finishes": [
+      {
+       "id": "moth-stare-down",
+       "name": "Stare-down",
+       "of": "one who has never had to make good on the look",
+       "text": "Four eyes now, one to a wing. It has held them open at three named beasts, and each one looked away first.",
+       "sign": "An eye on every wing, four in all, and it does not blink them. The real ones, on its head, are very small.",
+       "habit": "It will not be the first to look away, from a foe, a friend or a lamp.",
+       "features": [
+        "old-eyes"
+       ],
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "orders": {
+         "guard": 0.5
+        }
+       },
+       "body": {
+        "wings": [
+         "four",
+         1.0
+        ],
+        "hold": "cross",
+        "pitch": 88,
+        "pattern": [
+         "eyes4"
+        ],
+        "eyes": [
+         "small",
+         0.7
+        ],
+        "feelers": [
+         "feather",
+         0.9
+        ],
+        "build": {
+         "span": 1.3,
+         "body": 1.0
+        }
+       }
+      },
+      {
+       "id": "moth-lintel",
+       "name": "Lintel-moth",
+       "of": "one who sits over the door, so that what comes in comes in under their eye",
+       "text": "It sits over the door of wherever you sleep, wings spread, and what comes in comes in under its eye or not at all.",
+       "sign": "Its forewings have set into one beam of old oak as wide as a door. Its hindwings hang under it like a curtain, an eye in each, and the eyes follow whoever passes under.",
+       "habit": "It takes the place over every door you go through, and is the last to leave it.",
+       "features": [
+        "ward-eyes"
+       ],
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "ground": {
+         "line": 0.4
+        }
+       },
+       "body": {
+        "wings": [
+         "lintel",
+         1.0
+        ],
+        "hold": "spread",
+        "flap": "still",
+        "pitch": 90,
+        "pattern": [
+         "ward"
+        ],
+        "build": {
+         "span": 1.25,
+         "body": 0.95
+        }
+       }
+      }
+     ]
+    },
+    {
+     "id": "moth-underwing",
+     "name": "Underwing",
+     "of": "one who keeps their one bright thing hidden, and shows it to startle",
+     "text": "Grey as bark until it is cornered. Then it shows what is underneath, once, and is somewhere else before the foe has finished looking.",
+     "sign": "Bark-grey forewings shut like a book. Under them, when it startles, a flash of violet banded black.",
+     "habit": "It shows you the bright wings once a day, when nobody else is in the room.",
+     "features": [
+      "bark-wings"
+     ],
+     "leans": {
+      "fights": {
+       "dodges": 1.0
+      }
+     },
+     "body": {
+      "wings": [
+       "under",
+       1.0
+      ],
+      "hold": "shut",
+      "flap": "still",
+      "pitch": 62,
+      "pattern": [
+       "bark",
+       "peek"
+      ],
+      "perch": [
+       "log",
+       1.0
+      ],
+      "feelers": [
+       "thread",
+       1.0
+      ],
+      "fur": [
+       "plain",
+       0.9
+      ],
+      "build": {
+       "span": 1.15,
+       "body": 1.0
+      }
+     },
+     "finishes": [
+      {
+       "id": "moth-flash-wing",
+       "name": "Flash-wing",
+       "of": "one who has one trick, and it has never failed",
+       "text": "The flash is brighter than the lamp now. It times it to your Pattern, so that the foe is looking at the wrong light.",
+       "sign": "Its hidden wings give off a light of their own when they open, and leave a shape on the eye afterwards.",
+       "habit": "It opens and shuts its wings in its sleep, and lights the ceiling.",
+       "features": [
+        "glow"
+       ],
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "fights": {
+         "dodges": 0.5
+        }
+       },
+       "body": {
+        "hold": "flash",
+        "flap": "glide",
+        "pitch": 64,
+        "pattern": [
+         "bark",
+         "flash"
+        ],
+        "perch": null,
+        "aura": [
+         "rings",
+         1.0
+        ],
+        "build": {
+         "span": 1.25,
+         "body": 1.05
+        }
+       }
+      },
+      {
+       "id": "moth-bark-sitter",
+       "name": "Bark-sitter",
+       "of": "one who is safest when nobody knows they are there",
+       "text": "Flat against a wall it is the wall. It has sat through whole fights that way, a hand from the foe, and called every blow.",
+       "sign": "Pressed flat on any surface it takes the surface's pattern, cracks and all. Only its feelers move.",
+       "habit": "It chooses a place on the wall each night, and in the morning you cannot find it until it moves.",
+       "features": [
+        "quiet-place"
+       ],
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        },
+        "shape": {
+         "read": 0.5
+        }
+       },
+       "body": {
+        "wings": [
+         "wall",
+         1.0
+        ],
+        "hold": "press",
+        "pitch": 88,
+        "pattern": [
+         "wall"
+        ],
+        "perch": null,
+        "feelers": [
+         "thread",
+         1.4
+        ],
+        "build": {
+         "span": 1.15,
+         "body": 0.9
+        }
+       }
+      }
+     ]
+    },
+    {
+     "id": "moth-serpent-wing",
+     "name": "Serpent-wing",
+     "of": "one who lets the danger show at the edges and stays soft in the middle",
+     "text": "The tips of its wings are two snakes' heads, eyes and all, and it moves them as if they looked about. The moth between is as soft as ever.",
+     "sign": "Great violet-banded wings whose tips curl into the heads of two snakes. It weaves them when it is watched.",
+     "habit": "It sways its wing-tips at anything it does not know, and watches from between them.",
+     "features": [
+      "snake-tips"
+     ],
+     "leans": {
+      "shape": {
+       "bind": 1.0
+      },
+      "ground": {
+       "wild": 0.5
+      }
+     },
+     "body": {
+      "wings": [
+       "atlas",
+       1.0
+      ],
+      "pitch": 72,
+      "pattern": [
+       "rings",
+       "snake"
+      ],
+      "build": {
+       "span": 1.45,
+       "body": 1.0
+      }
+     },
+     "finishes": [
+      {
+       "id": "moth-window-wing",
+       "name": "Window-wing",
+       "of": "one who lets you see through them, in the places they choose",
+       "text": "It has a clear pane in each wing. What you see through them is the foe as it will be a breath from now. It lets you look.",
+       "sign": "A clear pane the shape of a tear in each wing, edged in violet. Things seen through them are a little ahead of themselves.",
+       "habit": "It holds a wing up between you and whatever you are worrying about.",
+       "features": [
+        "clear-wings"
+       ],
+       "leans": {
+        "shape": {
+         "read": 1.0
+        }
+       },
+       "body": {
+        "hold": "offer",
+        "pitch": 66,
+        "pattern": [
+         "rings",
+         "windows",
+         "snake"
+        ],
+        "build": {
+         "span": 1.5,
+         "body": 1.05
+        }
+       }
+      },
+      {
+       "id": "moth-unfed",
+       "name": "The Unfed",
+       "of": "one who came to do one thing and will not stop to eat",
+       "text": "It has no mouth. It was given what it would need, once, and it is spending it on your oath. It does not mind the arithmetic.",
+       "sign": "The largest of its kind and the lightest. Where a mouth would be there is smooth fur, and its wings are worn thin enough to read through.",
+       "habit": "It sits with you at meals and watches you eat, with every sign of pleasure.",
+       "features": [
+        "no-mouth"
+       ],
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        }
+       },
+       "body": {
+        "wings": [
+         "long",
+         1.0
+        ],
+        "hold": "droop",
+        "flap": "still",
+        "pitch": 86,
+        "pattern": [
+         "worn",
+         "rings"
+        ],
+        "fur": [
+         "mane",
+         1.4
+        ],
+        "abdomen": [
+         "slim",
+         0.8
+        ],
+        "feelers": [
+         "feather",
+         1.5
+        ],
+        "build": {
+         "span": 1.7,
+         "body": 1.1
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "moth-moon",
+   "name": "Moon-moth",
+   "of": "one who steers by one far thing and is not turned by anything nearer",
+   "text": "It learned from you to pick one light a long way off and fly at it all night. It has been told it is only a lamp. It does not mind.",
+   "sign": "Pale green wings that end in two long twisted tails, and a straight line across any room that only it can see.",
+   "habit": "It sits facing the same window every night, whatever else is in the room.",
+   "features": [
+    "dust-wings",
+    "antennae",
+    "wing-tails"
+   ],
+   "leans": {
+    "shape": {
+     "read": 1.0
+    },
+    "ground": {
+     "night": 0.8
+    },
+    "company": {
+     "alone": 0.4
+    }
+   },
+   "body": {
+    "kind": "moth",
+    "wings": [
+     "tailed",
+     1.0
+    ],
+    "hold": "v",
+    "flap": "glide",
+    "pitch": 56,
+    "pattern": [
+     "moon",
+     "costa"
+    ],
+    "tails": [
+     "twist",
+     1.0
+    ],
+    "feelers": [
+     "feather",
+     1.0
+    ],
+    "fur": [
+     "plain",
+     1.0
+    ],
+    "abdomen": [
+     "slim",
+     1.0
+    ],
+    "eyes": [
+     "big",
+     1.0
+    ],
+    "brow": "calm",
+    "accent": "jade",
+    "coat": "moon",
+    "build": {
+     "span": 1.1,
+     "body": 0.95
+    }
+   },
+   "prongs": [
+    {
+     "id": "moth-ghost",
+     "name": "Ghost-moth",
+     "of": "one who is at ease with the dead, and says so",
+     "text": "At dusk it hangs in one place in the air, white as a shirt, and sways. The shades you speak with come to it first, as to a lamp.",
+     "sign": "White, without a mark but a thread of green at the hem and the throat. It hangs in one place at dusk and sways like a lamp on a chain.",
+     "habit": "It keeps the hour between day and night in the same spot of air, and is not to be spoken to during it.",
+     "features": [
+      "cold-core"
+     ],
+     "leans": {
+      "bonds": {
+       "shade": 1.0
+      }
+     },
+     "body": {
+      "wings": [
+       "narrow",
+       1.0
+      ],
+      "hold": "hang",
+      "flap": "glide",
+      "pitch": 88,
+      "pattern": [
+       "white",
+       "hem"
+      ],
+      "tails": null,
+      "fur": [
+       "ghost",
+       1.2
+      ],
+      "aura": [
+       "sway",
+       1.0
+      ],
+      "build": {
+       "span": 1.15,
+       "body": 1.1
+      }
+     },
+     "finishes": [
+      {
+       "id": "moth-psyche",
+       "name": "Psyche",
+       "of": "one who has understood whose soul they are",
+       "text": "The old word for it is the old word for a soul. It has worked out what it is to you, and has stopped pretending to be an insect.",
+       "sign": "Wings nearly clear, and in each, where an eye-spot would be, the faint likeness of your own face.",
+       "habit": "It rests on your breastbone when you sleep, and rises and falls.",
+       "features": [
+        "likeness"
+       ],
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        },
+        "pattern": {
+         "sworn": 0.6
+        }
+       },
+       "body": {
+        "wings": [
+         "psyche",
+         1.0
+        ],
+        "hold": "flat",
+        "pitch": 84,
+        "pattern": [
+         "frame",
+         "likeness"
+        ],
+        "aura": [
+         "halo",
+         1.0
+        ],
+        "abdomen": [
+         "slim",
+         1.2
+        ],
+        "build": {
+         "span": 1.5,
+         "body": 1.05
+        }
+       }
+      },
+      {
+       "id": "moth-lych",
+       "name": "Lych-moth",
+       "of": "one who walks the dead as far as the gate and comes back",
+       "text": "It goes ahead of a shade that has agreed to go, as far as it is allowed, and comes back alone. It has never said how far that is.",
+       "sign": "White wings edged with a line of cold light, and a pale train behind it that a hand could keep hold of.",
+       "habit": "It waits at thresholds, and will not go through one first unless someone is following.",
+       "features": [
+        "rime"
+       ],
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        },
+        "bonds": {
+         "shade": 0.5
+        }
+       },
+       "body": {
+        "hold": "v",
+        "pitch": 40,
+        "pattern": [
+         "white",
+         "costa",
+         "hem",
+         "edge"
+        ],
+        "carry": [
+         "train",
+         1.0
+        ],
+        "aura": null,
+        "build": {
+         "span": 1.2,
+         "body": 1.05
+        }
+       }
+      }
+     ]
+    },
+    {
+     "id": "moth-long-tail",
+     "name": "Long-tail",
+     "of": "one who is all direction",
+     "text": "Its tails are four times its body and stream straight behind it. It has not been seen to turn round. It goes about, like a ship.",
+     "sign": "Two tails four times the length of its body, twisted once at the ends, streaming dead straight behind.",
+     "habit": "It points, in its sleep, the way you will go tomorrow.",
+     "features": [
+      "current"
+     ],
+     "leans": {
+      "range": {
+       "far": 1.0
+      }
+     },
+     "body": {
+      "hold": "swept",
+      "pitch": 50,
+      "tails": [
+       "stream",
+       2.4
+      ],
+      "build": {
+       "span": 1.0,
+       "body": 1.0
+      }
+     },
+     "finishes": [
+      {
+       "id": "moth-comet",
+       "name": "Comet-moth",
+       "of": "one who would rather arrive burning than not arrive",
+       "text": "It crosses the whole fight in one line, tails alight, and is on the far side before the foe has turned its head.",
+       "sign": "Its tails burn with a cold light from the tips inward, a little shorter each year.",
+       "habit": "It races falling stars, and keeps count of the ones it has beaten.",
+       "features": [
+        "ember"
+       ],
+       "leans": {
+        "range": {
+         "far": 1.0
+        },
+        "pattern": {
+         "fires": 0.6
+        }
+       },
+       "body": {
+        "hold": "dart",
+        "pitch": -30,
+        "tails": [
+         "burn",
+         2.6
+        ],
+        "pattern": [
+         "moon",
+         "costa",
+         "streak"
+        ],
+        "build": {
+         "span": 1.05,
+         "body": 1.1
+        }
+       }
+      },
+      {
+       "id": "moth-lodestar",
+       "name": "Lodestar",
+       "of": "one whom others have started steering by",
+       "text": "It still flies at its one far light. It has noticed the cohort flying at it, and has started going a little slower.",
+       "sign": "A point of steady light rides above its head like a star on a stick, and its wings are marked like a compass card.",
+       "habit": "It sits at the head of the stair when the cohort comes in late, so there is something to walk towards.",
+       "features": [
+        "dial"
+       ],
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "ground": {
+         "night": 0.5
+        }
+       },
+       "body": {
+        "hold": "flat",
+        "pitch": 76,
+        "tails": [
+         "twist",
+         0.8
+        ],
+        "pattern": [
+         "moon",
+         "compass"
+        ],
+        "carry": [
+         "star",
+         1.0
+        ],
+        "build": {
+         "span": 1.35,
+         "body": 1.05
+        }
+       }
+      }
+     ]
+    },
+    {
+     "id": "moth-plume",
+     "name": "Plume-moth",
+     "of": "one who writes down where they have been, to know where they are going",
+     "text": "Its wings have come apart into quills, five a side, with ink on the tips. It keeps the log of every line you have walked.",
+     "sign": "Wings that are five plain quills a side, held out stiff like the arms of a T, with ink on the tips.",
+     "habit": "It walks across your open notebook at night, and in the morning there is a line you did not write.",
+     "features": [
+      "plumes"
+     ],
+     "leans": {
+      "quests": {
+       "linework": 1.0
+      },
+      "ground": {
+       "line": 0.5
+      }
+     },
+     "body": {
+      "wings": [
+       "quills",
+       1.0
+      ],
+      "hold": "tee",
+      "flap": "glide",
+      "pitch": 80,
+      "pattern": [
+       "ink"
+      ],
+      "tails": null,
+      "abdomen": [
+       "slim",
+       1.5
+      ],
+      "feelers": [
+       "thread",
+       1.0
+      ],
+      "legs": [
+       "long",
+       1.0
+      ],
+      "build": {
+       "span": 1.2,
+       "body": 0.9
+      }
+     },
+     "finishes": [
+      {
+       "id": "moth-many-plume",
+       "name": "Many-plume",
+       "of": "one who has kept every page",
+       "text": "Twenty-four plumes, and it spreads them like a hand of cards. Each is a year of someone's road, and it will read you any one you ask for.",
+       "sign": "Wings like two fans of twelve feathers each, ruled with fine lines. It squares them like a clerk squaring a ledger.",
+       "habit": "It fans its wings shut one plume at a time, and counts them.",
+       "features": [
+        "pages"
+       ],
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        }
+       },
+       "body": {
+        "wings": [
+         "fans",
+         1.0
+        ],
+        "hold": "fan",
+        "pitch": 80,
+        "pattern": [
+         "ink",
+         "ruled"
+        ],
+        "build": {
+         "span": 1.25,
+         "body": 1.0
+        }
+       }
+      },
+      {
+       "id": "moth-chart",
+       "name": "Chart-moth",
+       "of": "one whose own back is the map",
+       "text": "Every road you have walked together is on its wings, in its own hand. Where you have not been is left pale, and it looks at those parts a good deal.",
+       "sign": "Its wings are a chart, coast and line and post, drawn fine in green and brown, with a part still blank.",
+       "habit": "It spreads itself flat on the table when you plan a journey, and waits to be consulted.",
+       "features": [
+        "map-wings"
+       ],
+       "leans": {
+        "shape": {
+         "make": 1.0
+        },
+        "quests": {
+         "linework": 0.4
+        }
+       },
+       "body": {
+        "wings": [
+         "chart",
+         1.0
+        ],
+        "hold": "spread",
+        "flap": "still",
+        "pitch": 62,
+        "pattern": [
+         "chart"
+        ],
+        "carry": [
+         "dividers",
+         1.0
+        ],
+        "abdomen": [
+         "slim",
+         1.0
+        ],
+        "legs": null,
+        "build": {
+         "span": 1.25,
+         "body": 0.95
+        }
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "newFeatures": [
+  {
+   "id": "silk-case",
+   "slot": "surface",
+   "label": "a case of silk and scraps"
+  },
+  {
+   "id": "dust-wings",
+   "slot": "wings",
+   "label": "a moth's wings, dusted, an eye on each"
+  },
+  {
+   "id": "antennae",
+   "slot": "head",
+   "label": "feathered feelers that read the air"
+  },
+  {
+   "id": "eye-spots",
+   "slot": "surface",
+   "label": "eyes on its wings that are not eyes"
+  },
+  {
+   "id": "wing-tails",
+   "slot": "surface",
+   "label": "long tails to its wings"
+  },
+  {
+   "id": "long-tongue",
+   "slot": "surface",
+   "label": "a tongue kept coiled like a watch-spring"
+  },
+  {
+   "id": "death-mark",
+   "slot": "surface",
+   "label": "a pale mark like a skull"
+  },
+  {
+   "id": "tiger-bars",
+   "slot": "surface",
+   "label": "bars that say it is not good to eat"
+  },
+  {
+   "id": "ward-eyes",
+   "slot": "surface",
+   "label": "wing-eyes that follow whoever passes"
+  },
+  {
+   "id": "bark-wings",
+   "slot": "surface",
+   "label": "wings the pattern of whatever it rests on"
+  },
+  {
+   "id": "snake-tips",
+   "slot": "surface",
+   "label": "wing-tips shaped like the heads of snakes"
+  },
+  {
+   "id": "clear-wings",
+   "slot": "surface",
+   "label": "a clear pane in each wing"
+  },
+  {
+   "id": "no-mouth",
+   "slot": "surface",
+   "label": "no mouth, and wings worn thin"
+  },
+  {
+   "id": "likeness",
+   "slot": "surface",
+   "label": "its partner's face, faintly, in each wing"
+  },
+  {
+   "id": "plumes",
+   "slot": "surface",
+   "label": "wings come apart into quills"
+  },
+  {
+   "id": "map-wings",
+   "slot": "surface",
+   "label": "wings drawn like a chart"
+  }
+ ]
+}
