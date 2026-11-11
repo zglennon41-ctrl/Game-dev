@@ -339,7 +339,7 @@
      "name": "Lamp-holder",
      "of": "one who holds the light while another does the work, and counts that work",
      "text": "It holds the light so that you have both hands free. It has never once asked to be the one holding the tools.",
-     "sign": "A lamp on a staff twice its height, held dead still, and its wings folded shut behind it so they throw no shadow on your work.",
+     "sign": "A lamp on a staff half as tall again as itself, held dead still, and its wings folded shut behind it so they throw no shadow on your work.",
      "habit": "It moves the light before you ask, to the place you are about to look.",
      "leans": {
       "ground": {
@@ -1167,7 +1167,7 @@
      "name": "Point-down",
      "of": "one who could, and has decided not to yet",
      "text": "It has a sword and it keeps it point down. It would like you to notice both of those things.",
-     "sign": "A sword as long as it is tall, point down before it with a hand on the pommel. Its wings are half open and perfectly still.",
+     "sign": "A sword as long as it is tall, hung point down from one hand, lower than its feet. Its wings are half open and perfectly still.",
      "habit": "When you are angry it turns the blade a quarter, so the flat faces whoever you are angry at.",
      "leans": {
       "fights": {
