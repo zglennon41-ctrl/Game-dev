@@ -289,8 +289,8 @@ A body is either what it says it is, with the joints and the weight of that anim
 thing, or it is a magical choice made on purpose and carried all the way. Nothing may be
 one animal wearing another's parts by accident. Each family's section says which for each
 line, in a sentence. The known cases: the Drake (was a hound with wings; rebuilt on
-2026-11-11 as a true drake, long in the neck and the tail, low and splayed, its wings
-rooted at the shoulder); the Hawk's Harriers (griffins by accident: to be griffins on purpose, or birds
+2026-11-11 as a true drake, and again on 2026-11-12 to the Wolf's standard: standing on
+thick legs, a larger head, wings that are an event, rooted at the shoulder); the Hawk's Harriers (griffins by accident: to be griffins on purpose, or birds
 on foot); what floats and should lie (a pool, black ice, a grass-fire); a fish and an
 octopus in the air (a choice: they swim in the field, and everything about them says so).
 
@@ -1155,15 +1155,15 @@ grown, and none has a skeleton of its own. The wolf's slots still work on them (
 | | `neck` | what is worn round a neck as it lies: `mane` `bell` `lamp` `ivy` `garland` `teeth` `chains` `ash` `bands` |
 | Fox | `whiskers` `mouth` `tails` `tip` `mask` `face` `back` `feet` `fins` `claws` | what it carries in its mouth; two tails or many; what its tail-tips carry (`light` `white` `ring` `coal` `flame` `wisp`); a mask and the face under it. In `carry`: `panniers` `pole` `cape`; in `ruff`: `courtier` |
 | Stag | `crown` `horn` `hung` `throat` `breath` `hide` `legs` `flank` `chest` | the shape of its antlers, what they are made of, and what is in them |
-| Drake | `crane` `tail` `horns` `frill` `ridge` `wings` `membrane` `flight` `belly` `scales` `throat` `tailend` `shell` `lies` `hide` `jaw` `gape` `fangs` `breath` `nostrils` `claws` `feet` `eye` `lid` `head` | a body of its own on the wolf's bones: see "The Drake" below |
+| Drake | `crane` `tail` `horns` `frill` `ridge` `wings` `membrane` `flight` `belly` `scales` `throat` `tailend` `shell` `lies` `hide` `jaw` `gape` `fangs` `breath` `nostrils` `claws` `feet` `eye` `lid` `head` `plating`, and `build.rear` | a body of its own on the wolf's bones: see "The Drake" below |
 
 What each Path keeps: of the Fox, the Gone-away is lean and looks elsewhere, the Cache-fox
 is hearth-brown with something in its mouth, the Fire-tail carries its tail high with a
 light at the tip; of the Stag, the Tilter has a plated brow and its head down, the
 Wood-walker a red hide and branch antlers with moss, the Watch-hart one ear turned and its
-head over its shoulder; of the Drake, the Hoard is low and long and plated in brass, the
-Fire blood-red with a row of flame down its back, the Sky taller on the leg with its wings
-up.
+head over its shoulder; of the Drake, the Hoard is low and long and plated in gold, the
+Fire stands up before, blood-red, its throat lit and its wings folded above its back, the Sky
+is a wyvern, all wing.
 
 The look's roles are kept, so the partner's coat goes on: `fur_dark` and `fur_light` on the
 Fox and the Drake (whose ridge, wings and tail-tip are its markings), `hide_red` and
@@ -1238,63 +1238,86 @@ thing does not wave, so Holdfast, Points-turner, Shell-carrier and Fair Copy mov
 Deep Sleeper alone on its Path wears a coat shift (`night`).
 ### The Drake
 
-**Its anatomy, in a sentence:** a six-limbed drake, long in the neck and longer in the tail,
-low on legs that go out from the body to the elbow and the knee and stand on a heel, deep and
-keeled in the chest, plated under from chin to tail, with a wedge of a head (a brow, a jaw of
-its own, nostrils, teeth) and, as a third pair of limbs rooted above the shoulder, wings with
+Rebuilt on 2026-11-12 to the Wolf's standard (the owner: "the wolf tree is incredible, the
+drake tree is weak"). What was weak, form by form, came to five things: a head too small to
+read; legs that were a wolf's skin, thin, folded under a belly that lay on the ground; wings
+that were stubs or lay flat on the flank, so only one Path in three had an outline with wings
+in it; tails that were a straight stick behind; and a Hoard Path that was a row of low lumps.
+
+**Its anatomy, in a sentence:** a six-limbed dragon that stands with its belly clear of the
+ground on thick legs (a round of muscle at each shoulder and each haunch, a forearm and a
+shank under them, a heel on the ground behind), deep and keeled in the chest, plated under
+from chin to tail, long in the neck and the tail, with a head half again a wolf's (a brow,
+a jaw of its own, spines swept back from the hinge of the jaw, nostrils, teeth, an eye a
+fifth larger than it was) and, as a third pair of limbs rooted above the shoulder, wings with
 an arm, a wrist, fingers and the skin between. Six limbs is the choice made, and it is carried
-all the way: the keel is there for the wings, the wings fold along the flank on a drake that
-has given up the air, and nothing of the forelegs is a wing.
+all the way: the keel is there for the wings, and nothing of the forelegs is a wing.
 
 **What is still the wolf's:** its skeleton and its three clips (idle, walk, run), so a drake
-walks with a wolf's gait on a lizard's stance; and the skin of its four legs, reshaped (the
-upper bone twice as long and slanted out, the hock brought down for a heel) under its own
-toes and claws. Everything else of the wolf is taken away as the form is built
+walks with a wolf's gait; and the skin of its four legs under the drake's own muscle, in one
+hide all the way down (a wolf's pale inner leg and socks are painted out; the drake's toes
+carry its socks). Everything else of the wolf is taken away as the form is built
 (`_strip_wolf`), and the drake's own is laid on the bones: one skin from the back of the skull
 to the end of the tail (`_drake_body`), cut to where the wolf's frame put its back, its
 brisket and its ribs, so `build` still means what it says; and a head made from nothing
-(`_drake_head`), so `build.head`, `muzzle` and `jaw` are its own.
+(`_drake_head`, sized by `HEAD_K`), so `build.head`, `muzzle` and `jaw` are its own.
 
 **Carriage is data.** `crane` is how it carries its neck (`swan` as it is made, `low`,
 `level`, `reared`, `hook`, `down`, `up`, `sky`, `ground`, `strike`, `proud`; a size under 1
 goes part of the way): the neck is bent along its own line once it is made, so it stays
 round however it is carried. `tail` has the drake's own carriages beside the kin's: `drag`,
-`sweep`, `coil` (on the ground), `level`, `high`, `hook`, `lash`; a tail never goes under the
-ground. A form is sized by where its head would be carried as it is made, so a drake that
-carries its head on the ground is as large as one that rears.
+`sweep`, `coil` (on the ground), `level`, `high`, `hook`, `lash`; `drag`, `level` and `high`
+now turn one way and then the other along their length, so a tail is a line and not a stick;
+a tail never goes under the ground. `build.rear` (the Drake's own) stands it up before: the
+forelegs longer by that much and everything before the hips raised with them, so its back
+climbs to its withers. A form is sized by where its head would be carried as it is made, so a
+drake that carries its head on the ground is as large as one that rears.
 
-**The three Paths are three animals**, each in one coat shift and one colour:
+**The three Paths are three dragons in outline**, each in one coat shift and one colour:
 
-| Path | The animal | Its coat | Its colour, and where | Each Advancement's step |
+| Path | The dragon | Its coat | Its colour, and where | Each Advancement's step |
 |---|---|---|---|---|
-| Hoard-drake | a low heavy lizard on short legs, its tail dragged, broad horns, wings shrunk to stubs, eyes half shut (it is counting) | `brass` | `gold`: the plates under it, from the chin to the tail | Post-coiler banded, with its tail in a coil and a lamp in it; Ruin-sleeper dulled, under rubble and dust; Debt-drake plain, with gold beads on a wire down its back |
-| Fire-drake | a lean one, its throat lit between the plates, wings folded on the flank | `blood` | `madder`: the row of flame down its back, the plates under it, the pleats of its folded wings | Kiln-throat pale under, a glazed cap on its snout; Far-spitter banded up a long straight neck; Smoke-drake dark, no flame, smoke where the ridge was |
-| Sky-drake | a wyvern in build: narrow, long in the leg, all wing | `moon` | `lapis`: the skin of its wings, and the plates under it | Thermal-rider's wings pale along the leading edge; the Stooping Drake's dark and swept; the Herald-drake's barred, with a frill |
+| Hoard-drake | low and long on four square legs, no wings to speak of, broad horns like a bull's, a back like a row of shields, plates lapped down each shoulder and haunch, eyes half shut (it is counting) | `brass` | `gold`: the shields of its back (`ridge: hoard`), the plates of its limbs (`plating: limbs`), the plates under it | Post-coiler banded, its neck up and its tail in a coil with a lamp in it; Ruin-sleeper dulled, head down under rubble and dust; Debt-drake plain and taller, one horn grown long, gold beads on a wire down its back |
+| Fire-drake | upright: forelegs longer than hind (`rear`), deep in the chest, its neck carried proud, its throat lit between the plates, wings folded so that they stand above its back | `blood` | `madder`: the row of flame down its back, the plates under it, the skin of its wings | Kiln-throat pale under, wings half open, a glazed cap on its snout; Far-spitter banded up a long level neck; Smoke-drake dark, no flame, smoke where the ridge was |
+| Sky-drake | a wyvern in build: narrow, long in the leg, risen a little before, all wing | `moon` | `lapis`: the skin of its wings, and the plates under it | Thermal-rider's wings out wide and pale along the leading edge; the Stooping Drake's dark and swept back; the Herald-drake's raised and barred, with a frill |
 
-**Its face.** Every drake has a brow over each eye, a lid, a slit, nostrils under hoods and
-teeth along the lip. `eye` sets them: `keen`, `counting` (half shut, one brow up), `glare`,
-`far`, `old`, `shut`, `sly`; `lid: shutter` is the Gate-wyrm's. `gape` opens the jaw (`open`,
-`glow`, `yawn`, `speak`, `taste`).
+**Wings are an event.** They are a third larger than they were (`WING_K`) and heavier in the
+arm. On the small forms they are `nubs` (the hatchling) or `folded`: the wrist carried above
+the shoulder and the fingers trailing back, so a shut wing is still a shape against the sky
+(`flat` is the old fold along the flank; `furled` a smaller fold). On Advancements and Finals
+they open: `half`, `glide`, `stoop`, `brake`, `banner`, `shadow`, `cloak`, and the two that
+are a Final's moment, `mantle` (raised high over the back, seen whole from the side) and
+`rampant` (thrown wide). Every Final but the three that have given up the air for something
+else (the Vault-drake under its vault, Old Coin gone to coin, the Ledger-wyrm) has its wings
+out: the Sworn Drake's mantle in gold over a reared chest; the Gate-wyrm's laid out along the
+road like the leaves of a gate; Slag-jaw's and the Signal-fire's raised; the Ridge-king's the
+largest mantle of the line, the Trophy-drake's rampant.
+
+**Its face.** Every drake has a brow over each eye, a lid, a slit, nostrils under hoods,
+teeth along the lip and (past the hatchling) two spines swept back from the hinge of each
+jaw. `eye` sets the eyes: `keen`, `counting` (half shut, one brow up), `glare`, `far`, `old`,
+`shut`, `sly`; `lid: shutter` is the Gate-wyrm's. `gape` opens the jaw (`open`, `glow`,
+`yawn`, `speak`, `taste`).
 
 **What moves.** Every drake's eyes blink (`blink_eye_l`, `_r`, riding the head's bone). Open
 wings ride the chest's bone: `glide_wing_*` where they are held half open or out for warm air,
-`beat_wing_*` where it is mantling, landing or hanging in the air (`flight` overrides), and a
-cloak of them sways. Also: `flick_` flames of the Fire's ridge, heat over its nostrils and
-the Slag-jaw's drips; `pulse_` a lit throat or gullet, the Forge-drake's jet, the
-Signal-fire's beacon; `sway_` lamps on their hooks, smoke, a beard, a black tongue, a ledger
-on its strap, a pennant; `spin_helm` the Vault-drake's wheel; `bob_cinders`. Folded wings and
-stubs do not move. (A piece named `*_wheel` would be taken by the importer for a vehicle's
-wheel: hence `helm`.)
+`beat_wing_*` where it is mantling, rampant, landing or hanging in the air (`flight`
+overrides), and a cloak of them sways. Also: `flick_` flames of the Fire's ridge, heat over
+its nostrils and the Slag-jaw's drips; `pulse_` a lit throat or gullet, the Forge-drake's jet,
+the Signal-fire's beacon; `sway_` lamps on their hooks, smoke, a beard, a black tongue, a
+ledger on its strap, a pennant; `spin_helm` the Vault-drake's wheel; `bob_cinders`. Folded
+wings and stubs do not move. (A piece named `*_wheel` would be taken by the importer for a
+vehicle's wheel: hence `helm`.)
 
-**Still weak.** The legs are a wolf's skin: faceted, and thin at the wrist against the body.
-The gait is a wolf's trot, not a lizard's sprawl, and a dragged tail swings with the wolf's
-tail clip. Smoke is puffs of grey, readable but plain. The Hoard-drake and its low Finals
-(Gate-wyrm, Ruin-sleeper) are small in a portrait because they are long and low, and at their
-true size the half-grown Hoard-drake is hardly larger than the hatchling. Cinder-rain's neck
-straight up is a pole. Faces are right at arm's length and small at fifteen metres. The
-wings' webs are flat panels. The base body the clips are borrowed from
-(`beast-drake`, `tools/blender/genius_tree.py`) is still the first pass's hound-drake; it is
-seen only if a form's own model is missing.
+**Still weak.** The gait is a wolf's trot, and a dragged tail swings with the wolf's tail
+clip. The hind leg still sits on its heel, so a drake at rest looks ready to spring rather
+than standing square. The Hoard's low Finals (Gate-wyrm, Ruin-sleeper, Vault-drake) are long
+and low by design and so are the smallest pictures of the line. Wings seen from dead ahead or
+dead behind are thin: their webs are flat panels. Smoke is puffs of grey. The hatchling is
+the partner's coat with no Path colour, and on a dark coat it is a dark small thing. One
+model (the Ruin-sleeper, 302 KB) is a little over the 300 KB asked of a rigged body; the
+heaviest was 289 KB. The base body the clips are borrowed from (`beast-drake`, `tools/blender/genius_tree.py`)
+is still the first pass's hound-drake; it is seen only if a form's own model is missing.
 
 ## What is still weak
 
