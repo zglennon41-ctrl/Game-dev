@@ -20,7 +20,7 @@ from mathutils import Vector, Matrix
 import people_kit as pk
 
 HAIR_STYLES = ["crop", "short", "curls", "coils", "rows", "locs", "bob", "long", "tail", "braid", "twins", "knot", "topknot", "crest"]
-BEARD_STYLES = ["stubble", "moustache", "goatee", "short", "full", "long"]
+BEARD_STYLES = ["stubble", "moustache", "goatee", "short", "full"]
 
 
 def _smooth(t):
@@ -410,9 +410,8 @@ def hair(surf_ob, centre, sex, H, mat, back_y=None):
     beard("Beard_goatee", lambda p, n: max(jaw(p, n, 0.0, 0.3), lip(p, n, 0.13)), 0.012)
     beard("Beard_short", lambda p, n: max(jaw(p, n, 0.08), lip(p, n)), 0.011)
     beard("Beard_full", lambda p, n: max(jaw(p, n, 0.0), lip(p, n, 0.16)), 0.02)
-    beard("Beard_long", lambda p, n: max(jaw(p, n, 0.0), lip(p, n, 0.16)), 0.022)
     face = c.y - 0.39 * H
-    for style, drop, r0 in (("full", 0.36, 0.12), ("long", 0.74, 0.125)):
+    for style, drop, r0 in (("full", 0.36, 0.12),):
         bm = bmesh.new()
         pts = [Vector((c.x, face + 0.09 * H, chin_z + 0.03 * H)), Vector((c.x, face + 0.06 * H, chin_z - 0.4 * drop * H)), Vector((c.x, face + 0.05 * H, chin_z - 0.8 * drop * H)), Vector((c.x, face + 0.05 * H, chin_z - drop * H))]
         _tube(bm, pts, [r0 * H, r0 * 0.86 * H, r0 * 0.5 * H, 0.012 * H], segments=12, lobes=6, depth=0.09)

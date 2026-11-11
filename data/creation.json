@@ -969,8 +969,7 @@
       "moustache",
       "goatee",
       "short",
-      "full",
-      "long"
+      "full"
     ],
     "faces": [
       "own",
@@ -1224,8 +1223,7 @@
         "moustache": "Moustache",
         "goatee": "Chin beard",
         "short": "Short",
-        "full": "Full",
-        "long": "Long"
+        "full": "Full"
       },
       "hairColors": {
         "black": "Black",

@@ -30,7 +30,7 @@ func _process(dt: float) -> void:
 	if _shut > 0.0:
 		_shut -= dt
 		if _shut <= 0.0:
-			_set(0.0)
+			_lids_to(0.0)
 			_wait = 0.16 if _again else randf_range(BETWEEN.x, BETWEEN.y)
 			_again = false
 		return
@@ -38,9 +38,9 @@ func _process(dt: float) -> void:
 	if _wait <= 0.0:
 		_shut = SHUT
 		_again = not _again and randf() < 0.18
-		_set(1.0)
+		_lids_to(1.0)
 
-func _set(v: float) -> void:
+func _lids_to(v: float) -> void:
 	for l in _lids:
 		if is_instance_valid(l[0]):
 			(l[0] as MeshInstance3D).set_blend_shape_value(l[1], v)
