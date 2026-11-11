@@ -15,6 +15,7 @@ eyes `blink_eye_*`, its gill-covers `pulse_gill_*`.
 A form's `body` is read as every line's is (a form wears what its parent wears; a key
 replaces its parent's; `build` merges). The keys and their styles are in the docs.
 """
+import json
 import math
 import os
 import random
@@ -33,7 +34,9 @@ from genius_kit import mat, field, PALETTE  # noqa: E402
 
 GL = None           # genius_lines, whichever way it was started (set in register)
 REF = 0.43          # how high the game's measure of it stands over a fish of size 1 (a Path's carp is 0.7 m long)
-FLOAT = 0.17        # how far the lowest of it hangs above its own origin
+FLOAT = 0.17        # how far the belly hangs above the spine's own origin as it is made
+BELLY = 0.02        # and above the model's, as it is hung: the game holds a thing that floats by its origin, at its partner's shoulder
+DROP = 0.3          # what hangs from it (whiskers, a chain, a veil) may hang this far below that, in the world's metres, and no further
 YAW = -0.3          # it never hangs dead ahead: a fish holding station is always a little across
 # The points round the body, from the keel of the belly up its left side, over the back and
 # down its right: sixteen, with one narrow face on each side where the line runs by which a
@@ -53,7 +56,7 @@ PALETTE.update({
     "bone_bud": ((0.62, 0.48, 0.4), 0.9, 0.0), "stone_key": ((0.2, 0.2, 0.215), 0.95, 0.0), "stone_plate": ((0.17, 0.18, 0.2), 0.8, 0.0),
     "stone_silt": ((0.2, 0.19, 0.2), 1.0, 0.0), "stone_silt_dark": ((0.06, 0.055, 0.065), 1.0, 0.0),
     "stone_barnacle": ((0.56, 0.53, 0.46), 0.95, 0.0), "cord_rope": ((0.44, 0.34, 0.2), 0.95, 0.0), "cloth_ribbon": ((0.4, 0.1, 0.08), 0.9, 0.0),
-    "glass_ice": ((0.1, 0.17, 0.22), 0.12, 0.0), "glass_spray": ((0.8, 0.87, 0.9), 0.3, 0.0), "iron_lamp": ((0.1, 0.1, 0.115), 0.5, 0.8),
+    "glass_ice": ((0.1, 0.17, 0.22), 0.12, 0.0), "glass_frost": ((0.45, 0.58, 0.66), 0.15, 0.0), "glass_spray": ((0.8, 0.87, 0.9), 0.3, 0.0), "iron_lamp": ((0.1, 0.1, 0.115), 0.5, 0.8),
     "brass_lamp": ((0.52, 0.4, 0.15), 0.4, 0.8), "iron_chain": ((0.16, 0.16, 0.18), 0.5, 0.8), "moss_weed": ((0.12, 0.2, 0.1), 0.9, 0.0),
     "earth_mud": ((0.22, 0.165, 0.11), 1.0, 0.0), "earth_crack": ((0.07, 0.05, 0.035), 1.0, 0.0),
 })
@@ -61,6 +64,16 @@ PALETTE.update({
 
 def log(*a):
     print("[lines_carp]", *a)
+
+
+def world_scale(level, size):
+    """How many of the world's metres one of the model's is, for a form of this stage: the game
+    stands ref_top at the stage's height (data/genius.json, size) times the body's art size."""
+    with open(os.path.join(kit.ROOT, "data", "genius.json")) as f:
+        stands = float(json.load(f)["size"][str(level)])
+    with open(os.path.join(kit.ROOT, "data", "genius-bodies.json")) as f:
+        art = float(json.load(f)["silhouettes"]["beast-carp"].get("artSize", 1.0))
+    return art * stands / (REF / size)
 
 
 # ======================================================================================
@@ -97,6 +110,7 @@ POSES = {
     "dragon": (lambda t: -1.2 * math.sin(2 * math.pi * 1.5 * max(0.0, t - 0.05) / 0.95), lambda t: 0.28 * math.sin(2 * math.pi * 0.9 * t), 0.0),
     "present": (lambda t: 0.85 * (1 - t) ** 2 - 0.12, _c(-0.2), 0.0),                   # a bow: the crown of the head shown
     "stand": (lambda t: -1.25 + 0.5 * t * t, lambda t: 0.25 * math.sin(2 * math.pi * t), 0.0),
+    "bank": (lambda t: -0.12 + 0.1 * t, _c(-0.15), 0.6),                                # the top of a long low arc: banked, its back to whoever watches
     "crescent": (lambda t: 0.06 * math.sin(2 * math.pi * t), lambda t: -0.75 + 1.5 * t, 0.0),        # bent round whoever it lies against
 }
 
@@ -638,7 +652,7 @@ def side_fin(fish, style, size, spec, sg, t=None, low=-0.55):
         return [(g.blade(root, tip, Lf * 0.3, thick=fish.L * 0.01, normal=outw, belly=0.45), a)], root
     # the fin's own axes: along it, and across it
     if style == "wing":
-        along, across, Lf, wide, m = (outw * 0.75 + d * 0.35 + up * 0.56).normalized(), (d * 0.86 + up * 0.5 - outw * 0.1).normalized(), Lf * 3.1, 0.34, 9
+        along, across, Lf, wide, m = (outw * 0.86 + d * 0.4 + up * 0.3).normalized(), (d * 0.92 + up * 0.3 - outw * 0.1).normalized(), Lf * 3.0, 0.46, 9
     elif style == "swept":
         along, across, wide, m = (outw * 0.45 + d * 0.85 - up * 0.25).normalized(), (d * 0.5 - up * 0.85).normalized(), 0.4, 5
     elif style == "veil":
@@ -659,7 +673,7 @@ def side_fin(fish, style, size, spec, sg, t=None, low=-0.55):
     for j in range(m + 1):
         th = -wide + 2 * wide * j / m
         if style == "wing":
-            r = 1.0 - 0.5 * (j / m) ** 1.3
+            r = 1.0 - 0.42 * (j / m) ** 1.3
         elif style == "claw":
             r = 0.75 + 0.25 * (j % 2)
         elif style == "veil":
@@ -962,9 +976,10 @@ def carried(fish, spec, pieces):
                 s_ = L * (0.062 - 0.003 * j)
                 its = groups[j % 3]
                 firsts.setdefault(j % 3, c)
-                its.append((g.moved(g.ico((0, 0, 0), 1.0, sub=1, scale=(s_ * 0.5, s_ * 1.45, s_ * 0.78)), M), mat("scale_pale"), True))
-                its.append((g.blade(c + d * s_ * 1.2, c + d * s_ * 2.7, s_ * 1.5, thick=s_ * 0.14, normal=side), mat("accent")))
-                its.append((g.ico(c + fd * s_ * 0.9 + up * s_ * 0.2 - side * s_ * 0.3, s_ * 0.3, sub=0), field("fry", 2.4), False))
+                its.append((g.blade(c + fd * s_ * 1.7, c + d * s_ * 1.5, s_ * 1.5, thick=s_ * 0.55, normal=side, belly=0.36), mat("scale_pale"), True))
+                its.append((g.blade(c + d * s_ * 2.9, c + d * s_ * 1.2, s_ * 1.7, thick=s_ * 0.12, normal=side, belly=0.12), mat("accent")))
+                for e_sg in (1, -1):
+                    its.append((g.ico(c + fd * s_ * 0.95 + up * s_ * 0.16 + side * e_sg * s_ * 0.3, s_ * 0.24, sub=0), field("fry", 2.4), True))
             for j, its in groups.items():
                 if its:
                     out.append(obj("bob_fry_%d" % j, its, frame=at_point(firsts[j])))
@@ -995,24 +1010,36 @@ def carried(fish, spec, pieces):
                 w, u, dn = fish.girth(t)
                 root = p + up * u * 0.92 + side * w * 0.5 * math.sin(j * 2.6)
                 h = L * (0.05 + 0.035 * rnd.random())
-                items.append((g.blade(root, root + up * h + side * h * 0.5 * math.sin(j * 2.6), h * 0.42, thick=h * 0.16, normal=d), mat("glass_ice")))
+                items.append((g.blade(root, root + up * h + side * h * 0.5 * math.sin(j * 2.6), h * 0.42, thick=h * 0.16, normal=d), mat("glass_frost")))
             for j in range(int(5 * size)):      # and the ice that hangs from it
                 t = 0.1 + 0.19 * j
                 p, d, side, up = fish.at(t)
                 w, u, dn = fish.girth(t)
                 root = p - up * dn * 0.9
                 h = L * (0.12 + 0.07 * rnd.random())
-                items.append((g.cone(root + Z * h * 0.1, root - Z * h, h * 0.2, n=5), mat("glass_ice")))
+                items.append((g.cone(root + Z * h * 0.1, root - Z * h, h * 0.2, n=5), mat("glass_frost")))
             out.append(obj("rime", items))
         elif style == "pane":
             p, d, side, up = fish.at(0.45)
             w, u, dn = fish.girth(0.45)
-            c = p + up * (u + L * 0.1)
-            R = Matrix.Rotation(-0.12, 3, "X")
-            items = [(g.box(c, (L * 0.66, L * 0.98, L * 0.026), rot=R), mat("glass_ice"))]
-            for j, (dx, dy) in enumerate(((0.3, 0.4), (-0.28, 0.3), (0.2, -0.42), (-0.3, -0.36))):
-                q = c + side * L * dx + d * L * dy
-                items.append((g.blade(q - up * L * 0.02, q - up * L * (0.16 + 0.04 * j), L * 0.07, thick=L * 0.03, normal=d), mat("glass_ice")))
+            c = p + up * (u + L * 0.13)
+            tilt = (up * 0.94 - side * 0.3 - d * 0.14).normalized()        # its face a little toward whoever looks
+            e1 = d.cross(tilt).normalized()
+            e2 = tilt.cross(e1).normalized()
+            outline = []
+            for j in range(9):
+                a_ = 2 * math.pi * j / 9.0
+                rr = 0.8 + 0.3 * rnd.random()
+                outline.append(c + e1 * (math.cos(a_) * L * 0.36 * rr) + e2 * (math.sin(a_) * L * 0.56 * rr))
+            outline.append(outline[0])
+            items = [(plate(outline, tilt, L * 0.045), mat("glass_ice"))]
+            for j in range(3):          # the cracks in it
+                q = c + e1 * L * (0.16 * (j - 1)) + tilt * L * 0.024
+                items.append((g.blade(q - e2 * L * 0.3 + e1 * L * 0.05 * j, q + e2 * L * (0.1 + 0.12 * j) - e1 * L * 0.07, L * 0.02, thick=L * 0.006, normal=tilt), mat("glass_frost")))
+            for j in range(5):          # and what hangs from its edge
+                q = outline[(j * 2 + 1) % 9].lerp(c, 0.12)
+                h = L * (0.1 + 0.05 * rnd.random())
+                items.append((g.cone(q, q - Z * h, h * 0.22, n=5), mat("glass_frost")))
             out.append(obj("pane", items))
         elif style == "shards":
             items = []
@@ -1022,7 +1049,7 @@ def carried(fish, spec, pieces):
                 w, u, dn = fish.girth(t)
                 o = (up * (0.8 + 0.5 * rnd.random()) + side * rnd.uniform(-0.8, 0.8) + d * rnd.uniform(-0.3, 0.3)).normalized()
                 q = p + o * (u * 1.25 + L * 0.06 * (j % 3))
-                items.append((g.blade(q, q + o * L * (0.1 + 0.05 * rnd.random()), L * 0.07, thick=L * 0.022, normal=d + side * rnd.uniform(-0.5, 0.5)), mat("glass_ice")))
+                items.append((g.blade(q, q + o * L * (0.1 + 0.05 * rnd.random()), L * 0.07, thick=L * 0.022, normal=d + side * rnd.uniform(-0.5, 0.5)), mat("glass_frost")))
             out.append(obj("shards", items))
         elif style == "drops":
             items = []
@@ -1121,13 +1148,14 @@ def carried(fish, spec, pieces):
             e1 = look.cross(Z).normalized()
             e2 = e1.cross(look).normalized()
             crack = [c + (look + e2 * 0.62 + e1 * 0.2).normalized() * R * 0.99, c + (look + e2 * 0.2 - e1 * 0.05).normalized() * R * 0.97, c + (look - e2 * 0.25 + e1 * 0.08).normalized() * R * 0.97, c + (look - e2 * 0.7 - e1 * 0.18).normalized() * R * 0.97]
-            items.append((g.tongue(crack, [R * 0.16, R * 0.56, R * 0.5, R * 0.12], thick=0.05, normal=look), mat("accent_deep"), True))
+            items.append((g.tongue(crack, [R * 0.16, R * 0.6, R * 0.54, R * 0.12], thick=0.05, normal=look), mat("accent_dark"), True))
             for j in range(6):
                 o = Vector((math.cos(j * 2.4), math.sin(j * 2.4) * 0.8, 0.5 + 0.4 * math.sin(j))).normalized()
                 items.append((g.blade(c + o * R * 0.95, c + o * R * 1.2, R * 0.32, thick=R * 0.05, normal=o.cross(Z)), mat("stone_silt")))
-            for j in range(3):          # and a few cracks more, lit from inside by the Path's colour
-                o = (look + e1 * (0.9 - 0.9 * j) + e2 * (0.5 if j == 1 else -0.35)).normalized()
-                items.append((g.blade(c + o * R * 0.985, c + (o + e2 * 0.35 + e1 * 0.1).normalized() * R * 0.985, R * 0.09, thick=R * 0.03, normal=o), mat("accent")))
+            for j in range(6):          # and a few cracks more, lit from inside by the Path's colour
+                o = (look * (0.9 if j < 4 else 0.2) + e1 * (1.1 - 0.72 * j) + e2 * (0.62 if j % 2 else -0.5)).normalized()
+                q = (o + e2 * (0.42 if j % 2 == 0 else -0.4) + e1 * 0.16).normalized()
+                items.append((g.blade(c + o * R * 0.99, c + q * R * 0.99, R * 0.15, thick=R * 0.035, normal=o), mat("accent" if j % 2 else "accent_light")))
             out.append(obj("mudball", items))
     return [o for o in out if o is not None]
 
@@ -1232,7 +1260,7 @@ def build_form(form_id, level, spec, base=None):
                 objects.append(obj("sway_barbel%s_%s" % ("2" if which else "", tag), [(g.tube(pts, radii, n=5), bm, True)], frame=at_point(pts[0])))
     objects += carried(fish, spec, pieces)
     objects = [o for o in objects if o is not None]
-    # hang it over its own origin: the middle of everything it is, its lowest point a hand above
+    # hang it over its own origin
     bpy.context.view_layer.update()
     lo, hi = [1e9] * 3, [-1e9] * 3
     for ob in objects:
@@ -1240,7 +1268,9 @@ def build_form(form_id, level, spec, base=None):
             q = ob.matrix_world @ v.co
             for ax in range(3):
                 lo[ax], hi[ax] = min(lo[ax], q[ax]), max(hi[ax], q[ax])
-    shift = Vector((-(lo[0] + hi[0]) / 2.0, -(lo[1] + hi[1]) / 2.0, FLOAT - lo[2]))
+    # (in the middle of what it is, in plan; its belly at the origin, where the game holds it)
+    world = world_scale(level, fish.size)
+    shift = Vector((-(lo[0] + hi[0]) / 2.0, -(lo[1] + hi[1]) / 2.0, max(BELLY - FLOAT, -DROP / world - lo[2])))
     for ob in objects:
         if ob.parent is None:
             ob.matrix_world = Matrix.Translation(shift) @ ob.matrix_world
