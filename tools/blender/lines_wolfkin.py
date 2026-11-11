@@ -21,8 +21,8 @@ paws, armor, carry, aura and the rest); what is theirs alone is here:
                claws, and in carry: panniers, pole, cape; in ruff: courtier
   the Stag     crown (the shape of its antlers), horn (what they are made of), hung (what
                is in them), throat, breath, hide, legs, flank, chest
-  the Drake    horns, frill, ridge, wings, belly, throat, tailend, shell, jaw, breath,
-               nostrils, claws, eye
+  the Drake    a body of its own on the wolf's bones (see "The Drake" below): crane, horns, frill, ridge,
+               wings, membrane, belly, scales, throat, tailend, shell, lies, jaw, gape, breath, nostrils, eye
 
 A form's `coat` is still its partner's coat, shifted; the look's roles for each body
 (data/genius-looks.json, bodies) are kept, so the coat goes on: fur_dark and fur_light on
