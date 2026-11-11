@@ -497,7 +497,8 @@ and colour, with its form's sign on it small, and its clasp at the wearer's thro
   0.16), with its two ends down the breast.
 - *Where it sits.* `worn` stands at the nape of a person at the origin; the game brings it
   to the chest bone, 0.4 up and 0.05 back (`data/genius-types.json`, `mounts.back`), and it
-  rides that bone.
+  rides that bone. A great coat's blades of light (the fifth and sixth instars) stand
+  behind its wearer's head, from the mantle (`GeniusBody.set_worn`).
 
 | Cut | Whose | What it is |
 |---|---|---|
