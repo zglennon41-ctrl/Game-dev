@@ -102,8 +102,80 @@ func _run() -> void:
 	test_blood_marks()
 	test_life_features()
 	test_bots()
+	test_opening()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
+
+## The opening: the title, the cards, the night at the station, the recruiter (data/story.json).
+func test_opening() -> void:
+	var st: Dictionary = Data.story
+	for key in ["title", "station", "notes", "moments", "credits", "recruiter_scene", "gate_shot"]:
+		check(st.has(key), "the story has its %s" % key)
+	# the station is a place the game can build, the size of the fight room
+	var place: Dictionary = st["station"]
+	var room: Dictionary = Data.room["arena"]
+	check(float(place["size"][0]) == float(room["width"]) and float(place["size"][1]) == float(room["depth"]), "the station is the size the fight is tuned for")
+	var pieces: Array = [String(place["style"]["floor"])]
+	for side in place["style"]["sides"].values():
+		pieces.append_array(side.get("bays", []))
+		for f in side.get("features", []):
+			pieces.append(String(f["piece"]))
+	for f in place["furniture"]:
+		pieces.append(String(f["piece"]))
+		# nothing stands where the fight goes: the furniture is along the walls
+		check(absf(float(f["at"][1])) > float(place["size"][1]) / 2.0 - 0.8 or absf(float(f["at"][0])) > float(place["size"][0]) / 2.0 - 0.8, "the station's %s stands clear of the fight" % f["piece"])
+	for piece in pieces:
+		check(ResourceLoader.exists(World.ACADEMY_DIR % piece), "the kit has the station's %s" % piece)
+	check(absf(float(place["spawn"][1])) > 2.2, "the figure of the title stands on a platform, not on the line")
+	# the words the night asks for are all written, and nothing in them is left unfilled
+	for id in ["wake_parry", "wake_block", "wake_hurt", "wake_evade", "wake_turned", "whiff", "no_will", "not_ready", "pattern_slipped", "pattern_later", "pattern_bar", "pattern_locked"]:
+		check(st["notes"].has(id), "the night has its word for %s" % id)
+	for answers in [[0, 1, 2, 0, 1, 2, 0, 1, 2, 0], [2, 2, 1, 1, 0, 0, 2, 1, 0, 2], [1, 0, 0, 2, 2, 1, 1, 0, 2, 1]]:
+		var h := Creation.generate(answers)
+		h["name"] = "Test"
+		var texts: Array = []
+		for c in st["cards"].values():
+			texts.append_array(c)
+		for b in st["beats"]:
+			texts.append(String(b["title"]))
+			texts.append(String(b["text"]).replace("{trigger_hint}", ""))
+		for n in st["notes"]:
+			if n != "comment":
+				texts.append(String(st["notes"][n]).replace("{trigger}", ""))
+		for m in st["moments"].values():
+			if m is Dictionary:
+				texts.append(String(m["title"]))
+				texts.append(String(m["sub"]))
+		texts.append_array(st["recruiter_lines"].map(func(l): return String(l).replace("{blood_line}", "")))
+		texts.append_array(st["blood_lines"].values())
+		var left := 0
+		for t in texts:
+			var filled := Prologue.fill(String(t), h)
+			if filled.contains("{") or filled.contains("}"):
+				left += 1
+		check(left == 0, "every line of the opening is filled in for a %s %s" % [h["blood"], h["shape"]])
+	check(Data.story["beats"].map(func(b): return b["id"]) == ["quiet", "hold", "woke", "technique", "pattern", "finish"], "the night's steps are in their order: move, guard, strike, the technique, the Pattern, the end")
+	# the recruiter is someone the Academy knows
+	check(not Data.by_id(Data.academy["instructors"], String(st["recruiter"]["id"])).is_empty(), "the recruiter is an Instructor of the Academy")
+	check(Data.academy["places"].has("gate"), "the Academy has the Gate the gate screen is shot at")
+	# the lamps catch one after another
+	check(World.lamp_level(0.0, 0, 6) == 0.0 and World.lamp_level(0.0, 5, 6) == 0.0, "lamps that are out are out")
+	check(World.lamp_level(1.0, 0, 6) == 1.0 and World.lamp_level(1.0, 5, 6) == 1.0, "lamps that are alight are all alight")
+	check(World.lamp_level(0.3, 0, 6) > World.lamp_level(0.3, 5, 6), "the first lamp catches before the last")
+	var rising := true
+	for i in 20:
+		if World.lamp_level((i + 1) / 20.0, 3, 6) < World.lamp_level(i / 20.0, 3, 6):
+			rising = false
+	check(rising, "a lamp that is catching never dims")
+	# a card's lines wait long enough to be read, and never too long
+	check(Hud.card_wait("ACT ONE") >= 1.0 and Hud.card_wait("You are fifteen. Your field has not woken. Tonight the line went quiet.") > 2.5 and Hud.card_wait("word ".repeat(80)) <= 3.2, "a card's line waits for the one before it to be read")
+	# the fight bar: wide slots when few, and it never runs under the hero's frame
+	check(Hud.slot_width(6) == Hud.SLOT_W, "six slots are as wide as reads best")
+	var fits := true
+	for n in range(1, 11):
+		if (Hud.slot_width(n) + 8.0) * n - 8.0 > maxf(Hud.BAR_MOST, (Hud.SLOT_W + 8.0) * 6):
+			fits = false
+	check(fits and Hud.slot_width(10) >= 64.0, "ten slots still fit between the frames")
 
 func run_for(f: Fight, seconds: float, move := Vector2.ZERO) -> Array:
 	var all: Array = []

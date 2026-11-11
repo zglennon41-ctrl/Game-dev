@@ -430,7 +430,12 @@ func _ready() -> void:
 	else:
 		menu()
 		if _args.has("shots") and _args.has("title"):
-			await get_tree().create_timer(2.0).timeout
+			# --title=settings or --title=credits: that screen under the title
+			if str(_args["title"]) == "settings":
+				_settings_screen()
+			elif str(_args["title"]) == "credits":
+				_credits_screen()
+			await _wait(3.0)
 			_shot("title")
 			await get_tree().create_timer(0.3).timeout
 			get_tree().quit()
@@ -493,21 +498,22 @@ func menu() -> void:
 ## The title's menu, over the station: what a returning player most likely wants first.
 func _title_screen() -> void:
 	mode = "menu"
+	_title_sub = false
 	var saved := Settings.hero()
 	var T: Dictionary = Data.story.get("title", {})
 	var buttons: Array = []
 	if not saved.is_empty():
 		var where := (String(T.get("where_settled", "settled, ready for the line")) if saved.get("settled", false) else String(T.get("where_academy", "at the Academy"))) if saved.has("academy") else String(T.get("where_gate", "at the Academy's gate"))
-		buttons.append([String(T.get("continue", "Continue")), func(): hero = saved; enter_academy() if saved.has("academy") else _academy_gate(),
+		buttons.append([String(T.get("continue", "Continue")), func(): hud.blackout(func(): hero = saved; enter_academy() if saved.has("academy") else _academy_gate()),
 			{ "primary": true, "sub": "%s  ·  %s %s  ·  %s" % [saved["name"], Data.by_id(Data.bloods, saved["blood"])["name"], String(saved["shape"]).capitalize(), where] }])
-		buttons.append([String(T.get("new", "New character")), new_character])
-		buttons.append([String(T.get("yard", "Practice yard")), func(): hero = saved; start("fight")])
+		buttons.append([String(T.get("new", "New character")), func(): hud.blackout(new_character)])
+		buttons.append([String(T.get("yard", "Practice yard")), func(): hud.blackout(func(): hero = saved; start("fight"))])
 	else:
-		buttons.append([String(T.get("new", "New character")), new_character, { "primary": true }])
+		buttons.append([String(T.get("new", "New character")), func(): hud.blackout(new_character), { "primary": true }])
 	if saved.has("genius") and Genius.from_dict(saved["genius"]).is_born():
 		var sg := Genius.for_hero(saved)
 		buttons.append([String(T.get("genius", "Your genius: {name}")).format({ "name": sg.name if sg.name != "" else sg.form_name() }), func(): page.hero = saved; page.open(sg, World.SHAPE_COLORS.get(saved["shape"], Color.WHITE), 0, int(saved.get("academy", {}).get("record", {}).get("marks", 0)))])
-	buttons.append([String(T.get("tutorial", "Combat tutorial")), func(): hero = {}; start("tutorial")])
+	buttons.append([String(T.get("tutorial", "Combat tutorial")), func(): hud.blackout(func(): hero = {}; start("tutorial"))])
 	buttons.append([String(T.get("settings", "Settings")), _settings_screen, { "row": true }])
 	buttons.append([String(T.get("credits", "Credits")), _credits_screen, { "row": true }])
 	if not OS.has_feature("web"):   # a browser's tab is closed by the browser
@@ -515,7 +521,10 @@ func _title_screen() -> void:
 	hud.show_screen("WILDLINE", String(T.get("subtitle", "The Cumberland Cut")), String(T.get("foot", "")), buttons, "title")
 
 ## Settings: the sound, how fast the mouse turns the camera, the whole screen. Kept between sessions.
+var _title_sub := false      # a screen under the title is up (Settings, Credits): Esc goes back
+
 func _settings_screen() -> void:
+	_title_sub = true
 	var T: Dictionary = Data.story.get("title", {})
 	var rows: Array = [
 		[String(T.get("set_sound", "Sound")), { "stepper": {
@@ -535,6 +544,7 @@ func _settings_screen() -> void:
 	hud.show_screen(String(T.get("settings", "Settings")).to_upper(), "", "", buttons, "left")
 
 func _credits_screen() -> void:
+	_title_sub = true
 	var T: Dictionary = Data.story.get("title", {})
 	hud.show_screen(String(T.get("credits", "Credits")).to_upper(), "", "\n\n".join(Data.story.get("credits", [])), [[String(T.get("back", "Back")), _title_screen]], "left")
 
@@ -758,9 +768,9 @@ func _academy_gate() -> void:
 	_show_preview = true
 	music.play_track(String(Data.music.get("places", {}).get("gate", "gate")) if not Data.music.is_empty() else "gate")
 	hud.show_screen(a["title"], "%s  ·  %s  ·  %s" % [hero["name"], Data.by_id(Data.bloods, hero["blood"])["name"], String(hero["shape"]).capitalize()], a["text"], [
-		[String(a.get("enter", "Walk through the Gate")), func(): _show_preview = false; world.cine = false; enter_academy(), { "primary": true }],
-		[String(a.get("yard", "Practice yard")), func(): _show_preview = false; start("fight")],
-		[String(a.get("menu", "Main menu")), func(): _show_preview = false; menu()],
+		[String(a.get("enter", "Walk through the Gate")), func(): hud.blackout(func(): _show_preview = false; world.cine = false; enter_academy()), { "primary": true }],
+		[String(a.get("yard", "Practice yard")), func(): hud.blackout(func(): _show_preview = false; start("fight"))],
+		[String(a.get("menu", "Main menu")), func(): hud.blackout(func(): _show_preview = false; menu())],
 	], "left")
 	if _args.has("answers"):
 		print("REACHED THE ACADEMY: %s, %s %s with a %s; Pattern %s" % [hero["name"], hero["blood"], hero["shape"], hero["weapon"], Builder.sentence(hero["pattern"])])
@@ -1533,6 +1543,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if page.visible:
 		if event.is_action_pressed("genius_page") or event.is_action_pressed("menu"):
 			page.hide_page()
+		return
+	if mode == "menu" and _title_sub and event.is_action_pressed("menu"):
+		_title_screen()
 		return
 	if event.is_action_pressed("show_step"):
 		hud.show_prompt_again()

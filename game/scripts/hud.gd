@@ -764,7 +764,7 @@ func _build_card() -> void:
 	c.set_anchors_preset(Control.PRESET_FULL_RECT)
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(c)
-	_card_box.custom_minimum_size = Vector2(900, 0)
+	_card_box.custom_minimum_size = Vector2(1180, 0)
 	_card_box.alignment = BoxContainer.ALIGNMENT_CENTER
 	_card_box.add_theme_constant_override("separation", 22)
 	_card_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -835,7 +835,7 @@ func show_card(lines: Array, next: Callable, style := "story", auto := 0.0) -> v
 		l.text = String(lines[i]).to_upper() if (style == "story" and i == 0 and lines.size() > 1) else String(lines[i])
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD
-		l.custom_minimum_size = Vector2(900, 0)
+		l.custom_minimum_size = Vector2(1180, 0)
 		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		l.modulate.a = 0.0
 		_card_box.add_child(l)
@@ -846,7 +846,8 @@ func show_card(lines: Array, next: Callable, style := "story", auto := 0.0) -> v
 			_card_box.add_child(r)
 			_card_items.append({ "node": r, "at": at + 0.2 })
 		at += card_wait(String(lines[i])) if style == "story" else 0.9
-	_card_full_at = float(_card_items[-1]["at"]) + Style.t("ceremony") if not _card_items.is_empty() else 0.0
+	# (with no lines it is only the dark between two places: it holds until the dark is whole)
+	_card_full_at = (float(_card_items[-1]["at"]) + Style.t("ceremony")) if not _card_items.is_empty() else Style.t("arrive")
 	_card_hint.text = _go_on_words()
 	_card_hint.modulate.a = 0.0
 	_card_state = "arriving"
