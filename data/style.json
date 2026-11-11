@@ -95,13 +95,13 @@
     ],
     "places": [
       ["wild:stone", "rock", 0.6, 0.55], ["wild:earth", "earth", 0.4, 0.55], ["wild:ruin", "ashlar", 0.5, 0.55],
-      ["stone_floor", "flagstone", 0.45, 0.5], ["stone_dress", "flagstone", 0.7, 0.4], ["stone_course", "cobble", 0.9, 0.4],
-      ["plaster", "plaster", 0.35, 0.5], ["brick", "brick", 0.5, 0.5], ["slate", "slate", 0.5, 0.5], ["roof", "slate", 0.5, 0.5],
-      ["wood_plank", "planks", 0.6, 0.5], ["dirt", "earth", 0.4, 0.55], ["grass", "grass", 0.5, 0.6], ["moss", "grass", 0.7, 0.5],
+      ["stone_floor", "flagstone", 0.45, 0.4], ["stone_dress", "flagstone", 0.7, 0.4], ["stone_course", "cobble", 0.9, 0.4],
+      ["plaster", "plaster", 0.35, 0.38], ["brick", "brick", 0.5, 0.5], ["slate", "slate", 0.5, 0.5], ["roof", "slate", 0.5, 0.5],
+      ["wood_plank", "planks", 0.6, 0.5], ["dirt", "earth", 0.4, 0.55], ["grass", "grass", 0.5, 0.5], ["moss", "grass", 0.7, 0.5],
       ["bark", "bark", 0.8, 0.55], ["leaf", "wool", 1.5, 0.3], ["straw", "twill", 2.0, 0.4], ["rope", "twill", 6.0, 0.4],
-      ["stone", "ashlar", 0.5, 0.5], ["#stone", "flagstone", 0.5, 0.45], ["#earth", "earth", 0.4, 0.5], ["#growth", "grass", 0.7, 0.45],
+      ["stone", "ashlar", 0.5, 0.42], ["#stone", "flagstone", 0.5, 0.45], ["#earth", "earth", 0.4, 0.5], ["#growth", "grass", 0.7, 0.45],
       ["#wood", "timber", 1.2, 0.5], ["#iron", "hammered", 3.0, 0.4], ["#brass", "brushed", 4.0, 0.4], ["#leather", "creased", 3.0, 0.4],
-      ["#bone", "rock", 3.0, 0.3]
+      ["#bone", "rock", 3.0, 0.3], ["#mixed", "flagstone", 0.5, 0.3]
     ],
     "grainFit": { "$comment": "How a body's grain is fitted to it. show: every body's grain this much stronger or weaker at once (1 is as the table says; no row times this may pass 0.7). size, power, least, most: a grain is so many repeats to a metre, which on a hatchling would be two scales and on an apex a thousand; so a body smaller than size (metres, across its longest side) takes its grains finer and a larger one coarser, by (size / across) to the power, held between least and most. Power 0 is the same grain on everything; 1 is the same count of scales on every body. sharp: how sharply the grain laid from the side gives way to the grain laid from above and from the front (1 is a soft blend, and smears a pattern that has a direction). along: the grains that follow the length of the piece they are on (up a bow, along a blade, down a door's planks) and not the body's nose to tail.", "show": 1.0, "size": 1.0, "power": 0.75, "least": 0.4, "most": 1.6, "sharp": 4.0, "along": ["timber", "brushed", "bark", "horn", "wood", "bronze"] },
     "classes": {
@@ -133,7 +133,7 @@
     "rim": { "strength": 0.28, "color": "#D2D8EC", "power": 3.2 },
     "occlusion": 0.8,
     "keyRim": 0.45,
-    "place": { "macro": 0.3, "macroScale": 0.09, "macroGrain": "fog", "foot": 0.32, "footHeight": 0.7, "sway": 0.035 },
+    "place": { "macro": 0.16, "macroScale": 0.09, "macroGrain": "fog", "foot": 0.32, "footHeight": 0.7, "sway": 0.035 },
     "contact": { "people": 0.58, "props": 0.45 },
     "smooth": { "living": true, "made": false }
   },

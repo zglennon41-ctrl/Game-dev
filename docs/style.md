@@ -22,6 +22,9 @@ same as a failing test.
 | The ink line's weight or colour | `ink` |
 | The lamp's, the fire's or the moon's colour; how a kind of place is lit | `lights` |
 | The picture's grade, grain, exposure | `film` |
+| What a floor, a wall or a roof is built of; the patches, the wear at a wall's foot, the wind | `materials.places`, `shading.place` |
+| The glow about a lamp, its cone and pool, a window's light on the ground; the sky; what the distance fades to | `lights.halo`, `lights.sky`, `lights.kinds` (`fog`) |
+| The contact shadow under what stands; the key light along a body's edge | `shading.contact`, `shading.keyRim` |
 | An effect's colour or shape | `effects` |
 | How long things take to move | `motion` |
 | The interface's colours, corners, typefaces | `interface`, `type` |
@@ -356,9 +359,10 @@ the colours the data names (hair, a zone's night, the creator's lights).
   and not down it; a horn made in one piece with its body is ringed the wrong way on two of
   its sides; a beam across a door of upright planks takes the planks' grain. Putting this
   right wants a direction written into the model, which no model has.
-- **The places still wear the first seven grains** (linen, wool, leather, bronze, skin,
-  stone, wood), which are faint and blocky beside the thirteen made since. They want making
-  again and looking at place by place; nothing of a place was changed here.
+- The places now wear nine grains of their own, by their materials' names
+  (`materials.places`; `docs/graphics-comparison.md`, "The third pass of the picture"). The
+  borrowed dungeon tiles of the Cut take one plain stone grain, since their one painted
+  texture does not say what each part is.
 - **A grain multiplies the colour**, so a matt coat near black shows almost none of it (a
   body of shadow stays a shape), a glossy one shows it only in its shine, and a pale one
   shows it most.
