@@ -3096,7 +3096,7 @@ def register(builders):
     _fox_styles()
     _stag_styles()
     _drake_styles()
-    builders["fox"] = _builder(fox_species, fox_ages, ("fur_dark", "fur_light"), ("socks", "mask", "saddle", "tailtip"), {"fur_ruff": "fur_dark"})
+    # (the Fox is built by lines_fox.py: a fox's body of its own)
     # (the Stag is built by lines_stag.py: a deer's body of its own)
     builders["drake"] = drake_build
 
