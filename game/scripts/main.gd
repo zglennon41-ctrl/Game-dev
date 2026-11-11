@@ -1075,11 +1075,12 @@ func _academy_frame(delta: float, real_dt: float) -> void:
 					if fight.dist() > want_d + 0.5:
 						move = (fight.w_pos - fight.p_pos).normalized()
 					elif fight.dist() < want_d - 0.1:
-						move = -(fight.w_pos - fight.p_pos).normalized()
+						move = _bot_back_off(delta)
 					else:
+						_bot_back_t = 0.0
 						fight.input(academy.bot_action())
 				elif fight.p_state == "free" and fight.dist() < want_d - 0.1:
-					move = -(fight.w_pos - fight.p_pos).normalized()
+					move = _bot_back_off(delta)
 			"fight": move = _bot()
 			_: move = academy.auto_move()
 	fight.update(minf(delta, 0.1), move)
@@ -1103,6 +1104,13 @@ func _academy_frame(delta: float, real_dt: float) -> void:
 		hud.update_play(fight, "", academy.place_label(), true)
 	if _args.has("shots") and not _args.has("tour") and _clock_shots(real_dt):
 		_shot("academy-" + String(academy.progress["place"]))
+
+## Automated checks: step back from the foe; with a wall behind (no ground gained), round it.
+var _bot_back_t := 0.0
+func _bot_back_off(dt: float) -> Vector2:
+	_bot_back_t += dt
+	var away := -(fight.w_pos - fight.p_pos).normalized()
+	return away.rotated(1.3) if _bot_back_t > 2.0 else away
 
 ## Automated checks in a lesson: keep near the genius, face it, and parry each bite.
 func _lesson_bot() -> Vector2:

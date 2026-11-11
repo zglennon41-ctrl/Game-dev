@@ -708,9 +708,18 @@ func lesson_available(lesson: Dictionary) -> bool:
 	for d in req.get("done", []):
 		if not lesson_done(d):
 			return false
-	if req.has("rested_after") and not rested_on(req["rested_after"]):
+	if req.has("rested_after") and not rested_on(_rest_after(req)):
 		return false
 	return true
+
+## The lesson a night's rest must follow before this one. With advanced standing a lesson is
+## passed over (the line): then the rest that counts is the one after the last lesson done, or
+## the next lesson could never begin.
+func _rest_after(req: Dictionary) -> String:
+	var need := String(req.get("rested_after", ""))
+	if not progress["done"].has(need) and lesson_done(need):
+		return last_done()
+	return need
 
 ## What stands between the hero and the next lesson: "rest", "rite", or "".
 func next_need() -> String:
@@ -722,7 +731,7 @@ func next_need() -> String:
 	if nl.is_empty():
 		for lesson in Data.academy["lessons"]:
 			if not lesson_done(lesson["id"]):
-				return "rest" if lesson.get("requires", {}).has("rested_after") and not rested_on(lesson["requires"]["rested_after"]) else ""
+				return "rest" if lesson.get("requires", {}).has("rested_after") and not rested_on(_rest_after(lesson["requires"])) else ""
 		if not progress["done"].has("gate"):
 			if not gate_ready():
 				return "board"

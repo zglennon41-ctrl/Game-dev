@@ -1486,6 +1486,15 @@ func test_advanced_standing() -> void:
 		var left: Array = titles[lid].filter(func(t): return not adv["skipSteps"][lid].has(t))
 		check(left.size() >= 1, "%s keeps at least one step under advanced standing (%s)" % [lid, str(left)])
 	check(titles["project"].filter(func(t): return not adv["skipSteps"]["project"].has(t)).has("Extraction"), "the Field Examination survives advanced standing")
+	# The lesson after a skipped one can begin: its night's rest follows the last lesson done
+	# (the soak test found a second life resting for ever, the Examination never open).
+	var ac := Academy.new()
+	ac.hero = { "advanced": true }
+	ac.progress = { "done": ["hold", "rite", "shape", "discipline"], "rested_after": "discipline" }
+	check(ac.next_lesson().get("id", "") == "project", "with advanced standing, a night's rest after the Discipline lesson opens the Examination")
+	ac.progress["rested_after"] = "shape"
+	check(ac.next_lesson().is_empty(), "and without that rest it waits")
+	ac.free()
 
 ## Marks and ranks match the server's rules; every Shape and launch school has an archetype.
 func test_marks() -> void:
