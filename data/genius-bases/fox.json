@@ -56,6 +56,10 @@
   ],
   "body": {
    "fox": "red",
+   "rest": [
+    "crouch",
+    1.0
+   ],
    "build": {
     "brush": 1.1,
     "tail": 0.95
@@ -95,6 +99,7 @@
    ],
    "body": {
     "fox": "red",
+    "rest": null,
     "coat": "russet",
     "accent": "madder",
     "build": {
@@ -145,6 +150,10 @@
       "long-legs"
      ],
      "body": {
+      "rest": [
+       "stride",
+       1.0
+      ],
       "build": {
        "legs": 1.14,
        "girth": 0.92,
@@ -193,6 +202,7 @@
         "glow"
        ],
        "body": {
+        "rest": null,
         "build": {
          "legs": 1.18,
          "brush": 1.25,
@@ -237,6 +247,10 @@
         "shadow-cloak"
        ],
        "body": {
+        "rest": [
+         "stalk",
+         1.0
+        ],
         "build": {
          "legs": 0.96,
          "girth": 0.85,
@@ -463,6 +477,10 @@
       "tunnel-ear"
      ],
      "body": {
+      "rest": [
+       "point",
+       1.0
+      ],
       "build": {
        "legs": 1.08,
        "girth": 0.9
@@ -507,6 +525,10 @@
         "watching-eye"
        ],
        "body": {
+        "rest": [
+         "sit",
+         1.0
+        ],
         "build": {
          "legs": 1.12,
          "neck": 1.12,
@@ -559,6 +581,7 @@
         "quiet-place"
        ],
        "body": {
+        "rest": null,
         "build": {
          "legs": 0.9,
          "girth": 1.25,
@@ -623,6 +646,7 @@
    ],
    "body": {
     "fox": "den",
+    "rest": null,
     "coat": "sand",
     "accent": "gold",
     "build": {},
@@ -1143,6 +1167,7 @@
    ],
    "body": {
     "fox": "silver",
+    "rest": null,
     "coat": "slate",
     "accent": "amethyst",
     "build": {},

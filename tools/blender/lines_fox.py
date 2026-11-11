@@ -817,7 +817,7 @@ def _tail(r, A):
     elif many == "many":          # nine, fanned behind it like a hand of cards
         for i, a in enumerate((0.0, 0.3, -0.3, 0.6, -0.6, 0.9, -0.9, 1.2, -1.2)):
             lean = Matrix.Rotation(-0.1 * abs(a), 3, X)
-            _brush(r, "brush_%d" % i, lean @ Matrix.Rotation(a, 3, ax) if a else None, fat=0.74, long=1.0 - 0.1 * abs(a), shag=i < 3)
+            _brush(r, "brush_%d" % i, lean @ Matrix.Rotation(a, 3, ax) if a else None, fat=0.74, long=1.0 - 0.1 * abs(a), shag=i < 1)
     else:
         _brush(r, "brush_0")
 
