@@ -632,7 +632,7 @@
    "habit": "It swims the same circuit of your room at the same hour, and is put out if a chair has moved.",
    "leans": {
     "orders": {
-     "guard": 1.0
+     "hold": 1.0
     },
     "ground": {
      "quiet": 0.8
@@ -1136,12 +1136,15 @@
    "sign": "A flat head, a wide slow mouth, and whiskers longer than itself that touch a thing before it does.",
    "habit": "It lies along the skirting board with its whiskers out, and knows who came in while you were away.",
    "leans": {
-    "shape": {
-     "read": 1.0
+    "range": {
+     "close": 1.0
     },
     "ground": {
      "ruin": 0.8,
      "night": 0.3
+    },
+    "shape": {
+     "read": 0.5
     }
    },
    "features": [
