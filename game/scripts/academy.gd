@@ -39,6 +39,21 @@ var _fade := ColorRect.new()
 var _prompt := PanelContainer.new()
 var _prompt_label := Label.new()
 var _objective := Label.new()
+var _objective_head := Label.new()
+var _objective_note := Label.new()
+var _tracker := PanelContainer.new()
+var _guide := Control.new()
+var _guide_mark := Polygon2D.new()
+var _guide_rim := Line2D.new()
+var _guide_arrow := Polygon2D.new()
+var _guide_label := Label.new()
+var _step_card := VBoxContainer.new()
+var _step_card_head := Label.new()
+var _step_card_sub := Label.new()
+var _arrive_t := -1.0        # the arrival: the camera comes down over the quad (seconds in; -1 when not)
+var _arrive_carded := false
+var _talk_cine := false      # the camera is holding a conversation's frame
+var _resting := false        # the night is passing: black, the dormitory's words, the day's card
 var _place_card := Label.new()
 var _box := PanelContainer.new()
 var _speaker := Label.new()
@@ -52,12 +67,66 @@ func _ready() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
-	# What you are doing now, top left under nothing else.
-	Style.label(_objective, 22, Style.FG, "italic", 6)
-	_objective.position = Vector2(30, 24)
-	_objective.custom_minimum_size = Vector2(760, 0)
+	# What you are doing now, top left under nothing else: what it is called, what to do, and
+	# (on the first day) how many of the cohort you have met. A dark plate behind it, so names
+	# over heads in the world never run through the words.
+	_tracker.position = Vector2(24, 20)
+	var ts := Style.plate(Color(0.035, 0.03, 0.027, 0.62), Style.BRASS, 0, 12)
+	ts.border_width_left = 3
+	ts.content_margin_left = 16
+	ts.content_margin_right = 20
+	_tracker.add_theme_stylebox_override("panel", ts)
+	_tracker.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var tv := VBoxContainer.new()
+	tv.add_theme_constant_override("separation", 1)
+	_tracker.add_child(tv)
+	Style.label(_objective_head, 15, Style.GOLD, "title")
+	tv.add_child(_objective_head)
+	Style.label(_objective, 21, Style.FG, "body")
+	_objective.custom_minimum_size = Vector2(500, 0)
 	_objective.autowrap_mode = TextServer.AUTOWRAP_WORD
-	root.add_child(_objective)
+	tv.add_child(_objective)
+	Style.label(_objective_note, 15, Style.DIM, "italic")
+	tv.add_child(_objective_note)
+	_tracker.modulate.a = 0.0
+	root.add_child(_tracker)
+	# The way-marker: a small gold diamond over who or what the objective names, or an arrow at
+	# the edge of the screen toward it (the pause menu turns it off).
+	_guide.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_guide.visible = false
+	_guide_mark.polygon = PackedVector2Array([Vector2(0, -14), Vector2(10, 0), Vector2(0, 14), Vector2(-10, 0)])
+	_guide_mark.color = Style.GOLD
+	_guide_rim.points = PackedVector2Array([Vector2(0, -14), Vector2(10, 0), Vector2(0, 14), Vector2(-10, 0), Vector2(0, -14)])
+	_guide_rim.width = 2.0
+	_guide_rim.default_color = Color(0.03, 0.025, 0.02, 0.9)
+	_guide_arrow.polygon = PackedVector2Array([Vector2(27, 0), Vector2(15, -8), Vector2(15, 8)])
+	_guide_arrow.color = Style.GOLD
+	_guide.add_child(_guide_mark)
+	_guide.add_child(_guide_rim)
+	_guide.add_child(_guide_arrow)
+	Style.label(_guide_label, 16, Style.FG, "ui", 6)
+	_guide_label.position = Vector2(-100, 17)
+	_guide_label.custom_minimum_size = Vector2(200, 0)
+	_guide_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_guide.add_child(_guide_label)
+	root.add_child(_guide)
+	# A step of a lesson done: its name over a rule, for a breath.
+	_step_card.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_step_card.position = Vector2(-300, 150)
+	_step_card.custom_minimum_size = Vector2(600, 0)
+	_step_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_step_card.add_theme_constant_override("separation", 4)
+	Style.label(_step_card_head, 30, Style.GOLD, "title", 6)
+	_step_card_head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_step_card.add_child(_step_card_head)
+	var sr := Style.rule(260)
+	sr.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_step_card.add_child(sr)
+	Style.label(_step_card_sub, 17, Style.FG, "italic", 5)
+	_step_card_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_step_card.add_child(_step_card_sub)
+	_step_card.modulate.a = 0.0
+	root.add_child(_step_card)
 	# The name of the place, as you enter it.
 	Style.label(_place_card, 46, Style.FG, "title", 6)
 	_place_card.set_anchors_preset(Control.PRESET_CENTER_TOP)
@@ -114,6 +183,10 @@ func _ready() -> void:
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fade.modulate.a = 0.0
 	root.add_child(_fade)
+	root.move_child(_fade, _box.get_index())
+	# (the great card and the rite's panels are made now: the tracker and the place's name ask
+	# whether the great card is up, and it must be there, and clear, to answer)
+	_build_rite_ui()
 
 # --- Entering ----------------------------------------------------------------
 
@@ -159,9 +232,60 @@ func enter(h: Dictionary) -> void:
 	go(String(progress.get("place", "quad")), not bool(progress["arrived"]))
 	if progress.get("quest", {}) is Dictionary and not progress.get("quest", {}).is_empty():
 		_begin_quest(progress["quest"])
+	_arrive_t = -1.0
+	_dev_jump()
 	if not progress["arrived"]:
-		var a: Dictionary = Data.academy["arrival"]
-		say(a["speaker"], a["lines"], func(): progress["arrived"] = true; save())
+		_arrive()
+
+## The first sight of the Academy: out of the dark the camera comes down across the quad from
+## above the gatehouse, the place is named, and it settles behind the newcomer as the Instructor
+## who found them speaks. E skips the look round. Words: data/academy.json, "arrival".
+func _arrive() -> void:
+	_build_rite_ui()
+	_arrive_t = 0.0
+	_arrive_carded = false
+	_place_pending = false
+	_place_card.modulate.a = 0.0
+	if _place_tw:
+		_place_tw.kill()
+	var p := Vector3(fight.p_pos.x, 0, fight.p_pos.y)
+	world.cine = true
+	world.cine_speed = 0.5
+	world._cam_pos = Vector3(3.5, 9.2, 10.0)    # (clear of the court's trees)
+	world._cam_look = Vector3(-3.0, 1.2, -7.0)
+	world.cine_pos = p + Vector3(-2.0, 2.5, 2.3)
+	world.cine_look = p + Vector3(0.9, 1.35, -3.0)
+
+func _arrive_update(dt: float) -> void:
+	_arrive_t += dt
+	var a: Dictionary = Data.academy["arrival"]
+	var card: Dictionary = a.get("card", {})
+	if not _arrive_carded and _arrive_t >= 1.0:
+		_arrive_carded = true
+		if not card.is_empty():
+			title_card(String(card.get("title", "")).to_upper(), fill(String(card.get("sub", ""))), Style.GOLD)
+			sfx.play("stance", 0.7, -8.0)
+	if _arrive_t >= (5.4 if not card.is_empty() else 2.5):
+		_arrive_talk()
+
+func _arrive_talk() -> void:
+	if _arrive_t < 0.0:
+		return
+	_arrive_t = -1.0
+	var a: Dictionary = Data.academy["arrival"]
+	if _big.modulate.a > 0.0:
+		_clear_big()
+	say(a["speaker"], a["lines"], func(): progress["arrived"] = true; save())
+
+## Automated checks and reviews: --at=after-hold (with --academy --fresh) puts a fresh student
+## at the dormitory door with Lesson 1 behind them and the night not yet slept.
+func _dev_jump() -> void:
+	for a in OS.get_cmdline_user_args():
+		if a == "--at=after-hold" and progress["done"].is_empty():
+			progress["arrived"] = true
+			progress["done"] = ["hold"]
+			progress["met"] = ["c0", "c1"]
+			go("dorm", true, "quad")
 
 var genius: Genius = null
 
@@ -374,6 +498,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 		ilook.merge({ "dress": "master", "headgear": true, "cape": false }, true)
 		ilook.merge(data.get("look", {}), true)
 		var fig := world.add_figure(data["body"], at, (spawn - at).angle(), data["name"], data.get("title", ""), "", Color(0, 0, 0, 0), ilook)
+		fig["lead"] = true    # an Instructor's name shows before a classmate's beside them
 		_people.append({ "kind": "instructor", "id": data["id"], "name": data["name"], "pos": at })
 		if data.has("genius"):
 			fight.w_state = "idle"
@@ -468,13 +593,123 @@ var _post: Dictionary = {}
 var _holding := false
 var _hold_t := 0.0
 
+var _place_tw: Tween
+
+## The name of the place, as you walk into it. Never with the great card (a day, a Shape): it
+## waits until that has gone.
 func _show_place(title: String) -> void:
 	_place_card.text = title
-	var tw := _place_card.create_tween()
+	if _place_tw:
+		_place_tw.kill()
 	_place_card.modulate.a = 0.0
-	tw.tween_property(_place_card, "modulate:a", 1.0, Style.t("ceremony"))
-	tw.tween_interval(Style.t("hold"))
-	tw.tween_property(_place_card, "modulate:a", 0.0, Style.t("ceremony"))
+	if not _place_card.is_inside_tree():
+		return
+	if not place_card_may_show(_big.modulate.a, _resting):
+		_place_pending = true
+		return
+	_place_pending = false
+	_place_tw = _place_card.create_tween()
+	_place_tw.tween_property(_place_card, "modulate:a", 1.0, Style.t("ceremony"))
+	_place_tw.tween_interval(Style.t("hold"))
+	_place_tw.tween_property(_place_card, "modulate:a", 0.0, Style.t("ceremony"))
+
+var _place_pending := false
+
+## The place's name may come up only when the great card is quite gone and no night is passing.
+static func place_card_may_show(big_alpha: float, resting: bool) -> bool:
+	return big_alpha <= 0.01 and not resting
+
+## The objective line in two parts: what it is called ("LESSON 1 · HOLD") and what to do.
+static func split_objective(t: String) -> Array:
+	var cut := t.find(": ")
+	var skip := 2
+	if cut < 0:
+		cut = t.find(" · ")
+		skip = 3
+	if cut < 0:
+		return ["", t]
+	var body := t.substr(cut + skip)
+	return [t.substr(0, cut).to_upper(), body.substr(0, 1).to_upper() + body.substr(1)]
+
+## Where the objective sends you, in this place: the person to see, the bed, or the door that
+## leads there. {} when there is nothing to point at (a lesson has its own plate; a zone its own).
+func guide_goal() -> Dictionary:
+	if in_lesson() or _in_zone() or not progress.get("arrived", false):
+		return {}
+	var place: String = progress["place"]
+	var want := ""
+	match next_need():
+		"rest": want = "dorm"
+		"rite": want = "hearth"
+		"gate": want = "gate"
+		"board":
+			if rest_reason() == "" and postings_open().is_empty() and troubles_open().is_empty():
+				want = "dorm"
+			else:
+				var bs: Dictionary = place_spec("quad").get("board", {})
+				if place == "quad" and not bs.is_empty():
+					return { "pos": Vector2(bs["at"][0], bs["at"][1]), "height": 2.9, "label": "The board" }
+				want = "quad"
+		_:
+			var nl := next_lesson()
+			want = String(nl.get("place", ""))
+	if want == "":
+		return {}
+	if place == want:
+		if want == "dorm":
+			return {} if _rest.is_empty() else { "pos": Vector2(_rest["at"][0], _rest["at"][1]), "height": 1.6, "label": "Rest" }
+		var who := ""
+		if next_need() in ["rite", "gate"]:
+			who = String(Data.academy[next_need()]["instructor"])
+		else:
+			var nl2 := next_lesson()
+			who = lesson_instructor(nl2) if not nl2.is_empty() else ""
+		for p in _people:
+			if p["kind"] == "instructor" and p["id"] == who:
+				return { "pos": p["pos"], "height": 3.05, "label": "" }
+		return {}
+	for d in _doors:
+		if d["to"] == want or (d["to"] == "quad" and not _doors.any(func(x): return x["to"] == want)):
+			return { "pos": Vector2(d["at"][0], d["at"][1]) * 0.93, "height": 3.3, "label": String(d["label"]).substr(0, 1).to_upper() + String(d["label"]).substr(1) }
+	return {}
+
+## The way-marker is on unless the player turned it off (the pause menu).
+func guide_on() -> bool:
+	return bool(Settings.cfg.get_value("play", "way_marker", true))
+
+func _guide_update(dt: float) -> void:
+	var g: Dictionary = guide_goal() if guide_on() and not busy() and _arrive_t < 0.0 else {}
+	var cam: Camera3D = world.camera if world else null
+	if g.is_empty() or cam == null or get_tree().paused:
+		_guide.modulate.a = move_toward(_guide.modulate.a, 0.0, dt * 4.0)
+		_guide.visible = _guide.modulate.a > 0.0
+		return
+	var at := Vector3(g["pos"].x, float(g["height"]), g["pos"].y)
+	var vp: Vector2 = _guide.get_viewport_rect().size
+	var mid := vp / 2.0
+	var sp := cam.unproject_position(at)
+	var behind := cam.is_position_behind(at)
+	if behind:
+		sp = mid + (mid - sp)
+	var box := Rect2(Vector2(70, 150), vp - Vector2(140, 330))
+	var off := behind or not box.has_point(sp)
+	if off:
+		# at the edge of the screen, on the line from its middle toward where the thing is
+		var dir := (sp - mid).normalized() if (sp - mid).length() > 1.0 else Vector2.UP
+		if behind and absf(dir.y) > 0.9:
+			dir = Vector2(signf(dir.x) if dir.x != 0.0 else 1.0, 0.0)
+		var k := minf((box.size.x / 2.0) / maxf(absf(dir.x), 0.001), (box.size.y / 2.0) / maxf(absf(dir.y), 0.001))
+		sp = box.get_center() + dir * k
+		_guide_arrow.rotation = dir.angle()
+	_guide_arrow.visible = off
+	var dist: float = (fight.p_pos - Vector2(g["pos"])).length()
+	_guide_label.text = (String(g["label"]) + "  ·  " if String(g["label"]) != "" else "") + "%d m" % roundi(dist)
+	_guide_label.visible = off or dist > 5.0
+	_guide.position = sp + Vector2(0, sin(_clock * 2.4) * 3.0)
+	# close enough to act on it: the marker has done its work, and stands down
+	var want := 0.0 if dist < 2.6 else (1.0 if off else 0.85)
+	_guide.modulate.a = move_toward(_guide.modulate.a, want, dt * 3.0)
+	_guide.visible = _guide.modulate.a > 0.0
 
 # --- Talking -----------------------------------------------------------------
 
@@ -497,7 +732,52 @@ func say(who: Variant, lines: Array, then: Callable = Callable()) -> void:
 		_lines.append({ "speaker": speaker, "sub": sub, "text": fill(String(l), c) })
 	_line_i = 0
 	_after_lines = then
+	_frame_talk(who)
 	_show_line()
+
+## A conversation is framed: the camera comes round over the hero's shoulder onto whoever is
+## speaking, and goes back behind the hero when they have done. Only on the grounds, with the
+## speaker standing near; a scene that holds the camera already (the rite, the Gate) keeps it.
+func _frame_talk(who: Variant) -> void:
+	if world == null or fight == null or _rite or _gate or in_lesson() or _in_zone():
+		return
+	if world.cine and not _talk_cine and progress.get("arrived", false):
+		return
+	var id: String = who if who is String else String((who as Dictionary).get("id", ""))
+	var sp := Vector2.INF
+	for p in _people:
+		if p.get("id", "") == id and id != "":
+			sp = p["pos"]
+	if sp == Vector2.INF or (sp - fight.p_pos).length() > 6.0:
+		return
+	# (an Instructor's genius sitting by them is kept out of the way of the picture)
+	var f := talk_frame(fight.p_pos, sp, fight.w_pos if world.show_wolf and fight.w_state != "absent" else Vector2.INF)
+	var look: Vector3 = f[1]
+	world.cine = true
+	world.cine_speed = 3.2 if progress.get("arrived", false) else 1.4
+	world.cine_pos = world._keep_in_chamber(look, f[0])
+	world.cine_look = look
+	_talk_cine = true
+	# and the hero turns to whoever it is
+	fight.p_facing = (sp - fight.p_pos).angle()
+
+## Where the camera stands for a conversation, and what it looks at: behind the listener and off
+## one shoulder (the side nearer the middle of the place, away from the walls), on the speaker.
+## With something to keep out of the picture (`avoid`: a genius sitting by its Instructor), the
+## shoulder away from it.
+static func talk_frame(hero_at: Vector2, speaker_at: Vector2, avoid := Vector2.INF) -> Array:
+	var dir := (speaker_at - hero_at).normalized() if (speaker_at - hero_at).length() > 0.05 else Vector2(0, -1)
+	var side := Vector2(-dir.y, dir.x)
+	var back := hero_at - dir * 1.9
+	var a := back + side * 2.1
+	var b := back - side * 2.1
+	var cam := a
+	if avoid != Vector2.INF:
+		if (b - avoid).length() > (a - avoid).length():
+			cam = b
+	elif b.length() < a.length():
+		cam = b
+	return [Vector3(cam.x, 1.95, cam.y), Vector3(speaker_at.x, 1.5, speaker_at.y)]
 
 func fill(t: String, c: Dictionary = {}) -> String:
 	t = Prologue.fill(t, hero)
@@ -520,6 +800,9 @@ func fill(t: String, c: Dictionary = {}) -> String:
 func _show_line() -> void:
 	if _line_i >= _lines.size():
 		_box.visible = false
+		if _talk_cine:
+			_talk_cine = false
+			world.cine = false
 		var then := _after_lines
 		_after_lines = Callable()
 		if then.is_valid():
@@ -544,6 +827,12 @@ func talking() -> bool:
 
 ## E, a click, or the pad's interact: finish the line, next line, or act on what is near.
 func interact() -> void:
+	if _arrive_t >= 0.0:
+		if _arrive_t > 0.6:
+			_arrive_talk()
+		return
+	if _resting and not talking():
+		return
 	if talking():
 		if _text.visible_ratio < 1.0:
 			if _type_tw:
@@ -787,20 +1076,42 @@ func _rest_now() -> void:
 	# After the last lesson the mornings are the board's, until the Gate's postings are done.
 	var next_key := "board" if last == "project" and not gate_ready() else last
 	var next_line: String = r["next"].get(next_key, "") if r["next"] is Dictionary else String(r["next"])
-	say("", r["lines"] + ([next_line] if next_line != "" else []), func():
+	var night: Array = r["lines"] + ([next_line] if next_line != "" else [])
+	var morning := func():
 		progress["rested_after"] = last
 		progress["day"] = int(progress["day"]) + 1
 		save()
 		_build_rite_ui()
-		# Morning: the fade down and up, and the day's number.
+		# Morning: the day's number on the dark, alone; then the light comes up on the room.
+		title_card("DAY %d" % int(progress["day"]), day_card_sub(weekday(), String(Data.academy.get("calendar", {}).get("season", "the Thaw")), String(Data.academy.get("calendar", {}).get("notes", {}).get(weekday(), ""))), Style.GOLD)
+		sfx.play("stance", 0.8, -6.0)
 		_fade.modulate.a = 1.0
+		if not _fade.is_inside_tree():
+			_fade.modulate.a = 0.0
+			_resting = false
+			return
 		var tw := _fade.create_tween()
-		tw.tween_interval(0.6)
+		tw.tween_interval(1.7)
 		Style.ease_ui(tw.tween_property(_fade, "modulate:a", 0.0, Style.t("ceremony")))
-		title_card("DAY %d" % int(progress["day"]), "%s  ·  %s" % [date_line(), Data.academy.get("calendar", {}).get("notes", {}).get(weekday(), "")], Style.GOLD)
-		sfx.play("stance", 0.8, -6.0))
+		tw.tween_callback(func(): _resting = false)
+	if not _fade.is_inside_tree():
+		say("", night, morning)
+		return
+	# Night: the room goes dark first, and the dormitory's words are read on the dark.
+	_resting = true
+	_prompt.visible = false
+	_target = {}
+	var down := _fade.create_tween()
+	Style.ease_ui(down.tween_property(_fade, "modulate:a", 1.0, Style.t("arrive") * 2.0))
+	down.tween_callback(func(): say("", night, morning))
 
 # --- Each frame -----------------------------------------------------------------
+
+## Under the day's great number: the weekday and the season, and what the day is known for
+## where it is known for something.
+static func day_card_sub(day_name: String, season: String, note: String) -> String:
+	var s := "%s of %s" % [day_name, season]
+	return s if note == "" else "%s  ·  %s" % [s, note]
 
 ## The term's date: "Day 3, Wednesday of the Thaw".
 func weekday() -> String:
@@ -852,6 +1163,23 @@ func objective() -> String:
 		return "Settled. The line is waiting; the Academy is yours to walk."
 	return "Day %d · %s walks with you." % [day, g.get("name", "Your genius")]
 
+## The tracker at the top left: the objective in two parts, and on the first day the count of
+## the cohort met. It stands down while someone is speaking, in a scene, and in a lesson (which
+## has its own plate).
+func _tracker_update(dt: float) -> void:
+	var parts := split_objective(objective())
+	_objective_head.text = parts[0]
+	_objective_head.visible = parts[0] != ""
+	_objective.text = parts[1]
+	var note := ""
+	if not progress["done"].has("hold") and progress["place"] == "quad":
+		note = "Cohort met  %d of %d" % [progress["met"].size(), cohort.size()]
+	_objective_note.text = note
+	_objective_note.visible = note != ""
+	var show := not in_lesson() and not busy() and _big.modulate.a <= 0.01
+	_tracker.modulate.a = move_toward(_tracker.modulate.a, 1.0 if show else 0.0, dt * (3.0 if show else 6.0))
+	_tracker.visible = _tracker.modulate.a > 0.0
+
 ## The lesson asks for stillness now (Contain): the autopilot keeps its hands down.
 func wants_still() -> bool:
 	return bot_mode() == "still"
@@ -895,7 +1223,7 @@ func bot_action() -> String:
 	return "tech%d" % int(g["tech"]) if g.has("tech") else "technique"
 
 func busy() -> bool:
-	return talking() or _rite != null or _gate != null or _naming or _choice_box != null or _reading_box != null
+	return talking() or _arrive_t >= 0.0 or _resting or _rite != null or _gate != null or _naming or _choice_box != null or _reading_box != null
 
 func in_rite() -> bool:
 	return _rite != null
@@ -998,7 +1326,16 @@ func update(events: Array, dt: float) -> void:
 			_count_technique(String(e.get("id", "")))
 		elif e["type"] in ["wolf-down", "foe-down"] and _in_zone():
 			progress["record"]["wolves_felled"] = int(progress["record"].get("wolves_felled", 0)) + 1
-	_objective.text = objective()
+	_tracker_update(dt)
+	_guide_update(dt)
+	_big_shade.modulate.a = _big.modulate.a
+	if _place_pending and place_card_may_show(_big.modulate.a, _resting):
+		_show_place(_place_card.text)
+	world.hush_names = busy()
+	if _arrive_t >= 0.0:
+		_prompt.visible = false
+		_arrive_update(dt)
+		return
 	if _gate and talking() and auto:
 		_auto_wait -= dt
 		if _auto_wait <= 0.0:
@@ -1020,7 +1357,6 @@ func update(events: Array, dt: float) -> void:
 				_text.visible_ratio = 1.0
 				interact()
 		return
-	_objective.visible = not in_lesson()
 	if in_lesson():
 		_lesson_update(events, dt)
 	if talking():
@@ -1067,7 +1403,8 @@ func update(events: Array, dt: float) -> void:
 		# The lost thing is the errand: within reach it wins over whoever stands beside it.
 		if _lost_at != Vector2.INF and (fight.p_pos - _lost_at).length() < 2.0:
 			_target = { "kind": "find", "pos": _lost_at }
-	_prompt.visible = not _target.is_empty()
+	# (the day's great card has the screen to itself)
+	_prompt.visible = not _target.is_empty() and _big.modulate.a < 0.05
 	if _prompt.visible:
 		match _target["kind"]:
 			"door": _prompt_label.text = ("E   " + ("Enter " if door_open(_target["door"]) else "Try ") + String(_target["door"]["label"]))
@@ -1271,6 +1608,9 @@ func _start_lesson(lesson0: Dictionary) -> void:
 			if counts.has(st["title"]):
 				st["goal"]["count"] = counts[st["title"]]
 	_lesson = lesson
+	if _place_tw:
+		_place_tw.kill()
+	_place_card.modulate.a = 0.0
 	# A run of the line starts with every door of the Green shut again.
 	progress["cleared"] = {}
 	# The Discipline lesson hands over the school's three techniques to learn.
@@ -1639,6 +1979,38 @@ func _lesson_update(events: Array, dt: float) -> void:
 		sfx.play("cue-hit", 1.0)
 		hud.set_prompt_status("Done.", "")
 		_step_hold = 1.0
+		if not _lesson.get("quest", false) and not _lesson.get("trouble", false):
+			_step_done_card(s)
+
+## A step of a lesson done: its name comes up over a rule for a breath, with a rising note, so
+## that getting it right feels like getting it right. The last step names the lesson learned.
+func _step_done_card(s: Dictionary) -> void:
+	var n: int = _lesson["steps"].size()
+	var last := _step == n - 1
+	_step_card_head.text = String(_lesson["title"] if last else s["title"]).to_upper()
+	_step_card_sub.text = step_done_line(_step, n, int(_lesson.get("number", 0)))
+	if not last:
+		sfx.play("cue", 1.0 + 0.12 * _step, -6.0)
+	if fight:
+		world.burst(world._v3(fight.p_pos, 1.2), Style.GOLD, 16 if not last else 40, 3.0)
+	if not _step_card.is_inside_tree():
+		return
+	if _step_tw:
+		_step_tw.kill()
+	_step_card.modulate.a = 0.0
+	_step_tw = _step_card.create_tween()
+	_step_tw.tween_property(_step_card, "modulate:a", 1.0, Style.t("quick"))
+	# (gone before the next step's words come up in the same place: the step holds one second)
+	_step_tw.tween_interval(1.5 if last else 0.55)
+	_step_tw.tween_property(_step_card, "modulate:a", 0.0, Style.t("arrive") if last else Style.t("quick"))
+
+var _step_tw: Tween
+
+## The line under a finished step's name.
+static func step_done_line(step: int, steps: int, lesson_number: int) -> String:
+	if step >= steps - 1:
+		return "Lesson %d learned" % lesson_number
+	return "%d of %d done" % [step + 1, steps]
 
 func _finish_lesson() -> void:
 	var lesson := _lesson
@@ -1673,6 +2045,7 @@ var _rite: RiteScene = null
 var _naming := false
 var _big := Label.new()
 var _big_sub := Label.new()
+var _big_shade := TextureRect.new()
 var _pour_box := PanelContainer.new()
 var _pour_label := RichTextLabel.new()
 var _pour_bar := ProgressBar.new()
@@ -1684,6 +2057,23 @@ func _build_rite_ui() -> void:
 		return
 	_ui_built = true
 	var root: Control = get_child(0)
+	var grad := Gradient.new()
+	grad.set_color(0, Color(0.01, 0.008, 0.008, 0.72))
+	grad.set_color(1, Color(0.01, 0.008, 0.008, 0.0))
+	var gt := GradientTexture2D.new()
+	gt.gradient = grad
+	gt.fill_from = Vector2(0, 0.25)
+	gt.fill_to = Vector2(0, 1)
+	gt.width = 8
+	gt.height = 64
+	_big_shade.texture = gt
+	_big_shade.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	_big_shade.custom_minimum_size = Vector2(0, 420)
+	_big_shade.stretch_mode = TextureRect.STRETCH_SCALE
+	_big_shade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_big_shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_big_shade.modulate.a = 0.0
+	root.add_child(_big_shade)
 	Style.label(_big, 120, Style.FG, "title", 10)
 	_big.set_anchors_preset(Control.PRESET_CENTER)
 	_big.position = Vector2(-700, -400)
@@ -1691,7 +2081,12 @@ func _build_rite_ui() -> void:
 	_big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_big.modulate.a = 0.0
 	root.add_child(_big)
-	Style.label(_big_sub, 24, Style.FG, "title_light", 6)
+	Style.label(_big_sub, 26, Style.FG, "title_light", 8)
+	# (a dark edge all round: the line is read over lit windows and firelight)
+	_big_sub.add_theme_color_override("font_shadow_color", Color(0.01, 0.008, 0.008, 0.85))
+	_big_sub.add_theme_constant_override("shadow_outline_size", 14)
+	_big_sub.add_theme_constant_override("shadow_offset_x", 0)
+	_big_sub.add_theme_constant_override("shadow_offset_y", 1)
 	_big_sub.set_anchors_preset(Control.PRESET_CENTER)
 	_big_sub.position = Vector2(-700, -250)
 	_big_sub.custom_minimum_size = Vector2(1400, 0)
@@ -1747,6 +2142,16 @@ func set_pour(k: float) -> void:
 
 ## A great word over the scene: the Shape, the form.
 func title_card(text: String, sub: String, color: Color) -> void:
+	_build_rite_ui()
+	# the place's name never shows with the great card
+	if _place_tw:
+		_place_tw.kill()
+	_place_card.modulate.a = 0.0
+	if _big_tw_in:
+		_big_tw_in.kill()
+	if _big_tw_out:
+		_big_tw_out.kill()
+	_big_sub.modulate.a = 0.0
 	_big.text = text
 	_big.add_theme_font_size_override("font_size", 120 if text.length() <= 10 else (88 if text.length() <= 16 else 64))
 	_big.add_theme_color_override("font_color", color.lightened(0.35))
@@ -1757,14 +2162,36 @@ func title_card(text: String, sub: String, color: Color) -> void:
 	_big_sub.text = sub
 	_big.pivot_offset = Vector2(700, 70)
 	_big.scale = Vector2(1.25, 1.25)
+	if not _big.is_inside_tree():
+		return
 	var tw := _big.create_tween().set_parallel(true)
+	_big_tw_in = tw
 	tw.tween_property(_big, "modulate:a", 1.0, Style.t("quick"))
 	Style.ease_settle(tw.tween_property(_big, "scale", Vector2.ONE, Style.t("ceremony")))
 	tw.tween_property(_big_sub, "modulate:a", 1.0, Style.t("ceremony")).set_delay(Style.t("ceremony") * 0.7)
 	var out := _big.create_tween()
+	_big_tw_out = out
 	out.tween_interval(3.4)
 	out.tween_property(_big, "modulate:a", 0.0, Style.t("ceremony"))
 	out.parallel().tween_property(_big_sub, "modulate:a", 0.0, Style.t("ceremony"))
+
+var _big_tw_in: Tween
+var _big_tw_out: Tween
+
+## The great card goes at once (someone has begun to speak).
+func _clear_big() -> void:
+	if _big_tw_in:
+		_big_tw_in.kill()
+	if _big_tw_out:
+		_big_tw_out.kill()
+	if not _big.is_inside_tree():
+		_big.modulate.a = 0.0
+		_big_sub.modulate.a = 0.0
+		return
+	var tw := _big.create_tween().set_parallel(true)
+	_big_tw_out = tw
+	tw.tween_property(_big, "modulate:a", 0.0, Style.t("quick"))
+	tw.tween_property(_big_sub, "modulate:a", 0.0, Style.t("quick"))
 
 ## Name the genius: a box with its form's name already in it.
 func ask_name(default_name: String, then: Callable) -> void:
@@ -1820,7 +2247,9 @@ var _card: GeniusCard = null
 func show_card(info: Dictionary, color: Color, title: String) -> void:
 	hide_card()
 	_card = GeniusCard.make(info, color, title)
-	_card.position = Vector2(60, 70)
+	# (a little smaller than life, so it ends above the dialogue box on the shortest screen)
+	_card.scale = Vector2(0.9, 0.9)
+	_card.position = Vector2(60, 24)
 	get_child(0).add_child(_card)
 	_card.modulate.a = 0.0
 	_card.position.x -= 40
@@ -2070,6 +2499,10 @@ func pause() -> void:
 	var buttons: Array = [["Continue", unpause]]
 	if genius and genius.is_born():
 		buttons.append(["The genius's page  (J)", func(): unpause(); get_parent().call("open_genius_page")])
+	buttons.append(["Way-marker: %s" % ("on  (turn it off)" if guide_on() else "off  (turn it on)"), func():
+		Settings.cfg.set_value("play", "way_marker", not guide_on())
+		Settings.cfg.save(Settings.PATH)
+		pause.call_deferred()])
 	buttons.append(["Leave by the line  (to the title, the term saved)", func(): get_tree().paused = false; leave.emit()])
 	hud.show_screen("THE TERM SO FAR", "%s  ·  %s" % [hero["name"], Data.academy["term"]["cohort"]], "\n".join(lines), buttons)
 
@@ -2227,13 +2660,15 @@ func _reading_card(row: Control, c: Dictionary, n: int, look: Dictionary, col: C
 		band.custom_minimum_size = Vector2(0, 5)
 		band.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		col_v.add_child(band)
-	col_v.add_child(GeniusCard.make(info, col, title, true, _reading_art))
+	var gc := GeniusCard.make(info, col, title, true, _reading_art)
+	gc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	col_v.add_child(gc)
 	var why := RichTextLabel.new()
 	why.bbcode_enabled = true
 	why.fit_content = true
 	why.scroll_active = false
 	why.custom_minimum_size = Vector2(300, 0)
-	Style.rich(why, 13, Style.DIM, "italic")
+	Style.rich(why, 16, Style.FG.darkened(0.12), "italic")
 	why.text = why_text
 	col_v.add_child(why)
 	var b := Button.new()
