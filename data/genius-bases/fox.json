@@ -53,7 +53,14 @@
   "habit": "It hides one of every pair of things you own, and watches you look.",
   "features": [
    "tail"
-  ]
+  ],
+  "body": {
+   "build": {
+    "brush": 1.45,
+    "tail": 1.15,
+    "body": 0.9
+   }
+  }
  },
  "paths": [
   {
@@ -77,6 +84,33 @@
    "features": [
     "whiskers"
    ],
+   "body": {
+    "build": {
+     "legs": 1.14,
+     "girth": 0.9,
+     "waist": 0.88,
+     "muzzle": 1.1,
+     "brush": 1.0,
+     "tail": 1.0,
+     "body": 1.0
+    },
+    "whiskers": [
+     "long",
+     1.0
+    ],
+    "ears": [
+     "one",
+     0.8
+    ],
+    "tail": [
+     "low",
+     0.6
+    ],
+    "pose": [
+     "aside",
+     0.8
+    ]
+   },
    "prongs": [
     {
      "id": "fox-red-decoy",
@@ -93,6 +127,28 @@
      "features": [
       "long-legs"
      ],
+     "body": {
+      "build": {
+       "legs": 1.3,
+       "girth": 0.88,
+       "waist": 0.82,
+       "chest": 1.04,
+       "tail": 1.15
+      },
+      "coat": "russet",
+      "pose": [
+       "back",
+       1.0
+      ],
+      "tail": [
+       "up",
+       0.5
+      ],
+      "ears": [
+       "long",
+       0.5
+      ]
+     },
      "finishes": [
       {
        "id": "fox-brush-flag",
@@ -111,7 +167,26 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.34,
+         "brush": 1.3,
+         "tail": 1.25
+        },
+        "tail": [
+         "up",
+         1.0
+        ],
+        "tip": [
+         "white",
+         1.2
+        ],
+        "pose": [
+         "back",
+         0.5
+        ]
+       }
       },
       {
        "id": "fox-hen-house-ghost",
@@ -130,7 +205,41 @@
        },
        "features": [
         "shadow-cloak"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.0,
+         "girth": 0.85,
+         "waist": 0.8,
+         "body": 1.1,
+         "brush": 0.8
+        },
+        "coat": "ash",
+        "pose": [
+         "low",
+         0.7
+        ],
+        "tail": [
+         "low",
+         0.8
+        ],
+        "spine": [
+         "smoke",
+         1.0
+        ],
+        "paws": [
+         "shade",
+         1.0
+        ],
+        "back": [
+         "feathers",
+         1.0
+        ],
+        "ears": [
+         "laid",
+         0.8
+        ]
+       }
       }
      ]
     },
@@ -149,6 +258,30 @@
      "features": [
       "fangs"
      ],
+     "body": {
+      "build": {
+       "legs": 1.05,
+       "chest": 1.14,
+       "nape": 1.14,
+       "jaw": 1.14
+      },
+      "maw": [
+       "open",
+       0.7
+      ],
+      "pose": [
+       "back",
+       0.8
+      ],
+      "tail": [
+       "wrap",
+       1.0
+      ],
+      "ears": [
+       "laid",
+       0.4
+      ]
+     },
      "finishes": [
       {
        "id": "fox-turnabout",
@@ -164,7 +297,31 @@
        },
        "features": [
         "ring"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.1,
+         "chest": 1.15,
+         "brush": 1.25,
+         "tail": 1.2
+        },
+        "tail": [
+         "over",
+         1.0
+        ],
+        "tip": [
+         "ring",
+         1.2
+        ],
+        "pose": [
+         "back",
+         0.6
+        ],
+        "ruff": [
+         "mane",
+         0.6
+        ]
+       }
       },
       {
        "id": "fox-hole-in-the-hedge",
@@ -180,7 +337,45 @@
        },
        "features": [
         "tunnel-ear"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 0.95,
+         "girth": 0.9,
+         "waist": 0.85,
+         "body": 1.08
+        },
+        "ears": [
+         [
+          "great",
+          0.8
+         ],
+         [
+          "one",
+          1.0
+         ]
+        ],
+        "back": [
+         "leaves",
+         1.2
+        ],
+        "neck": [
+         "ivy",
+         1.0
+        ],
+        "tail": [
+         "low",
+         0.5
+        ],
+        "pose": [
+         "back",
+         0.9
+        ],
+        "maw": [
+         "fangs",
+         0.8
+        ]
+       }
       }
      ]
     },
@@ -199,6 +394,30 @@
      "features": [
       "tunnel-ear"
      ],
+     "body": {
+      "build": {
+       "legs": 1.1,
+       "girth": 0.9
+      },
+      "ears": [
+       "great",
+       1.2
+      ],
+      "pose": [
+       [
+        "low",
+        0.5
+       ],
+       [
+        "tilt",
+        1.0
+       ]
+      ],
+      "tail": [
+       "low",
+       0.4
+      ]
+     },
      "finishes": [
       {
        "id": "fox-at-the-crossroads",
@@ -214,7 +433,35 @@
        },
        "features": [
         "watching-eye"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.14,
+         "neck": 1.12,
+         "chest": 1.08
+        },
+        "ears": [
+         "great",
+         1.0
+        ],
+        "eyes": [
+         "third",
+         1.3
+        ],
+        "pose": [
+         "high",
+         0.5
+        ],
+        "tail": [
+         "wrap",
+         1.0
+        ],
+        "ruff": [
+         "mane",
+         0.7
+        ],
+        "coat": "moon"
+       }
       },
       {
        "id": "fox-snow-silent-fox",
@@ -230,7 +477,39 @@
        },
        "features": [
         "quiet-place"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 0.92,
+         "girth": 1.25,
+         "chest": 1.18,
+         "waist": 1.1,
+         "brush": 1.5,
+         "muzzle": 0.86
+        },
+        "ears": [
+         "small",
+         1.0
+        ],
+        "coat": "frost",
+        "ruff": [
+         "mane",
+         1.0
+        ],
+        "feet": [
+         "snow",
+         1.0
+        ],
+        "pose": [
+         "low",
+         0.3
+        ],
+        "whiskers": null,
+        "tail": [
+         "low",
+         0.3
+        ]
+       }
       }
      ]
     }
@@ -255,6 +534,22 @@
    "features": [
     "maw"
    ],
+   "body": {
+    "build": {
+     "chest": 1.12,
+     "girth": 1.1,
+     "legs": 0.96,
+     "jaw": 1.1,
+     "brush": 1.0,
+     "tail": 1.0,
+     "body": 1.0
+    },
+    "mouth": [
+     "sack",
+     0.9
+    ],
+    "coat": "hearth"
+   },
    "prongs": [
     {
      "id": "fox-night-raider",
@@ -271,6 +566,25 @@
      "features": [
       "dark-eyed"
      ],
+     "body": {
+      "build": {
+       "legs": 1.06,
+       "waist": 0.88
+      },
+      "coat": "night",
+      "eyes": [
+       "lamp",
+       0.8
+      ],
+      "mouth": [
+       "sack",
+       1.0
+      ],
+      "ears": [
+       "long",
+       0.5
+      ]
+     },
      "finishes": [
       {
        "id": "fox-dock-fox",
@@ -289,7 +603,28 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "build": {
+         "chest": 1.14,
+         "legs": 1.04
+        },
+        "carry": [
+         [
+          "lamp",
+          1.1
+         ],
+         [
+          "panniers",
+          1.0
+         ]
+        ],
+        "paws": [
+         "grease",
+         1.2
+        ],
+        "mouth": null
+       }
       },
       {
        "id": "fox-graveyard-fox",
@@ -305,7 +640,42 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.12,
+         "girth": 0.84,
+         "waist": 0.78,
+         "chest": 0.96,
+         "brush": 0.75
+        },
+        "coat": "ash",
+        "eyes": [
+         "old",
+         1.2
+        ],
+        "neck": [
+         "ivy",
+         1.0
+        ],
+        "aura": [
+         "motes",
+         1.0
+        ],
+        "tail": [
+         "low",
+         0.6
+        ],
+        "mouth": null,
+        "pose": [
+         "low",
+         0.5
+        ],
+        "spine": [
+         "ridge",
+         0.6
+        ]
+       }
       }
      ]
     },
@@ -324,6 +694,34 @@
      "features": [
       "ground-claws"
      ],
+     "body": {
+      "build": {
+       "legs": 0.7,
+       "girth": 1.3,
+       "chest": 1.4,
+       "nape": 1.25,
+       "muzzle": 1.2,
+       "brush": 0.85,
+       "head": 1.05
+      },
+      "claws": [
+       "dig",
+       1.0
+      ],
+      "back": [
+       "stripe",
+       1.0
+      ],
+      "mouth": null,
+      "pose": [
+       "low",
+       0.5
+      ],
+      "ears": [
+       "small",
+       0.9
+      ]
+     },
      "finishes": [
       {
        "id": "fox-name-thief",
@@ -339,7 +737,35 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 0.95,
+         "girth": 1.2,
+         "chest": 1.3,
+         "head": 1.06
+        },
+        "carry": [
+         "tags",
+         1.3
+        ],
+        "mouth": [
+         "prize",
+         1.2
+        ],
+        "ears": [
+         "torn",
+         1.0
+        ],
+        "pose": [
+         "high",
+         0.6
+        ],
+        "tail": [
+         "up",
+         0.7
+        ]
+       }
       },
       {
        "id": "fox-culvert-king",
@@ -358,7 +784,37 @@
        },
        "features": [
         "sleek-coat"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 0.72,
+         "girth": 1.05,
+         "chest": 0.86,
+         "waist": 0.84,
+         "body": 1.25,
+         "brush": 0.55,
+         "tail": 1.25,
+         "muzzle": 1.15,
+         "nape": 0.95
+        },
+        "coat": "iron",
+        "claws": [
+         "dig",
+         0.7
+        ],
+        "ruff": [
+         "crown",
+         0.6
+        ],
+        "feet": [
+         "webbed",
+         0.8
+        ],
+        "whiskers": [
+         "long",
+         1.0
+        ]
+       }
       }
      ]
     },
@@ -377,6 +833,39 @@
      "features": [
       "long-legs"
      ],
+     "body": {
+      "build": {
+       "legs": 1.5,
+       "girth": 0.86,
+       "waist": 0.8,
+       "chest": 1.0,
+       "jaw": 1.0
+      },
+      "pose": [
+       [
+        "low",
+        0.9
+       ],
+       [
+        "tilt",
+        0.9
+       ]
+      ],
+      "ears": [
+       "long",
+       0.8
+      ],
+      "mouth": null,
+      "paws": [
+       "frost",
+       0.6
+      ],
+      "tail": [
+       "up",
+       0.6
+      ],
+      "coat": null
+     },
      "finishes": [
       {
        "id": "fox-frost-fox",
@@ -392,7 +881,38 @@
        },
        "features": [
         "rime"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.5,
+         "brush": 1.3
+        },
+        "coat": "frost",
+        "ruff": [
+         "frost",
+         0.9
+        ],
+        "spine": [
+         "frost",
+         0.8
+        ],
+        "paws": [
+         "frost",
+         1.0
+        ],
+        "aura": [
+         "cold",
+         0.8
+        ],
+        "tail": [
+         "rime",
+         1.0
+        ],
+        "whiskers": [
+         "long",
+         0.9
+        ]
+       }
       },
       {
        "id": "fox-cinder-brush",
@@ -408,7 +928,32 @@
        },
        "features": [
         "ember"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.4,
+         "brush": 1.2
+        },
+        "coat": "ember",
+        "tail": [
+         [
+          "up",
+          0.9
+         ],
+         [
+          "ember",
+          1.4
+         ]
+        ],
+        "spine": [
+         "ember",
+         0.8
+        ],
+        "paws": [
+         "grease",
+         1.0
+        ]
+       }
       }
      ]
     }
@@ -433,6 +978,23 @@
    "features": [
     "glow"
    ],
+   "body": {
+    "build": {
+     "legs": 1.06,
+     "brush": 1.15,
+     "neck": 1.06,
+     "tail": 1.0,
+     "body": 1.0
+    },
+    "tail": [
+     "up",
+     0.6
+    ],
+    "tip": [
+     "light",
+     1.0
+    ]
+   },
    "prongs": [
     {
      "id": "fox-mask-wearer",
@@ -449,6 +1011,19 @@
      "features": [
       "mask"
      ],
+     "body": {
+      "mask": [
+       "worn",
+       1.0
+      ],
+      "build": {
+       "neck": 1.1
+      },
+      "ruff": [
+       "mane",
+       0.6
+      ]
+     },
      "finishes": [
       {
        "id": "fox-of-two-faces",
@@ -467,7 +1042,30 @@
        },
        "features": [
         "second-face"
-       ]
+       ],
+       "body": {
+        "face": [
+         "two",
+         1.0
+        ],
+        "mask": [
+         "half",
+         1.0
+        ],
+        "build": {
+         "legs": 1.12,
+         "neck": 1.14,
+         "brush": 1.3
+        },
+        "ruff": [
+         "mane",
+         0.9
+        ],
+        "aura": [
+         "motes",
+         1.0
+        ]
+       }
       },
       {
        "id": "fox-contract-fox",
@@ -483,7 +1081,30 @@
        },
        "features": [
         "ledger"
-       ]
+       ],
+       "body": {
+        "mask": [
+         "raised",
+         1.0
+        ],
+        "carry": [
+         "book",
+         0.75
+        ],
+        "coat": "night",
+        "build": {
+         "neck": 1.16,
+         "legs": 1.1
+        },
+        "tail": [
+         "up",
+         0.8
+        ],
+        "ruff": [
+         "crown",
+         0.7
+        ]
+       }
       }
      ]
     },
@@ -502,6 +1123,16 @@
      "features": [
       "second-tail"
      ],
+     "body": {
+      "tails": [
+       "two",
+       1.0
+      ],
+      "tail": null,
+      "build": {
+       "brush": 1.2
+      }
+     },
      "finishes": [
       {
        "id": "fox-of-many-tails",
@@ -520,7 +1151,27 @@
        },
        "features": [
         "many-tails"
-       ]
+       ],
+       "body": {
+        "tails": [
+         "many",
+         1.0
+        ],
+        "tail": [
+         "up",
+         1.0
+        ],
+        "build": {
+         "chest": 1.14,
+         "legs": 1.1,
+         "neck": 1.1,
+         "brush": 1.2
+        },
+        "ruff": [
+         "mane",
+         0.9
+        ]
+       }
       },
       {
        "id": "fox-reynard-of-the-hall",
@@ -536,7 +1187,37 @@
        },
        "features": [
         "voice"
-       ]
+       ],
+       "body": {
+        "tails": [
+         "two",
+         1.0
+        ],
+        "ruff": [
+         "courtier",
+         1.0
+        ],
+        "carry": [
+         "cape",
+         1.0
+        ],
+        "aura": [
+         "motes",
+         1.5
+        ],
+        "maw": [
+         "open",
+         0.6
+        ],
+        "pose": [
+         "high",
+         0.7
+        ],
+        "build": {
+         "neck": 1.15,
+         "chest": 1.1
+        }
+       }
       }
      ]
     },
@@ -555,6 +1236,26 @@
      "features": [
       "webbed"
      ],
+     "body": {
+      "build": {
+       "legs": 1.3,
+       "girth": 0.85,
+       "waist": 0.85
+      },
+      "feet": [
+       "webbed",
+       1.0
+      ],
+      "tail": [
+       "up",
+       0.9
+      ],
+      "tip": [
+       "wisp",
+       1.0
+      ],
+      "coat": "slate"
+     },
      "finishes": [
       {
        "id": "fox-ferry-fox",
@@ -570,7 +1271,40 @@
        },
        "features": [
         "fins"
-       ]
+       ],
+       "body": {
+        "fins": [
+         "fox",
+         1.0
+        ],
+        "carry": [
+         "pole",
+         1.0
+        ],
+        "coat": "iron",
+        "build": {
+         "legs": 1.2,
+         "girth": 0.95,
+         "chest": 1.1,
+         "brush": 0.8
+        },
+        "tail": [
+         "low",
+         0.3
+        ],
+        "tip": [
+         "light",
+         0.8
+        ],
+        "pose": [
+         "high",
+         0.5
+        ],
+        "ears": [
+         "laid",
+         0.6
+        ]
+       }
       },
       {
        "id": "fox-fen-candle",
@@ -587,7 +1321,33 @@
        },
        "features": [
         "ember"
-       ]
+       ],
+       "body": {
+        "coat": "night",
+        "tail": [
+         "over",
+         1.0
+        ],
+        "tip": [
+         "flame",
+         1.3
+        ],
+        "build": {
+         "legs": 1.4,
+         "girth": 0.8,
+         "waist": 0.76,
+         "brush": 0.7,
+         "neck": 1.1
+        },
+        "spine": [
+         "smoke",
+         0.6
+        ],
+        "paws": [
+         "shade",
+         0.8
+        ]
+       }
       }
      ]
     }

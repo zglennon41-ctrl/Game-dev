@@ -14,6 +14,7 @@ extends Node3D
 const BODY_DIR := "res://game/assets/genius/bodies/%s.glb"
 const PART_DIR := "res://game/assets/genius/parts/%s.glb"
 const FORM_DIR := "res://game/assets/genius/forms/%s.glb"      # a body of a form's own (docs/genius-evolutions.md)
+const GIFT_DIR := "res://game/assets/genius/gifts/%s.glb"      # a base's own make of a part it gives a hybrid (<feature>-<base>)
 const KEEP_DIR := "res://game/assets/genius/keepsakes/%s.glb"
 const TRAP_DIR := "res://game/assets/genius/trappings/%s.glb"
 
@@ -165,6 +166,9 @@ func _assemble(instar: int) -> void:
 	# Parts, on the sockets for their slots.
 	var feats: Array = info.get("features", [])
 	var slot_count := {}
+	# whose gift a hybrid's form carries (first+second:<form>): the second base's
+	var gift_of := fid.get_slice(":", 0).get_slice("+", 1) if fid.contains("+") and fid.contains(":") else ""
+	var gifts: Array = Data.base(gift_of).get("hybrid", {}).get("gift", []) if gift_of != "" else []
 	for f in feats:
 		var slot := _slot_of(f)
 		# A surface changes the skin and hangs nothing, unless it has a part and a place of its
@@ -178,10 +182,15 @@ func _assemble(instar: int) -> void:
 		# elsewhere (heritage, an adaptation, a graft, a hybrid's gift) hangs as a part.
 		if carried.has(f):
 			continue
+		# A hybrid wears its second base's gift in that base's own make of the part, where it
+		# has one (gifts/<feature>-<base>.glb): a fox's brush and a drake's tail are both "a tail".
+		var part_path := PART_DIR % f
+		if gift_of != "" and gifts.has(f) and ResourceLoader.exists(GIFT_DIR % ("%s-%s" % [f, gift_of])):
+			part_path = GIFT_DIR % ("%s-%s" % [f, gift_of])
 		var socks: Array = cfg["slotSockets"].get(slot, ["socket_body"])
 		var i: int = slot_count.get(slot, 0)
 		slot_count[slot] = i + 1
-		if ResourceLoader.exists(PART_DIR % f):
+		if ResourceLoader.exists(part_path):
 			# A part made for a paired slot (limbs, arms) goes on every socket the body has for it;
 			# some features name their own sockets (a beak at the mouth, hands at the wrists).
 			var named: Array = cfg.get("featureSockets", {}).get(f, []).filter(func(sn): return sockets.has(sn))
@@ -189,7 +198,7 @@ func _assemble(instar: int) -> void:
 			if targets.is_empty():
 				targets = [socks[i % socks.size()]]
 			for sn in targets:
-				var art: Node3D = load(PART_DIR % f).instantiate()
+				var art: Node3D = load(part_path).instantiate()
 				_socket(sn).add_child(art)
 				# Parts of a pair are made for the left; the right wears the mirror.
 				if is_right(String(sn)):

@@ -51,7 +51,37 @@
   "features": [
    "horns",
    "tail"
-  ]
+  ],
+  "body": {
+   "horns": [
+    "nubs",
+    1.0
+   ],
+   "ridge": [
+    "young",
+    1.0
+   ],
+   "wings": [
+    "nubs",
+    1.0
+   ],
+   "belly": [
+    "plates",
+    1.0
+   ],
+   "throat": [
+    "ember",
+    0.8
+   ],
+   "tailend": [
+    "spade",
+    0.8
+   ],
+   "head": [
+    "eggshell",
+    1.0
+   ]
+  }
  },
  "paths": [
   {
@@ -72,6 +102,38 @@
    "features": [
     "plated"
    ],
+   "body": {
+    "horns": [
+     "broad",
+     1.0
+    ],
+    "ridge": [
+     "plates",
+     1.0
+    ],
+    "belly": [
+     "brass",
+     1.0
+    ],
+    "head": null,
+    "build": {
+     "body": 1.12,
+     "legs": 0.8,
+     "girth": 1.15,
+     "chest": 1.12,
+     "waist": 1.1,
+     "stance": 0.1,
+     "tail": 1.1
+    },
+    "tail": [
+     "low",
+     1.2
+    ],
+    "pose": [
+     "low",
+     0.5
+    ]
+   },
    "prongs": [
     {
      "id": "drake-post-coiler",
@@ -91,6 +153,23 @@
      "features": [
       "lantern"
      ],
+     "body": {
+      "tail": [
+       "loop",
+       1.0
+      ],
+      "tailend": [
+       "lamp",
+       1.0
+      ],
+      "build": {
+       "tail": 1.35
+      },
+      "pose": [
+       "high",
+       0.3
+      ]
+     },
      "finishes": [
       {
        "id": "drake-lamp-hoarder",
@@ -109,7 +188,23 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "ridge": [
+         "lamps",
+         1.0
+        ],
+        "throat": [
+         "blue",
+         1.0
+        ],
+        "build": {
+         "chest": 1.25,
+         "girth": 1.2,
+         "tail": 1.35
+        },
+        "coat": "night"
+       }
       },
       {
        "id": "drake-gate-wyrm",
@@ -128,7 +223,40 @@
        },
        "features": [
         "broad-chest"
-       ]
+       ],
+       "body": {
+        "frill": [
+         "gate",
+         1.0
+        ],
+        "eye": [
+         "shutter",
+         1.0
+        ],
+        "build": {
+         "body": 1.3,
+         "chest": 1.45,
+         "girth": 1.35,
+         "nape": 1.4,
+         "head": 1.15,
+         "legs": 0.78,
+         "stance": 0.14,
+         "tail": 1.2
+        },
+        "tailend": [
+         "spade",
+         1.4
+        ],
+        "tail": [
+         "low",
+         1.5
+        ],
+        "pose": [
+         "low",
+         0.9
+        ],
+        "coat": "iron"
+       }
       }
      ]
     },
@@ -150,6 +278,33 @@
      "features": [
       "dark-eyed"
      ],
+     "body": {
+      "coat": "ash",
+      "eyes": [
+       "dark",
+       0.55
+      ],
+      "back": [
+       "rubble",
+       1.0
+      ],
+      "build": {
+       "body": 1.22,
+       "legs": 0.72,
+       "girth": 1.2,
+       "chest": 1.15,
+       "waist": 1.15,
+       "stance": 0.14
+      },
+      "tail": [
+       "low",
+       1.6
+      ],
+      "pose": [
+       "low",
+       0.9
+      ]
+     },
      "finishes": [
       {
        "id": "drake-vault-drake",
@@ -168,7 +323,23 @@
        },
        "features": [
         "shell"
-       ]
+       ],
+       "body": {
+        "shell": [
+         "vault",
+         1.0
+        ],
+        "back": null,
+        "ridge": null,
+        "build": {
+         "legs": 0.72,
+         "girth": 1.5,
+         "chest": 1.4,
+         "waist": 1.35,
+         "stance": 0.18
+        },
+        "coat": "slate"
+       }
       },
       {
        "id": "drake-old-coin",
@@ -185,7 +356,32 @@
        },
        "features": [
         "brass-plate"
-       ]
+       ],
+       "body": {
+        "ridge": [
+         "coins",
+         1.0
+        ],
+        "back": null,
+        "coat": "brass",
+        "horns": [
+         "crown",
+         0.8
+        ],
+        "build": {
+         "legs": 0.85,
+         "girth": 1.3,
+         "chest": 1.3
+        },
+        "tailend": [
+         "spade",
+         1.3
+        ],
+        "eyes": [
+         "old",
+         0.9
+        ]
+       }
       }
      ]
     },
@@ -207,6 +403,33 @@
      "features": [
       "ledger"
      ],
+     "body": {
+      "horns": [
+       "long",
+       1.0
+      ],
+      "ridge": [
+       "beads",
+       1.0
+      ],
+      "carry": [
+       "book",
+       0.9
+      ],
+      "build": {
+       "neck": 1.1,
+       "legs": 0.95,
+       "girth": 1.1
+      },
+      "tail": [
+       "low",
+       0.6
+      ],
+      "pose": [
+       "high",
+       0.5
+      ]
+     },
      "finishes": [
       {
        "id": "drake-ledger-wyrm",
@@ -225,7 +448,35 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "maw": [
+         "open",
+         1.0
+        ],
+        "jaw": [
+         "tongue",
+         1.0
+        ],
+        "neck": [
+         "chains",
+         1.0
+        ],
+        "paws": [
+         "grease",
+         0.9
+        ],
+        "build": {
+         "body": 1.2,
+         "neck": 1.15,
+         "tail": 1.2
+        },
+        "coat": "night",
+        "pose": [
+         "low",
+         0.5
+        ]
+       }
       },
       {
        "id": "drake-sworn-drake",
@@ -244,7 +495,34 @@
        },
        "features": [
         "crown"
-       ]
+       ],
+       "body": {
+        "horns": [
+         "crown",
+         1.2
+        ],
+        "frill": [
+         "crown",
+         1.0
+        ],
+        "ridge": [
+         "plates",
+         1.6
+        ],
+        "build": {
+         "chest": 1.35,
+         "neck": 1.15,
+         "girth": 1.2
+        },
+        "tailend": [
+         "spade",
+         1.5
+        ],
+        "pose": [
+         "high",
+         0.9
+        ]
+       }
       }
      ]
     }
@@ -268,6 +546,30 @@
    "features": [
     "ember"
    ],
+   "body": {
+    "throat": [
+     "banked",
+     1.0
+    ],
+    "ridge": [
+     "flame",
+     0.8
+    ],
+    "nostrils": [
+     "heat",
+     1.0
+    ],
+    "coat": "blood",
+    "head": null,
+    "horns": [
+     "swept",
+     1.0
+    ],
+    "wings": [
+     "folded",
+     0.8
+    ]
+   },
    "prongs": [
     {
      "id": "drake-kiln-throat",
@@ -287,6 +589,29 @@
      "features": [
       "maw"
      ],
+     "body": {
+      "maw": [
+       "glow",
+       1.2
+      ],
+      "jaw": [
+       "glaze",
+       1.0
+      ],
+      "build": {
+       "nape": 1.35,
+       "jaw": 1.3,
+       "head": 1.12,
+       "chest": 1.2,
+       "legs": 0.92,
+       "girth": 1.2
+      },
+      "nostrils": null,
+      "pose": [
+       "low",
+       0.5
+      ]
+     },
      "finishes": [
       {
        "id": "drake-slag-jaw",
@@ -305,7 +630,39 @@
        },
        "features": [
         "scorched"
-       ]
+       ],
+       "body": {
+        "jaw": [
+         [
+          "glaze",
+          1.0
+         ],
+         [
+          "drips",
+          1.2
+         ]
+        ],
+        "build": {
+         "jaw": 1.6,
+         "head": 1.25,
+         "nape": 1.5,
+         "chest": 1.4,
+         "girth": 1.35
+        },
+        "armor": [
+         "scars",
+         1.2
+        ],
+        "ridge": [
+         "flame",
+         1.3
+        ],
+        "paws": [
+         "grease",
+         1.0
+        ],
+        "coat": "ember"
+       }
       },
       {
        "id": "drake-forge-drake",
@@ -324,7 +681,37 @@
        },
        "features": [
         "iron-hide"
-       ]
+       ],
+       "body": {
+        "coat": "iron",
+        "breath": [
+         "jet",
+         1.0
+        ],
+        "armor": [
+         "brow",
+         1.1
+        ],
+        "tailend": [
+         "hammer",
+         1.0
+        ],
+        "ridge": [
+         "plates",
+         1.3
+        ],
+        "build": {
+         "chest": 1.4,
+         "nape": 1.3,
+         "girth": 1.3,
+         "jaw": 1.2
+        },
+        "jaw": null,
+        "throat": [
+         "blue",
+         0.8
+        ]
+       }
       }
      ]
     },
@@ -346,6 +733,30 @@
      "features": [
       "far-eyes"
      ],
+     "body": {
+      "build": {
+       "neck": 1.45,
+       "nape": 0.85,
+       "legs": 1.05,
+       "girth": 0.92,
+       "waist": 0.85,
+       "tail": 1.25,
+       "muzzle": 1.15
+      },
+      "throat": [
+       "bulges",
+       1.0
+      ],
+      "eyes": [
+       "far",
+       1.1
+      ],
+      "nostrils": null,
+      "pose": [
+       "low",
+       0.45
+      ]
+     },
      "finishes": [
       {
        "id": "drake-signal-fire",
@@ -364,7 +775,31 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "maw": [
+         "open",
+         1.1
+        ],
+        "breath": [
+         "beacon",
+         1.0
+        ],
+        "neck": [
+         "bands",
+         1.0
+        ],
+        "build": {
+         "neck": 1.6,
+         "nape": 1.0,
+         "legs": 1.1
+        },
+        "pose": [
+         "high",
+         1.2
+        ],
+        "throat": null
+       }
       },
       {
        "id": "drake-cinder-rain",
@@ -383,7 +818,44 @@
        },
        "features": [
         "mist"
-       ]
+       ],
+       "body": {
+        "neck": [
+         "ash",
+         1.0
+        ],
+        "breath": [
+         "cinders",
+         1.0
+        ],
+        "coat": "ash",
+        "spine": [
+         "smoke",
+         0.9
+        ],
+        "build": {
+         "neck": 1.4,
+         "chest": 1.15
+        },
+        "pose": [
+         [
+          "high",
+          1.0
+         ],
+         [
+          "nod",
+          -1.2
+         ]
+        ],
+        "ridge": [
+         "crumbled",
+         1.0
+        ],
+        "throat": [
+         "banked",
+         0.8
+        ]
+       }
       }
      ]
     },
@@ -405,6 +877,27 @@
      "features": [
       "smoke"
      ],
+     "body": {
+      "nostrils": [
+       "smoke",
+       1.0
+      ],
+      "throat": null,
+      "ridge": null,
+      "spine": [
+       "smoke",
+       1.0
+      ],
+      "coat": "night",
+      "eyes": [
+       "far",
+       0.8
+      ],
+      "build": {
+       "girth": 1.05,
+       "waist": 0.9
+      }
+     },
      "finishes": [
       {
        "id": "drake-chimney-wyrm",
@@ -423,7 +916,33 @@
        },
        "features": [
         "shadow-cloak"
-       ]
+       ],
+       "body": {
+        "ridge": [
+         "pots",
+         1.0
+        ],
+        "spine": null,
+        "back": [
+         "soot",
+         1.6
+        ],
+        "build": {
+         "body": 1.35,
+         "neck": 1.2,
+         "tail": 1.3,
+         "legs": 0.85,
+         "girth": 1.15
+        },
+        "tail": [
+         "loop",
+         1.0
+        ],
+        "nostrils": [
+         "smoke",
+         1.3
+        ]
+       }
       },
       {
        "id": "drake-ash-walker",
@@ -442,7 +961,38 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "coat": "ash",
+        "ridge": [
+         "crumbled",
+         1.0
+        ],
+        "spine": null,
+        "nostrils": null,
+        "aura": [
+         "cold",
+         1.0
+        ],
+        "paws": [
+         "frost",
+         1.0
+        ],
+        "armor": [
+         "scars",
+         1.0
+        ],
+        "build": {
+         "girth": 0.85,
+         "waist": 0.78,
+         "chest": 0.95,
+         "legs": 1.1
+        },
+        "breath": [
+         "cinders",
+         0.7
+        ]
+       }
       }
      ]
     }
@@ -466,6 +1016,31 @@
    "features": [
     "wings"
    ],
+   "body": {
+    "wings": [
+     "half",
+     1.0
+    ],
+    "head": null,
+    "horns": [
+     "swept",
+     1.0
+    ],
+    "ridge": [
+     "plates",
+     1.0
+    ],
+    "build": {
+     "legs": 1.15,
+     "girth": 0.9,
+     "chest": 1.05,
+     "waist": 0.85
+    },
+    "pose": [
+     "high",
+     0.4
+    ]
+   },
    "prongs": [
     {
      "id": "drake-thermal-rider",
@@ -485,6 +1060,23 @@
      "features": [
       "long-legs"
      ],
+     "body": {
+      "wings": [
+       "glide",
+       1.0
+      ],
+      "tailend": [
+       "rudder",
+       1.0
+      ],
+      "build": {
+       "legs": 1.3,
+       "girth": 0.82,
+       "waist": 0.78,
+       "tail": 1.25
+      },
+      "coat": "moon"
+     },
      "finishes": [
       {
        "id": "drake-ridge-king",
@@ -503,7 +1095,36 @@
        },
        "features": [
         "horn-brow"
-       ]
+       ],
+       "body": {
+        "wings": [
+         "mantle",
+         1.0
+        ],
+        "horns": [
+         "brow",
+         1.2
+        ],
+        "ridge": [
+         "plates",
+         1.8
+        ],
+        "frill": [
+         "crown",
+         1.0
+        ],
+        "build": {
+         "chest": 1.4,
+         "nape": 1.2,
+         "legs": 1.1,
+         "girth": 1.1
+        },
+        "pose": [
+         "high",
+         1.1
+        ],
+        "coat": "hearth"
+       }
       },
       {
        "id": "drake-weather-drake",
@@ -522,7 +1143,30 @@
        },
        "features": [
         "fins"
-       ]
+       ],
+       "body": {
+        "wings": [
+         "half",
+         1.2
+        ],
+        "ridge": [
+         "sail",
+         1.0
+        ],
+        "tailend": [
+         "rudder",
+         1.3
+        ],
+        "coat": "slate",
+        "build": {
+         "legs": 1.2,
+         "chest": 1.1
+        },
+        "eyes": [
+         "far",
+         0.9
+        ]
+       }
       }
      ]
     },
@@ -544,6 +1188,30 @@
      "features": [
       "talons"
      ],
+     "body": {
+      "wings": [
+       "stoop",
+       1.0
+      ],
+      "horns": [
+       "flat",
+       1.0
+      ],
+      "claws": [
+       "talons",
+       1.0
+      ],
+      "build": {
+       "legs": 1.1,
+       "chest": 1.2,
+       "waist": 0.8,
+       "neck": 0.9
+      },
+      "pose": [
+       "low",
+       0.7
+      ]
+     },
      "finishes": [
       {
        "id": "drake-trophy-drake",
@@ -562,7 +1230,38 @@
        },
        "features": [
         "fangs"
-       ]
+       ],
+       "body": {
+        "neck": [
+         "teeth",
+         1.2
+        ],
+        "maw": [
+         "fangs",
+         1.6
+        ],
+        "armor": [
+         "scars",
+         1.0
+        ],
+        "claws": [
+         "talons",
+         1.3
+        ],
+        "build": {
+         "chest": 1.35,
+         "nape": 1.2,
+         "girth": 1.1
+        },
+        "wings": [
+         "stoop",
+         1.2
+        ],
+        "pose": [
+         "high",
+         0.4
+        ]
+       }
       },
       {
        "id": "drake-wing-shadow",
@@ -581,7 +1280,31 @@
        },
        "features": [
         "dark-eyed"
-       ]
+       ],
+       "body": {
+        "wings": [
+         "shadow",
+         1.0
+        ],
+        "coat": "night",
+        "eyes": [
+         "dark",
+         1.0
+        ],
+        "claws": [
+         "talons",
+         1.1
+        ],
+        "build": {
+         "girth": 0.85,
+         "waist": 0.75,
+         "chest": 1.05
+        },
+        "pose": [
+         "low",
+         0.5
+        ]
+       }
       }
      ]
     },
@@ -603,6 +1326,28 @@
      "features": [
       "voice"
      ],
+     "body": {
+      "wings": [
+       "half",
+       1.1
+      ],
+      "frill": [
+       "herald",
+       1.0
+      ],
+      "maw": [
+       "open",
+       0.9
+      ],
+      "build": {
+       "neck": 1.2,
+       "chest": 1.1
+      },
+      "pose": [
+       "low",
+       0.6
+      ]
+     },
      "finishes": [
       {
        "id": "drake-banner-wyrm",
@@ -621,7 +1366,31 @@
        },
        "features": [
         "crest"
-       ]
+       ],
+       "body": {
+        "wings": [
+         "banner",
+         1.0
+        ],
+        "frill": [
+         "crest",
+         1.0
+        ],
+        "tailend": [
+         "banner",
+         1.0
+        ],
+        "build": {
+         "neck": 1.25,
+         "chest": 1.2,
+         "tail": 1.2
+        },
+        "pose": [
+         "high",
+         0.6
+        ],
+        "maw": null
+       }
       },
       {
        "id": "drake-grey-counsel",
@@ -640,7 +1409,43 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "wings": [
+         "cloak",
+         1.0
+        ],
+        "frill": [
+         "beard",
+         1.0
+        ],
+        "horns": [
+         "droop",
+         1.2
+        ],
+        "eyes": [
+         "old",
+         1.2
+        ],
+        "coat": "ash",
+        "build": {
+         "neck": 1.2,
+         "nape": 1.15,
+         "chest": 1.15,
+         "girth": 1.1
+        },
+        "pose": [
+         [
+          "high",
+          0.5
+         ],
+         [
+          "nod",
+          0.8
+         ]
+        ],
+        "maw": null
+       }
       }
      ]
     }

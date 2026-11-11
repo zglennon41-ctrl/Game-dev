@@ -895,18 +895,21 @@ def _spots(r, A):
     return spots
 
 
-def wolf_form(form_id, level, spec, species=None):
-    """One form on the wolf's rig: its stage, its build, what it has grown."""
+def wolf_form(form_id, level, spec, species=None, coat=("fur_dark", "fur_light"), marks=("socks", "mask", "saddle", "tailtip"), ages=None, measure=None):
+    """One form on the wolf's rig: its stage, its build, what it has grown. Another animal on
+    the same rig gives its own shape (species), the names of its coat's two materials (the
+    look's roles for its body), its marking regions, its own ages in place of the wolf's, and
+    measure(r, A) to correct what is read of a body the wolf's readings do not fit."""
     _, r = kit._wolf()
     _weld(r)
     c = PALETTE
-    r.recolor("Main", "fur_dark", c["fur_dark"][0], rough=0.92)
-    r.recolor("Main_Light", "fur_light", c["fur_light"][0], rough=0.9)
+    r.recolor("Main", coat[0], c.get(coat[0], c["fur_dark"])[0], rough=0.92)
+    r.recolor("Main_Light", coat[1], c.get(coat[1], c["fur_light"])[0], rough=0.9)
     r.recolor("Eyes_Black", "field_eyes", (0.03, 0.03, 0.03), rough=0.3, emission=(1, 1, 1), strength=3.0)
     r.recolor("Nose", "nose", c["nose"][0], rough=0.5)
     if species:
         species(r)
-    stage(r, level)
+    (ages or stage)(r, level)
     build(r, spec.get("build", {}))
     for slot in spec:
         for style, size in (each(spec.get(slot)) if slot not in ("build", "coat") else []):
@@ -917,8 +920,10 @@ def wolf_form(form_id, level, spec, species=None):
     for style, size in each(spec.get("tail")):
         reshape_tail(r, style, size)
     r.settle()
-    kit._wolf_marks(r, ("fur_dark", "fur_light"), ("socks", "mask", "saddle", "tailtip"))
+    kit._wolf_marks(r, coat, marks)
     A = Anat(r)
+    if measure:
+        measure(r, A)
     spots = _spots(r, A)
     ref = A.skull
     for slot, fn in SLOTS:
