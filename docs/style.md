@@ -167,6 +167,8 @@ three sides, so no model has to be unwrapped for it.
   portrait shows about the same count.
 - **How strong.** Enough to see on a portrait; never over 0.7 (the check holds it), where it
   would fight the bands. From far off a grain fades to its mid-grey: it does not sparkle.
+  One number turns every body's grain up or down at once: `grainFit.show` (1.0 is as the
+  table says; 0 is none).
 - **It is in the shine as well as the colour.** On a body the edge of a highlight follows
   the grain: hammered iron's dimples, worn leather's creases, a timber's figure. A glossy
   coat near black shows its grain by nothing else.

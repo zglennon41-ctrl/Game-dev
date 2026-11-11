@@ -1241,6 +1241,7 @@ func toonify(node: Node, place := false, kind := "") -> void:
 	var xfs := {}
 	var fit := 1.0
 	var along: Array = Style.data()["materials"].get("grainFit", {}).get("along", [])
+	var show := float(Style.data()["materials"].get("grainFit", {}).get("show", 1.0))      # every body's grain, stronger or weaker at once
 	if not place:
 		grains = _grains_of(meshes, kind)
 		for m in meshes:
@@ -1294,6 +1295,7 @@ func toonify(node: Node, place := false, kind := "") -> void:
 					body = {}
 				if body.has("scale"):
 					body["scale"] = float(body["scale"]) * fit
+					body["strength"] = float(body.get("strength", 0.0)) * show
 					body["lay"] = lay_along if along.has(String(body.get("grain", ""))) else lay
 			_surface_look(t, cls, mi, body, i)
 			if sm.emission_enabled:

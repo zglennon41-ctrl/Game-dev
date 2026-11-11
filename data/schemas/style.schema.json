@@ -75,6 +75,7 @@
           "additionalProperties": false,
           "properties": {
             "$comment": { "type": "string" },
+            "show": { "type": "number", "minimum": 0, "maximum": 2 },
             "size": { "type": "number", "exclusiveMinimum": 0 },
             "power": { "$ref": "#/definitions/unit" },
             "least": { "type": "number", "exclusiveMinimum": 0 },

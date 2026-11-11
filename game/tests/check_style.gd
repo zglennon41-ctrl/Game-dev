@@ -87,12 +87,13 @@ func check_grains(d: Dictionary, classes: Dictionary) -> void:
 	for cn in classes:
 		if float(classes[cn].get("wear", 0.0)) > limit:
 			fail("class %s wears its grain at %.2f: over %.2f it fights the cel bands" % [cn, float(classes[cn]["wear"]), limit])
+	var show := float(d["materials"].get("grainFit", {}).get("show", 1.0))
 	for row in d["materials"].get("grains", []):
 		var what := String(row[0])
 		if what.begins_with("#") and not classes.has(what.substr(1).get_slice(":", 0)):
 			fail("the grain row '%s' names a class that is not there" % what)
-		if float(row[3]) > limit:
-			fail("the grain row '%s' lays its grain on at %.2f: over %.2f it fights the cel bands" % [what, float(row[3]), limit])
+		if float(row[3]) * show > limit + 0.0001:
+			fail("the grain row '%s' lays its grain on at %.2f (with grainFit.show): over %.2f it fights the cel bands" % [what, float(row[3]) * show, limit])
 		if String(row[1]) != "" and float(row[3]) > 0.0 and float(row[2]) <= 0.0:
 			fail("the grain row '%s' has a grain and no scale" % what)
 	for g in d["materials"].get("grainFit", {}).get("along", []):
