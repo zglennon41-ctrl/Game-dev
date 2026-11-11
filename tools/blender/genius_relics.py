@@ -373,7 +373,7 @@ def talon_grip_part():
 
 def wing_cloak_part():
     """Wings worn as a cloak, on its back: a cloak laid over it and hanging to either side, a
-    collar standing at the front of it, and the clasp it grew from, with its eye. The Coat's
+    collar standing at the front of it, and the clasp it grew from, with its eye. It was the Coat's
     gift. (One piece: a cloak hangs; it does not beat.)"""
     cloth, lining, brass = gk.mat("cloth_wool"), gk.mat("cloth_rag"), gk.mat("metal_brass")
     rings = []
