@@ -2607,6 +2607,11 @@
      },
      "plumb": {
       "type": "boolean"
+     },
+     "hides": {
+      "enum": [
+       "offhand"
+      ]
      }
     }
    }

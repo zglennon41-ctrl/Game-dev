@@ -56,7 +56,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .pic { flex: none; display: block; width: 84px; aspect-ratio: 8 / 9; padding: 0; border: 1px solid var(--rule); border-radius: 3px; background-color: var(--shot); background-repeat: no-repeat; background-size: 800% 400%; background-position: calc(var(--c) / 7 * 100%) calc(var(--r) / 3 * 100%); cursor: zoom-in }
 .pic:hover, .pic:focus-visible { border-color: var(--brass-hi); outline: none }
 __SPRITES__
-/* the line at a glance: an evolution chart, one column a Final, read top down */
+/* the line at a glance: a chart of its stages, one column a Final, read top down */
 .chartwrap { overflow-x: auto; margin-top: 20px; border: 1px solid var(--rule); border-top: 3px solid var(--brass); background: var(--plate); padding: 12px 10px 14px }
 .chart { display: grid; grid-template-columns: 92px repeat(18, minmax(70px, 1fr)); min-width: 1352px }
 .chart .lab { grid-column: 1; align-self: center; font-family: var(--ui); font-weight: 700; font-size: 11px; letter-spacing: .13em; text-transform: uppercase; color: var(--faint) }
@@ -99,6 +99,24 @@ __SPRITES__
 .more dl { margin: 0 0 4px; display: grid; grid-template-columns: max-content 1fr; gap: 2px 10px; font-size: 15.5px }
 .more dt { font-family: var(--ui); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--brass); padding-top: 3px }
 .more dd { margin: 0; color: var(--dim) }
+.fight { margin: 4px 0 0; font-size: 15.5px; color: var(--dim) }
+.fight b { font-family: var(--ui); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--brass); font-weight: 700; margin-right: 4px }
+/* the three types: four plates, each with what it looks like beside its partner and what each base of it does */
+.kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; align-items: start }
+.kind { min-width: 0; background: var(--plate); border: 1px solid var(--rule); border-top: 3px solid var(--brass); padding: 14px }
+.kind h3 { font-family: var(--display); font-size: 21px; letter-spacing: .04em; color: var(--brass-hi); margin: 0 0 4px }
+.kind > p { margin: 0 0 10px }
+.worn { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 10px }
+.worn figure { margin: 0 }
+.worn img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 3px; background: var(--shot) }
+.worn figcaption { font-family: var(--ui); font-size: 12.5px; color: var(--dim); margin-top: 3px }
+.kind dl { margin: 0; display: grid; gap: 2px 0; font-size: 15.5px }
+.kind dt { font-family: var(--ui); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--brass); margin-top: 8px }
+.kind dt a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--rule) }
+.kind dd { margin: 0; color: var(--dim) }
+.kind dd em { color: var(--fg) }
+.kind .who { display: block; font-family: var(--ui); font-size: 13.5px; margin-top: 2px }
+.kind .who a { color: var(--fg) }
 .form.miss { opacity: .22 }
 .form.hit .fname { text-decoration: underline; text-decoration-color: var(--ember); text-underline-offset: 3px }
 dialog.look { border: 1px solid var(--brass); border-radius: 4px; background: var(--plate); color: var(--fg); padding: 14px; max-width: min(92vw, 460px); width: 100% }

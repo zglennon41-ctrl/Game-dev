@@ -293,8 +293,7 @@ func build_hero(hero: Dictionary) -> void:
 	var skel: Skeleton3D = _player.find_child("Skeleton3D", true, false)
 	var w: Dictionary = Data.by_id(Data.weapons, hero.get("weapon", "saber"))
 	_sword = _attach(skel, "handslot.r", _weapon_model(w["model"]))
-	if w.has("offhand"):
-		_attach(skel, "handslot.l", _weapon_model(w["offhand"]))
+	_offhand = _attach(skel, "handslot.l", _weapon_model(w["offhand"])) if w.has("offhand") else null
 	_p_anim = _player.find_child("AnimationPlayer", true, false)
 	for loop in ["Idle", "Running_A", "Running_Strafe_Left", "Running_Strafe_Right", "Walking_Backwards", "Walking_A", "Blocking", "Death_A_Pose", "1H_Ranged_Aiming", "2H_Ranged_Aiming", "Spellcasting"]:
 		if _p_anim.has_animation(loop):
@@ -858,6 +857,7 @@ var _trail := MeshInstance3D.new()
 var _trail_mesh := ImmediateMesh.new()
 var _trail_pts: Array = []
 var _sword: Node3D
+var _offhand: Node3D = null      # what the partner carries in the other hand (a shield); not drawn while a genius is worn in its place
 var _sword_a := Vector3.ZERO
 var _sword_b := Vector3.ZERO
 var _vignette := ColorRect.new()
@@ -4243,11 +4243,16 @@ func _update_form(f: Fight, dt: float) -> void:
 		return
 	# A worn or carried genius sits on its partner where its kind is worn (data/genius-types.json,
 	# mounts), by the empty its own model has for that, at the size it was made.
+	if _offhand and is_instance_valid(_offhand):
+		_offhand.visible = true
 	if f.g_type in ["defense", "ritual"] and not genius_down and _p_skel and _g_body and is_instance_valid(_g_body) and _g_body._model:
 		var mount: Dictionary = Data.genius_types().get("mounts", {}).get(String(f.g_item.get("worn", "")), {})
 		var held: Node3D = _held_at(String(mount["by"])) if not mount.is_empty() else null
 		var bone := _p_skel.find_bone(String(mount.get("bone", ""))) if held else -1
 		if held and bone >= 0:
+			# a shield that is its genius is the shield on that arm: the carried one is not drawn
+			if _offhand and is_instance_valid(_offhand) and String(mount.get("hides", "")) == "offhand":
+				_offhand.visible = false
 			var bt := _p_skel.global_transform * _p_skel.get_bone_global_pose(bone)
 			var at: Array = mount["at"]
 			var turn: Array = mount["turn"]

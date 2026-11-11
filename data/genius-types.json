@@ -628,13 +628,13 @@
     }
   },
   "mounts": {
-    "$comment": "Where a worn or carried genius sits on its partner (items.<base>.worn names one of these): the bone of the partner's rig it rides, which empty of the genius's own model is brought there (wear for a piece of armor, carry for an instrument: docs/genius-evolutions.md), where on the bone in metres and turned how in degrees, and how large against the size it was made. plumb: it hangs upright from that place whatever the bone does (a lamp on a hook), and 'at' is then counted in its partner's own left, up and front. A form that says how tall it is in the hand (held, in its body) is brought to that height, times scale. A genius whose model has no such empty, or whose place is not here, floats at its partner's side as before.",
+    "$comment": "Where a worn or carried genius sits on its partner (items.<base>.worn names one of these): the bone of the partner's rig it rides, which empty of the genius's own model is brought there (wear for a piece of armor, carry for an instrument: docs/genius-evolutions.md), where on the bone in metres and turned how in degrees, and how large against the size it was made. plumb: it hangs upright from that place whatever the bone does (a lamp on a hook), and 'at' is then counted in its partner's own left, up and front. A form that says how tall it is in the hand (held, in its body) is brought to that height, times scale. hides: what its partner carries there is not drawn while it is worn (offhand: a shield in the other hand). A genius whose model has no such empty, or whose place is not here, floats at its partner's side as before.",
     "arm": {
-      "bone": "lowerarm.l",
+      "bone": "handslot.l",
       "by": "wear",
       "at": [
         0.0,
-        0.12,
+        0.0,
         0.0
       ],
       "turn": [
@@ -642,10 +642,11 @@
         0,
         0
       ],
-      "scale": 1.0
+      "scale": 1.0,
+      "hides": "offhand"
     },
     "hand": {
-      "bone": "wrist.l",
+      "bone": "handslot.l",
       "by": "wear",
       "at": [
         0.0,

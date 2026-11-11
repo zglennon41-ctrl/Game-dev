@@ -209,8 +209,9 @@ there (`tally` in the data):
 - **In the world**: a weapon genius in the hand is drawn in the hand, seated where its own
   model says the hand closes on it (an empty named `grip`), and the carried weapon is not
   drawn. An item is drawn where it is worn (`mounts` in the data, by its base's `worn`):
-  a shield on the forearm and a gauntlet on the hand, each by its own `wear`; a coat down
-  the back; a lantern at the hip, a bell at the belt and an astrolabe afloat at the
+  a shield in the left hand, where a carried shield would be (and a carried one is not
+  drawn under it), and a gauntlet on that hand, each by its own `wear`; a coat down the
+  back; a lantern at the hip, a bell at the belt and an astrolabe afloat at the
   shoulder, each hung by its own ring (`carry`), upright whatever its partner's body does,
   at the height its form says it has in the hand (`held`) times the mount's `scale`.
   `godot --path . -- --fight --genius=<form id>:3 --near` (or `--near=back`) brings the

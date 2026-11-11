@@ -90,6 +90,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--out', required=True)
     ap.add_argument('--shots', default='')
+    ap.add_argument('--worn', default='', help='a folder of pictures of a genius in the hand or worn, named for its base (blade.png, coat.png) or companion.png')
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
 
@@ -109,6 +110,50 @@ def main():
         im.crop((0, 0, im.size[0] // 8, im.size[1] // 4)).resize((300, 338), Image.LANCZOS).save(os.path.join(args.out, 'img', 'baby.jpg'), quality=86, optimize=True)
         baby = True
 
+    kinds = load('data/genius-types.json')
+    kind_of = {c: k for k, v in kinds['types'].items() if isinstance(v, dict) for c in v['classes']}
+    worn = {}
+    if args.worn and os.path.isdir(args.worn):
+        from PIL import Image
+        os.makedirs(os.path.join(args.out, 'img'), exist_ok=True)
+        for f in sorted(os.listdir(args.worn)):
+            key, ext = os.path.splitext(f)
+            if ext.lower() in ('.png', '.jpg') and (key in by_id or key == 'companion'):
+                im = Image.open(os.path.join(args.worn, f)).convert('RGB')
+                im.thumbnail((640, 640), Image.LANCZOS)
+                im.save(os.path.join(args.out, 'img', 'worn-%s.jpg' % key), quality=86, optimize=True)
+                worn[key] = im.size
+
+    def beside(b):
+        """What this base does beside its partner (data/genius-types.json), for its header."""
+        bid, k = b['id'], kind_of.get(b['class'], '')
+        t = kinds['types'].get(k, {})
+        if k == 'weapon' and bid in kinds['weapon']['bases']:
+            w = kinds['weapon']['bases'][bid]
+            return ('<div><h3>Beside you: a weapon</h3><p class="sub">G takes it in hand in place of the weapon you carry, and lets it go again.</p><p class="sub"><em>In the hand.</em> %s</p></div>'
+                    % e(w['inHand']))
+        if k in ('defense', 'ritual') and bid in kinds['items']:
+            it = kinds['items'][bid]
+            return ('<div><h3>Beside you: a %s</h3><p class="sub"><em>Always, %s.</em> %s</p><p class="sub"><em>G, %s.</em> %s</p></div>'
+                    % (e(t['name'].lower()), e(it['always']['name'].lower()), e(it['always']['text']), e(it['use']['name'].lower()), e(it['use']['text'])))
+        if k == 'companion' and bid in kinds['companions']:
+            r = kinds['roles'][kinds['companions'][bid]['role']]
+            return ('<div><h3>Beside you: a companion</h3><p class="sub"><strong>%s.</strong> %s It supplies %s.</p><p class="sub"><em>%s.</em> %s</p></div>'
+                    % (e(r['name']), e(r['does']), e(r['supplies']), e(r['own']['name']), e(r['own']['text'])))
+        return ''
+
+    def in_fight(b, n):
+        """What a Path makes of that, in a line."""
+        bid, k = b['id'], kind_of.get(b['class'], '')
+        if k == 'weapon':
+            d = kinds['weapon']['bases'].get(bid, {}).get('paths', {}).get(n['id'])
+            return '<p class="fight"><b>%s.</b> %s</p>' % (e(d['name']), e(d['text'])) if d else ''
+        if k in ('defense', 'ritual'):
+            d = kinds['items'].get(bid, {}).get('paths', {}).get(n['id'])
+            return '<p class="fight"><b>In a fight.</b> %s</p>' % e(d['text']) if d else ''
+        d = kinds['companions'].get(bid, {}).get('paths', {}).get(n['id'])
+        return '<p class="fight"><b>%s at heart.</b> %s</p>' % (e(kinds['roles'][d['shade']]['name']), e(d['text'])) if d else ''
+
     def pic(base_id, fid, name):
         if base_id not in cells or fid not in cells[base_id]:
             return ''
@@ -119,12 +164,12 @@ def main():
         return ('<details class="more"><summary>the detail</summary><p>%s</p><dl><dt>Its sign</dt><dd>%s</dd><dt>Its habit</dt><dd>%s</dd></dl></details>'
                 % (e(n['text']), e(n['sign']), e(n['habit'])))
 
-    def form(base_id, n, level, tag):
+    def form(base_id, n, level, tag, fight=''):
         of = '<p class="of">%s</p>' % e(n['of']) if 'of' in n else ''
         ln = '<p class="comes">comes of %s</p>' % e(leans(n['leans'])) if n.get('leans') else ''
         words = ' '.join([n['name'], n.get('of', ''), n['text'], n['sign'], n['habit']]).lower()
-        return ('<div class="form l%d" data-s="%s">%s<div class="txt"><%s class="fname">%s</%s>%s%s%s</div></div>'
-                % (level, e(words), pic(base_id, n['id'], n['name']), tag, e(n['name']), tag, of, ln, detail(n)))
+        return ('<div class="form l%d" data-s="%s">%s<div class="txt"><%s class="fname">%s</%s>%s%s%s%s</div></div>'
+                % (level, e(words), pic(base_id, n['id'], n['name']), tag, e(n['name']), tag, of, ln, fight, detail(n)))
 
     def node(base_id, n, level, col, span, pos, kids):
         cls = 'node n%d %s%s' % (level, pos, ' kids' if kids else '')
@@ -132,7 +177,7 @@ def main():
                 % (cls, col + 1, span, level + 1, pic(base_id, n['id'], n['name']), e(n['name']), '<i></i>' if kids else ''))
 
     def chart(b):
-        """The whole line at a glance, as an evolution chart: one column a Final."""
+        """The whole line at a glance, as a chart of its stages: one column a Final."""
         bid = b['id']
         cells = ['<span class="lab" style="grid-row:%d">%s</span>' % (i + 1, t) for i, t in enumerate(('Baby', 'Starter', 'Paths', 'Advancements', 'Finals'))]
         # everyone's is the same before the rite
@@ -172,6 +217,7 @@ def main():
                        % (pic(bid, s['id'], s['name']), e(s['name']), e(s['text']), e(s['sign']), e(s['habit'])))
             sec.append('<div><h3>Who it comes to</h3><p class="sub">Seeds: %s</p><p class="sub">Shapes: %s</p><p class="sub">Bloods: %s</p><p class="sub">Likelier for children of %s</p><p class="sub">In a hybrid it is the <strong>%s</strong> half: %s</p></div></div></header>'
                        % (seeds_line, e(shapes), bloods, e(homes_line), e(b['hybrid']['adj']), e(b['hybrid']['text'])))
+            sec[-1] = sec[-1].replace('</div></header>', beside(b) + '</div></header>')
             if bid in lives:
                 p0 = b['paths'][0]
                 q0 = p0['prongs'][0]
@@ -183,7 +229,7 @@ def main():
                 sec.append(chart(b))
             sec.append('<div class="paths">')
             for p in b['paths']:
-                sec.append('<div class="path">' + form(bid, p, 2, 'h3'))
+                sec.append('<div class="path">' + form(bid, p, 2, 'h3', in_fight(b, p)))
                 for q in p['prongs']:
                     sec.append('<div class="prong">' + form(bid, q, 3, 'h4') + '<div class="finishes">')
                     sec.append(''.join(form(bid, f, 4, 'h5') for f in q['finishes']))
@@ -197,19 +243,54 @@ def main():
         key = '%s+%s' % (a, b2)
         if key in cells and a in by_id and b2 in by_id:
             name = load('data/genius-hybrids.json')['pairs'][key].get('name') or '%s %s' % (by_id[b2]['hybrid']['adj'], by_id[a]['name'])
-            hyb.append('<figure class="life"><img loading="lazy" src="img/%s-%s.jpg" width="2400" height="1350" alt="The thirty-one forms of the %s."><figcaption><strong>%s.</strong> A %s that turned toward the %s at its first refinement: its settled form, three paths, nine prongs and eighteen finishes, in that order.</figcaption></figure>'
+            hyb.append('<figure class="life"><img loading="lazy" src="img/%s-%s.jpg" width="2400" height="1350" alt="The thirty-one forms of the %s."><figcaption><strong>%s.</strong> A %s that turned toward the %s at its first refinement: its Starter, three Paths, nine Advancements and eighteen Finals, in that order. It keeps the body of its first base and wears the gift of its second.</figcaption></figure>'
                        % (a, b2, e(name), e(name), e(by_id[a]['name']), e(by_id[b2]['name'])))
     hybrids = ('<section class="base" id="hybrids"><header class="bhead"><p class="eyebrow">Two bases in one</p><h2>Hybrids</h2><p class="soul">A partner who changes how they play after the rite and before the first refinement may be offered a turning: their genius takes a second base into itself, and grows down a tree made of both.</p></header>%s</section>'
                % ''.join(hyb)) if hyb else ''
     if hyb:
         nav.append('<div class="navgroup"><span class="navlabel">Also</span><a href="#hybrids">Hybrids</a></div>')
 
+    def shot(key, cap):
+        if key not in worn:
+            return ''
+        w, h = worn[key]
+        return '<figure><img loading="lazy" src="img/worn-%s.jpg" width="%d" height="%d" alt="%s"><figcaption>%s</figcaption></figure>' % (key, w, h, e(cap), e(cap))
+
+    def kind(k, title, lead, shots, rows):
+        return ('<div class="kind"><h3>%s</h3><p>%s</p>%s<dl>%s</dl></div>'
+                % (e(title), lead, '<div class="worn">%s</div>' % ''.join(shots) if any(shots) else '', ''.join('<dt>%s</dt><dd>%s</dd>' % r for r in rows)))
+
+    T, W, I, R = kinds['types'], kinds['weapon']['bases'], kinds['items'], kinds['roles']
+    named = lambda ids: [by_id[i] for i in ids if i in by_id]
+    weapons = named(W)
+    defs = [b for b in bases if kind_of.get(b['class']) == 'defense' and b['id'] in I]
+    rits = [b for b in bases if kind_of.get(b['class']) == 'ritual' and b['id'] in I]
+    comps = kinds['companions']
+    item_row = lambda b: ('<a href="#%s">%s</a>' % (b['id'], e(b['name'])),
+                          '<em>Always:</em> %s <em>G, %s:</em> %s' % (e(I[b['id']]['always']['text']), e(I[b['id']]['use']['name'].lower()), e(I[b['id']]['use']['text'])))
+    role_row = lambda rid: ('%s' % e(R[rid]['name']),
+                            '%s %s <span class="who">%s</span>' % (e(R[rid]['does']), e(R[rid]['lacks']),
+                                                                   ', '.join('<a href="#%s">%s</a>' % (b['id'], e(b['name'])) for b in bases if comps.get(b['id'], {}).get('role') == rid)))
+    types = ('<section class="base types" id="types"><header class="bhead"><p class="eyebrow">What it does beside you</p><h2>Three types of genius</h2>'
+             '<p class="soul">One key means a different thing for each: G takes a weapon in hand, uses an item, gives a companion its order.</p></header><div class="kinds">%s%s%s%s</div></section>'
+             % (kind('weapon', 'Weapon', e(T['weapon']['says']),
+                     [shot(b['id'], 'A %s in the hand' % b['name']) for b in weapons],
+                     [('<a href="#%s">%s</a>' % (b['id'], e(b['name'])), e(W[b['id']]['inHand'])) for b in weapons]),
+                kind('defense', 'Defensive item', e(T['defense']['says']),
+                     [shot(b['id'], 'A %s, worn' % b['name']) for b in defs], [item_row(b) for b in defs]),
+                kind('ritual', 'Ritual item', e(T['ritual']['says']),
+                     [shot(b['id'], 'A %s, carried' % b['name']) for b in rits], [item_row(b) for b in rits]),
+                kind('companion', 'Companion', e(T['companion']['says']),
+                     [shot('companion', 'A companion at its post')],
+                     [role_row(rid) for rid in R if isinstance(R[rid], dict) and 'name' in R[rid]])))
+    nav.insert(0, '<div class="navgroup"><span class="navlabel">First</span><a href="#types">The three types</a></div>')
+
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'genius-tree-page.html')) as f:
         page = f.read()
     seen = ('Each picture is the form as the game draws it today, brought up close; tap one to look closer. '
             'The row under each base shows one life at its true sizes. '
-            'Most forms still wear their base\'s body with the parts their features give them.') if cells else ''
-    page = (page.replace('__NAV__', ''.join(nav)).replace('__BODY__', '\n'.join(out) + hybrids).replace('__SPRITES__', ''.join(css))
+            'Every form has a body of its own: no two on a line are the same shape.') if cells else ''
+    page = (page.replace('__NAV__', ''.join(nav)).replace('__BODY__', types + '\n'.join(out) + hybrids).replace('__SPRITES__', ''.join(css))
             .replace('__SEEN__', seen).replace('__TOTAL__', str(31 * len(bases))).replace('__NBASE__', str(len(bases))))
     with open(os.path.join(args.out, 'genius-tree.html'), 'w') as f:
         f.write(page)
