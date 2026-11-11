@@ -9,7 +9,8 @@
   "gun": 1.8,
   "shield": 1.5,
   "wolf": 1.4,
-  "hawk": 1.3
+  "hawk": 1.3,
+  "angel": 1.3
  },
  "cahokia": {
   "bell": 1.6,
@@ -33,7 +34,8 @@
   "shield": 1.8,
   "wolf": 1.6,
   "blade": 1.4,
-  "hawk": 1.3
+  "hawk": 1.3,
+  "angel": 1.5
  },
  "khemet": {
   "hawk": 1.6,
@@ -51,7 +53,8 @@
   "ember": 1.6,
   "bell": 1.5,
   "stag": 1.4,
-  "lurker": 1.3
+  "lurker": 1.3,
+  "angel": 1.5
  },
  "jiangnan": {
   "drake": 1.7,

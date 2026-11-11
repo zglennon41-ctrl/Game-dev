@@ -329,6 +329,7 @@
     "aspect-whirl": { "coats": "dust", "roles": { "dust": "main", "dust_dark": "under", "dust_pale": "trim" }, "marks": { "grass": { "name": "green grass in it", "on": "under" } } },
     "kith-fitter": { "coats": "wool", "roles": { "cloth_wool": "main", "leather_dark": "under", "leather": "trim" } },
     "kith-clerk": { "coats": "robe", "roles": { "cloth_dark": "main", "paper": "under", "cloth_rag": "trim" } },
+    "kith-angel": { "coats": "robe", "roles": { "cloth_robe": "main", "cloth_lining": "under", "hair_angel": "trim" } },
     "daemon-vigil": { "coats": "shade", "roles": { "shade": "main", "shade_edge": "under" }, "marks": { "hem": { "name": "a pale hem", "on": "under" } } },
     "daemon-marginal": { "coats": "ink", "roles": { "ink": "main", "ink_edge": "under", "paper": "trim" }, "marks": { "cover": { "name": "a tooled cover", "on": "under" }, "drip": { "name": "a run of pale ink", "on": "main" } } }
   },
