@@ -642,7 +642,7 @@ def _fox_tip(style):
 
 def _fox_mask(style):
     def fn(r, A, size):
-        e, n = A.eye, A.nose
+        e, n, hb = A.eye, A.nose, A.head
         if style == "raised":         # pushed up on its head, for now
             tip, up = Vector((0, e.y + 0.02, e.z + 0.2)), Vector((0, 0.82, 0.57))
         else:
@@ -650,23 +650,65 @@ def _fox_mask(style):
             up = (brow - tip).normalized()
         out = X.cross(up).normalized()
         h = 0.66 * 1.3 * size
+        lift = 0.1
+        # a shell and not a board: over the muzzle and down the sides of the face, past the eyes
+        we = (e.x + 0.08) * (0.9 + 0.1 * size)
+        if style == "raised":
+            be, de = 0.78, 0.22
+        else:
+            eye = Vector((0, e.y, e.z))
+            be = (eye - tip).dot(up) / h
+            de = (tip + up * (h * be) + out * lift - eye).dot(out) + 0.13
+        rows = [(-0.05, 0.04, 0.02), (0.16, 0.12, 0.13), (be * 0.6, 0.6 * we + 0.05, 0.75 * de), (be - 0.02, we, de), (be + 0.2, we * 0.95, de * 0.55), (be + 0.32, we * 0.7, 0.08)]
 
-        def P(a, b, lift=0.09):
-            return tip + up * (h * b) + X * (a * 1.45 * size) + out * lift
+        def at(b):
+            """How wide the mask is at b, and how far down its sides come."""
+            for (b0, w0, d0), (b1, w1, d1) in zip(rows, rows[1:]):
+                if b <= b1:
+                    t = max(0.0, min(1.0, (b - b0) / (b1 - b0)))
+                    return w0 + (w1 - w0) * t, d0 + (d1 - d0) * t
+            return rows[-1][1], rows[-1][2]
+
+        def top(a, b, proud=0.012):
+            """A point on the mask's brow and muzzle (a across, -1..1)."""
+            w, d = at(b)
+            return tip + up * (h * b) + X * (a * w * 0.9) + out * (lift + proud - 0.3 * d * abs(a))
+
+        def wall(sg, b, t, proud=0.012):
+            """A point on its side (t: 0 at the shoulder of the mask, 1 at its edge)."""
+            w, d = at(b)
+            return tip + up * (h * b) + X * (sg * (w + proud)) + out * (lift - d * (0.3 + 0.7 * t))
         half = style == "half"
-        side = [(0.13, 0.12), (0.27, 0.52), (0.36, 0.86), (0.3, 1.22), (0.16, 1.02)]
-        outline = [P(0, -0.05)] + ([P(0.0, 0.5), P(0, 1.08)] if half else [P(a, b) for a, b in side] + [P(0, 1.08)]) + [P(-a, b) for a, b in reversed(side)]
-        back = [p - out * 0.04 for p in outline]
-        _add(r, "mask", g.loft([outline, back], caps=True), "Head", mat("mask_pale"), smooth=False)
-        slits, marks = None, None
-        for sg in ((-1,) if half else (1, -1)):
-            slits = g.merge(slits, g.blade(P(sg * 0.1, 0.62, 0.085), P(sg * 0.29, 0.76, 0.085), 0.07 * size, normal=out, belly=0.5))
-            marks = g.merge(marks, g.blade(P(sg * 0.12, 0.2, 0.08), P(sg * 0.28, 0.5, 0.08), 0.06 * size, normal=out, belly=0.5))
-            marks = g.merge(marks, g.blade(P(sg * 0.2, 0.95, 0.08), P(sg * 0.28, 1.16, 0.08), 0.07 * size, normal=out, belly=0.5))
-        _add(r, "mask_eyes", slits, "Head", field("eyes", 3.4))
+        sides = (-1,) if half else (1, -1)
+        cols = ((-1.0, 1.0), (-0.92, 0.3), (0.0, 0.0)) if half else ((-1.0, 1.0), (-0.92, 0.3), (0.0, 0.0), (0.92, 0.3), (1.0, 1.0))
+        rings = []
+        for b, w, d in rows:
+            face = [tip + up * (h * b) + X * (c * w) + out * (lift - d * k) for c, k in cols]
+            rings.append(face + [q - out * 0.03 - X * (0.03 * (1 if q.x > 0.01 else -1 if q.x < -0.01 else 0)) for q in reversed(face)])
+        _add(r, "mask", g.loft(rings, caps=True), "Head", mat("mask_pale"), smooth=False)
+        slits, sparks, marks, ears, cord = None, None, None, None, None
+        for sg in sides:
+            nx = Vector((sg, 0, 0))
+            # the eyes it looks out of are the mask's: long and dark, a light far back in each
+            slits = g.merge(slits, g.blade(wall(sg, be - 0.14, 0.48), wall(sg, be + 0.12, 0.28), 0.12 * size, normal=nx, belly=0.5))
+            sparks = g.merge(sparks, g.ico(wall(sg, be - 0.01, 0.38, 0.03), 0.03 * size, sub=0))
+            # red under each eye and down the cheek, and a stroke up the brow
+            marks = g.merge(marks, g.blade(wall(sg, be - 0.2, 0.9), wall(sg, be + 0.04, 0.72), 0.06 * size, normal=nx, belly=0.5))
+            marks = g.merge(marks, g.blade(wall(sg, be * 0.5, 0.75), wall(sg, be * 0.25, 0.55), 0.05 * size, normal=nx, belly=0.5))
+            marks = g.merge(marks, g.blade(top(sg * 0.5, be + 0.02), top(sg * 0.62, be + 0.28), 0.07 * size, normal=out, belly=0.5))
+            # the mask has ears of its own, a little wrong for the ears beneath
+            ears = g.merge(ears, g.blade(top(sg * 0.6, be + 0.2, 0.0), top(sg * 0.85, be + 0.62, 0.2), 0.2 * size, normal=out, belly=0.3))
+            if style != "raised":     # and a red cord ties it on
+                cord = g.merge(cord, g.tube([wall(sg, be + 0.18, 0.5), Vector((sg * (e.x + 0.12), hb.y + 0.1, e.z)), Vector((sg * 0.06, hb.y + 0.32, e.z + 0.06)),
+                                             Vector((sg * 0.14, hb.y + 0.44, e.z - 0.12)), Vector((sg * 0.18, hb.y + 0.48, e.z - 0.36))], [0.022, 0.022, 0.026, 0.02, 0.012], n=4))
+        _add(r, "mask_ears", ears, "Head", mat("mask_pale"), smooth=False)
+        _add(r, "mask_eyes", slits, "Head", mat("coal"))
+        _add(r, "mask_sparks", sparks, "Head", field("eyes", 3.6))
         _add(r, "mask_marks", marks, "Head", mat("mask_red"))
+        if cord:
+            _add(r, "mask_cord", cord, "Head", mat("mask_red"), smooth=True)
         if not half:
-            _add(r, "mask_brow", g.blade(P(0, 0.84, 0.085), P(0, 1.02, 0.085), 0.09 * size, normal=out, belly=0.5), "Head", field("brow", 2.6))
+            _add(r, "mask_brow", g.blade(top(0, be - 0.02), top(0, be + 0.2), 0.09 * size, normal=out, belly=0.5), "Head", field("brow", 2.6))
     return fn
 
 
@@ -1165,11 +1207,10 @@ def _stag_breath(style):
     def fn(r, A, size):
         n = A.nose
         geo = None
-        if style == "wisp":           # you see its breath before you see it
-            for k, (dx, L) in enumerate(((0.07, 0.6), (-0.06, 0.44), (0.0, 0.8))):
-                p0 = n + Vector((dx, -0.03, -0.05))
-                geo = g.merge(geo, g.tongue([p0, p0 + Vector((dx, -L * 0.4, -0.05)) * size, p0 + Vector((dx * 2, -L * 0.8, 0.08)) * size, p0 + Vector((dx, -L, 0.26)) * size],
-                                            [0.1, 0.2, 0.17, 0.02], thick=0.5, normal=Z))
+        if style == "wisp":           # you see its breath before you see it: it leaves it in puffs, and they rise
+            for d, rad, dx, dz in ((0.16, 0.055, 0.02, -0.03), (0.4, 0.085, -0.04, 0.02), (0.7, 0.115, 0.05, 0.12), (0.98, 0.075, -0.03, 0.26)):
+                c = n + Vector((dx, -d * size, -0.05 + dz * size))
+                geo = g.merge(geo, g.ico(c, rad * size, sub=2, scale=(1.0, 1.3, 0.8)))
         else:                         # breath that hangs behind it
             for k, (dx, L) in enumerate(((0.3, 1.5), (-0.3, 1.2), (0.36, 2.2))):
                 p0 = n + Vector((dx * 0.4, 0.2, 0.05))
