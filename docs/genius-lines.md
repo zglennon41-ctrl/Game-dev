@@ -266,7 +266,7 @@ told apart at the size of a thumbnail before their shapes can.
 | Ember | Kept Fire `marigold` · Rushlight `peacock` · Wildfire `madder` |
 | Fiend | Flare-up `madder` · Banked Coal `amethyst` · Grate-fiend `marigold` |
 | Fog | Fog-shroud `peacock` · Lingering Mist `gold` · Shifting Fog `amethyst` |
-| Fox | Gone-away `jade` · Cache-fox `gold` · Fire-tail `amethyst` |
+| Fox | Gone-away `madder` · Cache-fox `gold` · Fire-tail `amethyst` |
 | Gauntlet | Maker's Hand `gold` · Fighting Fist `madder` · Open Hand `jade` |
 | Gun | Long Gun `jade` · Repeater `marigold` · Standing Gun `lapis` |
 | Hawk | High Circler `lapis` · Eyrie-holder `gold` · Stooper `madder` |
@@ -1132,14 +1132,16 @@ crescent rise and fall (`bob_*`); the Still Wolf's bird looks about (`turn_bird`
   its own faces; fur is flat locks lying close; marks are the body's own faces painted where
   that will do.
 
-## The wolf's kin: the Fox, the Drake (and once the Stag)
+## The wolf's kin: the Drake (and once the Fox and the Stag)
 
 `tools/blender/lines_wolfkin.py`. Each is the wolf's rig reshaped as a species, aged its own
 way (a kit is all ear where a pup is all paw), and then grown from its `body`. Underneath,
 every form is one wolf reshaped: outlines change through proportion, carriage and what is
 grown, and none has a skeleton of its own. (The Stag was built here until 2026-11-12; it has
-a deer's body of its own now, in a file of its own: "The Stag", below. What this file still
-holds of it is its two gifts and its old styles, which nothing calls.) The wolf's slots still work on them (`build`,
+a deer's body of its own now, in a file of its own: "The Stag", below; and the Fox until the
+same day: "The Fox", below. What this file still holds of each is its two gifts and its old
+styles, which nothing calls. What is said of the Fox in the rest of this section is the old
+one.) The wolf's slots still work on them (`build`,
 `ears`, `eyes`, `maw`, `spine`, `paws`, `armor`, `carry`, `aura`); what is theirs alone:
 
 | Line | Keys | What they are |
@@ -1238,6 +1240,90 @@ crown look about.
 
 **Its gifts** are still made by `lines_wolfkin.py gifts` (`stag-horn-brow`, `stag-long-legs`),
 from the old antler table there.
+
+## The Fox (`tools/blender/lines_fox.py`)
+
+> "some of the figures are just poorly adapted wolf figures." (owner, 2026-11-12). The last
+> worker's verdict on the Fox: "a small wolf: tall straight legs, a deep chest, a broad
+> muzzle, and a brush much shorter than its body."
+
+**Its anatomy** is a fox's, sound, and nothing of the wolf's is left on it but the bones and
+the clips (built the way the Stag was). The frame is stood as a fox stands before any flesh
+is laid: lower than a wolf, its feet brought close under it on a narrow track, its head
+carried up on a short neck at the pitch its `stance` names. Then every part is its own: one
+skin from the back of the skull to the rump (a shallow chest, a long level back, a waist
+tucked up, a narrow rump), pale under the belly and in one bib from the chin down the
+breast; a broad skull and cheeks drawn to a long fine muzzle, with a small dark nose, pale
+lips, cheeks and chin, a mouth turned up at the corner, tufts at the cheek and whiskers;
+eyes set forward and aslant, each a lit iris with a slit of a pupil in a dark rim drawn long
+(back and up from the outer corner, down the muzzle from the inner), under a lid and a brow
+that come down toward the nose, so that it looks sly; big triangular ears laid on the wolf's
+ear bones (they flick as its did), dark behind, pale within, a tuft in each; fine legs with an
+elbow tucked against the chest, a small wrist and a hock that shows, in dark stockings, on
+small neat paws; and **a brush as long as its body**, laid on the wolf's eight tail bones (so
+it sways and wags by the clips), thin at the root, thickest past its middle, drawn to a
+pale point, with locks of fur standing off it. The brush is the line's event: how it is
+carried (`tail`), how many there are (`tails`), and what rides at the tip (`tip`). It is
+stood by the height a plain fox of its legs carries its head at, so a lowered head or a
+brush carried high does not make a larger or a smaller fox: its ears and its brush stand
+above its stage's height.
+
+**Three Paths are three foxes** (a form's `fox`), in outline as in colour:
+
+| Path | Its fox | Coat | Colour, and where | Its brush | Its Advancements, and their Finals |
+|---|---|---|---|---|---|
+| Gone-away | `red`: the red fox. Long in the leg and the muzzle, great pointed ears (one turned behind it), looking elsewhere | `russet` | `madder`: its stockings (dark), the backs of its ears, a bright band round its brush before the pale tip | streaming level behind it | Red Decoy (taller, caught in its stride, looking back over its shoulder, its brush lifted; a garter at each stocking): the Brush-flag, its brush straight up and ringed, a white mop at the tip with a light that bobs, and the Hen-house Ghost, ash-grey and stalking, smoke off its back, a feather on it. Double-back (a grin, looking back, its brush wrapped round its feet; the cross fox's dark cross on its shoulders): the Turnabout, its brush arched over its back with a ring of light spinning at the tip, and the Hole in the Hedge, great ears, leaves in its coat, ivy at its neck. Listening Fox (great ears, its head down and on one side, one forepaw lifted): the fox At the Crossroads, sitting, moon-pale, its brush round its feet, an eye-mark on its brow, and the Snow-silent Fox, white and round, furred to the pad |
+| Cache-fox | `den`: the fox of the sand and the earth. Round, short in the leg and the face, small round ears, thick in the neck | `sand` | `gold`: a stripe from its brow down its spine and along its brush, and its brush gold from the middle to the tip | as fat as itself, a plume | Night Raider (a night coat, long and slinking, lamp eyes rimmed in brass, a gold mask across them, a sack in its mouth): the Dock-fox, a lamp at its collar and panniers, and the Graveyard Fox, gaunt, ash-grey, old-eyed, ivy at its neck. Den-digger (low and long, broad earthy forepaws, a cross on its shoulders): the Name-thief, a chain of tags and a bright thing in its mouth, a torn ear, and the Culvert King, long as a drain, iron-grey, crested, web-footed. Snow-pouncer (too long in the leg, its nose down over the ground and its head on one side): the Frost-fox, white, rime standing on its brush and ruff, and the Cinder-brush, soot-dark, its brush straight up with a live coal at the tip |
+| Fire-tail | `silver`: the silver fox of the stories. Tall and narrow, a long neck, the tallest ears | `slate` | `amethyst`: its brush from the middle, deepening to the tip; the inside of its ears; its feet | the longest, carried up like a flame, a light at the tip | Mask-wearer (a pale mask tied on with a cord, not quite the shape of the face under it; its brush in an S): the fox Of Two Faces, half a mask, one side of it dark, two brushes, and the Contract Fox, its mask pushed up, a book at its collar, a lamp hung from its brush. Split-tail (two brushes): the fox Of Many Tails, nine fanned behind it, a light at each, and Reynard of the Hall, three brushes, a courtier's ruff and a cape, its mouth open. Marsh-light Fox (web-footed, leaving rings, its brush arched over with a wisp floating above the tip): the Ferry-fox, finned, a pole across its back and a lamp at its brush, and the Fen-candle, night-dark, a flame at its tip |
+
+The Starter is a kit: more tail than fox, all ear and eye, caught in a play-bow.
+
+Eleven forms leave their Path's coat because their sign is a coat: the Hen-house Ghost and the
+Graveyard Fox (`ash`), At the Crossroads (`moon`), the Snow-silent Fox and the Frost-fox
+(`frost`), the Night Raider and its Dock-fox, and the Fen-candle (`night`), the Culvert King
+and the Ferry-fox (`iron`), the Cinder-brush (`ember`). Each still wears its Path's colour.
+
+**Its slots** (`data/genius-bases/fox.json`; the wolf's `spine`, `paws` and `aura` still grow
+on it, and its `carry` for a lamp, tags and a book):
+
+| Key | What it is | Styles |
+|---|---|---|
+| `fox` | which fox | `red` `den` `silver` |
+| `stance` | how it carries its neck, made before its flesh is laid | `alert` `proud` `watch` `level` `low` `sniff` `sky` `sly` |
+| `build` | the frame: `legs` `neck` `body`; the flesh: `chest` `girth` `waist` `nape` `head` `muzzle` `ears` `cheeks` `paws`; the brush: `tail` (its length) `brush` (how fat) | |
+| `tail` | how it carries its brush (the table `TAILS`; a size under 1 is part of the way from level), and what is on it | `level` `low` `up` `over` `flag` `s` `wrap` `tuck` `plume` `hook`; `ember` `rime` |
+| `tails` | more than one, fanned about the root | `two` `three` `many` (nine) |
+| `tip` | what every tail-tip carries | `light` `white` `ring` `flame` `wisp` `lantern` |
+| `marks` | where it wears its Path's colour (a step of it after a colon) | `stockings` `socks` `garters` `ears` `inner` `band` `rings` `tip` `brush` `dorsal` `saddle` `cross` `bib` `blaze` `mask` `cheeks` `flecks` |
+| `ears` `eyes` `whiskers` `maw` `mouth` | | `one` `long` `great` `small` `laid` `torn`; `third` `lamp` `old`; `long`; `open` `fangs`; `sack` `prize` |
+| `mask` `face` `ruff` `neck` | | `worn` `raised` `half`; `two`; `mane` `crown` `frost` `courtier`; `ivy` |
+| `back` `feet` `claws` `fins` `carry` | | `leaves` `feathers` `stripe`; `webbed` `snow`; `dig`; `fox`; `panniers` `pole` `cape` |
+| `pose` | a turn of the head, put on last | `low` `high` `nod` `back` `aside` `tilt` |
+| `rest` | the Wolf's ways of resting: the kit's play-bow is `crouch`; also `stride` `stalk` `point` `sit` | |
+
+The look's roles are kept, so the partner's coat goes on: `fur_dark` and `fur_light` (its
+underside, its bib, its lips, cheeks and chin, the inside of its legs and ears, the tip of its
+brush), and three of the four markings (`mark_mask` down the face, `mark_saddle` along the
+back, `mark_tailtip`). Its stockings and the backs of its ears are a near-black of the line's
+own (`fur_stocking`), so `mark_socks` has nothing to show on a fox.
+
+**What moves**: its ears, legs and brush by the borrowed clips (every brush of a many-tailed
+fox rides the same eight bones, so they move as one). By name: its eyes blink; a light at a
+tail-tip breathes, a white tip's light and a wisp rise and fall, a ring spins, a flame and
+the sparks of a coal gutter, a lamp on a brush or a pole sways on a hook of its own; what it
+carries in its mouth sways; the rings its webbed feet leave breathe; a third eye breathes.
+
+**Its gifts** are still made by `lines_wolfkin.py gifts` (`fox-tail`, `fox-glow`), unchanged,
+and the written hybrid `fox+lantern` wears these bodies with the Lantern's lamp at the throat.
+
+**What is still weak.** The camera of the sheet looks from before and to one side, so a
+brush carried level or low is half hidden behind the body: the Gone-away's own, the
+Hen-house Ghost's, the Graveyard Fox's. A thick ruff (`mane`) reads as heavy dark-edged
+shingles at a thumbnail. The Turnabout's ring is seen face-on and reads as a badge, not a
+spinning ring. The masks read as a pale face with marks, not yet as a carved thing. The den
+fox's short legs make the Den-digger and the Culvert King nearly dachshunds (which the signs
+ask for, but it is a near thing). Its walk is the wolf's: nothing was keyed for a fox's
+trot or its pounce.
 
 ## The Octopus (`tools/blender/lines_octopus.py`)
 
@@ -1397,9 +1483,9 @@ page.
   one goes through the floor. The Shade-friend is pale for its Path and is the one form the
   colour check still puts elsewhere at some sizes. Faces read as eyes and marks; at a
   thumbnail the lids' angle (which is what makes the three Paths' looks) is two pixels.
-- **Every other line on the wolf's rig** (Fox, the Hawk's three Harriers; the Drake has had a
+- **Every other line on the wolf's rig** (the Hawk's three Harriers; the Drake has had a
   body of its own since 2026-11-11, so what is said of it here is the old one, and the Stag
-  since 2026-11-12: "The Stag"):
+  and the Fox since 2026-11-12: "The Stag", "The Fox"):
   one wolf reshaped. Outlines change by proportion, carriage and what is grown; none has a
   skeleton or clips of its own. The Drake is the weakest for it: its legs and chest are a
   wolf's, so the Sky path can read as a winged hound, and its wings do not beat. The
@@ -1420,8 +1506,7 @@ page.
 - **Told apart by what they carry, not by outline.** Shield: Wall-shield to Battered Shield; the
   Road-shield is plain. Gauntlet: Catching Hand and Iron Palm. Hawk: the eleven of the
   High Circler's path, all on the wing. Sprite and Homunculus: Shoulder-mender, Clay
-  Stand-in, Ward-builder, Weather-sprite. Fox: Gone-away, Listening Fox, Snow-pouncer;
-  Marsh-light beside Fire-tail. Fiend:
+  Stand-in, Ward-builder, Weather-sprite. Fiend:
   Flare-up, Pyre-dancer and Brush-burner are one imp in three moods; Oath-scorch, Mark of
   the Sworn and Vendetta differ by what they wear. Ember: Kept Fire, Circle-flame,
   Tempering Flame. Bow: Omen-bow, The Twitch, Oath-bow.
