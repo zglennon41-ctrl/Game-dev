@@ -29,9 +29,9 @@
    "stands-between": 0.3
   },
   "shape": {
-   "anchor": 0.6,
-   "turn": 0.5,
-   "cast": 0.5
+   "cast": 0.5,
+   "anchor": 0.5,
+   "turn": 0.5
   },
   "blood": {
    "demigod": 1.0,
@@ -59,6 +59,7 @@
    "small-weather"
   ],
   "body": {
+   "coat": "ash",
    "build": {
     "muscle": 0.7,
     "weight": 0.5
@@ -105,7 +106,7 @@
    ],
    "body": {
     "accent": "gold",
-    "coat": "hearth",
+    "coat": "sand",
     "build": {
      "wide": 0.7,
      "shoulders": 0.8,
@@ -125,6 +126,10 @@
     "wear": [
      "wrap",
      "sash"
+    ],
+    "chest": [
+     "heart",
+     1.0
     ],
     "under": [
      "slab",
@@ -561,7 +566,11 @@
     ],
     "wear": [
      "wrap",
-     "band"
+     [
+      "band",
+      1.0,
+      "accent"
+     ]
     ],
     "under": [
      "wave",
@@ -590,7 +599,11 @@
       "stance": "stroll",
       "wear": [
        "wrap",
-       "band",
+       [
+        "band",
+        1.0,
+        "accent"
+       ],
        [
         "stole",
         1.0
@@ -621,7 +634,11 @@
         ],
         "wear": [
          "wrap",
-         "band",
+         [
+          "band",
+          1.0,
+          "accent"
+         ],
          [
           "stole",
           0.5
@@ -659,7 +676,11 @@
          1.4
         ],
         "wear": [
-         "band"
+         [
+          "band",
+          1.0,
+          "accent"
+         ]
         ],
         "under": [
          "surge",
@@ -696,7 +717,11 @@
       ],
       "wear": [
        "wrap",
-       "band",
+       [
+        "band",
+        1.0,
+        "accent"
+       ],
        [
         "pauldrons",
         1.0
@@ -731,7 +756,11 @@
         ],
         "wear": [
          "wrap",
-         "band"
+         [
+          "band",
+          1.0,
+          "accent"
+         ]
         ],
         "under": [
          "berg",
@@ -758,7 +787,11 @@
         "stance": "stride",
         "wear": [
          "wrap",
-         "band",
+         [
+          "band",
+          1.0,
+          "accent"
+         ],
          [
           "pauldrons",
           1.0
@@ -911,7 +944,7 @@
    ],
    "body": {
     "accent": "amethyst",
-    "coat": "slate",
+    "coat": "storm",
     "build": {
      "wide": -0.6,
      "shoulders": -0.3,
@@ -1158,7 +1191,7 @@
      "name": "Daybreak",
      "of": "one who comes up every day whatever happened yesterday",
      "text": "The small god of the first hour of light. Yesterday was what it was. It is up, it has opened the shutters, and it expects you to be up too.",
-     "sign": "Bright-eyed, arms open, with a low gold disc rising behind its shoulders and rays for hair.",
+     "sign": "Bright-eyed, arms open, with a low rose-gold disc rising behind its shoulders and rays for hair.",
      "habit": "It is awake before you every morning, sitting on the sill with its back to the window, waiting.",
      "leans": {
       "orders": {
@@ -1169,7 +1202,7 @@
       "glow"
      ],
      "body": {
-      "accent2": "gold",
+      "accent2": "rose",
       "stance": "greet",
       "hair": [
        "rays",
@@ -1201,7 +1234,7 @@
        "name": "High Noon",
        "of": "one before whom nothing has a shadow to hide in",
        "text": "Small god of the sun straight overhead. Stand near it and everything is exactly as it is: no long shadows, nothing behind anything.",
-       "sign": "A gold disc stands upright behind its head, and its robe falls straight to its feet. It casts no shadow. Its gaze is level.",
+       "sign": "A white disc stands upright behind its head, and its robe falls straight to its feet. It casts no shadow. Its gaze is level.",
        "habit": "It walks round a thing you are proud of, once, at midday, and you see the flaw yourself.",
        "leans": {
         "shape": {
@@ -1212,6 +1245,7 @@
         "far-eyes"
        ],
        "body": {
+        "accent2": "bone",
         "stance": "hieratic",
         "hair": [
          "rays",
@@ -1238,7 +1272,7 @@
        "name": "Sundown",
        "of": "one who is kindest just before leaving",
        "text": "Small god of the last light. Everything it looks at is better looking for a quarter of an hour, and then it has gone, and you remember the quarter of an hour.",
-       "sign": "It sits with one knee up, half turned away, a red-gold disc sunk low behind its shoulder and a long cloak the colour of the hour.",
+       "sign": "It sits with one knee up, half turned away, a red disc sunk low behind its shoulder and a long cloak the colour of the hour.",
        "habit": "It says the kindest thing it has said all day at the door, on its way out, without turning round.",
        "leans": {
         "bonds": {

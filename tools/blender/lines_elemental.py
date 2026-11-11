@@ -128,16 +128,16 @@ def lump(c, r, seed=0, sub=1, scale=(1, 1, 1), rough=0.2):
     return [c + (p - c) * (1.0 + rough * (2.0 * rnd(i + 1, seed + 0.37) - 1.0)) for i, p in enumerate(vs)], fs
 
 
-def cloud(c, r, n=5, seed=0, flat=0.72, sub=1):
-    """A cloud: a few balls run together, flat underneath."""
+def cloud(c, r, n=5, seed=0, flat=0.8, sub=3):
+    """A cloud: a few balls run together, heaped in the middle (sub: 3 round, 2 for a small one)."""
     c = V(c)
-    geo = g.ico(c, r * 0.7, sub=sub, scale=(1.2, 0.95, flat))
+    geo = g.ico(c, r * 0.6, sub=sub, scale=(1.25, 1.0, flat))
     for i in range(n):
         a = 2 * math.pi * (i + 0.4 * rnd(i, seed)) / n
-        rr = r * (0.4 + 0.2 * rnd(i, seed + 1))
-        p = c + Vector((math.cos(a) * r * 0.74, math.sin(a) * r * 0.5, (rnd(i, seed + 2) - 0.3) * r * 0.36))
-        geo = g.merge(geo, g.ico(p, rr, sub=max(0, sub - (i % 2)), scale=(1, 1, 0.85)))
-    return geo
+        rr = r * (0.32 + 0.2 * rnd(i, seed + 1))
+        p = c + Vector((math.cos(a) * r * 0.66, math.sin(a) * r * 0.46, (rnd(i, seed + 2) - 0.25) * r * 0.3))
+        geo = g.merge(geo, g.ico(p, rr, sub=2))
+    return g.merge(geo, g.ico(c + Vector((0.14 * r, 0.0, r * 0.4 * flat)), r * 0.42, sub=2))
 
 
 def prism(base, top, r, n=6, taper=1.0, phase=0.0):
@@ -672,7 +672,7 @@ def _lean(F):
 @stance("fly")
 def _fly(F):
     """Stretched out along the wind as if lying on it."""
-    out = {"hips": (68, 0, 0), "chest": (-10, 0, 0), "head": (-48, 0, 0)}
+    out = {"hips": (56, 0, 0), "chest": (-8, 0, 0), "head": (-40, 0, 0)}
     _arms(out, ("dir", (0.3, 0.9, -0.3), (0.16, 0.96, -0.2)), ("dir", (-0.22, -0.9, 0.36), (-0.1, -0.95, 0.3)))
     return _legs(out, ("dir", (0.06, 0.95, -0.28), (0.03, 0.98, -0.16), (0.02, 0.9, -0.42)), ("dir", (-0.08, 0.9, -0.42), (-0.03, 0.99, 0.08), (-0.02, 0.9, -0.42)))
 
@@ -882,7 +882,7 @@ def eyes(F, size, word):
     """Eyes with lids. Each eye is its own piece and shuts (blink_eye_l, blink_eye_r); behind it
     is the lid it shuts to. lit: the field in the iris. dark: wide and dark, a light sunk in."""
     P = F.P
-    k = 1.42 * size * (1.2 if F._style == "dark" else 1.0)
+    k = 1.66 * size * (1.15 if F._style == "dark" else 1.0)
     r = P.eye_r * 1.04 * k
     skin = P.skin
     lids, shut = None, None
@@ -890,16 +890,15 @@ def eyes(F, size, word):
         c = Vector((sg * P.eye.x, P.eye.y - P.eye_r * 0.4 * (k - 1.0), P.eye.z))
         f = c + Vector((0, -r * 0.62, 0))
         if F._style == "dark":
-            items = [(g.ico(c, r, sub=1), "eye_dark"), (g.ico(f + Vector((sg * r * 0.2, -r * 0.2, r * 0.22)), r * 0.24, sub=0, scale=(1, 0.6, 1)), field("eyes", 4.0))]
+            items = [(g.ico(c, r, sub=2), "eye_dark"), (g.ico(f + Vector((sg * r * 0.2, -r * 0.2, r * 0.22)), r * 0.24, sub=0, scale=(1, 0.6, 1)), field("eyes", 4.0))]
         else:
-            items = [(g.ico(c, r, sub=1), "eye_white"), (g.ico(f, r * 0.66, sub=1, scale=(1.0, 0.55, 1.0)), field("eyes", 3.6)),
-                     (g.ico(f + Vector((0, -r * 0.3, 0)), r * 0.27, sub=0, scale=(1.0, 0.5, 1.0)), "eye_dark")]
+            items = [(g.ico(c, r, sub=2), field("eyes", 3.4)), (g.ico(f + Vector((0, -r * 0.36, 0)), r * 0.26, sub=1, scale=(1.0, 0.5, 1.0)), "eye_dark")]
         F.move("blink", "eye", items, c, "head", side=tag, smooth=True)
-        shut = g.merge(shut, g.ico(c + Vector((0, r * 0.16, 0)), r * 0.99, sub=1))
+        shut = g.merge(shut, g.ico(c + Vector((0, r * 0.16, 0)), r * 0.99, sub=2))
         # the upper lid: lower for the steady and the old, lifted at the outer corner for the keen
         drop = {"steady": 0.8, "old": 0.7, "stern": 0.74, "soft": 0.86, "keen": 0.94}.get(F.temper, 0.82)
         tilt = {"keen": -0.3, "stern": 0.26, "soft": 0.1}.get(F.temper, 0.0) * sg
-        lids = g.merge(lids, g.ico(c + Vector((0, -r * 0.1, r * drop)), r * 1.08, sub=1, scale=(1.16, 1.0, 0.56), rot=(0.25, tilt, 0)))
+        lids = g.merge(lids, g.ico(c + Vector((0, -r * 0.08, r * (drop + 0.12))), r * 1.08, sub=2, scale=(1.16, 1.0, 0.42), rot=(0.25, tilt, 0)))
     F.add("eye_shut", shut, skin, "head", smooth=True)
     F.add("eye_lids", lids, skin, "head", smooth=True)
 
@@ -908,7 +907,7 @@ def face(F):
     """Brows and a mouth: each Path a temperament you can see."""
     P = F.P
     t = F.temper
-    hr, e, r = P.hr, P.eye, P.eye_r * 1.45
+    hr, e, r = P.hr, P.eye, P.eye_r * 1.66
     # (inner end's lift, outer end's lift, thickness, how far out) in eye radii
     inn, outr, thick, reach = {"steady": (1.5, 1.55, 0.5, 2.3), "old": (1.4, 1.7, 0.62, 2.5), "stern": (1.12, 1.9, 0.5, 2.3), "soft": (1.75, 1.6, 0.3, 2.2),
                                "keen": (1.3, 2.15, 0.34, 2.4)}.get(t, (1.5, 1.6, 0.4, 2.3))
@@ -917,15 +916,15 @@ def face(F):
         a = Vector((sg * (e.x - r * 0.95), e.y - r * 0.95, e.z + r * inn))
         b = Vector((sg * (e.x + r * 0.2), e.y - r * 0.9, e.z + r * (0.5 * (inn + outr) + 0.22)))
         c = Vector((sg * (e.x + r * (reach - 1.0)), e.y - r * 0.25, e.z + r * outr))
-        brows = g.merge(brows, g.tube([a, b, c], [r * thick * 0.5, r * thick * 0.46, r * thick * 0.2], n=5, flat=0.7))
-    F.add("brows", brows, "trim" if not getattr(F, "brow", None) else F.brow, "head", smooth=True)
+        brows = g.merge(brows, g.tube([a, b, c], [r * thick * 0.36, r * thick * 0.34, r * thick * 0.14], n=5, flat=0.7))
+    F.add("brows", brows, "accent_deep", "head", smooth=True)
     z = float(P.mouth[2]) - 0.07 * hr
     y = P.front(z) - 0.004
     w = 0.34 * hr
     lift = {"steady": 0.0, "old": -0.04, "stern": -0.1, "soft": 0.07, "keen": 0.1}.get(t, 0.0) * hr
     skew = 0.05 * hr if t == "keen" else 0.0
     pts = [(-w, y + 0.03 * hr, z + lift - skew), (-w * 0.5, y + 0.004, z + lift * 0.3 - skew * 0.4), (0, y - 0.004, z), (w * 0.5, y + 0.004, z + lift * 0.3 + skew * 0.4), (w, y + 0.03 * hr, z + lift + skew)]
-    F.add("mouth", g.tube(pts, [0.012 * hr, 0.03 * hr, 0.034 * hr, 0.03 * hr, 0.012 * hr], n=4, flat=0.55), "stone_band", "head", smooth=True)
+    F.add("mouth", g.tube(pts, [0.012 * hr, 0.028 * hr, 0.032 * hr, 0.028 * hr, 0.012 * hr], n=4, flat=0.55), "accent_deep", "head", smooth=True)
 
 
 @style("face", "steady", "old", "stern", "soft", "keen")
@@ -939,12 +938,12 @@ def face_beard(F, size, word):
     P = F.P
     hr = P.hr
     c = Vector((0, P.hy0 + 0.25 * hr, P.chin + 0.05 * hr))
-    geo = cloud(c + Vector((0, -0.1 * hr, -0.02)), 0.6 * hr * size, n=4, seed=3, sub=1)
+    geo = cloud(c + Vector((0, -0.2 * hr, -0.1 * hr)), 0.85 * hr * size, n=5, seed=3, sub=2)
     pts = [c + Vector((0.2 * hr, 0.3 * hr, -0.3 * hr)), c + Vector((0.9 * hr, 1.3 * hr, -0.2 * hr)), c + Vector((1.5 * hr, 2.6 * hr, 0.3 * hr)), c + Vector((1.7 * hr, 4.0 * hr * size, 0.9 * hr))]
     F.add("beard", geo, "mist_white", "head", smooth=True)
     tail = None
     for i, p in enumerate(pts[1:]):
-        tail = g.merge(tail, cloud(p, (0.62 - 0.11 * i) * hr * size, n=4, seed=5 + i, sub=1 if i < 2 else 0))
+        tail = g.merge(tail, cloud(p, (0.86 - 0.14 * i) * hr * size, n=4, seed=5 + i, sub=2))
     F.move("sway", "beard", [(tail, "mist_white")], c + Vector((0.2 * hr, 0.3 * hr, 0)), "head", smooth=True)
 
 
@@ -1162,13 +1161,13 @@ def crown_peak(F, size, word):
     hr, cy, top, y0, y1 = _head(F)
     _scalp(F, "stone_band")
     c = Vector((0, cy + 0.1 * hr, top - 0.36 * hr))
-    hgt = 2.5 * hr * size
-    rock = g.lathe([(1.02 * hr, 0.0), (0.84 * hr, 0.3 * hgt), (0.5 * hr, 0.62 * hgt), (0.2 * hr, 0.86 * hgt), (0.0, hgt)], n=7, centre=c, phase=0.3)
+    hgt = 3.3 * hr * size
+    rock = g.lathe([(1.2 * hr, 0.0), (1.0 * hr, 0.3 * hgt), (0.56 * hr, 0.62 * hgt), (0.22 * hr, 0.86 * hgt), (0.0, hgt)], n=7, centre=c, phase=0.3)
     rock = ([p + Vector((0.06 * hr * math.sin(p.z * 9.0), 0.05 * hr * math.cos(p.z * 7.0), 0)) for p in rock[0]], rock[1])
-    snow = g.lathe([(0.56 * hr, 0.6 * hgt), (0.25 * hr, 0.86 * hgt), (0.0, hgt + 0.03 * hr)], n=7, centre=c + Vector((0, 0, 0.012)), phase=0.3, caps=False)
+    snow = g.lathe([(0.62 * hr, 0.6 * hgt), (0.27 * hr, 0.86 * hgt), (0.0, hgt + 0.03 * hr)], n=7, centre=c + Vector((0, 0, 0.012)), phase=0.3, caps=False)
     F.add("peak", rock, "stone_slab", "head", smooth=False)
     F.add("peak_snow", snow, "ice_white", "head", smooth=False)
-    F.add("peak_band", hoop(c + Vector((0, 0, 0.05 * hr)), 1.05 * hr, 1.05 * hr, 0.07 * hr, n=10, sides=4), "accent", "head", smooth=False)
+    F.add("peak_band", hoop(c + Vector((0, 0, 0.05 * hr)), 1.24 * hr, 1.24 * hr, 0.08 * hr, n=10, sides=4), "accent", "head", smooth=False)
 
 
 @style("crown", "wheat")
@@ -1185,11 +1184,11 @@ def crown_wheat(F, size, word):
         d = Vector((math.cos(a) * 0.4, math.sin(a) * 0.4, 1.0)).normalized()
         L = (1.0 + 0.5 * rnd(i, 12)) * hr * size
         stalks = g.merge(stalks, g.tube([b0, b0 + d * L], [0.035 * hr, 0.025 * hr], n=3))
-        for j in range(3):
-            q = b0 + d * (L + (j - 0.4) * 0.22 * hr)
-            ears = g.merge(ears, g.ico(q, 0.13 * hr, sub=0, scale=(0.8, 0.8, 1.5)))
+        for j in range(2):
+            q = b0 + d * (L + (j - 0.3) * 0.26 * hr)
+            ears = g.merge(ears, g.ico(q, 0.14 * hr, sub=1, scale=(0.8, 0.8, 1.6)))
     F.add("wheat_stalks", stalks, "straw_wheat", "head", smooth=True)
-    F.move("sway", "wheat", [(ears, "accent_light")], c, "head", smooth=False)
+    F.move("sway", "wheat", [(ears, "accent_light")], c, "head", smooth=True)
 
 
 @style("crown", "crater")
@@ -1244,9 +1243,9 @@ def crown_lure(F, size, word):
     hr, cy, top, y0, y1 = _head(F)
     b0 = Vector((0, y0 + 0.5 * hr, top - 0.12 * hr))
     pts = [b0, b0 + Vector((0, -0.3 * hr, 1.0 * hr)) * size, b0 + Vector((0, -1.5 * hr, 1.35 * hr)) * size, b0 + Vector((0, -2.3 * hr, 0.6 * hr)) * size, b0 + Vector((0, -2.45 * hr, -0.1 * hr)) * size]
-    stalk = g.tube(pts, [0.09 * hr, 0.07 * hr, 0.05 * hr, 0.035 * hr, 0.03 * hr], n=5)
-    lamp = g.ico(pts[-1] + Vector((0, 0, -0.26 * hr)), 0.3 * hr * size, sub=1, scale=(1, 1, 1.25))
-    cage = hoop(pts[-1] + Vector((0, 0, -0.26 * hr)), 0.33 * hr * size, 0.33 * hr * size, 0.03 * hr, u=X, v=Y, n=8, sides=3)
+    stalk = g.tube(pts, [0.12 * hr, 0.1 * hr, 0.075 * hr, 0.055 * hr, 0.045 * hr], n=5)
+    lamp = g.ico(pts[-1] + Vector((0, 0, -0.36 * hr)), 0.44 * hr * size, sub=1, scale=(1, 1, 1.25))
+    cage = hoop(pts[-1] + Vector((0, 0, -0.36 * hr)), 0.48 * hr * size, 0.48 * hr * size, 0.04 * hr, u=X, v=Y, n=8, sides=3)
     F.move("sway", "lure", [(stalk, "accent"), (lamp, field("lure", 3.8)), (cage, "accent_pale")], b0, "head", smooth=True)
 
 
@@ -1255,8 +1254,9 @@ def crown_anvil(F, size, word):
     """A tower of cloud worn like a headdress, flat on top; small lightnings run in it."""
     hr, cy, top, y0, y1 = _head(F)
     c = Vector((0, cy + 0.1 * hr, top - 0.1 * hr))
+    size *= 2.0
     dark = g.merge(cloud(c + Vector((0, 0, 0.2 * hr)), 1.15 * hr * size, n=5, seed=20), cloud(c + Vector((0.1 * hr, 0, 1.0 * hr * size)), 1.3 * hr * size, n=5, seed=21))
-    pale = g.merge(cloud(c + Vector((0, 0, 1.95 * hr * size)), 1.75 * hr * size, n=6, seed=22, flat=0.6), g.ico(c + Vector((0, 0, 2.5 * hr * size)), 2.5 * hr * size, sub=1, scale=(1.0, 0.72, 0.2)))
+    pale = g.merge(cloud(c + Vector((0, 0, 1.95 * hr * size)), 1.75 * hr * size, n=6, seed=22, flat=0.6), g.ico(c + Vector((0, 0, 2.5 * hr * size)), 3.0 * hr * size, sub=3, scale=(1.0, 0.72, 0.18)))
     bolts = g.merge(bolt(c + Vector((0.5 * hr, -1.0 * hr * size, 1.5 * hr * size)), c + Vector((0.1 * hr, -1.08 * hr * size, 0.4 * hr)), 0.14 * hr, seed=1),
                     bolt(c + Vector((-0.8 * hr, -0.95 * hr * size, 1.25 * hr * size)), c + Vector((-0.5 * hr, -1.0 * hr * size, 0.55 * hr)), 0.1 * hr, seed=2, n=3))
     F.move("pulse", "anvil", [(dark, "mist_storm"), (pale, "mist_cloud"), (bolts, field("bolt", 3.6))], c, "head", smooth=True)
@@ -1342,11 +1342,11 @@ def wear_mantle(F, size, word):
     else:
         pd = _lp().people_dress
         z0, z1 = P.neckz + 0.02, P.armz - 0.2 * size * P.t
-        cape = pd.drape((0, c.y + 0.02, 0), lambda t: (0.12 + (sw + 0.07 - 0.12) * t ** 0.6, 0.12 + (sw * 0.8 - 0.12) * t ** 0.6), [z0, (z0 + z1) / 2 + 0.05, z1], -math.pi * 0.96, math.pi * 0.96, thick=0.035, n=12)
+        cape = pd.drape((0, c.y + 0.02, 0), lambda t: (0.12 + (sw + 0.07 - 0.12) * t ** 0.6, 0.12 + (sw * 0.8 - 0.12) * t ** 0.6), [z0, (z0 + z1) / 2 + 0.05, z1], -math.pi * 0.7, math.pi * 0.7, thick=0.035, n=12)
         F.add("mantle", cape, "moss_green", "chest", smooth=True)
         leaves, pale = None, None
         for i in range(11):
-            a = math.pi * (-0.92 + 1.84 * i / 10)
+            a = math.pi * (-0.68 + 1.36 * i / 10)
             b0 = Vector((math.sin(a) * (sw + 0.06), c.y + 0.02 + math.cos(a) * sw * 0.8, z1 + 0.04))
             d = Vector((math.sin(a) * 0.5, math.cos(a) * 0.5, -1.0)).normalized()
             leaf = g.blade(b0, b0 + d * (0.2 + 0.1 * rnd(i, 16)) * P.t * size, 0.15 * P.t, normal=(math.sin(a), math.cos(a), 0.3), belly=0.45)
@@ -1410,11 +1410,12 @@ def wear_stole(F, size, word):
                                       [w * 0.7, w, w], normal=(0, -0.3, 1), thick=0.22))
     F.add("stole_yoke", front, "accent", "chest", smooth=True)
     by = P.rear(P.chestz) + 0.06
-    L = 2.2 * size * P.t
-    pts, pts2 = [], []
+    L = 2.6 * size * P.t
+    w *= 1.3
+    pts = []
     for i in range(9):
         t = i / 8
-        pts.append(Vector((0.55 * math.sin(t * math.pi * 2.3) * (0.25 + t) * L * 0.5, by + t * L * 0.62, P.chestz - 0.05 - t * (P.chestz - P.hipz + 0.3 * P.t) + 0.12 * math.sin(t * 7.0) * P.t)))
+        pts.append(Vector((math.sin(t * math.pi * 2.2) * (0.25 + 0.95 * t) * L * 0.44, by + 0.04 + t * L * 0.5, P.chestz - 0.05 - t * (P.chestz - P.hipz + 0.6 * P.t) + 0.14 * math.sin(t * 7.0) * P.t)))
     half = 5
     a_geo = ribbon(pts[:half], [w, w * 1.1, w * 1.2, w * 1.25, w * 1.3], normal=Z, thick=0.2)
     b_geo = ribbon(pts[half - 1:], [w * 1.3, w * 1.3, w * 1.2, w * 0.9, w * 0.2], normal=Z, thick=0.2)
@@ -1449,7 +1450,7 @@ def wear_cloak(F, size, word):
     if word == "ice":
         L = (z0 - P.footz) * 1.0
         pts = [Vector((0, by, z0)), Vector((0, by + 0.12, z0 - L * 0.4)), Vector((0, by + 0.5 * size, z0 - L * 0.8)), Vector((0, by + 1.3 * size, P.footz + 0.08)), Vector((0, by + 2.1 * size, P.footz + 0.03))]
-        sheet = ribbon(pts, [sw * 1.7, sw * 2.2, sw * 2.6, sw * 2.9, sw * 1.2], normal=(0, 1, 0.3), thick=0.14)
+        sheet = ribbon(pts, [sw * 1.8, sw * 2.6, sw * 3.4, sw * 4.0, sw * 2.8], normal=(0, 1, 0.3), thick=0.14)
         F.add("cloak", sheet, "ice_clear", "chest", smooth=False)
         F.add("cloak_band", ribbon([p + Vector((0, 0.012, 0.012)) for p in pts[1:4]], [sw * 0.5, sw * 0.6, sw * 0.6], normal=(0, 1, 0.3), thick=0.12), "accent", "chest", smooth=False)
         rocks = None
@@ -1644,20 +1645,21 @@ def under_slab(F, size, word):
         rocks = None
         for i in range(5):
             a = 0.9 + 1.25 * i
-            rocks = g.merge(rocks, lump(c + Vector((math.cos(a) * r * 0.78, math.sin(a) * r * 0.62 + 0.1, 0.1)), (0.13 + 0.09 * rnd(i, 23)) * size, seed=i + 2, sub=0, scale=(1, 1, 1.3)))
+            rocks = g.merge(rocks, lump(c + Vector((math.cos(a) * r * 0.8, math.sin(a) * r * 0.64 + 0.1, 0.07)), (0.14 + 0.1 * rnd(i, 23)) * size, seed=i + 2, sub=1, scale=(1.1, 1.0, 0.85)))
         F.add("slab_rocks", rocks, "stone_basalt", "root", smooth=False)
     elif word == "ridge":
         flank = None
         for sg in (1, -1):
-            flank = g.merge(flank, shard(c + Vector((sg * r * 0.5, 0, -0.1)), c + Vector((sg * r * 1.5, 0.05, -0.55 * size)), 0.34 * size, n=5, belly=0.2))
+            flank = g.merge(flank, shard(c + Vector((sg * r * 0.5, 0, -0.12)), c + Vector((sg * r * 1.3, 0.05, -0.5 * size)), 0.2 * size, n=5, belly=0.2))
         F.add("slab_flank", flank, "stone_slab", "root", smooth=False)
     elif word == "roots":
         roots = None
-        for i in range(6):
-            a = 2 * math.pi * i / 6 + 0.5
-            b0 = c + Vector((math.cos(a) * r * 0.5, math.sin(a) * r * 0.42, -0.4 * size))
-            L = (0.5 + 0.4 * rnd(i, 24)) * size
-            roots = g.merge(roots, g.tube([b0, b0 + Vector((math.cos(a) * 0.1, math.sin(a) * 0.1, -L * 0.5)), b0 + Vector((math.cos(a + 0.6) * 0.16, math.sin(a + 0.6) * 0.16, -L))], [0.05 * size, 0.032 * size, 0.008], n=4))
+        for i in range(9):
+            a = 2 * math.pi * i / 9 + 0.5
+            b0 = c + Vector((math.cos(a) * r * (0.3 + 0.3 * rnd(i, 28)), math.sin(a) * r * (0.25 + 0.25 * rnd(i, 29)), -0.42 * size))
+            L = (0.5 + 0.7 * rnd(i, 24)) * size
+            k1, k2 = Vector((math.cos(a + 1.2), math.sin(a + 1.2), 0)) * 0.12 * size, Vector((math.cos(a - 0.9), math.sin(a - 0.9), 0)) * 0.16 * size
+            roots = g.merge(roots, g.tube([b0, b0 + k1 + Vector((0, 0, -L * 0.36)), b0 + k1 * 0.4 + k2 + Vector((0, 0, -L * 0.7)), b0 + k2 * 1.6 + Vector((0, 0, -L))], [0.036 * size, 0.026 * size, 0.016 * size, 0.004], n=4))
         F.move("sway", "roots", [(roots, "root_brown")], c + Vector((0, 0, -0.4 * size)), "root", smooth=True)
     elif word == "magma":
         glow = None
@@ -1677,7 +1679,7 @@ def under_cone(F, size, word):
     prof = [(0.3 * P.t, z0), (0.42, z0 - 0.3), (0.62, P.kneez - 0.1), (0.95 * size, 0.1), (1.25 * size, -0.42), (0.8 * size, -0.62), (0.0, -0.7)]
     rock = g.lathe(prof, n=9, centre=c, phase=0.2)
     rock = ([p + Vector((0.05 * math.sin(p.z * 8.0 + p.x * 5.0), 0.05 * math.cos(p.z * 6.0 + p.y * 4.0), 0)) for p in rock[0]], rock[1])
-    F.add("cone", rock, "slag_dark", "root", smooth=False)
+    F.add("cone", rock, "slag_dark", "root", smooth=True)
     lava, hot = None, None
     for i in range(5):
         a = 2 * math.pi * i / 5 + 0.7
@@ -1803,11 +1805,11 @@ def under_cloud(F, size, word):
     """A cloud under its feet. storm: dark, with a stroke under it; bank: a long bank of it."""
     c = Vector((0, 0.05, F.seat - 0.2 * size))
     if word == "bank":
-        geo = g.merge(cloud(c, 0.5 * size, n=5, seed=40), cloud(c + Vector((0.62 * size, 0.1, -0.05)), 0.42 * size, n=4, seed=41), cloud(c + Vector((-0.66 * size, 0.06, -0.03)), 0.44 * size, n=4, seed=42))
-        F.move("pulse", "cloud", [(geo, "mist_cloud"), (cloud(c + Vector((0.1, 0.02, -0.14 * size)), 0.52 * size, n=4, seed=43, sub=0), "accent_pale")], c, "root", smooth=True)
+        geo = g.merge(cloud(c, 0.5 * size, n=5, seed=40), cloud(c + Vector((0.62 * size, 0.1, -0.05)), 0.42 * size, n=4, seed=41, sub=2), cloud(c + Vector((-0.66 * size, 0.06, -0.03)), 0.44 * size, n=4, seed=42, sub=2))
+        F.move("pulse", "cloud", [(geo, "mist_cloud"), (cloud(c + Vector((0.1, 0.02, -0.14 * size)), 0.52 * size, n=4, seed=43, sub=2), "accent_pale")], c, "root", smooth=True)
         return
     geo = cloud(c, 0.56 * size, n=6, seed=44 + F.level)
-    items = [(geo, "mist_storm" if word == "storm" else "mist_cloud"), (cloud(c + Vector((0.05, 0.02, -0.12 * size)), 0.4 * size, n=4, seed=45, sub=0), "accent_dark" if word == "storm" else "accent_pale")]
+    items = [(geo, "mist_storm" if word == "storm" else "mist_cloud"), (cloud(c + Vector((0.05, 0.02, -0.12 * size)), 0.4 * size, n=4, seed=45, sub=2), "accent_dark" if word == "storm" else "accent_pale")]
     if word == "storm":
         items.append((bolt(c + Vector((0.1, -0.16, -0.2 * size)), c + Vector((-0.12, -0.2, -0.95 * size)), 0.12 * size, seed=7), field("bolt", 3.6)))
     F.move("pulse", "cloud", items, c, "root", smooth=True)
@@ -1911,8 +1913,10 @@ def hold_sail(F, size, word):
         ww = w * (1.0 - 0.2 * t)
         belly = -0.5 * size * math.sin(t * math.pi) - 0.02
         rows.append([Vector((-ww, y, zz)), Vector((-ww * 0.5, y + belly * 0.8, zz)), Vector((0, y + belly, zz)), Vector((ww * 0.5, y + belly * 0.8, zz)), Vector((ww, y, zz))])
-    sail = g.loft(rows, caps=False, closed=False)
-    stripe = g.loft([[p + Vector((0, -0.012, 0)) for p in rows[1][1:4]], [p + Vector((0, -0.012, 0)) for p in rows[2][1:4]], [p + Vector((0, -0.012, 0)) for p in rows[3][1:4]]], caps=False, closed=False)
+    def sheet(rs, thick=0.02):      # a cloth with two sides: each row out and back again
+        return g.loft([r_ + [q + Vector((0, thick, 0)) for q in reversed(r_)] for r_ in rs], caps=True)
+    sail = sheet(rows)
+    stripe = sheet([[q + Vector((0, -0.014, 0)) for q in rows[k][1:4]] for k in (1, 2, 3)], thick=0.048)
     F.move("pulse", "sail", [(sail, "cloth_sail"), (stripe, "accent")], (0, y, z + 0.7 * size), "chest", smooth=True)
 
 
@@ -1943,7 +1947,7 @@ def around_cloudlet(F, size, word):
     for i in range(4):
         p = c + Vector(((i - 1.5) * 0.11, 0.03 * (i % 2), -0.3 - 0.11 * (i % 3)))
         drops = g.merge(drops, g.blade(p + Vector((0, 0, 0.1)), p, 0.05, normal=Y, belly=0.75))
-    F.move("bob", "cloudlet", [(cloud(c, 0.3 * size, n=5, seed=50), "mist_cloud"), (drops, field("rain", 2.6))], c, "chest", smooth=True)
+    F.move("bob", "cloudlet", [(cloud(c, 0.36 * size, n=5, seed=50, sub=2), "mist_cloud"), (drops, field("rain", 2.6))], c, "chest", smooth=True)
 
 
 @style("around", "stones", "embers", "sparks", "fish", "bubbles")
@@ -1992,7 +1996,7 @@ def around_streams(F, size, word):
     for sg, tag in ((1, "l"), (-1, "r")):
         b0 = Vector((sg * (P.sx + 0.02), P.army, P.armz + 0.09 * P.t))
         pts = [b0, b0 + Vector((sg * 0.3, 0.02, -0.03)) * size, b0 + Vector((sg * 0.6, 0.04, -0.4)) * size, b0 + Vector((sg * 0.74, 0.06, -1.0)) * size, Vector((sg * (P.sx + 0.8 * size), P.army + 0.06, F.seat - 0.3))]
-        water = ribbon(pts, [0.09, 0.11, 0.1, 0.085, 0.05], normal=(0, -1, 0.2), thick=0.6)
+        water = ribbon(pts, [0.05, 0.065, 0.06, 0.05, 0.03], normal=(0, -1, 0.2), thick=0.7)
         F.move("sway", "stream", [(water, "water_foam"), (g.ico(pts[-1], 0.08, sub=0), "ice_white")], b0, "chest", side=tag, smooth=True)
 
 
@@ -2028,11 +2032,16 @@ def storm(form_id, level, spec):
         z = 0.1 + 0.115 * k
         rad = 0.07 + 0.052 * k
         dark = k % 2 == 0
-        geo, veil = None, None
+        tk = 0.05 + 0.011 * k
+        geo = g.lathe([(rad - tk * 0.5, z - tk * 0.72), (rad + tk * 0.62, z - tk * 0.5), (rad + tk, z), (rad + tk * 0.62, z + tk * 0.62), (rad - tk * 0.5, z + tk * 0.8), (rad - tk, z)], n=14, caps=False)
+        geo = g.merge(geo, g.loft([[Vector((math.cos(2 * math.pi * j / 14) * (rad - tk), math.sin(2 * math.pi * j / 14) * (rad - tk), z)) for j in range(14)],
+                                   [Vector((math.cos(2 * math.pi * j / 14) * (rad - tk * 0.5), math.sin(2 * math.pi * j / 14) * (rad - tk * 0.5), z - tk * 0.72)) for j in range(14)]], caps=False))
+        veil = None
         for i in range(5 + k):
             a = 2 * math.pi * i / (5 + k) + 0.5 * k
-            p = Vector((math.cos(a) * rad, math.sin(a) * rad, z + 0.02 * math.sin(i * 2.0)))
-            geo = g.merge(geo, g.ico(p, 0.052 + 0.012 * k, sub=1, scale=(1.3, 1.0, 0.72), rot=(0, 0, a + math.pi / 2)))
+            p = Vector((math.cos(a) * (rad + tk * 0.5), math.sin(a) * (rad + tk * 0.5), z + 0.02 * math.sin(i * 2.0)))
+            if i % 3 == 0:
+                geo = g.merge(geo, g.ico(p, tk * 0.8, sub=2, scale=(1.3, 1.0, 0.8), rot=(0, 0, a + math.pi / 2)))
             if i % 2 == 0:
                 veil = g.merge(veil, g.blade(p, p + Vector((-math.sin(a), math.cos(a), 0.1)) * (0.13 + 0.02 * k), 0.06, normal=(math.cos(a), math.sin(a), 0.3), belly=0.3))
         objs.append(gl.moving("spin", "band", [(geo, mat("mist_storm" if dark else "accent_dark")), (veil, mat("accent_light" if dark else "mist_cloud"))], (0, 0, z), side="r" if k % 2 else "", n=k))
@@ -2040,7 +2049,7 @@ def storm(form_id, level, spec):
     objs.append(gl.moving("wag", "tail", [(tail, mat("mist_storm"))], (0, 0, 0.11)))
     # the head of the storm: an anvil of cloud, and the light inside it
     c = Vector((0, 0, 0.56))
-    top = g.merge(cloud(c, 0.2, n=7, seed=70), cloud(c + Vector((0, 0.02, 0.07)), 0.24, n=6, seed=71, flat=0.5), g.ico(c + Vector((0, 0.02, 0.12)), 0.33, sub=1, scale=(1.0, 0.75, 0.18)))
+    top = g.merge(cloud(c, 0.2, n=7, seed=70), cloud(c + Vector((0, 0.02, 0.07)), 0.24, n=6, seed=71, flat=0.5), g.ico(c + Vector((0, 0.02, 0.12)), 0.33, sub=3, scale=(1.0, 0.75, 0.18)))
     under = cloud(c + Vector((0, 0, -0.07)), 0.19, n=6, seed=72)
     objs.append(gl.moving("pulse", "crown", [(top, mat("mist_cloud")), (under, mat("mist_storm"))], c))
     inner = g.merge(bolt((0.08, -0.13, 0.5), (0.02, -0.15, 0.2), 0.035, seed=1, n=4), bolt((-0.14, -0.1, 0.47), (-0.08, -0.13, 0.27), 0.026, seed=2, n=3), bolt((0.17, 0.02, 0.44), (0.12, -0.02, 0.24), 0.026, seed=3, n=3, normal=(1, 0.3, 0)))
@@ -2048,7 +2057,7 @@ def storm(form_id, level, spec):
     # the face it keeps for your sake: calm, in the eye of it
     f = Vector((0, -0.17, 0.53))
     fr = 0.085
-    face_geo = g.ico(f, fr, sub=2, scale=(0.86, 0.5, 1.12))
+    face_geo = g.ico(f, fr, sub=3, scale=(0.86, 0.5, 1.12))
     nose = g.blade(f + Vector((0, -fr * 0.46, fr * 0.2)), f + Vector((0, -fr * 0.62, -fr * 0.3)), fr * 0.3, normal=(1, 0, 0), belly=0.7, thick=fr * 0.2)
     brows, mouth = None, None
     for sg in (1, -1):
@@ -2059,7 +2068,7 @@ def storm(form_id, level, spec):
     objs.append(face_ob)
     for sg, tag in ((1, "l"), (-1, "r")):
         e = f + Vector((sg * fr * 0.38, -fr * 0.42, fr * 0.2))
-        objs.append(gl.moving("blink", "eye", [(g.ico(e, fr * 0.2, sub=1, scale=(1.2, 0.6, 0.9)), mat("eye_white")), (g.ico(e + Vector((0, -fr * 0.08, 0)), fr * 0.12, sub=1, scale=(1, 0.6, 1)), field("eyes", 3.8))], e, side=tag))
+        objs.append(gl.moving("blink", "eye", [(g.ico(e, fr * 0.2, sub=2, scale=(1.2, 0.6, 0.9)), field("eyes", 3.8)), (g.ico(e + Vector((0, -fr * 0.1, 0)), fr * 0.07, sub=1, scale=(1, 0.6, 1)), mat("eye_dark"))], e, side=tag))
     # what turns round it: rain, and leaves it has picked up
     rain, bits = None, None
     for i in range(8):
@@ -2127,3 +2136,73 @@ def build(form_id, level, spec, base):
 
 def register(builders):
     builders["elemental"] = build
+
+
+# ======================================================================================
+# What it gives a hybrid: a crown nobody gave it, and a small weather of its own
+# ======================================================================================
+
+def gift_crown():
+    """The Elemental's crown, on whatever wears it: a ring of basalt columns that stands a
+    finger off the head, a flame of the field in the middle of it, and three small stones
+    that go round. Made at the head's socket, at the kit's size."""
+    import genius_lines as gl
+    cols, caps = None, None
+    n = 8
+    for i in range(n):
+        a = 2 * math.pi * (i + 0.5) / n
+        b0 = Vector((math.cos(a) * 0.082, math.sin(a) * 0.088, 0.012))
+        hgt = 0.05 + 0.06 * rnd(i, 80) + (0.03 if math.sin(a) > 0.3 else 0.0)
+        cols = g.merge(cols, prism(b0, b0 + Vector((math.cos(a) * 0.006, math.sin(a) * 0.006, hgt)), 0.03, n=6, phase=a))
+        caps = g.merge(caps, prism(b0 + Vector((0, 0, hgt)), b0 + Vector((0, 0, hgt + 0.008)), 0.03, n=6, phase=a, taper=0.8))
+    band = hoop((0, 0, 0.014), 0.09, 0.096, 0.012, n=12, sides=4)
+    ring = g.pieces("crown", [(cols, mat("stone_basalt")), (caps, mat("stone_pale")), (band, mat("brass_band"))], smooth=False)
+    c = Vector((0, 0, 0.03))
+    fire = g.merge(ribbon([c, c + Vector((0.012, 0, 0.07)), c + Vector((-0.006, 0.01, 0.16))], [0.07, 0.06, 0.004], normal=Y, thick=0.9),
+                   ribbon([c + Vector((0.02, 0.01, 0)), c + Vector((0.03, 0.01, 0.05)), c + Vector((0.022, 0.0, 0.1))], [0.04, 0.034, 0.003], normal=X, thick=0.9))
+    flame = gl.moving("flick", "flame", [(fire, field("flame", 3.2))], c)
+    stones = None
+    for i in range(3):
+        a = 2 * math.pi * i / 3
+        stones = g.merge(stones, lump((math.cos(a) * 0.17, math.sin(a) * 0.17, 0.07 + 0.03 * i), 0.024 + 0.008 * i, seed=i + 7, sub=0, scale=(1, 0.8, 1.3)))
+    orbit = gl.moving("spin", "stones", [(stones, mat("stone_slab"))], (0, 0, 0.08), smooth=False)
+    return [ring, flame, orbit]
+
+
+def gift_small_weather():
+    """The Elemental's small weather, over the head of whatever has it: a cloud the size of a
+    fist, dark underneath, that rains the field's light and now and then lets go a stroke."""
+    import genius_lines as gl
+    c = Vector((0, 0.01, 0.34))
+    top = cloud(c, 0.15, n=5, seed=90, sub=2)
+    under = cloud(c + Vector((0.01, 0, -0.035)), 0.115, n=4, seed=91, sub=2)
+    rain = None
+    for i in range(6):
+        a = 2.4 * i
+        p = c + Vector((math.cos(a) * 0.07, math.sin(a) * 0.05, -0.1 - 0.03 * (i % 3)))
+        rain = g.merge(rain, g.blade(p + Vector((0.004, 0, 0.045)), p, 0.014, normal=Y, belly=0.75))
+    cloud_ob = gl.moving("bob", "cloud", [(top, mat("mist_cloud")), (under, mat("mist_storm")), (rain, field("rain", 2.8))], c)
+    stroke = bolt(c + Vector((0.03, -0.03, -0.07)), c + Vector((-0.02, -0.05, -0.24)), 0.034, seed=9, n=4)
+    return [cloud_ob, gl.moving("flick", "bolt", [(stroke, field("bolt", 3.8))], c + Vector((0.03, -0.03, -0.07)), smooth=False)]
+
+
+GIFTS = {"elemental-crown": gift_crown, "elemental-small-weather": gift_small_weather}
+
+
+def build_gift(name):
+    kit.reset()
+    PALETTE.update(OWN)
+    objs = GIFTS[name]()
+    path = os.path.join(GIFT_DIR, name + ".glb")
+    os.makedirs(GIFT_DIR, exist_ok=True)
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in objs:
+        o.select_set(True)
+    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=True, export_yup=True)
+    tris = sum(sum(len(poly.vertices) - 2 for poly in o.data.polygons) for o in objs)
+    log("wrote", os.path.relpath(path, ROOT), "%d triangles, %d KB" % (tris, os.path.getsize(path) // 1024))
+
+
+if __name__ == "__main__":
+    for name in ([a for a in sys.argv[1:] if a in GIFTS] or list(GIFTS)):
+        build_gift(name)
