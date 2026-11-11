@@ -11,6 +11,7 @@
   "gun": 1.8,
   "shield": 1.5,
   "wolf": 1.4,
+  "elemental": 1.3,
   "hawk": 1.3
  },
  "cahokia": {
@@ -43,6 +44,7 @@
  },
  "khemet": {
   "hawk": 1.6,
+  "elemental": 1.5,
   "tortoise": 1.4,
   "ember": 1.4,
   "astrolabe": 1.4
@@ -56,6 +58,7 @@
  "varanasi": {
   "ember": 1.6,
   "bell": 1.5,
+  "elemental": 1.4,
   "stag": 1.4,
   "moth": 1.3,
   "lurker": 1.3
@@ -84,6 +87,7 @@
   "blade": 1.9,
   "demon": 1.3,
   "fox": 1.6,
+  "elemental": 1.5,
   "bow": 1.4,
   "carp": 1.4,
   "drake": 1.3,
