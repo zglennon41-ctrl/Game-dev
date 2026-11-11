@@ -798,6 +798,7 @@ def plan_curtain(B):
                (s * 0.5, -0.03, 0.45), side="l" if s > 0 else "r")
     for x in (-0.42, -0.21, 0.0, 0.21, 0.42):       # the pelmet of it
         roll(B, (x, -0.02, 0.9 - 0.04 * (1 - (x / 0.42) ** 2)), 0.085, (1.5, 0.8, 0.75), "main", 0.0, "still")
+    eyes(B, (0, -0.1, 0.865), 0.05, 0.016, part="still")
     # the eye of open air
     c = Vector((0, 0.0, 0.52))
     loop = [c + Vector((0.19 * math.cos(a), 0, 0.115 * math.sin(a) * (1.0 - 0.25 * abs(math.cos(a))))) for a in [2 * math.pi * i / 20 for i in range(21)]]

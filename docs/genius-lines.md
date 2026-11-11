@@ -859,7 +859,7 @@ are no longer on a floor: its arms hang below it and sway.
 *What moves*: the hood (`turn_head`; not the Name-stalker's, which is at a wall), the eyes
 (`blink_`), the hem in four pieces and every arm that holds nothing (`sway_`), the Dark
 Ahead's arms (`glide_`), the cape, the chain, the ribbon, the boughs, a lamp under a swaying
-arm (`sway_`), a candle or a low lamp's flame (`flick_`), the lamp, the glow, the heart, the
+arm (`sway_`), a candle's flame and the keeper's lamp (`flick_`), the glow, the heart, the
 maw, the keyhole, the core, the road's rings (`pulse_`), the mask, the twelve in three
 companies, the breath (`bob_`), the second face and the eye in the corner (`turn_`, and their
 eyes blink).
@@ -909,9 +909,8 @@ the Dark Threshold no longer shows the still air; the Second Assailant is the ne
 (0.17 against 0.165). The Fog: `mist` is drawn as water is, so every roll has a highlight
 (it wants a class of its own in `data/style.json`); the dark round an eye reads as
 spectacles; the Trail-keeper is a caterpillar on a board and the Smother a stack of blankets;
-the Calling Mist's faces are uncanny rather than nearly-known; Sudden Clearing has one eye,
-as its sign says, where every other Fog has two; Harbour Fog and Ground-veil are within a
-tenth of the size an object may be.
+the Calling Mist's faces are uncanny rather than nearly-known; Harbour Fog and Ground-veil
+are within a tenth of the size an object may be.
 
 **What was changed outside the two lines' files, and why.**
 

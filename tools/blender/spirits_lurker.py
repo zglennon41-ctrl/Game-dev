@@ -455,7 +455,7 @@ def plan_blot(B, spec):
     B.add(g.tube(sk.curve([(0, 0.03, 0.56), (0.0, 0.06, 0.63), (0.025, 0.1, 0.67), (0.05, 0.11, 0.66)], n=3), [0.06, 0.055, 0.047, 0.04, 0.033, 0.026, 0.018, 0.012, 0.007, 0.003], n=7), B.under, True)
     B.move("sway", "tail", [(g.tongue([(0, 0.04, 0.34), (0.05, 0.16, 0.25), (-0.03, 0.24, 0.16), (0.03, 0.27, 0.06)], [0.22, 0.14, 0.07, 0.005], thick=0.7), B.main, True)], (0, 0.04, 0.34))
     # a little darker where the eyes would be, and the eyes: soft, lidded, awake
-    B.add(sk.eye_pair((0, -0.118, 0.42), 0.057, 0.05, scale=(1.0, 0.4, 1.15), slant=0.0), B.main)
+    B.add(g.merge(g.ico((0.057, -0.112, 0.42), 0.05, sub=2, scale=(1.0, 0.32, 1.15)), g.ico((-0.057, -0.112, 0.42), 0.05, sub=2, scale=(1.0, 0.32, 1.15))), B.main)
     eyes, lids = None, None
     for s in (1, -1):
         eyes = g.merge(eyes, g.ico((s * 0.057, -0.139, 0.422), 0.021, sub=2, scale=(1.0, 0.5, 1.05)))
@@ -1287,7 +1287,7 @@ def head_prow(B, F, size):
 
 
 def holds_lamp(B, F, size, low=False):
-    """A covered lamp in its lap: brass of its Path's colour, and the light in it breathing."""
+    """A covered lamp in its lap: brass of its Path's colour, and the light in it guttering."""
     robed = getattr(F, "robed", False)
     k = B.spec.get("build", {}).get("tall", 0.55) / 0.55 if robed else 1.0
     c = Vector((0, -0.23, 0.2 * k)) if robed else ((F.hand("l") + F.hand("r")) / 2 + Vector((0, -0.02, -0.03)) if "l" in F.hands and "r" in F.hands else Vector((0, -0.24, 0.42)))
@@ -1303,7 +1303,7 @@ def holds_lamp(B, F, size, low=False):
     s = 1.25 * size
     B.add(g.lathe([(0.02 * s, 0.0), (0.045 * s, 0.01 * s), (0.045 * s, 0.03 * s)], n=8, centre=c), "accent_dark", False)
     B.add(g.lathe([(0.045 * s, 0.06 * s), (0.047 * s, 0.075 * s), (0.02 * s, 0.1 * s), (0.0, 0.11 * s)], n=8, centre=c), "accent_light", False)
-    B.move("pulse", "lamp", [(g.lathe([(0.036 * s, 0.03 * s), (0.04 * s, 0.045 * s), (0.036 * s, 0.06 * s)], n=8, centre=c, caps=False), field("core", 4.0), True)], c + Z * 0.045 * s)
+    B.move("flick", "lamp", [(g.lathe([(0.036 * s, 0.03 * s), (0.04 * s, 0.045 * s), (0.036 * s, 0.06 * s)], n=8, centre=c, caps=False), field("core", 4.0), True)], c + Z * 0.03 * s)
     posts = None
     for i in range(4):
         a = math.pi / 4 + i * math.pi / 2
