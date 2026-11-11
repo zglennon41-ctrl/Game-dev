@@ -1,7 +1,11 @@
 ## The soak test: many different characters play the whole game, from the questionnaire's
 ## result to Commencement, without a window and faster than the clock.
 ##
-##   npm run soak                      every character of the spread (about forty)
+##   npm run soak                      every character of the spread (about forty), from the
+##                                     questionnaire's result through the six lessons and the
+##                                     Field Examination (about a minute each)
+##   npm run soak -- --gate            and on through the term's postings to the Gate and
+##                                     Commencement (the term is long: a quarter of an hour each)
 ##   npm run soak -- --count=6         the first six
 ##   npm run soak -- --only=17         one of them, by number (to look at a failure again)
 ##   npm run soak -- --debug           and say what the autopilot is doing
@@ -25,7 +29,7 @@ extends Node
 const MAIN := preload("res://game/scenes/main.tscn")
 const SAVE := "user://soak.cfg"
 const STALL := 150.0          # game seconds with nothing moving
-const LIMIT := 75.0 * 60.0    # game seconds for one character, creation to Commencement
+var LIMIT := 40.0 * 60.0      # game seconds for one character (with --gate: four hours)
 
 var main: Node = null
 var args := {}
@@ -47,6 +51,7 @@ var _state := "idle"
 var _fails: Array = []        # this character's
 var _results: Array = []
 var _waiting := 0.0
+var _last_screen := -10.0
 var _last_lesson := ""
 var _steps_seen := {}
 
@@ -56,6 +61,8 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		var kv := String(a).trim_prefix("--").split("=", true, 1)
 		args[kv[0]] = kv[1] if kv.size() > 1 else true
+	if args.has("gate"):
+		LIMIT = 240.0 * 60.0
 	Settings.use_file(SAVE)
 	_wipe_save()
 	cast = make_cast(int(args.get("seed", "20261111")))
@@ -228,6 +235,13 @@ static func _buttons(under: Node) -> Array:
 	return out
 
 func _process(delta: float) -> void:
+	if _state == "rest":
+		# (the autopilot's own timers on the last screen run out before the next one starts)
+		_waiting -= delta
+		if _waiting <= 0.0:
+			_state = "idle"
+			_next_character()
+		return
 	if _state != "play" or main == null:
 		return
 	# No hit-stop and no slow motion here: they are kept by the wall clock, and this run is not.
@@ -242,7 +256,13 @@ func _process(delta: float) -> void:
 	_read_words()
 	_watch_steps()
 	# The screens: a player presses a button.
+	# Without --gate the character is through when the six lessons are behind them.
+	if not args.has("gate") and main.mode == "academy" and a.progress.get("done", []).has("project") and not a.in_lesson() and not a.busy() and not hud.screen.visible:
+		a.save()
+		_end_character(true)
+		return
 	if hud.screen.visible:
+		_last_screen = _t
 		_screen_t += dt
 		if _screen_t > 0.5:
 			_screen_t = 0.0
@@ -264,7 +284,7 @@ func _process(delta: float) -> void:
 	else:
 		_box_t = 0.0
 	# Leaving and coming back.
-	if main.mode == "academy" and not hud.screen.visible and _t >= _next_break and _breaks < 6:
+	if main.mode == "academy" and not hud.screen.visible and _t - _last_screen > 4.0 and _t >= _next_break and _breaks < 6:
 		_break()
 	# Is anything moving?
 	var sig := _signature()
@@ -394,7 +414,7 @@ func _end_character(through: bool) -> void:
 		var rec: Dictionary = h.get("academy", {}).get("record", {})
 		if g == null or not g.is_born():
 			_fail("left with no genius born")
-		elif g.instar < 2:
+		elif g.instar < 2 and args.has("gate"):
 			_fail("left without a Second Form (the genius is at %s)" % g.instar_name())
 		elif g.name == "":
 			_fail("left with a genius that has no name")
@@ -402,17 +422,19 @@ func _end_character(through: bool) -> void:
 			_fail("left at Stage %d, not 3" % int(h.get("stage", 2)))
 		if h.get("techniques", []).size() < 3:
 			_fail("left with %d school techniques in the hand, not 3" % h.get("techniques", []).size())
-		if int(h.get("marks", 0)) <= 0 or int(rec.get("marks", 0)) <= 0:
+		if int(rec.get("marks", 0)) <= 0 or (args.has("gate") and int(h.get("marks", 0)) <= 0):
 			_fail("left with no Marks")
-		if h.get("archetypes", []).is_empty():
+		if h.get("archetypes", []).is_empty() and args.has("gate"):
 			_fail("left with no archetype")
 		for l in ["hold", "rite", "shape", "discipline", "line", "project", "gate"]:
+			if l == "gate" and not args.has("gate"):
+				continue
 			if not h.get("academy", {}).get("done", []).has(l) and not (h.get("advanced", false) and l in ["hold", "shape", "discipline", "line"]):
 				_fail("left without %s done" % l)
 		if not h.get("advanced", false) and who["then"] != h.get("weapon", ""):
 			_fail("chose %s at the Discipline lesson and carries %s" % [who["then"], h.get("weapon", "")])
 		if g and g.is_born():
-			line = "Stage %d, %d Marks, %s the %s (%s), techniques %s, %d postings, %d troubles, carried out %d" % [int(h.get("stage", 2)), int(h.get("marks", 0)), g.name, g.form_name(), g.instar_name(),
+			line = "Stage %d, %d Marks, %s the %s (%s), techniques %s, %d postings, %d troubles, carried out %d" % [int(h.get("stage", 2)), int(rec.get("marks", 0)), g.name, g.form_name(), g.instar_name(),
 				",".join(h.get("techniques", [])), int(rec.get("quests", 0)), int(rec.get("troubles", 0)), int(rec.get("rescued", 0))]
 	var ok := through and _fails.is_empty()
 	var wall := (Time.get_ticks_msec() - _wall0) / 1000.0
@@ -422,9 +444,10 @@ func _end_character(through: bool) -> void:
 		print("SOAK     steps: %s" % ", ".join(slow))
 	_results.append({ "n": at, "who": _who_line(who), "through": through, "fails": _fails.duplicate(), "minutes": _t / 60.0 })
 	# The next one starts in the same session (a second character), unless this one broke it.
-	if not through or get_tree().paused:
+	if not through or get_tree().paused or not args.has("gate"):
 		_new_main()
-	call_deferred("_next_character")
+	_state = "rest"
+	_waiting = 3.0
 
 func _finish() -> void:
 	var through := _results.filter(func(r): return r["through"]).size()

@@ -5,7 +5,7 @@
 set -u
 here="$(dirname "$0")"
 LOG="${SOAK_LOG:-$(mktemp -t wildline-soak.XXXXXX.log)}"
-godot --headless --fixed-fps 60 --path "$here/.." res://game/tests/soak.tscn -- "$@" > "$LOG" 2>&1
+godot --headless --fixed-fps 30 --path "$here/.." res://game/tests/soak.tscn -- "$@" > "$LOG" 2>&1
 code=$?
 grep -a '^SOAK' "$LOG"
 # (the windowless renderer has no meshes: "Parameter "m" is null" is its, not the game's)
