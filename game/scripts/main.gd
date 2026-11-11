@@ -435,8 +435,18 @@ func _ready() -> void:
 				_settings_screen()
 			elif str(_args["title"]) == "credits":
 				_credits_screen()
+			if _args.has("lamps"):
+				# --title --lamps=0: the station with its lamps out, to look at
+				world.set_lamps(float(_args["lamps"]))
+				world.portrait_lights(false)
 			await _wait(3.0)
-			_shot("title")
+			if _args.has("mouse"):
+				# --title --mouse="New character": click that button with the mouse, and say where it led
+				for words in str(_args["mouse"]).split(","):
+					await _click_button(words)
+					await _wait(1.5)
+					print("MOUSE: '%s' led to mode %s%s" % [words, mode, ", a screen under the title" if _title_sub else ""])
+			await _shot("title")
 			await get_tree().create_timer(0.3).timeout
 			get_tree().quit()
 
@@ -623,7 +633,54 @@ func _card(lines: Array, next: Callable, style := "story", auto := 0.0) -> void:
 			await get_tree().process_frame
 		await _wait(0.6)
 		await _shot("card")
-		hud._card_go()
+		if _args.has("mouse"):
+			await _click(get_viewport().get_visible_rect().size / 2.0)
+		else:
+			hud._card_go()
+
+## Automated checks (--mouse): a click of the mouse at a place on the screen, in the interface's
+## own coordinates, sent the way a real one arrives: so a button that the mouse cannot reach
+## (something lying over it) fails the check as it would fail a player.
+func _click(at: Vector2) -> void:
+	var p := get_viewport().get_final_transform() * at
+	var mv := InputEventMouseMotion.new()
+	mv.position = p
+	mv.global_position = p
+	Input.parse_input_event(mv)
+	await get_tree().process_frame
+	for down in [true, false]:
+		var e := InputEventMouseButton.new()
+		e.button_index = MOUSE_BUTTON_LEFT
+		e.pressed = down
+		e.position = p
+		e.global_position = p
+		Input.parse_input_event(e)
+		await get_tree().process_frame
+		await get_tree().process_frame
+
+## Automated checks: the button of the screen that is up whose words begin so.
+func _button(words: String, under: Node = null) -> Button:
+	for c in (under if under else hud).get_children():
+		if c is Button and (c as Button).is_visible_in_tree():
+			var t := (c as Button).text
+			if t == "" and c.get_child_count() > 0:
+				var l := c.find_children("*", "Label", true, false)
+				t = (l[0] as Label).text if not l.is_empty() else ""
+			if t.begins_with(words):
+				return c
+		var found := _button(words, c)
+		if found:
+			return found
+	return null
+
+## Automated checks: click a button of the screen that is up, with the mouse.
+func _click_button(words: String) -> bool:
+	var b := _button(words)
+	if b == null:
+		print("MOUSE: no button '%s'" % words)
+		return false
+	await _click(b.get_global_rect().get_center())
+	return true
 
 ## Automated checks: wait by the game's own frames (a slow machine's frames are capped, and a
 ## timer by the wall's clock would run ahead of what is drawn).
@@ -724,22 +781,43 @@ func _recruiter_scene() -> void:
 	world.cine_look = b3 + Vector3(0, 1.4, 0) + side * 0.2
 	var go := func():
 		hud.hide_speech()
+		# The year passes, the act is named, and the hero walks straight in: the Instructor is
+		# waiting inside. (The gate's own screen is for a character who comes back to it from
+		# the title; the automated checks stop at it.)
 		_card(Data.story["cards"]["skip"], func():
-			_card(Data.story["cards"]["act1"], _academy_gate, "title", 2.6), "title", 2.0)
+			_card(Data.story["cards"]["act1"], _academy_gate if _args.has("answers") else _walk_in, "title", 2.6), "title", 2.0)
 	hud.show_speech(String(r["name"]), String(r["title"]), lines, [[String(r.get("go", "Go with her")), go]])
 	if _args.has("answers"):
 		for i in lines.size():
 			await _wait(1.2)
-			hud._speech_t = 1.0
-			hud.speech_press()
+			if _args.has("mouse"):
+				await _click(get_viewport().get_visible_rect().size / 2.0)
+			else:
+				hud._speech_t = 1.0
+				hud.speech_press()
 			if i == 0 or i == lines.size() - 1:
 				await _wait(0.3)
 				await _shot("recruiter")
-			hud._speech_t = 1.0
-			hud.speech_press()
+			if i < lines.size() - 1:
+				if _args.has("mouse"):
+					await _wait(0.3)
+					await _click(get_viewport().get_visible_rect().size / 2.0)
+				else:
+					hud._speech_t = 1.0
+					hud.speech_press()
 		await _wait(0.8)
 		await _shot("recruiter-end")
-		go.call()
+		if _args.has("mouse"):
+			await _click_button(String(r.get("go", "Go with her")))
+			await _wait(0.5)
+			print("MOUSE: the recruiter's button %s" % ("works" if mode == "story" and hud.card_up() else "DID NOTHING"))
+		else:
+			go.call()
+
+func _walk_in() -> void:
+	world.cine = false
+	_show_preview = false
+	enter_academy()
 
 ## The Academy's gate, a year on: the hero before the way in, and the choice to walk through.
 func _academy_gate() -> void:
@@ -776,6 +854,10 @@ func _academy_gate() -> void:
 		print("REACHED THE ACADEMY: %s, %s %s with a %s; Pattern %s" % [hero["name"], hero["blood"], hero["shape"], hero["weapon"], Builder.sentence(hero["pattern"])])
 		await _wait(2.5)
 		await _shot("academy")
+		if _args.has("mouse"):
+			await _click_button(String(a.get("enter", "Walk through the Gate")))
+			await _wait(2.0)
+			print("MOUSE: the gate's button %s" % ("works" if mode == "academy" else "DID NOTHING"))
 		if _args.has("quit"):
 			get_tree().create_timer(0.5, true, false, true).timeout.connect(get_tree().quit)
 
@@ -1665,12 +1747,22 @@ func _process(delta: float) -> void:
 	if _args.has("shots") and fight.now > _next_shot:
 		_next_shot = fight.now + float(_args.get("every", "5"))
 		_shot(mode)
+	# (and a picture of each of the night's great moments, with its name across the screen)
+	if _args.has("shots") and hud.banner_up() != _banner_seen:
+		_banner_seen = hud.banner_up()
+		if _banner_seen:
+			_shot_moment()
 	if mode == "fight":
 		if fight.p_state == "down":
 			_results.call_deferred("down")
 			mode = "results"
 		elif fight.now >= fight_end:
 			_results("time")
+
+var _banner_seen := false
+func _shot_moment() -> void:
+	await _wait(0.5)
+	await _shot("moment")
 
 func _sounds(events: Array) -> void:
 	for e in events:

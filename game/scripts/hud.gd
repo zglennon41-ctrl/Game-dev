@@ -1047,6 +1047,10 @@ func _speech_line_out() -> void:
 				btn.pressed.connect(spec[1])
 				_speech_buttons.add_child(btn)
 				Style.arrive(btn)
+				# (a moment before it can be pressed: someone hurrying the lines along with a
+				# key does not take the choice by accident)
+				btn.disabled = true
+				btn.create_tween().tween_callback(func(): btn.disabled = false).set_delay(0.45)
 			if _speech_buttons.get_child_count() > 0:
 				(_speech_buttons.get_child(0) as Button).call_deferred("grab_focus")
 	else:

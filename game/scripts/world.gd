@@ -3580,13 +3580,13 @@ func _kit_piece(name: String, pos: Vector3, rot_deg := 0.0, scale := Vector3.ONE
 			if name in ["lamp_post", "signal_lamp"]:
 				_lamp_cone(c as Node3D, Style.light("lamp", "color"))
 		_lamps.append(entry)
-	if name in ["lamp_post", "signal_lamp"]:
-		# the lit glass of a lamp on a post goes out with it
+	if place == "station":
+		# the lit glass of a lamp (on a post, on a wall) goes out with it; a lit window does not
 		for m in n.find_children("*", "MeshInstance3D", true, false):
 			var mi: MeshInstance3D = m
 			for i in (mi.mesh.get_surface_count() if mi.mesh != null else 0):
 				var sm := mi.get_surface_override_material(i) as ShaderMaterial
-				if sm != null and sm.get_shader_parameter("emission_energy") != null and float(sm.get_shader_parameter("emission_energy")) > 0.0:
+				if sm != null and String(sm.resource_name).to_lower().contains("lamp") and sm.get_shader_parameter("emission_energy") != null and float(sm.get_shader_parameter("emission_energy")) > 0.0:
 					_lamp_glows.append({ "mat": sm, "base": float(sm.get_shader_parameter("emission_energy")), "key": "emission_energy" })
 	return n
 
