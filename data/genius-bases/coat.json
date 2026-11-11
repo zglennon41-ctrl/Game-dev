@@ -61,7 +61,7 @@
   ],
   "body": {
    "kind": "clasp",
-   "stands": 0.75,
+   "stands": 1.1,
    "worn": {
     "cut": "scarf"
    },
@@ -318,17 +318,16 @@
       "cut": 0.55,
       "sweep": [
        0,
-       0.34
+       0.42
       ],
       "sleeves": [
        "aft",
        "fore"
       ],
       "lean": [
-       9,
+       13,
        0
       ],
-      "turn": 28,
       "grown": [
        "belt",
        [
@@ -387,7 +386,6 @@
          0,
          0
         ],
-        "turn": 0,
         "collar": [
          "turned",
          1.3
@@ -445,7 +443,6 @@
          0,
          0
         ],
-        "turn": 0,
         "sleeves": [
          "hold",
          "akimbo"
@@ -951,7 +948,7 @@
          "throat",
          "tuck"
         ],
-        "turn": -30,
+        "turn": -16,
         "lean": [
          -4,
          0

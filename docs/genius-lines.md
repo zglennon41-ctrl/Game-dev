@@ -479,18 +479,19 @@ how each holds itself, which is its form's habit:
 `sway_ghost` (the sleeve the Empty Sleeve left), `flick_flame` (Many Pockets' candle),
 `blink_eyes` (what looks out of a high collar). On the worn piece: `blink_weye`,
 `sway_wtag`, `sway_hood` (a cowl's hood), `sway_tassel_l|r` (a tippet's ends),
-`sway_scrap_l|r` (the Starter's).
+`sway_wscrap_l|r` (the Starter's).
 
 **The worn piece: a mantle (rule 7).** A coat that is worn is not its whole body hung down
 a back. It is the coat's own collar and a short cape over the shoulders, in its Path's cut
 and colour, with its form's sign on it small, and its clasp at the wearer's throat.
 
-- *It is made on the body it is worn on.* `MANTLE_ROWS` is the section of the game's
-  people at each height below the top of the shoulders (measured on `alexandria-m`; the
-  other men are within a finger of him, the women a finger lower at the shoulder and
-  slimmer in the neck, so on them it rides a little high and never cuts in): two fingers
-  off the body up the slope of the neck, flat across the shoulders, round the point of the
-  shoulder, down the blades and the breast. Its folds open toward its hem.
+- *It is made on the bodies it is worn on.* `MANTLE_ROWS` is its section at each height
+  below the top of the shoulders: up the slope of the neck, flat across the shoulders,
+  round the point of the shoulder, down the blades and the breast. One piece is worn by
+  all twenty-six of the game's people, each brought to it by the chest bone, so the rows
+  are the least that clears every one of them in the tunic they wear (the women's backs
+  and napes stand furthest behind the bone and set its back; the men's chests set its
+  front). Its folds open toward its hem.
 - *It keeps clear of the arms.* It is longest down the back (never below the bottom of the
   shoulder blades: 0.34 under the top of the shoulders), shortest over the arms (0.10 to
   0.16), with its two ends down the breast.
@@ -524,12 +525,13 @@ and on its mantle. Every model with its mantle in it is under 120 KB.
 
 **What is still weak.** The mantle is rigid: it rides the chest bone, so an arm lifted
 high passes through the lobe over its shoulder, and a wearer bent far forward carries it
-like a yoke. It is fitted to the men's shoulders. The eye in the clasp is small at a
-distance (it is a thumbnail's width on a sheet): a coat's face is still its whole bearing.
-A great coat's blades of light (the fifth and sixth instars) are placed for the floating
-body: worn, they need moving to the mantle (`genius_body.gd`). On the sheet the Starter is
-drawn smaller than its cell allows (the sheet's first measure misjudges a body under half
-a metre: `--cell=1.6 --only=coat-clasp` draws it right).
+like a yoke. One cut for every body is a loose cut on some: on a man it stands three
+fingers off the back and the nape, where on a woman it lies close. The eye in the clasp is
+small at a distance (a thumbnail's width on a sheet): a coat's face is still its whole
+bearing. On the sheet the Starter is drawn smaller than its cell allows (the sheet's first
+measure misjudges a body under half a metre: `--cell=1.6 --only=coat-clasp` draws it
+right). The Coat's two gifts to a hybrid (`wing-cloak`, `shadow-cloak`) are as the first
+pass left them.
 
 All three take `stands` and `coat` (the shift), as above. A style may not be `null` (that
 takes the key off and the line's default comes back): say `none`.

@@ -9,13 +9,23 @@ it is alive, and it blinks.
 The second pass (docs/genius-lines.md, "The second pass"):
 
   its Path's colour   the lining, and the trims its Path keeps (`trim`: hem, facing, cuffs,
-                      collar, piping, yoke), in the materials accent*
-  how it holds itself `sleeves` (a gesture for each arm), `lean` and `turn`: a coat is alive,
-                      and no two stand alike
+                      collar, piping, yoke...), in the materials accent*; `tone` is the step
+                      of the ramp a form's broad trims take
+  how it holds itself `sleeves` (a gesture for each arm), `lean`, `turn`, `bend`: a coat is
+                      alive, and no two stand alike
   what moves          the eye blinks, a sleeve that hangs sways, the tag on its clasp sways
   the worn piece      a coat that is worn is not the whole coat hung down a back: it is a
                       mantle, the coat's own collar and a short cape over the shoulders, in
                       its Path's cut and colour and carrying its form's sign (`worn`; Mantle)
+
+How cloth is made here. The game draws a face from its own side only and inks its other side
+(its toon shader culls back faces, whatever the model says). So a shell is a `skin`: its
+outside, and its lining only where the lining can be seen; a flat piece seen from both sides
+is a `leaf`: two sheets back to back, each the other's ink line; a trim lying on the cloth is
+a `band_on`; and anything else already wound the right way out is a `sheet`. None of these is
+passed through Blender's guess at which way a face looks. The clasp is one mesh for a form,
+set on the coat and on its mantle (`clasp_objects`), which is what keeps a model and its worn
+piece under 120 KB.
 """
 import math
 import os
@@ -1374,7 +1384,7 @@ class Mantle(Coat):
             for j, dx in enumerate((-0.028, 0.0, 0.028)):
                 b0 = cl[2] + Vector((dx, 0, 0.004))
                 its.append((g.blade(b0, b0 + Vector((dx * 0.4, 0.0, -0.04 - 0.014 * (j % 2))), 0.032, normal=Y), self.main))
-            self.move("sway", "scrap", its, top, side="l" if s > 0 else "r")
+            self.move("sway", "wscrap", its, top, side="l" if s > 0 else "r")
 
 
 def mantle(form_id, spec):
