@@ -4,39 +4,125 @@ lines_armors.py loads this file; what the conventions are, and what `wear` means
 A coat stands as if one of the game's people wore it and no one does: its hem at z = 0, the
 wearer's middle up the Z axis, their front to -Y. `length` is from the shoulders to the hem.
 Every coat keeps at its throat the clasp it grew from, and the eye in the clasp: that is where
-it is alive.
+it is alive, and it blinks.
+
+The second pass (docs/genius-lines.md, "The second pass"):
+
+  its Path's colour   the lining, and the trims its Path keeps (`trim`: hem, facing, cuffs,
+                      collar, piping, yoke), in the materials accent*
+  how it holds itself `sleeves` (a gesture for each arm), `lean` and `turn`: a coat is alive,
+                      and no two stand alike
+  what moves          the eye blinks, a sleeve that hangs sways, the tag on its clasp sways
+  the worn piece      a coat that is worn is not the whole coat hung down a back: it is a
+                      mantle, the coat's own collar and a short cape over the shoulders, in
+                      its Path's cut and colour and carrying its form's sign (`worn`; Mantle)
 """
 import math
+import os
 
+import bpy
 from mathutils import Matrix, Vector
 
 import genius_geo as g
 from genius_geo import X, Y, Z
 import genius_kit as kit
-from genius_kit import mat, field, mark
+from genius_kit import mat, field, mark, STAND
 from genius_relics import strap, ringtube
-from lines_armors import Piece, finish, eye, opt, each, lathe_at
+import genius_relics as rel
+from lines_armors import Piece, eye, opt, each, lathe_at, art_size, SOFT, log
 
 PI = math.pi
 
+# How each arm is held: where the elbow and the cuff are from the shoulder, as (out to its own
+# side, to the front, down). A coat with nobody in it still has a way of standing.
+SLEEVES = {
+    "hang": ((0.07, -0.02, 0.43), (0.08, 0.07, 0.90)),
+    "flat": ((0.035, -0.01, 0.45), (0.04, 0.0, 0.97)),            # empty, pressed flat
+    "trail": ((0.08, -0.02, 0.52), (0.1, 0.06, 1.2)),             # a sleeve let down for a longer arm
+    "reach": ((0.07, 0.08, 0.35), (-0.06, 0.52, 0.15)),           # reaching to take hold
+    "spread": ((0.34, 0.0, 0.15), (0.7, 0.05, 0.35)),             # held wide: an embrace
+    "back": ((0.06, -0.2, 0.37), (0.07, -0.4, 0.75)),             # swept back
+    "akimbo": ((0.32, -0.08, 0.34), (0.1, 0.1, 0.56)),            # a fist on its hip
+    "tuck": ((0.17, -0.03, 0.4), (0.03, 0.13, 0.68)),             # a hand in a pocket
+    "raise": ((0.24, 0.04, -0.04), (0.33, 0.1, -0.52)),           # an arm up: hailing
+    "cup": ((0.27, 0.0, 0.08), (0.2, 0.06, -0.26)),               # a hand to its ear
+    "throat": ((0.2, 0.14, 0.26), (0.02, 0.2, -0.02)),            # a hand to its own collar
+    "point": ((0.08, 0.26, 0.26), (0.05, 0.68, 0.1)),             # level, to the front
+    "hold": ((0.1, 0.14, 0.36), (0.0, 0.44, 0.4)),                # holding a thing out, low
+    "fold": ((0.15, 0.15, 0.37), (-0.24, 0.25, 0.3)),             # folded across itself
+    "heart": ((0.17, 0.11, 0.33), (-0.13, 0.21, 0.13)),           # a hand laid on its breast
+    "behind": ((0.11, -0.15, 0.38), (-0.15, -0.21, 0.56)),        # hands behind its back
+    "low": ((0.27, 0.03, 0.3), (0.48, 0.07, 0.55)),               # out and down: holding itself open
+    "fore": ((0.07, 0.17, 0.4), (0.06, 0.42, 0.72)),              # swung forward in a stride
+    "aft": ((0.07, -0.17, 0.4), (0.07, -0.36, 0.76)),             # swung back in a stride
+}
+SWAYS = ("hang", "flat", "trail")          # a sleeve that only hangs is free to sway
+
 
 class Coat(Piece):
+    fit = 1.0            # how much wider its collar is than the coat's own (the worn piece's is wider)
+
     def __init__(self, form_id, spec):
         Piece.__init__(self, form_id)
         g_ = lambda k, d: float(spec.get(k, d))  # noqa: E731
+        self.spec = spec
         self.L = g_("length", 1.5)
         self.flare, self.chest, self.waist, self.shw = g_("flare", 0.12), g_("chest", 1.0), g_("waist", 1.0), g_("shoulders", 1.0)
         self.open, self.cut, self.wave, self.rag = g_("open", 0.05), g_("cut", 0.0), g_("wave", 0.0), g_("rag", 0.0)
         sw = spec.get("sweep", [0, 0])
         self.sweep = (float(sw[0]), float(sw[1]))
         self.main, self.under, self.brass = mat("leather"), mat("leather_dark"), mat("metal_brass")
-        # what it is lined with shows wherever it is turned back (collar, lapels, cuffs). A lining of
-        # the field's light stays at those edges, so the coat keeps its form; `storm` is light all through
+        # its Path's colour (the builder has put the ramp's steps in the palette for this form)
+        self.acc, self.acc_d, self.acc_l, self.acc_p, self.acc_x = mat("accent"), mat("accent_dark"), mat("accent_light"), mat("accent_pale"), mat("accent_deep")
+        # what it is lined with shows wherever it is turned back (collar, lapels, the front as it
+        # opens): its Path's colour. A lining of the field's light stays at those edges, so the
+        # coat keeps its form; `storm` is light all through; `fur` is pelt.
         kind = spec.get("lining", "plain")
-        plain = mark("lining", self.under)
-        self.lining = {"plain": plain, "field": field("lining", 1.3), "storm": field("lining", 1.3), "red": mat("cloth_lining"), "fur": mat("pelt_light")}[kind]
-        self.inside = plain if kind == "field" else self.lining
+        self.lining = {"plain": self.acc, "red": self.acc, "field": field("lining", 1.3), "storm": field("lining", 1.3), "fur": mat("pelt_light")}[kind]
+        self.inside = self.acc_d if kind == "field" else (self.acc if kind in ("plain", "red") else self.lining)
+        self.trim = [t for t in (spec.get("trim") or [])]
         self.cuffs = {}          # side -> (where the cuff ends, the way the sleeve runs there, its radius)
+        self.movers = []         # (kind, what, [(geometry, material)], pivot, side): what the game moves
+
+    # --- what it is made of ---------------------------------------------------------------
+    def add(self, geo, material, smooth=None):
+        if smooth is None and material.name.startswith("accent"):
+            smooth = True                      # the Path's colour is cloth
+        Piece.add(self, geo, material, smooth)
+
+    def solid(self, geo, pick):
+        ob = Piece.solid(self, geo, pick)
+        names = [m.name for m in ob.data.materials]
+        for p in ob.data.polygons:
+            if names[p.material_index].startswith("accent"):
+                p.use_smooth = True
+        return ob
+
+    def move(self, kind, what, items, pivot, side=""):
+        """A piece of it the game moves (docs/genius-lines.md, "What moves")."""
+        items = [(geo, m) for geo, m in items if geo and geo[0]]
+        if items:
+            self.movers.append((kind, what, items, Vector(pivot), side))
+
+    def build(self, M=None):
+        """One object, stood on its lowest point: and what moves is part of what stands."""
+        ob = Piece.build(self, M)
+        low = 0.0
+        for kind, what, items, pivot, side in self.movers:
+            for geo, m in items:
+                low = min([low] + [(self.lift @ Vector(v)).z for v in geo[0]])
+        if low < 0.0:
+            up = Matrix.Translation((0, 0, -low))
+            ob.data.transform(up)
+            ob.data.update()
+            self.lift = up @ self.lift
+        return ob
+
+    def moving(self, T):
+        """The pieces that move, made where the body now stands (the geometry is turned, not
+        the object: a piece's own up stays the model's)."""
+        import genius_lines as gl
+        return [gl.moving(kind, what, [(g.moved(geo, T), m) for geo, m in items], T @ pivot, side=side) for kind, what, items, pivot, side in self.movers]
 
     # --- the body of the coat ------------------------------------------------------------
     def t(self, d):
@@ -50,9 +136,11 @@ class Coat(Piece):
         if d >= rows[-1][0]:
             rx, ry = rows[-1][1] + self.flare * (d - 0.77), rows[-1][2] + 0.85 * self.flare * (d - 0.77)
         else:
+            rx, ry = rows[0][1], rows[0][2]
             for (d0, x0, y0), (d1, x1, y1) in zip(rows, rows[1:]):
                 if d <= d1:
                     f = max(0.0, (d - d0) / (d1 - d0))
+                    f = f * f * (3 - 2 * f)          # eased from one measure to the next
                     rx, ry = x0 + (x1 - x0) * f, y0 + (y1 - y0) * f
                     break
         t = self.t(d)
@@ -74,12 +162,28 @@ class Coat(Piece):
         rx, ry, cx, cy = self.section(d)
         return Vector((math.sin(a) * ry, math.cos(a) * rx, 0)).normalized()
 
-    def shell(self, n=13, thick=0.02):
+    def fall(self, a):
+        """How far below the shoulders its edge is, round it (a coat's hem is level)."""
+        return self.L
+
+    def hem(self, a, up=0.05, out=0.007):
+        """A place on its edge: `up` above it, `out` from the cloth."""
+        d = self.fall(a) - up
+        p = self.at(d, a, out)
+        if self.rag:
+            p.z += self.rag * 0.16 * abs(math.sin(3.5 * a + 0.5)) * max(0.0, 1.0 - up / 0.2)
+        return p
+
+    def hem_pts(self, up=0.05, out=0.007, n=17):
+        phi = self.gap(self.L - up)
+        return [self.hem(-(PI - phi) + 2 * (PI - phi) * i / (n - 1), up, out) for i in range(n)]
+
+    def shell(self, n=17, thick=0.02):
         L = self.L
-        ds = [d for d in (-0.05, 0.0, 0.2, 0.52, 0.77) if d < L - 0.04]
+        ds = [d for d in (-0.05, 0.0, 0.09, 0.2, 0.36, 0.52, 0.64, 0.77) if d < L - 0.04]
         d = 0.77
-        while d + 0.3 < L - 0.04:
-            d += 0.3
+        while d + 0.2 < L - 0.04:
+            d += 0.2
             ds.append(d)
         ds.append(L)
         rings = []
@@ -106,24 +210,63 @@ class Coat(Piece):
             st = g.merge(st, g.tube(back, [0.005] * len(back), n=3))
         self.round(st, mark("stitch", self.main))
 
+    def trims(self):
+        """Its Path's colour where it shows on the outside: the same places down a whole Path."""
+        L, tr = self.L, self.trim
+        ds = [d for d in (0.03, 0.2, 0.36, 0.52, 0.64, 0.77) if d < L - 0.1]
+        d = 0.77
+        while d + 0.2 < L - 0.1:
+            d += 0.2
+            ds.append(d)
+        ds.append(L - 0.03)
+        if "hem" in tr:              # a broad band at the hem
+            self.round(strap(self.hem_pts(0.065, 0.008), 0.11, 0.01, up=Z), self.acc_d)
+            self.round(g.tube(self.hem_pts(0.125, 0.012), [0.007] * 17, n=3), self.acc_l)
+        if "facing" in tr:           # the front edges faced with it
+            for s in (1, -1):
+                pts = [self.at(d, s * (PI - self.gap(d) - 0.085), 0.009) for d in ds]
+                self.round(strap(pts, 0.085, 0.01, up=X), self.acc)
+        if "piping" in tr:           # a thin bright line along every edge: a dark coat's outline
+            self.round(g.tube(self.hem_pts(0.012, 0.01), [0.011] * 17, n=4), self.acc_l)
+            for s in (1, -1):
+                pts = [self.at(d, s * (PI - self.gap(d) - 0.012), 0.01) for d in ds]
+                self.round(g.tube(pts, [0.011] * len(pts), n=4), self.acc_l)
+        if "yoke" in tr:             # a yoke across the shoulders
+            rings, m = [], 13
+            for d, out in ((-0.03, 0.01), (0.05, 0.022), (0.16, 0.028), (0.24, 0.03)):
+                phi = 0.22
+                outer = [self.at(d, -(PI - phi) + 2 * (PI - phi) * i / (m - 1), out) for i in range(m)]
+                inner = [self.at(d, -(PI - phi) + 2 * (PI - phi) * i / (m - 1), out - 0.012) for i in range(m)]
+                rings.append(outer + list(reversed(inner)))
+            self.round(g.loft(rings, caps=True, closed=True), self.acc_d)
+        if "stripe" in tr:           # a stripe down each side seam
+            for s in (1, -1):
+                pts = [self.at(d, s * 0.5 * PI, 0.009) for d in ds]
+                self.round(strap(pts, 0.07, 0.01, up=Y), self.acc)
+
     def sleeve(self, side, style, arm=1.0):
         if style in (None, "none"):
             return
         s, L, shx = side, self.L, 0.3 * self.shw
         sh = Vector((s * (shx - 0.02), 0.0, L - 0.05))
-        path = {
-            "hang": [sh, Vector((s * (shx + 0.07), 0.02, L - 0.48)), Vector((s * (shx + 0.08), -0.07, L - 0.95))],
-            "flat": [sh, Vector((s * (shx + 0.035), 0.01, L - 0.5)), Vector((s * (shx + 0.04), 0.0, L - 1.02))],
-            "reach": [sh, Vector((s * (shx + 0.07), -0.08, L - 0.4)), Vector((s * (shx - 0.06), -0.52, L - 0.2))],
-            "spread": [sh, Vector((s * (shx + 0.34), 0.0, L - 0.2)), Vector((s * (shx + 0.7), -0.05, L - 0.4))],
-            "back": [sh, Vector((s * (shx + 0.06), 0.2, L - 0.42)), Vector((s * (shx + 0.07), 0.4, L - 0.8))],
-        }[style]
+        (eo, ef, ed), (co, cf, cd) = SLEEVES[style]
+        path = [sh, Vector((s * (shx + eo), -ef, L - ed)), Vector((s * (shx + co), -cf, L - cd))]
         radii = [0.094 * arm, 0.08 * arm, 0.075 * arm]
-        self.round(g.tube(path, radii, n=7, flat=0.3 if style == "flat" else 1.0, up=Y if style == "flat" else None), self.main)
+        items = [(g.tube(path, radii, n=8, flat=0.3 if style == "flat" else 1.0, up=Y if style == "flat" else None), self.main)]
         d = (path[2] - path[1]).normalized()
         if style != "flat":
-            self.round(lathe_at([(radii[2] * 1.02, -0.07), (radii[2] * 1.13, -0.06), (radii[2] * 1.16, 0.006), (radii[2] * 0.9, 0.008)], path[2], d, n=7), self.lining)
-            self.round(lathe_at([(radii[2] * 0.92, 0.0), (0.0, 0.012)], path[2], d, n=7), mat("void"))
+            r = radii[2]
+            if "cuffs" in self.trim:       # a deep cuff turned back, in its Path's colour
+                items.append((lathe_at([(r * 1.04, -0.15), (r * 1.2, -0.14), (r * 1.26, 0.004), (r * 0.92, 0.01)], path[2], d, n=8), self.acc_l))
+                items.append((lathe_at([(r * 1.22, -0.155), (r * 1.25, -0.15), (r * 1.25, -0.128), (r * 1.2, -0.125)], path[2], d, n=8), self.acc_d))
+            else:
+                items.append((lathe_at([(r * 1.02, -0.07), (r * 1.13, -0.06), (r * 1.16, 0.006), (r * 0.9, 0.008)], path[2], d, n=8), mark("lining", self.under)))
+            items.append((lathe_at([(r * 0.92, 0.0), (0.0, 0.012)], path[2], d, n=8), mat("void")))
+        if style in SWAYS:                 # it hangs free, and stirs
+            self.move("sway", "sleeve", items, sh, side="l" if s > 0 else "r")
+        else:
+            for geo, m in items:
+                self.round(geo, m)
         self.cuffs[side] = (path[2], d, radii[2])
 
     # --- its collar ---------------------------------------------------------------------
@@ -134,15 +277,18 @@ class Coat(Piece):
         return 0.66 * 0.24 * rim, 0.66 * 0.22 * rim, rz, self.L + 0.46 * size - 0.9 * rz
 
     def collar(self, style, size=1.0):
-        L = self.L
+        L, fit = self.L, self.fit
+        worn = fit > 1.0             # round a neck that is there: nothing where the head is
         main, lining = self.main, self.lining
+        out_m = self.acc if "collar" in self.trim else main
         if style in (None, "none"):
             return
 
-        def band(z0, z1, r0, r1, gap=0.5, n=11, thick=0.016, tilt=0.0):
+        def band(z0, z1, r0, r1, gap=0.5, n=13, thick=0.016, tilt=0.0):
             """A collar standing round the neck: open at the front, flaring as it rises."""
             rings = []
             for z, (rx, ry) in ((z0, r0), ((z0 + z1) / 2, ((r0[0] + r1[0]) / 2, (r0[1] + r1[1]) / 2)), (z1, r1)):
+                rx, ry = rx * fit, ry * fit
                 outer, inner = [], []
                 for i in range(n):
                     a = -(PI - gap) + 2 * (PI - gap) * i / (n - 1)
@@ -150,64 +296,87 @@ class Coat(Piece):
                     outer.append(Vector((rx * math.sin(a), ry * math.cos(a) + 0.006, L + z + lift)))
                     inner.append(Vector(((rx - thick) * math.sin(a), (ry - thick) * math.cos(a) + 0.006, L + z + lift)))
                 rings.append(outer + list(reversed(inner)))
-            self.solid(g.loft(rings, caps=True, closed=True), lambda c, nrm: lining if (nrm.x * c.x + nrm.y * c.y) < -0.25 * math.hypot(c.x, c.y) else main)
+            self.solid(g.loft(rings, caps=True, closed=True), lambda c, nrm: lining if (nrm.x * c.x + nrm.y * c.y) < -0.25 * math.hypot(c.x, c.y) else out_m)
         if style in ("turned", "whiskers", "frost"):
             band(-0.03, 0.2 * size, (0.115, 0.105), (0.175 * (0.8 + 0.2 * size), 0.16 * (0.8 + 0.2 * size)), tilt=0.25)
         elif style == "stand":
             band(-0.03, 0.09 * size, (0.112, 0.102), (0.118, 0.108), gap=0.3)
         elif style == "high":        # a collar that stands up by itself
-            band(-0.03, 0.46 * size, (0.125, 0.115), (0.24 * (0.7 + 0.3 * size), 0.22 * (0.7 + 0.3 * size)), gap=0.62, tilt=0.2)
-            rx, ry, rz, zc = self.dark(size)       # and is full of dark, to the brim
-            self.round(g.ico((0, 0.02, zc), 1.0, sub=2, scale=(rx, ry, rz)), mat("void"))
+            if worn:                 # to the ears, and open to the face
+                band(-0.03, 0.27 * size, (0.125, 0.115), (0.2 * (0.7 + 0.3 * size), 0.185 * (0.7 + 0.3 * size)), gap=0.95, tilt=0.3)
+            else:
+                band(-0.03, 0.46 * size, (0.125, 0.115), (0.24 * (0.7 + 0.3 * size), 0.22 * (0.7 + 0.3 * size)), gap=0.62, tilt=0.2)
+                rx, ry, rz, zc = self.dark(size)       # and is full of dark, to the brim
+                self.round(g.ico((0, 0.02, zc), 1.0, sub=2, scale=(rx, ry, rz)), mat("void"))
         elif style == "spread":      # spread wide, flat as a dish, to hear with
-            band(-0.02, 0.12, (0.115, 0.105), (0.46 * size, 0.42 * size), gap=0.3, tilt=0.5, n=13)
+            band(-0.02, 0.12, (0.115, 0.105), (0.46 * size / fit, 0.42 * size / fit), gap=0.3, tilt=0.5, n=15)
         elif style in ("ear", "ears"):
             band(-0.03, 0.1, (0.112, 0.102), (0.13, 0.12), gap=0.4)
-        elif style == "hood":        # a hood, and the dark where a face would be
-            c = Vector((0, 0.03, L + 0.19 * size))
-            self.round(g.ico(c, 0.215 * size, sub=2, scale=(0.92, 1.0, 1.12)), main)
-            face = c + Vector((0, -0.15 * size, -0.03 * size))
-            self.round(g.ico(face, 0.1 * size, sub=2, scale=(1.2, 0.82, 1.5)), mat("void"))
-            self.round(ringtube(face + Vector((0, -0.04 * size, 0)), 0.124 * size, 0.154 * size, 0.015 * size, n=12, u=X, v=Z), main)
-            band(-0.04, 0.06, (0.125, 0.115), (0.2, 0.19), gap=0.3)
+        elif style == "hood":
+            if worn:                 # thrown back: it hangs behind the neck, open, and stirs
+                c = Vector((0, 0.2 * fit, L - 0.05 * size))
+                items = [(g.ico(c, 0.17 * size, sub=2, scale=(1.0, 0.62, 1.15)), main),
+                         (g.ico(c + Vector((0, -0.02, 0.1 * size)), 0.125 * size, sub=1, scale=(1.05, 0.5, 0.6)), lining),
+                         (ringtube(c + Vector((0, -0.02, 0.1 * size)), 0.135 * size, 0.07 * size, 0.016 * size, n=12, u=X, v=Y), out_m),
+                         (g.cone(c + Vector((0, 0.03, -0.14 * size)), c + Vector((0, 0.06, -0.34 * size)), 0.07 * size, n=6), main)]
+                self.move("sway", "hood", items, (0, 0.11 * fit, L + 0.02))
+                band(-0.04, 0.07, (0.125, 0.115), (0.19, 0.18), gap=0.45)
+            else:                    # a hood, and the dark where a face would be
+                c = Vector((0, 0.03, L + 0.19 * size))
+                self.round(g.ico(c, 0.215 * size, sub=2, scale=(0.92, 1.0, 1.12)), main)
+                face = c + Vector((0, -0.15 * size, -0.03 * size))
+                self.round(g.ico(face, 0.1 * size, sub=2, scale=(1.2, 0.82, 1.5)), mat("void"))
+                self.round(ringtube(face + Vector((0, -0.04 * size, 0)), 0.124 * size, 0.154 * size, 0.019 * size, n=14, u=X, v=Z), out_m if out_m is not main else self.acc)
+                band(-0.04, 0.06, (0.125, 0.115), (0.2, 0.19), gap=0.3)
         elif style == "fur":         # a collar of pelt
             for i in range(11):
                 a = -2.4 + 4.8 * i / 10
-                b0 = Vector((0.13 * math.sin(a), 0.12 * math.cos(a), L + 0.02))
+                b0 = Vector((0.13 * fit * math.sin(a), 0.12 * fit * math.cos(a), L + 0.02))
                 self.add(g.blade(b0, b0 + Vector((0.16 * math.sin(a), 0.15 * math.cos(a), 0.1 + 0.04 * (i % 2))) * size, 0.13, normal=Vector((math.sin(a), math.cos(a), 0.8))), mat("pelt_dark") if i % 2 else mat("pelt_light"))
         elif style == "cape":
             band(-0.03, 0.1, (0.112, 0.102), (0.14, 0.13), gap=0.4)
         else:
             raise ValueError("no such collar: " + str(style))
         if style in ("ear", "ears"):  # a collar shaped like the rim of an ear, either side
+            k = size * (0.82 if worn else 1.0)
+            x0 = 0.1 * fit
             for s in (1, -1):
-                k = size
-                path = [Vector((s * 0.1, 0.03, L - 0.01)), Vector((s * 0.2 * k, 0.06, L + 0.2 * k)), Vector((s * 0.36 * k, 0.07, L + 0.36 * k)), Vector((s * 0.5 * k, 0.05, L + 0.3 * k)),
-                        Vector((s * 0.53 * k, 0.03, L + 0.12 * k)), Vector((s * 0.42 * k, 0.02, L - 0.0 * k)), Vector((s * 0.3 * k, 0.02, L - 0.02))]
-                self.round(g.tube(path, [0.03, 0.036 * k, 0.04 * k, 0.04 * k, 0.036 * k, 0.03 * k, 0.02], n=6), main)
-                self.round(g.ico(Vector((s * 0.33 * k, 0.065, L + 0.16 * k)), 0.19 * k, sub=1, scale=(0.95, 0.1, 0.92)), lining)
-                self.round(g.tube([Vector((s * 0.24 * k, 0.04, L + 0.08 * k)), Vector((s * 0.34 * k, 0.03, L + 0.2 * k)), Vector((s * 0.42 * k, 0.03, L + 0.16 * k))], [0.018 * k, 0.022 * k, 0.012 * k], n=5), main)
+                path = [Vector((s * x0, 0.03, L - 0.01)), Vector((s * (x0 + 0.1 * k), 0.06, L + 0.2 * k)), Vector((s * (x0 + 0.26 * k), 0.07, L + 0.36 * k)), Vector((s * (x0 + 0.4 * k), 0.05, L + 0.3 * k)),
+                        Vector((s * (x0 + 0.43 * k), 0.03, L + 0.12 * k)), Vector((s * (x0 + 0.32 * k), 0.02, L - 0.0 * k)), Vector((s * (x0 + 0.2 * k), 0.02, L - 0.02))]
+                self.round(g.tube(path, [0.03, 0.036 * k, 0.04 * k, 0.04 * k, 0.036 * k, 0.03 * k, 0.02], n=7), out_m)
+                self.round(g.ico(Vector((s * (x0 + 0.23 * k), 0.065, L + 0.16 * k)), 0.19 * k, sub=2, scale=(0.95, 0.1, 0.92)), lining)
+                self.round(g.tube([Vector((s * (x0 + 0.14 * k), 0.04, L + 0.08 * k)), Vector((s * (x0 + 0.24 * k), 0.03, L + 0.2 * k)), Vector((s * (x0 + 0.32 * k), 0.03, L + 0.16 * k))], [0.018 * k, 0.022 * k, 0.012 * k], n=5), self.acc_d)
         if style == "whiskers":      # fine whiskers of thread along the collar's edge, that stir at sounds
             for i in range(9):
                 a = -2.3 + 4.6 * i / 8
-                b0 = Vector((0.175 * math.sin(a), 0.16 * math.cos(a), L + 0.2 * size + 0.05 * math.cos(a)))
+                b0 = Vector((0.175 * fit * math.sin(a), 0.16 * fit * math.cos(a), L + 0.2 * size + 0.05 * math.cos(a)))
                 tip = b0 + Vector((0.2 * math.sin(a), 0.16 * math.cos(a), 0.12 + 0.05 * (i % 2))) * size
                 self.round(g.tube([b0, (b0 + tip) / 2 + Vector((0, 0, 0.03)), tip], [0.006, 0.005, 0.002], n=3), mat("thread"))
         if style == "frost":         # frost on the collar that does not melt by the fire
             for i in range(9):
                 a = -2.3 + 4.6 * i / 8
-                b0 = Vector((0.17 * math.sin(a), 0.155 * math.cos(a), L + 0.19 * size + 0.05 * math.cos(a)))
+                b0 = Vector((0.17 * fit * math.sin(a), 0.155 * fit * math.cos(a), L + 0.19 * size + 0.05 * math.cos(a)))
                 self.add(g.cone(b0, b0 + Vector((0.06 * math.sin(a), 0.05 * math.cos(a), 0.08 + 0.04 * (i % 3))) * size, 0.022, n=4), mat("frost"))
 
-    def clasp(self, size=1.0):
-        """The clasp it grew from, at its throat, and the eye in it."""
-        c = self.at(0.07, PI, 0.022)
+    def clasp(self, size=1.0, what="eye"):
+        """The clasp it grew from, at its throat; the eye in it, which blinks; and the tag that
+        hangs from it, in its Path's colour."""
+        c = self.at(0.07, PI, 0.024)
         k = size
         for s in (1, -1):
-            self.add(g.box(c + Vector((s * 0.04 * k, 0, 0)), (0.055 * k, 0.014, 0.05 * k)), self.brass)
-            self.round(g.ico(c + Vector((s * 0.07 * k, -0.004, 0)), 0.012 * k, sub=0), mark("studs", self.main))
-        self.round(g.tube([c + Vector((-0.03 * k, -0.01, 0.0)), c + Vector((0.0, -0.016, 0.006 * k)), c + Vector((0.03 * k, -0.01, 0.0))], [0.007 * k, 0.007 * k, 0.007 * k], n=4), self.brass)
-        self.add_items(eye(c + Vector((-0.04 * k, -0.008, 0)), 0.02 * k, lids=self.brass))
+            self.add(g.box(c + Vector((s * 0.045 * k, 0, 0)), (0.062 * k, 0.016, 0.058 * k)), self.brass)
+            self.round(g.ico(c + Vector((s * 0.08 * k, -0.005, 0)), 0.013 * k, sub=0), mark("studs", self.main))
+        self.round(g.tube([c + Vector((-0.034 * k, -0.011, 0.0)), c + Vector((0.0, -0.018, 0.007 * k)), c + Vector((0.034 * k, -0.011, 0.0))], [0.008 * k, 0.008 * k, 0.008 * k], n=5), self.brass)
+        ec, r = c + Vector((-0.045 * k, -0.01, 0)), 0.03 * k
+        items = eye(ec, r, lids=self.brass)
+        self.move("blink", what, items[:2], ec)             # the iris and its slit shut; the lids stay
+        self.add_items(items[2:])
+        # a tag on a short chain, the size of a thumb
+        top = c + Vector((0.05 * k, -0.012, -0.03 * k))
+        tag = [(g.tube([top, top + Vector((0.0, -0.004, -0.045 * k))], [0.004, 0.004], n=3), self.brass),
+               (g.box(top + Vector((0, -0.006, -0.075 * k)), (0.036 * k, 0.008, 0.056 * k)), self.acc_l),
+               (g.ico(top + Vector((0, -0.012, -0.062 * k)), 0.007 * k, sub=0), self.brass)]
+        self.move("sway", "tag" if what == "eye" else "wtag", tag, top)
 
     def pocket(self, d, a, w=0.2, h=0.2, bulge=0.0, flap=True, material=None):
         material = material or self.main
@@ -217,55 +386,88 @@ class Coat(Piece):
         if bulge:
             self.round(g.ico(c + n * (0.02 + 0.03 * bulge) + Vector((0, 0, -0.02)), w * 0.42, sub=1, scale=(1.0, 0.5 * bulge + 0.2, 0.95)), material)
         if flap:
-            self.add(g.box(c + n * 0.024 + Vector((0, 0, h * 0.42)), (w * 1.08, 0.022, h * 0.3), rot=(0, 0, rz)), self.under)
+            self.add(g.box(c + n * 0.024 + Vector((0, 0, h * 0.42)), (w * 1.08, 0.022, h * 0.3), rot=(0, 0, rz)), self.acc_d)
             self.round(g.ico(c + n * 0.04 + Vector((0, 0, h * 0.3)), 0.012, sub=0), self.brass)
         return c, n
 
 
+# what a mantle can carry of a coat's signs (the rest belong to the skirts and the sleeves)
+ON_A_MANTLE = ("buttons", "buttons2", "offices", "pack", "dust", "stamps", "pelt", "rime", "pads", "lamp", "smoke", "lapels", "stars", "scorch",
+               "epaulettes", "chain", "stock", "tokens", "whiskers", "drops", "current", "knife", "oath", "figure", "patches", "hook", "wind", "eyes", "items")
+
+
 def grow(C, style, size, spec):
     L = C.L
+    worn = C.fit > 1.0
     main, under, brass, lining = C.main, C.under, C.brass, C.lining
     iron = mat("metal_iron")
-    if style == "belt":            # a belt, and its buckle
+    if style == "belt":            # a belt, and its buckle; its end hangs free, and stirs
         d = 0.5
         phi = C.gap(d)
         pts = [C.at(d, -(PI - phi) + 2 * (PI - phi) * i / 12, 0.012) for i in range(13)]
         C.add(strap(pts, 0.06, 0.014, up=Z), under)
-        C.add(g.box(C.at(d, PI - phi - 0.12, 0.022), (0.07, 0.02, 0.075)), brass)
+        bk = C.at(d, PI - phi - 0.12, 0.022)
+        C.add(g.box(bk, (0.07, 0.02, 0.075)), brass)
         for i in (3, 6, 9):
-            C.round(g.ico(pts[i] + C.normal(d, 0) * 0.0 + (pts[i] - Vector((0, 0, pts[i].z))).normalized() * 0.008, 0.011, sub=0), mark("studs", main))
+            C.round(g.ico(pts[i] + (pts[i] - Vector((0, 0, pts[i].z))).normalized() * 0.008, 0.011, sub=0), mark("studs", main))
+        end = bk + Vector((-0.02, -0.012, -0.03))
+        C.move("sway", "belt", [(strap([end, end + Vector((-0.01, -0.004, -0.11 * size)), end + Vector((-0.02, 0.0, -0.22 * size))], 0.05, 0.012, up=X), under),
+                                (g.box(end + Vector((-0.02, -0.002, -0.235 * size)), (0.056, 0.016, 0.03)), brass)], end)
     elif style in ("buttons", "buttons2", "offices"):     # buttons; two rows; a button for every writ served
         rows = 1 if style == "buttons" else 2
         n = {"buttons": 4, "buttons2": 5, "offices": 11}[style]
         bottom = {"buttons": 0.62, "buttons2": 0.66, "offices": min(L - 0.12, 1.45)}[style]
+        if worn:
+            n, bottom = (3 if style != "offices" else 5), C.fall(PI) - 0.07
         for r_ in range(rows):
             for i in range(n):
                 d = 0.14 + (bottom - 0.14) * i / (n - 1)
-                a = PI - C.gap(d) - (0.1 if rows == 1 else (0.12 + 0.26 * r_)) if rows == 1 or True else 0
+                a = PI - C.gap(d) - (0.1 if rows == 1 else 0.12)
                 if rows == 2 and r_ == 1:
                     a = -(PI - C.gap(d) - 0.12)
                 m = brass if style != "offices" or (i + r_) % 3 else field("writ", 1.8)
-                C.round(g.ico(C.at(d, a, 0.014), 0.017 * size, sub=0, scale=(1, 1, 1)), m)
-    elif style == "pack":          # what it carries between places: a roll at the back, and its strap
-        c = C.at(0.2, 0.0, 0.09)
-        C.round(g.tube([c + Vector((-0.2, 0, 0)), c, c + Vector((0.2, 0, 0))], [0.075 * size, 0.085 * size, 0.075 * size], n=7), mat("cloth_wool"))
+                C.round(g.ico(C.at(d, a, 0.014), 0.019 * size, sub=1, scale=(1, 1, 1)), m)
+    elif style in ("pack", "bedroll"):   # what it carries between places: a roll at the back, and its strap
+        up = 0.2 if style == "pack" and not worn else -0.06
+        c = C.at(max(up, 0.02), 0.0, 0.09) + Vector((0, 0, max(0.0, -up) + (0.05 if worn else 0.0)))
+        k = size * (0.8 if worn else 1.0)
+        C.round(g.tube([c + Vector((-0.22 * k, 0, 0)), c, c + Vector((0.22 * k, 0, 0))], [0.075 * k, 0.085 * k, 0.075 * k], n=8), mat("cloth_wool"))
         for s in (1, -1):
-            C.round(ringtube(c + Vector((s * 0.12, 0, 0)), 0.088 * size, 0.088 * size, 0.008, n=8, u=Y, v=Z), under)
-        C.add(strap([C.at(0.02, 0.6, 0.014), C.at(0.2, PI * 0.72, 0.016), C.at(0.46, PI - 0.45, 0.016)], 0.05, 0.012, up=Z), under)
+            C.round(ringtube(c + Vector((s * 0.13 * k, 0, 0)), 0.09 * k, 0.09 * k, 0.012, n=10, u=Y, v=Z), C.acc_l)
+        if not worn:
+            C.add(strap([C.at(0.02, 0.6, 0.014), C.at(0.2, PI * 0.72, 0.016), C.at(0.46, PI - 0.45, 0.016)], 0.05, 0.012, up=Z), under)
+            # a tin cup on a thong, that knocks as it walks
+            top = c + Vector((0.2 * k, 0.03, -0.07 * k))
+            C.move("sway", "cup", [(g.tube([top, top + Vector((0, 0, -0.08))], [0.004, 0.004], n=3), mat("cord")),
+                                   (lathe_at([(0.03, 0.0), (0.036, 0.008), (0.036, 0.07), (0.03, 0.07), (0.03, 0.012)], top + Vector((0, 0, -0.15)), Z, n=8), mat("metal_iron"))], top)
+        else:
+            C.add(strap([C.at(0.01, 0.9, 0.014), C.at(0.1, PI * 0.7, 0.016), C.at(0.2, PI - 0.5, 0.016)], 0.045, 0.012, up=Z), under)
+    elif style == "frame":         # a pack-frame that stands above its shoulders, and what is lashed to it
+        k = size
+        for s in (1, -1):
+            C.round(g.tube([C.at(0.5, s * 0.25, 0.1), C.at(0.0, s * 0.25, 0.1) + Vector((0, 0, 0.0)), C.at(0.0, s * 0.25, 0.1) + Vector((0, 0.0, 0.42 * k))], [0.016, 0.016, 0.014], n=5), mat("wood_dark"))
+        for z, w in ((0.36 * k, 0.24), (0.14 * k, 0.26), (-0.2, 0.26)):
+            c = C.at(0.0, 0.0, 0.11) + Vector((0, 0, z))
+            C.round(g.tube([c + Vector((-w, 0.0, 0)), c + Vector((w, 0.0, 0))], [0.013, 0.013], n=4), mat("wood_dark"))
+        c = C.at(0.0, 0.0, 0.17) + Vector((0, 0, 0.3 * k))
+        C.round(g.tube([c + Vector((-0.26, 0, 0)), c, c + Vector((0.26, 0, 0))], [0.085, 0.1, 0.085], n=8), mat("cloth_wool"))
+        for s in (1, -1):
+            C.round(ringtube(c + Vector((s * 0.15, 0, 0)), 0.104, 0.104, 0.013, n=10, u=Y, v=Z), C.acc_l)
+        C.round(g.ico(C.at(0.24, 0.0, 0.2), 0.19, sub=2, scale=(1.1, 0.7, 1.25)), under)
+        C.add(g.box(C.at(0.2, 0.0, 0.32), (0.2, 0.03, 0.14)), C.acc_d)
+        top = c + Vector((-0.24, 0.04, -0.09))
+        C.move("sway", "pan", [(g.tube([top, top + Vector((0, 0, -0.1))], [0.004, 0.004], n=3), mat("cord")),
+                               (g.ico(top + Vector((0, 0.0, -0.17)), 0.075, sub=1, scale=(1.0, 0.25, 1.0)), mat("metal_iron"))], top)
     elif style == "dust":          # dust on the hem from somewhere else
-        d = L - 0.07
-        phi = C.gap(d)
-        pts = [C.at(d, -(PI - phi) + 2 * (PI - phi) * i / 14, 0.006) for i in range(15)]
-        C.add(strap(pts, 0.13 * size, 0.008, up=Z), mat("cloth_dust"))
+        C.add(strap(C.hem_pts(0.07, 0.006, 15), 0.13 * size * (0.5 if worn else 1.0), 0.008, up=Z), mat("cloth_dust"))
     elif style == "stamps":        # a hem covered in post-marks, stamped one over another
-        for row, (dd, off) in enumerate(((0.08, 0.0), (0.2, 0.5), (0.32, 0.2))):
-            d = L - dd
-            phi = C.gap(d)
+        for row, (dd, off) in enumerate(((0.08, 0.0), (0.2, 0.5), (0.32, 0.2))[: 1 if worn else 3]):
+            phi = C.gap(L - dd)
             n = 11
             for i in range(n):
                 a = -(PI - phi - 0.1) + 2 * (PI - phi - 0.1) * (i + off) / n
                 m = (mat("stamp_ink"), mat("paint_red"), mat("paint_pale"))[(i + row) % 3]
-                C.round(g.ico(C.at(d, a, 0.006), 0.05 * size, sub=1, scale=(1.0, 1.0, 1.0)), m)
+                C.round(g.ico(C.hem(a, dd, 0.006), (0.036 if worn else 0.05) * size, sub=1, scale=(1.0, 1.0, 1.0)), m)
         for s in (1, -1):
             if s in C.cuffs:
                 p, dvec, r = C.cuffs[s]
@@ -278,6 +480,11 @@ def grow(C, style, size, spec):
             if d < L - 0.12:
                 C.pocket(d, a, w, h, bulge=b, material=stuff[i % 4])
     elif style == "items":         # what has turned up in them
+        if worn:
+            c = C.at(0.16, PI - 0.55, 0.03)
+            C.round(g.tube([c, c + Vector((0.01, 0, 0.13))], [0.024, 0.018], n=6), mat("glass"))
+            C.round(g.ico(c + Vector((0.01, 0, 0.145)), 0.017, sub=0), mat("wax"))
+            return
         c, n = C.at(0.76, PI * 0.7, 0.03), C.normal(0.76, PI * 0.7)
         C.round(g.tube([c, c + Vector((0.01, 0, 0.2))], [0.03, 0.022], n=6), mat("glass"))                    # a bottle
         C.round(g.ico(c + Vector((0.01, 0, 0.22)), 0.02, sub=0), mat("wax"))
@@ -289,120 +496,136 @@ def grow(C, style, size, spec):
         c4 = C.at(1.02, PI * 0.42, 0.06)
         C.round(g.ico(c4 + Vector((0, 0, 0.06)), 0.05, sub=1), field("lost", 2.4))                               # and something it lost last season
     elif style == "pelt":          # a pelt has grown through the cloth at the shoulders
-        for row, (d, n, Lb) in enumerate(((0.02, 13, 0.22), (0.14, 15, 0.26), (0.3, 15, 0.22))[: 2 + (size > 1.2)]):
+        for row, (d, n, Lb) in enumerate(((0.02, 13, 0.22), (0.14, 15, 0.26), (0.3, 15, 0.22))[: (1 if worn else 2) + (size > 1.2)]):
             for i in range(n):
                 a = -PI * 0.86 + 2 * PI * 0.86 * i / (n - 1)
                 b0 = C.at(d, a, 0.0)
                 nrm = C.normal(d, a)
-                C.add(g.blade(b0, b0 + nrm * 0.1 * size + Vector((0, 0, -Lb * size)), 0.17 * size, normal=nrm + Vector((0, 0, 0.5)), belly=0.4), mat("pelt_dark") if (i + row) % 2 else mat("pelt_light"))
+                C.add(g.blade(b0, b0 + nrm * 0.1 * size + Vector((0, 0, -Lb * size * (0.6 if worn else 1.0))), 0.17 * size, normal=nrm + Vector((0, 0, 0.5)), belly=0.4), mat("pelt_dark") if (i + row) % 2 else mat("pelt_light"))
     elif style == "rime":          # frost that does not melt
         for i in range(12):
             a = -PI * 0.8 + 2 * PI * 0.8 * i / 11
             b0 = C.at(0.03, a, 0.02)
             nrm = C.normal(0.03, a)
             C.add(g.cone(b0, b0 + nrm * 0.07 + Vector((0, 0, 0.1 + 0.05 * (i % 3))) * size, 0.03, n=4), mat("frost"))
-        d = L - 0.05
-        phi = C.gap(d)
-        pts = [C.at(d, -(PI - phi) + 2 * (PI - phi) * i / 14, 0.006) for i in range(15)]
-        C.add(strap(pts, 0.1, 0.008, up=Z), mat("frost"))
+        C.add(strap(C.hem_pts(0.05, 0.006, 15), 0.1 * (0.6 if worn else 1.0), 0.008, up=Z), mat("frost"))
     elif style == "pads":          # padded at the elbows and shoulders with something like stone
         for s in (1, -1):
-            sh = Vector((s * 0.3 * C.shw, 0.0, L - 0.02))
+            sh = Vector((s * 0.3 * C.shw * C.fit, 0.0, L - 0.02))
             C.add(g.ico(sh + Vector((s * 0.03, 0, 0.02)), 0.15 * size, sub=1, scale=(1.1, 1.0, 0.62)), mat("stone_hide"))
             C.add(g.ico(sh + Vector((s * 0.03, 0, 0.07)), 0.09 * size, sub=0, scale=(1.1, 1.0, 0.6)), mat("stone_light"))
             if s in C.cuffs:
                 p, dvec, r = C.cuffs[s]
                 C.add(g.ico(p - dvec * 0.46 + Vector((s * 0.02, 0.05, 0)), 0.1 * size, sub=1, scale=(0.9, 1.0, 1.1)), mat("stone_hide"))
-        C.add(g.box(C.at(0.25, 0.0, 0.03), (0.34, 0.06, 0.4)), mat("stone_plate"))
-    elif style == "lamp":          # a lamp at its collar, for where the air is bad
-        c = C.at(0.16, PI - 0.5, 0.05)
+        C.add(g.box(C.at(0.25 if not worn else 0.16, 0.0, 0.03), (0.34, 0.06, 0.4 if not worn else 0.22)), mat("stone_plate"))
+    elif style in ("lamp", "handlamp"):   # a lamp, for where the air is bad: at its collar, or held out
         r = 0.05 * size
+        if style == "handlamp" and -1 in C.cuffs and not worn:
+            p, dvec, rr = C.cuffs[-1]
+            top = p + dvec * 0.03
+            c = top + Vector((0, 0, -0.16))
+            r = 0.062 * size
+            C.move("sway", "lamp", [(g.tube([top, c + Vector((0, 0, r * 1.2))], [0.005, 0.005], n=3), iron),
+                                    (lathe_at([(r * 0.5, 0.0), (r, 0.01), (r, 0.028), (r * 0.5, 0.034)], c + Vector((0, 0, -r - 0.03)), Z, n=8), brass),
+                                    (g.ico(c, r, sub=2, scale=(1, 1, 1.15)), field("lamp", 3.6)),
+                                    (lathe_at([(r * 0.85, 0.0), (r * 0.2, 0.035)], c + Vector((0, 0, r * 1.05)), Z, n=8), brass)], top)
+            return
+        c = C.at(0.16, PI - 0.5, 0.05)
         C.round(lathe_at([(r * 0.5, 0.0), (r, 0.01), (r, 0.028), (r * 0.5, 0.034)], c + Vector((0, 0, -r - 0.03)), Z, n=6), brass)
         C.round(g.ico(c, r, sub=1, scale=(1, 1, 1.15)), field("lamp", 3.6))
         C.round(lathe_at([(r * 0.8, 0.0), (r * 0.2, 0.03)], c + Vector((0, 0, r * 1.05)), Z, n=6), brass)
     elif style == "smoke":         # it is hard to say where it ends
-        d = L - 0.02
         for i in range(8):
             a = -2.6 + 5.2 * i / 7
-            b0 = C.at(d, a, 0.0)
-            nrm = C.normal(d, a)
-            k = size * (0.8 + 0.3 * math.sin(i * 1.7))
+            b0 = C.hem(a, 0.02, 0.0)
+            nrm = C.normal(C.fall(a) - 0.02, a)
+            k = size * (0.8 + 0.3 * math.sin(i * 1.7)) * (0.55 if worn else 1.0)
             pts = [b0 + Vector((0, 0, 0.1)), b0 + nrm * 0.04 * k + Vector((0, 0, -0.02)), b0 + nrm * 0.1 * k + Vector((0.03 * math.sin(i), 0, 0.12 * k)), b0 + nrm * 0.07 * k + Vector((0, 0, 0.3 * k))]
             C.add(g.tongue(pts, [0.12, 0.11, 0.07, 0.01], thick=0.3, normal=nrm), mat("smoke") if i % 3 else mat("shade_edge"))
     elif style == "ghost_sleeve":  # it leaves a sleeve where its partner was, and the sleeve takes the blow
         s = -1
-        base = Vector((s * (0.3 * C.shw + 0.34), -0.1, L - 0.3))
-        pts = [base, base + Vector((s * 0.06, -0.02, -0.42)), base + Vector((s * 0.02, -0.08, -0.86))]
-        C.round(g.tube(pts, [0.085, 0.075, 0.07], n=7), mat("smoke"))
-        C.round(lathe_at([(0.076, 0.0), (0.0, 0.012)], pts[2], (pts[2] - pts[1]).normalized(), n=7), mat("void"))
+        base = Vector((s * (0.3 * C.shw + 0.44), -0.14, L - 0.24))
+        pts = [base, base + Vector((s * 0.1, -0.02, -0.42)), base + Vector((s * 0.04, -0.1, -0.86))]
+        its = [(g.tube(pts, [0.085, 0.075, 0.07], n=8), mat("smoke")),
+               (lathe_at([(0.076, 0.0), (0.0, 0.012)], pts[2], (pts[2] - pts[1]).normalized(), n=8), mat("void")),
+               (ringtube(pts[1], 0.082, 0.082, 0.008, n=10, u=X, v=Y), field("pulse", 1.6)),
+               (ringtube(pts[2] - (pts[2] - pts[1]).normalized() * 0.03, 0.078, 0.078, 0.01, n=10, u=X, v=Y), C.acc_l)]
         for i in range(4):
             b0 = base + Vector((0.0, 0.0, 0.02))
-            C.add(g.tongue([b0, b0 + Vector((-s * 0.1, 0.02 * i, 0.06 + 0.03 * i)), b0 + Vector((-s * 0.22, 0.03 * i, 0.04 * i))], [0.1, 0.07, 0.01], thick=0.3, normal=Y), mat("shade_edge"))
-        C.round(ringtube(pts[1], 0.082, 0.082, 0.006, n=8, u=X, v=Y), field("pulse", 1.6))
+            its.append((g.tongue([b0, b0 + Vector((-s * 0.1, 0.02 * i, 0.06 + 0.03 * i)), b0 + Vector((-s * 0.22, 0.03 * i, 0.04 * i))], [0.1, 0.07, 0.01], thick=0.3, normal=Y), mat("shade_edge")))
+        C.move("sway", "ghost", its, base)
     elif style == "knife":         # a hard straight line in the lining, a hand long
-        d0 = 0.3
+        d0 = 0.3 if not worn else 0.14
         a = PI - C.gap(d0) - 0.05
         hilt = C.at(d0, a, -0.03) + Vector((0.02, -0.02, 0))
-        tip = hilt + Vector((0.0, 0.0, -0.36 * size))
+        tip = hilt + Vector((0.0, 0.0, -0.36 * size * (0.4 if worn else 1.0)))
         C.add(g.tongue([hilt + Vector((0, 0, -0.06)), (hilt + tip) / 2, tip], [0.045, 0.04, 0.004], thick=0.2, normal=Y), mat("steel_polish"))
         C.round(g.tube([hilt + Vector((0, 0, -0.06)), hilt + Vector((0, 0, 0.06))], [0.016, 0.014], n=5), under)
         C.add(g.box(hilt + Vector((0, 0, -0.06)), (0.09, 0.02, 0.016)), brass)
         C.round(g.ico(hilt + Vector((0, 0, 0.07)), 0.018, sub=0), field("hilt", 2.6))
     elif style == "lapels":        # lapels, turned back to show what it is lined with; or cut sharp as blades
+        k = size * (0.55 if worn else 1.0)
         for s in (1, -1):
             a = s * (PI - C.gap(0.1) - 0.02)
-            top, low = C.at(0.0, a, 0.02), C.at(0.46 * size, s * (PI - C.gap(0.46 * size) - 0.02), 0.02)
+            top, low = C.at(0.0, a, 0.02), C.at(0.46 * k, s * (PI - C.gap(0.46 * k) - 0.02), 0.02)
             out = C.normal(0.2, s * (PI - 0.5))
-            mid = (top + low) / 2 + out * 0.12 * size + Vector((0, -0.03, 0.05))
-            C.add(g.tongue([top, mid, low], [0.05, 0.2 * size, 0.02], thick=0.14, normal=Vector((s * 0.3, -1, 0.1))), lining)
+            mid = (top + low) / 2 + out * 0.12 * k + Vector((0, -0.03, 0.05))
+            C.add(g.tongue([top, mid, low], [0.05, 0.2 * k, 0.02], thick=0.14, normal=Vector((s * 0.3, -1, 0.1))), lining)
     elif style == "eyes":          # what looks out of the dark of its collar
         c_style, k = opt(spec.get("collar", "turned"))
+        if worn:                   # worn, they are two points of light on the collar's rim, behind the wearer's ears
+            for s in (1, -1):
+                C.round(g.ico(Vector((s * 0.15 * C.fit, 0.1 * C.fit, L + 0.25 * k)), 0.024 * size, sub=1, scale=(1.2, 0.7, 0.8)), field("eyes", 4.0))
+            return
         rx, ry, rz, zc = C.dark(k)
         el, az = math.radians(48), math.radians(38)       # high on the dark and to the front, over the collar's edge
+        its = []
         for s in (1, -1):
             d = Vector((s * math.cos(el) * math.sin(az), -math.cos(el) * math.cos(az), math.sin(el)))
             p = Vector((rx * d.x, 0.02 + ry * d.y, zc + rz * d.z)) + d * 0.006
-            er = 0.27 * rx * min(size, 1.15)
-            C.round(g.ico(p, er, sub=1, scale=(1.3, 0.6, 0.7)), field("eyes", 4.0))
+            er = 0.3 * rx * min(size, 1.15)
+            its.append((g.ico(p, er, sub=1, scale=(1.3, 0.6, 0.7)), field("eyes", 4.0)))
+        C.move("blink", "eyes", its, (0, 0.02 - ry * 0.5, zc + rz * math.sin(el)))
     elif style == "stars":         # after dusk, the colour of whatever is behind it
         f = field("stars", 2.0)
-        for i in range(14):
+        for i in range(14 if not worn else 8):
             a = -2.7 + 5.4 * ((i * 0.618) % 1.0)
-            d = 0.25 + (L - 0.4) * ((i * 0.381 + 0.13) % 1.0)
+            d = 0.25 + (L - 0.4) * ((i * 0.381 + 0.13) % 1.0) if not worn else 0.05 + (C.fall(a) - 0.1) * ((i * 0.381 + 0.13) % 1.0)
             C.round(g.ico(C.at(d, a, 0.006), 0.014 + 0.008 * (i % 3), sub=0), f)
     elif style == "wind":          # the lining is weather now, and it has been let out
         f = field("storm", 1.5)
-        for i in range(7):
-            d = 0.3 + 0.16 * i
-            if d > L - 0.1:
+        for i in range(7 if not worn else 3):
+            d = 0.3 + 0.16 * i if not worn else 0.08 + 0.07 * i
+            if d > L - 0.1 and not worn:
                 break
             s = 1 if i % 2 else -1
             b0 = C.at(d, s * (PI - C.gap(d) * 0.5), -0.05)
-            k = size * (0.8 + 0.3 * math.sin(i * 2.1))
+            k = size * (0.8 + 0.3 * math.sin(i * 2.1)) * (0.45 if worn else 1.0)
             pts = [b0, b0 + Vector((s * 0.1, -0.2, 0.05)) * k, b0 + Vector((s * 0.3, -0.42, 0.16)) * k, b0 + Vector((s * 0.26, -0.62, 0.36)) * k]
             C.add(g.tongue(pts, [0.12, 0.11, 0.07, 0.01], thick=0.3, normal=Vector((0, 0.2, 1))), f if i % 2 else mat("smoke"))
     elif style == "scorch":        # black at every edge, and stiff as hide
         st = mat("soot")
-        d = L - 0.05
-        phi = C.gap(d)
-        pts = [C.at(d, -(PI - phi) + 2 * (PI - phi) * i / 14, 0.008) + Vector((0, 0, 0.06 * abs(math.sin(3.5 * (-(PI - phi) + 2 * (PI - phi) * i / 14) + 0.5)) * C.rag)) for i in range(15)]
-        C.add(strap(pts, 0.12, 0.008, up=Z), st)
+        pts = C.hem_pts(0.05, 0.008, 15)
+        C.add(strap(pts, 0.12 * (0.5 if worn else 1.0), 0.008, up=Z), st)
         for s in (1, -1):
             if s in C.cuffs:
                 p, dvec, r = C.cuffs[s]
                 C.round(g.tube([p - dvec * 0.1, p + dvec * 0.01], [r * 1.08, r * 1.2], n=7), st)
-            edge = [C.at(dd, s * (PI - C.gap(dd) - 0.02), 0.01) for dd in (0.05, 0.3, 0.55, min(L - 0.05, 0.8))]
-            C.add(strap(edge, 0.07, 0.008, up=Y), st)
+            if not worn:
+                edge = [C.at(dd, s * (PI - C.gap(dd) - 0.02), 0.01) for dd in (0.05, 0.3, 0.55, min(L - 0.05, 0.8))]
+                C.add(strap(edge, 0.07, 0.008, up=Y), st)
         f = field("ember", 2.6)
-        C.round(g.tube([p + Vector((0, 0, 0.07)) for p in pts], [0.008] * len(pts), n=3), f)
-        C.add(strap([p + Vector((0, 0, 0.12)) for p in pts], 0.035, 0.008, up=Z), mat("cloth_dust"))
+        C.round(g.tube([p + Vector((0, 0, 0.07 if not worn else 0.035)) for p in pts], [0.008] * len(pts), n=3), f)
+        if not worn:
+            C.add(strap([p + Vector((0, 0, 0.12)) for p in pts], 0.035, 0.008, up=Z), mat("cloth_dust"))
         for i in range(7):
             a = -2.6 + 5.2 * i / 6
-            C.round(g.ico(C.at(L - 0.03 - 0.03 * (i % 2), a, 0.016), 0.024 * size, sub=0), f)
+            C.round(g.ico(C.hem(a, 0.03 + 0.03 * (i % 2), 0.016), 0.024 * size, sub=0), f)
     elif style == "epaulettes":    # the offices it has held, on its shoulders
         for s in (1, -1):
-            sh = Vector((s * 0.3 * C.shw, 0.0, L + 0.0))
+            sh = Vector((s * 0.3 * C.shw * C.fit, 0.0, L + 0.0))
             C.add(g.box(sh + Vector((-s * 0.04, 0, 0.012)), (0.2, 0.13, 0.03)), brass)
+            C.add(g.box(sh + Vector((-s * 0.04, 0, 0.03)), (0.15, 0.09, 0.012)), C.acc)
             for i in range(5):
                 b0 = sh + Vector((s * 0.06, -0.05 + 0.025 * i, 0.0))
                 C.round(g.tube([b0, b0 + Vector((s * 0.02, 0, -0.1 * size))], [0.009, 0.007], n=4), brass)
@@ -411,22 +634,24 @@ def grow(C, style, size, spec):
         for i in range(15):
             t = i / 14
             a = PI - 0.9 + 1.8 * t
-            d = 0.06 + 0.3 * math.sin(PI * t)
+            d = 0.06 + (0.3 if not worn else 0.2) * math.sin(PI * t)
             geo = g.merge(geo, g.ico(C.at(d, a, 0.02), 0.018 * size, sub=0, scale=(1.3, 0.6, 1.0) if i % 2 else (0.8, 0.6, 1.3)))
         C.round(geo, brass)
-        C.round(g.ico(C.at(0.38, PI, 0.03), 0.045 * size, sub=1, scale=(1, 0.4, 1)), field("seal", 2.4))
+        C.round(g.ico(C.at(0.38 if not worn else 0.27, PI, 0.03), 0.045 * size, sub=1, scale=(1, 0.4, 1)), field("seal", 2.4))
     elif style == "oath":          # its partner's oath, stitched in the lining where only they can read it: the left breast, turned back
         f = field("oath", 2.2)
-        a = PI - C.gap(0.3) - 0.42
-        c, n = C.at(0.3, a, 0.03), C.normal(0.3, a)
+        d0 = 0.3 if not worn else 0.15
+        k = size * (0.5 if worn else 1.0)
+        a = PI - C.gap(d0) - 0.42
+        c, n = C.at(d0, a, 0.03), C.normal(d0, a)
         rz = math.atan2(-n.x, n.y)
-        C.add(g.box(c, (0.26 * size, 0.02, 0.36 * size), rot=(0, 0, rz)), mat("cloth_lining"))
+        C.add(g.box(c, (0.26 * k, 0.02, 0.36 * k), rot=(0, 0, rz)), C.acc_d)
         side = Vector((n.y, -n.x, 0))
         for i in range(5):
             z = 0.13 - 0.06 * i
-            w = (0.1 - 0.02 * (i % 2)) * size
-            C.round(g.tube([c + n * 0.014 - side * w + Vector((0, 0, z * size)), c + n * 0.014 + side * w + Vector((0, 0, z * size))], [0.007, 0.007], n=3), f)
-        C.round(g.ico(c + n * 0.016 + Vector((0, 0, -0.2 * size)), 0.03, sub=1, scale=(1, 1, 1)), mat("wax"))
+            w = (0.1 - 0.02 * (i % 2)) * k
+            C.round(g.tube([c + n * 0.014 - side * w + Vector((0, 0, z * k)), c + n * 0.014 + side * w + Vector((0, 0, z * k))], [0.007, 0.007], n=3), f)
+        C.round(g.ico(c + n * 0.016 + Vector((0, 0, -0.2 * k)), 0.03 * (0.7 if worn else 1.0), sub=1, scale=(1, 1, 1)), mat("wax"))
     elif style == "stock":         # a clerk's white stock at the throat, and the points of a collar
         c = C.at(0.1, PI, 0.012)
         C.add(g.blade(c + Vector((0, 0, 0.07)), c + Vector((0, -0.01, -0.16 * size)), 0.17 * size, normal=Vector((0, -1, 0)), belly=0.3), mat("paper"))
@@ -434,7 +659,7 @@ def grow(C, style, size, spec):
             C.add(g.blade(c + Vector((s * 0.03, 0, 0.08)), c + Vector((s * 0.14 * size, -0.01, 0.0)), 0.07, normal=Vector((0, -1, 0.3))), mat("paper"))
     elif style == "sash":          # the sash of an office, shoulder to hip
         pts = [C.at(0.02, PI * 0.56, 0.02), C.at(0.2, PI * 0.8, 0.02), C.at(0.38, PI - 0.25, 0.022), C.at(0.56, -(PI - 0.5), 0.02), C.at(0.72, -PI * 0.6, 0.02)]
-        C.add(strap(pts, 0.1 * size, 0.012, up=Z), mat("paint_red"))
+        C.add(strap(pts, 0.1 * size, 0.012, up=Z), C.acc_l)
         C.round(g.ico(C.at(0.7, -PI * 0.62, 0.04), 0.04, sub=1, scale=(1, 0.5, 1)), brass)
     elif style == "tug":           # one cuff worn thin where it takes hold of a wrist
         if 1 in C.cuffs:
@@ -449,6 +674,9 @@ def grow(C, style, size, spec):
             # and what it has hold of: the place a wrist would be, shown in light
             C.round(ringtube(p + dvec * 0.085 * size, 0.062 * size, 0.062 * size, 0.013, n=10, u=dvec, v=u_, sides=4), field("pulse", 2.6))
     elif style == "hook":          # left on a hook in another room
+        if worn:                   # worn, the loop it hangs by, at the nape
+            C.round(ringtube(Vector((0, 0.13 * C.fit, L + 0.03)), 0.03, 0.045, 0.008, n=10, u=X, v=Z), mat("cord"))
+            return
         top = Vector((0, 0.06, L + 0.42 * size))
         C.add(g.box(top + Vector((0, 0.05, 0.06)), (0.5, 0.04, 0.12)), mat("wood_dark"))
         C.round(g.tube([top + Vector((0, 0.03, 0.06)), top + Vector((0, -0.05, 0.04)), top + Vector((0, -0.07, -0.04)), top + Vector((0, -0.03, -0.08))], [0.014, 0.014, 0.013, 0.01], n=5), iron)
@@ -458,16 +686,25 @@ def grow(C, style, size, spec):
     elif style == "patches":       # mended in four different hands
         spots = [(0.3, PI * 0.72, "cloth_patch_a", 0.2), (0.9, -PI * 0.6, "cloth_patch_b", 0.26), (1.15, PI * 0.3, "cloth_patch_c", 0.22), (0.62, -PI * 0.2, "cloth_patch_a", 0.18),
                  (0.36, -PI * 0.8, "cloth_patch_c", 0.16), (1.2, -PI * 0.85, "cloth_patch_b", 0.2)]
+        if worn:
+            spots = [(0.12, 0.5, "cloth_patch_a", 0.13), (0.18, -0.7, "cloth_patch_b", 0.14), (0.1, PI * 0.75, "cloth_patch_c", 0.1)]
         for i, (d, a, m, w) in enumerate(spots[: int(round(4 * size)) + 1]):
-            if d < L - 0.14:
+            if d < C.fall(a) - 0.1:
                 c, n = C.at(d, a, 0.008), C.normal(d, a)
                 C.add(g.box(c, (w, 0.014, w * (0.8 + 0.3 * (i % 2))), rot=(0, 0.2 * (i - 2), math.atan2(-n.x, n.y))), mat(m))
-                C.round(g.tube([c + Vector((0, 0, w * 0.5)) + n * 0.01, c + Vector((0, 0, w * 0.62)) + n * 0.012], [0.006, 0.006], n=3), mat("thread") if i % 2 else mat("cloth_lining"))
+                C.round(g.tube([c + Vector((0, 0, w * 0.5)) + n * 0.01, c + Vector((0, 0, w * 0.62)) + n * 0.012], [0.006, 0.006], n=3), mat("thread") if i % 2 else C.acc_l)
         if 1 in C.cuffs:            # and one sleeve let down for a longer arm
             p, dvec, r = C.cuffs[1]
             C.round(g.tube([p, p + dvec * 0.12], [r * 1.02, r * 0.98], n=7), mat("cloth_patch_b"))
     elif style == "figure":        # it stands as someone before stood: a little of them is still in it
         f = field("shade", 1.3)
+        if worn:                   # worn, their hand is on its wearer's shoulder
+            c = Vector((0.24 * C.fit, 0.02, L + 0.035))
+            C.round(g.ico(c, 0.075 * size, sub=1, scale=(1.0, 1.25, 0.4)), f)
+            for i in range(4):
+                b0 = c + Vector((-0.045 + 0.03 * i, -0.07, 0.0))
+                C.round(g.tube([b0, b0 + Vector((0, -0.07, -0.03))], [0.015, 0.011], n=4), f)
+            return
         C.round(g.ico(Vector((0, 0.0, L + 0.2 * size)), 0.12 * size, sub=2, scale=(0.85, 0.95, 1.15)), f)
         C.round(g.tube([Vector((0, 0, L - 0.02)), Vector((0, 0, L + 0.1 * size))], [0.06, 0.05], n=6), f)
         for s in (1, -1):
@@ -483,13 +720,16 @@ def grow(C, style, size, spec):
             C.round(g.tube([c + Vector((0, 0, 0.02)), c + Vector((0, 0, 0.07))], [0.004, 0.004], n=3), mat("thread"))
     elif style == "whiskers":      # fine whiskers of thread along the collar's edge, that stir at sounds
         c_style, k = opt(spec.get("collar", "turned"))
+        fit = C.fit
         tips = []
         if c_style in ("ear", "ears"):
+            kk = k * (0.82 if worn else 1.0)
+            x0 = 0.1 * fit
             for s in (1, -1):
-                for (x, y, z) in ((0.2, 0.06, 0.2), (0.36, 0.07, 0.36), (0.5, 0.05, 0.3), (0.53, 0.03, 0.12)):
-                    tips.append((Vector((s * x * k, y, L + z * k)), Vector((s * (x - 0.3), 0.0, z - 0.12)).normalized()))
+                for (x, y, z) in ((0.1, 0.06, 0.2), (0.26, 0.07, 0.36), (0.4, 0.05, 0.3), (0.43, 0.03, 0.12)):
+                    tips.append((Vector((s * (x0 + x * kk), y, L + z * kk)), Vector((s * (x - 0.2), 0.0, z - 0.12)).normalized()))
         else:
-            r = 0.46 * k if c_style == "spread" else 0.175
+            r = 0.46 * k if c_style == "spread" else 0.175 * fit
             zc = L + (0.12 if c_style == "spread" else 0.2 * k)
             for i in range(9):
                 a = -2.3 + 4.6 * i / 8
@@ -501,55 +741,304 @@ def grow(C, style, size, spec):
     elif style == "drops":         # water stands on it in beads
         for i in range(12):
             a = -2.8 + 5.6 * ((i * 0.618) % 1.0)
-            d = 0.05 + 0.5 * ((i * 0.381) % 1.0)
+            d = 0.05 + (0.5 if not worn else C.fall(a) - 0.1) * ((i * 0.381) % 1.0)
             C.round(g.ico(C.at(d, a, 0.008), 0.016, sub=0), mat("steel_glint"))
     elif style == "current":       # a hem that moves as if there were a current in the room
-        d = L - 0.04
-        phi = C.gap(d)
-        pts = [C.at(d, -(PI - phi) + 2 * (PI - phi) * i / 16, 0.01) for i in range(17)]
-        C.round(g.tube(pts, [0.014] * 17, n=4), field("current", 1.8))
-        pts2 = [C.at(d - 0.16, -(PI - phi) + 2 * (PI - phi) * i / 16, 0.008) for i in range(17)]
-        C.round(g.tube(pts2, [0.007] * 17, n=3), field("current", 1.2))
+        C.round(g.tube(C.hem_pts(0.04, 0.01), [0.014] * 17, n=4), field("current", 1.8))
+        if not worn:
+            C.round(g.tube(C.hem_pts(0.2, 0.008), [0.007] * 17, n=3), field("current", 1.2))
     elif style == "mantle":        # a cape over the shoulders
         rings = []
-        n = 13
+        n = 15
+        cm = main if spec.get("mantle") != "oil" else mat("cloth_oil")
         for d, out in ((-0.02, 0.012), (0.1, 0.04), (0.3 * size, 0.07), (0.44 * size, 0.09)):
             phi = 0.35
             outer = [C.at(max(d, -0.04), -(PI - phi) + 2 * (PI - phi) * i / (n - 1), out) + Vector((math.sin(-(PI - phi) + 2 * (PI - phi) * i / (n - 1)) * 0.06 * (d > 0.05), 0, 0)) for i in range(n)]
             inner = [p - (p - Vector((0, 0, p.z))).normalized() * 0.016 for p in outer]
             rings.append(outer + list(reversed(inner)))
-        C.solid(g.loft(rings, caps=True, closed=True), lambda c, nrm: lining if (nrm.x * c.x + nrm.y * c.y) < -0.25 * math.hypot(c.x, c.y) else (main if spec.get("mantle") != "oil" else mat("cloth_oil")))
+        C.solid(g.loft(rings, caps=True, closed=True), lambda c, nrm: lining if (nrm.x * c.x + nrm.y * c.y) < -0.25 * math.hypot(c.x, c.y) else cm)
+        # its edge, in its Path's colour
+        edge = [C.at(0.44 * size - 0.02, -(PI - 0.35) + 2 * (PI - 0.35) * i / (n - 1), 0.097) + Vector((math.sin(-(PI - 0.35) + 2 * (PI - 0.35) * i / (n - 1)) * 0.06, 0, 0)) for i in range(n)]
+        C.round(g.tube(edge, [0.012] * n, n=4), C.acc_l)
+    elif style == "tails":         # cut away in front, and two long tails behind
+        for s in (1, -1):
+            top = C.at(L - 0.02, s * 0.34, 0.0)
+            C.add(g.tongue([top + Vector((0, 0, 0.06)), top + Vector((s * 0.03, 0.05, -0.3 * size)), top + Vector((s * 0.05, 0.1, -0.62 * size))], [0.26, 0.2, 0.05], thick=0.1, normal=Y), main)
+            C.round(g.tongue([top + Vector((0, -0.012, 0.04)), top + Vector((s * 0.03, 0.036, -0.3 * size)), top + Vector((s * 0.05, 0.085, -0.6 * size))], [0.2, 0.15, 0.03], thick=0.08, normal=Y), C.acc)
+            C.round(g.ico(top + Vector((0, 0.03, 0.04)), 0.02, sub=0), brass)
+    elif style == "pool":          # too long for whoever is in it: it lies on the ground round its hem
+        for i in range(9):
+            a = -2.7 + 5.4 * i / 8
+            b0 = C.hem(a, 0.0, 0.0)
+            nrm = C.normal(L, a)
+            C.round(g.ico(b0 + nrm * 0.06 * size + Vector((0, 0, 0.02)), 0.13 * size, sub=1, scale=(1.0, 1.0, 0.24), rot=(0, 0, a)), main if i % 2 else C.acc_d)
+    elif style == "fling":         # one side of it thrown open, to show what it is lined with
+        s = 1 if size >= 0 else -1
+        k = abs(size)
+        tops = [C.at(d, s * (PI - C.gap(d) - 0.02), 0.01) for d in (0.12, 0.45, 0.8, min(L - 0.04, 1.15))]
+        out = Vector((s * 1.0, -0.55, 0.0)).normalized()
+        for j in range(len(tops) - 1):
+            a0, a1 = tops[j], tops[j + 1]
+            w0, w1 = 0.2 * k * (1 + j * 0.7), 0.2 * k * (1 + (j + 1) * 0.7)
+            quad = ([a0, a0 + out * w0 + Vector((0, 0, 0.03 * j)), a1 + out * w1 + Vector((0, 0, 0.03 * (j + 1))), a1], [(0, 1, 2, 3), (3, 2, 1, 0)])
+            C.add(quad, lining, smooth=True)
+        C.round(g.tube([tops[0] + out * 0.2 * k, tops[1] + out * 0.34 * k + Vector((0, 0, 0.03)), tops[2] + out * 0.48 * k + Vector((0, 0, 0.06)), tops[3] + out * 0.62 * k + Vector((0, 0, 0.09))], [0.012] * 4, n=4), main)
+    elif style == "cane":          # it leans on a stick it has no hand for
+        if -1 in C.cuffs:
+            p, dvec, r = C.cuffs[-1]
+            C.round(g.tube([p + Vector((0, 0, 0.05)), Vector((p.x - 0.03, p.y - 0.06, 0.0))], [0.016, 0.013], n=5), mat("wood_dark"))
+            C.round(g.ico(p + Vector((0, 0, 0.07)), 0.03, sub=1), brass)
     else:
         raise ValueError("a coat cannot grow: " + str(style))
 
 
 def _clasp_alone(C, spec):
-    """The Starter: a coat's clasp and the scrap of cloth it still holds."""
-    brass, main, under = C.brass, C.main, C.under
-    zc = 0.25
+    """The Starter: a coat's clasp and the scrap of cloth it still holds. The scraps are its
+    arms, the clasp its face: one eye, wide open."""
+    brass, main = C.brass, C.main
+    cloth, torn = C.acc, C.acc_d
+    zc = 0.3
     for s in (1, -1):
         # a plate of brass, a hand's breadth across, its corners worn round
-        pts = [(s * 0.02, -0.04), (s * 0.03, 0.048), (s * 0.1, 0.06), (s * 0.15, 0.03), (s * 0.15, -0.03), (s * 0.1, -0.06)]
+        pts = [(s * 0.02, -0.05), (s * 0.035, 0.06), (s * 0.12, 0.075), (s * 0.18, 0.04), (s * 0.18, -0.04), (s * 0.12, -0.075)]
         if s < 0:
             pts = list(reversed(pts))
-        rings = [[Vector((x, y0, zc + z)) for x, z in pts] for y0 in (-0.016, 0.006)]
+        rings = [[Vector((x, y0, zc + z)) for x, z in pts] for y0 in (-0.02, 0.008)]
         C.add(g.loft(rings, caps=True, closed=True), brass)
-        for dz in (-0.036, 0.0, 0.036):
-            C.round(g.ico(Vector((s * 0.132, -0.018, zc + dz)), 0.009, sub=0), mark("studs", main))
-        # the scrap of the coat it still holds, hanging from it, its end torn
-        cl = [Vector((s * 0.115, 0.014, zc + 0.05)), Vector((s * 0.15, 0.022, zc - 0.05)), Vector((s * 0.175, 0.02, zc - 0.15)), Vector((s * 0.215, 0.03, zc - 0.24))]
-        C.add(strap(cl, [0.13, 0.16, 0.15, 0.1], 0.018, up=X), main)
-        for j, dx in enumerate((-0.036, 0.0, 0.036)):
+        for dz in (-0.045, 0.0, 0.045):
+            C.round(g.ico(Vector((s * 0.158, -0.022, zc + dz)), 0.011, sub=0), mark("studs", main))
+        # the scrap of the coat it still holds, hanging from it, its end torn: it stirs
+        top = Vector((s * 0.14, 0.016, zc + 0.06))
+        cl = [top, Vector((s * 0.19, 0.026, zc - 0.07)), Vector((s * 0.23, 0.024, zc - 0.2)), Vector((s * 0.285, 0.036, zc - 0.31))]
+        its = [(strap(cl, [0.15, 0.2, 0.19, 0.13], 0.02, up=X), cloth)]
+        for j, dx in enumerate((-0.045, 0.0, 0.045)):
             b0 = cl[3] + Vector((dx, 0, 0.004))
-            C.add(g.blade(b0, b0 + Vector((dx * 0.4 + s * 0.012, 0.0, -0.045 - 0.016 * (j % 2))), 0.042, normal=Y), main)
-        C.round(g.tube([p + Vector((s * 0.045, -0.013, 0)) for p in cl[:3]], [0.005] * 3, n=3), mark("stitch", main))
-        C.round(g.tube([p + Vector((-s * 0.045, -0.013, 0)) for p in cl], [0.005] * 4, n=3), field("weave", 1.7))
-    # the hook and the ring it closes on, and the one small eye in the metal
-    C.round(g.tube([Vector((-0.04, -0.018, zc + 0.005)), Vector((0.0, -0.034, zc + 0.022)), Vector((0.05, -0.026, zc + 0.012)), Vector((0.055, -0.018, zc - 0.02))], [0.012, 0.012, 0.011, 0.008], n=5), brass)
-    C.round(ringtube(Vector((0.07, -0.018, zc)), 0.03, 0.03, 0.008, n=10, u=X, v=Z), brass)
-    C.add_items(eye(Vector((-0.09, -0.02, zc)), 0.034, lids=brass))
+            its.append((g.blade(b0, b0 + Vector((dx * 0.4 + s * 0.014, 0.0, -0.06 - 0.02 * (j % 2))), 0.05, normal=Y), cloth))
+        its.append((g.tube([p + Vector((s * 0.055, -0.015, 0)) for p in cl[:3]], [0.006] * 3, n=3), mark("stitch", main)))
+        its.append((g.tube([p + Vector((-s * 0.055, -0.015, 0)) for p in cl], [0.007] * 4, n=3), field("weave", 1.7)))
+        its.append((strap([p + Vector((0, 0.012, 0)) for p in cl], [0.11, 0.15, 0.14, 0.09], 0.008, up=X), torn))
+        C.move("sway", "scrap", its, top, side="l" if s > 0 else "r")
+    # the hook and the ring it closes on, and the one eye in the metal
+    C.round(g.tube([Vector((-0.05, -0.022, zc + 0.006)), Vector((0.0, -0.042, zc + 0.027)), Vector((0.06, -0.032, zc + 0.015)), Vector((0.066, -0.022, zc - 0.024))], [0.014, 0.014, 0.013, 0.01], n=6), brass)
+    C.round(ringtube(Vector((0.085, -0.022, zc)), 0.036, 0.036, 0.01, n=12, u=X, v=Z), brass)
+    ec, r = Vector((-0.1, -0.026, zc)), 0.05
+    items = eye(ec, r, lids=brass)
+    C.move("blink", "eye", items[:2], ec)
+    C.add_items(items[2:])
     C.wear = (Vector((0, 0.22, zc)), None)
-    return {"socket_head": ((0, 0, zc + 0.06), None), "socket_eyes": ((0, -0.03, zc + 0.02), None), "socket_back": ((0, 0.03, zc), None), "socket_body": ((0, -0.03, zc - 0.06), None)}
+    return {"socket_head": ((0, 0, zc + 0.08), None), "socket_eyes": ((0, -0.04, zc + 0.02), None), "socket_back": ((0, 0.03, zc), None), "socket_body": ((0, -0.03, zc - 0.08), None)}
+
+
+# ======================================================================================
+# The worn piece: a mantle
+# ======================================================================================
+# The game's people, standing at the origin and facing -Y (alexandria-m; the others are within
+# a few fingers of him at the shoulder): the top of the shoulders, the middle of the trunk
+# front to back, the nape of the neck, and where the chest bone that carries the piece is.
+SHOULDER_Z = 2.0
+TRUNK_Y = -0.055
+NAPE = Vector((0.0, 0.079, 1.987))
+CHEST = Vector((0.0, 0.029, 1.587))
+
+
+class Mantle(Coat):
+    """A coat as it is worn: its own collar and a short cape over the shoulders, longer down
+    the back than over the arms, so that an arm can swing and lift under it. Built as a coat
+    whose "hem" is the cape's edge; then set on the shoulders of the game's people."""
+    fit = 1.2
+
+    def __init__(self, form_id, spec):
+        w = dict(spec.get("worn") or {})
+        Coat.__init__(self, form_id + "_worn", spec)
+        f = lambda k, d: float(w.get(k, d))  # noqa: E731
+        self.w = w
+        self.cutname = w.get("cut", "capelet")
+        self.back, self.side, self.front = f("back", 0.34), f("side", 0.17), f("front", 0.25)
+        self.L = max(self.back, self.front, self.side)
+        self.open, self.cut = f("gap", 0.07), f("part", 0.45)
+        self.flare, self.rag, self.wave, self.sweep = f("flare", 0.12), f("rag", 0.0), 0.0, (0.0, 0.0)
+        self.points = int(w.get("points", 0))          # a hem cut in points
+        self.trim = [t for t in (w.get("trim") or self.trim)]
+
+    def t(self, d):
+        return max(0.0, min(1.0, d / max(0.05, self.L)))
+
+    def section(self, d):
+        rows = ((-0.06, 0.135, 0.112), (0.0, 0.315, 0.168), (0.07, 0.392, 0.19), (0.18, 0.41, 0.205))
+        if d >= rows[-1][0]:
+            rx, ry = rows[-1][1] + 0.4 * self.flare * (d - 0.18), rows[-1][2] + 0.6 * self.flare * (d - 0.18)
+        else:
+            rx, ry = rows[0][1], rows[0][2]
+            for (d0, x0, y0), (d1, x1, y1) in zip(rows, rows[1:]):
+                if d <= d1:
+                    q = max(0.0, (d - d0) / (d1 - d0))
+                    q = q * q * (3 - 2 * q)
+                    rx, ry = x0 + (x1 - x0) * q, y0 + (y1 - y0) * q
+                    break
+        return rx, ry, 0.0, 0.0
+
+    def fall(self, a):
+        """Longest down the back, shortest over the arms, and its two ends down the front."""
+        x = abs(a)
+        sm = lambda e0, e1, v: max(0.0, min(1.0, (v - e0) / (e1 - e0))) ** 2 * (3 - 2 * max(0.0, min(1.0, (v - e0) / (e1 - e0))))  # noqa: E731
+        wb = 1.0 - sm(0.55, 1.3, x)
+        wf = sm(1.85, 2.55, x)
+        v = self.side + (self.back - self.side) * wb + (self.front - self.side) * wf
+        if self.points:
+            v *= 1.0 - 0.22 * abs(math.sin(self.points * 0.5 * a + 0.3))
+        return v
+
+    def hem(self, a, up=0.05, out=0.007):
+        return self.at(self.fall(a) - up, a, out)
+
+    def hem_pts(self, up=0.05, out=0.007, n=17):
+        phi = self.gap(self.L)
+        return [self.hem(-(PI - phi) + 2 * (PI - phi) * i / (n - 1), up, out) for i in range(n)]
+
+    def shell(self, n=25, thick=0.016):
+        rings = []
+        for tt in (None, 0.0, 0.22, 0.45, 0.7, 0.88, 1.0):
+            outer, inner = [], []
+            for i in range(n):
+                u = -1.0 + 2.0 * i / (n - 1)
+                if tt is None:
+                    a, d = u * (PI - self.open), -0.05
+                else:
+                    a = u * (PI - (self.open + self.cut * tt))
+                    d = tt * self.fall(a)
+                outer.append(self.at(d, a))
+                inner.append(self.at(d, a, -thick))
+            rings.append(outer + list(reversed(inner)))
+        main, lining = self.main, self.inside
+        self.solid(g.loft(rings, caps=True, closed=True), lambda c, nrm: lining if (nrm.x * c.x + nrm.y * c.y) < -0.25 * math.hypot(c.x, c.y) else main)
+        # the seam down its back: its partner may show it pale
+        back = [self.at(d, 0.0, 0.006) for d in (0.0, self.back * 0.5, self.back - 0.02)]
+        self.round(g.tube(back, [0.005] * len(back), n=3), mark("stitch", self.main))
+
+    def trims(self):
+        tr = self.trim
+        if "hem" in tr:
+            self.round(strap(self.hem_pts(0.04, 0.008, 25), 0.065, 0.01, up=Z), self.acc_d)
+            self.round(g.tube(self.hem_pts(0.078, 0.011, 25), [0.006] * 25, n=3), self.acc_l)
+        if "piping" in tr:
+            self.round(g.tube(self.hem_pts(0.008, 0.009, 25), [0.01] * 25, n=4), self.acc_l)
+        if "facing" in tr:
+            for s in (1, -1):
+                pts = []
+                for tt in (0.05, 0.35, 0.65, 0.95):
+                    a = s * (PI - (self.open + self.cut * tt) - 0.1)
+                    pts.append(self.at(tt * self.fall(a), a, 0.008))
+                self.round(strap(pts, 0.07, 0.01, up=X), self.acc)
+        if "yoke" in tr:
+            rings, m = [], 15
+            for d, out in ((-0.03, 0.01), (0.04, 0.02), (0.1, 0.024)):
+                outer = [self.at(d, -(PI - 0.3) + 2 * (PI - 0.3) * i / (m - 1), out) for i in range(m)]
+                inner = [self.at(d, -(PI - 0.3) + 2 * (PI - 0.3) * i / (m - 1), out - 0.012) for i in range(m)]
+                rings.append(outer + list(reversed(inner)))
+            self.round(g.loft(rings, caps=True, closed=True), self.acc_d)
+        if "ends" in tr:             # the two ends down its front, banded, and a tassel on each that stirs
+            for s in (1, -1):
+                a = s * (PI - (self.open + self.cut) - 0.16)
+                e = self.hem(a, 0.0, 0.004)
+                for up, m in ((0.03, self.acc_l), (0.075, self.acc_d)):
+                    aa = [s * (PI - (self.open + self.cut) - 0.02 - 0.3 * j / 3) for j in range(4)]
+                    self.round(strap([self.hem(q, up, 0.009) for q in aa], 0.03, 0.01, up=Z), m)
+                self.move("sway", "tassel", [(g.tube([e, e + Vector((0, -0.003, -0.05))], [0.005, 0.005], n=3), mat("thread")),
+                                             (g.cone(e + Vector((0, -0.003, -0.13)), e + Vector((0, -0.003, -0.045)), 0.022, n=6), self.acc_l)], e, side="l" if s > 0 else "r")
+
+    def scarf(self):
+        """The Starter's: no cape yet. A band of its cloth round the neck, and its two ends
+        down the front from the clasp."""
+        L = self.L
+        ring = [Vector((0.15 * math.sin(q), 0.127 * math.cos(q) + 0.006, L + 0.0 + 0.03 * math.cos(q))) for q in [-(PI - 0.25) + 2 * (PI - 0.25) * i / 12 for i in range(13)]]
+        self.round(strap(ring, 0.085, 0.022, up=Z), self.acc)
+        self.round(g.tube([p + Vector((0, 0, 0.03)) for p in ring], [0.006] * 13, n=3), field("weave", 1.7))
+        for s in (1, -1):
+            top = self.at(0.06, s * (PI - 0.2), 0.012)
+            cl = [top, top + Vector((s * 0.02, -0.012, -0.1)), top + Vector((s * 0.035, -0.004, -0.2))]
+            its = [(strap(cl, [0.085, 0.1, 0.075], 0.016, up=X), self.acc), (strap([p + Vector((0, 0.01, 0)) for p in cl], [0.06, 0.07, 0.05], 0.008, up=X), self.acc_d)]
+            for j, dx in enumerate((-0.025, 0.0, 0.025)):
+                b0 = cl[2] + Vector((dx, 0, 0.004))
+                its.append((g.blade(b0, b0 + Vector((dx * 0.4, 0.0, -0.035 - 0.012 * (j % 2))), 0.03, normal=Y), self.acc))
+            self.move("sway", "scrap", its, top, side="l" if s > 0 else "r")
+
+
+def mantle(form_id, spec):
+    """The worn piece of a form: the objects to export with it, the empty named worn first."""
+    import genius_lines as gl
+    M = Mantle(form_id, spec)
+    c_style, c_size = opt(spec.get("collar", "turned"))
+    if M.cutname == "scarf":
+        M.scarf()
+        M.clasp(1.25, what="weye")
+    else:
+        M.shell()
+        M.trims()
+        M.collar(c_style, c_size)
+        for style, size in each(spec.get("grown")):
+            if style in ON_A_MANTLE:
+                grow(M, style, size, spec)
+        for style, size in each(M.w.get("grown")):          # and what only the worn piece has
+            grow(M, style, size, spec)
+        M.clasp(float(spec.get("clasp", 1.0)) * 1.15, what="weye")
+    # from the coat's own measure (its shoulders at z = L, its middle at y = 0) to the person's
+    place = Matrix.Translation((0.0, TRUNK_Y, SHOULDER_Z - M.L))
+    obs = list(M.objects)
+    for i, (material, geo, soft) in enumerate(M.geo.values()):
+        obs.append(g.to_object("%s_%d" % (M.name, i), geo, material, smooth=soft))
+    ob = g.join(M.name, obs)
+    ob.data.transform(place)
+    ob.data.update()
+    return gl.worn([ob] + M.moving(place), at=NAPE)
+
+
+def finish_coat(C, form_id, base, spec, M=None, sockets=None, worn=None):
+    """Join it, stand it, give it its sockets, the pieces of it that move and the piece that is
+    worn, and write it (lines_armors.finish, with those)."""
+    import genius_lines as gl
+    ob = C.build(M)
+    movers = C.moving(C.lift)
+    pts = [v.co for v in ob.data.vertices] + [Vector(m.location) + v.co for m in movers for v in m.data.vertices]
+    lo = Vector((min(p.x for p in pts), min(p.y for p in pts), 0.0))
+    hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
+    H, W, D = hi.z, hi.x - lo.x, hi.y - lo.y
+    measure = max(H, 0.62 * max(W, D))
+    ref = measure * art_size(base) / float(spec.get("stands", 1.0))
+    s = ref / STAND            # parts and keepsakes are made for a body that stands STAND tall
+    yc, yf, yb = (lo.y + hi.y) / 2, lo.y, hi.y
+    table = {
+        "socket_head": (0, yc, H), "socket_eyes": (0, yf - 0.01, 0.72 * H), "socket_mouth": (0, yf - 0.01, 0.45 * H), "socket_grip": (0, yb + 0.01, 0.5 * H),
+        "socket_throat": (0, yf - 0.01, 0.36 * H), "socket_light": (0, yf - 0.01, 0.24 * H), "socket_back": (0, yb + 0.01, 0.66 * H), "socket_body": (0, yf - 0.01, 0.52 * H),
+        "socket_tail": (0, yb, 0.06 * H), "socket_arm_l": (hi.x + 0.01, yc, 0.62 * H), "socket_arm_r": (lo.x - 0.01, yc, 0.62 * H),
+        "socket_limb_fl": (0.3 * W, yf, 0.02), "socket_limb_fr": (-0.3 * W, yf, 0.02), "socket_keepsake": (0, yf - 0.012, 0.3 * H),
+    }
+    size = Matrix.Diagonal((s, s, s))
+    socks = {name: kit.free_socket(name, at, size) for name, at in table.items()}
+    for name, (at, rot) in (sockets or {}).items():          # the builder's own, given in the piece's space before it was stood
+        if name in socks:
+            bpy.data.objects.remove(socks[name])
+        p = C.lift @ Vector(at)
+        r3 = C.lift.to_3x3() @ (rot if rot is not None else Matrix.Identity(3))
+        socks[name] = kit.free_socket(name, p, r3 @ size)
+    if C.wear is not None:
+        at, rot = C.wear
+        socks["wear"] = kit.free_socket("wear", C.lift @ Vector(at), C.lift.to_3x3() @ (rot if rot is not None else Matrix.Identity(3)))
+    path = os.path.join(gl.OUT, form_id + ".glb")
+    tris = gl.export_objects([ob] + movers + list(worn or []), socks, path, ref=ref)
+    kb = os.path.getsize(path) // 1024
+    if kb > 120:
+        log("OVER BUDGET", form_id, kb, "KB")
+    return tris
+
+
+def posture(spec):
+    """How it holds itself: `lean` [to the front, to its left] in degrees, `turn` about its own
+    height. A coat that leans, leans from its hem."""
+    lean = spec.get("lean") or [0, 0]
+    turn = float(spec.get("turn", 0.0))
+    if not (lean[0] or lean[1] or turn):
+        return None
+    return Matrix.Rotation(math.radians(turn), 4, "Z") @ Matrix.Rotation(math.radians(float(lean[0])), 4, "X") @ Matrix.Rotation(math.radians(float(lean[1])), 4, "Y")
 
 
 def build(form_id, level, spec, base):
@@ -557,7 +1046,7 @@ def build(form_id, level, spec, base):
     C = Coat(form_id, spec)
     if spec.get("kind") == "clasp":
         socks = _clasp_alone(C, spec)
-        return finish(C, form_id, base, spec, sockets=socks)
+        return finish_coat(C, form_id, base, spec, sockets=socks, worn=mantle(form_id, spec))
     L = C.L
     C.shell()
     sl = spec.get("sleeves", "hang")
@@ -565,6 +1054,7 @@ def build(form_id, level, spec, base):
     arm = float(spec.get("arm", 1.0))
     C.sleeve(1, left, arm)
     C.sleeve(-1, right, arm)
+    C.trims()
     c_style, c_size = opt(spec.get("collar", "turned"))
     C.collar(c_style, c_size)
     for style, size in each(spec.get("grown")):
@@ -583,4 +1073,4 @@ def build(form_id, level, spec, base):
         if s in C.cuffs:
             socks["socket_hand_" + tag] = (tuple(C.cuffs[s][0]), None)
     socks["socket_grip"] = socks.get("socket_hand_r", socks["socket_back"])
-    return finish(C, form_id, base, spec, sockets=socks)
+    return finish_coat(C, form_id, base, spec, M=posture(spec), sockets=socks, worn=mantle(form_id, spec))
