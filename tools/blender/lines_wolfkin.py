@@ -1769,7 +1769,12 @@ def _drake_body(r, A):
     ctrl = list(reversed(neck)) + trunk + tail
     steps = [3] * 3 + [2] + [2] * 4 + [2] + [2] * 8
     line = _cr([c for c, _, _ in ctrl], steps)
-    size = _cr([Vector((a, b, 0)) for _, a, b in ctrl], steps)
+    size = []                                           # its girth runs evenly from each place to the next (a curve through them would overshoot)
+    for i, n in enumerate(steps):
+        for k in range(n):
+            f = k / n
+            size.append(Vector((ctrl[i][1] + (ctrl[i + 1][1] - ctrl[i][1]) * f, ctrl[i][2] + (ctrl[i + 1][2] - ctrl[i][2]) * f, 0)))
+    size.append(Vector((ctrl[-1][1], ctrl[-1][2], 0)))
     zone = []
     for i, n in enumerate(steps):
         zone.extend(["neck" if i < 4 else "back" if i < 8 else "tail"] * n)
@@ -2704,7 +2709,7 @@ def drake_shell(r, A, size):
     for k in range(3):
         dv = X * math.cos(k * math.pi / 3) + Y * math.sin(k * math.pi / 3)
         wheel = g.merge(wheel, g.tube([hub + Z * 0.1 - dv * 0.3 * size, hub + Z * 0.1 + dv * 0.3 * size], [0.024, 0.024], n=4))
-    _piece("spin", "wheel", [(wheel, mat("accent_light") if acc else brass, True), (g.tube([hub - Z * 0.05, hub + Z * 0.14], [0.06, 0.05], n=6), iron, True)], hub, "Torso2")
+    _piece("spin", "helm", [(wheel, mat("accent_light") if acc else brass, True), (g.tube([hub - Z * 0.05, hub + Z * 0.14], [0.06, 0.05], n=6), iron, True)], hub, "Torso2")
     _add(r, "vault_seal", g.ico(hub + Z * 0.16, 0.06 * size, sub=1), "Torso2", field("seal", 2.0), smooth=True)
 
 
