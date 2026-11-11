@@ -271,6 +271,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 	if debug:
 		print("GO %s from %s (lesson %s step %d)" % [place_id, from, _lesson.get("id", ""), _step])
 	progress["place"] = place_id
+	_greet_t = 0.0
 	# The shade stays at its hearth.
 	if _shade_node:
 		_shade_node.queue_free()
@@ -1154,7 +1155,12 @@ func auto_move() -> Vector2:
 	elif place == "quad":
 		# Greet two classmates on the way out, the first time.
 		var unmet := _people.filter(func(p): return p["kind"] == "classmate" and not progress["met"].has(p["id"]))
-		if progress["met"].size() < 2 and not unmet.is_empty():
+		_greet_t += get_process_delta_time()
+		if progress["met"].size() < 2 and not unmet.is_empty() and _greet_t < 15.0:
+			# (whoever is unmet and in reach will do: the one aimed at may stand behind another)
+			if _target.get("kind", "") == "classmate" and not progress["met"].has(_target["id"]):
+				interact()
+				return Vector2.ZERO
 			goal = unmet[0]["pos"]
 		else:
 			for d in _doors:
@@ -1206,6 +1212,7 @@ func _leads_out(pid: String, depth: int) -> bool:
 
 var _steer_last_pos := Vector2.INF
 var _steer_stuck_t := 0.0
+var _greet_t := 0.0   # the autopilot gives up on a greeting it cannot reach
 var _unstick_until := 0.0
 var _unstick_dir := Vector2.ZERO
 

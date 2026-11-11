@@ -144,3 +144,23 @@ The server is a mastery progression: the player learns to use their field and to
 weaknesses by levelling, until the character dies of old age, of injury, or by spending the
 whole field at once in a grand working that leaves a lasting mark on the world. A life is
 about 300 hours. The Academy is built to lead into that life; its rules are later steps.
+
+## What was tested, and how to run it
+
+- `npm run soak` plays the real game without a window, faster than the clock, for a spread of
+  39 characters: every home (13), every weapon a school teaches as the weapon carried from the
+  station and another of the same school chosen at the Discipline lesson, the six Shapes in
+  turn, both sexes, the bloods the creator offers, the whole term and advanced standing. Each
+  goes from the creator's result through the opening, the six lessons and the Field
+  Examination; `npm run soak -- --gate` goes on through the postings to the Gate and
+  Commencement (long: the term is hours of play). `-- --only=17` plays one of them again;
+  `-- --list` names them.
+- It presses the screens' own buttons, picks at choices and Readings as a player would, leaves
+  by the pause menu and comes back by Continue, and closes the game without warning and opens
+  it again, several times a character.
+- It fails on: anything that does not move for 150 seconds of game time; a choice with nothing
+  in it; words on the screen with a `{token}` or `$name` left in them; a character who ends
+  without a named genius, Stage 3, three school techniques, Marks, the weapon they chose (and,
+  with `--gate`, a Second Form and an archetype); any script error in the log.
+- `godot --path . res://game/tests/hud_shots.tscn -- --shots=DIR` draws the play screen's words
+  (the step open, folded, with a note, for a gamepad) to look at.
