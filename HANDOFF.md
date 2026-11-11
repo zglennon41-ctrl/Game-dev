@@ -653,6 +653,10 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   or an item genius is in the hand (or carried), a companion walks beside. The "maybe" is
   the owner's: the Living Armor is built to be looked at, and the Coat's data is kept in
   git history if it is not liked.
+- **Wolves in other skins** (owner, 2026-11-12): "Also some of the figures are just poorly
+  adapted wolf figures. The stag is the most glaring example especially at the higher
+  levels." Read as: a line built by reshaping the Wolf's body (the Stag, the Fox, the
+  Hawk's Harriers) gets a body of its own, with its own animal's anatomy; the Stag first.
 
 ## 10. What good looks like
 
