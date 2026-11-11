@@ -378,6 +378,21 @@ func test_creation() -> void:
 		var c := Creation.generate(answers)
 		shapes[c["shape"]] = true
 	check(shapes.size() == 6, "all six Shapes can be made (%s)" % str(shapes.keys()))
+	# Whatever home a character has, the Discipline lesson has weapons to offer, and the one
+	# carried from creation is among them (Alexandria has no school of its own: it was a wall).
+	var homes_seen := {}
+	for qi in qs.size():
+		for ai in qs[qi]["answers"].size():
+			var answers2: Array = []
+			for qj in qs.size():
+				answers2.append(ai if qj == qi else 0)
+			var c2 := Creation.generate(answers2)
+			homes_seen[c2["city"]] = true
+			var offered := Creation.school_weapons(c2)
+			check(not offered.is_empty(), "a character from %s has weapons to choose at the Discipline lesson" % c2["city"])
+			check(offered.any(func(w): return w["id"] == c2["weapon"]), "%s's school teaches the weapon they came with (%s)" % [c2["city"], c2["weapon"]])
+	check(homes_seen.has("alexandria"), "the questionnaire can make an Alexandrian (%s)" % str(homes_seen.keys()))
+	check(not Creation.school_weapons({ "city": "alexandria", "discipline": "" }).is_empty(), "no home and no school still has weapons to offer")
 	# Determinism, and a full character.
 	var a := [1, 2, 4, 7, 2, 0, 3, 4, 0, 8]
 	var c1 := Creation.generate(a)

@@ -43,6 +43,8 @@ func _run() -> void:
 	check_art()
 	print("The ink line")
 	check_ink()
+	print("Where the grain is laid")
+	check_laid()
 	print("The light of every place")
 	check_places()
 	print("\nstyle: %d failed, %d moved onto a ramp by the game" % [failures, notes])
@@ -56,6 +58,66 @@ static func warm(c: Color) -> bool:
 
 static func cool(c: Color) -> bool:
 	return Style.saturation(c) > 0.05 and c.h > 0.45 and c.h < 0.78
+
+## The grains (materials.grains and each class's own): every one named is a texture that is
+## there (tools/textures.py makes them), mid-grey on the whole so that it changes no colour's
+## place on its ramp; no grain is laid on strongly enough to fight the cel bands; and the
+## table still says what the bodies are covered in.
+func check_grains(d: Dictionary, classes: Dictionary) -> void:
+	for g in Style.grain_names():
+		var path := "res://game/assets/textures/detail/%s.png" % g
+		if not ResourceLoader.exists(path):
+			fail("a grain is named that has no texture: %s (tools/textures.py makes them)" % g)
+			continue
+		var img := (load(path) as Texture2D).get_image()
+		if img == null or img.is_empty():
+			continue
+		if img.is_compressed():
+			img.decompress()
+		var sum := 0.0
+		for y in range(0, img.get_height(), 4):
+			for x in range(0, img.get_width(), 4):
+				sum += img.get_pixel(x, y).r
+		var mean := sum / float((img.get_width() / 4) * (img.get_height() / 4))
+		# (the first seven were made a little off it, leather the furthest at 0.56, and are left as
+		# the places have worn them; the grains made since are mid-grey to the hundredth)
+		if absf(mean - 0.5) > 0.07:
+			fail("the grain %s is not mid-grey on the whole (%.2f): it would darken or lighten everything it is laid on" % [g, mean])
+	var limit := 0.7
+	for cn in classes:
+		if float(classes[cn].get("wear", 0.0)) > limit:
+			fail("class %s wears its grain at %.2f: over %.2f it fights the cel bands" % [cn, float(classes[cn]["wear"]), limit])
+	var show := float(d["materials"].get("grainFit", {}).get("show", 1.0))
+	for row in d["materials"].get("grains", []):
+		var what := String(row[0])
+		if what.begins_with("#") and not classes.has(what.substr(1).get_slice(":", 0)):
+			fail("the grain row '%s' names a class that is not there" % what)
+		if float(row[3]) * show > limit + 0.0001:
+			fail("the grain row '%s' lays its grain on at %.2f (with grainFit.show): over %.2f it fights the cel bands" % [what, float(row[3]) * show, limit])
+		if String(row[1]) != "" and float(row[3]) > 0.0 and float(row[2]) <= 0.0:
+			fail("the grain row '%s' has a grain and no scale" % what)
+	for g in d["materials"].get("grainFit", {}).get("along", []):
+		if not Style.grain_names().has(String(g)):
+			fail("grainFit.along names a grain that nothing is covered in: %s" % g)
+	# what the table is for: a body is covered in what it is, whatever its material was named
+	# (and a word inside another word is not that word: steel is not an eel's hide)
+	var wants := [
+		["fur_dark", "wolf", "fur"], ["fur_dark", "drake", "scales"], ["feather_wing", "hawk", "feathers"],
+		["stone_plate", "tortoise", "horn"], ["horn_ridge", "tortoise", "horn"], ["stone_hide", "shield", "pebble"],
+		["metal_plate", "", "hammered"], ["metal_iron", "shield", "hammered"], ["metal_steel_edge", "blade", "brushed"],
+		["metal_brass", "", "brushed"], ["wood_oak", "bow", "timber"], ["bark_light", "stag", "bark"],
+		["leather_strap", "", "creased"], ["cloth_rag", "", "linen"], ["robe_black", "imp", "twill"], ["hair", "", "fur"],
+		["mist_pale", "fog", "fog"], ["shade_smoke", "wolf", "fog"], ["void", "lurker", "fog"], ["slate_light", "", "rock"],
+		["bone", "", "rock"], ["moss", "", "wool"], ["eye_gold", "wolf", ""], ["field_glow", "wolf", ""], ["nose", "wolf", ""],
+		["accent_dark", "wolf", "wool"], ["stone_smooth", "", "rock"] ]
+	for beside in ["accent", "accent_dark", "mark_saddle"]:
+		if not Style.grain_for(beside, World.surface_of(beside), "wolf").get("beside", false):
+			fail("%s should take the grain of what lies beside it, as a marking and a Path's colour do (materials.grains: beside:)" % beside)
+	for w in wants:
+		var cls := World.surface_of(String(w[0]))
+		var got := String(Style.grain_for(String(w[0]), cls, String(w[1])).get("grain", ""))
+		if got != String(w[2]):
+			fail("a %s's %s should be covered in '%s' and is covered in '%s' (materials.grains: the first row that fits wins)" % [w[1] if w[1] != "" else "thing", w[0], w[2], got])
 
 func check_data() -> void:
 	var d := Style.data()
@@ -80,6 +142,7 @@ func check_data() -> void:
 		for cn in String(pair[1]).split("|"):
 			if not classes.has(cn):
 				fail("the word '%s' names a class that is not there: %s" % [pair[0], cn])
+	check_grains(d, classes)
 	# the loud are loud, and the telegraph is the telegraph everywhere
 	for sh in d["loud"]["shapes"]:
 		if Style.saturation(Style.shape_color(sh)) < 0.1:
@@ -316,6 +379,51 @@ func check_ink() -> void:
 	if not _has_ink(gb):
 		fail("a genius carries no ink line")
 	gb.queue_free()
+
+# --- where the grain is laid ------------------------------------------------------------------
+
+## The living and the carried wear their grain in their own space, and where they have bones
+## from where they lie at rest, so that it stays on them as they move; a place wears its grain
+## in the world's, so that neighbouring pieces match (docs/style.md, rule 3).
+func check_laid() -> void:
+	var form: Dictionary = Data.form(String(Data.bases()[0]["settled"]["id"]))
+	var gb := world.make_form({ "form": form["id"], "silhouette": form["silhouette"], "expression": form["expression"], "features": form["features"], "instar": 1 }, Style.shape_color("anchor"))
+	add_child(gb)
+	var bodies := { "the hero": world._player, "the beast": world._wolf, "a genius": gb }
+	for who in bodies:
+		var n: Node = bodies[who]
+		if n == null:
+			continue
+		var grained := 0
+		for m in _meshes(n):
+			var mi: MeshInstance3D = m
+			for i in mi.mesh.get_surface_count():
+				var t := mi.get_active_material(i) as ShaderMaterial
+				if t == null or t.get_shader_parameter("detail_strength") == null or float(t.get_shader_parameter("detail_strength")) <= 0.0:
+					continue
+				grained += 1
+				if t.get_shader_parameter("detail_local") != true:
+					fail("%s: the grain of %s is laid in the world's space: it would swim as the body moves" % [who, t.resource_name])
+				elif world._boned(mi) and t.get_shader_parameter("use_rest") != true:
+					fail("%s: %s has bones and its grain is not laid where it rests: it would slide as a limb swings" % [who, t.resource_name])
+		if grained == 0:
+			fail("%s wears no grain at all" % who)
+	gb.queue_free()
+	var wall := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	var stone := StandardMaterial3D.new()
+	stone.resource_name = "stone_wall"
+	stone.albedo_color = Style.conform(Color(0.5, 0.5, 0.5), "stone")
+	box.material = stone
+	wall.mesh = box
+	add_child(wall)
+	world.toonify(wall, true)
+	var laid := wall.get_active_material(0) as ShaderMaterial
+	if laid == null or laid.get_shader_parameter("detail_strength") == null or float(laid.get_shader_parameter("detail_strength")) <= 0.0:
+		fail("a place of stone wears no grain")
+	elif laid.get_shader_parameter("detail_local") == true:
+		fail("a place's grain is laid in its own space: neighbouring pieces would not match")
+	wall.queue_free()
 
 # --- the light of every place ---------------------------------------------------------------
 

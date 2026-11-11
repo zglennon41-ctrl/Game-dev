@@ -58,3 +58,12 @@ staves) is built by `tools/blender/weapon_kit.py` in Blender and owned by the pr
 Flat-shaded low poly, no textures, materials from a small named palette; sized for the human
 hand and hung from the hand slots on KayKit's axes. Nothing a person carries is KayKit's
 any more.
+
+## Surface grains (made for WILDLINE)
+
+`game/assets/textures/detail/` (twenty small grey pictures that repeat without a seam: fur,
+feathers, scales, pebbled hide, horn, hammered and brushed metal, timber, bark, creased
+leather, twill, linen, wool, rock, fog and the rest) is made by `python3 tools/textures.py`
+from arithmetic alone: no photograph and no one else's texture is in them. Owned by the
+project. The game lays them over a surface by what its material is named (`docs/style.md`,
+rule 3; `data/style.json`, `materials.grains`).

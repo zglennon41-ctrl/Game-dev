@@ -1,0 +1,1712 @@
+{
+ "id": "carp",
+ "name": "Carp",
+ "class": "animal",
+ "expression": "beast",
+ "silhouette": "beast-carp",
+ "soul": "The soul of one who swims against the current as a matter of course, and has never thought to call it hard.",
+ "spark": "The mote holds its place a little upwind of you in any draught, as if the air were going somewhere and it had declined.",
+ "nature": {
+  "ground": {
+   "water": 1.0
+  },
+  "orders": {
+   "hold": 0.7
+  },
+  "fights": {
+   "hurts": 0.5
+  }
+ },
+ "calls": {
+  "seed": {
+   "remembers": 0.6,
+   "stands-between": 0.5
+  },
+  "shape": {
+   "anchor": 0.6,
+   "turn": 0.4,
+   "read": 0.3
+  },
+  "blood": {
+   "riverborn": 1.0,
+   "reads-currents": 0.6,
+   "tidewater": 0.5,
+   "dragon-blooded": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Finned",
+  "gift": [
+   "fins",
+   "tail"
+  ],
+  "text": "It holds its place in whatever is going past it, and has not yet been carried off."
+ },
+ "settled": {
+  "id": "carp-fingerling",
+  "name": "Fingerling",
+  "text": "A fish the length of your finger, mostly eye. It hangs in the air at your shoulder with its nose to whatever is coming.",
+  "sign": "The length of your finger, and mostly eye. It always faces into the draught, working its tail to stay where it is.",
+  "habit": "It holds its place over the washbasin for an hour at a time, and looks pleased with itself.",
+  "features": [
+   "fins"
+  ],
+  "body": {
+   "build": {
+    "len": 0.3,
+    "depth": 0.95,
+    "width": 1.0,
+    "head": 1.5,
+    "eye": 1.9,
+    "size": 1.8
+   },
+   "shape": "carp",
+   "pose": "level",
+   "tail": [
+    "fan",
+    0.9
+   ],
+   "dorsal": [
+    "low",
+    0.7
+   ],
+   "fins": [
+    "paddle",
+    0.75
+   ],
+   "barbels": [
+    "none",
+    1.0
+   ],
+   "mouth": "lips",
+   "eyes": "round",
+   "scales": "none",
+   "marks": [],
+   "carry": [],
+   "brow": "mild"
+  }
+ },
+ "paths": [
+  {
+   "id": "carp-weir-leaper",
+   "name": "Weir-leaper",
+   "of": "one who does not go round",
+   "text": "It learned from you that the way round is longer than it looks. It goes over; and if it falls back, it goes over again.",
+   "sign": "Scales thick as coin along the shoulder, a nose scuffed pale, and a body bent like a drawn bow.",
+   "habit": "It throws itself at the top stair, falls short, and does it again until it is on the landing.",
+   "leans": {
+    "ground": {
+     "water": 1.0
+    },
+    "fights": {
+     "hurts": 0.8
+    },
+    "quests": {
+     "deep-run": 0.4
+    }
+   },
+   "features": [
+    "plated"
+   ],
+   "body": {
+    "build": {
+     "len": 0.56,
+     "depth": 1.0,
+     "width": 1.0,
+     "head": 1.1,
+     "eye": 1.15,
+     "size": 1.0
+    },
+    "shape": "carp",
+    "pose": "bow",
+    "tail": [
+     "fork",
+     1.1
+    ],
+    "dorsal": [
+     "sail",
+     1.0
+    ],
+    "fins": [
+     "paddle",
+     1.0
+    ],
+    "barbels": [
+     "short",
+     1.0
+    ],
+    "mouth": "lips",
+    "eyes": "round",
+    "scales": "coin",
+    "marks": [
+     [
+      "stripe",
+      1.0
+     ]
+    ],
+    "carry": [
+     [
+      "scuff",
+      1.0
+     ]
+    ],
+    "accent": "jade",
+    "brow": "keen",
+    "finmark": "rays"
+   },
+   "prongs": [
+    {
+     "id": "carp-falls-climber",
+     "name": "Falls-climber",
+     "of": "one who keeps climbing after everyone has said it is high enough",
+     "text": "On the deep runs it goes up each fall ahead of you and waits in the slack above, looking down.",
+     "sign": "Whiskers grown long and swept back, a longer body, and a look upward even on level ground.",
+     "habit": "It noses at the ceiling in the corners, where the wall stops, as if there might be more.",
+     "leans": {
+      "quests": {
+       "deep-run": 1.0
+      }
+     },
+     "features": [
+      "whiskers"
+     ],
+     "body": {
+      "build": {
+       "len": 0.7,
+       "depth": 0.9,
+       "width": 0.95
+      },
+      "pose": "climb",
+      "barbels": [
+       "long",
+       1.5
+      ],
+      "tail": [
+       "fork",
+       1.25
+      ],
+      "dorsal": [
+       "ridge",
+       1.0
+      ],
+      "marks": [
+       [
+        "stripe",
+        1.0
+       ],
+       [
+        "bands",
+        1.0
+       ]
+      ],
+      "carry": [
+       [
+        "spray",
+        0.8
+       ]
+      ],
+      "eyes": "up",
+      "brow": "mild"
+     },
+     "finishes": [
+      {
+       "id": "carp-horn-bud",
+       "name": "Horn-bud",
+       "of": "one who is changed by the climb before they reach the top",
+       "text": "Each blow you take on the deep runs it takes with you, and something has begun to come through above its eyes.",
+       "sign": "Two blunt buds above the eyes, soft as new antler, and the start of a mane behind them.",
+       "habit": "It rubs its brow along the lintel of every door it passes under, slowly, on both sides.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "quests": {
+         "deep-run": 0.5
+        }
+       },
+       "features": [
+        "horn-brow"
+       ],
+       "body": {
+        "build": {
+         "len": 0.8,
+         "depth": 0.88,
+         "head": 1.08
+        },
+        "pose": "rear",
+        "head": [
+         [
+          "buds",
+          1.5
+         ]
+        ],
+        "dorsal": [
+         "mane",
+         0.7
+        ],
+        "barbels": [
+         "long",
+         1.9
+        ],
+        "scales": "plates",
+        "carry": [],
+        "eyes": "round",
+        "brow": "mild"
+       }
+      },
+      {
+       "id": "carp-past-the-gate",
+       "name": "Past-the-Gate",
+       "of": "one who came through, and is still surprised by their own reflection",
+       "text": "Every named beast you felled was a fall it went up. After the last, what looked out of its face had horns.",
+       "sign": "Long as a banner, maned and whiskered, with antlers of horn; and a carp's round, mild eye.",
+       "habit": "It still turns into the draught and holds its place there, though nothing could move it now.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "ground": {
+         "water": 0.5
+        }
+       },
+       "features": [
+        "horns",
+        "mane"
+       ],
+       "body": {
+        "build": {
+         "len": 1.2,
+         "depth": 1.4,
+         "width": 1.4,
+         "head": 1.25,
+         "eye": 0.72
+        },
+        "shape": "long",
+        "pose": "dragon",
+        "head": [
+         [
+          "antlers",
+          0.6
+         ]
+        ],
+        "dorsal": [
+         "dragon",
+         0.62
+        ],
+        "fins": [
+         "claw",
+         0.5
+        ],
+        "barbels": [
+         "dragon",
+         1.0
+        ],
+        "tail": [
+         "banner",
+         0.6
+        ],
+        "scales": "plates",
+        "carry": [
+         [
+          "pearl",
+          1.0
+         ]
+        ],
+        "accent2": "gold",
+        "brow": "mild",
+        "eyes": "round"
+       }
+      }
+     ]
+    },
+    {
+     "id": "carp-rapids-runner",
+     "name": "Rapids-runner",
+     "of": "one who is quickest where it is roughest",
+     "text": "It is through the gap in the foe's swing before the swing has finished. You go where it went.",
+     "sign": "Narrow as a blade, with a deep forked tail. It is never quite still, even asleep.",
+     "habit": "It shoots the length of the corridor when a door bangs, and comes back slowly, as if it had meant to.",
+     "leans": {
+      "fights": {
+       "dodges": 1.0
+      },
+      "range": {
+       "close": 0.4
+      }
+     },
+     "features": [
+      "sleek-coat"
+     ],
+     "body": {
+      "build": {
+       "len": 0.66,
+       "depth": 0.7,
+       "width": 0.72,
+       "head": 0.9
+      },
+      "shape": "slim",
+      "pose": "dart",
+      "tail": [
+       "scythe",
+       1.4
+      ],
+      "dorsal": [
+       "low",
+       0.8
+      ],
+      "fins": [
+       "swept",
+       1.0
+      ],
+      "scales": "net",
+      "marks": [
+       [
+        "stripe",
+        1.2
+       ],
+       [
+        "dash",
+        1.0
+       ]
+      ],
+      "carry": [],
+      "brow": "stern"
+     },
+     "finishes": [
+      {
+       "id": "carp-white-water",
+       "name": "White-water",
+       "of": "one who looks calmest in the middle of the worst of it",
+       "text": "In the thick of a party's fight it hangs quite still, and the blows go round it like water round a stone.",
+       "sign": "Pale as foam at fins and tail, and a line of spray that hangs in the air behind it.",
+       "habit": "It rests in the one place in a crowd where nobody is pushing.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "fights": {
+         "dodges": 0.5
+        }
+       },
+       "features": [
+        "current"
+       ],
+       "body": {
+        "build": {
+         "len": 0.7,
+         "depth": 0.8
+        },
+        "pose": "level",
+        "tail": [
+         "foam",
+         1.5
+        ],
+        "fins": [
+         "foam",
+         1.2
+        ],
+        "dorsal": [
+         "foam",
+         1.0
+        ],
+        "carry": [
+         [
+          "spray",
+          1.2
+         ],
+         [
+          "eddy",
+          1.0
+         ]
+        ],
+        "brow": "calm"
+       }
+      },
+      {
+       "id": "carp-skimmer",
+       "name": "Skimmer",
+       "of": "one who leaves the water when the water is not enough",
+       "text": "From far off it leaves the current altogether, and comes down on the far side of whatever stood between you and the foe.",
+       "sign": "Fins at its shoulders grown long as wings and held out flat. It travels in long low arcs.",
+       "habit": "It launches from the back of your chair and glides to the windowsill every evening, and sometimes misses.",
+       "leans": {
+        "range": {
+         "far": 1.0
+        }
+       },
+       "features": [
+        "wings"
+       ],
+       "body": {
+        "build": {
+         "len": 0.62,
+         "depth": 0.62,
+         "width": 0.7
+        },
+        "pose": "bank",
+        "fins": [
+         "wing",
+         1.0
+        ],
+        "tail": [
+         "scythe",
+         1.6
+        ],
+        "dorsal": [
+         "low",
+         0.6
+        ],
+        "marks": [
+         [
+          "stripe",
+          1.2
+         ],
+         [
+          "wingbars",
+          1.0
+         ]
+        ],
+        "carry": [],
+        "brow": "keen"
+       }
+      }
+     ]
+    },
+    {
+     "id": "carp-shoal-head",
+     "name": "Shoal-head",
+     "of": "one who goes first into it so the rest have slack water to follow in",
+     "text": "It takes the front of the party and the worst of the current, and your classmates come up easier in its wake.",
+     "sign": "A broad blunt head and heavy shoulders, and a wake that shows in the air behind it.",
+     "habit": "It goes through every doorway first and waits just inside, facing back the way it came.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      },
+      "bonds": {
+       "classmate": 0.5
+      }
+     },
+     "features": [
+      "broad-chest"
+     ],
+     "body": {
+      "build": {
+       "len": 0.6,
+       "depth": 1.15,
+       "width": 1.25,
+       "head": 1.3
+      },
+      "shape": "bull",
+      "pose": "level",
+      "tail": [
+       "fan",
+       1.0
+      ],
+      "dorsal": [
+       "sail",
+       0.8
+      ],
+      "fins": [
+       "paddle",
+       1.2
+      ],
+      "scales": "coin",
+      "marks": [
+       [
+        "stripe",
+        1.0
+       ],
+       [
+        "shoulder",
+        1.0
+       ]
+      ],
+      "carry": [
+       [
+        "wake",
+        1.0
+       ]
+      ],
+      "brow": "stern"
+     },
+     "finishes": [
+      {
+       "id": "carp-cutwater",
+       "name": "Cutwater",
+       "of": "one who stands where it hits hardest, so that behind them it is calm",
+       "text": "It sets itself across the rush as you set your guard, and the blow breaks on its shoulders. Behind it your friends have room to breathe.",
+       "sign": "A head like a prow, plated grey as harbour stone, and still water in the lee of it.",
+       "habit": "It lies across the threshold when the wind gets up, and the draught goes round.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        },
+        "company": {
+         "party": 0.5
+        }
+       },
+       "features": [
+        "stone-skin"
+       ],
+       "body": {
+        "build": {
+         "len": 0.66,
+         "depth": 1.3,
+         "width": 1.5,
+         "head": 1.5
+        },
+        "pose": "broadside",
+        "head": [
+         [
+          "prow",
+          1.0
+         ]
+        ],
+        "scales": "armour",
+        "dorsal": [
+         "spines",
+         1.0
+        ],
+        "tail": [
+         "fan",
+         0.9
+        ],
+        "carry": [
+         [
+          "wake",
+          1.4
+         ]
+        ]
+       }
+      },
+      {
+       "id": "carp-shoal-elder",
+       "name": "Shoal-elder",
+       "of": "one who turns back at the top to show the small ones the way",
+       "text": "On escorts a shoal of small lights follows in its wake. It counts them at every halt, and goes back for the last.",
+       "sign": "A dozen fry no longer than a thumbnail swim in its wake, and scatter and regather when it turns.",
+       "habit": "It will not settle for the night until every one of the small ones is under its fins.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "bonds": {
+         "classmate": 0.5
+        }
+       },
+       "features": [
+        "glow"
+       ],
+       "body": {
+        "build": {
+         "len": 0.64,
+         "depth": 1.1,
+         "width": 1.15,
+         "head": 1.2
+        },
+        "pose": "turn",
+        "tail": [
+         "fan",
+         1.2
+        ],
+        "fins": [
+         "shelter",
+         1.3
+        ],
+        "barbels": [
+         "long",
+         1.2
+        ],
+        "carry": [
+         [
+          "fry",
+          1.0
+         ]
+        ],
+        "brow": "heavy"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "carp-still-water",
+   "name": "Still-water Carp",
+   "of": "one who makes a small place deep by staying in it",
+   "text": "It learned from you that a pool is as deep as the time you give it. It has stopped looking for the river.",
+   "sign": "A pale body with patches like spilled lacquer, and a slow turn at the end of every length, as if at a wall.",
+   "habit": "It swims the same circuit of your room at the same hour, and is put out if a chair has moved.",
+   "leans": {
+    "orders": {
+     "hold": 1.0
+    },
+    "ground": {
+     "quiet": 0.8
+    },
+    "bonds": {
+     "classmate": 0.4
+    }
+   },
+   "features": [
+    "hall-fat"
+   ],
+   "body": {
+    "build": {
+     "len": 0.54,
+     "depth": 1.2,
+     "width": 1.2,
+     "head": 1.0,
+     "eye": 1.15,
+     "size": 1.0
+    },
+    "shape": "carp",
+    "pose": "turn",
+    "tail": [
+     "fan",
+     1.2
+    ],
+    "dorsal": [
+     "sail",
+     0.9
+    ],
+    "fins": [
+     "fan",
+     1.1
+    ],
+    "barbels": [
+     "short",
+     0.8
+    ],
+    "mouth": "lips",
+    "eyes": "round",
+    "scales": "net",
+    "marks": [
+     [
+      "patches",
+      1.0
+     ]
+    ],
+    "carry": [],
+    "coat": "frost",
+    "accent": "madder",
+    "brow": "calm",
+    "finmark": "roots"
+   },
+   "prongs": [
+    {
+     "id": "carp-lacquer-back",
+     "name": "Lacquer-back",
+     "of": "one who wears who they are where anyone can read it",
+     "text": "Each time your Pattern fires its markings come up brighter, and the foe cannot help looking.",
+     "sign": "The patches have drawn together into one clean saddle and a mask, bright as wet lacquer.",
+     "habit": "It turns broadside under the lamp and holds there until somebody has noticed.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      }
+     },
+     "features": [
+      "mask"
+     ],
+     "body": {
+      "build": {
+       "len": 0.6,
+       "depth": 1.15
+      },
+      "pose": "broadside",
+      "marks": [
+       [
+        "saddle",
+        1.0
+       ],
+       [
+        "mask",
+        1.0
+       ]
+      ],
+      "dorsal": [
+       "sail",
+       1.3
+      ],
+      "tail": [
+       "fan",
+       1.35
+      ]
+     },
+     "finishes": [
+      {
+       "id": "carp-crane-crowned",
+       "name": "Crane-crowned",
+       "of": "one who has pared themselves down to a single true thing",
+       "text": "All its markings have gone but one: a round red crown, the colour of the word you swore.",
+       "sign": "White as paper, with one round red mark on the crown of its head and nothing else.",
+       "habit": "It rises to the top of the room at first light and shows the mark to the east.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        }
+       },
+       "features": [
+        "crown"
+       ],
+       "body": {
+        "build": {
+         "len": 0.68,
+         "depth": 0.95,
+         "width": 0.95,
+         "head": 1.05
+        },
+        "pose": "present",
+        "marks": [],
+        "dorsal": [
+         "sail",
+         1.0
+        ],
+        "tail": [
+         "fork",
+         1.3
+        ],
+        "fins": [
+         "fan",
+         1.0
+        ],
+        "scales": "none",
+        "carry": [],
+        "finmark": "plain",
+        "head": [
+         [
+          "cap",
+          1.0
+         ]
+        ],
+        "brow": "sleepy"
+       }
+      },
+      {
+       "id": "carp-brocade",
+       "name": "Brocade Carp",
+       "of": "one who has been many things and kept the colours of all of them",
+       "text": "Every Cast you threw left a colour on it. It has kept them all, laid one over another like brocade.",
+       "sign": "Three colours laid over one another, and fins and tail so long they follow it round corners.",
+       "habit": "It will not be hurried past a mirror.",
+       "leans": {
+        "shape": {
+         "cast": 1.0
+        },
+        "pattern": {
+         "fires": 0.5
+        }
+       },
+       "features": [
+        "veil-fins"
+       ],
+       "body": {
+        "build": {
+         "len": 0.62,
+         "depth": 1.2
+        },
+        "pose": "sway",
+        "marks": [
+         [
+          "brocade",
+          1.0
+         ]
+        ],
+        "dorsal": [
+         "veil",
+         1.2
+        ],
+        "tail": [
+         "veil",
+         1.5
+        ],
+        "fins": [
+         "veil",
+         1.25
+        ],
+        "barbels": [
+         "long",
+         1.2
+        ],
+        "accent2": "gold"
+       }
+      }
+     ]
+    },
+    {
+     "id": "carp-hand-fed",
+     "name": "Hand-fed Carp",
+     "of": "one who comes when called, and is not ashamed of it",
+     "text": "It comes to a classmate's hand as readily as to yours, and they fight the steadier for having fed it.",
+     "sign": "Thick soft lips, and a way of rising mouth first to any hand held out flat.",
+     "habit": "It knows the sound of the refectory bell, and is at the door before the bell has finished.",
+     "leans": {
+      "bonds": {
+       "classmate": 1.0
+      }
+     },
+     "features": [
+      "maw"
+     ],
+     "body": {
+      "build": {
+       "len": 0.58,
+       "depth": 1.3,
+       "width": 1.3,
+       "head": 1.15
+      },
+      "pose": "rise",
+      "mouth": "gape",
+      "marks": [
+       [
+        "patches",
+        1.2
+       ],
+       [
+        "lips",
+        1.0
+       ]
+      ],
+      "barbels": [
+       "short",
+       1.2
+      ],
+      "brow": "mild"
+     },
+     "finishes": [
+      {
+       "id": "carp-hundred-winters",
+       "name": "Hundred-winter Carp",
+       "of": "one whom everyone has fed and nobody owns",
+       "text": "The shades at the hearth know it by name. It was in this yard for their cohorts, in a way, and now it has seen yours.",
+       "sign": "Very large and very slow, weed on its back, its whiskers gone white, and eyes that have watched a great many people.",
+       "habit": "It lies near whoever is oldest in the room, and they both seem to rest.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        },
+        "ground": {
+         "quiet": 0.5
+        }
+       },
+       "features": [
+        "old-eyes"
+       ],
+       "body": {
+        "build": {
+         "len": 0.8,
+         "depth": 1.4,
+         "width": 1.45,
+         "head": 1.2,
+         "eye": 0.8
+        },
+        "shape": "bull",
+        "pose": "level",
+        "mouth": "lips",
+        "eyes": "old",
+        "barbels": [
+         "white",
+         2.0
+        ],
+        "tail": [
+         "ragged",
+         1.2
+        ],
+        "dorsal": [
+         "ragged",
+         0.9
+        ],
+        "fins": [
+         "fan",
+         1.2
+        ],
+        "scales": "coin",
+        "marks": [
+         [
+          "faded",
+          1.0
+         ]
+        ],
+        "carry": [
+         [
+          "weed",
+          1.0
+         ]
+        ],
+        "brow": "heavy"
+       }
+      },
+      {
+       "id": "carp-ring-bearer",
+       "name": "Ring-bearer",
+       "of": "one who can be trusted with what you cannot afford to lose",
+       "text": "It carries your writs in a ring of light in its mouth, and has never once swallowed. What you give it to keep, it keeps.",
+       "sign": "A ring of light held gently in its mouth, which it shifts from side to side like a sweet.",
+       "habit": "It takes small things you have dropped and gives them back a day later, when you have stopped looking.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        },
+        "bonds": {
+         "classmate": 0.4
+        }
+       },
+       "features": [
+        "ring"
+       ],
+       "body": {
+        "build": {
+         "len": 0.56,
+         "depth": 1.1,
+         "width": 1.1,
+         "head": 1.2
+        },
+        "pose": "level",
+        "mouth": "ring",
+        "marks": [
+         [
+          "collar",
+          1.0
+         ],
+         [
+          "tips",
+          1.0
+         ]
+        ],
+        "tail": [
+         "fan",
+         1.1
+        ],
+        "carry": [
+         [
+          "seal",
+          1.0
+         ]
+        ],
+        "brow": "mild"
+       }
+      }
+     ]
+    },
+    {
+     "id": "carp-ice-sleeper",
+     "name": "Ice-sleeper",
+     "of": "one who can wait out a whole season without moving",
+     "text": "When you turn the cold on a foe it goes still beside you and takes none of it. It has slept under worse.",
+     "sign": "Fins folded close, a rime along its back, and a stillness you could mistake for a carving.",
+     "habit": "In the cold months it hangs in one corner of the room for days, and wakes when you say its name twice.",
+     "leans": {
+      "shape": {
+       "turn": 1.0
+      },
+      "ground": {
+       "quiet": 0.4
+      }
+     },
+     "features": [
+      "rime"
+     ],
+     "body": {
+      "build": {
+       "len": 0.6,
+       "depth": 1.05,
+       "width": 1.0
+      },
+      "pose": "hang",
+      "fins": [
+       "folded",
+       1.0
+      ],
+      "tail": [
+       "closed",
+       1.0
+      ],
+      "dorsal": [
+       "folded",
+       1.0
+      ],
+      "marks": [
+       [
+        "patches",
+        0.8
+       ]
+      ],
+      "carry": [
+       [
+        "rime",
+        1.0
+       ]
+      ],
+      "brow": "sleepy"
+     },
+     "finishes": [
+      {
+       "id": "carp-under-the-ice",
+       "name": "Under-the-Ice",
+       "of": "one who is most alive where nothing shows",
+       "text": "When you block, a pane of ice forms over it like a window. It watches the blow land on that, and is not touched.",
+       "sign": "A slab of clear ice rides over its back like a lid, and it looks up through it.",
+       "habit": "It breathes on the window on cold mornings, from the inside, and watches the yard through the clear patch.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        },
+        "shape": {
+         "turn": 0.5
+        }
+       },
+       "features": [
+        "ice-lid"
+       ],
+       "body": {
+        "build": {
+         "len": 0.64,
+         "depth": 1.1
+        },
+        "pose": "level",
+        "eyes": "up",
+        "carry": [
+         [
+          "rime",
+          0.6
+         ],
+         [
+          "pane",
+          1.0
+         ]
+        ],
+        "brow": "mild"
+       }
+      },
+      {
+       "id": "carp-first-thaw",
+       "name": "First Thaw",
+       "of": "one who is the first thing moving when it is over",
+       "text": "When your wards go up it breaks out of its stillness with the ice still on it, and everything near it wakes too.",
+       "sign": "Shards of ice still ride on its back and melt as it goes, and its fins are spread as wide as they will open.",
+       "habit": "It is at the window on the first warm morning, tapping the glass with its nose.",
+       "leans": {
+        "shape": {
+         "make": 1.0
+        },
+        "company": {
+         "party": 0.4
+        }
+       },
+       "features": [
+        "glow"
+       ],
+       "body": {
+        "build": {
+         "len": 0.64,
+         "depth": 1.1
+        },
+        "pose": "burst",
+        "fins": [
+         "fan",
+         1.7
+        ],
+        "tail": [
+         "fan",
+         1.7
+        ],
+        "dorsal": [
+         "sail",
+         1.6
+        ],
+        "marks": [
+         [
+          "patches",
+          1.3
+         ]
+        ],
+        "carry": [
+         [
+          "shards",
+          1.0
+         ],
+         [
+          "drops",
+          1.0
+         ]
+        ],
+        "eyes": "round",
+        "brow": "mild"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "carp-silt-reader",
+   "name": "Silt-reader",
+   "of": "one who finds out by touch, slowly, and is never surprised",
+   "text": "It learned from you that what happened is kept at the bottom of things. It goes down and feels for it.",
+   "sign": "A flat head, a wide slow mouth, and whiskers longer than itself that touch a thing before it does.",
+   "habit": "It lies along the skirting board with its whiskers out, and knows who came in while you were away.",
+   "leans": {
+    "range": {
+     "close": 1.0
+    },
+    "ground": {
+     "ruin": 0.8,
+     "night": 0.3
+    },
+    "shape": {
+     "read": 0.5
+    }
+   },
+   "features": [
+    "whiskers"
+   ],
+   "body": {
+    "build": {
+     "len": 0.62,
+     "depth": 0.85,
+     "width": 1.15,
+     "head": 1.1,
+     "eye": 0.85,
+     "size": 1.0
+    },
+    "shape": "flat",
+    "pose": "nose-down",
+    "tail": [
+     "paddle",
+     1.0
+    ],
+    "dorsal": [
+     "low",
+     0.8
+    ],
+    "fins": [
+     "fan",
+     1.0
+    ],
+    "barbels": [
+     "feelers",
+     1.6
+    ],
+    "mouth": "wide",
+    "eyes": "small",
+    "scales": "none",
+    "marks": [
+     [
+      "back",
+      1.0
+     ],
+     [
+      "spots",
+      1.0
+     ]
+    ],
+    "carry": [],
+    "coat": "slate",
+    "accent": "amethyst",
+    "brow": "sleepy",
+    "finmark": "edge"
+   },
+   "prongs": [
+    {
+     "id": "carp-quake-fish",
+     "name": "Quake-fish",
+     "of": "one who feels it coming through the floor",
+     "text": "It feels the foe's weight shift before the foe has moved, and twitches; and you are already turning the blow.",
+     "sign": "Its whiskers hang straight down like plumb lines, and tremble a moment before anything else does.",
+     "habit": "It goes rigid a breath before the car passes, and a breath before the cup falls.",
+     "leans": {
+      "fights": {
+       "parries": 1.0
+      },
+      "shape": {
+       "read": 0.4
+      }
+     },
+     "features": [
+      "tunnel-ear"
+     ],
+     "body": {
+      "build": {
+       "len": 0.7,
+       "depth": 0.9,
+       "width": 1.3,
+       "head": 1.25
+      },
+      "pose": "arch",
+      "barbels": [
+       "plumb",
+       2.0
+      ],
+      "tail": [
+       "eel",
+       1.2
+      ],
+      "dorsal": [
+       "low",
+       0.6
+      ],
+      "carry": [
+       [
+        "tremor",
+        0.7
+       ]
+      ],
+      "brow": "mild",
+      "marks": [
+       [
+        "back",
+        1.0
+       ],
+       [
+        "bands",
+        0.8
+       ]
+      ]
+     },
+     "finishes": [
+      {
+       "id": "carp-anchor-stone",
+       "name": "Anchor-stone",
+       "of": "one who holds still so that everything else can",
+       "text": "Set to Hold, it takes up a stone and lies under it. While it lies still, the ground under you does not move.",
+       "sign": "A grey boulder roped to its back, worn smooth where the rope goes, and a patience that is nearly geology.",
+       "habit": "It will not shift from where it has settled until you have asked it three times, politely.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "fights": {
+         "blocks": 0.5
+        }
+       },
+       "features": [
+        "hump"
+       ],
+       "body": {
+        "build": {
+         "len": 0.8,
+         "depth": 0.95,
+         "width": 1.55,
+         "head": 1.35
+        },
+        "pose": "level",
+        "barbels": [
+         "plumb",
+         1.6
+        ],
+        "carry": [
+         [
+          "stone",
+          1.0
+         ]
+        ],
+        "tail": [
+         "eel",
+         1.0
+        ],
+        "brow": "sleepy"
+       }
+      },
+      {
+       "id": "carp-ground-shaker",
+       "name": "Ground-shaker",
+       "of": "one whose smallest movement is felt by everyone in the room",
+       "text": "When your Pattern lands it rolls once, and the foe's footing goes out from under it.",
+       "sign": "A great heavy head, and rings that spread in the air from its tail whenever it turns.",
+       "habit": "It turns over in its sleep and the cups ring on the shelf.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "range": {
+         "close": 0.5
+        }
+       },
+       "features": [
+        "standing-air"
+       ],
+       "body": {
+        "build": {
+         "len": 0.95,
+         "depth": 1.0,
+         "width": 1.35,
+         "head": 1.6
+        },
+        "pose": "thrash",
+        "barbels": [
+         "lash",
+         2.2
+        ],
+        "tail": [
+         "eel",
+         1.5
+        ],
+        "dorsal": [
+         "spines",
+         0.8
+        ],
+        "carry": [
+         [
+          "tremor",
+          1.15
+         ]
+        ],
+        "marks": [
+         [
+          "back",
+          1.0
+         ],
+         [
+          "bands",
+          1.2
+         ]
+        ],
+        "brow": "stern"
+       }
+      }
+     ]
+    },
+    {
+     "id": "carp-lamp-barbel",
+     "name": "Lamp-barbel",
+     "of": "one who carries the only light there is down there, and chooses who sees by it",
+     "text": "On the night runs it goes ahead with a light on the end of one whisker, held low, so that only you can see by it.",
+     "sign": "One whisker grown long as a rod, with a small steady light at its tip, carried out in front.",
+     "habit": "It reads over your shoulder at night, holding its light just clear of the page.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      },
+      "company": {
+       "alone": 0.4
+      }
+     },
+     "features": [
+      "lantern"
+     ],
+     "body": {
+      "build": {
+       "len": 0.64,
+       "depth": 0.95,
+       "width": 1.1,
+       "head": 1.2,
+       "eye": 1.2
+      },
+      "pose": "level",
+      "barbels": [
+       "feelers",
+       1.2
+      ],
+      "carry": [
+       [
+        "rod",
+        1.0
+       ]
+      ],
+      "eyes": "round",
+      "dorsal": [
+       "sail",
+       0.7
+      ],
+      "brow": "calm",
+      "marks": [
+       [
+        "back",
+        1.0
+       ],
+       [
+        "dash",
+        1.0
+       ]
+      ]
+     },
+     "finishes": [
+      {
+       "id": "carp-wreck-light",
+       "name": "Wreck-light",
+       "of": "one who makes a home in what went down, and keeps a lamp in the window",
+       "text": "It lives in what the old world left under the water, and comes out of the ruins with a lamp grown into its back.",
+       "sign": "A ship's lamp is grown into its back among barnacles and weed, and still burns.",
+       "habit": "It sleeps inside anything hollow: a boot, a helmet, the stove when it is cold.",
+       "leans": {
+        "ground": {
+         "ruin": 1.0
+        },
+        "quests": {
+         "salvage": 0.5
+        }
+       },
+       "features": [
+        "barnacles"
+       ],
+       "body": {
+        "build": {
+         "len": 0.78,
+         "depth": 1.15,
+         "width": 1.3,
+         "head": 1.2
+        },
+        "shape": "bull",
+        "pose": "level",
+        "carry": [
+         [
+          "shiplamp",
+          1.0
+         ],
+         [
+          "barnacles",
+          1.0
+         ],
+         [
+          "weed",
+          0.5
+         ],
+         [
+          "chain",
+          1.0
+         ]
+        ],
+        "tail": [
+         "ragged",
+         1.1
+        ],
+        "scales": "armour",
+        "brow": "heavy"
+       }
+      },
+      {
+       "id": "carp-well-watcher",
+       "name": "Well-watcher",
+       "of": "one who has only ever seen a coin of sky, and knows it by heart",
+       "text": "On Guard it looks up, always. It sees the strike that comes from above before you have thought to look.",
+       "sign": "Round as a float, with great eyes set on the top of its head that look only upward.",
+       "habit": "It lies on the floor under the skylight for whole afternoons, watching the square of sky go by.",
+       "leans": {
+        "shape": {
+         "read": 1.0
+        },
+        "orders": {
+         "guard": 0.5
+        }
+       },
+       "features": [
+        "far-eyes"
+       ],
+       "body": {
+        "build": {
+         "len": 0.46,
+         "depth": 1.7,
+         "width": 1.75,
+         "head": 1.3,
+         "eye": 1.9
+        },
+        "shape": "round",
+        "pose": "level",
+        "eyes": "top",
+        "tail": [
+         "veil",
+         1.0
+        ],
+        "fins": [
+         "fan",
+         0.8
+        ],
+        "dorsal": [
+         "none",
+         1.0
+        ],
+        "barbels": [
+         "short",
+         1.0
+        ],
+        "carry": [
+         [
+          "coin",
+          1.0
+         ]
+        ],
+        "mouth": "lips",
+        "brow": null
+       }
+      }
+     ]
+    },
+    {
+     "id": "carp-doctor-fish",
+     "name": "Doctor-fish",
+     "of": "one whom the hurt come and lean against",
+     "text": "When you have taken a blow for the party it comes and lays its side against you until your hands are steady.",
+     "sign": "Small scales under a thick clear slime that shines green-gold, and a calm that the hurt drift towards.",
+     "habit": "It lies against whichever of you has had the worst day, saying nothing.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      },
+      "fights": {
+       "hurts": 0.5
+      }
+     },
+     "features": [
+      "pulse"
+     ],
+     "body": {
+      "build": {
+       "len": 0.6,
+       "depth": 1.25,
+       "width": 1.2,
+       "head": 0.95,
+       "eye": 1.0
+      },
+      "shape": "tench",
+      "pose": "lean",
+      "tail": [
+       "paddle",
+       1.2
+      ],
+      "dorsal": [
+       "round",
+       1.0
+      ],
+      "fins": [
+       "paddle",
+       1.2
+      ],
+      "barbels": [
+       "short",
+       0.8
+      ],
+      "mouth": "lips",
+      "eyes": "round",
+      "scales": "small",
+      "marks": [
+       [
+        "back",
+        1.0
+       ],
+       [
+        "sheen",
+        1.0
+       ]
+      ],
+      "carry": [],
+      "accent2": "jade",
+      "brow": "heavy"
+     },
+     "finishes": [
+      {
+       "id": "carp-salve-carp",
+       "name": "Salve-carp",
+       "of": "one who gives away what protects them, and grows it back",
+       "text": "It has leaned against every classmate who was ever hurt beside you, and its own sides are worn bright with it.",
+       "sign": "Its sides are worn bare in patches where others have leaned, and shine there like new metal.",
+       "habit": "It goes down the row of beds at night and touches each sleeper once, as if counting.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        },
+        "fights": {
+         "hurts": 0.5
+        }
+       },
+       "features": [
+        "glow"
+       ],
+       "body": {
+        "build": {
+         "len": 0.74,
+         "depth": 1.3,
+         "width": 1.25
+        },
+        "pose": "crescent",
+        "marks": [
+         [
+          "back",
+          1.0
+         ],
+         [
+          "worn",
+          1.0
+         ]
+        ],
+        "tail": [
+         "paddle",
+         1.4
+        ],
+        "fins": [
+         "paddle",
+         1.5
+        ],
+        "carry": []
+       }
+      },
+      {
+       "id": "carp-mud-sleeper",
+       "name": "Mud-sleeper",
+       "of": "one who shuts themselves away to get through the lean time, and comes out whole",
+       "text": "Alone in the dead places it shuts itself in a ball of mud and waits. You have learned to wait with it.",
+       "sign": "A ball of dried mud with a crack in it, a tail curled round the outside, and one eye looking out of the crack.",
+       "habit": "It builds a nest of your blankets, goes in, and is not seen for two days. Then it is hungry.",
+       "leans": {
+        "company": {
+         "alone": 1.0
+        },
+        "ground": {
+         "ruin": 0.4
+        }
+       },
+       "features": [
+        "quiet-place"
+       ],
+       "body": {
+        "build": {
+         "len": 0.5,
+         "depth": 1.2,
+         "width": 1.2
+        },
+        "pose": "curl",
+        "carry": [
+         [
+          "mudball",
+          1.0
+         ]
+        ],
+        "tail": [
+         "paddle",
+         1.1
+        ],
+        "dorsal": [
+         "none",
+         1.0
+        ],
+        "fins": [
+         "folded",
+         1.0
+        ],
+        "brow": "mild"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "newFeatures": [
+  {
+   "id": "veil-fins",
+   "slot": "limbs",
+   "label": "fins long as a court sleeve"
+  },
+  {
+   "id": "ice-lid",
+   "slot": "surface",
+   "label": "a pane of ice over its back"
+  },
+  {
+   "id": "barnacles",
+   "slot": "surface",
+   "label": "barnacles and weed"
+  }
+ ]
+}
