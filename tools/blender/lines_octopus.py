@@ -60,7 +60,7 @@ def _r(ramp, step):
 # everything else is named for what it is made of and lies on a ramp.
 PALETTE.update({
     "hide_octopus": (_r("rust", 3), 0.5, 0.0), "hide_octopus_pale": (_r("bone", 3), 0.45, 0.0), "hide_octopus_dark": (_r("rust", 1), 0.55, 0.0),
-    "eye_gold": ((0.83, 0.51, 0.2), 0.25, 0.0), "pupil_bar": ((0.012, 0.01, 0.014), 0.2, 0.0),
+    "eye_gold": ((0.83, 0.51, 0.2), 0.25, 0.0), "ink_bar": (_r("ink", 0), 0.6, 0.0),
     "glass_bottle": (_r("verdigris", 1), 0.12, 0.0), "glass_bottle_pale": (_r("verdigris", 3), 0.1, 0.0), "glass_bottle_dark": (_r("verdigris", 0), 0.15, 0.0),
     "glass_clear": (_r("steel", 3), 0.08, 0.0), "glass_clear_dark": (_r("steel", 0), 0.1, 0.0), "glass_flesh": (_r("steel", 4), 0.1, 0.0),
     "brass_key": (_r("brass", 3), 0.3, 0.85), "brass_key_dark": (_r("brass", 1), 0.35, 0.85), "iron_pot": (_r("iron", 1), 0.5, 0.7), "iron_pot_light": (_r("iron", 3), 0.45, 0.7),
@@ -470,7 +470,7 @@ class Octo:
         d = re * 0.5
         dome = turn([(re, -re * 0.1), (re * 0.95, d * 0.3), (re * 0.72, d * 0.72), (re * 0.36, d * 0.95), (0.0, d)], E, e, "eye_gold", n=8, u=up)
         wide, tall = (0.94, 0.52) if st != "wide" else (0.85, 0.64)
-        pupil = blob(E, 1.0, "pupil_bar", n=8, m=4, scale=(re * wide, re * tall, d * 1.12), axis=e, u=sv)
+        pupil = blob(E, 1.0, "ink_bar", n=8, m=8, scale=(re * wide, re * tall, d * 1.2), axis=e, u=sv)
         self.mover("blink", "eye", [dome, pupil], E, side=side, rot=Matrix((sv, -e, up)).transposed())
         lid = {"bar": 0.2, "wide": 0.0, "half": 0.42}.get(st, 0.2) if lid is None else lid
         if lid > 0.0:       # a lid: its own skin, drawn part of the way down
@@ -1852,7 +1852,7 @@ def _comb(O):
         p0, dr = O.root(i)
         hour = 0.36 + 0.07 * q
         O.arm_pts(i, [p0 + dr * 0.05 + Vector((0, 0, -0.03)), C + Vector((x_, -0.02 + 0.012 * (q % 2), -0.14)), C + Vector((x_, -0.02, -0.14 - L * 0.5)), C + Vector((x_ + 0.006, -0.02, -0.14 - L))],
-                  n=10, still=0.3, pieces=2, tipr=0.007, lit=(hour, hour + 0.07), o0=Vector((0, 1, 0)))
+                  n=9, still=0.3, pieces=2, tipr=0.007, lit=(hour, hour + 0.08), o0=Vector((0, 1, 0)))
     O.web(to=0.3, sag=0.1)
 
 

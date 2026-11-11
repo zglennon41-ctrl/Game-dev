@@ -900,8 +900,7 @@ out of the wearer's back, suckered sides out, in the wearer's own Path's colour 
 own, a ring of the field round each (`socket_eyes`). Both keep their moving names, so the
 arms wave and the eyes blink on a wolf.
 
-**Still weak.** The bar of the pupil is thin at the size of a thumbnail: the eye reads as a
-gold disc first. Bottle-dweller's neck is lost behind its own eye and arm, so the bottle reads
+**Still weak.** Bottle-dweller's neck is lost behind its own eye and arm, so the bottle reads
 as a jar. Key-turner and Eight-at-once are wide, so the game stands their bodies smaller than
 their neighbours'. Ink-blot is a crowd of lobes and its drawn omen (a door) is small. The
 Storm-glass, Glass Thinker and Eight Minds are "glass" by being pale and opened at the front
