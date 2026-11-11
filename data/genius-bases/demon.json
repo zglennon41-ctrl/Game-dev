@@ -1,0 +1,1810 @@
+{
+ "id": "demon",
+ "name": "Demon",
+ "class": "monster",
+ "expression": "daemon",
+ "silhouette": "daemon-prince",
+ "soul": "The soul of one who will not be told, and would rather be wrong on their own account than right on another's.",
+ "spark": "The mote will not come when it is called. It comes a little after, as if it had thought of it itself.",
+ "nature": {
+  "orders": {
+   "free": 1.0
+  },
+  "company": {
+   "alone": 0.7
+  },
+  "fights": {
+   "hurts": 0.5
+  },
+  "shape": {
+   "bind": 0.4
+  }
+ },
+ "calls": {
+  "seed": {
+   "owes-me": 0.7,
+   "with-a-voice": 0.4,
+   "watches-from-above": 0.3
+  },
+  "shape": {
+   "bind": 0.6,
+   "turn": 0.4,
+   "cast": 0.2
+  },
+  "blood": {
+   "demon-blooded": 0.9,
+   "demigod": 0.4,
+   "nightfolk": 0.3,
+   "winged": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Unbowed",
+  "gift": [
+   "horns",
+   "wings"
+  ],
+  "text": "It answers to nobody. It has made one exception, and does not care to have it mentioned."
+ },
+ "newFeatures": [
+  {
+   "id": "cloven-hooves",
+   "slot": "limbs",
+   "label": "a goat's legs, and hooves"
+  },
+  {
+   "id": "horn-crown",
+   "slot": "head",
+   "label": "a crown of its own horns"
+  },
+  {
+   "id": "many-arms",
+   "slot": "arms",
+   "label": "two arms more than it was born with"
+  }
+ ],
+ "settled": {
+  "id": "demon-princeling",
+  "name": "Princeling",
+  "text": "Knee-high, with its chin up and two buds of horn. It has never once come when it was called; it turns up a little after, on business of its own.",
+  "sign": "Two buds of horn, small hooves, wings no bigger than its hands, and a tail it cannot keep still.",
+  "habit": "Told to get down off the table, it stays up there one minute more, so that getting down is its own idea.",
+  "features": [
+   "horns",
+   "cloven-hooves"
+  ],
+  "body": {
+   "horns": [
+    "buds",
+    1.0
+   ],
+   "wings": [
+    "buds",
+    1.0
+   ],
+   "tail": [
+    "tuft",
+    0.8,
+    "wag"
+   ],
+   "legs": [
+    "shag",
+    1.0
+   ],
+   "eyes": [
+    "big",
+    1.0
+   ],
+   "brow": "proud",
+   "mouth": "set",
+   "wear": [
+    "loincloth"
+   ]
+  }
+ },
+ "paths": [
+  {
+   "id": "demon-exile",
+   "name": "Exile",
+   "of": "one who left rather than be told, and has not looked back to check",
+   "text": "It learned from you that some rooms can only be left. It left with its head up and kept the crown, which broke on the way out.",
+   "sign": "A cracked crown worn low between its horns, its wings round its shoulders like a short cloak, and a very straight back.",
+   "habit": "It sits a little apart at every table, and is put out if nobody remarks on it.",
+   "leans": {
+    "company": {
+     "alone": 1.0
+    },
+    "ground": {
+     "night": 0.7
+    },
+    "orders": {
+     "free": 0.4
+    }
+   },
+   "features": [
+    "crown",
+    "wing-cloak"
+   ],
+   "body": {
+    "build": {
+     "legs": 1.05,
+     "neck": 0.4,
+     "bow": -0.03,
+     "shoulders": 0.2
+    },
+    "horns": [
+     "prongs",
+     1.0
+    ],
+    "crown": [
+     "broken",
+     1.0
+    ],
+    "wings": [
+     "cape",
+     1.0
+    ],
+    "tail": [
+     "spade",
+     0.9
+    ],
+    "eyes": [
+     "hooded",
+     1.0
+    ],
+    "brow": "level",
+    "mouth": "set",
+    "hair": [
+     "long",
+     0.8
+    ],
+    "wear": [
+     "doublet",
+     "breeches",
+     "belt"
+    ],
+    "legs": "gaiters",
+    "coat": "moon",
+    "accent": "amethyst"
+   },
+   "prongs": [
+    {
+     "id": "demon-pretender",
+     "name": "Pretender",
+     "of": "one who keeps a rank that nobody else recognises",
+     "text": "Nobody crowned it. It has gone on behaving exactly as if somebody had, for so long that people have begun to stand up.",
+     "sign": "The crown mended with wire and worn dead straight, its wings up behind its head like a collar, its horns grown long.",
+     "habit": "It waits at a door to be announced. You have caught yourself doing the announcing.",
+     "leans": {
+      "pattern": {
+       "sworn": 1.0
+      }
+     },
+     "features": [
+      "high-collar"
+     ],
+     "body": {
+      "build": {
+       "legs": 1.16,
+       "neck": 0.7,
+       "bow": -0.05,
+       "wide": -0.15
+      },
+      "horns": [
+       "lyre",
+       1.1
+      ],
+      "crown": [
+       "mended",
+       1.0
+      ],
+      "wings": [
+       "high",
+       1.5
+      ],
+      "hair": null,
+      "right": [
+       "cane",
+       1.0
+      ],
+      "wear": [
+       "doublet",
+       "breeches",
+       [
+        "sash",
+        1.0,
+        "accent_light"
+       ]
+      ],
+      "chest": [
+       "order",
+       1.0
+      ],
+      "tail": [
+       "spade",
+       1.0
+      ]
+     },
+     "finishes": [
+      {
+       "id": "demon-court-of-one",
+       "name": "Court of One",
+       "of": "one who rules a country of a single subject, and rules it well",
+       "text": "It holds court wherever you sit down. There is one subject. The subject has never once been kept waiting.",
+       "sign": "Seven horns stand in a ring where the crown was, and the back of a throne is strapped behind its shoulders.",
+       "habit": "It grants you things you already had: the window seat, the last of the bread, your own name.",
+       "leans": {
+        "orders": {
+         "guard": 1.0
+        }
+       },
+       "features": [
+        "horn-crown",
+        "broad-guard"
+       ],
+       "body": {
+        "build": {
+         "legs": 1.1,
+         "wide": 0.35,
+         "shoulders": 0.5,
+         "neck": 0.5,
+         "bow": -0.05,
+         "faces": 0.66
+        },
+        "horns": [
+         "ring",
+         1.0
+        ],
+        "crown": null,
+        "back": [
+         "throne",
+         1.1
+        ],
+        "wings": [
+         "cape",
+         1.3,
+         "trimmed"
+        ],
+        "wear": [
+         "doublet",
+         "breeches",
+         [
+          "sash",
+          1.0,
+          "accent_light"
+         ],
+         "collar-fur"
+        ],
+        "chest": [
+         "chain-of-office",
+         1.0
+        ],
+        "right": null,
+        "tail": [
+         "spade",
+         1.15
+        ],
+        "eyes": [
+         "hooded",
+         1.0
+        ],
+        "brow": "level",
+        "hair": [
+         "long",
+         1.0
+        ]
+       }
+      },
+      {
+       "id": "demon-stiff-neck",
+       "name": "Stiff-neck",
+       "of": "one who would not bow the head, and now has none to bow",
+       "text": "It would not bow its head to anyone. In the end the head went, and the not bowing stayed, and burns where it was.",
+       "sign": "Above the collar there is no head. A crown of flame stands there with two eyes in it, and the horns still either side.",
+       "habit": "It nods to nobody. It will incline the flame a very little, to you, at breakfast.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        },
+        "company": {
+         "alone": 0.5
+        }
+       },
+       "features": [
+        "ember",
+        "scorched"
+       ],
+       "body": {
+        "build": {
+         "legs": 1.12,
+         "neck": 0.7,
+         "bow": -0.06,
+         "wide": 0.1
+        },
+        "horns": [
+         "spires",
+         1.0
+        ],
+        "crown": [
+         "flame",
+         1.0
+        ],
+        "hair": null,
+        "mouth": null,
+        "brow": null,
+        "face": null,
+        "wings": [
+         "cape",
+         0.8
+        ],
+        "right": null,
+        "wear": [
+         "doublet",
+         "breeches",
+         [
+          "ruff",
+          1.5
+         ],
+         [
+          "sash",
+          1.0,
+          "accent_light"
+         ]
+        ],
+        "chest": [
+         "order",
+         1.0
+        ],
+        "tail": [
+         "flame",
+         1.1
+        ],
+        "eyes": [
+         "lit",
+         1.25
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "demon-door-keeper",
+     "name": "Door-keeper",
+     "of": "one who left, and kept the door they left by",
+     "text": "It took the door with it when it went. Nobody has been able to shut it out since, there being nothing to shut.",
+     "sign": "A small shut door is strapped to its back, hinges and all. One horn broke on the lintel. The key is at its belt.",
+     "habit": "It shuts every door behind you both, gently, and tries the handle after.",
+     "leans": {
+      "ground": {
+       "ruin": 1.0
+      }
+     },
+     "features": [
+      "door"
+     ],
+     "body": {
+      "build": {
+       "legs": 1.0,
+       "bow": 0.1,
+       "wide": 0.2
+      },
+      "horns": [
+       "single",
+       1.0
+      ],
+      "back": [
+       "door",
+       0.86,
+       "shut"
+      ],
+      "wings": [
+       "cape",
+       0.7,
+       "split"
+      ],
+      "belt": [
+       "key",
+       1.3
+      ],
+      "wear": [
+       "doublet",
+       "breeches",
+       "door-straps"
+      ],
+      "tail": [
+       "spade",
+       1.0
+      ]
+     },
+     "finishes": [
+      {
+       "id": "demon-door-left-ajar",
+       "name": "Door Left Ajar",
+       "of": "one who went first so that whoever came after would find it open",
+       "text": "It leaves the door a hand's width open now, with a light behind it, for whoever is still deciding whether to go.",
+       "sign": "The door on its back stands a hand open, and the light of the field comes through the gap in one long bar.",
+       "habit": "It will not shut the last door of the evening. It leaves it on the latch, in case.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        }
+       },
+       "features": [
+        "lantern"
+       ],
+       "body": {
+        "build": {
+         "legs": 1.14,
+         "bow": 0.0,
+         "wide": 0.3,
+         "faces": 0.7
+        },
+        "horns": [
+         "swept",
+         1.0,
+         "banded"
+        ],
+        "crown": null,
+        "back": [
+         "door",
+         1.2,
+         "ajar"
+        ],
+        "wings": [
+         "cape",
+         0.8,
+         "split"
+        ],
+        "tail": [
+         "spade",
+         1.1
+        ],
+        "brow": "glad",
+        "mouth": "smile",
+        "belt": [
+         "crown",
+         1.2
+        ],
+        "wear": [
+         "doublet",
+         "breeches",
+         "door-straps",
+         [
+          "sash",
+          1.0,
+          "accent_light"
+         ]
+        ],
+        "eyes": [
+         "lit",
+         1.1
+        ]
+       }
+      },
+      {
+       "id": "demon-bolted-door",
+       "name": "Bolted Door",
+       "of": "one who will not be followed, and has seen to it",
+       "text": "The door is barred across in iron now, and it carries it in front. What it left is not coming after it. Nor is anything else.",
+       "sign": "The door has come round onto its arm, barred and bolted. It stands behind it as behind a wall.",
+       "habit": "It checks the bolt with its thumb whenever anybody says the word home.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        }
+       },
+       "features": [
+        "tower-shield"
+       ],
+       "body": {
+        "build": {
+         "wide": 0.6,
+         "shoulders": 0.7,
+         "limbs": 1.15,
+         "legs": 1.0,
+         "bow": 0.04,
+         "muscle": 0.5,
+         "faces": 0.66
+        },
+        "horns": [
+         "broken",
+         1.0,
+         "iron"
+        ],
+        "crown": [
+         "iron",
+         1.0
+        ],
+        "back": null,
+        "left": [
+         "door-shield",
+         1.2
+        ],
+        "wings": [
+         "cape",
+         0.9,
+         "plain"
+        ],
+        "wear": [
+         "doublet",
+         "breeches",
+         "pauldron",
+         "belt"
+        ],
+        "belt": null,
+        "tail": [
+         "spade",
+         1.0
+        ],
+        "brow": "fierce",
+        "eyes": [
+         "narrow",
+         1.0
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "demon-fly-by-night",
+     "name": "Fly-by-night",
+     "of": "one who left after dark, by the window, and found they could fly",
+     "text": "It left by the window, at night, on wings it had not known it had until it was already out.",
+     "sign": "Two wings of skin held half open, as if it has just landed or is about to go. It prefers the sill to the room.",
+     "habit": "It sleeps by the window with one wing over its head, and is gone and back before you wake.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      }
+     },
+     "features": [
+      "wings"
+     ],
+     "body": {
+      "build": {
+       "legs": 1.1,
+       "limbs": 0.95,
+       "bow": 0.04
+      },
+      "horns": [
+       "back",
+       1.0
+      ],
+      "wings": [
+       "half",
+       1.0
+      ],
+      "crown": [
+       "broken",
+       0.8
+      ],
+      "wear": [
+       "shirt",
+       "breeches",
+       "belt"
+      ],
+      "tail": [
+       "whip",
+       1.2,
+       "spade"
+      ],
+      "eyes": [
+       "lit",
+       1.1
+      ]
+     },
+     "finishes": [
+      {
+       "id": "demon-long-way-round",
+       "name": "Long Way Round",
+       "of": "one who would sooner go a hundred miles than ask the way once",
+       "text": "It has never once asked the way. It has seen a great deal of country because of that, and regrets none of it.",
+       "sign": "Wings wide enough to cross a valley on, long ringed horns laid back, and the look of having come a great distance.",
+       "habit": "Shown a short cut, it thanks you, and goes the way it was going.",
+       "leans": {
+        "ground": {
+         "wild": 1.0
+        },
+        "range": {
+         "far": 0.4
+        }
+       },
+       "features": [
+        "far-eyes"
+       ],
+       "body": {
+        "build": {
+         "legs": 1.16,
+         "limbs": 0.95,
+         "wide": 0.1,
+         "bow": 0.02
+        },
+        "horns": [
+         "antelope",
+         1.2
+        ],
+        "wings": [
+         "spread",
+         1.3,
+         "barred"
+        ],
+        "crown": null,
+        "belt": [
+         "crown",
+         1.0
+        ],
+        "wear": [
+         "shirt",
+         "breeches",
+         [
+          "sash",
+          1.0,
+          "accent_light"
+         ],
+         "scarf-long"
+        ],
+        "tail": [
+         "whip",
+         1.5,
+         "spade"
+        ],
+        "eyes": [
+         "far",
+         1.1
+        ],
+        "brow": "glad",
+        "legs": "wraps"
+       }
+      },
+      {
+       "id": "demon-moonless",
+       "name": "Moonless",
+       "of": "one who is most themselves when nobody at all can see",
+       "text": "On the darkest nights it lets go of its edges. There is a shape with two eyes in it, and it is perfectly at ease.",
+       "sign": "Its wings are wrapped round it like a cloak, and where the cloak ends it is going to smoke. One horn. Two eyes.",
+       "habit": "It puts the lamp out with its fingers when you have fallen asleep, and sits on in the dark.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "fights": {
+         "dodges": 0.5
+        }
+       },
+       "features": [
+        "wing-cloak",
+        "smoke"
+       ],
+       "body": {
+        "build": {
+         "legs": 1.12,
+         "limbs": 0.9,
+         "wide": -0.1,
+         "bow": 0.06
+        },
+        "horns": [
+         "mono",
+         1.2
+        ],
+        "wings": [
+         "cloak",
+         1.2
+        ],
+        "crown": null,
+        "mouth": null,
+        "tail": [
+         "smoke",
+         1.2
+        ],
+        "wear": [
+         "breeches"
+        ],
+        "eyes": [
+         "wide",
+         1.3
+        ],
+        "brow": "calm",
+        "around": [
+         "smoke-edges",
+         1.0
+        ],
+        "legs": "smoke"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "demon-advocate",
+   "name": "Advocate",
+   "of": "one who can make the case for anything, and enjoys it",
+   "text": "It learned from you that nearly anything can be argued, and that being hit for it is no reason to stop. It finishes the sentence.",
+   "sign": "A good coat with gold at the cuffs, whose tails are its own folded wings, and one hand always a little out.",
+   "habit": "It argues you out of the last cake, and then gives you half.",
+   "leans": {
+    "shape": {
+     "bind": 1.0
+    },
+    "fights": {
+     "hurts": 0.7
+    },
+    "company": {
+     "party": 0.4
+    }
+   },
+   "features": [
+    "voice"
+   ],
+   "body": {
+    "build": {
+     "legs": 1.05,
+     "limbs": 0.92,
+     "hands": 1.1,
+     "wide": -0.15
+    },
+    "horns": [
+     "crescent",
+     1.0
+    ],
+    "wings": [
+     "tails",
+     1.0
+    ],
+    "tail": [
+     "curl",
+     1.0
+    ],
+    "eyes": [
+     "lit",
+     1.0
+    ],
+    "brow": "wry",
+    "mouth": "smile",
+    "face": [
+     "goatee"
+    ],
+    "hair": [
+     "slick",
+     0.8
+    ],
+    "wear": [
+     "shirt",
+     "waistcoat",
+     [
+      "tailcoat",
+      1.0
+     ],
+     "breeches",
+     "cravat",
+     "cuffs"
+    ],
+    "legs": [
+     "bare",
+     1.0,
+     "gilt"
+    ],
+    "accent": "gold"
+   },
+   "prongs": [
+    {
+     "id": "demon-fair-offer",
+     "name": "Fair Offer",
+     "of": "one who holds out the thing you wanted before you had said so",
+     "text": "It always has something in its hand that you want. It tells you the price first, and the price is always exactly what it said.",
+     "sign": "A small light rides in its left hand. The right is kept behind its back, and is empty; it will show you.",
+     "habit": "It offers you a bite of whatever it is eating before you have looked at it twice.",
+     "leans": {
+      "pattern": {
+       "fires": 1.0
+      }
+     },
+     "features": [
+      "glow"
+     ],
+     "body": {
+      "build": {
+       "legs": 1.08,
+       "hands": 1.15
+      },
+      "horns": [
+       "hooks",
+       1.0,
+       "gilt"
+      ],
+      "left": [
+       "coin-light",
+       1.0
+      ],
+      "wear": [
+       "shirt",
+       "waistcoat",
+       [
+        "tailcoat",
+        1.0
+       ],
+       "breeches",
+       "cravat",
+       "cuffs",
+       "glove"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "demon-gilded-hand",
+       "name": "Gilded Hand",
+       "of": "one whose gifts are real, and cost exactly what was agreed",
+       "text": "Everything it has handed over has been worth it, and paid for. The hand it gives with has gone to gold to the elbow.",
+       "sign": "Its right arm is gold from the fingers to the elbow, and held a little away from the rest of it, like something lent.",
+       "habit": "It pays for everything on the nail, yours included, and tells you afterwards what you owe.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "bonds": {
+         "named": 0.4
+        }
+       },
+       "features": [
+        "brass-plate"
+       ],
+       "body": {
+        "build": {
+         "legs": 1.1,
+         "hands": 1.25,
+         "neck": 0.3
+        },
+        "horns": [
+         "spiral",
+         1.1,
+         "gilt"
+        ],
+        "arms": [
+         "gilded",
+         1.0
+        ],
+        "left": null,
+        "right": [
+         "coin-light",
+         1.2
+        ],
+        "wear": [
+         "shirt",
+         [
+          "waistcoat",
+          1.0,
+          "striped"
+         ],
+         [
+          "tailcoat",
+          1.0
+         ],
+         "breeches",
+         "cravat",
+         "cuffs"
+        ],
+        "wings": [
+         "tails",
+         1.2,
+         "lined"
+        ],
+        "tail": [
+         "curl",
+         1.2
+        ]
+       }
+      },
+      {
+       "id": "demon-second-helping",
+       "name": "Second Helping",
+       "of": "one who wants a little more, and has stopped pretending otherwise",
+       "text": "It wants things, and it says so. It has a second mouth, below the first, which says so more plainly.",
+       "sign": "A wide second mouth across its belly, with good teeth. The upper mouth makes the conversation.",
+       "habit": "It finishes what is on your plate while explaining, quite fairly, why you did not want it.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        }
+       },
+       "features": [
+        "maw"
+       ],
+       "body": {
+        "build": {
+         "belly": 1.0,
+         "wide": 1.0,
+         "fat": 0.8,
+         "legs": 0.82,
+         "limbs": 1.2,
+         "neck": -0.5,
+         "head": 1.1
+        },
+        "horns": [
+         "stubs",
+         1.0
+        ],
+        "chest": [
+         "belly-mouth",
+         1.0
+        ],
+        "left": null,
+        "mouth": "grin",
+        "wear": [
+         "shirt",
+         [
+          "waistcoat",
+          1.0,
+          "open"
+         ],
+         "breeches",
+         [
+          "cravat",
+          1.4,
+          "napkin"
+         ],
+         "cuffs"
+        ],
+        "wings": [
+         "tails",
+         0.8
+        ],
+        "tail": [
+         "curl",
+         0.9
+        ],
+        "face": null
+       }
+      }
+     ]
+    },
+    {
+     "id": "demon-both-sides",
+     "name": "Both Sides",
+     "of": "one who argues both sides, and means both",
+     "text": "It can put your case better than you can, and then the other one. It is not being false. It believes whichever it is saying.",
+     "sign": "A second face looks out from the back of its head. One horn curls forward and one back, and its coat is of two halves.",
+     "habit": "It loses arguments to itself, out loud, on the stairs.",
+     "leans": {
+      "shape": {
+       "read": 1.0
+      }
+     },
+     "features": [
+      "second-face"
+     ],
+     "body": {
+      "build": {
+       "legs": 1.14,
+       "neck": 0.5,
+       "wide": -0.25
+      },
+      "horns": [
+       "both-ways",
+       1.3
+      ],
+      "face": [
+       "goatee",
+       "back-face"
+      ],
+      "wear": [
+       "shirt",
+       "waistcoat",
+       [
+        "tailcoat",
+        1.0,
+        "parti"
+       ],
+       "breeches",
+       "cravat",
+       "cuffs"
+      ],
+      "wings": [
+       "tails",
+       1.0,
+       "odd"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "demon-full-bench",
+       "name": "Full Bench",
+       "of": "one who has taken every side and now sits as all of them",
+       "text": "There are several of it now, as mouths, and they hear the matter together. The finding is usually in your favour.",
+       "sign": "Small mouths hang in the air about its head, each with an opinion. Its horns are rolled like a judge's wig.",
+       "habit": "It puts small questions to the vote. You have one vote. It has five.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        }
+       },
+       "features": [
+        "ring"
+       ],
+       "body": {
+        "build": {
+         "legs": 1.06,
+         "wide": 0.3,
+         "neck": 0.2
+        },
+        "horns": [
+         "wig",
+         1.2
+        ],
+        "around": [
+         "mouths",
+         1.0
+        ],
+        "face": [
+         "goatee",
+         "back-face"
+        ],
+        "wear": [
+         "shirt",
+         "waistcoat",
+         [
+          "gown",
+          1.0
+         ],
+         "breeches",
+         "bands",
+         "cuffs"
+        ],
+        "wings": null,
+        "brow": "level"
+       }
+      },
+      {
+       "id": "demon-last-word",
+       "name": "Last Word",
+       "of": "one who has to have it, and has arranged always to have it",
+       "text": "It keeps a mouth at the back of its head for leaving with. Nobody has yet had the last word on it, including you.",
+       "sign": "The face behind has grown a wide mouth of its own, which goes on talking as the rest of it walks away.",
+       "habit": "It says goodnight, and then one more thing from the stairs, and then one more from its bed.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        }
+       },
+       "features": [
+        "maw"
+       ],
+       "body": {
+        "build": {
+         "legs": 1.12,
+         "neck": 0.6,
+         "wide": -0.1
+        },
+        "horns": [
+         "four",
+         1.0
+        ],
+        "face": [
+         "goatee",
+         [
+          "back-mouth",
+          1.2
+         ]
+        ],
+        "tail": [
+         "curl",
+         1.4
+        ],
+        "wear": [
+         "shirt",
+         "waistcoat",
+         [
+          "tailcoat",
+          1.0,
+          "parti"
+         ],
+         "breeches",
+         "cravat",
+         "cuffs"
+        ],
+        "wings": [
+         "tails",
+         1.3,
+         "odd"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "demon-good-company",
+     "name": "Good Company",
+     "of": "one who makes any room glad it came, and is never off its guard",
+     "text": "It is the best company at any table, and it has not once forgotten whose side it is on. Yours. Only yours.",
+     "sign": "Curled horns oiled to a shine and banded in gold, a flower at its collar, and a small bow for everybody.",
+     "habit": "It learns the name of everyone in a room in a minute, and uses each exactly once.",
+     "leans": {
+      "bonds": {
+       "classmate": 1.0
+      }
+     },
+     "features": [
+      "sleek-coat"
+     ],
+     "body": {
+      "build": {
+       "legs": 1.06,
+       "hips": 0.1
+      },
+      "horns": [
+       "curled",
+       1.15,
+       "banded"
+      ],
+      "chest": [
+       "flower",
+       1.4
+      ],
+      "hair": [
+       "slick",
+       1.0
+      ],
+      "wings": [
+       "fan",
+       1.0
+      ],
+      "right": [
+       "cane",
+       1.0
+      ],
+      "wear": [
+       "shirt",
+       "waistcoat",
+       [
+        "tailcoat",
+        1.0
+       ],
+       "breeches",
+       "cravat",
+       "cuffs",
+       [
+        "sash",
+        1.0,
+        "accent_light"
+       ]
+      ]
+     },
+     "finishes": [
+      {
+       "id": "demon-master-of-revels",
+       "name": "Master of Revels",
+       "of": "one who will see everybody fed and merry, by force if need be",
+       "text": "It keeps the table. Nobody has left it hungry, or early, and one or two have not been allowed to leave it at all.",
+       "sign": "A wreath of leaves hung between wide horns, a great coat like a bell, and a cup that is somehow always full.",
+       "habit": "It fills your cup when you are not looking, and looks hurt when you notice.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        }
+       },
+       "features": [
+        "hall-fat"
+       ],
+       "body": {
+        "build": {
+         "belly": 0.7,
+         "wide": 0.6,
+         "fat": 0.5,
+         "legs": 0.98,
+         "limbs": 1.1
+        },
+        "horns": [
+         "wide",
+         1.2,
+         "banded"
+        ],
+        "crown": [
+         "wreath",
+         1.0
+        ],
+        "right": [
+         "cup",
+         1.2
+        ],
+        "mouth": "grin",
+        "brow": "glad",
+        "wear": [
+         "shirt",
+         [
+          "waistcoat",
+          1.0,
+          "striped"
+         ],
+         [
+          "gown",
+          0.8,
+          "bell"
+         ],
+         "breeches",
+         "cravat",
+         "cuffs",
+         [
+          "sash",
+          1.0,
+          "accent_light"
+         ]
+        ],
+        "wings": [
+         "fan",
+         1.2
+        ],
+        "chest": null
+       }
+      },
+      {
+       "id": "demon-honest-enemy",
+       "name": "Honest Enemy",
+       "of": "one who is perfectly civil to those it means to ruin",
+       "text": "It bows to the named beast before every meeting, and means it. Then it does what it came to do.",
+       "sign": "A half-mask over its eyes, a tail as thin as a sword with a barb to it, and its wings folded like the tails of a coat.",
+       "habit": "It sends word ahead. It thinks it only fair that the thing should know who is coming.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        }
+       },
+       "features": [
+        "mask"
+       ],
+       "body": {
+        "build": {
+         "legs": 1.16,
+         "limbs": 0.9,
+         "wide": -0.3,
+         "neck": 0.5,
+         "bow": -0.03
+        },
+        "horns": [
+         "rapier",
+         1.2,
+         "gilt"
+        ],
+        "face": [
+         "half-mask"
+        ],
+        "tail": [
+         "barb",
+         1.6
+        ],
+        "wings": [
+         "tails",
+         1.5,
+         "lined"
+        ],
+        "wear": [
+         "shirt",
+         [
+          "waistcoat",
+          1.0
+         ],
+         [
+          "tailcoat",
+          1.0
+         ],
+         "breeches",
+         "cravat",
+         "cuffs",
+         "glove"
+        ],
+        "mouth": "set",
+        "chest": null,
+        "right": null,
+        "eyes": [
+         "narrow",
+         1.0
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "demon-head-down",
+   "name": "Head-down",
+   "of": "one who settles it by being the larger",
+   "text": "It learned from you that some things are not argued with. It puts its head down and goes through them, and is larger on the far side.",
+   "sign": "Its horns have come forward and its shoulders up round them. It looks at a shut door the way others look at an open one.",
+   "habit": "It leans on things to see if they will hold: fences, doors, you.",
+   "leans": {
+    "orders": {
+     "hunt": 1.0
+    },
+    "pattern": {
+     "fires": 0.7
+    },
+    "range": {
+     "close": 0.4
+    }
+   },
+   "features": [
+    "horn-brow"
+   ],
+   "body": {
+    "build": {
+     "wide": 0.5,
+     "shoulders": 0.6,
+     "limbs": 1.2,
+     "hands": 1.25,
+     "legs": 0.96,
+     "bow": 0.08,
+     "neck": -0.3,
+     "muscle": 0.6
+    },
+    "horns": [
+     "forward",
+     1.0
+    ],
+    "wings": [
+     "stubs",
+     0.9
+    ],
+    "tail": [
+     "bull",
+     1.0
+    ],
+    "eyes": [
+     "narrow",
+     1.0
+    ],
+    "brow": "fierce",
+    "mouth": "tusks",
+    "hair": [
+     "mane",
+     0.8
+    ],
+    "wear": [
+     "war-kilt",
+     "harness",
+     "paint"
+    ],
+    "legs": [
+     "shag",
+     1.3
+    ],
+    "coat": "russet",
+    "accent": "madder"
+   },
+   "prongs": [
+    {
+     "id": "demon-gate-ram",
+     "name": "Gate-ram",
+     "of": "one who knocks once",
+     "text": "It knocks once, with its head. What is behind the door has usually reconsidered by the time the dust settles.",
+     "sign": "A ram's horns curled close at its temples, and a brow like a doorstep. There is plaster in its hair.",
+     "habit": "It opens doors with its forehead, even when they were not shut.",
+     "leans": {
+      "range": {
+       "close": 1.0
+      }
+     },
+     "features": [
+      "broad-chest"
+     ],
+     "body": {
+      "build": {
+       "wide": 0.75,
+       "shoulders": 0.8,
+       "bow": 0.13,
+       "limbs": 1.25,
+       "head": 1.04,
+       "muscle": 0.7
+      },
+      "horns": [
+       "ram",
+       1.2
+      ],
+      "wear": [
+       "war-kilt",
+       "harness",
+       "pauldron",
+       "paint"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "demon-wall-goer",
+       "name": "Wall-goer",
+       "of": "one who has stopped going round things",
+       "text": "It has stopped going round. It goes from where it is to where the thing is, and the walls between are its own affair.",
+       "sign": "The two horns have grown forward and met in a single boss, like the head of a ram for breaking gates.",
+       "habit": "It walks through hedges. It could use the gap. It has seen the gap.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        }
+       },
+       "features": [
+        "stone-skin"
+       ],
+       "body": {
+        "build": {
+         "wide": 1.0,
+         "shoulders": 1.0,
+         "bow": 0.18,
+         "limbs": 1.32,
+         "legs": 0.94,
+         "neck": -0.6,
+         "muscle": 1.0,
+         "hands": 1.35
+        },
+        "horns": [
+         "boss",
+         1.3
+        ],
+        "skin": [
+         "stone-dust",
+         1.0
+        ],
+        "wear": [
+         "war-kilt",
+         "harness",
+         "pauldrons-stone",
+         "paint"
+        ],
+        "tail": [
+         "bull",
+         1.2
+        ],
+        "wings": null
+       }
+      },
+      {
+       "id": "demon-gate-crasher",
+       "name": "Gate-crasher",
+       "of": "one who was not asked, and came, and was right to",
+       "text": "It was not sent for. It arrives through the nearest shut thing at the moment it is needed, and expects no thanks, and wants some.",
+       "sign": "A bull's horns set wide, with half a gate still hanging from the left one. It has not noticed, or will not admit to it.",
+       "habit": "It turns up at the end of every quarrel you did not tell it about.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        }
+       },
+       "features": [
+        "chain"
+       ],
+       "body": {
+        "build": {
+         "wide": 0.8,
+         "shoulders": 0.8,
+         "bow": 0.08,
+         "limbs": 1.25,
+         "legs": 1.02,
+         "muscle": 0.8
+        },
+        "horns": [
+         "great-bull",
+         1.3,
+         "gate"
+        ],
+        "wear": [
+         "war-kilt",
+         "harness",
+         [
+          "sash",
+          1.0,
+          "accent_light"
+         ],
+         "paint"
+        ],
+        "mouth": "grin-tusks",
+        "brow": "glad",
+        "tail": [
+         "bull",
+         1.2
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "demon-strong-arm",
+     "name": "Strong Arm",
+     "of": "one who takes hold, and lets that be the argument",
+     "text": "It does not hit things much. It takes hold of them and waits, and they come round to its way of thinking.",
+     "sign": "Hands the size of its head on arms like a smith's, and a bull's horns set wide and low.",
+     "habit": "It shakes hands for slightly too long, to learn what it needs to.",
+     "leans": {
+      "shape": {
+       "anchor": 1.0
+      }
+     },
+     "features": [
+      "set-feet"
+     ],
+     "body": {
+      "build": {
+       "hands": 1.8,
+       "forearms": 1.35,
+       "arm_girth": 1.3,
+       "wide": 0.7,
+       "shoulders": 1.0,
+       "arms": 1.2,
+       "muscle": 0.8,
+       "bow": 0.02,
+       "legs": 0.9
+      },
+      "horns": [
+       "low",
+       1.3
+      ],
+      "wings": null,
+      "wear": [
+       "war-kilt",
+       [
+        "bracers",
+        1.0,
+        "iron"
+       ],
+       "belt-wide",
+       "paint"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "demon-arms-folded",
+       "name": "Arms Folded",
+       "of": "one who can refuse a thing and do it in the same breath",
+       "text": "It has four arms now. Two are folded, and say no. The other two have already started on what you asked.",
+       "sign": "Four arms: the upper pair folded tight across its chest, the lower pair free, and busy.",
+       "habit": "It says it will not help you move the table, from the far end of the table, lifting.",
+       "leans": {
+        "orders": {
+         "free": 1.0
+        }
+       },
+       "features": [
+        "many-arms"
+       ],
+       "body": {
+        "build": {
+         "wide": 0.95,
+         "shoulders": 1.0,
+         "hands": 1.4,
+         "limbs": 1.28,
+         "muscle": 0.9,
+         "legs": 1.0
+        },
+        "horns": [
+         "double",
+         1.1
+        ],
+        "arms": [
+         "four",
+         1.0
+        ],
+        "wear": [
+         "war-kilt",
+         [
+          "bracers",
+          1.0,
+          "iron"
+         ],
+         "paint"
+        ],
+        "brow": "level"
+       }
+      },
+      {
+       "id": "demon-yoke-breaker",
+       "name": "Yoke-breaker",
+       "of": "one who was put in harness once, and only once",
+       "text": "Somebody put a yoke on it, once. It wears the half that is left, to remind people how that went.",
+       "sign": "Half a broken yoke round its neck with a length of chain swinging from it, and a ring in its nose, pulled open.",
+       "habit": "It will carry anything for you, and nothing at all if you tell it to.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        }
+       },
+       "features": [
+        "mane",
+        "chain"
+       ],
+       "body": {
+        "build": {
+         "wide": 0.9,
+         "shoulders": 0.9,
+         "neck": -0.7,
+         "bow": 0.12,
+         "hands": 1.5,
+         "limbs": 1.3,
+         "muscle": 1.0,
+         "legs": 0.98
+        },
+        "horns": [
+         "ox",
+         1.3,
+         "broken-tip"
+        ],
+        "chest": [
+         "yoke",
+         1.0
+        ],
+        "face": [
+         "nose-ring"
+        ],
+        "hair": [
+         "mane",
+         1.2
+        ],
+        "wear": [
+         "war-kilt",
+         [
+          "bracers",
+          1.0,
+          "iron"
+         ],
+         "paint"
+        ],
+        "tail": [
+         "bull",
+         1.3
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "demon-sharp-set",
+     "name": "Sharp-set",
+     "of": "one who is hungry, and has stopped apologising for it",
+     "text": "It is always a little hungry, and it has found that the feeling points. It follows where it points, at a trot.",
+     "sign": "Lean where its kin are broad, with a stag's horns, a long whip of a tail and its nose to the wind.",
+     "habit": "It knows what is for supper before you do, and what was for supper next door.",
+     "leans": {
+      "quests": {
+       "hunt": 1.0
+      }
+     },
+     "features": [
+      "antlers"
+     ],
+     "body": {
+      "build": {
+       "wide": 0.15,
+       "shoulders": 0.3,
+       "limbs": 1.0,
+       "legs": 1.15,
+       "hands": 1.1,
+       "bow": 0.1,
+       "muscle": 0.4,
+       "belly": -0.3
+      },
+      "horns": [
+       "stag",
+       1.0
+      ],
+      "tail": [
+       "whip",
+       1.4,
+       "tuft"
+      ],
+      "mouth": "fangs",
+      "wear": [
+       "loincloth",
+       "harness",
+       "paint"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "demon-horn-wreath",
+       "name": "Horn-wreath",
+       "of": "one who keeps something of everything it ran down",
+       "text": "It has kept a horn from every named beast it ran down, and wears them. The wreath is nearly round.",
+       "sign": "A wreath of horns, no two alike, lies over its own from brow to nape and down between its shoulders.",
+       "habit": "It counts the horns with one finger at night, and stops at the gap, and looks at you.",
+       "leans": {
+        "quests": {
+         "hunt": 1.0
+        },
+        "bonds": {
+         "named": 0.6
+        }
+       },
+       "features": [
+        "crest"
+       ],
+       "body": {
+        "build": {
+         "legs": 1.18,
+         "wide": 0.35,
+         "limbs": 1.1,
+         "bow": 0.1,
+         "muscle": 0.6
+        },
+        "horns": [
+         "wreath",
+         1.2
+        ],
+        "back": [
+         "spines",
+         1.0
+        ],
+        "wear": [
+         "war-kilt",
+         "harness",
+         "paint"
+        ],
+        "tail": [
+         "whip",
+         1.6,
+         "tuft"
+        ],
+        "wings": null
+       }
+      },
+      {
+       "id": "demon-never-full",
+       "name": "Never Full",
+       "of": "one whose hunger has outgrown what it had to keep it in",
+       "text": "It ran down everything it wanted and went on wanting. There is more appetite to it now than body, and it thins to smoke at the edges.",
+       "sign": "A great jaw, a rack of ribs, and from the knees and the elbows out it is smoke with embers in. It is quite cheerful.",
+       "habit": "It eats the candle ends. It eats the string. It asks, politely, whether you are finishing that.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        }
+       },
+       "features": [
+        "smoke",
+        "fangs"
+       ],
+       "body": {
+        "build": {
+         "legs": 1.14,
+         "wide": 0.25,
+         "limbs": 0.86,
+         "belly": -0.6,
+         "bow": 0.14,
+         "head": 1.08
+        },
+        "horns": [
+         "stag",
+         1.4,
+         "ember"
+        ],
+        "mouth": [
+         "open",
+         1.4
+        ],
+        "skin": [
+         "ribs",
+         1.0
+        ],
+        "around": [
+         "smoke-edges",
+         1.0
+        ],
+        "tail": [
+         "smoke",
+         1.3
+        ],
+        "wear": [
+         "loincloth",
+         "paint"
+        ],
+        "legs": "smoke",
+        "arms": [
+         "smoke",
+         1.0
+        ],
+        "brow": "glad",
+        "wings": [
+         "stubs",
+         1.2
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -234,6 +234,7 @@ told apart at the size of a thumbnail before their shapes can.
 | Bow | Hunting Bow `jade` · War Bow `madder` · Singing Bow `amethyst` |
 | Carp | Weir-leaper `jade` · Still-water Carp `madder` · Silt-reader `amethyst` |
 | Coat | Travelling Coat `marigold` · Shadow-coat `amethyst` · Listening Coat `peacock` |
+| Demon | Exile `amethyst` · Advocate `gold` · Head-down `madder` |
 | Drake | Hoard-drake `gold` · Fire-drake `madder` · Sky-drake `lapis` |
 | Ember | Kept Fire `marigold` · Rushlight `peacock` · Wildfire `madder` |
 | Fiend | Flare-up `madder` · Banked Coal `amethyst` · Grate-fiend `marigold` |
@@ -1457,3 +1458,99 @@ Skimmer's wings are flat, so it is posed banking; level, from in front, they are
 wave at the Shoal-head's head can read as a hoop. A great carp's mantle of light stands off
 its back: the game sets it by height, and a fish is long and low. Its face is its lids: the
 eyes do not turn to look at anything. The game's grain lays round scales on the fins as on the body (a fin is the coat's trim, and is named for it). By colour the Under-the-Ice reads as a Silt-reader: its floe is the largest thing in its picture, and it is slate.
+## The Demon (`tools/blender/lines_demon.py`, `demon_dress.py`, `demon_gifts.py`)
+
+> "Add three more: one angel line, one demon line, and one line specifically for elementals
+> with a humanoid form like tiny demigods." (owner, 2026-11-11)
+
+A prince in exile: the soul of one who will not be told, and would rather be wrong on their
+own account than right on another's. It is not evil; it is pride, appetite and refusal, and
+it is loyal to its partner and to no one else. It is neither of the game's two small devils:
+the Fiend is a flame (it feels everything) and the Imp a clerk (it keeps count). The Demon is
+a small horned person with a straight back. Class `monster`; beside its partner it is a
+**hunter**; silhouette `daemon-prince` (it walks; the coat is the `drake` palette's, so its
+hide is its partner's verdigris, rust, slate, soot, sand or plum).
+
+**Its anatomy, in a sentence.** A person in the trunk, the arms and the face; **a goat's legs
+made of the person's own and nothing else**: the thigh brought forward, the shin back, the
+foot stood on its toes and drawn out long, so that the hock is its heel and the cloven hoof
+its toe, and the rig's hip, knee, ankle and toe bones are exactly where that leg bends
+(`goat_legs`; `build.hock`, 0 a person's to 1 a goat's); horns from the brow; a tail that
+carries on the spine; and wings of skin rooted at the shoulder blades, which is the one
+magical choice (six limbs), made on purpose and worn by every form.
+
+**What carries down the whole line:** horns (its crown and its outline: a different pair at
+every one of the thirty-one forms), hooves, a tail, eyes of the field with a goat's level
+pupil, and **wings whose skin is its Path's colour**, worn as that Path wears them.
+
+| Path | Colour, coat | What it keeps | Its wings | Its face |
+|---|---|---|---|---|
+| **Exile** (the one who left) | `amethyst`, coat `moon` | a straight back, a black doublet, the crown that broke | a short cloak over its shoulders; a collar; spread, on the branch that left by the window | hooded eyes, level brows |
+| **Advocate** (the one who can make the case) | `gold`, the partner's own coat | a cut-away coat, a gold waistcoat and cuffs, a white cravat, gilt hooves, a small beard | the tails of its coat | one brow up, a smile on one side |
+| **Head-down** (the one who settles it by being larger) | `madder`, coat `russet` | bulk, a goat's shag to the hock, a kilt of straps, paint on its hide, tusks | stubs that never grew | narrowed eyes, brows down |
+
+The Advancements, by their great part: Pretender (lyre horns, the crown mended, a staff),
+Door-keeper (the door it left by, on its back; one horn broken on the lintel; the key),
+Fly-by-night (wings half open); Fair Offer (a light in its hand), Both Sides (a face behind,
+one horn forward and one back, a coat of two halves, one wing a tail and one a cape), Good
+Company (curled banded horns, a cane, its tails held out); Gate-ram (a ram's curl), Strong Arm
+(hands the size of its head, no wings), Sharp-set (lean, a stag's horns, a whip of a tail).
+The Finals grow strange on purpose: Court of One (a ring of seven horns for a crown, the back
+of a throne strapped on), Stiff-neck (no head: a crown of flame with eyes in it), Door Left
+Ajar (the field's light through the gap), Bolted Door (the door on its arm), Long Way Round,
+Moonless (its wings a cloak, going to smoke), Gilded Hand, Second Helping (a second mouth
+across its belly), Full Bench (mouths in the air, horns rolled like a wig), Last Word (a mouth
+behind), Master of Revels, Honest Enemy (a half-mask, a tail like a sword), Wall-goer (the
+horns met in one boss), Gate-crasher (half a gate hanging from a horn), Arms Folded (four
+arms, two of them folded), Yoke-breaker, Horn-wreath, Never Full.
+
+**How it is built.** On the small people's kit (`lines_people.Person`, loaded when the first
+form is built and not changed), so a garment is cut from its own skin and sits as the skin
+sits. Its knees come forward, so nothing it wears is a closed skirt: a doublet's short stiff
+skirt, a kilt of straps that lie out over the thighs, a gown open down the front; and its
+long garments are its own wings. A slot holds a style, `[style, size]`, `[style, size,
+word]`, or a list; a style the Demon has not is looked for among the small people's.
+
+| Key | What it is | Styles (and words) |
+|---|---|---|
+| `build` | the small people's, and `hock` (how far its legs are a goat's), `muscle` (0 to 1), `faces` (the share of its stage's faces the body keeps) | |
+| `horns` | | `buds` `prongs` `lyre` `spires` `swept` `back` `antelope` `crescent` `hooks` `stubs` `wide` `rapier` `forward` `great-bull` `low` `ox` `spiral` `curled` `ram` `wig` `stag`; `single` (one whole, one stump) `broken` `both-ways` `mono` `ring` (a crown of seven) `four` `double` `boss` `wreath`; words `gilt` `banded` `iron` `ember` `gate` |
+| `crown` | | `broken` `mended` `iron` `wreath` (leaves from horn to horn) `flame` (no head: a crown of fire) |
+| `eyes`, `brow`, `mouth` | each Path a temperament | eyes `lit` `big` `wide` `hooded` `narrow` `far`; brow `level` `proud` `wry` `fierce` `glad` `calm` `sad`; mouth `set` `smile` `grin` `tusks` `fangs` `open` `grin-tusks` |
+| `face`, `hair` | | `goatee` `half-mask` `nose-ring` `back-face` `back-mouth`; hair `slick` `long` `mane` |
+| `wings` | in its Path's colour | `buds` `cape` (`split` `trimmed`) `high` `half` `spread` (`barred`) `cloak` `tails` (`lined` `parti` `odd`) `fan` `stubs` |
+| `tail` | | `tuft` `spade` `curl` `whip` `barb` `bull` `smoke` `flame`; words `wag` `spade` `tuft` |
+| `legs` | hooves always | `bare` `shag` `gaiters` `wraps` `smoke`; word `gilt` |
+| `wear` | | `loincloth` `breeches` `shirt` `doublet` `waistcoat` (`striped` `open`) `tailcoat` (`parti`) `gown` (`bell`) `cravat` (`napkin`) `bands` `cuffs` `glove` `bracers` (`iron`) `belt` `belt-wide` `sash` `collar-fur` `ruff` `scarf-long` `harness` `door-straps` `pauldron` `pauldrons-stone` `war-kilt` `paint` |
+| `skin`, `arms` | | `stone-dust` `ribs`; arms `gilded` `four` `smoke` |
+| `back`, `chest`, `belt` | | `door` (`shut` `ajar`) `throne` `spines`; `order` `chain-of-office` `flower` `belly-mouth` `yoke`; `key` `crown` |
+| `right`, `left`, `around` | | `coin-light` `cup` `cane` `door-shield`; `mouths` `smoke-edges` |
+| `coat`, `accent` | as every line's | |
+
+**What moves.** Every form blinks (`blink_eye_l/_r`: the eye is a piece of its own riding the
+head bone; the lids are the face's). Its wings mantle (`glide_wing_l/_r`; the Princeling's
+buds `beat_`), its tail sways (`sway_tail`; the Princeling's wags), and by form: the flames of
+a crown and a tail `flick_`, a key, a chain, a wreath, a scarf and half a gate `sway_`, mouths
+and embers `bob_`. `Demon.rider` makes a moving piece that rides any bone.
+
+**Its gifts** (`python tools/blender/lines_demon.py gifts`): `demon-horns` (two long ringed
+horns standing through a crown that has lost a third of itself) and `demon-wings` (skin on
+long fingers, a claw at each wrist, that mantle). The adjective is Unbowed.
+`python tools/blender/lines_demon.py body` builds `bodies/daemon-prince.glb`, the
+Princeling's own body with the rig's three clips left in it, which the forms borrow.
+
+**What is still weak.**
+- **The face at a distance.** The eyes read; the brows and mouth are a few pixels at fifteen
+  metres, and on a dark coat (soot, plum) the unshifted Advocate's face is dark.
+- **Rigid on a moving body.** Kilts, gowns, doors and the throne ride one bone; in a run the
+  thighs come through a kilt's front straps. Wings worn as a cape cover the upper arm only
+  while the arms hang (they do in all three clips).
+- **It walks, always.** The Fly-by-night branch has wings that could carry it, and no
+  floating silhouette was registered for it (a humanoid that hovers still plays its walk).
+- **No chains on a rigged body.** The game takes each piece that rides a bone in as a bone
+  of its own and moves that piece alone, so a `wave_`/`wag_` chain (`_<n>`) does not carry
+  its next piece: a tail here is one piece, and a tail's flame keeps the tail still.
+- **Seen from in front, a pair is one.** The Pretender's collar of wings and the Advocate's
+  tails are mostly one shape from the sheet's angle; the Advocate's nine differ by what they
+  carry and their horns more than by their build.
+- The walk is the rig's own, fitted to a goat's leg: honest in its joints, not yet a trot.

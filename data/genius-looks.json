@@ -293,6 +293,7 @@
     "daemon-small": { "coats": "ink", "roles": { "ink": "main", "leather": "under", "cloth_rag": "trim" } },
     "daemon-tall": { "coats": "ink", "roles": { "ink": "main", "leather": "under", "cloth_rag": "trim" } },
     "daemon-wick": { "coats": "coal", "roles": { "coal": "main", "shade_edge": "under" }, "marks": { "drips": { "name": "wax down its shoulders", "on": "main" } } },
+    "daemon-prince": { "coats": "drake", "roles": { "hide_demon": "main", "cloth_linen": "under", "cloth_coat": "trim" } },
     "daemon-whisper": { "coats": "shade", "roles": { "ink": "main", "ink_edge": "under" }, "marks": { "hem": { "name": "a pale hem", "on": "under" } } },
     "daemon-shadow": { "coats": "shade", "roles": { "ink": "main", "ink_edge": "under" } },
     "aspect-shadow": { "coats": "shade", "roles": { "shade": "main", "shade_edge": "under" } },

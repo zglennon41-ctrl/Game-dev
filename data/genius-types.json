@@ -1003,6 +1003,23 @@
         }
       }
     },
+    "demon": {
+      "role": "hunter",
+      "paths": {
+        "demon-exile": {
+          "shade": "lookout",
+          "text": "It stands a little apart, where it can see: it calls the strike."
+        },
+        "demon-advocate": {
+          "shade": "harrier",
+          "text": "It puts the other side of it to the foe: the guard is down longer."
+        },
+        "demon-head-down": {
+          "shade": "hunter",
+          "text": "It puts its head down and goes through: heavier into every opening."
+        }
+      }
+    },
     "drake": {
       "role": "bulwark",
       "paths": {
