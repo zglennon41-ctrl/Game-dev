@@ -1372,7 +1372,7 @@ PALETTE.update({
     "hide_wing": ((0.16, 0.2, 0.19), 0.6, 0.0), "drake_horn": ((0.72, 0.66, 0.5), 0.45, 0.0), "drake_claw": ((0.8, 0.75, 0.62), 0.35, 0.0),
     "drake_tooth": ((0.86, 0.82, 0.72), 0.35, 0.0), "eye_slit": ((0.012, 0.012, 0.016), 0.25, 0.0), "eye_socket": ((0.03, 0.028, 0.034), 0.5, 0.0),
     "stone_dust": ((0.56, 0.54, 0.5), 1.0, 0.0), "brass_coin": ((0.66, 0.5, 0.2), 0.35, 0.85), "iron_gate": ((0.2, 0.2, 0.23), 0.5, 0.75),
-    "smoke_pale": ((0.34, 0.33, 0.36), 1.0, 0.0), "paper_ledger": ((0.76, 0.7, 0.56), 0.8, 0.0), "leather_book": ((0.24, 0.12, 0.07), 0.7, 0.0),
+    "smoke_pale": ((0.14, 0.14, 0.16), 1.0, 0.0), "paper_ledger": ((0.76, 0.7, 0.56), 0.8, 0.0), "leather_book": ((0.24, 0.12, 0.07), 0.7, 0.0),
     "glaze_kiln": ((0.72, 0.74, 0.7), 0.15, 0.0), "slag_crust": ((0.07, 0.06, 0.062), 0.6, 0.0), "ash_fall": ((0.55, 0.54, 0.52), 1.0, 0.0),
 })
 
@@ -3086,38 +3086,52 @@ def gift_long_legs_stag():
     return [kit._part("long_legs", [(hoof, mat("horn")), (feather, mat("fur_cream"))])]
 
 
+def _drake_gift(name, items):
+    """A gift part of the Drake's: [(geometry, material, shaded round?)] as one object."""
+    return [g.join(name, [g.to_object("%s_%d" % (name, i), geo, m, sm) for i, (geo, m, sm) in enumerate(items) if geo and geo[0]])]
+
+
 def gift_horns_drake():
-    """A drake's horns: two swept back, a spine behind each cheek, and a crown of them behind the skull."""
-    geo = None
+    """A drake's horns: two swept back and up, two spines at the corner of each jaw, a crown of
+    short ones behind the skull, and a coal of the field between them."""
+    horns, crown = None, None
     for sg in (1, -1):
         base = Vector((sg * 0.03, 0.0, -0.01))
-        pts = [base, base + Vector((sg * 0.02, 0.09, 0.09)), base + Vector((sg * 0.03, 0.2, 0.17)), base + Vector((sg * 0.03, 0.3, 0.2))]
-        geo = g.merge(geo, g.tube(pts, [0.024, 0.02, 0.012, 0.002], n=5))
-        for k, (dz, ln) in enumerate(((-0.03, 0.09), (-0.06, 0.07))):
-            b0 = Vector((sg * 0.05, 0.0, dz))
-            geo = g.merge(geo, g.cone(b0, b0 + Vector((sg * 0.035, ln, 0.0)), 0.012, n=4))
-    frill = None
+        horns = g.merge(horns, _horn([base, base + Vector((sg * 0.022, 0.07, 0.075)), base + Vector((sg * 0.04, 0.17, 0.15)), base + Vector((sg * 0.045, 0.27, 0.2)), base + Vector((sg * 0.03, 0.35, 0.21))], 0.026, n=6))
+        for k, ln in enumerate((0.1, 0.075)):
+            b0 = Vector((sg * 0.052, 0.005, -0.03 - 0.032 * k))
+            horns = g.merge(horns, g.cone(b0, b0 + Vector((sg * 0.04, ln, 0.006 - 0.012 * k)), 0.013, n=5))
     for i in range(7):
-        a = math.pi * (0.1 + 0.8 * i / 6)
+        a = math.pi * (0.08 + 0.84 * i / 6)
         d = Vector((math.cos(a), 0, math.sin(a)))
-        b0 = Vector((d.x * 0.06, 0.06, d.z * 0.05 - 0.03))
-        frill = g.merge(frill, g.blade(b0, b0 + Vector((d.x * 0.12, 0.08, d.z * 0.12)), 0.035, normal=d, belly=0.2))
-    return [kit._part("horns", [(geo, mat("drake_horn")), (frill, mat("drake_horn")), (g.ico((0, 0.01, 0.0), 0.016, sub=0), field("ember", 2.4))])]
+        b0 = Vector((d.x * 0.058, 0.055, d.z * 0.05 - 0.03))
+        L = 0.085 + 0.045 * math.sin(a)
+        crown = g.merge(crown, _horn([b0, b0 + (d * 0.7 + Y * 0.7).normalized() * L * 0.6, b0 + (d * 0.5 + Y * 0.9).normalized() * L], 0.013, n=4, steps=1))
+    return _drake_gift("horns", [(horns, mat("drake_horn"), True), (crown, mat("drake_horn"), True), (g.ico((0, 0.012, 0.0), 0.017, sub=1), field("ember", 2.4), True)])
 
 
 def gift_tail_drake():
-    """A drake's tail: long, ridged, a spade at its end."""
-    pts = [Vector((0, 0.0, 0.0)), Vector((0, 0.13, 0.0)), Vector((0, 0.28, 0.03)), Vector((0, 0.43, 0.09)), Vector((0, 0.56, 0.18)), Vector((0, 0.64, 0.28))]
-    body = g.tube(pts, [0.045, 0.042, 0.034, 0.024, 0.014, 0.006], n=6)
-    ridge = None
-    for i in range(1, 5):
-        d = (pts[i + 1] - pts[i - 1]).normalized()
-        up = (Z - d * Z.dot(d)).normalized()
-        b0 = pts[i] + up * 0.02
-        ridge = g.merge(ridge, g.blade(b0, b0 + up * (0.07 - 0.008 * i) + d * 0.03, 0.06, normal=X, belly=0.35))
-    d = (pts[-1] - pts[-2]).normalized()
-    spade = g.blade(pts[-1] - d * 0.01, pts[-1] + d * 0.12, 0.1, normal=X, belly=0.45, thick=0.012)
-    return [kit._part("tail", [(body, mat("drake_hide")), (ridge, mat("drake_horn")), (spade, mat("drake_horn"))])]
+    """A drake's tail: thick where it leaves the body and a whip at its end, plates standing
+    down its back, plates lapped under it, a spade at the tip."""
+    ctrl = [Vector((0, 0.0, 0.0)), Vector((0, 0.12, -0.012)), Vector((0, 0.27, 0.0)), Vector((0, 0.42, 0.045)), Vector((0, 0.55, 0.13)), Vector((0, 0.64, 0.24)), Vector((0, 0.68, 0.34))]
+    line = _cr(ctrl, 2)
+    fr = _frames(line)
+    n = len(fr)
+    rings, ridge, under = [], None, None
+    for i, (pt, d, u, v) in enumerate(fr):
+        t = i / (n - 1.0)
+        rad = 0.056 * (1.0 - t) ** 0.85 * (0.78 + 0.22 * (1.0 - t)) + 0.003
+        rings.append(_ring(pt, u, v, rad * 0.94, rad, m=8, crest=0.16))
+        if 0 < i < n - 2:
+            h = 0.075 * (1.0 - t) + 0.014
+            ridge = g.merge(ridge, g.blade(pt + v * rad * 0.9, pt + v * (rad + h) + d * h * 0.4, 0.05 * (1.0 - 0.5 * t), normal=u, belly=0.34, thick=0.008))
+        if 0 < i < n - 3 and i % 2:
+            arc = [pt + u * (rad * 0.94 * math.cos(math.radians(a)) * 1.06) + v * (rad * math.sin(math.radians(a)) * 1.06) for a in (200, 235, 270, 305, 340)]
+            arc2 = [q + d * 0.045 * (1.0 - 0.4 * t) + (q - pt) * 0.07 for q in arc]
+            under = g.merge(under, g.loft([arc, arc2, [q - (q - pt) * 0.2 for q in arc2]], caps=False, closed=False), g.loft([[q - (q - pt) * 0.08 for q in arc], arc], caps=False, closed=False))
+    pt, d, u, v = fr[-1]
+    spade = g.blade(pt - d * 0.012, pt + d * 0.13, 0.11, normal=u, belly=0.44, thick=0.012)
+    return _drake_gift("tail", [(g.loft(rings, caps=True), mat("drake_hide"), True), (ridge, mat("drake_horn"), False), (under, mat("drake_claw"), False), (spade, mat("drake_horn"), False)])
 
 
 GIFTS = {"fox-tail": gift_tail_fox, "fox-glow": gift_glow_fox, "stag-horn-brow": gift_horn_brow_stag, "stag-long-legs": gift_long_legs_stag,
