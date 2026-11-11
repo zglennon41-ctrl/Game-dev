@@ -96,7 +96,7 @@
    "body": {
     "fox": "red",
     "coat": "russet",
-    "accent": "jade",
+    "accent": "madder",
     "build": {
      "legs": 1.04,
      "waist": 0.9
@@ -119,10 +119,10 @@
      0.8
     ],
     "marks": [
-     "stockings",
+     "stockings:dark",
      "ears",
      [
-      "band",
+      "band:light",
       1.5
      ],
      "inner:dark"
@@ -164,10 +164,10 @@
        0.6
       ],
       "marks": [
-       "stockings",
+       "stockings:dark",
        "ears",
        [
-        "band",
+        "band:light",
         1.6
        ],
        "garters:light"
@@ -211,7 +211,7 @@
          0.5
         ],
         "marks": [
-         "stockings",
+         "stockings:dark",
          "ears",
          "rings",
          "garters:light"
@@ -269,10 +269,10 @@
          0.8
         ],
         "marks": [
-         "stockings",
+         "stockings:dark",
          "ears",
          [
-          "band",
+          "band:light",
           1.6
          ],
          "flecks"
@@ -320,10 +320,10 @@
       ],
       "stance": "sly",
       "marks": [
-       "stockings",
+       "stockings:dark",
        "ears",
        [
-        "band",
+        "band:light",
         1.5
        ],
        "inner:dark",
@@ -370,10 +370,10 @@
          0.7
         ],
         "marks": [
-         "stockings",
+         "stockings:dark",
          "ears",
          [
-          "band",
+          "band:light",
           1.5
          ],
          "inner:dark",
@@ -434,10 +434,10 @@
          0.8
         ],
         "marks": [
-         "stockings",
+         "stockings:dark",
          "ears",
          [
-          "band",
+          "band:light",
           1.5
          ],
          "cross:dark",
@@ -481,10 +481,10 @@
        0.5
       ],
       "marks": [
-       "stockings",
+       "stockings:dark",
        "ears",
        [
-        "band",
+        "band:light",
         1.5
        ],
        "inner:light"
@@ -532,10 +532,10 @@
         ],
         "coat": "moon",
         "marks": [
-         "stockings",
+         "stockings:dark",
          "ears",
          [
-          "band",
+          "band:light",
           1.5
          ],
          "inner:light",
@@ -591,7 +591,7 @@
         "marks": [
          "ears",
          [
-          "band",
+          "band:light",
           1.8
          ],
          "inner:light"
@@ -623,7 +623,7 @@
    ],
    "body": {
     "fox": "den",
-    "coat": "hearth",
+    "coat": "sand",
     "accent": "gold",
     "build": {},
     "mouth": [
@@ -949,7 +949,8 @@
          "dorsal:light",
          "brush",
          "inner:dark",
-         "cross"
+         "cross",
+         "stockings"
         ]
        }
       }
