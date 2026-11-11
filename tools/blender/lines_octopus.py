@@ -60,7 +60,7 @@ def _r(ramp, step):
 # everything else is named for what it is made of and lies on a ramp.
 PALETTE.update({
     "hide_octopus": (_r("rust", 3), 0.5, 0.0), "hide_octopus_pale": (_r("bone", 3), 0.45, 0.0), "hide_octopus_dark": (_r("rust", 1), 0.55, 0.0),
-    "eye_gold": ((0.82, 0.5, 0.08), 0.25, 0.0), "pupil_bar": ((0.012, 0.01, 0.014), 0.2, 0.0),
+    "eye_gold": ((0.83, 0.51, 0.2), 0.25, 0.0), "pupil_bar": ((0.012, 0.01, 0.014), 0.2, 0.0),
     "glass_bottle": (_r("verdigris", 1), 0.12, 0.0), "glass_bottle_pale": (_r("verdigris", 3), 0.1, 0.0), "glass_bottle_dark": (_r("verdigris", 0), 0.15, 0.0),
     "glass_clear": (_r("steel", 3), 0.08, 0.0), "glass_clear_dark": (_r("steel", 0), 0.1, 0.0), "glass_flesh": (_r("steel", 4), 0.1, 0.0),
     "brass_key": (_r("brass", 3), 0.3, 0.85), "brass_key_dark": (_r("brass", 1), 0.35, 0.85), "iron_pot": (_r("iron", 1), 0.5, 0.7), "iron_pot_light": (_r("iron", 3), 0.45, 0.7),
