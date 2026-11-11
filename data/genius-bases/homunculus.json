@@ -54,7 +54,20 @@
   "habit": "It copies whatever your hands do, a beat late, with nothing in its own.",
   "features": [
    "small-hands"
-  ]
+  ],
+  "body": {
+   "skin": [
+    "rough",
+    "clay-legs"
+   ],
+   "face": "thumbprint",
+   "head": "seam",
+   "chest": [
+    "heart",
+    0.8,
+    "bare"
+   ]
+  }
  },
  "paths": [
   {
@@ -78,6 +91,35 @@
    "features": [
     "brush"
    ],
+   "body": {
+    "build": {
+     "hands": 1.25
+    },
+    "skin": [
+     [
+      "rough",
+      0.5
+     ],
+     "fired-hands"
+    ],
+    "wear": [
+     [
+      "apron",
+      1.0,
+      "trim"
+     ],
+     "breeches"
+    ],
+    "face": null,
+    "head": [
+     "seam",
+     "brush-ear"
+    ],
+    "chest": "heart",
+    "belt": [
+     "pouch"
+    ]
+   },
    "prongs": [
     {
      "id": "homunculus-copy-clerk",
@@ -94,6 +136,45 @@
      "features": [
       "pages"
      ],
+     "body": {
+      "build": {
+       "hands": 0.9,
+       "wide": -0.2
+      },
+      "skin": [
+       "ink-hands"
+      ],
+      "wear": [
+       [
+        "robe",
+        1.0,
+        "main"
+       ],
+       [
+        "cuffs",
+        1.0,
+        "under"
+       ],
+       [
+        "sash",
+        1.0,
+        "trim"
+       ]
+      ],
+      "head": [
+       [
+        "cap-square",
+        0.8,
+        "trim"
+       ],
+       "pens-ears"
+      ],
+      "chest": null,
+      "belt": [
+       "satchel",
+       1.3
+      ]
+     },
      "silhouette": "kith-clerk",
      "finishes": [
       {
@@ -110,7 +191,55 @@
        },
        "features": [
         "ledger"
-       ]
+       ],
+       "body": {
+        "build": {
+         "age": 0.5,
+         "head": 0.93,
+         "legs": 1.1,
+         "neck": 0.8,
+         "old": 0.5
+        },
+        "wear": [
+         [
+          "robe",
+          1.0,
+          "main"
+         ],
+         [
+          "collar",
+          1.3,
+          "under"
+         ],
+         [
+          "stole",
+          1.2,
+          "trim"
+         ],
+         [
+          "cuffs",
+          1.0,
+          "under"
+         ]
+        ],
+        "head": [
+         [
+          "cap-square",
+          1.3,
+          "trim"
+         ]
+        ],
+        "face": [
+         "spectacles",
+         1.0,
+         "low"
+        ],
+        "belt": [
+         "ledger-chained",
+         1.3
+        ],
+        "left": "seal-stamp"
+       }
       },
       {
        "id": "homunculus-indexer",
@@ -126,7 +255,38 @@
        },
        "features": [
         "dial"
-       ]
+       ],
+       "body": {
+        "wear": [
+         [
+          "robe",
+          1.0,
+          "main"
+         ],
+         [
+          "cuffs",
+          1.0,
+          "under"
+         ],
+         [
+          "sash",
+          1.0,
+          "trim"
+         ]
+        ],
+        "skin": [
+         "thread-fingers"
+        ],
+        "chest": [
+         "dial",
+         1.3
+        ],
+        "belt": null,
+        "back": [
+         "card-drawers",
+         1.0
+        ]
+       }
       }
      ]
     },
@@ -145,6 +305,27 @@
      "features": [
       "ring"
      ],
+     "body": {
+      "build": {
+       "wide": 0.4
+      },
+      "skin": [
+       "white-knees",
+       "fired-hands"
+      ],
+      "belt": [
+       "chalk-ring",
+       1.2
+      ],
+      "right": "chalk",
+      "back": [
+       "stakes"
+      ],
+      "around": [
+       "ward-ring",
+       0.8
+      ]
+     },
      "finishes": [
       {
        "id": "homunculus-mason-of-the-post",
@@ -163,7 +344,31 @@
        },
        "features": [
         "wall-plate"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": 0.8,
+         "forearms": 1.4,
+         "limbs": 1.1
+        },
+        "skin": [
+         "stone-arms",
+         "white-knees"
+        ],
+        "head": [
+         "seam",
+         "cap-flat"
+        ],
+        "right": "trowel",
+        "back": [
+         "hod",
+         1.2
+        ],
+        "around": [
+         "ward-ring",
+         1.0
+        ]
+       }
       },
       {
        "id": "homunculus-makers-maker",
@@ -179,7 +384,29 @@
        },
        "features": [
         "wheels"
-       ]
+       ],
+       "body": {
+        "build": {
+         "old": 1.0
+        },
+        "face": [
+         "spectacles",
+         "beard"
+        ],
+        "right": "brush-tool",
+        "back": null,
+        "chest": [
+         "heart",
+         1.4
+        ],
+        "around": [
+         "little-ones",
+         3
+        ],
+        "belt": [
+         "tools"
+        ]
+       }
       }
      ]
     },
@@ -198,6 +425,40 @@
      "features": [
       "lantern"
      ],
+     "body": {
+      "build": {
+       "bow": -0.04
+      },
+      "wear": [
+       [
+        "apron",
+        1.0,
+        "trim"
+       ],
+       "breeches",
+       [
+        "mantle",
+        1.0,
+        "cloth_wool"
+       ],
+       [
+        "scarf",
+        1.0,
+        "under"
+       ]
+      ],
+      "head": [
+       [
+        "cap-wool",
+        1.0,
+        "cloth_wool"
+       ]
+      ],
+      "belt": [
+       "lantern-front",
+       1.2
+      ]
+     },
      "finishes": [
       {
        "id": "homunculus-knocker-up",
@@ -213,7 +474,39 @@
        },
        "features": [
         "tunnel-ear"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.06
+        },
+        "wear": [
+         [
+          "coat",
+          2.0,
+          "trim"
+         ],
+         "breeches",
+         [
+          "scarf",
+          1.0,
+          "under"
+         ]
+        ],
+        "head": [
+         "cap-flat"
+        ],
+        "face": [
+         "big-ear",
+         1.3
+        ],
+        "belt": [
+         "lantern"
+        ],
+        "back": [
+         "tap-pole",
+         1.0
+        ]
+       }
       },
       {
        "id": "homunculus-halls-caretaker",
@@ -229,7 +522,43 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "build": {
+         "old": 1.2,
+         "bow": 0.14
+        },
+        "wear": [
+         [
+          "apron",
+          1.4,
+          "trim"
+         ],
+         "breeches",
+         [
+          "waistcoat",
+          "cloth_wool"
+         ]
+        ],
+        "head": "seam",
+        "face": [
+         "beard",
+         1.0
+        ],
+        "eyes": "old",
+        "belt": [
+         "keys",
+         "lantern"
+        ],
+        "back": [
+         "broom",
+         1.0
+        ],
+        "around": [
+         "motes",
+         2
+        ]
+       }
       }
      ]
     }
@@ -256,6 +585,41 @@
    "features": [
     "short-blade"
    ],
+   "body": {
+    "build": {
+     "age": 0.3,
+     "head": 0.8,
+     "legs": 1.4,
+     "limbs": 0.74,
+     "hands": 0.76,
+     "feet": 0.76,
+     "old": -0.5,
+     "belly": 0.0
+    },
+    "skin": [
+     [
+      "rough",
+      0.3
+     ]
+    ],
+    "wear": [
+     [
+      "tunic",
+      1.0,
+      "homespun"
+     ],
+     [
+      "belt",
+      1.0,
+      "leather_dark"
+     ]
+    ],
+    "face": "blank-half",
+    "head": "seam",
+    "chest": "heart",
+    "right": "short-blade",
+    "coat": "moon"
+   },
    "prongs": [
     {
      "id": "homunculus-sparring-doll",
@@ -272,6 +636,20 @@
      "features": [
       "mask"
      ],
+     "body": {
+      "skin": null,
+      "wear": [
+       "padding"
+      ],
+      "face": [
+       [
+        "mask-smooth",
+        1.0,
+        "main"
+       ],
+       "dents"
+      ]
+     },
      "finishes": [
       {
        "id": "homunculus-mirror-hand",
@@ -287,7 +665,43 @@
        },
        "features": [
         "edge"
-       ]
+       ],
+       "body": {
+        "build": {
+         "age": 0.42
+        },
+        "wear": [
+         [
+          "tunic",
+          1.0,
+          "homespun"
+         ],
+         [
+          "belt",
+          1.0,
+          "leather_dark"
+         ],
+         [
+          "bracers",
+          1.0,
+          "tin"
+         ]
+        ],
+        "face": [
+         [
+          "mask-smooth",
+          1.0,
+          "tin"
+         ]
+        ],
+        "left": "edge-hand",
+        "right": [
+         "short-blade",
+         1.0,
+         "steel"
+        ],
+        "around": "strings"
+       }
       },
       {
        "id": "homunculus-pell-breaker",
@@ -303,7 +717,42 @@
        },
        "features": [
         "horn-brow"
-       ]
+       ],
+       "body": {
+        "build": {
+         "age": 0.42,
+         "hands": 2.0,
+         "forearms": 1.5,
+         "shoulders": 1.0,
+         "wide": 0.9,
+         "limbs": 1.2,
+         "bow": 0.1
+        },
+        "wear": [
+         [
+          "rag",
+          1.0,
+          "homespun"
+         ],
+         [
+          "bracers",
+          1.0,
+          "paper"
+         ]
+        ],
+        "face": "dents",
+        "head": [
+         "seam",
+         [
+          "brow-ridge",
+          1.4
+         ]
+        ],
+        "skin": [
+         "stone-knuckles"
+        ],
+        "right": null
+       }
       }
      ]
     },
@@ -322,6 +771,43 @@
      "features": [
       "ring"
      ],
+     "body": {
+      "skin": [
+       [
+        "crackle",
+        0.6,
+        "light"
+       ]
+      ],
+      "wear": [
+       [
+        "tunic",
+        1.0,
+        "homespun"
+       ],
+       [
+        "belt",
+        1.0,
+        "leather_dark"
+       ],
+       [
+        "mantle",
+        1.0,
+        "cloth_rag"
+       ]
+      ],
+      "chest": [
+       "heart",
+       [
+        "pattern-ring",
+        1.3
+       ]
+      ],
+      "face": [
+       "blank-half",
+       0.6
+      ]
+     },
      "finishes": [
       {
        "id": "homunculus-walking-likeness",
@@ -340,7 +826,46 @@
        },
        "features": [
         "second-face"
-       ]
+       ],
+       "body": {
+        "build": {
+         "age": 0.46,
+         "head": 0.9,
+         "legs": 1.1
+        },
+        "skin": null,
+        "wear": [
+         [
+          "coat",
+          2.0,
+          "homespun"
+         ],
+         [
+          "boots",
+          1.0,
+          "leather_dark"
+         ],
+         [
+          "belt",
+          1.0,
+          "leather_dark"
+         ],
+         "hose"
+        ],
+        "face": [
+         "face-mask"
+        ],
+        "head": [
+         [
+          "hair-wig",
+          1.0
+         ]
+        ],
+        "chest": [
+         "pattern-ring",
+         0.8
+        ]
+       }
       },
       {
        "id": "homunculus-sworn-likeness",
@@ -356,7 +881,58 @@
        },
        "features": [
         "ledger"
-       ]
+       ],
+       "body": {
+        "build": {
+         "age": 0.44
+        },
+        "skin": [
+         [
+          "crackle",
+          0.5,
+          "light"
+         ]
+        ],
+        "wear": [
+         [
+          "tabard",
+          1.0,
+          "homespun"
+         ],
+         [
+          "belt",
+          1.0,
+          "leather_dark"
+         ],
+         [
+          "cloak",
+          1.0,
+          "cloth_rag"
+         ],
+         [
+          "boots",
+          1.0,
+          "leather_dark"
+         ]
+        ],
+        "face": null,
+        "head": [
+         "seam",
+         "circlet"
+        ],
+        "chest": [
+         "terms",
+         [
+          "pattern-ring",
+          1.1
+         ]
+        ],
+        "right": [
+         "short-blade",
+         1.1,
+         "steel"
+        ]
+       }
       }
      ]
     },
@@ -375,6 +951,34 @@
      "features": [
       "sight-glass"
      ],
+     "body": {
+      "build": {
+       "wide": 0.3
+      },
+      "wear": [
+       [
+        "breeches",
+        1.0,
+        "homespun"
+       ],
+       [
+        "waistcoat",
+        "leather_dark"
+       ],
+       "bandolier",
+       [
+        "belt",
+        1.0,
+        "leather_dark"
+       ]
+      ],
+      "face": "glass",
+      "left": "shot",
+      "right": null,
+      "belt": [
+       "shot-pouch"
+      ]
+     },
      "finishes": [
       {
        "id": "homunculus-clay-sharpshooter",
@@ -390,7 +994,40 @@
        },
        "features": [
         "barrel"
-       ]
+       ],
+       "body": {
+        "build": {
+         "age": 0.44,
+         "legs": 1.08,
+         "bow": -0.03
+        },
+        "wear": [
+         [
+          "coat",
+          2.0,
+          "homespun"
+         ],
+         "bandolier",
+         [
+          "boots",
+          1.0,
+          "leather_dark"
+         ]
+        ],
+        "head": [
+         [
+          "hat-brim",
+          0.8,
+          "leather_dark"
+         ]
+        ],
+        "face": "glass",
+        "right": [
+         "barrel-arm",
+         1.2
+        ],
+        "left": null
+       }
       },
       {
        "id": "homunculus-brush-beater",
@@ -409,7 +1046,34 @@
        },
        "features": [
         "long-legs"
-       ]
+       ],
+       "body": {
+        "build": {
+         "age": 0.4,
+         "legs": 1.3,
+         "leg_girth": 0.85,
+         "arms": 1.08
+        },
+        "wear": [
+         [
+          "rag",
+          1.0,
+          "homespun"
+         ],
+         "bandolier"
+        ],
+        "face": null,
+        "head": [
+         "seam",
+         "twigs"
+        ],
+        "skin": [
+         "scratched-legs"
+        ],
+        "right": "stone",
+        "left": "stone",
+        "belt": null
+       }
       }
      ]
     }
@@ -436,6 +1100,40 @@
    "features": [
     "broad-chest"
    ],
+   "body": {
+    "build": {
+     "wide": 1.0,
+     "shoulders": 0.8,
+     "bow": 0.14,
+     "limbs": 1.12,
+     "legs": 0.94
+    },
+    "skin": [
+     [
+      "rough",
+      0.4
+     ]
+    ],
+    "wear": [
+     [
+      "breeches",
+      1.0,
+      "homespun"
+     ],
+     [
+      "harness",
+      1.0,
+      "apron_hide"
+     ]
+    ],
+    "face": null,
+    "head": "seam",
+    "chest": "heart",
+    "back": [
+     "pack-frame"
+    ],
+    "coat": "slate"
+   },
    "prongs": [
     {
      "id": "homunculus-fitter",
@@ -455,6 +1153,51 @@
      "features": [
       "gears"
      ],
+     "body": {
+      "build": {
+       "wide": 0.7,
+       "bow": 0.06
+      },
+      "skin": [
+       "wrist-gears"
+      ],
+      "wear": [
+       [
+        "shirt-rolled",
+        1.0,
+        "main"
+       ],
+       [
+        "apron",
+        1.0,
+        "trim"
+       ],
+       [
+        "boots",
+        1.0,
+        "under"
+       ],
+       [
+        "belt",
+        1.0,
+        "under"
+       ]
+      ],
+      "head": [
+       [
+        "cap-flat",
+        1.0,
+        "under"
+       ]
+      ],
+      "face": "goggles",
+      "right": [
+       "spanner",
+       1.3
+      ],
+      "back": null,
+      "chest": null
+     },
      "silhouette": "kith-fitter",
      "finishes": [
       {
@@ -471,7 +1214,60 @@
        },
        "features": [
         "brass-plate"
-       ]
+       ],
+       "body": {
+        "build": {
+         "age": 0.46,
+         "wide": 0.8,
+         "belly": 0.5
+        },
+        "wear": [
+         [
+          "shirt",
+          1.0,
+          "main"
+         ],
+         [
+          "apron",
+          1.3,
+          "trim"
+         ],
+         [
+          "boots",
+          1.0,
+          "under"
+         ],
+         [
+          "belt",
+          1.0,
+          "under"
+         ]
+        ],
+        "head": [
+         [
+          "cap-peaked",
+          1.0,
+          "under"
+         ]
+        ],
+        "face": [
+         "goggles",
+         "beard"
+        ],
+        "chest": [
+         "badge",
+         1.8
+        ],
+        "right": null,
+        "back": [
+         "spanner-back",
+         1.5
+        ],
+        "belt": [
+         "tools",
+         "lantern"
+        ]
+       }
       },
       {
        "id": "homunculus-plate-layer",
@@ -490,7 +1286,49 @@
        },
        "features": [
         "set-feet"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": 0.9,
+         "hips": 1.0,
+         "feet": 1.5,
+         "leg_girth": 1.3
+        },
+        "wear": [
+         [
+          "shirt-rolled",
+          1.0,
+          "main"
+         ],
+         "breeches",
+         [
+          "boots",
+          1.3,
+          "under"
+         ],
+         [
+          "scarf",
+          1.0,
+          "trim"
+         ]
+        ],
+        "head": [
+         [
+          "cap-flat",
+          1.0,
+          "under"
+         ]
+        ],
+        "face": null,
+        "right": [
+         "lantern",
+         1.0
+        ],
+        "back": [
+         "hammer-long",
+         1.3
+        ]
+       }
       }
      ]
     },
@@ -509,6 +1347,40 @@
      "features": [
       "stone-skin"
      ],
+     "body": {
+      "build": {
+       "deep": 0.7,
+       "forearms": 1.4
+      },
+      "skin": [
+       [
+        "rough",
+        0.3
+       ],
+       [
+        "patch",
+        1.3
+       ]
+      ],
+      "wear": [
+       [
+        "breeches",
+        1.0,
+        "homespun"
+       ],
+       [
+        "harness",
+        1.0,
+        "apron_hide"
+       ],
+       [
+        "pauldrons",
+        1.0,
+        "tin"
+       ]
+      ],
+      "back": null
+     },
      "finishes": [
       {
        "id": "homunculus-thrice-mended",
@@ -524,7 +1396,34 @@
        },
        "features": [
         "iron-hide"
-       ]
+       ],
+       "body": {
+        "skin": [
+         "mends",
+         [
+          "patch",
+          1.0
+         ]
+        ],
+        "wear": [
+         [
+          "breeches",
+          1.0,
+          "homespun"
+         ],
+         [
+          "harness",
+          1.0,
+          "apron_hide"
+         ],
+         [
+          "bracers",
+          1.0,
+          "tin"
+         ]
+        ],
+        "coat": "iron"
+       }
       },
       {
        "id": "homunculus-kiln-fired",
@@ -540,7 +1439,29 @@
        },
        "features": [
         "scorched"
-       ]
+       ],
+       "body": {
+        "build": {
+         "limbs": 0.9,
+         "bow": 0.0,
+         "wide": 0.6
+        },
+        "skin": [
+         [
+          "crackle",
+          1.2,
+          "light"
+         ]
+        ],
+        "wear": [
+         "breeches"
+        ],
+        "chest": [
+         "heart",
+         1.5
+        ],
+        "coat": "ember"
+       }
       }
      ]
     },
@@ -559,6 +1480,32 @@
      "features": [
       "plated"
      ],
+     "body": {
+      "build": {
+       "wide": 1.0,
+       "bow": 0.16
+      },
+      "wear": [
+       [
+        "breeches",
+        1.0,
+        "homespun"
+       ],
+       [
+        "strap-plates",
+        1.0,
+        "tin"
+       ]
+      ],
+      "head": [
+       "seam",
+       "brow-band"
+      ],
+      "back": [
+       "pack",
+       1.4
+      ]
+     },
      "finishes": [
       {
        "id": "homunculus-litter-bearer",
@@ -574,7 +1521,38 @@
        },
        "features": [
         "broad-guard"
-       ]
+       ],
+       "body": {
+        "build": {
+         "arms": 1.36,
+         "wide": 1.0,
+         "bow": 0.08
+        },
+        "skin": [
+         "flat-arms"
+        ],
+        "wear": [
+         [
+          "breeches",
+          1.0,
+          "homespun"
+         ],
+         [
+          "strap-plates",
+          1.0,
+          "tin"
+         ],
+         [
+          "sash",
+          1.0,
+          "cloth_rag"
+         ]
+        ],
+        "back": [
+         "litter-poles",
+         1.0
+        ]
+       }
       },
       {
        "id": "homunculus-cohorts-hand",
@@ -590,7 +1568,48 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "build": {
+         "bow": 0.06,
+         "wide": 0.8
+        },
+        "skin": [
+         "glow-hands"
+        ],
+        "wear": [
+         [
+          "breeches",
+          1.0,
+          "homespun"
+         ],
+         [
+          "waistcoat",
+          "apron_hide"
+         ],
+         [
+          "strap-plates",
+          1.0,
+          "tin"
+         ]
+        ],
+        "head": [
+         "cap-flat"
+        ],
+        "left": [
+         "flask",
+         1.2
+        ],
+        "back": [
+         "pack",
+         1.2
+        ],
+        "belt": [
+         "lantern",
+         "pouch",
+         "tools"
+        ]
+       }
       }
      ]
     }
