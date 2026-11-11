@@ -1092,15 +1092,14 @@ func _detail(grain: String, for_body: bool) -> Texture2D:
 
 ## Where a mesh with bones has its vertices at rest, for the grain: the surface's own places
 ## and then its normals, as a texture the shader reads by vertex index. {} for a mesh with no
-## bones (its vertices are where they were made already) or one that cannot be read.
-var _rest_cache: Dictionary = {}
-
+## bones (its vertices are where they were made already) or one that cannot be read. It is
+## made once for a mesh and kept on the mesh, so it goes when the mesh does.
 func _rest_of(mi: MeshInstance3D, surface: int) -> Dictionary:
 	if mi.skin == null or not (mi.mesh is ArrayMesh):
 		return {}
-	var key := "%d|%d" % [mi.mesh.get_rid().get_id(), surface]
-	if not _rest_cache.has(key):
-		_rest_cache[key] = {}
+	var key := "grain_rest_%d" % surface
+	if not mi.mesh.has_meta(key):
+		var rest := {}
 		var arrays := (mi.mesh as ArrayMesh).surface_get_arrays(surface)
 		if arrays.size() > Mesh.ARRAY_NORMAL and arrays[Mesh.ARRAY_VERTEX] is PackedVector3Array and arrays[Mesh.ARRAY_NORMAL] is PackedVector3Array:
 			var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
@@ -1116,8 +1115,9 @@ func _rest_of(mi: MeshInstance3D, surface: int) -> Dictionary:
 				lies.resize(width * rows * 12)
 				places.append_array(lies)
 				var img := Image.create_from_data(width, rows * 2, false, Image.FORMAT_RGBF, places)
-				_rest_cache[key] = { "tex": ImageTexture.create_from_image(img), "width": width, "rows": rows }
-	return _rest_cache[key]
+				rest = { "tex": ImageTexture.create_from_image(img), "width": width, "rows": rows }
+		mi.mesh.set_meta(key, rest)
+	return mi.mesh.get_meta(key, {})
 
 ## What each surface under a body is covered in (data/style.json, materials.grains), by its
 ## material's name; a marking or a Path's colour takes the grain of the largest surface of the

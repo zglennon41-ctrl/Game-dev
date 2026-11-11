@@ -107,7 +107,11 @@ func check_grains(d: Dictionary, classes: Dictionary) -> void:
 		["metal_brass", "", "brushed"], ["wood_oak", "bow", "timber"], ["bark_light", "stag", "bark"],
 		["leather_strap", "", "creased"], ["cloth_rag", "", "linen"], ["robe_black", "imp", "twill"], ["hair", "", "fur"],
 		["mist_pale", "fog", "fog"], ["shade_smoke", "wolf", "fog"], ["void", "lurker", "fog"], ["slate_light", "", "rock"],
-		["bone", "", "rock"], ["moss", "", "wool"], ["eye_gold", "wolf", ""], ["field_glow", "wolf", ""], ["nose", "wolf", ""] ]
+		["bone", "", "rock"], ["moss", "", "wool"], ["eye_gold", "wolf", ""], ["field_glow", "wolf", ""], ["nose", "wolf", ""],
+		["accent_dark", "wolf", "wool"], ["stone_smooth", "", "rock"] ]
+	for beside in ["accent", "accent_dark", "mark_saddle"]:
+		if not Style.grain_for(beside, World.surface_of(beside), "wolf").get("beside", false):
+			fail("%s should take the grain of what lies beside it, as a marking and a Path's colour do (materials.grains: beside:)" % beside)
 	for w in wants:
 		var cls := World.surface_of(String(w[0]))
 		var got := String(Style.grain_for(String(w[0]), cls, String(w[1])).get("grain", ""))

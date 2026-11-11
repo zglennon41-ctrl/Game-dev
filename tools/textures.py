@@ -197,6 +197,16 @@ def level(a, spread=0.085, lo=0.24, hi=0.76):
     return a - a.mean() + 0.5
 
 
+def keep(name, a):
+    """Save a grain, having seen that it repeats without a seam: the step from its last row to
+    its first, and from its last column to its first, is no greater than its steps elsewhere."""
+    for axis, what in ((0, "top to bottom"), (1, "side to side")):
+        steps = np.abs(np.diff(a, axis=axis, append=np.take(a, [0], axis=axis))).mean(axis=1 - axis)
+        if steps[-1] > 1.25 * steps[:-1].max():
+            raise SystemExit("%s does not tile %s: the step across its edge is %.4f and nowhere else over %.4f" % (name, what, steps[-1], steps[:-1].max()))
+    save(name, a)
+
+
 def more():
     v, u = np.mgrid[0:N, 0:N] / float(N)
     # fur: locks lying down the picture, each a pointed tuft over the next (what is seen of a
@@ -206,7 +216,7 @@ def more():
     lock = 0.3 + 0.44 * step(0.3, 0.75, y) - 0.2 * step(0.5, 1.0, np.abs(x)) * (1.0 - 0.5 * y)
     strokes = np.tanh(2.0 * streaks(N, 1.0, 11.0)) * 0.5 + np.tanh(1.4 * streaks(N, 2.6, 26.0)) * 0.36 + 0.3 * streaks(N, 11.0, 22.0)
     lock = smooth(np.where(on, lock, 0.25), 1.0, 1.6)
-    save("fur", level((lock - lock.mean()) / lock.std() * 0.8 + strokes / strokes.std() * 0.5, 0.095, 0.2, 0.8))
+    keep("fur", level((lock - lock.mean()) / lock.std() * 0.8 + strokes / strokes.std() * 0.5, 0.095, 0.2, 0.8))
     # feathers: long vanes overlapping, each with a shaft and its barbs, a dark edge where the next lies under
     fresh("feathers")
     x, y, on = shingles(N, 3, 4, 2.3, 1.12, 2.2)
@@ -214,30 +224,30 @@ def more():
     barbs = np.sin((y * 2.3 * 9.0 - np.abs(x) * 3.2) * 2.0 * np.pi) * (1.0 - shaft) * step(0.0, 0.25, y)
     edge = step(0.82, 1.0, np.maximum(np.abs(x), y ** 3))
     feathers = 0.5 + 0.46 * (step(0.25, 1.0, y) - 0.5) + 0.1 * shaft * step(0.05, 0.3, y) + 0.05 * barbs - 0.3 * edge
-    save("feathers", level(smooth(np.where(on, feathers, 0.26), 0.7, 0.7), 0.1, 0.2, 0.8))
+    keep("feathers", level(smooth(np.where(on, feathers, 0.26), 0.7, 0.7), 0.1, 0.2, 0.8))
     # scales: short round scales in rows, bright toward the lip, shadowed where the row above lies over
     fresh("scales")
     x, y, on = shingles(N, 4, 6, 1.75, 1.1, 2.0)
     r = np.sqrt(x ** 2 * 0.55 + y ** 2)
     lip = step(0.84, 1.0, np.maximum(np.abs(x) ** 1.5, y ** 2))
     scales = 0.5 + 0.5 * (step(0.2, 1.0, y) - 0.5) + 0.05 * np.cos(r * 9.0) * step(0.2, 0.6, y) - 0.32 * lip
-    save("scales", level(smooth(np.where(on, scales, 0.26), 0.8, 0.8), 0.1, 0.2, 0.8))
+    keep("scales", level(smooth(np.where(on, scales, 0.26), 0.8, 0.8), 0.1, 0.2, 0.8))
     # pebble: a hide of small bumps with dark grooves between (a tortoise's leg, a lizard's flank, an octopus)
     fresh("pebble")
     f1, f2 = cells(N, 11, 0.85)
     pebble = 0.5 + 0.2 * (1.0 - step(0.0, 0.5, f1)) - 0.3 * (1.0 - step(0.0, 0.13, f2 - f1))
-    save("pebble", level(smooth(pebble, 0.8, 0.8), 0.075))
+    keep("pebble", level(smooth(pebble, 0.8, 0.8), 0.075))
     # horn: fine ridges across the grain, uneven (horn, antler, claw, beak, a shell's rings, chitin)
     fresh("horn")
     warp = streaks(N, 26.0, 9.0)
     ridges = (0.5 + 0.5 * np.sin((v * 22.0 + warp * 0.34) * 2.0 * np.pi)) ** 1.6
     horn = ridges * 0.8 + 0.2 * (0.5 + 0.5 * np.sin((v * 66.0 + warp * 0.9) * 2.0 * np.pi)) + 0.12 * streaks(N, 9.0, 2.0)
-    save("horn", level(horn, 0.07))
+    keep("horn", level(horn, 0.07))
     # hammered: soft dimples, each with a bright rim where it meets the next (beaten plate)
     fresh("hammered")
     f1, f2 = cells(N, 7, 0.7)
     hammered = 0.5 - 0.16 * (1.0 - step(0.0, 0.55, f1)) + 0.14 * (1.0 - step(0.0, 0.16, f2 - f1))
-    save("hammered", level(smooth(hammered, 1.6, 1.6), 0.06))
+    keep("hammered", level(smooth(hammered, 1.6, 1.6), 0.06))
     # twill: a herringbone weave, the diagonal turning back every band
     fresh("twill")
     bands, threads = 8, 16
@@ -245,33 +255,33 @@ def more():
     wale = 0.5 + 0.5 * np.sin((v * threads + turn * (u * bands - np.floor(u * bands)) * (threads / bands) * 2.0) * 2.0 * np.pi)
     seam = 1.0 - step(0.0, 0.08, np.abs((u * bands) % 1.0 - 0.5) * 2.0 - 0.92 + 0.08)
     twill = wale ** 0.8 - 0.25 * seam + 0.18 * streaks(N, 1.2, 1.2)
-    save("twill", level(twill, 0.075))
+    keep("twill", level(twill, 0.075))
     # bark: broad ridges with narrow dark fissures running down
     fresh("bark")
     grain = streaks(N, 5.0, 46.0)
     fissure = 1.0 - step(0.04, 0.62, np.abs(grain))
     bark = 0.58 - 0.42 * fissure + 0.1 * np.tanh(streaks(N, 2.0, 20.0)) + 0.05 * streaks(N, 6.0, 2.0)
-    save("bark", level(bark, 0.085))
+    keep("bark", level(bark, 0.085))
     # fog: soft cloud, nothing in it small (mist, smoke, a body of shadow)
     fresh("fog")
-    save("fog", level(cloud(N, 1.9), 0.075))
+    keep("fog", level(cloud(N, 1.75), 0.095, 0.2, 0.8))
     # timber: wood as a body carries it (a bow, a shield, a stock): the figure of the grain in
     # long bands down the picture, and the pores along it
     fresh("timber")
     figure = (0.5 + 0.5 * np.sin((u * 7.0 + 0.3 * streaks(N, 14.0, 60.0)) * 2.0 * np.pi)) ** 1.4
     timber = 0.52 * (figure - figure.mean()) / figure.std() + 0.42 * np.tanh(1.5 * streaks(N, 1.1, 34.0)) + 0.26 * streaks(N, 5.0, 90.0)
-    save("timber", level(timber, 0.08))
+    keep("timber", level(timber, 0.08))
     # creased: worn leather: a crackle of creases, and a fine pebble between them
     fresh("creased")
     f1, f2 = cells(N, 5, 0.95)
     g1, g2 = cells(N, 21, 0.9)
     creased = 0.5 - 0.4 * (1.0 - step(0.0, 0.2, f2 - f1)) ** 1.5 + 0.08 * (1.0 - step(0.0, 0.6, g1)) - 0.1 * (1.0 - step(0.0, 0.22, g2 - g1)) + 0.11 * cloud(N, 1.9)
-    save("creased", level(smooth(creased, 0.7, 0.7), 0.085))
+    keep("creased", level(smooth(creased, 0.7, 0.7), 0.085))
     # brushed: metal drawn along a stone: fine scratches down the picture, a few of them deep
     fresh("brushed")
     deep = streaks(N, 0.8, 70.0)
     brushed = 0.6 * np.tanh(1.3 * streaks(N, 0.9, 42.0)) + 0.3 * streaks(N, 3.5, 100.0) - 0.5 * step(2.1, 2.9, deep) + 0.12 * cloud(N, 1.5)
-    save("brushed", level(brushed, 0.07))
+    keep("brushed", level(brushed, 0.07))
     # rock: stone as a body carries it (slate, clay, coal, old bone): a rough mottle, pits, a few cracks
     fresh("rock")
     f1, f2 = cells(N, 4, 1.0)
@@ -279,7 +289,7 @@ def more():
     pick = smooth(rng2.random((N, N)), 6.0, 6.0)
     pits = (1.0 - step(0.05, 0.2, g1)) * step(0.0, 0.004, pick - np.median(pick))
     rock = 0.5 + 0.22 * cloud(N, 1.3) - 0.3 * pits - 0.4 * (1.0 - step(0.0, 0.05, f2 - f1)) * step(-0.2, 0.5, cloud(N, 2.0))
-    save("rock", level(smooth(rock, 0.6, 0.6), 0.075))
+    keep("rock", level(smooth(rock, 0.6, 0.6), 0.075))
 
 
 if __name__ == "__main__":

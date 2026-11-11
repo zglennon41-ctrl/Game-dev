@@ -167,6 +167,9 @@ three sides, so no model has to be unwrapped for it.
   portrait shows about the same count.
 - **How strong.** Enough to see on a portrait; never over 0.7 (the check holds it), where it
   would fight the bands. From far off a grain fades to its mid-grey: it does not sparkle.
+- **It is in the shine as well as the colour.** On a body the edge of a highlight follows
+  the grain: hammered iron's dimples, worn leather's creases, a timber's figure. A glossy
+  coat near black shows its grain by nothing else.
 - **To look at the difference**: `-- --grain=world` lays every body's grain as it was laid
   before (its class's, in the world's space) and `-- --grain=none` lays none.
 
@@ -354,8 +357,9 @@ the colours the data names (hair, a zone's night, the creator's lights).
 - **The places still wear the first seven grains** (linen, wool, leather, bronze, skin,
   stone, wood), which are faint and blocky beside the thirteen made since. They want making
   again and looking at place by place; nothing of a place was changed here.
-- **A grain multiplies the colour**, so a coat near black shows little of it, and a pale one
-  the most.
+- **A grain multiplies the colour**, so a matt coat near black shows almost none of it (a
+  body of shadow stays a shape), a glossy one shows it only in its shine, and a pale one
+  shows it most.
 - **A Path's colour takes the grain of what lies beside it**, so a band of the Path's colour
   that is a made thing (a collar, a strap) on a furred body is furred.
 - Sound.
