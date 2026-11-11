@@ -54,7 +54,30 @@
   "features": [
    "lantern",
    "voice"
-  ]
+  ],
+  "body": {
+   "wear": [
+    "shift"
+   ],
+   "head": [
+    "crest",
+    0.8
+   ],
+   "back": [
+    "wings",
+    0.8,
+    "bud"
+   ],
+   "chest": [
+    "lantern-hug",
+    1.3
+   ],
+   "mouth": [
+    "open",
+    0.8
+   ],
+   "eyes": "big"
+  }
  },
  "paths": [
   {
@@ -78,6 +101,45 @@
    "features": [
     "small-hands"
    ],
+   "body": {
+    "build": {
+     "wide": 0.6,
+     "belly": 0.3,
+     "limbs": 1.14
+    },
+    "wear": [
+     [
+      "shirt-rolled",
+      1.0,
+      "paper_old"
+     ],
+     [
+      "apron",
+      1.0,
+      "main"
+     ],
+     "breeches"
+    ],
+    "head": [
+     [
+      "kerchief",
+      1.0,
+      "main"
+     ]
+    ],
+    "back": [
+     "wings",
+     0.7,
+     "beetle"
+    ],
+    "chest": null,
+    "belt": [
+     "lantern"
+    ],
+    "mouth": null,
+    "coat": "hearth",
+    "eyes": "lit"
+   },
    "prongs": [
     {
      "id": "sprite-shoulder-mender",
@@ -94,6 +156,57 @@
      "features": [
       "brush"
      ],
+     "body": {
+      "build": {
+       "wide": 0.5
+      },
+      "wear": [
+       [
+        "shirt-rolled",
+        1.0,
+        "paper_old"
+       ],
+       [
+        "apron",
+        1.0,
+        "main"
+       ],
+       "breeches",
+       [
+        "sash",
+        1.0,
+        "thread_red"
+       ]
+      ],
+      "head": [
+       [
+        "kerchief",
+        1.0,
+        "main"
+       ],
+       "brush-ear"
+      ],
+      "right": [
+       "needle",
+       1.5
+      ],
+      "mouth": "tongue",
+      "back": [
+       [
+        "wings",
+        0.8,
+        "beetle"
+       ],
+       [
+        "thread-spool",
+        1.0
+       ]
+      ],
+      "belt": [
+       "lantern",
+       "pincushion"
+      ]
+     },
      "finishes": [
       {
        "id": "sprite-wound-wright",
@@ -109,7 +222,57 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": 0.3
+        },
+        "wear": [
+         [
+          "shirt",
+          1.0,
+          "paper_old"
+         ],
+         [
+          "apron",
+          1.4,
+          "paper"
+         ],
+         "breeches",
+         [
+          "sleeve-guards",
+          1.0,
+          "paper"
+         ]
+        ],
+        "head": [
+         [
+          "kerchief",
+          1.0,
+          "under"
+         ]
+        ],
+        "skin": [
+         "glow-fingers"
+        ],
+        "right": [
+         "needle",
+         1.3
+        ],
+        "mouth": null,
+        "back": [
+         [
+          "wings",
+          0.9,
+          "beetle"
+         ],
+         "satchel-back"
+        ],
+        "belt": [
+         "bandage-rolls",
+         "lantern"
+        ]
+       }
       },
       {
        "id": "sprite-thimble-knight",
@@ -125,7 +288,48 @@
        },
        "features": [
         "short-blade"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": 0.5,
+         "shoulders": 0.6,
+         "bow": -0.04
+        },
+        "wear": [
+         [
+          "shirt",
+          1.0,
+          "paper_old"
+         ],
+         [
+          "tabard",
+          1.0,
+          "main"
+         ],
+         "boots",
+         "belt"
+        ],
+        "head": [
+         "thimble",
+         1.2
+        ],
+        "right": [
+         "needle-lance",
+         1.0
+        ],
+        "left": "button-shield",
+        "mouth": null,
+        "back": [
+         [
+          "wings",
+          0.9,
+          "beetle"
+         ]
+        ],
+        "belt": [
+         "lantern"
+        ]
+       }
       }
      ]
     },
@@ -144,6 +348,53 @@
      "features": [
       "ember"
      ],
+     "body": {
+      "build": {
+       "wide": 0.7,
+       "belly": 0.9
+      },
+      "wear": [
+       [
+        "shirt-rolled",
+        1.0,
+        "paper_old"
+       ],
+       [
+        "apron",
+        1.0,
+        "main"
+       ],
+       "breeches",
+       [
+        "scarf",
+        1.0,
+        "trim"
+       ]
+      ],
+      "head": [
+       [
+        "cap-wool",
+        1.0,
+        "main"
+       ]
+      ],
+      "chest": [
+       "lantern-hug",
+       1.5,
+       "shell"
+      ],
+      "skin": [
+       "glow-hands"
+      ],
+      "belt": [
+       "kettle"
+      ],
+      "back": [
+       "wings",
+       0.7,
+       "beetle"
+      ]
+     },
      "finishes": [
       {
        "id": "sprite-hob-of-the-hall",
@@ -163,6 +414,68 @@
        "features": [
         "crown"
        ],
+       "body": {
+        "build": {
+         "age": 0.52,
+         "head": 0.97,
+         "legs": 0.96,
+         "wide": 0.5,
+         "belly": 0.5,
+         "old": 0.7
+        },
+        "wear": [
+         [
+          "coat",
+          2.2,
+          "main"
+         ],
+         [
+          "boots",
+          1.0,
+          "under"
+         ],
+         [
+          "belt",
+          1.0,
+          "trim"
+         ],
+         [
+          "scarf",
+          1.0,
+          "trim"
+         ]
+        ],
+        "head": [
+         [
+          "crest",
+          0.8
+         ],
+         [
+          "crown-wire",
+          1.0
+         ]
+        ],
+        "face": [
+         "beard",
+         0.8
+        ],
+        "chest": null,
+        "skin": null,
+        "back": [
+         [
+          "lamp-pole",
+          1.0
+         ],
+         [
+          "wings",
+          0.5,
+          "beetle"
+         ]
+        ],
+        "belt": [
+         "keys"
+        ]
+       },
        "silhouette": "kith-lamplighter"
       },
       {
@@ -179,7 +492,36 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "build": {
+         "head": 1.2,
+         "legs": 0.85,
+         "belly": 0.3,
+         "wide": 0.2,
+         "old": 0.4
+        },
+        "wear": [
+         "shift",
+         [
+          "muffler",
+          1.0,
+          "main"
+         ]
+        ],
+        "head": [
+         "crest",
+         0.9
+        ],
+        "eyes": "old",
+        "chest": [
+         "lantern-peek",
+         1.4
+        ],
+        "skin": null,
+        "belt": null,
+        "back": null
+       }
       }
      ]
     },
@@ -201,6 +543,29 @@
      "features": [
       "ring"
      ],
+     "body": {
+      "build": {
+       "wide": 0.4
+      },
+      "head": [
+       [
+        "kerchief",
+        1.0,
+        "main"
+       ]
+      ],
+      "right": "rag",
+      "around": [
+       "lamp-glass",
+       "light-ring"
+      ],
+      "belt": null,
+      "back": [
+       "wings",
+       0.6,
+       "beetle"
+      ]
+     },
      "finishes": [
       {
        "id": "sprite-thimble-of-oil",
@@ -219,7 +584,51 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": 0.8,
+         "belly": 1.2,
+         "fat": 0.7
+        },
+        "wear": [
+         [
+          "shirt",
+          1.0,
+          "paper_old"
+         ],
+         [
+          "waistcoat",
+          "main"
+         ],
+         "breeches",
+         "belt",
+         [
+          "collar",
+          0.8,
+          "paper"
+         ]
+        ],
+        "head": [
+         "lamp-roof"
+        ],
+        "right": null,
+        "chest": [
+         "thimble-string",
+         1.7
+        ],
+        "around": [
+         [
+          "light-ring",
+          1.2
+         ]
+        ],
+        "back": [
+         "wings",
+         0.7,
+         "beetle"
+        ]
+       }
       },
       {
        "id": "sprite-door-ward-hob",
@@ -238,7 +647,40 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": 0.4
+        },
+        "wear": [
+         [
+          "coat",
+          2.0,
+          "main"
+         ],
+         "boots",
+         "belt",
+         [
+          "hood",
+          1.0,
+          "main"
+         ]
+        ],
+        "head": null,
+        "right": [
+         "chain-lamp",
+         1.3
+        ],
+        "left": "key-ring",
+        "around": [
+         "light-ring"
+        ],
+        "back": [
+         "wings",
+         0.7,
+         "beetle"
+        ]
+       }
       }
      ]
     }
@@ -265,6 +707,40 @@
    "features": [
     "old-eyes"
    ],
+   "body": {
+    "build": {
+     "wide": -0.2,
+     "bow": 0.1,
+     "nose-scale-vert": 0.6
+    },
+    "wear": [
+     "tunic",
+     [
+      "mantle",
+      1.0,
+      "main"
+     ]
+    ],
+    "head": [
+     "crest",
+     1.0,
+     "long"
+    ],
+    "face": "spectacles",
+    "right": [
+     "lantern-stick",
+     1.0
+    ],
+    "back": [
+     "wings",
+     0.9,
+     "moth"
+    ],
+    "chest": null,
+    "mouth": null,
+    "coat": "moon",
+    "eyes": "lit"
+   },
    "prongs": [
     {
      "id": "sprite-book-wisp",
@@ -281,6 +757,28 @@
      "features": [
       "pages"
      ],
+     "body": {
+      "build": {
+       "bow": 0.12
+      },
+      "face": [
+       "spectacles",
+       "mouth-light"
+      ],
+      "right": null,
+      "chest": [
+       "book-open",
+       1.2
+      ],
+      "skin": [
+       "white-knees"
+      ],
+      "back": [
+       "wings",
+       1.0,
+       "pages"
+      ]
+     },
      "finishes": [
       {
        "id": "sprite-stack-light",
@@ -296,7 +794,51 @@
        },
        "features": [
         "dial"
-       ]
+       ],
+       "body": {
+        "build": {
+         "bow": 0.06
+        },
+        "wear": [
+         [
+          "robe",
+          1.0,
+          "under"
+         ],
+         [
+          "mantle",
+          1.0,
+          "main"
+         ]
+        ],
+        "head": [
+         [
+          "crest",
+          1.0,
+          "long"
+         ],
+         "cap-square"
+        ],
+        "chest": null,
+        "left": [
+         "dial",
+         1.2
+        ],
+        "skin": [
+         "ink-feet"
+        ],
+        "back": [
+         [
+          "wings",
+          1.1,
+          "pages"
+         ],
+         [
+          "book-stack",
+          1.0
+         ]
+        ]
+       }
       },
       {
        "id": "sprite-writ-riddler",
@@ -312,7 +854,42 @@
        },
        "features": [
         "second-face"
-       ]
+       ],
+       "body": {
+        "build": {
+         "bow": 0.04
+        },
+        "wear": [
+         [
+          "robe",
+          1.0,
+          "under"
+         ],
+         [
+          "stole",
+          1.0,
+          "main"
+         ]
+        ],
+        "face": [
+         "spectacles",
+         "second-face"
+        ],
+        "chest": null,
+        "left": [
+         "writ-long",
+         1.3
+        ],
+        "right": "quill",
+        "skin": null,
+        "back": [
+         [
+          "wings",
+          1.1,
+          "moth"
+         ]
+        ]
+       }
       }
      ]
     },
@@ -331,6 +908,40 @@
      "features": [
       "cold-core"
      ],
+     "body": {
+      "build": {
+       "bow": 0.06
+      },
+      "wear": [
+       [
+        "robe",
+        1.0,
+        "under"
+       ],
+       [
+        "hood",
+        1.0,
+        "main"
+       ]
+      ],
+      "head": null,
+      "face": null,
+      "right": [
+       "lantern-low",
+       1.2,
+       "cold"
+      ],
+      "around": [
+       "motes",
+       2
+      ],
+      "back": [
+       "wings",
+       0.9,
+       "moth"
+      ],
+      "coat": "frost"
+     },
      "finishes": [
       {
        "id": "sprite-shade-lighter",
@@ -347,6 +958,50 @@
        "features": [
         "glow"
        ],
+       "body": {
+        "build": {
+         "age": 0.5,
+         "head": 0.93,
+         "wide": -0.3,
+         "legs": 1.04,
+         "bow": 0.04
+        },
+        "wear": [
+         [
+          "coat",
+          2.6,
+          "main"
+         ],
+         [
+          "hood",
+          1.0,
+          "under"
+         ],
+         [
+          "boots",
+          1.0,
+          "under"
+         ]
+        ],
+        "right": null,
+        "around": [
+         "shades",
+         3,
+         "line"
+        ],
+        "back": [
+         [
+          "lamp-pole-behind",
+          1.0
+         ],
+         [
+          "wings",
+          0.7,
+          "moth"
+         ]
+        ],
+        "coat": "ash"
+       },
        "silhouette": "kith-lamplighter"
       },
       {
@@ -363,7 +1018,50 @@
        },
        "features": [
         "watching-eye"
-       ]
+       ],
+       "body": {
+        "build": {
+         "bow": 0.0,
+         "eyebrows-angle": -1.0,
+         "eyebrows-trans": -0.8,
+         "nose-scale-vert": 0.6
+        },
+        "wear": [
+         [
+          "robe",
+          1.0,
+          "under"
+         ],
+         [
+          "mantle",
+          1.0,
+          "main"
+         ],
+         [
+          "collar",
+          1.4,
+          "main"
+         ]
+        ],
+        "head": [
+         "crest",
+         1.2,
+         "spiky"
+        ],
+        "eyes": "far",
+        "right": [
+         "lantern",
+         1.5,
+         "eye"
+        ],
+        "around": null,
+        "back": [
+         "wings",
+         1.1,
+         "eyed"
+        ],
+        "coat": "ember"
+       }
       }
      ]
     },
@@ -382,6 +1080,32 @@
      "features": [
       "rime"
      ],
+     "body": {
+      "wear": [
+       "tunic",
+       [
+        "scarf",
+        1.0,
+        "main"
+       ]
+      ],
+      "head": [
+       "crest",
+       1.1,
+       "swept"
+      ],
+      "face": null,
+      "around": [
+       "small-weather",
+       1.3,
+       "pale"
+      ],
+      "back": [
+       "wings",
+       1.0,
+       "frost"
+      ]
+     },
      "finishes": [
       {
        "id": "sprite-storm-in-a-jar",
@@ -400,7 +1124,38 @@
        },
        "features": [
         "smoke"
-       ]
+       ],
+       "body": {
+        "wear": [
+         [
+          "coat",
+          1.5,
+          "main"
+         ],
+         [
+          "scarf",
+          1.2,
+          "trim"
+         ],
+         "boots"
+        ],
+        "right": [
+         "lantern",
+         1.6,
+         "jar"
+        ],
+        "around": [
+         "small-weather",
+         1.3,
+         "storm"
+        ],
+        "back": [
+         "wings",
+         1.2,
+         "soot"
+        ],
+        "coat": "night"
+       }
       },
       {
        "id": "sprite-light-at-the-heart",
@@ -416,7 +1171,47 @@
        },
        "features": [
         "standing-air"
-       ]
+       ],
+       "body": {
+        "build": {
+         "bow": -0.04,
+         "legs": 1.04
+        },
+        "wear": [
+         [
+          "robe",
+          1.0,
+          "under"
+         ],
+         [
+          "mantle",
+          1.0,
+          "main"
+         ]
+        ],
+        "head": [
+         [
+          "crest",
+          1.0,
+          "long"
+         ],
+         "circlet"
+        ],
+        "right": null,
+        "chest": [
+         "lantern-heart",
+         1.2
+        ],
+        "around": [
+         "standing-air",
+         1.0
+        ],
+        "back": [
+         "wings",
+         1.4,
+         "light"
+        ]
+       }
       }
      ]
     }
@@ -443,6 +1238,38 @@
    "features": [
     "wings"
    ],
+   "body": {
+    "build": {
+     "wide": -0.3,
+     "legs": 1.12,
+     "limbs": 0.9
+    },
+    "wear": [
+     [
+      "shift",
+      0.7
+     ]
+    ],
+    "head": [
+     "crest",
+     1.2,
+     "spiky"
+    ],
+    "back": [
+     [
+      "wings",
+      1.1,
+      "dragonfly"
+     ],
+     "lantern-behind"
+    ],
+    "chest": null,
+    "mouth": [
+     "wide",
+     0.6
+    ],
+    "eyes": "lit"
+   },
    "prongs": [
     {
      "id": "sprite-stray-light-pixy",
@@ -459,6 +1286,25 @@
      "features": [
       "dark-eyed"
      ],
+     "body": {
+      "eyes": "black",
+      "back": [
+       [
+        "wings",
+        1.2,
+        "dragonfly"
+       ],
+       [
+        "crook-lantern",
+        1.0
+       ]
+      ],
+      "coat": "night",
+      "mouth": [
+       "wide",
+       0.5
+      ]
+     },
      "finishes": [
       {
        "id": "sprite-marsh-jack",
@@ -474,7 +1320,42 @@
        },
        "features": [
         "webbed"
-       ]
+       ],
+       "body": {
+        "build": {
+         "feet": 1.4
+        },
+        "wear": [
+         [
+          "coat",
+          1.3,
+          "main"
+         ]
+        ],
+        "head": [
+         [
+          "hat-brim",
+          0.9,
+          "grass"
+         ]
+        ],
+        "skin": [
+         "wet-legs",
+         "webbed-feet"
+        ],
+        "back": [
+         [
+          "wings",
+          1.3,
+          "dragonfly"
+         ],
+         [
+          "crook-lantern",
+          1.3,
+          "square"
+         ]
+        ]
+       }
       },
       {
        "id": "sprite-shuttered-sprite",
@@ -490,7 +1371,38 @@
        },
        "features": [
         "mask"
-       ]
+       ],
+       "body": {
+        "wear": [
+         "tunic",
+         [
+          "mantle",
+          1.0,
+          "main"
+         ],
+         "gloves",
+         [
+          "hood",
+          1.0,
+          "main"
+         ]
+        ],
+        "head": null,
+        "face": "tin-mask",
+        "right": [
+         "lantern",
+         1.4,
+         "shutter"
+        ],
+        "back": [
+         [
+          "wings",
+          1.2,
+          "dragonfly"
+         ]
+        ],
+        "mouth": null
+       }
       }
      ]
     },
@@ -509,6 +1421,27 @@
      "features": [
       "ring"
      ],
+     "body": {
+      "head": [
+       "crest",
+       1.3,
+       "flame"
+      ],
+      "skin": [
+       "glow-hands"
+      ],
+      "around": [
+       "afterglow",
+       1.0
+      ],
+      "back": [
+       [
+        "wings",
+        1.2,
+        "light"
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "sprite-star-burst",
@@ -528,6 +1461,10 @@
        "features": [
         "ember"
        ],
+       "body": {
+        "shape": "starburst",
+        "lights": 13
+       },
        "silhouette": "aspect-wisps"
       },
       {
@@ -544,7 +1481,40 @@
        },
        "features": [
         "far-eyes"
-       ]
+       ],
+       "body": {
+        "wear": [
+         [
+          "coat",
+          1.6,
+          "main"
+         ],
+         "boots"
+        ],
+        "head": [
+         [
+          "crest",
+          0.8,
+          "flame"
+         ],
+         "cap-peaked"
+        ],
+        "eyes": "far",
+        "right": "cup-shade",
+        "around": [
+         "afterglow",
+         0.7
+        ],
+        "back": [
+         [
+          "wings",
+          1.0,
+          "light"
+         ]
+        ],
+        "mouth": null,
+        "coat": "night"
+       }
       }
      ]
     },
@@ -563,6 +1533,35 @@
      "features": [
       "short-blade"
      ],
+     "body": {
+      "wear": [
+       [
+        "shift",
+        0.7
+       ],
+       "bandolier",
+       [
+        "bracers",
+        1.0,
+        "thorn"
+       ]
+      ],
+      "head": [
+       "acorn-cap"
+      ],
+      "right": [
+       "thorn",
+       1.5
+      ],
+      "back": [
+       [
+        "wings",
+        1.2,
+        "dragonfly"
+       ]
+      ],
+      "mouth": null
+     },
      "finishes": [
       {
        "id": "sprite-wedge-leader",
@@ -578,7 +1577,44 @@
        },
        "features": [
         "crown"
-       ]
+       ],
+       "body": {
+        "wear": [
+         [
+          "shift",
+          0.8
+         ],
+         [
+          "mantle",
+          1.0,
+          "main"
+         ],
+         "bandolier"
+        ],
+        "head": [
+         [
+          "crest",
+          1.0,
+          "spiky"
+         ],
+         "crown-grass"
+        ],
+        "right": [
+         "thorn",
+         1.6
+        ],
+        "around": [
+         "wedge",
+         6
+        ],
+        "back": [
+         [
+          "wings",
+          1.4,
+          "dragonfly"
+         ]
+        ]
+       }
       },
       {
        "id": "sprite-thorn-knight",
@@ -594,7 +1630,44 @@
        },
        "features": [
         "plated"
-       ]
+       ],
+       "body": {
+        "build": {
+         "shoulders": 0.6
+        },
+        "wear": [
+         [
+          "shift",
+          0.7
+         ],
+         "beetle-plates",
+         [
+          "boots",
+          1.0,
+          "beetle"
+         ],
+         [
+          "gloves",
+          1.0,
+          "beetle"
+         ]
+        ],
+        "head": [
+         "beetle-helm"
+        ],
+        "right": [
+         "thorn",
+         1.6,
+         "upright"
+        ],
+        "back": [
+         [
+          "wings",
+          1.2,
+          "elytra"
+         ]
+        ]
+       }
       }
      ]
     }

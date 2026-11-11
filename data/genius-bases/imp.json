@@ -53,7 +53,31 @@
   "features": [
    "horns",
    "ledger"
-  ]
+  ],
+  "body": {
+   "wear": [
+    "rag"
+   ],
+   "head": [
+    "nubs"
+   ],
+   "back": [
+    "tail",
+    0.6
+   ],
+   "chest": [
+    "book-hug",
+    1.25
+   ],
+   "mouth": [
+    "open",
+    0.7
+   ],
+   "eyes": [
+    "big",
+    1.1
+   ]
+  }
  },
  "paths": [
   {
@@ -77,6 +101,42 @@
    "features": [
     "chain"
    ],
+   "body": {
+    "build": {
+     "wide": 0.5,
+     "bow": 0.05,
+     "hands": 1.15
+    },
+    "wear": [
+     [
+      "waistcoat",
+      "trim"
+     ],
+     "rag",
+     "belt"
+    ],
+    "head": [
+     "horns-bull",
+     0.7
+    ],
+    "back": [
+     "tail",
+     0.8,
+     "hook"
+    ],
+    "chest": null,
+    "belt": [
+     "chain-tags",
+     "book"
+    ],
+    "skin": [
+     "script",
+     0.5
+    ],
+    "mouth": null,
+    "eyes": "lit",
+    "coat": "blood"
+   },
    "prongs": [
     {
      "id": "imp-dunner",
@@ -93,6 +153,36 @@
      "features": [
       "maw"
      ],
+     "body": {
+      "build": {
+       "wide": 0.7,
+       "bow": 0.1,
+       "hands": 1.3
+      },
+      "wear": [
+       [
+        "coat",
+        1.0,
+        "trim"
+       ],
+       "belt",
+       "boots"
+      ],
+      "head": [
+       "horns-bull",
+       1.0
+      ],
+      "back": [
+       "tail",
+       1.0,
+       "hook"
+      ],
+      "left": "bill",
+      "mouth": [
+       "wide",
+       1.1
+      ]
+     },
      "finishes": [
       {
        "id": "imp-knee-breaker",
@@ -111,7 +201,70 @@
        },
        "features": [
         "ground-claws"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 0.84,
+         "wide": 1.0,
+         "feet": 1.9,
+         "hands": 1.3,
+         "limbs": 1.35,
+         "bow": 0.16,
+         "head": 0.94,
+         "shoulders": 0.8
+        },
+        "wear": [
+         [
+          "coat",
+          1.0,
+          "trim"
+         ],
+         "belt",
+         [
+          "bracers",
+          "under"
+         ]
+        ],
+        "head": [
+         [
+          "horns-bull",
+          1.4
+         ],
+         [
+          "brow-ridge",
+          1.0,
+          "main"
+         ]
+        ],
+        "skin": [
+         [
+          "script",
+          0.7
+         ],
+         "clawed-feet"
+        ],
+        "right": [
+         "mallet",
+         1.3
+        ],
+        "left": null,
+        "belt": [
+         [
+          "chain-tags",
+          1.3
+         ],
+         "book"
+        ],
+        "back": [
+         "tail",
+         1.2,
+         "ball"
+        ],
+        "mouth": [
+         "wide",
+         1.0
+        ]
+       }
       },
       {
        "id": "imp-reckoner-of-arrears",
@@ -127,7 +280,59 @@
        },
        "features": [
         "ledger-closed"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.06,
+         "wide": 0.2,
+         "belly": 0.7,
+         "bow": 0.14,
+         "neck": 0.6,
+         "hands": 1.0,
+         "head": 0.96
+        },
+        "wear": [
+         [
+          "coat",
+          2.2,
+          "trim"
+         ],
+         [
+          "collar",
+          1.0,
+          "paper"
+         ],
+         "belt"
+        ],
+        "head": [
+         [
+          "horns-swept",
+          1.0
+         ],
+         "quill-ear"
+        ],
+        "face": [
+         "spectacles",
+         1.0,
+         "low"
+        ],
+        "left": [
+         "book-arm",
+         1.3
+        ],
+        "belt": [
+         [
+          "chain-tags",
+          1.5
+         ]
+        ],
+        "back": [
+         "tail",
+         1.2,
+         "hook"
+        ],
+        "mouth": null
+       }
       }
      ]
     },
@@ -149,6 +354,53 @@
      "features": [
       "glow"
      ],
+     "body": {
+      "build": {
+       "wide": 0.5,
+       "belly": 0.8,
+       "head": 1.04,
+       "hands": 1.0,
+       "bow": 0.0
+      },
+      "wear": [
+       [
+        "apron",
+        1.0,
+        "apron_hide"
+       ],
+       "rag",
+       [
+        "scarf",
+        1.0,
+        "trim"
+       ]
+      ],
+      "head": [
+       "horns-bull",
+       0.55
+      ],
+      "back": [
+       [
+        "tail",
+        0.8,
+        "spade"
+       ],
+       "bundle"
+      ],
+      "chest": [
+       "heart-glow",
+       1.2
+      ],
+      "skin": null,
+      "belt": [
+       "pouch"
+      ],
+      "coat": "hearth",
+      "mouth": [
+       "open",
+       0.6
+      ]
+     },
      "finishes": [
       {
        "id": "imp-cohorts-devil",
@@ -164,7 +416,54 @@
        },
        "features": [
         "voice"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": 0.0,
+         "belly": 0.2,
+         "ears": 1.7,
+         "neck": 0.8,
+         "legs": 1.06,
+         "head": 0.97
+        },
+        "wear": [
+         [
+          "mantle",
+          1.2,
+          "trim"
+         ],
+         "rag",
+         [
+          "scarf",
+          1.0,
+          "trim"
+         ]
+        ],
+        "head": [
+         "horns-swept",
+         1.3
+        ],
+        "around": [
+         "ring-lights",
+         12
+        ],
+        "back": [
+         "tail",
+         1.3,
+         "spade"
+        ],
+        "belt": [
+         "keys"
+        ],
+        "chest": [
+         "heart-glow",
+         1.0
+        ],
+        "mouth": [
+         "pursed",
+         1.0
+        ]
+       }
       },
       {
        "id": "imp-kettle-watcher",
@@ -183,7 +482,57 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "build": {
+         "belly": 0.5,
+         "wide": 0.3,
+         "neck": 0.5,
+         "head": 1.03
+        },
+        "wear": [
+         [
+          "apron",
+          1.3,
+          "apron_hide"
+         ],
+         [
+          "sleeve-guards",
+          1.0,
+          "paper"
+         ],
+         "rag",
+         [
+          "collar",
+          0.8,
+          "paper"
+         ]
+        ],
+        "head": [
+         [
+          "horns-bull",
+          0.6
+         ],
+         "lamp-band"
+        ],
+        "belt": [
+         "kettle",
+         "keys"
+        ],
+        "back": [
+         "tail",
+         0.9,
+         "hook"
+        ],
+        "mouth": [
+         "pursed",
+         1.2
+        ],
+        "chest": [
+         "heart-glow",
+         0.8
+        ]
+       }
       }
      ]
     },
@@ -202,6 +551,50 @@
      "features": [
       "dark-eyed"
      ],
+     "body": {
+      "build": {
+       "wide": -0.3,
+       "bow": 0.14,
+       "belly": 0.2,
+       "head": 1.03,
+       "legs": 1.06,
+       "hands": 1.0
+      },
+      "wear": [
+       [
+        "shirt-rolled",
+        1.0,
+        "paper"
+       ],
+       [
+        "waistcoat",
+        "trim"
+       ],
+       "rag"
+      ],
+      "head": [
+       [
+        "horns-quill",
+        0.8
+       ],
+       "eyeshade",
+       "quill-ear"
+      ],
+      "eyes": "black",
+      "skin": [
+       "ink-arms"
+      ],
+      "belt": [
+       "book"
+      ],
+      "back": [
+       "tail",
+       0.9,
+       "nib"
+      ],
+      "coat": "night",
+      "mouth": null
+     },
      "finishes": [
       {
        "id": "imp-lights-out-imp",
@@ -217,7 +610,45 @@
        },
        "features": [
         "shadow-cloak"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": 0.3,
+         "bow": 0.1,
+         "head": 0.98
+        },
+        "wear": [
+         [
+          "shadow-cloak",
+          1.5
+         ],
+         [
+          "hood",
+          1.0,
+          "shade"
+         ],
+         "rag"
+        ],
+        "head": [
+         [
+          "horns-quill",
+          1.1
+         ]
+        ],
+        "right": [
+         "snuffer",
+         1.3
+        ],
+        "skin": [
+         "ink-arms"
+        ],
+        "belt": null,
+        "back": [
+         "tail",
+         1.2,
+         "nib"
+        ]
+       }
       },
       {
        "id": "imp-quiet-clerk",
@@ -233,7 +664,47 @@
        },
        "features": [
         "quiet-place"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": -0.2,
+         "bow": 0.0,
+         "neck": 0.6,
+         "head": 1.0,
+         "belly": 0.1
+        },
+        "wear": [
+         [
+          "robe",
+          1.0,
+          "paper"
+         ],
+         [
+          "sash",
+          1.0,
+          "trim"
+         ]
+        ],
+        "head": [
+         [
+          "horns-quill",
+          0.7
+         ]
+        ],
+        "eyes": "shut",
+        "skin": null,
+        "chest": [
+         "book-flat",
+         1.3
+        ],
+        "belt": null,
+        "back": [
+         "tail",
+         0.9,
+         "nib"
+        ],
+        "coat": "ash"
+       }
       }
      ]
     }
@@ -258,6 +729,53 @@
    "features": [
     "sight-glass"
    ],
+   "body": {
+    "build": {
+     "wide": -0.5,
+     "legs": 1.1,
+     "neck": 0.9,
+     "belly": 0.1,
+     "head": 0.94,
+     "nose-scale-vert": 1.0,
+     "nose-point": -1.0
+    },
+    "wear": [
+     [
+      "waistcoat",
+      "trim"
+     ],
+     [
+      "collar",
+      1.2,
+      "paper"
+     ],
+     "rag"
+    ],
+    "head": [
+     "horns-quill",
+     0.7
+    ],
+    "face": "glass",
+    "back": [
+     "tail",
+     0.9,
+     "nib"
+    ],
+    "belt": [
+     "book"
+    ],
+    "chest": null,
+    "mouth": [
+     "pursed",
+     1.0
+    ],
+    "coat": "moon",
+    "skin": [
+     "script",
+     0.4
+    ],
+    "eyes": "lit"
+   },
    "prongs": [
     {
      "id": "imp-process-server",
@@ -274,6 +792,46 @@
      "features": [
       "brass-plate"
      ],
+     "body": {
+      "build": {
+       "wide": -0.3,
+       "legs": 1.16
+      },
+      "wear": [
+       [
+        "coat",
+        1.6,
+        "trim"
+       ],
+       [
+        "collar",
+        1.2,
+        "paper"
+       ],
+       "boots",
+       "belt"
+      ],
+      "head": [
+       [
+        "horns-quill",
+        0.9
+       ],
+       "cap-peaked"
+      ],
+      "chest": [
+       "badge",
+       1.2
+      ],
+      "right": "writ",
+      "belt": [
+       "satchel"
+      ],
+      "back": [
+       "tail",
+       1.0,
+       "nib"
+      ]
+     },
      "finishes": [
       {
        "id": "imp-seal-breaker",
@@ -289,7 +847,60 @@
        },
        "features": [
         "watching-eye"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": -0.2,
+         "legs": 1.1,
+         "hands": 1.3,
+         "bow": 0.12
+        },
+        "wear": [
+         [
+          "coat",
+          2.0,
+          "trim"
+         ],
+         [
+          "collar",
+          1.3,
+          "paper"
+         ],
+         "boots",
+         [
+          "mantle",
+          1.2,
+          "seal_wax"
+         ]
+        ],
+        "head": [
+         [
+          "horns-quill",
+          1.3
+         ]
+        ],
+        "face": [
+         "big-eye",
+         1.5
+        ],
+        "skin": [
+         "wax-nails"
+        ],
+        "left": [
+         "letter-open",
+         1.3
+        ],
+        "right": null,
+        "belt": [
+         "seals"
+        ],
+        "chest": null,
+        "back": [
+         "tail",
+         1.2,
+         "seal"
+        ]
+       }
       },
       {
        "id": "imp-appraiser-to-the-archive",
@@ -305,7 +916,69 @@
        },
        "features": [
         "small-hands"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": -0.4,
+         "legs": 1.08,
+         "bow": 0.14,
+         "hands": 1.8,
+         "arms": 1.14
+        },
+        "wear": [
+         [
+          "robe",
+          1.0,
+          "trim"
+         ],
+         [
+          "sleeve-guards",
+          1.0,
+          "paper"
+         ],
+         [
+          "collar",
+          1.2,
+          "paper"
+         ],
+         [
+          "sash",
+          1.0,
+          "under"
+         ]
+        ],
+        "head": [
+         [
+          "horns-quill",
+          1.0
+         ]
+        ],
+        "face": "loupe",
+        "skin": [
+         "white-gloves"
+        ],
+        "right": [
+         "scales",
+         1.2
+        ],
+        "left": [
+         "relic",
+         1.2
+        ],
+        "belt": [
+         "pouch"
+        ],
+        "chest": null,
+        "back": [
+         "tail",
+         1.1,
+         "nib"
+        ],
+        "mouth": [
+         "pursed",
+         1.3
+        ]
+       }
       }
      ]
     },
@@ -324,6 +997,10 @@
      "features": [
       "pages"
      ],
+     "body": {
+      "shape": "marginal",
+      "rises": "climbs"
+     },
      "silhouette": "daemon-marginal",
      "finishes": [
       {
@@ -343,7 +1020,11 @@
        },
        "features": [
         "far-eyes"
-       ]
+       ],
+       "body": {
+        "rises": "reads",
+        "book": 1.15
+       }
       },
       {
        "id": "imp-errata",
@@ -359,7 +1040,10 @@
        },
        "features": [
         "watching-eye"
-       ]
+       ],
+       "body": {
+        "rises": "points"
+       }
       }
      ]
     },
@@ -378,6 +1062,45 @@
      "features": [
       "gears"
      ],
+     "body": {
+      "build": {
+       "wide": 0.1,
+       "legs": 1.0,
+       "hands": 1.15
+      },
+      "wear": [
+       [
+        "apron",
+        1.0,
+        "apron_hide"
+       ],
+       "rag",
+       "belt"
+      ],
+      "head": [
+       [
+        "horns-quill",
+        0.8
+       ],
+       "screwdriver-ear"
+      ],
+      "face": "goggles",
+      "skin": [
+       "cogs"
+      ],
+      "belt": [
+       "tools"
+      ],
+      "back": [
+       "tail",
+       0.9,
+       "hook"
+      ],
+      "mouth": [
+       "wide",
+       0.7
+      ]
+     },
      "finishes": [
       {
        "id": "imp-clockmakers-devil",
@@ -393,7 +1116,63 @@
        },
        "features": [
         "ring"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": 0.0,
+         "legs": 1.04
+        },
+        "wear": [
+         [
+          "waistcoat",
+          "trim"
+         ],
+         [
+          "apron",
+          0.8,
+          "apron_hide"
+         ],
+         [
+          "collar",
+          1.0,
+          "paper"
+         ],
+         "belt"
+        ],
+        "head": [
+         [
+          "horns-quill",
+          0.9
+         ]
+        ],
+        "face": "loupe",
+        "skin": [
+         [
+          "cogs",
+          1.2
+         ]
+        ],
+        "chest": [
+         "clock",
+         1.1
+        ],
+        "around": [
+         "gear-halo",
+         1.0
+        ],
+        "back": [
+         [
+          "tail",
+          1.0,
+          "hook"
+         ],
+         [
+          "winding-key",
+          1.2
+         ]
+        ],
+        "mouth": null
+       }
       },
       {
        "id": "imp-furnace-imp",
@@ -409,7 +1188,44 @@
        },
        "features": [
         "ember"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": 0.4,
+         "belly": 0.6
+        },
+        "wear": [
+         "rag"
+        ],
+        "head": [
+         [
+          "horns-bull",
+          1.1,
+          "coal_lump"
+         ]
+        ],
+        "face": null,
+        "skin": [
+         "cracks"
+        ],
+        "chest": [
+         "ember-heart",
+         1.3
+        ],
+        "around": [
+         "coals"
+        ],
+        "left": "paper-bag",
+        "belt": null,
+        "back": [
+         "smoke"
+        ],
+        "coat": "ember",
+        "mouth": [
+         "wide",
+         0.9
+        ]
+       }
       }
      ]
     }
@@ -436,6 +1252,48 @@
    "features": [
     "voice"
    ],
+   "body": {
+    "build": {
+     "wide": 0.2,
+     "shoulders": 0.6,
+     "neck": 0.7,
+     "bow": -0.04,
+     "belly": 0.2
+    },
+    "wear": [
+     [
+      "kilt",
+      1.1,
+      "paper_old"
+     ],
+     [
+      "stole",
+      1.0,
+      "robe_black"
+     ],
+     "belt"
+    ],
+    "head": [
+     "horns-ram",
+     0.6
+    ],
+    "skin": [
+     "terms-palms",
+     [
+      "script",
+      0.4
+     ]
+    ],
+    "chest": "seal",
+    "back": [
+     "tail",
+     0.8,
+     "seal"
+    ],
+    "mouth": null,
+    "eyes": "lit",
+    "coat": "ash"
+   },
    "prongs": [
     {
      "id": "imp-contract-daemon",
@@ -452,6 +1310,54 @@
      "features": [
       "horn-brow"
      ],
+     "body": {
+      "build": {
+       "age": 0.52,
+       "head": 0.78,
+       "legs": 1.18,
+       "arms": 1.08,
+       "wide": 0.6,
+       "shoulders": 0.9,
+       "limbs": 1.08,
+       "hands": 1.1,
+       "feet": 1.1,
+       "belly": 0.1
+      },
+      "wear": [
+       [
+        "robe",
+        1.0,
+        "paper_old"
+       ],
+       [
+        "stole",
+        1.3,
+        "robe_black"
+       ],
+       "belt"
+      ],
+      "head": [
+       "horn-brow",
+       1.2
+      ],
+      "left": [
+       "book-grown",
+       1.4
+      ],
+      "skin": [
+       "terms-palms",
+       [
+        "script",
+        1.0
+       ]
+      ],
+      "chest": "seal",
+      "back": [
+       "tail",
+       1.3,
+       "seal"
+      ]
+     },
      "silhouette": "daemon-tall",
      "finishes": [
       {
@@ -469,7 +1375,48 @@
        "features": [
         "ledger-closed",
         "crown"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": 0.7,
+         "shoulders": 1.0,
+         "head": 0.86
+        },
+        "wear": [
+         [
+          "robe",
+          1.0,
+          "paper_old"
+         ],
+         [
+          "mantle",
+          1.4,
+          "robe_black"
+         ],
+         "belt"
+        ],
+        "head": [
+         [
+          "horn-brow",
+          1.3
+         ],
+         [
+          "crown-plain",
+          1.2
+         ]
+        ],
+        "left": null,
+        "chest": [
+         "book-clasped",
+         1.5
+        ],
+        "skin": null,
+        "back": [
+         "tail",
+         1.3,
+         "seal"
+        ]
+       }
       },
       {
        "id": "imp-witness-for-the-dead",
@@ -485,7 +1432,47 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "build": {
+         "wide": 0.3,
+         "neck": 0.8,
+         "bow": -0.05,
+         "head": 0.86
+        },
+        "wear": [
+         [
+          "robe",
+          1.0,
+          "paper_old"
+         ],
+         [
+          "stole",
+          1.4,
+          "robe_black"
+         ]
+        ],
+        "head": [
+         [
+          "horn-brow",
+          1.1
+         ],
+         "veil"
+        ],
+        "eyes": "old",
+        "skin": [
+         "tear-tracks",
+         "terms-palms"
+        ],
+        "right": [
+         "candle",
+         1.3
+        ],
+        "around": [
+         "shades",
+         3
+        ]
+       }
       }
      ]
     },
@@ -504,6 +1491,46 @@
      "features": [
       "plated"
      ],
+     "body": {
+      "build": {
+       "bow": 0.22,
+       "legs": 0.96,
+       "wide": 0.4,
+       "arms": 1.08,
+       "hands": 1.15,
+       "head": 1.03
+      },
+      "wear": [
+       [
+        "rag",
+        1.0,
+        "paper_old"
+       ]
+      ],
+      "head": [
+       "horns-ram",
+       0.8
+      ],
+      "back": [
+       [
+        "tail",
+        0.9,
+        "spade"
+       ],
+       "welts"
+      ],
+      "skin": [
+       [
+        "script",
+        0.6
+       ]
+      ],
+      "chest": null,
+      "mouth": [
+       "open",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "imp-proxy-of-record",
@@ -522,7 +1549,51 @@
        },
        "features": [
         "scorched"
-       ]
+       ],
+       "body": {
+        "build": {
+         "bow": 0.14,
+         "wide": 0.4
+        },
+        "wear": [
+         [
+          "rag",
+          1.0,
+          "paper_old"
+         ],
+         [
+          "bandages",
+          1.0
+         ]
+        ],
+        "head": [
+         "horns-ram",
+         1.0
+        ],
+        "back": [
+         [
+          "tail",
+          1.0,
+          "spade"
+         ],
+         [
+          "welts",
+          1.2
+         ]
+        ],
+        "skin": [
+         "scorch-marks"
+        ],
+        "chest": [
+         "book-open",
+         1.0
+        ],
+        "right": [
+         "quill",
+         1.2
+        ],
+        "mouth": null
+       }
       },
       {
        "id": "imp-indemnity",
@@ -538,7 +1609,40 @@
        },
        "features": [
         "wall-plate"
-       ]
+       ],
+       "body": {
+        "build": {
+         "bow": 0.04,
+         "wide": 0.7,
+         "limbs": 1.25,
+         "feet": 1.3
+        },
+        "wear": [
+         [
+          "rag",
+          1.0,
+          "paper_old"
+         ],
+         "boots"
+        ],
+        "head": [
+         "horns-ram",
+         1.1
+        ],
+        "back": [
+         [
+          "tail",
+          1.0,
+          "ball"
+         ]
+        ],
+        "chest": [
+         "wall-plate",
+         1.0
+        ],
+        "skin": null,
+        "mouth": null
+       }
       }
      ]
     },
@@ -557,6 +1661,53 @@
      "features": [
       "crown"
      ],
+     "body": {
+      "build": {
+       "belly": 0.9,
+       "wide": 0.4,
+       "legs": 0.98,
+       "head": 1.03
+      },
+      "wear": [
+       [
+        "coat",
+        1.2,
+        "paper_old"
+       ],
+       [
+        "sash",
+        1.0,
+        "seal_wax"
+       ]
+      ],
+      "head": [
+       [
+        "horns-ram",
+        0.7
+       ],
+       [
+        "crown-coins",
+        1.0
+       ]
+      ],
+      "left": [
+       "toll-bowl",
+       1.1
+      ],
+      "belt": [
+       "purse"
+      ],
+      "back": [
+       [
+        "tail",
+        0.9,
+        "seal"
+       ],
+       "toll-pole"
+      ],
+      "skin": null,
+      "chest": null
+     },
      "finishes": [
       {
        "id": "imp-usurer",
@@ -572,7 +1723,68 @@
        },
        "features": [
         "ember"
-       ]
+       ],
+       "body": {
+        "build": {
+         "belly": 1.3,
+         "wide": 0.9,
+         "legs": 0.92,
+         "fat": 0.8,
+         "limbs": 1.2
+        },
+        "wear": [
+         [
+          "coat",
+          2.4,
+          "paper_old"
+         ],
+         [
+          "collar-fur",
+          1.2
+         ],
+         [
+          "sash",
+          1.0,
+          "seal_wax"
+         ]
+        ],
+        "head": [
+         [
+          "horns-ram",
+          1.1
+         ],
+         [
+          "crown-coins",
+          1.4
+         ]
+        ],
+        "right": [
+         "coal-fist",
+         1.3
+        ],
+        "left": null,
+        "belt": [
+         [
+          "purse",
+          1.5
+         ],
+         [
+          "chain-tags",
+          1.0
+         ]
+        ],
+        "back": [
+         [
+          "tail",
+          1.0,
+          "seal"
+         ]
+        ],
+        "mouth": [
+         "wide",
+         0.8
+        ]
+       }
       },
       {
        "id": "imp-bondsman",
@@ -588,7 +1800,50 @@
        },
        "features": [
         "iron-hide"
-       ]
+       ],
+       "body": {
+        "build": {
+         "belly": 0.2,
+         "wide": 0.8,
+         "shoulders": 1.0,
+         "limbs": 1.3,
+         "arms": 1.06,
+         "hands": 1.4,
+         "head": 0.97
+        },
+        "wear": [
+         [
+          "rag",
+          1.0,
+          "paper_old"
+         ],
+         "belt"
+        ],
+        "head": [
+         [
+          "horns-ram",
+          1.2,
+          "metal_iron"
+         ],
+         [
+          "crown-iron",
+          1.0
+         ]
+        ],
+        "skin": [
+         "iron-arms"
+        ],
+        "right": "broken-chain",
+        "left": null,
+        "belt": null,
+        "back": [
+         [
+          "tail",
+          1.2,
+          "ball"
+         ]
+        ]
+       }
       }
      ]
     }
