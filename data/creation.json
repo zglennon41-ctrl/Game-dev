@@ -945,19 +945,163 @@
     "edo-f"
   ],
   "look": {
-    "comment": "The look: what shows on the body and is chosen at creation. Hair styles and beards are pieces hung from the head bone of every body (tools/blender/people_kit.py); a cap hides under headgear, a fall hangs from under it. Colours are linear RGB. Bodies are <home>-<sex> (tools/blender/body_kit.py); build blends the lean and heavy shape keys; the skin tone tints the skin material. Labels are what the creator shows for each id. Build and stature are set on a slider between the least and the greatest of the named values; the names mark where a value falls. openHeadgear names the headgear that leaves the crown bare: the hair's cap shows under it.",
+    "comment": "The look: what shows on the body and is chosen at creation. Hair styles and beards are pieces hung from the head bone of every body (tools/blender/people_kit.py); a cap hides under headgear, a fall hangs from under it. Colours are linear RGB. Bodies are <home>-<sex> (tools/blender/body_kit.py); build blends the lean and heavy shape keys; the skin tone tints the skin material. Labels are what the creator shows for each id. Build and stature are set on a slider between the least and the greatest of the named values; the names mark where a value falls. openHeadgear names the headgear that leaves the crown bare: the hair's cap shows under it. faces: the face shapes a body carries as shape keys (own is the home's face as it is; the rest are data/bodies.json, faces.presets); faceStrength is how far a shape is drawn, on a slider; faceSliders are the features set one by one (data/bodies.json, faces.sliders), each from its least to its greatest. brows are the brow's shapes (soft is the brow as built). eyeColors and lipColors are linear RGB (lips: bare is the skin's own); lipStrength is how far a lip colour covers the skin's. marks are what every home may wear on the face; a home's own are in data/bodies.json (homes.<id>.marks).",
     "hair": [
       "bare",
       "crop",
+      "short",
+      "curls",
+      "coils",
+      "rows",
+      "locs",
+      "bob",
       "long",
+      "tail",
       "braid",
+      "twins",
       "knot",
-      "tail"
+      "topknot",
+      "crest"
     ],
     "beards": [
       "none",
+      "stubble",
+      "moustache",
+      "goatee",
       "short",
-      "full"
+      "full",
+      "long"
+    ],
+    "faces": [
+      "own",
+      "fine",
+      "broad",
+      "long",
+      "soft",
+      "sharp",
+      "weathered",
+      "high",
+      "grave"
+    ],
+    "faceStrength": {
+      "slight": 0.5,
+      "plain": 0.8,
+      "strong": 1.1
+    },
+    "faceSliders": {
+      "jaw": {
+        "narrow": -1.0,
+        "even": 0.0,
+        "broad": 1.0
+      },
+      "nose": {
+        "small": -1.0,
+        "even": 0.0,
+        "strong": 1.0
+      },
+      "eyes": {
+        "narrow": -1.0,
+        "even": 0.0,
+        "wide": 1.0
+      },
+      "lips": {
+        "thin": -1.0,
+        "even": 0.0,
+        "full": 1.0
+      }
+    },
+    "brows": [
+      "soft",
+      "straight",
+      "arched",
+      "heavy",
+      "fine",
+      "slant"
+    ],
+    "eyeColors": {
+      "dark": [
+        0.085,
+        0.05,
+        0.03
+      ],
+      "brown": [
+        0.2,
+        0.11,
+        0.05
+      ],
+      "hazel": [
+        0.3,
+        0.21,
+        0.08
+      ],
+      "amber": [
+        0.46,
+        0.27,
+        0.07
+      ],
+      "green": [
+        0.15,
+        0.29,
+        0.16
+      ],
+      "grey": [
+        0.3,
+        0.34,
+        0.38
+      ],
+      "blue": [
+        0.13,
+        0.26,
+        0.45
+      ],
+      "black": [
+        0.03,
+        0.025,
+        0.025
+      ]
+    },
+    "lips": [
+      "bare",
+      "rose",
+      "wine",
+      "ochre",
+      "plum",
+      "ink"
+    ],
+    "lipColors": {
+      "rose": [
+        0.6,
+        0.25,
+        0.27
+      ],
+      "wine": [
+        0.34,
+        0.07,
+        0.11
+      ],
+      "ochre": [
+        0.58,
+        0.29,
+        0.13
+      ],
+      "plum": [
+        0.29,
+        0.11,
+        0.23
+      ],
+      "ink": [
+        0.07,
+        0.055,
+        0.075
+      ]
+    },
+    "lipStrength": 0.72,
+    "marks": [
+      "freckles",
+      "mole",
+      "beauty",
+      "scar-brow",
+      "scar-cheek"
     ],
     "hairColors": {
       "black": [
@@ -1060,15 +1204,28 @@
       "hair": {
         "bare": "Shaved",
         "crop": "Cropped",
+        "short": "Short, parted",
+        "curls": "Curls",
+        "coils": "Coils",
+        "rows": "Rows",
+        "locs": "Locs",
+        "bob": "To the jaw",
         "long": "Long",
+        "tail": "Tied back",
         "braid": "Braided",
+        "twins": "Two braids",
         "knot": "Knotted",
-        "tail": "Tied back"
+        "topknot": "Topknot",
+        "crest": "Crest"
       },
       "beards": {
         "none": "None",
+        "stubble": "Stubble",
+        "moustache": "Moustache",
+        "goatee": "Chin beard",
         "short": "Short",
-        "full": "Full"
+        "full": "Full",
+        "long": "Long"
       },
       "hairColors": {
         "black": "Black",
@@ -1119,10 +1276,92 @@
         "turban": "Turban",
         "scholarcap": "Scholar's cap",
         "furhat": "Fur hat"
+      },
+      "faces": {
+        "own": "As your home made it",
+        "fine": "Fine",
+        "broad": "Broad",
+        "long": "Long",
+        "soft": "Soft",
+        "sharp": "Sharp",
+        "weathered": "Weathered",
+        "high": "High-boned",
+        "grave": "Grave"
+      },
+      "faceStrength": {
+        "slight": "Slight",
+        "plain": "Plain",
+        "strong": "Strong"
+      },
+      "faceSliders": {
+        "jaw": "Jaw",
+        "nose": "Nose",
+        "eyes": "Eyes",
+        "lips": "Lips"
+      },
+      "jaw": {
+        "narrow": "Narrow",
+        "even": "Even",
+        "broad": "Broad"
+      },
+      "nose": {
+        "small": "Small",
+        "even": "Even",
+        "strong": "Strong"
+      },
+      "eyes": {
+        "narrow": "Narrow",
+        "even": "Even",
+        "wide": "Wide"
+      },
+      "lipsShape": {
+        "thin": "Thin",
+        "even": "Even",
+        "full": "Full"
+      },
+      "brows": {
+        "soft": "Soft",
+        "straight": "Straight",
+        "arched": "Arched",
+        "heavy": "Heavy",
+        "fine": "Fine",
+        "slant": "Slanted"
+      },
+      "eyeColors": {
+        "dark": "Dark brown",
+        "brown": "Brown",
+        "hazel": "Hazel",
+        "amber": "Amber",
+        "green": "Green",
+        "grey": "Grey",
+        "blue": "Blue",
+        "black": "Black"
+      },
+      "lips": {
+        "bare": "Bare",
+        "rose": "Rose",
+        "wine": "Wine",
+        "ochre": "Ochre",
+        "plum": "Plum",
+        "ink": "Ink"
+      },
+      "marks": {
+        "freckles": "Freckles",
+        "mole": "A mole",
+        "beauty": "A beauty mark",
+        "scar-brow": "A scar through the brow",
+        "scar-cheek": "A scar on the cheek",
+        "kohl": "Kohl",
+        "brow-dot": "A mark between the brows",
+        "chin-lines": "Lines on the chin",
+        "cheek-bars": "Ochre under the eyes",
+        "cheek-cuts": "Three cuts on each cheek",
+        "eye-red": "Red at the eyes",
+        "brow-line": "A white line down the brow"
       }
     },
     "start": {
-      "comment": "What a new life starts with, drawn by its spark; all of it is the player's to change. Fair and red hair start only on the fair skins.",
+      "comment": "What a new life starts with, drawn by its spark from what its home's people most often have (data/bodies.json: hair, hairColors, eyes); all of it is the player's to change. hair and hairColors here are for a home that names none. markChance is how often a life starts with a mark; faceSlider is how far a feature may start from even.",
       "hair": [
         "crop",
         "long",
@@ -1150,7 +1389,10 @@
       "stature": [
         0.96,
         1.07
-      ]
+      ],
+      "markChance": 0.3,
+      "faceSlider": 0.45,
+      "beardChance": 0.35
     },
     "openHeadgear": [
       "headband"

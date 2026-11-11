@@ -503,8 +503,10 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 	var echo_cfg: Dictionary = Data.genius().get("echo", {})
 	var echo_grow := float(echo_cfg.get("grow", {}).get(str(g_instar), 1.0))
 	var echo_field := float(echo_cfg.get("field", {}).get(str(g_instar), 1.0))
-	var iris := Color(0.12, 0.09, 0.07)
+	var iris := eye_color(String(look.get("eye_color", "dark")))
 	var iris_glow := 0.0
+	var face := face_keys(look)
+	var marks: Array = look.get("marks", []) if look.get("marks", []) is Array else []
 	var glow := Color(0, 0, 0)
 	var glow_k := 0.0
 	var cape_thread := 0.0
@@ -533,9 +535,18 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 			mi.set_blend_shape_value(li, maxf(0.0, -build))
 		if hi >= 0:
 			mi.set_blend_shape_value(hi, maxf(0.0, build))
+		# the face's shape, the features set one by one and the brow are shape keys too (look.face...)
+		if mi.mesh != null and not face.is_empty():
+			for bi in mi.get_blend_shape_count():
+				var bn := String(mi.mesh.get_blend_shape_name(bi))
+				if bn.begins_with("face_") or bn.begins_with("set_") or bn.begins_with("brow_"):
+					mi.set_blend_shape_value(bi, float(face.get(bn, 0.0)))
 		_recolor_named(mi, "skin", tone, glow, glow_k)
-		_recolor_named(mi, "lips", lip_color(tone), glow, glow_k * 0.5)
+		_recolor_named(mi, "lips", lips_color(tone, String(look.get("lips", "bare"))), glow, glow_k * 0.5)
 		_recolor_named(mi, "iris", iris, iris, iris_glow)
+		_recolor_named(mi, "iris_rim", iris.darkened(0.6), iris, iris_glow * 0.5)
+		_recolor_named(mi, "skin_freckle", tone.darkened(0.3).lerp(Color(0.45, 0.2, 0.1), 0.3))
+		_recolor_named(mi, "skin_scar", tone.lightened(0.22).lerp(Color(0.85, 0.58, 0.56), 0.35))
 	if skel:
 		for a in skel.get_children():
 			if a is BoneAttachment3D and String(a.name).begins_with("feature_"):
@@ -595,6 +606,10 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 				if not open_kinds.has(kind):
 					covers = true
 	node.scale = Vector3.ONE * clampf(float(look.get("stature", 1.0)), 0.85, 1.2)
+	if node.get_node_or_null("Blink") == null and node.find_child("Lid_l", true, false) != null:
+		var blink := Blink.new()
+		blink.name = "Blink"
+		node.add_child(blink)
 	for a in node.find_children("*", "BoneAttachment3D", true, false):
 		var n := String(a.name)
 		if n.begins_with("feature_") or n.begins_with("socket_"):
@@ -606,7 +621,10 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 		elif n.begins_with("Beard_"):
 			a.visible = n == "Beard_%s" % beard or n.begins_with("Beard_%s_" % beard)
 			if a.visible:
-				_recolor(a, col, "coat")
+				# stubble is the hair's colour seen through the skin
+				_recolor(a, tone.lerp(col, 0.45) if beard == "stubble" else col, "skin" if beard == "stubble" else "coat")
+		elif n.begins_with("Mark_"):
+			a.visible = marks.has(n.trim_prefix("Mark_"))
 		elif n.begins_with("Brow_"):
 			# the brows take the hair's colour, a little darker
 			_recolor(a, col.darkened(0.3), "coat")
@@ -702,6 +720,37 @@ func _recolor_named(mi: MeshInstance3D, name: String, col: Color, glow := Color(
 static func lip_color(tone: Color) -> Color:
 	var warm := Color(0.62, 0.3, 0.32)
 	return tone.darkened(0.18).lerp(warm, 0.3)
+
+## The lips as the look colours them (data/creation.json, look.lipColors): bare is the skin's own.
+static func lips_color(tone: Color, id: String) -> Color:
+	var L: Dictionary = Data.creation.get("look", {})
+	var c: Array = L.get("lipColors", {}).get(id, [])
+	if c.size() < 3:
+		return lip_color(tone)
+	return lip_color(tone).lerp(Color(c[0], c[1], c[2]), float(L.get("lipStrength", 0.7)))
+
+## An eye colour by its name (data/creation.json, look.eyeColors).
+static func eye_color(id: String) -> Color:
+	var cols: Dictionary = Data.creation.get("look", {}).get("eyeColors", {})
+	var c: Array = cols.get(id, [0.12, 0.09, 0.07])
+	return Color(c[0], c[1], c[2])
+
+## The face a look names, as the shape keys the bodies carry (tools/blender/faces.py): the
+## shape and how far it is drawn, each feature set by its slider, and the brow.
+static func face_keys(look: Dictionary) -> Dictionary:
+	var out := {}
+	var shape := String(look.get("face", "own"))
+	if shape != "own" and shape != "":
+		out["face_" + shape] = clampf(float(look.get("face_strength", 0.8)), 0.0, 1.3)
+	var sets: Variant = look.get("face_set", {})
+	if sets is Dictionary:
+		for k in sets:
+			out["set_" + String(k)] = clampf(float(sets[k]), -1.0, 1.0)
+	var brows := String(look.get("brows", "soft"))
+	if brows != "soft" and brows != "":
+		out["brow_" + brows] = 1.0
+	out["_"] = 0.0      # never empty: a face set back to the home's own is drawn again as such
+	return out
 
 ## A hair colour by its name in data/creation.json, on the coat's ramps (docs/style.md).
 func hair_color(id: String) -> Color:
@@ -938,6 +987,7 @@ uniform bool use_ao = false;
 varying vec3 world_pos;
 varying vec3 world_nrm;
 varying float ao;
+varying vec3 hue;         // the vertex colour's hue (its red is the occlusion): warmth in a cheek
 varying float grain;      // what a body's grain makes of this fragment (1.0: nothing), for its highlight
 void vertex() {
 	if (detail_local) {
@@ -955,6 +1005,7 @@ void vertex() {
 		world_nrm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	}
 	ao = use_ao ? COLOR.r : 1.0;
+	hue = use_ao ? COLOR.rgb / max(COLOR.r, 0.001) : vec3(1.0);
 }
 float triplanar(vec3 p, vec3 n) {
 	vec3 w = pow(abs(n), vec3(detail_sharp));
@@ -990,7 +1041,7 @@ void fragment() {
 		grain = detail_local ? g : 1.0;
 	}
 	float occ = mix(1.0, ao, ao_strength);
-	ALBEDO = col * occ;
+	ALBEDO = col * occ * hue;
 	EMISSION = emission.rgb * emission_energy;
 	float fres = pow(1.0 - clamp(dot(normalize(NORMAL), normalize(VIEW)), 0.0, 1.0), rim_power);
 	EMISSION += rim_color.rgb * fres * rim_strength * col;

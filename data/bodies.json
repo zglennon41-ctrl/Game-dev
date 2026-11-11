@@ -1,5 +1,5 @@
 {
-  "comment": "The bodies of the thirteen homes (docs/bodies-plan.md): a carving brief for each face, the face parameters the body kit reads for the masculine and feminine body (multipliers on the base carving: brow ridge, nose length and width, lips, ears, jaw width, head length, cheekbones), and the skin palette offered at creation (tone ids from data/creation.json, look.skinTones). Every sentence is the owner's to rewrite. dress: the home's outfit as pieces the body kit builds as shells on the body's own rings (tunic, coat, robe, kilt, cuirass, apron, hakama, greaves, boots, belt, sash, collar) in named colours, and a headgear piece hung from the head (cap, hat, turban, furhat), which the look's headgear toggle shows or hides. culture: a line on the outfit, the owner's to rewrite. pieces may carry trim (a band colour at hem, cuff or collar), cuffs, stripes (alternate bands), wide, count; types: tunic, vest, coat, robe, kaftan, kilt, wrapskirt, cuirass, apron, hakama, greaves, boots, sandals, belt, sash, obi, collar, scarf, wrap, gloves, buttons, badge, sashknot, toolloop, pauldrons, pteruges. headgear: cap (peak, goggles), hat (trim band), turban (trim, jewel), furhat, scholarcap, hood, headband, helm (crest), with goggles on any. form is the human each home's people are built from (tools/blender/human.py, MakeHuman's CC0 base and targets): ancestry is the mix of MakeHuman's three ancestry forms (they sum to one), details are MakeHuman's detail targets by short name with a value from -1 to 1 (nose-hump 0.4 is nose-hump-incr at 0.4; a negative value is the opposite target; a name without l- or r- is both sides; head-oval and its like take 0 to 1), m and f add to or override the details for one sex. The brief is the sentence the details were written from. dress.trapping: what the home puts on a genius raised there (game/assets/genius/trappings/<home>.glb, tools/blender/genius_trappings.py), by name and in a sentence.",
+  "comment": "The bodies of the thirteen homes (docs/bodies-plan.md): a carving brief for each face, the face parameters the body kit reads for the masculine and feminine body (multipliers on the base carving: brow ridge, nose length and width, lips, ears, jaw width, head length, cheekbones), and the skin palette offered at creation (tone ids from data/creation.json, look.skinTones). Every sentence is the owner's to rewrite. dress: the home's outfit as pieces the body kit builds as shells on the body's own rings (tunic, coat, robe, kilt, cuirass, apron, hakama, greaves, boots, belt, sash, collar) in named colours, and a headgear piece hung from the head (cap, hat, turban, furhat), which the look's headgear toggle shows or hides. culture: a line on the outfit, the owner's to rewrite. pieces may carry trim (a band colour at hem, cuff or collar), cuffs, stripes (alternate bands), wide, count; types: tunic, vest, coat, robe, kaftan, kilt, wrapskirt, cuirass, apron, hakama, greaves, boots, sandals, belt, sash, obi, collar, scarf, wrap, gloves, buttons, badge, sashknot, toolloop, pauldrons, pteruges. headgear: cap (peak, goggles), hat (trim band), turban (trim, jewel), furhat, scholarcap, hood, headband, helm (crest), with goggles on any. form is the human each home's people are built from (tools/blender/human.py, MakeHuman's CC0 base and targets): ancestry is the mix of MakeHuman's three ancestry forms (they sum to one), details are MakeHuman's detail targets by short name with a value from -1 to 1 (nose-hump 0.4 is nose-hump-incr at 0.4; a negative value is the opposite target; a name without l- or r- is both sides; head-oval and its like take 0 to 1), m and f add to or override the details for one sex. The brief is the sentence the details were written from. dress.trapping: what the home puts on a genius raised there (game/assets/genius/trappings/<home>.glb, tools/blender/genius_trappings.py), by name and in a sentence. faces: the face shapes every body is built with as shape keys (tools/blender/faces.py): presets, each a set of MakeHuman detail targets laid over the home's own form (and an age, 0 a young adult, toward 0.5 old), and sliders, each a set of details the game runs from -1 to 1; the creator's names for them are in data/creation.json (look.labels). A home's eyes, hairColors, hair and marks are what its people most often have (a new life and a classmate are drawn from them; the creator offers every eye, colour and style to everyone, and a home's own marks only to that home).",
   "homes": {
     "alexandria": {
       "name": "Alexandria",
@@ -12,6 +12,37 @@
         "brown",
         "deep",
         "dark"
+      ],
+      "eyes": [
+        "dark",
+        "brown",
+        "brown",
+        "hazel",
+        "green",
+        "grey",
+        "blue",
+        "amber"
+      ],
+      "hairColors": [
+        "black",
+        "brown",
+        "brown",
+        "chestnut",
+        "fair",
+        "red"
+      ],
+      "hair": [
+        "crop",
+        "short",
+        "curls",
+        "bob",
+        "long",
+        "tail",
+        "braid",
+        "knot"
+      ],
+      "marks": [
+        "kohl"
       ],
       "form": {
         "ancestry": {
@@ -77,6 +108,31 @@
         "tan",
         "brown"
       ],
+      "eyes": [
+        "brown",
+        "brown",
+        "hazel",
+        "blue",
+        "grey",
+        "dark"
+      ],
+      "hairColors": [
+        "brown",
+        "brown",
+        "chestnut",
+        "black",
+        "fair",
+        "red"
+      ],
+      "hair": [
+        "short",
+        "crop",
+        "tail",
+        "long",
+        "braid",
+        "curls"
+      ],
+      "marks": [],
       "form": {
         "ancestry": {
           "african": 0.25,
@@ -175,6 +231,29 @@
         "brown",
         "deep"
       ],
+      "eyes": [
+        "dark",
+        "dark",
+        "brown",
+        "amber"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown"
+      ],
+      "hair": [
+        "twins",
+        "long",
+        "braid",
+        "tail",
+        "crest",
+        "crop"
+      ],
+      "marks": [
+        "chin-lines",
+        "cheek-bars"
+      ],
       "form": {
         "ancestry": {
           "african": 0.1,
@@ -255,6 +334,30 @@
         "fair",
         "olive"
       ],
+      "eyes": [
+        "blue",
+        "grey",
+        "grey",
+        "green",
+        "hazel",
+        "brown"
+      ],
+      "hairColors": [
+        "brown",
+        "chestnut",
+        "fair",
+        "red",
+        "black"
+      ],
+      "hair": [
+        "short",
+        "crop",
+        "bob",
+        "tail",
+        "curls",
+        "knot"
+      ],
+      "marks": [],
       "form": {
         "ancestry": {
           "african": 0.0,
@@ -344,6 +447,28 @@
         "tan",
         "brown"
       ],
+      "eyes": [
+        "brown",
+        "hazel",
+        "blue",
+        "grey",
+        "dark"
+      ],
+      "hairColors": [
+        "brown",
+        "chestnut",
+        "black",
+        "fair"
+      ],
+      "hair": [
+        "crop",
+        "short",
+        "crest",
+        "tail",
+        "braid",
+        "knot"
+      ],
+      "marks": [],
       "form": {
         "ancestry": {
           "african": 0.0,
@@ -433,6 +558,28 @@
         "olive",
         "tan"
       ],
+      "eyes": [
+        "brown",
+        "brown",
+        "dark",
+        "hazel",
+        "green"
+      ],
+      "hairColors": [
+        "black",
+        "brown",
+        "brown",
+        "chestnut"
+      ],
+      "hair": [
+        "crop",
+        "short",
+        "curls",
+        "knot",
+        "braid",
+        "bob"
+      ],
+      "marks": [],
       "form": {
         "ancestry": {
           "african": 0.1,
@@ -524,6 +671,30 @@
         "deep",
         "dark"
       ],
+      "eyes": [
+        "dark",
+        "dark",
+        "brown",
+        "amber"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown"
+      ],
+      "hair": [
+        "rows",
+        "locs",
+        "coils",
+        "crop",
+        "bob",
+        "braid",
+        "curls"
+      ],
+      "marks": [
+        "kohl",
+        "eye-red"
+      ],
       "form": {
         "ancestry": {
           "african": 0.55,
@@ -535,7 +706,7 @@
           "head-oval": 0.3,
           "mouth-upperlip-volume": 0.5,
           "mouth-lowerlip-volume": 0.5,
-          "eye-trans": 0.5,
+          "eye-trans-out": 0.5,
           "forehead-scale-vert": 0.5
         },
         "m": {},
@@ -605,6 +776,32 @@
         "olive",
         "tan",
         "brown"
+      ],
+      "eyes": [
+        "dark",
+        "brown",
+        "brown",
+        "hazel",
+        "amber",
+        "green"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown",
+        "chestnut"
+      ],
+      "hair": [
+        "curls",
+        "short",
+        "long",
+        "braid",
+        "knot",
+        "tail"
+      ],
+      "marks": [
+        "kohl",
+        "brow-dot"
       ],
       "form": {
         "ancestry": {
@@ -681,6 +878,30 @@
         "brown",
         "deep"
       ],
+      "eyes": [
+        "dark",
+        "dark",
+        "brown",
+        "hazel"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown"
+      ],
+      "hair": [
+        "long",
+        "braid",
+        "knot",
+        "topknot",
+        "short",
+        "curls"
+      ],
+      "marks": [
+        "brow-dot",
+        "kohl",
+        "brow-line"
+      ],
       "form": {
         "ancestry": {
           "african": 0.25,
@@ -749,6 +970,28 @@
         "fair",
         "olive",
         "tan"
+      ],
+      "eyes": [
+        "dark",
+        "dark",
+        "brown",
+        "black"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown"
+      ],
+      "hair": [
+        "topknot",
+        "knot",
+        "long",
+        "tail",
+        "bob",
+        "braid"
+      ],
+      "marks": [
+        "eye-red"
       ],
       "form": {
         "ancestry": {
@@ -823,6 +1066,31 @@
         "olive",
         "tan",
         "brown"
+      ],
+      "eyes": [
+        "brown",
+        "dark",
+        "hazel",
+        "grey",
+        "green"
+      ],
+      "hairColors": [
+        "black",
+        "brown",
+        "brown",
+        "chestnut",
+        "red"
+      ],
+      "hair": [
+        "twins",
+        "braid",
+        "crest",
+        "tail",
+        "crop",
+        "long"
+      ],
+      "marks": [
+        "cheek-bars"
       ],
       "form": {
         "ancestry": {
@@ -907,6 +1175,30 @@
         "deep",
         "dark"
       ],
+      "eyes": [
+        "dark",
+        "dark",
+        "brown",
+        "black"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown"
+      ],
+      "hair": [
+        "coils",
+        "locs",
+        "rows",
+        "crop",
+        "curls",
+        "braid"
+      ],
+      "marks": [
+        "cheek-cuts",
+        "kohl",
+        "brow-line"
+      ],
       "form": {
         "ancestry": {
           "african": 1.0,
@@ -989,6 +1281,28 @@
         "fair",
         "olive"
       ],
+      "eyes": [
+        "dark",
+        "dark",
+        "brown",
+        "black"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown"
+      ],
+      "hair": [
+        "topknot",
+        "tail",
+        "long",
+        "knot",
+        "bob",
+        "crop"
+      ],
+      "marks": [
+        "eye-red"
+      ],
       "form": {
         "ancestry": {
           "african": 0.0,
@@ -1055,5 +1369,172 @@
         }
       }
     }
+  },
+  "faces": {
+    "presets": [
+      {
+        "id": "fine",
+        "details": {
+          "chin-width": -0.5,
+          "chin-jaw-drop": -0.3,
+          "head-oval": 0.4,
+          "cheek-bones": 0.4,
+          "eye-scale": 0.45,
+          "nose-scale-horiz": -0.4,
+          "nose-scale-depth": -0.2,
+          "nose-point": 0.25,
+          "mouth-upperlip-volume": 0.3,
+          "mouth-lowerlip-volume": 0.4,
+          "mouth-scale-horiz": -0.2,
+          "eyebrows-angle": 0.2
+        }
+      },
+      {
+        "id": "broad",
+        "details": {
+          "head-square": 0.6,
+          "chin-width": 0.7,
+          "chin-bones": 0.5,
+          "chin-jaw-drop": 0.4,
+          "nose-scale-horiz": 0.5,
+          "nose-volume": 0.4,
+          "eye-scale": -0.3,
+          "mouth-scale-horiz": 0.4,
+          "mouth-upperlip-volume": -0.3,
+          "eyebrows-trans": -0.4
+        }
+      },
+      {
+        "id": "long",
+        "details": {
+          "head-rectangular": 0.3,
+          "chin-height": 0.6,
+          "cheek-volume": -0.6,
+          "nose-scale-vert": 0.5,
+          "nose-hump": 0.6,
+          "nose-point": -0.3,
+          "eye-scale": -0.2,
+          "eye-corner2": -0.4,
+          "mouth-upperlip-volume": -0.4,
+          "mouth-lowerlip-volume": -0.3,
+          "mouth-scale-horiz": 0.2,
+          "head-scale-horiz": -0.3
+        }
+      },
+      {
+        "id": "soft",
+        "details": {
+          "head-round": 0.6,
+          "cheek-volume": 0.7,
+          "chin-width": 0.2,
+          "chin-height": -0.4,
+          "chin-prominent": -0.2,
+          "nose-scale-vert": -0.4,
+          "nose-point": 0.5,
+          "nose-scale-depth": -0.3,
+          "eye-scale": 0.35,
+          "eye-trans-out": 0.3,
+          "mouth-upperlip-volume": 0.5,
+          "mouth-lowerlip-volume": 0.5,
+          "mouth-scale-horiz": -0.3,
+          "head-fat": 0.3
+        }
+      },
+      {
+        "id": "sharp",
+        "details": {
+          "head-invertedtriangular": 0.5,
+          "chin-triangle": 0.5,
+          "cheek-bones": 0.7,
+          "cheek-volume": -0.3,
+          "eye-corner2": 0.6,
+          "eye-height2": -0.2,
+          "nose-scale-horiz": -0.4,
+          "nose-greek": 0.3,
+          "eyebrows-angle": 0.6,
+          "mouth-angles": 0.3,
+          "mouth-cupidsbow": 0.5
+        }
+      },
+      {
+        "id": "weathered",
+        "age": 0.35,
+        "details": {
+          "head-age": 0.5,
+          "eye-bag": 0.6,
+          "mouth-laugh-lines": 0.7,
+          "nose-scale-vert": 0.3,
+          "nose-volume": 0.3,
+          "ear-scale": 0.3,
+          "mouth-upperlip-volume": -0.4,
+          "eyebrows-trans": -0.3,
+          "cheek-volume": -0.3
+        }
+      },
+      {
+        "id": "high",
+        "details": {
+          "head-diamond": 0.6,
+          "cheek-bones": 0.9,
+          "cheek-trans": 0.4,
+          "eye-trans-out": 0.35,
+          "nose-curve": -0.4,
+          "mouth-lowerlip-volume": 0.5,
+          "chin-prominent": 0.4,
+          "chin-width": -0.2
+        }
+      },
+      {
+        "id": "grave",
+        "details": {
+          "head-rectangular": 0.6,
+          "eyebrows-angle": -0.5,
+          "eyebrows-trans": -0.3,
+          "eye-eyefold": -0.6,
+          "eye-height2": -0.3,
+          "nose-greek": 0.6,
+          "nose-scale-vert": 0.3,
+          "mouth-angles": -0.4,
+          "mouth-scale-horiz": 0.2,
+          "chin-bones": 0.4,
+          "chin-cleft": 0.5
+        }
+      }
+    ],
+    "sliders": [
+      {
+        "id": "jaw",
+        "details": {
+          "chin-width": 0.9,
+          "chin-jaw-drop": 0.4,
+          "chin-bones": 0.4
+        }
+      },
+      {
+        "id": "nose",
+        "details": {
+          "nose-scale-vert": 0.6,
+          "nose-scale-horiz": 0.6,
+          "nose-scale-depth": 0.6,
+          "nose-volume": 0.3
+        }
+      },
+      {
+        "id": "eyes",
+        "details": {
+          "eye-scale": 0.9,
+          "eye-height2": 0.4
+        }
+      },
+      {
+        "id": "lips",
+        "details": {
+          "mouth-upperlip-volume": 0.9,
+          "mouth-lowerlip-volume": 0.9,
+          "mouth-upperlip-height": 0.3,
+          "mouth-lowerlip-height": 0.3
+        }
+      }
+    ]
   }
 }
