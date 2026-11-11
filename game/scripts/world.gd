@@ -4246,9 +4246,16 @@ func _update_form(f: Fight, dt: float) -> void:
 			var bt := _p_skel.global_transform * _p_skel.get_bone_global_pose(bone)
 			var at: Array = mount["at"]
 			var turn: Array = mount["turn"]
-			var place := Transform3D(bt.basis.orthonormalized(), bt.origin) * Transform3D(Basis.from_euler(Vector3(deg_to_rad(turn[0]), deg_to_rad(turn[1]), deg_to_rad(turn[2]))), Vector3(at[0], at[1], at[2]))
+			# plumb: it hangs upright from its place whatever the bone does, facing as its partner faces
+			var frame := Basis(Vector3.UP, _yaw(f.p_facing)) if mount.get("plumb", false) else bt.basis.orthonormalized()
+			var place := Transform3D(frame, bt.origin) * Transform3D(Basis.from_euler(Vector3(deg_to_rad(turn[0]), deg_to_rad(turn[1]), deg_to_rad(turn[2]))), Vector3(at[0], at[1], at[2]))
 			var g := _g_body._local_xf(held)
 			var k := float(mount["scale"]) / maxf(0.001, _g_body._model.scale.y)
+			# a form that says how tall it is in the hand (held, in its body) is brought to that
+			var tall := float(Data.form(_g_body.own_body).get("body", {}).get("held", 0.0)) if _g_body.own_body != "" else 0.0
+			var crown := _held_at("ref_top")
+			if tall > 0.0 and crown:
+				k = float(mount["scale"]) * tall / maxf(0.001, _g_body._local_xf(crown).origin.y)
 			var fb := place.basis * g.basis.orthonormalized().inverse() * Basis.from_scale(Vector3.ONE * k)
 			_g_form.global_transform = Transform3D(fb, place.origin - fb * g.origin)
 			_g_form_pos = place.origin

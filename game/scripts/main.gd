@@ -693,33 +693,48 @@ func _sheet(what: String) -> void:
 	# its cell, the settled form least and the finishes most, so that a pocket astrolabe is
 	# seen as near as a drake and the young still look young. True sizes are --lineage's.
 	var cell := float(_args.get("cell", "5.0"))
-	place.call(cell, false)
-	await get_tree().create_timer(1.0).timeout
-	await RenderingServer.frame_post_draw
-	var img := get_viewport().get_texture().get_image()
-	img.resize(COLS * 100, ROWS * 100, Image.INTERPOLATE_BILINEAR)
-	var back := img.get_pixel(1, 1)
+	const Q := 200            # how many pixels of a cell are measured
 	var wide: Array = []      # of each, from the middle of its cell, and how tall, in hundredths of a cell
 	var tall: Array = []
 	var low: Array = []       # and how far above its ground its underside is
-	for i in bodies.size():
-		wide.append(1.0)
-		tall.append(1.0)
-		low.append(100.0)
-	for y in img.get_height():
-		for x in img.get_width():
-			var n := (y / 100) * COLS + x / 100
-			if n >= bodies.size():
-				continue
-			var c := img.get_pixel(x, y)
-			if absf(c.r - back.r) + absf(c.g - back.g) + absf(c.b - back.b) < 0.12:
-				continue
-			var up := (1.0 - FLOOR) * 100.0 - float(y % 100)
-			if up < 0.0:
-				continue      # what hangs below its ground is not counted
-			wide[n] = maxf(wide[n], absf(float(x % 100) + 0.5 - 50.0) + 1.0)
-			tall[n] = maxf(tall[n], up + 1.0)
-			low[n] = minf(low[n], up)
+	for attempt in 4:
+		place.call(cell, false)
+		await get_tree().create_timer(1.0 if attempt == 0 else 0.5).timeout
+		await RenderingServer.frame_post_draw
+		var img := get_viewport().get_texture().get_image()
+		img.resize(COLS * Q, ROWS * Q, Image.INTERPOLATE_BILINEAR)
+		var back := img.get_pixel(1, 1)
+		wide.clear()
+		tall.clear()
+		low.clear()
+		for i in bodies.size():
+			wide.append(1.0)
+			tall.append(1.0)
+			low.append(100.0)
+		var per := 100.0 / Q
+		for y in img.get_height():
+			for x in img.get_width():
+				var n := (y / Q) * COLS + x / Q
+				if n >= bodies.size():
+					continue
+				var c := img.get_pixel(x, y)
+				if absf(c.r - back.r) + absf(c.g - back.g) + absf(c.b - back.b) < 0.12:
+					continue
+				var up := (1.0 - FLOOR) * 100.0 - (float(y % Q) + 0.5) * per
+				if up < 0.0:
+					continue      # what hangs below its ground is not counted
+				wide[n] = maxf(wide[n], absf((float(x % Q) + 0.5) * per - 50.0) + 0.5)
+				tall[n] = maxf(tall[n], up + 0.5)
+				low[n] = minf(low[n], up)
+		# one that reaches the edge of its cell has not been seen whole (a hawk's wings, a lamp on
+		# a mast): they are stood further apart and looked at again
+		var cramped := false
+		for i in bodies.size():
+			if float(wide[i]) >= 48.5 or float(tall[i]) >= (1.0 - FLOOR) * 100.0 - 1.5:
+				cramped = true
+		if not cramped or _args.has("cell"):
+			break
+		cell *= 1.6
 	const FILL := [0.56, 0.68, 0.78, 0.9]
 	for i in bodies.size():
 		var fill: float = FILL[clampi(int(tree[i]["level"]) - 1, 0, 3)]
@@ -1260,6 +1275,13 @@ func _process(delta: float) -> void:
 	if not fight.p_lock:
 		world.look(_cam_mouse)
 	_cam_mouse = Vector2.ZERO
+	# --near[=back]: the camera close on the partner, to see what it wears (a genius on the arm,
+	# at the belt, down the back)
+	if _args.has("near"):
+		var turn := fight.p_facing + (2.5 if str(_args["near"]) == "back" else 0.6)
+		world.cine = true
+		world.cine_look = world._v3(fight.p_pos, 1.0)
+		world.cine_pos = world._v3(fight.p_pos + Vector2.from_angle(turn) * 2.3, 1.5)
 	world.draw(fight, real_dt, cam, move)
 	var timer := ""
 	var score := "the old station" if mode == "prologue" else "the yard"

@@ -2604,6 +2604,9 @@
      "scale": {
       "type": "number",
       "exclusiveMinimum": 0
+     },
+     "plumb": {
+      "type": "boolean"
      }
     }
    }
