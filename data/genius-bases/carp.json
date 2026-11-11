@@ -204,7 +204,9 @@
         "spray",
         0.8
        ]
-      ]
+      ],
+      "eyes": "up",
+      "brow": "mild"
      },
      "finishes": [
       {
@@ -247,7 +249,9 @@
          1.9
         ],
         "scales": "plates",
-        "carry": []
+        "carry": [],
+        "eyes": "round",
+        "brow": "mild"
        }
       },
       {
@@ -309,7 +313,8 @@
          ]
         ],
         "accent2": "gold",
-        "brow": "mild"
+        "brow": "mild",
+        "eyes": "round"
        }
       }
      ]
@@ -364,7 +369,8 @@
         1.0
        ]
       ],
-      "carry": []
+      "carry": [],
+      "brow": "stern"
      },
      "finishes": [
       {
@@ -413,7 +419,8 @@
           1.0
          ]
         ],
-        "coat": "frost"
+        "coat": "frost",
+        "brow": "calm"
        }
       },
       {
@@ -460,7 +467,8 @@
           1.0
          ]
         ],
-        "carry": []
+        "carry": [],
+        "brow": "keen"
        }
       }
      ]
@@ -520,7 +528,8 @@
         "wake",
         1.0
        ]
-      ]
+      ],
+      "brow": "stern"
      },
      "finishes": [
       {
@@ -616,7 +625,8 @@
           "fry",
           1.0
          ]
-        ]
+        ],
+        "brow": "heavy"
        }
       }
      ]
@@ -773,7 +783,8 @@
           "cap",
           1.0
          ]
-        ]
+        ],
+        "brow": "sleepy"
        }
       },
       {
@@ -864,7 +875,8 @@
       "barbels": [
        "short",
        1.2
-      ]
+      ],
+      "brow": "mild"
      },
      "finishes": [
       {
@@ -925,7 +937,8 @@
           "weed",
           1.0
          ]
-        ]
+        ],
+        "brow": "heavy"
        }
       },
       {
@@ -974,7 +987,8 @@
           "seal",
           1.0
          ]
-        ]
+        ],
+        "brow": "mild"
        }
       }
      ]
@@ -1028,7 +1042,8 @@
         1.0
        ]
       ],
-      "coat": "frost"
+      "coat": "frost",
+      "brow": "sleepy"
      },
      "finishes": [
       {
@@ -1065,7 +1080,8 @@
           "pane",
           1.0
          ]
-        ]
+        ],
+        "brow": "mild"
        }
       },
       {
@@ -1120,7 +1136,9 @@
           1.0
          ]
         ],
-        "coat": "moon"
+        "coat": "moon",
+        "eyes": "round",
+        "brow": "mild"
        }
       }
      ]
@@ -1239,7 +1257,8 @@
         "tremor",
         0.7
        ]
-      ]
+      ],
+      "brow": "mild"
      },
      "finishes": [
       {
@@ -1281,7 +1300,8 @@
         "tail": [
          "eel",
          1.0
-        ]
+        ],
+        "brow": "sleepy"
        }
       },
       {
@@ -1337,7 +1357,8 @@
           "bands",
           1.2
          ]
-        ]
+        ],
+        "brow": "stern"
        }
       }
      ]
@@ -1383,7 +1404,8 @@
       "dorsal": [
        "sail",
        0.7
-      ]
+      ],
+      "brow": "calm"
      },
      "finishes": [
       {
@@ -1424,7 +1446,7 @@
          ],
          [
           "weed",
-          0.8
+          0.5
          ],
          [
           "chain",
@@ -1435,7 +1457,8 @@
          "ragged",
          1.1
         ],
-        "scales": "armour"
+        "scales": "armour",
+        "brow": "heavy"
        }
       },
       {
@@ -1489,7 +1512,8 @@
           1.0
          ]
         ],
-        "mouth": "lips"
+        "mouth": "lips",
+        "brow": null
        }
       }
      ]
@@ -1552,7 +1576,8 @@
        ]
       ],
       "carry": [],
-      "accent2": "jade"
+      "accent2": "jade",
+      "brow": "heavy"
      },
      "finishes": [
       {
@@ -1643,7 +1668,8 @@
         "fins": [
          "folded",
          1.0
-        ]
+        ],
+        "brow": "mild"
        }
       }
      ]

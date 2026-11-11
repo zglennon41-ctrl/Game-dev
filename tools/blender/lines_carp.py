@@ -20,8 +20,8 @@ import os
 import random
 import sys
 
+import bpy       # before bmesh: run alone (for the gifts), bmesh is not there until bpy is
 import bmesh
-import bpy
 from mathutils import Matrix, Vector
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -50,10 +50,10 @@ PALETTE.update({
     "scale_ink": ((0.03, 0.03, 0.035), 0.4, 0.0), "hide_lip": ((0.72, 0.58, 0.5), 0.5, 0.0), "hide_maw": ((0.13, 0.025, 0.025), 0.6, 0.0),
     "eye_pupil": ((0.008, 0.008, 0.012), 0.15, 0.0), "eye_white": ((0.82, 0.8, 0.72), 0.3, 0.0),
     "bone_barbel": ((0.74, 0.66, 0.54), 0.6, 0.0), "bone_white": ((0.86, 0.85, 0.8), 0.6, 0.0), "bone_horn": ((0.6, 0.52, 0.38), 0.5, 0.0),
-    "bone_bud": ((0.5, 0.38, 0.3), 0.9, 0.0), "stone_key": ((0.2, 0.2, 0.215), 0.95, 0.0), "stone_plate": ((0.17, 0.18, 0.2), 0.8, 0.0),
+    "bone_bud": ((0.62, 0.48, 0.4), 0.9, 0.0), "stone_key": ((0.2, 0.2, 0.215), 0.95, 0.0), "stone_plate": ((0.17, 0.18, 0.2), 0.8, 0.0),
     "stone_silt": ((0.2, 0.19, 0.2), 1.0, 0.0), "stone_silt_dark": ((0.06, 0.055, 0.065), 1.0, 0.0),
     "stone_barnacle": ((0.56, 0.53, 0.46), 0.95, 0.0), "cord_rope": ((0.44, 0.34, 0.2), 0.95, 0.0), "cloth_ribbon": ((0.4, 0.1, 0.08), 0.9, 0.0),
-    "glass_ice": ((0.34, 0.48, 0.56), 0.12, 0.0), "glass_spray": ((0.8, 0.87, 0.9), 0.3, 0.0), "iron_lamp": ((0.1, 0.1, 0.115), 0.5, 0.8),
+    "glass_ice": ((0.1, 0.17, 0.22), 0.12, 0.0), "glass_spray": ((0.8, 0.87, 0.9), 0.3, 0.0), "iron_lamp": ((0.1, 0.1, 0.115), 0.5, 0.8),
     "brass_lamp": ((0.52, 0.4, 0.15), 0.4, 0.8), "iron_chain": ((0.16, 0.16, 0.18), 0.5, 0.8), "moss_weed": ((0.12, 0.2, 0.1), 0.9, 0.0),
     "earth_mud": ((0.22, 0.165, 0.11), 1.0, 0.0), "earth_crack": ((0.07, 0.05, 0.035), 1.0, 0.0),
 })
@@ -287,6 +287,9 @@ def fin_items(outline, normal, thick, style, spec):
     mark = spec.get("finmark", "rays") if style not in ("foam", "mane", "banner", "claw", "wing") else "rays"
     if style == "veil" and mark == "rays":
         mark = "veil"
+    if style == "foam":
+        q = plate(outline, normal, thick, parity=True, band=0.56)
+        return [(q[0], mat("fin"), True), (q[1], mat("accent"), True), (q[2], mat("glass_spray"), True), (q[3], mat("scale_pale"), True)]
     if mark == "roots":
         q = plate(outline, normal, thick, parity=True, band=0.4)
         return [(q[0], mat("accent"), True), (q[1], mat("accent_dark"), True), (q[2], mat("scale_pale"), True), (q[3], mat("fin"), True)]
@@ -581,17 +584,17 @@ def dorsal_fin(fish, style, size, spec, t0, t1):
                 items.append((g.tongue([root - d * 0.01, root.lerp(tip, 0.5) + up * h * 0.16, tip], [h * 0.34, h * 0.26, 0.004], thick=0.35, normal=side), a if j % 2 else b, True))
             else:
                 h = H * (0.5 if style == "ridge" else 0.85) * (1.0 - 0.5 * abs(j / count - 0.35))
-                items.append((g.blade(root - d * (h * 0.3), root + up * h + d * (h * 0.35), h * 0.55, thick=h * 0.12, normal=side, belly=0.2), (b if j % 2 else mat("accent_dark")) if style == "ridge" else mat("bone_horn")))
+                items.append((g.blade(root - d * (h * 0.3), root + up * h + d * (h * 0.35), h * 0.55, thick=h * 0.12, normal=side, belly=0.2), (b if j % 2 else mat("accent_dark")) if style == "ridge" else mat("bone_horn"), style == "ridge"))
         return items
     out = [base[0]] + tips + [base[-1]]
     # close it along the back: the outline runs up the front, along the tips, and down the back
     geos = []
     side = fish.at((lo + hi) / 2)[2]
-    mark = spec.get("finmark", "rays") if style not in ("foam",) else "rays"
+    mark = spec.get("finmark", "rays") if style not in ("foam",) else "foam"
     if style == "veil" and mark == "rays":
         mark = "veil"
-    cut = {"roots": 0.4, "edge": 0.68, "veil": 0.66}.get(mark, 0.0)
-    pair = {"roots": (("accent", "accent_dark"), ("scale_pale", "fin")), "edge": (("fin", "scale"), ("accent_light", "accent")),
+    cut = {"roots": 0.4, "edge": 0.68, "veil": 0.66, "foam": 0.56}.get(mark, 0.0)
+    pair = {"roots": (("accent", "accent_dark"), ("scale_pale", "fin")), "edge": (("fin", "scale"), ("accent_light", "accent")), "foam": (("fin", "accent"), ("glass_spray", "scale_pale")),
             "veil": (("scale_pale", "accent_pale"), ("accent", "accent2")), "plain": (("scale_pale", "fin"), None)}.get(mark)
     nn = side * (fish.L * 0.0055)
     for j in range(m):
@@ -635,7 +638,7 @@ def side_fin(fish, style, size, spec, sg, t=None, low=-0.55):
         return [(g.blade(root, tip, Lf * 0.3, thick=fish.L * 0.01, normal=outw, belly=0.45), a)], root
     # the fin's own axes: along it, and across it
     if style == "wing":
-        along, across, Lf, wide, m = (outw * 0.82 + d * 0.42 + up * 0.38).normalized(), (d * 0.86 + up * 0.5 - outw * 0.1).normalized(), Lf * 2.6, 0.5, 9
+        along, across, Lf, wide, m = (outw * 0.75 + d * 0.35 + up * 0.56).normalized(), (d * 0.86 + up * 0.5 - outw * 0.1).normalized(), Lf * 3.1, 0.34, 9
     elif style == "swept":
         along, across, wide, m = (outw * 0.45 + d * 0.85 - up * 0.25).normalized(), (d * 0.5 - up * 0.85).normalized(), 0.4, 5
     elif style == "veil":
@@ -674,7 +677,7 @@ def side_fin(fish, style, size, spec, sg, t=None, low=-0.55):
     if style == "claw":
         for j in range(1, m + 1, 2):
             tip = out[j + 1]
-            items.append((g.cone(tip - along * Lf * 0.04, tip + along * Lf * 0.16 - nrm * Lf * 0.02, Lf * 0.035, n=5), mat("bone_horn")))
+            items.append((g.cone(tip - along * Lf * 0.04, tip + along * Lf * 0.16 - nrm * Lf * 0.02, Lf * 0.035, n=4), mat("bone_horn"), True))
     return items, root
 
 
@@ -712,7 +715,7 @@ def eye(fish, sg, style):
         M[row][0], M[row][1], M[row][2], M[row][3] = e1[row], e2[row], look[row], base[row]
     dome = g.moved(g.lathe([(rp, 0.0), (rp * 0.9, r * 0.2), (rp * 0.55, r * 0.29), (rp * 0.02, r * 0.32)], n=14, caps=False), M)
     items = [(g.ico(c, r, sub=1), field("eyes", 3.0), True), (dome, mat("eye_pupil"), True),
-             (g.ico(c + look * r * 1.02 + up * r * 0.36 + d * r * 0.26, r * 0.16, sub=0), mat("eye_white"), False)]
+             (g.ico(c + look * r * 1.02 + up * r * 0.36 + d * r * 0.26, r * 0.16, sub=0), mat("eye_white"), True)]
     return items, c, look, r, out
 
 
@@ -864,16 +867,17 @@ def head_grown(fish, spec):
                 rr = wc * 0.92 * size
                 items.append((g.moved(g.lathe([(rr, -ucc * 0.16), (rr * 0.93, ucc * 0.0), (rr * 0.62, ucc * 0.1), (rr * 0.02, ucc * 0.14)], n=16, caps=False), M), mat("accent"), True))
             if style == "buds":
-                r = fish.L * 0.026 * size
-                items.append((g.ico(base + up * r * 0.7, r, sub=1, scale=(0.9, 0.9, 1.5)), mat("bone_bud"), True))
+                r = fish.L * 0.03 * size
+                items.append((g.ico(base + up * r * 1.1 - d * r * 0.3, r, sub=1, scale=(0.95, 0.95, 1.9)), mat("bone_bud"), True))
+                items.append((g.ico(base + up * r * 2.75 - d * r * 0.3, r * 0.42, sub=1), mat("bone_white"), True))
             elif style == "antlers":
                 Lh = fish.L * 0.2 * size
                 beam = [base, base + (up * 0.55 + d * 0.5 + o * 0.25) * Lh, base + (up * 0.95 + d * 1.25 + o * 0.5) * Lh, base + (up * 1.5 + d * 1.75 + o * 0.42) * Lh]
-                items.append((g.tube(beam, [Lh * 0.1, Lh * 0.08, Lh * 0.058, Lh * 0.012], n=6), mat("bone_horn")))
+                items.append((g.tube(beam, [Lh * 0.1, Lh * 0.08, Lh * 0.058, Lh * 0.012], n=5), mat("bone_horn"), True))
                 for k, (at, rise) in enumerate(((1, 0.62), (2, 0.5))):
                     tb = beam[at]
                     items.append((g.tube([tb, tb + (up * rise + o * 0.34 - d * 0.14) * Lh, tb + (up * (rise + 0.42) + o * 0.3 + d * 0.16) * Lh],
-                                         [Lh * 0.062, Lh * 0.042, Lh * 0.01], n=5), mat("bone_horn")))
+                                         [Lh * 0.062, Lh * 0.042, Lh * 0.01], n=4), mat("bone_horn"), True))
         if style == "prow":
             # a ship's stem of harbour stone: a wedge up the middle of the face, from under the chin to a crest behind the eyes
             ht, L = fish.ht, fish.L
@@ -1061,34 +1065,34 @@ def carried(fish, spec, pieces):
             w, u, dn = fish.girth(0.42)
             c = p + up * (u + L * 0.07)
             s = L * 0.085
-            items = [(g.box(c, (s * 1.5, s * 1.5, s * 0.3)), mat("iron_lamp")), (g.ico(c + up * s * 0.95, s * 0.62, sub=1, scale=(1, 1, 1.25)), field("lamp", 3.0), True),
-                     (g.box(c + up * s * 1.9, (s * 1.6, s * 1.6, s * 0.28)), mat("iron_lamp")),
+            items = [(g.box(c, (s * 1.5, s * 1.5, s * 0.3)), mat("iron_lamp"), True), (g.ico(c + up * s * 0.95, s * 0.62, sub=1, scale=(1, 1, 1.25)), field("lamp", 3.0), True),
+                     (g.box(c + up * s * 1.9, (s * 1.6, s * 1.6, s * 0.28)), mat("iron_lamp"), True),
                      (g.cone(c + up * s * 2.0, c + up * s * 2.9, s * 0.75, n=4), mat("brass_lamp")), (tori(c + up * s * 3.05, side, s * 0.3, s * 0.07, n=10, sides=4), mat("brass_lamp"))]
             for dx, dy in ((1, 1), (1, -1), (-1, 1), (-1, -1)):
                 q = c + side * dx * s * 0.66 + d * dy * s * 0.66
-                items.append((g.tube([q, q + up * s * 1.9], [s * 0.07, s * 0.07], n=4), mat("iron_lamp")))
+                items.append((g.tube([q, q + up * s * 1.9], [s * 0.07, s * 0.07], n=4), mat("iron_lamp"), True))
             out.append(obj("shiplamp", items, parent=pieces["b0"]))
         elif style == "barnacles":
             items = []
-            for j in range(16):
-                t = 0.1 + 0.052 * j
+            for j in range(13):
+                t = 0.1 + 0.064 * j
                 a = 0.5 + 2.0 * rnd.random()
                 q = fish.skin(t, a, out=0.97)
                 nrm = (q - fish.at(t)[0]).normalized()
                 r = L * (0.018 + 0.022 * rnd.random())
                 items.append((g.cone(q - nrm * r * 0.3, q + nrm * r * 1.5, r, n=5), mat("stone_barnacle"), True))
             pc = [(i, it) for i, it in enumerate(items)]
-            out.append(obj("barnacles_head", [it for i, it in pc if i < 4]))
-            out.append(obj("barnacles_b0", [it for i, it in pc if 4 <= i < 10], parent=pieces["b0"]))
-            out.append(obj("barnacles_b1", [it for i, it in pc if i >= 10], parent=pieces["b1"]))
+            out.append(obj("barnacles_head", [it for i, it in pc if i < 3]))
+            out.append(obj("barnacles_b0", [it for i, it in pc if 3 <= i < 8], parent=pieces["b0"]))
+            out.append(obj("barnacles_b1", [it for i, it in pc if i >= 8], parent=pieces["b1"]))
         elif style == "chain":
             p, d, side, up = fish.at(0.5)
             w, u, dn = fish.girth(0.5)
             root = p - up * dn * 0.9 + side * w * 0.3
             items = []
-            for j in range(5):
-                q = root - up * L * 0.055 * j
-                items.append((tori(q, side if j % 2 else d, L * 0.026, L * 0.007, n=8, sides=4), mat("iron_chain"), True))
+            for j in range(4):
+                q = root - up * L * 0.06 * j
+                items.append((tori(q, side if j % 2 else d, L * 0.03, L * 0.008, n=6, sides=3), mat("iron_chain"), True))
             out.append(obj("sway_chain", items, frame=at_point(root), parent=pieces["b0"]))
         elif style == "coin":
             p, d, side, up = fish.at(0.3)
@@ -1140,7 +1144,7 @@ def build_form(form_id, level, spec, base=None):
     mud = any(s == "mudball" for s, _ in GL.each(spec.get("carry")))
     long_body = fish.shape == "long"
     ts = list(STATIONS) if not long_body else [0.0, 0.01, 0.025, 0.05, 0.075, 0.1, 0.13] + [0.13 + 0.87 * j / 24 for j in range(1, 25)]
-    cuts = [fish.ht * 1.25, 0.62] if not long_body else [0.13, 0.35, 0.57, 0.79]
+    cuts = [fish.ht * 1.25, 0.62] if not long_body else [0.13, 0.42, 0.71]
     cuts = [min(ts, key=lambda t: abs(t - c)) for c in cuts]
     bounds = [0.0] + cuts + [1.0]
     objects, pieces = [], {}
@@ -1182,7 +1186,7 @@ def build_form(form_id, level, spec, base=None):
         name = "carp_head" if first else "wag_body_%d" % (n_piece - 1)
         ob = obj(name, items, frame=None if first else fish.frame(lo), parent=prev)
         objects.append(ob)
-        pieces[["head", "b0", "b1"][min(n_piece, 2)] if not long_body else ("head" if first else "b0" if n_piece < 3 else "b1")] = ob
+        pieces[["head", "b0", "b1"][min(n_piece, 2)]] = ob
         prev = ob
     # the tail turns on the last of them
     tstyle, tsize = (GL.each(spec.get("tail")) or [("fan", 1.0)])[0]
@@ -1267,37 +1271,40 @@ def build_form(form_id, level, spec, base=None):
 # ======================================================================================
 
 def gift_fins():
-    """The Carp's fin on another's back: a sail of seven rays, made at the back's socket."""
-    out = [Vector((0, -0.2, 0.0))]
-    for j in range(8):
-        s = j / 7.0
-        h = 0.27 * (0.4 + 0.75 * math.sin(min(1.0, s * 2.2) * math.pi / 2)) * (1.0 - 0.7 * s ** 1.5)
-        out.append(Vector((0, -0.2 + 0.46 * s + h * 0.35, h)))
-    out.append(Vector((0, 0.27, 0.0)))
-    ga, gb = plate(out, X, 0.012, parity=True)
-    return [kit._part("fins", [(ga, mat("accent")), (gb, mat("fin"))])]
+    """The Carp's fin on another's back: a long sail, tall at the front and swept back, its
+    rays the Path's colour and its edge scalloped. Made at the back's socket."""
+    out = [Vector((0, -0.24, 0.0))]
+    n = 11
+    for j in range(n):
+        k = j / (n - 1.0)
+        h = 0.21 * (0.3 + 0.85 * math.sin(min(1.0, k * 2.8) * math.pi / 2)) * (1.0 - 0.72 * k ** 1.4) * (1.0 if j % 2 == 0 else 0.84)
+        out.append(Vector((0, -0.22 + 0.5 * k + h * 0.55, h)))
+    out.append(Vector((0, 0.3, 0.0)))
+    q = plate(out, X, 0.014, parity=True, band=0.5)
+    return [obj("fins", [(q[0], mat("fin"), True), (q[1], mat("accent_dark"), True), (q[2], mat("scale_pale"), True), (q[3], mat("accent"), True)])]
 
 
 def gift_tail():
-    """The Carp's tail in place of another's: a deep fan in two lobes, made at the tail's socket."""
-    out = [Vector((0, 0, -0.035))]
-    for j in range(13):
-        th = -1.0 + 2.0 * j / 12
-        r = 0.36 * (0.78 + 0.22 * math.sin(min(1.0, abs(th)) * math.pi * 0.85) - 0.2 * math.exp(-(th / 0.16) ** 2))
-        out.append(Vector((0, math.cos(th) * r + 0.1, math.sin(th) * r)))
-    out.append(Vector((0, 0, 0.035)))
-    ga, gb = plate(out, X, 0.014, parity=True)
-    stem = g.tube([(0, -0.02, 0), (0, 0.12, 0)], [0.05, 0.03], n=8)
-    return [kit._part("tail", [(ga, mat("fin")), (gb, mat("accent")), (stem, mat("scale"))])]
+    """The Carp's tail in place of another's: a deep fork in two lobes on a scaled stem. Made
+    at the tail's socket, running back from it."""
+    out = [Vector((0, 0.06, -0.04))]
+    for j in range(15):
+        th = -1.0 + 2.0 * j / 14
+        r = 0.36 * (0.36 + 0.64 * math.sin(min(1.0, abs(th) * 1.3) * math.pi / 2) ** 2)
+        out.append(Vector((0, 0.1 + math.cos(th) * r, math.sin(th) * r)))
+    out.append(Vector((0, 0.06, 0.04)))
+    q = plate(out, X, 0.016, parity=True, band=0.45)
+    stem = g.tube([(0, -0.03, 0), (0, 0.05, 0), (0, 0.13, 0)], [0.055, 0.045, 0.028], n=8)
+    return [obj("tail", [(q[0], mat("fin"), True), (q[1], mat("accent_dark"), True), (q[2], mat("scale_pale"), True), (q[3], mat("accent"), True), (stem, mat("scale"), True)])]
 
 
 GIFTS = {"carp-fins": gift_fins, "carp-tail": gift_tail}
 
 
 def gifts():
-    GL.accent({"accent": "jade"})
     for name, fn in GIFTS.items():
         kit.reset()
+        GL._palette_of("carp")        # its own colours, whatever another family calls a fin
         GL.accent({"accent": "jade"})
         objs = fn()
         path = os.path.join(kit.OUT, "gifts", name + ".glb")
