@@ -184,6 +184,9 @@ func _ready() -> void:
 	_fade.modulate.a = 0.0
 	root.add_child(_fade)
 	root.move_child(_fade, _box.get_index())
+	# (the great card and the rite's panels are made now: the tracker and the place's name ask
+	# whether the great card is up, and it must be there, and clear, to answer)
+	_build_rite_ui()
 
 # --- Entering ----------------------------------------------------------------
 
@@ -248,7 +251,7 @@ func _arrive() -> void:
 	var p := Vector3(fight.p_pos.x, 0, fight.p_pos.y)
 	world.cine = true
 	world.cine_speed = 0.5
-	world._cam_pos = Vector3(9.0, 8.6, 6.5)
+	world._cam_pos = Vector3(3.5, 9.2, 10.0)    # (clear of the court's trees)
 	world._cam_look = Vector3(-3.0, 1.2, -7.0)
 	world.cine_pos = p + Vector3(-2.0, 2.5, 2.3)
 	world.cine_look = p + Vector3(0.9, 1.35, -3.0)
@@ -2078,7 +2081,12 @@ func _build_rite_ui() -> void:
 	_big.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_big.modulate.a = 0.0
 	root.add_child(_big)
-	Style.label(_big_sub, 24, Style.FG, "title_light", 6)
+	Style.label(_big_sub, 26, Style.FG, "title_light", 8)
+	# (a dark edge all round: the line is read over lit windows and firelight)
+	_big_sub.add_theme_color_override("font_shadow_color", Color(0.01, 0.008, 0.008, 0.85))
+	_big_sub.add_theme_constant_override("shadow_outline_size", 14)
+	_big_sub.add_theme_constant_override("shadow_offset_x", 0)
+	_big_sub.add_theme_constant_override("shadow_offset_y", 1)
 	_big_sub.set_anchors_preset(Control.PRESET_CENTER)
 	_big_sub.position = Vector2(-700, -250)
 	_big_sub.custom_minimum_size = Vector2(1400, 0)
@@ -2494,7 +2502,7 @@ func pause() -> void:
 	buttons.append(["Way-marker: %s" % ("on  (turn it off)" if guide_on() else "off  (turn it on)"), func():
 		Settings.cfg.set_value("play", "way_marker", not guide_on())
 		Settings.cfg.save(Settings.PATH)
-		pause()])
+		pause.call_deferred()])
 	buttons.append(["Leave by the line  (to the title, the term saved)", func(): get_tree().paused = false; leave.emit()])
 	hud.show_screen("THE TERM SO FAR", "%s  ·  %s" % [hero["name"], Data.academy["term"]["cohort"]], "\n".join(lines), buttons)
 
