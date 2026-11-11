@@ -1315,7 +1315,7 @@ than standing square. The Hoard's low Finals (Gate-wyrm, Ruin-sleeper, Vault-dra
 and low by design and so are the smallest pictures of the line. Wings seen from dead ahead or
 dead behind are thin: their webs are flat panels. Smoke is puffs of grey. The hatchling is
 the partner's coat with no Path colour, and on a dark coat it is a dark small thing. One
-model (the Ruin-sleeper, 302 KB) is a little over the 300 KB asked of a rigged body; the
+model (Cinder-rain, 302 KB) is a little over the 300 KB asked of a rigged body; the
 heaviest was 289 KB. The base body the clips are borrowed from (`beast-drake`, `tools/blender/genius_tree.py`)
 is still the first pass's hound-drake; it is seen only if a form's own model is missing.
 
