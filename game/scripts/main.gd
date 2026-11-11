@@ -112,7 +112,10 @@ func _ready() -> void:
 		for q in Data.creation["questions"]:
 			creator.answers.append(0)
 		creator._reveal()
-		for id in String(_args["faces"]).split(","):
+		for spec in String(_args["faces"]).split(","):
+			# a body may carry a look of its own: lunden-f@face:fine;hair:bob
+			var id := spec.get_slice("@", 0)
+			var own := spec.get_slice("@", 1).replace(";", ",") if spec.contains("@") else ""
 			var home := id.get_slice("-", 0)
 			var h: Dictionary = creator.hero
 			h["city"] = home
@@ -120,17 +123,17 @@ func _ready() -> void:
 			h["look"] = Creation.look_of(home, 4)
 			h["look"]["sex"] = id.get_slice("-", 1)
 			h["look"]["headgear"] = false
-			for kv in String(_args.get("look", "")).split(",", false):
+			for kv in (String(_args.get("look", "")) + "," + own).split(",", false):
 				var parts := kv.split(":")
 				if parts.size() == 2:
-					h["look"][parts[0]] = (parts[1] == "1") if parts[0] in ["headgear", "cape"] else (float(parts[1]) if parts[1].is_valid_float() else parts[1])
+					h["look"][parts[0]] = (parts[1] == "1") if parts[0] in ["headgear", "cape"] else (float(parts[1]) if parts[1].is_valid_float() else ([parts[1]] if parts[0] == "marks" else parts[1]))
 			_preview_hero(h)
 			preview.p_facing = PI / 2.0 + deg_to_rad(float(_args.get("turn", "0")))
 			creator._set_tab("face")
 			if _args.has("frame"):
 				creator._set_frame(String(_args["frame"]))
 			await get_tree().create_timer(float(_args.get("wait", "1.6"))).timeout
-			await _shot("face-" + id)
+			await _shot("face-" + spec.replace("@", " ").replace(":", "-").replace(";", " "))
 		get_tree().quit()
 		return
 	if _args.has("reveal"):
