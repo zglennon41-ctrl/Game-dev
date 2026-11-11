@@ -887,6 +887,9 @@
       "far-eyes"
      ],
      "body": {
+      "build": {
+       "hands": 1.3
+      },
       "hair": "cropped",
       "mouth": "small",
       "wings": [
@@ -978,7 +981,8 @@
        "body": {
         "build": {
          "bow": 0.1,
-         "small": 0.74
+         "small": 0.74,
+         "hands": 1.0
         },
         "wings": [
          [
