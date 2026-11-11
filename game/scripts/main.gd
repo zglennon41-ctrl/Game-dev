@@ -192,6 +192,7 @@ func _ready() -> void:
 			pg.ran("ruin", true, 0)
 			pg.save_to(ph)
 		menu()
+		page.hero = ph
 		page.open(Genius.for_hero(ph), World.SHAPE_COLORS.get(ph.get("shape", "anchor"), Color.WHITE), 0, int(ph.get("academy", {}).get("record", {}).get("marks", 0)))
 		if _args.has("shots"):
 			await get_tree().create_timer(1.5).timeout
@@ -364,6 +365,27 @@ func _ready() -> void:
 	elif _args.has("fight"):
 		if _args.has("saved"):
 			hero = Settings.hero()
+		# --fight --genius=<form id>[:instar] (and --weapon=<weapon id>): the practice yard beside
+		# a genius standing at that form, to try what its type does (docs/genius-types.md). The
+		# form is a base's, or a hybrid's (wolf+blade:wolf-counting-wolf).
+		if _args.has("genius"):
+			var spec := str(_args["genius"])
+			var at := spec.rfind(":")
+			var form_id := spec
+			var instar := 0
+			if at > 0 and spec.substr(at + 1).is_valid_int():
+				form_id = spec.substr(0, at)
+				instar = int(spec.substr(at + 1))
+			var tg := Genius.at_form(form_id, instar)
+			if tg.is_born():
+				hero = Fight.default_hero().duplicate(true)
+				hero["name"] = "Test"
+				if _args.has("weapon") and not Data.by_id(Data.weapons, str(_args["weapon"])).is_empty():
+					hero["weapon"] = str(_args["weapon"])
+				tg.look = GeniusLook.born(4711)
+				tg.save_to(hero)
+			else:
+				push_warning("--genius: no form %s on any tree" % form_id)
 		start("fight")
 	else:
 		menu()
@@ -422,7 +444,7 @@ func menu() -> void:
 		buttons.append(["Practice yard: fight cut-wolves as %s  (two minutes)" % saved["name"], func(): hero = saved; start("fight")])
 	if saved.has("genius") and Genius.from_dict(saved["genius"]).is_born():
 		var sg := Genius.for_hero(saved)
-		buttons.append(["Your genius: %s" % (sg.name if sg.name != "" else sg.form_name()), func(): page.open(sg, World.SHAPE_COLORS.get(saved["shape"], Color.WHITE), 0, int(saved.get("academy", {}).get("record", {}).get("marks", 0)))])
+		buttons.append(["Your genius: %s" % (sg.name if sg.name != "" else sg.form_name()), func(): page.hero = saved; page.open(sg, World.SHAPE_COLORS.get(saved["shape"], Color.WHITE), 0, int(saved.get("academy", {}).get("record", {}).get("marks", 0)))])
 	buttons.append(["Combat tutorial  (as an Anchor)", func(): hero = {}; start("tutorial")])
 	buttons.append(["Quit", func(): get_tree().quit()])
 	hud.show_screen("WILDLINE", "The Cumberland Cut", body, buttons, "title")
@@ -1031,6 +1053,7 @@ func _open_builder() -> void:
 
 func open_genius_page() -> void:
 	if academy.genius and academy.genius.is_born():
+		page.hero = academy.hero
 		page.open(academy.genius, World.SHAPE_COLORS.get(academy.hero["shape"], Color.WHITE), 0, int(academy.progress["record"].get("marks", 0)))
 
 ## A classmate speaks for the moment, in their temperament's voice.
@@ -1155,6 +1178,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		hud.show_prompt_again()
 	if mode == "academy":
 		if event.is_action_pressed("genius_page") and not academy.busy() and not academy.in_lesson() and academy.genius and academy.genius.is_born():
+			page.hero = academy.hero
 			page.open(academy.genius, World.SHAPE_COLORS.get(academy.hero["shape"], Color.WHITE), 0, int(academy.progress["record"].get("marks", 0)))
 			return
 		if event.is_action_pressed("menu"):
@@ -1316,6 +1340,16 @@ func _sounds(events: Array) -> void:
 			"genius-up": sfx.play("cue-hit", 0.7)
 			"field-open": sfx.play("pattern", 1.1)
 			"order": sfx.play("stance", 1.7, -4.0)
+			# the genius's key, by its type
+			"genius-take": sfx.play("stance", 1.9 if e.get("in", false) else 1.3, -3.0)
+			"genius-use": sfx.play("stance" if not e.get("miss", false) else "deny", 1.5, -3.0)
+			"genius-took": sfx.play("block", 1.4)
+			"genius-caught": sfx.play("stagger", 1.4, -2.0)
+			"genius-toll": sfx.play("cue-hit", 0.5)
+			"genius-caught-fall": sfx.play("parry", 0.8)
+			"genius-held-blow": sfx.play("block", 1.1, -3.0)
+			"genius-mend", "genius-took-back": sfx.play("cue-hit", 1.2, -8.0)
+			"genius-not-ready": sfx.play("deny", 1.2, -6.0)
 
 func _shot(label: String) -> void:
 	if not _args.has("shots"):
@@ -1353,6 +1387,11 @@ func _bot() -> Vector2:
 		f.input("block-down")
 	elif f.p_block_held and f.w_state != "windup":
 		f.input("block-up")
+	# its genius's key, by its type: a weapon taken up and let go, an item used
+	if f.genius != null and f.g_type != "companion" and GeniusTypes.bot_wants_key(f, f.w_state == "windup" and int((f.now - f.w_timer) * 7.0) % 3 != 0):
+		f.input("order")
+	if f.p_state == "draw" and f.p_draw >= f.draw_seconds():
+		f.input("attack-up")
 	if f.pattern_ready():
 		f.input("pattern")
 	if f.p_state == "pattern" and not f.chain.is_empty():

@@ -243,7 +243,7 @@ var g_great_at := 0.0
 ## The moves a genius has, from what it is: its kind's, its Expression's, then one for each
 ## feature that brings one, in that order, no move twice, no more than `count` (and never more
 ## than fight.movesMax). Pure: the same body always has the same moves.
-static func genius_moves(kind: String, expression: String, features: Array, count: int) -> Array:
+static func genius_moves(kind: String, expression: String, features: Array, count: int, favours: Array = []) -> Array:
 	var F: Dictionary = Data.genius().get("fight", {})
 	var ids: Array = []
 	for id in F.get("byKind", {}).get(kind, []) + F.get("byExpression", {}).get(expression, []):
@@ -253,6 +253,13 @@ static func genius_moves(kind: String, expression: String, features: Array, coun
 		for id in F.get("byFeature", {}).get(String(f), []):
 			if not ids.has(id):
 				ids.append(id)
+	# a companion's role keeps the moves it favours first (data/genius-types.json, roles)
+	if not favours.is_empty():
+		var first: Array = []
+		for fid in favours:
+			if ids.has(fid) and not first.has(fid):
+				first.append(fid)
+		ids = first + ids.filter(func(x): return not first.has(x))
 	var out: Array = []
 	for id in ids.slice(0, mini(count, int(F.get("movesMax", 3)))):
 		var m: Dictionary = (F.get("moves", {}).get(id, {}) as Dictionary).duplicate()
@@ -283,6 +290,7 @@ func _genius_setup() -> void:
 	g_pos = p_pos + Vector2(-1.0, 0.8)
 	g_order = genius.order if genius.order != "free" else "guard"
 	g_great_at = float(F.get("great", {}).get("wait", 38.0)) * 0.4
+	_genius_type_setup()
 
 func _genius_has(id: String) -> Dictionary:
 	for m in g_moves:
@@ -293,7 +301,7 @@ func _genius_has(id: String) -> Dictionary:
 ## Its plain blow's worth: the Hunt's damage, by Expression and Resonance.
 func _genius_base() -> float:
 	var ex: Dictionary = Data.genius()["byExpression"].get(genius.body.get("expression", ""), { "damage": 1.0, "interval": 1.0 })
-	return float(_order("hunt")["hunt"]["damage"]) * float(ex["damage"]) * float(Data.genius()["byResonance"][str(genius.resonance())])
+	return float(_order("hunt")["hunt"]["damage"]) * float(ex["damage"]) * float(Data.genius()["byResonance"][str(genius.resonance())]) * _role_n("damage")
 
 ## Is it where it can guard its partner: beside them, or on the ground it holds with them on it?
 func _genius_covers() -> bool:
@@ -306,11 +314,11 @@ func _genius_covers() -> bool:
 
 ## Guard: it takes the hit you did not see, out of its own Will.
 func _genius_guards(dmg: float) -> bool:
-	if not genius or genius.fallen or now < g_guard_ready_at or not _genius_covers():
+	if not genius or genius.fallen or now < g_guard_ready_at or g_type != "companion" or not _genius_covers():
 		return false
 	var o := _order("guard")
 	var brace := _genius_has("brace")
-	var cost := float(o["guard"]["willCost"]) * float(brace.get("guardCost", 1.0))
+	var cost := float(o["guard"]["willCost"]) * float(brace.get("guardCost", 1.0)) * _role_n("guardCost")
 	# It guards with whatever Will it has left; emptied by the blow, it falls (braced, it does not).
 	if g_will <= 0.0:
 		return false
@@ -318,7 +326,7 @@ func _genius_guards(dmg: float) -> bool:
 	g_will = maxf(1.0 if not brace.is_empty() else 0.0, g_will - spent)
 	stats["g_will_spent"] += spent
 	stats["g_guards"] += 1
-	g_guard_ready_at = now + float(o["guard"]["cooldown"]) * float(brace.get("guardCooldown", 1.0))
+	g_guard_ready_at = now + float(o["guard"]["cooldown"]) * float(brace.get("guardCooldown", 1.0)) * _role_n("guardCooldown")
 	g_regen_from = now + float(Data.genius()["will"]["regenDelayAfterHit"])
 	_emit({ "type": "genius-guard", "damage": dmg, "braced": not brace.is_empty() })
 	if g_will <= 0.0:
@@ -370,9 +378,15 @@ func _genius_debt_paid(dmg: float, idx: int) -> void:
 func _genius_hits(dmg: float, what: String, through := false) -> void:
 	if w_state in ["down", "absent"]:
 		return
+	# a Hunter's blow into an opening (the foe staggered, recovering, or its guard brought down)
+	var into := _own("opening")
+	if into > 0.0 and what != "with" and (w_state in ["stagger", "recover"] or now < w_open_until):
+		dmg *= 1.0 + (float(_own_spec("opening").get("damage", 1.5)) - 1.0) * into
 	dmg = roundf(dmg if through else _guarded(dmg))
 	if w_state == "stagger":
 		dmg = roundf(dmg * float(room["break"]["staggerDamageFactor"]))
+	if now < w_exposed_until:
+		dmg = roundf(dmg * w_exposed)
 	dmg = maxf(1.0, dmg)
 	w_hp = maxf(w_floor, w_hp - dmg)
 	stats["damage_dealt"] += dmg
@@ -494,13 +508,22 @@ func _genius_after_hit(dmg: float, from_pattern: bool) -> void:
 	if not genius or genius.fallen or from_pattern or w_state in ["down", "absent"]:
 		return
 	var w := _genius_has("with")
+	var worth := float(g_age.get("power", 1.0))
+	# a weapon genius strikes with its partner from the shoulder from its First Form (in the
+	# hand it is the blow itself); so does an item whose path says so
+	if g_type == "weapon" and not g_weapon.is_empty():
+		w = {} if g_in_hand else (_types()["weapon"]["with"] as Dictionary)
+		worth = g_worth
+	elif g_type in ["defense", "ritual"]:
+		w = g_item.get("always", {}).get("with", {})
+		worth = g_worth
 	if not w.is_empty():
 		g_with += 1
 		if g_with % maxi(1, int(w.get("every", 3))) == 0:
-			g_move_now = String(w["name"])
+			g_move_now = String(w.get("name", "Strikes with you"))
 			g_move_until = now + 1.0
 			stats["g_moves"] += 1
-			_genius_hits(_genius_base() * float(w["damage"]) * float(g_age.get("power", 1.0)), "with")
+			_genius_hits(_genius_base() * float(w["damage"]) * worth, "with")
 	if now < g_double_until and w_state not in ["down", "absent"]:
 		_genius_hits(dmg * g_double, "double", true)
 
@@ -566,9 +589,14 @@ func _update_genius(dt: float) -> void:
 			g_up_at = -1.0
 			_emit({ "type": "genius-up" })
 		return
-	if now >= g_regen_from:
-		g_will = minf(g_will_max, g_will + float(Data.genius()["will"]["regenPerSecond"]) * dt)
+	# held in the hand it gets none of its Will back: it rests at the shoulder
+	if now >= g_regen_from and not g_in_hand:
+		g_will = minf(g_will_max, g_will + float(Data.genius()["will"]["regenPerSecond"]) * _rest_k() * dt)
 	var F: Dictionary = Data.genius()["fight"]
+	# a weapon or an item takes no orders: it is with its partner, and does what its type does
+	if g_type != "companion":
+		_update_typed(dt)
+		return
 	# its order: what it was told, or on Free what it judges
 	if genius.order == "free":
 		if now >= g_think_at:
@@ -584,16 +612,31 @@ func _update_genius(dt: float) -> void:
 	var hunting: bool = g_order == "hunt" and foe_up and p_lock and dist() <= float(_order("hunt")["hunt"]["reach"])
 	# where it goes
 	var side := p_pos + Vector2.from_angle(p_facing + 2.2) * 1.1
+	# its role's place beside its partner: a Bulwark between them and the foe, a Lookout behind
+	var stands := String(g_role.get("stands", ""))
+	# whatever its role, while it holds the foe it stands between the foe and its partner
+	if _holds():
+		stands = "front"
+	var toward := (w_pos - p_pos).normalized() if foe_up and dist() > 0.2 else Vector2.from_angle(p_facing)
+	if stands == "front" and foe_up:
+		side = p_pos + toward * 1.6
+	elif stands == "back":
+		side = p_pos - toward * 2.2
 	var want := side
 	if g_order == "hold":
 		want = g_hold_at
 	elif hunting:
-		# a runner comes round behind the foe; the rest come at it from where they are
+		# a runner comes round behind the foe; the rest come at it from where they are. A
+		# Harrier is always behind it; a Bulwark stands in its face, between it and its partner.
 		var away := (w_pos - p_pos).normalized() if g_kind == "quadruped" else (g_pos - w_pos).normalized()
+		if stands == "flank":
+			away = toward
+		elif stands == "front":
+			away = -toward
 		if away.length() < 0.5:
 			away = Vector2.RIGHT
 		want = w_pos + away * (float(beast["radius"]) + 0.9)
-	var speed := float(F.get("speed", {}).get(g_kind, 6.0))
+	var speed := float(F.get("speed", {}).get(g_kind, 6.0)) * _role_n("speed")
 	if g_kind == "object" or speed <= 0.0:
 		g_pos = p_pos
 	else:
@@ -617,6 +660,9 @@ func _update_genius(dt: float) -> void:
 		# at its partner's side it keeps to what shields them; hunting or holding, it uses what it has
 		if g_order != "guard" or String(g_great.get("effect", "")) in ["ward", "double"]:
 			_genius_great_move()
+	# what only its role does (data/genius-types.json, roles)
+	if not g_role.is_empty():
+		_role_acts(foe_up)
 	match g_order:
 		"guard":
 			# while it guards: a strike wound up at its partner, it may call onto itself
@@ -646,7 +692,7 @@ func _genius_hunts(h: Dictionary, from: Vector2) -> void:
 				return
 	if not near or now < g_hunt_at or g_will < float(h["willCost"]):
 		return
-	g_hunt_at = now + float(h["interval"]) * float(ex["interval"]) * float(g_age.get("wait", 1.0))
+	g_hunt_at = now + float(h["interval"]) * float(ex["interval"]) * float(g_age.get("wait", 1.0)) * _role_n("interval")
 	g_will -= float(h["willCost"])
 	stats["g_will_spent"] += float(h["willCost"])
 	_genius_hits(_genius_base() * float(g_age.get("strike", 1.0)), "strike")
@@ -743,6 +789,10 @@ func _record(evs: Array) -> void:
 			"hit":
 				if not e.get("pattern", false):
 					genius.hit_at(float(e.get("dist", 2.0)))
+					_typed_learns("hit", e)
+			"foe-hit":
+				if not e.get("genius", false):
+					_typed_learns("hit", e)
 			"technique":
 				genius.used_family("%s.%s" % [player_shape, String(tech.get("family", ""))])
 			"pattern-start":
@@ -756,15 +806,900 @@ func _record(evs: Array) -> void:
 			"genius-hunt":
 				if String(e.get("move", "")) in ["strike", "hamstring", "stoop", "shot"]:
 					genius.gave_order("hunt")
+				elif String(e.get("move", "")) == "with":
+					_typed_learns("with", e)
 			"genius-hold": genius.gave_order("hold")
 			"free": genius.gave_order("free")
 			# how its partner meets a blow: what Free judges by
-			"parry": genius.met_blow("parries")
+			"parry":
+				genius.met_blow("parries")
+				_typed_learns("turn", e)
 			"hurt": genius.met_blow("hurts")
-			"block": genius.met_blow("blocks")
+			"block":
+				genius.met_blow("blocks")
+				_typed_learns("turn", e)
 			"evade":
 				if String(e.get("how", "")) == "dodged":
 					genius.met_blow("dodges")
+
+# ===================================================================== the genius's type
+# What a genius does beside its partner follows from the class of its base
+# (data/genius-types.json; docs/genius-types.md). A weapon is taken in hand on a switch with
+# the main weapon, and strikes with its partner from the shoulder. A defensive or a ritual
+# item has something always true of the one who has it, and one thing they do with it. A
+# companion has a role laid over its moves and its orders: where it stands, the moves it
+# favours, its numbers, and one thing only that role does. One key, the genius's, means what
+# its type means. A genius whose base has no type written fights as genii did before types.
+
+const HELD := -2                 # whom the foe is after while a Bulwark holds it: the genius
+
+var g_type := "companion"        # weapon, defense, ritual, companion
+var g_base := ""                 # its base (a hybrid's first)
+var g_path := ""                 # the path it took ("" while it is only settled)
+var g_worth := 1.0               # how much of its function it has at its age (types.ages)
+var g_twait := 1.0               # its type's waits, longer or shorter by its age
+# --- a weapon
+var g_weapon: Dictionary = {}    # what it is in the hand: { style, willPerBlow, held, sig }
+var g_in_hand := false
+var g_out_at := -99.0            # when it was last let go
+var g_cut_until := -9.0          # the cut of the draw: its first blow after it is taken up
+var g_cut_blow := false          # the blow in flight is that cut
+var g_first_draw := false        # its first arrow from a full draw is still to come
+var g_riposte_until := -9.0      # the answer to a parry
+var g_score := 0                 # blows its partner has taken, cut into its flat
+var g_shots := 0                 # blows in a row since it was taken up
+var main: Dictionary = {}        # the weapon put away while the genius is held
+var p_startup_k := 1.0           # how much of its startup the swing in flight takes
+var p_draw_k := 1.0              # how much of its time the draw in progress takes
+var p_moved_at := 0.0            # when its partner last moved (a stand is feet set)
+var w_weak_until := -9.0         # a strike with the weight taken out of it
+var w_weak := 1.0
+# --- an item
+var g_item: Dictionary = {}      # { type, worn, always, use, bend } with its path laid over
+var g_use_at := 0.0              # when it can be used again
+var g_used_at := -9.0            # when it was last used well
+var g_set_until := -9.0          # a shield that is set
+var g_set_blows := 0
+var g_door: Dictionary = {}      # a shield set on the ground: { at, until, radius, blows }
+var g_lamp: Dictionary = {}      # lit ground: { at, until, radius, tick }
+var g_sight_until := -9.0        # the locked foe is sighted
+var g_measure := 0               # measures taken of the locked foe
+var g_measures: Dictionary = {}  # beast id -> measures kept of its kind
+var g_auto_at := 0.0             # when an hour-bell next tolls of itself
+var g_fall_caught := false       # an open hand has caught its partner this fight
+var p_slip: Dictionary = {}      # the slip in flight: { dir, distance, iframes }
+var p_haste_until := -9.0
+var p_haste := 1.0
+var p_punish_until := -9.0       # the blow after a blow slipped
+var p_punish := 1.0
+var p_hurt_at := -9.0            # when its partner was last hurt, and by how much
+var p_hurt_dmg := 0.0
+var p_struck_at := -9.0          # when a blow last landed on its partner, blocked or not
+# --- a companion's role
+var g_role: Dictionary = {}      # roles[its role]
+var g_role_id := ""
+var g_shade: Dictionary = {}     # the role its path shades toward ({} for none, or its own)
+var g_shade_id := ""
+var g_role_k := 0.0              # the strength of its role's own thing
+var g_shade_k := 0.0             # and of its shade's
+var g_role_text := ""
+var g_held_until := -9.0         # the foe is held on it
+var g_mend_at := 0.0
+var w_open_until := -9.0         # the foe's guard is down (worried, caught, taken apart)
+var w_exposed_until := -9.0      # and every blow on it lands for more
+var w_exposed := 1.0
+var g_opening_until := -9.0      # the opening a Lookout called
+var g_opening := 1.0
+
+func _types() -> Dictionary:
+	return Data.genius_types()
+
+## Its type, read off its form, and what that gives it in this fight.
+func _genius_type_setup() -> void:
+	var what := GeniusTypes.of(genius)
+	g_type = String(what["type"])
+	g_base = String(what["base"])
+	g_path = String(what["path"])
+	var row := GeniusTypes.age_row(genius.instar)
+	g_worth = float(row.get("worth", 1.0))
+	g_twait = float(row.get("wait", 1.0))
+	if not what["written"]:
+		return
+	var is_great := float(g_age.get("great", 0.0)) > 0.0
+	match g_type:
+		"weapon":
+			g_weapon = GeniusTypes.weapon_spec(g_base, g_path)
+			g_kind = "object"
+			g_moves = []
+			var gr: Dictionary = g_weapon.get("great", _types()["weapon"].get("great", {}))
+			if is_great and not gr.is_empty():
+				g_great = gr.duplicate()
+		"defense", "ritual":
+			g_item = GeniusTypes.item_spec(g_base, g_path, g_worth)
+			g_kind = "object"
+			g_moves = []
+			if is_great and g_item.has("great"):
+				g_great = (g_item["great"] as Dictionary).duplicate()
+		"companion":
+			var r := GeniusTypes.role_spec(g_base, g_path)
+			if r.is_empty():
+				return
+			g_role = r["role"]
+			g_role_id = String(r["id"])
+			g_shade = r["shade"]
+			g_shade_id = String(r["shade_id"])
+			g_role_k = float(r["k"]) * g_worth
+			g_shade_k = float(r["shade_k"]) * g_worth
+			g_role_text = String(r["text"])
+			g_will_max *= _role_n("will")
+			if not genius.fallen:
+				g_will = g_will_max
+			# the moves its role favours are kept first as it ages, and come round sooner
+			var fav: Array = (g_role.get("favours", []) as Array) + (g_shade.get("favours", []) as Array)
+			g_moves = Fight.genius_moves(g_kind, String(genius.body.get("expression", "")), genius.features(), int(g_age.get("moves", 2)), fav)
+			var sooner := float(_types().get("roles", {}).get("favourWait", 1.0))
+			for m in g_moves:
+				if (g_role.get("favours", []) as Array).has(m["id"]) and m.has("wait"):
+					m["wait"] = float(m["wait"]) * sooner
+
+## How much faster a weapon genius's Will comes back at the shoulder (weapon.rest).
+func _rest_k() -> float:
+	return float(_types().get("weapon", {}).get("rest", 1.0)) if g_type == "weapon" else 1.0
+
+## One of its role's numbers (will, damage, interval, speed, guardCost, guardCooldown): 1 for a
+## genius with no role.
+func _role_n(key: String) -> float:
+	return float(g_role.get("numbers", {}).get(key, 1.0)) if g_type == "companion" else 1.0
+
+## How strongly it has a role's own thing (hold-it, opening, worry, mend, calls): its role's at
+## the worth of its age, its shade's at a share of that, 0 if it has neither or has fallen.
+func _own(id: String) -> float:
+	if g_type != "companion" or genius == null or genius.fallen:
+		return 0.0
+	if String(g_role.get("own", {}).get("id", "")) == id:
+		return g_role_k
+	if String(g_shade.get("own", {}).get("id", "")) == id:
+		return g_shade_k
+	return 0.0
+
+func _own_spec(id: String) -> Dictionary:
+	if String(g_role.get("own", {}).get("id", "")) == id:
+		return g_role["own"]
+	if String(g_shade.get("own", {}).get("id", "")) == id:
+		return g_shade["own"]
+	return {}
+
+## What the genius's key would do now, for the HUD and the bots: { does (take, use, order),
+## label, ready, left (seconds until it is), active (in the hand; set; lit) }.
+func genius_key() -> Dictionary:
+	if not genius:
+		return { "does": "", "label": "", "ready": false, "left": 0.0, "active": false }
+	match g_type:
+		"weapon":
+			var need := g_will_max * float(_types()["weapon"]["take"]["retake"])
+			var ok := g_in_hand or (not genius.fallen and not p_disarmed and g_will >= need)
+			var per := float(Data.genius()["will"]["regenPerSecond"]) * _rest_k()
+			return { "does": "take", "label": "Let it go" if g_in_hand else "Take in hand", "ready": ok, "left": 0.0 if ok else maxf(0.0, (need - g_will) / maxf(0.01, per)), "active": g_in_hand }
+		"defense", "ritual":
+			var use: Dictionary = g_item.get("use", {})
+			var left := maxf(0.0, g_use_at - now)
+			return { "does": "use", "label": String(use.get("short", use.get("name", ""))), "ready": left <= 0.0 and g_will >= float(use.get("will", 0.0)) and not genius.fallen, "left": left,
+				"active": now < g_set_until or not g_door.is_empty() or not g_lamp.is_empty() or now < g_sight_until }
+	return { "does": "order", "label": String(_order(genius.order).get("name", genius.order)), "ready": not genius.fallen, "left": 0.0, "active": false }
+
+## Can the key not be answered this moment? A weapon changes hands from a free hand, the end
+## of a swing, a reload or a draw; an item is used out of anything but the Pattern.
+func _key_busy() -> bool:
+	if not genius or g_type == "companion":
+		return false
+	if p_state in ["pattern", "down"]:
+		return true
+	if g_type == "weapon":
+		return not (p_state in ["free", "reload", "draw"] or (p_state == "attack" and _can_start_action()))
+	return false
+
+func _genius_key_pressed() -> void:
+	if not genius:
+		return
+	match g_type:
+		"weapon":
+			if g_in_hand:
+				_let_go()
+			else:
+				_take_in_hand()
+		"defense", "ritual":
+			_genius_use()
+
+# --- a weapon, in the hand and out of it
+
+## Take the genius in hand: the main weapon is put away and its partner fights with it.
+func _take_in_hand() -> void:
+	var W: Dictionary = _types()["weapon"]
+	if genius.fallen or p_disarmed or g_weapon.is_empty() or g_will < g_will_max * float(W["take"]["retake"]):
+		_emit({ "type": "genius-not-ready", "why": "disarmed" if p_disarmed else "spent" })
+		return
+	var st: Dictionary = (room["styles"].get(String(g_weapon["style"]), {}) as Dictionary).duplicate(true)
+	if st.is_empty():
+		return
+	var sig: Dictionary = g_weapon.get("sig", {})
+	# the weapon it is: its type's, with what its path lays over it. A gun's rounds are its Will.
+	if st.has("shot"):
+		for k in sig.get("shot", {}):
+			st["shot"][k] = sig["shot"][k]
+		st["ammo"] = 0
+		st.erase("reload")
+	for sw in st.get("combo", []):
+		for k in sig.get("swing", {}):
+			sw[k] = sig["swing"][k]
+	if sig.has("heavyOn") and st.has("combo"):
+		var hv: Dictionary = st["combo"][clampi(int(sig["heavyOn"]) - 1, 0, st["combo"].size() - 1)]
+		hv["knockback"] = maxf(float(hv.get("knockback", 0.0)), 1.0)
+	main = { "style": style, "combo": combo, "ranged": ranged, "ammo": p_ammo, "ammo_max": p_ammo_max, "gear_damage": gear_damage, "gear_trait": gear_trait }
+	style = st
+	ranged = String(st.get("kind", "melee")) == "ranged"
+	combo = st.get("combo", [st.get("shot", {})])
+	p_ammo_max = 0
+	p_ammo = 0
+	gear_damage = float(W["inHand"].get(String(genius.age().get("id", "grown")), 1.0)) * float(sig.get("damage", 1.0))
+	gear_trait = {}
+	p_state = "free"
+	p_combo = 0
+	p_buffer = false
+	p_draw = 0.0
+	p_last_attack_end = -9.0
+	g_in_hand = true
+	g_shots = 0
+	var cut: Dictionary = W["take"]["drawCut"]
+	var rested := now - g_out_at
+	g_cut_until = now + float(cut["seconds"]) if rested >= float(cut["rest"]) else -9.0
+	g_cut_blow = false
+	g_first_draw = sig.has("firstFullDraw") and rested >= float(sig["firstFullDraw"]["rest"])
+	_emit({ "type": "genius-take", "in": true, "style": String(g_weapon["style"]), "cut": g_cut_until > now })
+
+## Let it go: it is back at the shoulder, and the weapon that was put away is in the hand.
+## spent: it left the hand of itself, with too little Will for another blow.
+func _let_go(spent := false) -> void:
+	if not g_in_hand:
+		return
+	style = main["style"]
+	combo = main["combo"]
+	ranged = main["ranged"]
+	p_ammo = main["ammo"]
+	p_ammo_max = main["ammo_max"]
+	gear_damage = main["gear_damage"]
+	gear_trait = main["gear_trait"]
+	main = {}
+	g_in_hand = false
+	g_out_at = now
+	g_cut_until = -9.0
+	g_cut_blow = false
+	g_riposte_until = -9.0
+	if p_state in ["attack", "draw", "reload"]:
+		p_state = "free"
+	p_combo = 0
+	p_buffer = false
+	p_draw = 0.0
+	p_startup_k = 1.0
+	p_draw_k = 1.0
+	p_last_attack_end = -9.0
+	g_regen_from = now + float(Data.genius()["will"]["regenDelayAfterHit"]) * 0.5
+	_emit({ "type": "genius-take", "in": false, "spent": spent })
+
+## Has it the Will for another blow (or is the blow the answer to a parry, which costs it none)?
+func _hand_can_strike() -> bool:
+	var sig: Dictionary = g_weapon.get("sig", {})
+	if now < g_riposte_until and sig.get("afterParry", {}).get("free", false):
+		return true
+	return g_will >= float(g_weapon.get("willPerBlow", 0.0))
+
+## The cut of the draw begins with this blow, if it was taken up rested and struck with at
+## once. Returns how much of its time the blow's start takes (a bow's draw, or a swing's startup).
+func _hand_cut_begins(draw: bool) -> float:
+	if not g_in_hand or now >= g_cut_until:
+		return 1.0
+	g_cut_until = -9.0
+	g_cut_blow = true
+	return float(_types()["weapon"]["take"]["drawCut"]["startup"]) if draw == style.has("draw") else 1.0
+
+## A swing or a shot begins with the genius in the hand: it costs it its Will.
+func _hand_swing_starts() -> void:
+	var sig: Dictionary = g_weapon.get("sig", {})
+	var free: bool = now < g_riposte_until and sig.get("afterParry", {}).get("free", false)
+	if not free:
+		var cost := float(g_weapon.get("willPerBlow", 0.0))
+		g_will = maxf(0.0, g_will - cost)
+		stats["g_will_spent"] += cost
+	if not style.has("draw"):
+		p_startup_k = _hand_cut_begins(false)
+
+func _startup(s: Dictionary) -> float:
+	return float(s.get("startup", 0.0)) * p_startup_k
+
+## How long the draw in progress takes to come to the full.
+func draw_seconds() -> float:
+	return float(style.get("draw", {}).get("seconds", 1.0)) * p_draw_k
+
+## Is its partner at a stand: feet set, or on the fight's post?
+func _stands() -> bool:
+	var stand := float(_types().get("tally", {}).get("weapon", {}).get("stand", 0.8))
+	if now - p_moved_at >= stand:
+		return true
+	return g_post != Vector2.INF and p_pos.distance_to(g_post) <= float(_order("hold").get("hold", {}).get("radius", 4.5))
+
+## What the weapon in the hand adds to the blow about to land: the cut of the draw, and the
+## one property its path gives it.
+func _hand_blow() -> float:
+	var sig: Dictionary = g_weapon.get("sig", {})
+	var k := 1.0
+	if g_cut_blow:
+		k *= float(_types()["weapon"]["take"]["drawCut"]["damage"])
+	if now < g_riposte_until and sig.has("afterParry"):
+		k *= float(sig["afterParry"]["damage"])
+	if sig.has("score") and g_score > 0:
+		k *= 1.0 + float(sig["score"]["per"]) * g_score
+	var full := style.has("draw") and p_charge >= 0.999
+	if sig.has("firstFullDraw") and g_first_draw and full:
+		k *= float(sig["firstFullDraw"]["damage"])
+	if sig.has("far") and w_state not in ["down", "absent"]:
+		var fr: Dictionary = sig["far"]
+		k *= lerpf(1.0, float(fr["damage"]), clampf((dist() - float(fr["from"])) / maxf(0.1, float(fr["to"]) - float(fr["from"])), 0.0, 1.0))
+	if sig.has("everyNth") and (g_shots + 1) % maxi(2, int(sig["everyNth"]["n"])) == 0:
+		k *= float(sig["everyNth"]["damage"])
+	if sig.has("still") and now - p_moved_at >= float(sig["still"]["seconds"]):
+		k *= float(sig["still"]["damage"])
+	return k
+
+## After the blow: what landing it (or missing) spends, and what it leaves on the foe.
+func _hand_blow_done(landed: bool, on_locked: bool, winding: bool) -> void:
+	var sig: Dictionary = g_weapon.get("sig", {})
+	var full := style.has("draw") and p_charge >= 0.999
+	g_cut_blow = false
+	g_shots += 1
+	g_riposte_until = -9.0
+	if full:
+		g_first_draw = false
+	if not landed:
+		return
+	if sig.has("score") and g_score > 0:
+		_emit({ "type": "genius-sig", "sig": "score", "name": String(sig.get("name", "")), "at": w_pos, "count": g_score })
+		g_score = 0
+	if not on_locked:
+		return
+	if sig.has("onWindup") and winding and w_state == "windup":
+		# the strike that follows this wind-up lands with the weight taken out of it
+		w_weak_until = now + (w_duration - w_timer) + float(w_attack.get("active", 0.2)) + 0.25
+		w_weak = float(sig["onWindup"]["weaken"])
+		_emit({ "type": "genius-sig", "sig": "onWindup", "name": String(sig.get("name", "")), "at": w_pos })
+	if sig.has("fullDraw") and full and w_state not in ["down", "absent"]:
+		w_slow_until = maxf(w_slow_until, now + float(sig["fullDraw"]["seconds"]))
+		w_slow = float(sig["fullDraw"]["slow"])
+		_emit({ "type": "genius-sig", "sig": "fullDraw", "name": String(sig.get("name", "")), "at": w_pos })
+
+# --- an item: what is always true, and what its partner does with it
+
+## An always-true multiplier of the item's, at the worth of its age (1 if it has none):
+## always[key], or always[key][sub].
+func _always_k(key: String, sub := "") -> float:
+	if genius == null or genius.fallen or g_type not in ["defense", "ritual"]:
+		return 1.0
+	var v: Variant = g_item.get("always", {}).get(key, null)
+	if v is Dictionary and sub != "":
+		v = (v as Dictionary).get(sub, null)
+	if v == null or v is Dictionary:
+		return 1.0
+	return GeniusTypes.at_worth(float(v), g_worth)
+
+## An always-true amount of the item's that is added, not multiplied, at the worth of its age.
+func _always_add(key: String, sub: String) -> float:
+	if genius == null or genius.fallen or g_type not in ["defense", "ritual"]:
+		return 0.0
+	var v: Variant = g_item.get("always", {}).get(key, null)
+	if not (v is Dictionary) or not (v as Dictionary).has(sub):
+		return 0.0
+	return float(v[sub]) * g_worth
+
+func _in_lamp(at: Vector2) -> bool:
+	return not g_lamp.is_empty() and now < float(g_lamp["until"]) and at.distance_to(g_lamp["at"]) <= float(g_lamp["radius"])
+
+## What a lamp's light does to something standing in it (use[what]; 1 outside it, or if its
+## light does no such thing): found (a guard), shelter (a blow), willRegen.
+func _lamp_k(what: String, at: Vector2) -> float:
+	if g_lamp.is_empty() or genius == null or genius.fallen:
+		return 1.0
+	var use: Dictionary = g_item.get("use", {})
+	if not use.has(what) or not _in_lamp(at):
+		return 1.0
+	return float(use[what])
+
+## How much longer (or shorter) the moment to parry is for what its genius is and does, never
+## more than caps.parryWindow: a blade in the hand, a sure hand, a lamp's light, a sighted
+## foe, a Lookout watching.
+func _parry_k() -> float:
+	if not genius or genius.fallen:
+		return 1.0
+	var k := 1.0
+	match g_type:
+		"weapon":
+			if g_in_hand:
+				k *= float(g_weapon.get("sig", {}).get("parryWindow", 1.0))
+		"defense", "ritual":
+			var use: Dictionary = g_item.get("use", {})
+			k *= _always_k("parryWindow")
+			if use.has("parryWindow"):
+				match String(use.get("effect", "")):
+					"light":
+						if _in_lamp(p_pos):
+							k *= float(use["parryWindow"])
+					"sight":
+						if now < g_sight_until:
+							k *= float(use["parryWindow"])
+		"companion":
+			var c := _own("calls")
+			if c > 0.0:
+				var o := _own_spec("calls")
+				if g_pos.distance_to(p_pos) <= float(o.get("reach", 14.0)):
+					k *= 1.0 + (float(o.get("parryWindow", 1.0)) - 1.0) * c
+	return minf(k, float(_types().get("caps", {}).get("parryWindow", 2.2)))
+
+## Its partner uses it: the one thing done with the key.
+func _genius_use() -> void:
+	var use: Dictionary = g_item.get("use", {})
+	if use.is_empty() or genius.fallen:
+		return
+	if now < g_use_at or g_will < float(use.get("will", 0.0)):
+		_emit({ "type": "genius-not-ready", "why": "wait" if now < g_use_at else "will" })
+		return
+	match String(use.get("effect", "")):
+		"set": _use_set(use)
+		"catch": _use_catch(use)
+		"slip": _use_slip(use)
+		"light": _use_light(use)
+		"sight": _use_sight(use)
+		"toll": _use_toll(use)
+
+## It was used well: its Will is spent, its wait begins, and the Tally hears of it.
+func _use_spent(use: Dictionary, at: Vector2) -> void:
+	var cost := float(use.get("will", 0.0))
+	g_will = maxf(0.0, g_will - cost)
+	stats["g_will_spent"] += cost
+	stats["g_moves"] += 1
+	stats["g_uses"] = int(stats.get("g_uses", 0)) + 1
+	g_use_at = now + float(use.get("wait", 8.0)) * g_twait
+	g_used_at = now
+	g_regen_from = now + float(Data.genius()["will"]["regenDelayAfterHit"])
+	g_move_now = String(use.get("name", ""))
+	g_move_until = now + 1.6
+	_feeds(String(use.get("feeds", "guard")), float(_types()["tally"]["item"]["use"]))
+	_emit({ "type": "genius-use", "effect": String(use.get("effect", "")), "name": g_move_now, "at": at })
+
+## Count an act toward a line of the Tally's orders (a weapon or an item takes no orders, but
+## the Reading reads that line still).
+func _feeds(line: String, by: float) -> void:
+	if genius == null or line == "":
+		return
+	genius.count("orders", line, by)
+	genius.counter("orders." + line, by)
+
+## The shield is set: for a moment the next blow is its own. Or it stands on the ground as a door.
+func _use_set(use: Dictionary) -> void:
+	_use_spent(use, p_pos)
+	if use.has("ground"):
+		g_door = { "at": p_pos, "until": now + float(use["ground"]["seconds"]), "radius": float(use["ground"]["radius"]), "blows": int(use.get("blows", 1)) }
+		_emit({ "type": "genius-door", "at": p_pos, "radius": float(use["ground"]["radius"]), "seconds": float(use["ground"]["seconds"]) })
+	else:
+		g_set_until = now + float(use.get("seconds", 1.4))
+		g_set_blows = int(use.get("blows", 1))
+
+## A blow the item takes whole before anything else is asked: a shield that is set (for its
+## partner, or for a classmate it covers), or one standing as a door while its partner is by it.
+func _item_takes(dmg: float, ally: int) -> bool:
+	if genius == null or genius.fallen or g_type != "defense":
+		return false
+	var use: Dictionary = g_item.get("use", {})
+	var took := false
+	if not g_door.is_empty() and now < float(g_door["until"]) and int(g_door["blows"]) > 0 and p_pos.distance_to(g_door["at"]) <= float(g_door["radius"]):
+		g_door["blows"] = int(g_door["blows"]) - 1
+		took = true
+		if int(g_door["blows"]) <= 0:
+			g_door = {}
+			_emit({ "type": "genius-door-end" })
+	elif now < g_set_until and g_set_blows > 0 and (ally < 0 or (use.has("allies") and (allies[ally]["pos"] as Vector2).distance_to(p_pos) <= float(use["allies"]))):
+		g_set_blows -= 1
+		took = true
+		if g_set_blows <= 0:
+			g_set_until = -9.0
+	if not took:
+		return false
+	var spent := dmg * float(use.get("takes", 0.35))
+	g_will = maxf(0.0, g_will - spent)
+	stats["g_will_spent"] += spent
+	stats["g_guards"] += 1
+	g_regen_from = now + float(Data.genius()["will"]["regenDelayAfterHit"])
+	_emit({ "type": "genius-took", "damage": dmg, "ally": ally })
+	_emit({ "type": "turned" })
+	return true
+
+## The hand reaches for a strike before it is thrown: the nearest foe winding up within its
+## reach (the locked one first; from farther, a strike wound up at a classmate, if it reaches
+## for those). Nothing winding up, and it closes on air.
+func _use_catch(use: Dictionary) -> void:
+	var reach := float(use.get("reach", 3.0))
+	var far := float(use.get("allyReach", 0.0))
+	var who := -9
+	if w_state == "windup":
+		var gap := dist() - float(beast["radius"])
+		if gap <= reach or (far > 0.0 and w_target >= 0 and gap <= far):
+			who = -1
+	if who == -9:
+		for i in foes.size():
+			var fo: Foe = foes[i]
+			if fo.state != "windup":
+				continue
+			var gap2 := fo.pos.distance_to(p_pos) - float(fo.beast["radius"])
+			if gap2 <= reach or (far > 0.0 and fo.target >= 0 and gap2 <= far):
+				who = i
+				break
+	if who == -9:
+		var miss := float(use.get("missWill", 0.0))
+		g_will = maxf(0.0, g_will - miss)
+		stats["g_will_spent"] += miss
+		g_use_at = now + float(use.get("missWait", 2.5))
+		_emit({ "type": "genius-use", "effect": "catch", "name": String(use.get("name", "")), "at": p_pos, "miss": true })
+		return
+	var at := w_pos if who == -1 else (foes[who] as Foe).pos
+	_use_spent(use, at)
+	var fl := float(use.get("flinch", 0.9))
+	if who == -1:
+		_wolf_set("flinch", fl)
+		_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 1.1 })
+		if use.has("open"):
+			w_open_until = now + float(use["open"])
+			w_exposed_until = w_open_until
+			w_exposed = float(use.get("exposed", 1.0))
+		if use.has("strike"):
+			_genius_hits(_genius_base() * float(use["strike"]) * g_worth, "catch", true)
+			if w_state not in ["down", "absent", "pinned"]:
+				w_pos = _clamp_in(w_pos + (w_pos - p_pos).normalized() * float(use.get("knockback", 0.0)))
+	else:
+		(foes[who] as Foe).set_state("flinch", fl)
+		if use.has("strike"):
+			_genius_hits_other(who, _genius_base() * float(use["strike"]) * g_worth)
+	_emit({ "type": "genius-caught", "foe": who, "at": at })
+
+## The coat pulls its partner out: an instant step, untouchable, out of anything.
+func _use_slip(use: Dictionary) -> void:
+	_use_spent(use, p_pos)
+	# with no direction held it goes round the foe, to its partner's left: out of the strike,
+	# and no farther from the answer (straight back would be an invitation to pounce)
+	var dir := p_dodge_dir
+	if dir.length() < 0.1:
+		dir = (w_pos - p_pos).orthogonal() if w_state not in ["down", "absent"] else -Vector2.from_angle(p_facing)
+	if dir.length() < 0.01:
+		dir = Vector2.LEFT
+	p_slip = { "dir": dir.normalized(), "distance": float(use.get("distance", 1.0)), "iframes": float(use.get("iframes", 0.4)) }
+	p_state = "dodge"
+	p_timer = 0.0
+	p_buffer = false
+	p_draw = 0.0
+	# made just after a blow landed, it takes most of that blow back
+	if use.has("late") and now - p_hurt_at <= float(use["late"]["seconds"]) and p_hp > 0.0:
+		var back := p_hurt_dmg * float(use["late"]["back"])
+		p_hp = minf(float(room["player"]["health"]), p_hp + back)
+		p_hurt_at = -9.0
+		_emit({ "type": "genius-took-back", "amount": back })
+	if use.has("willBack"):
+		p_will = minf(float(rules["field"]["willMax"]), p_will + float(use["willBack"]))
+	if use.has("haste"):
+		p_haste_until = now + float(room["dodge"]["duration"]) + float(use["haste"]["seconds"])
+		p_haste = float(use["haste"]["speed"])
+	_emit({ "type": "anim", "who": "player", "name": "Dodge_Backward", "duration": float(room["dodge"]["duration"]) })
+	_emit({ "type": "dodge", "dir": p_slip["dir"], "slip": true })
+
+## The lantern is set down: lit ground, where its partner stands or at the foe's feet.
+func _use_light(use: Dictionary) -> void:
+	var at := p_pos
+	if String(use.get("at", "partner")) == "foe" and w_state not in ["down", "absent"]:
+		at = w_pos
+	_use_spent(use, at)
+	g_lamp = { "at": at, "until": now + float(use.get("seconds", 8.0)), "radius": float(use.get("radius", 4.5)), "tick": now }
+	_emit({ "type": "genius-lamp", "at": at, "radius": float(g_lamp["radius"]), "seconds": float(use.get("seconds", 8.0)) })
+
+## A sight is taken on the locked foe.
+func _use_sight(use: Dictionary) -> void:
+	if w_state in ["down", "absent"] or dist() > float(use.get("reach", 18.0)):
+		_emit({ "type": "genius-not-ready", "why": "no foe" })
+		return
+	_use_spent(use, w_pos)
+	g_sight_until = now + float(use.get("seconds", 7.0))
+	_emit({ "type": "genius-sight", "seconds": float(use.get("seconds", 7.0)) })
+
+## The bell tolls: every foe near that is winding up is broken out of its strike, and its
+## partner is steadied. auto: it tolled of itself (an hour-bell), at no cost and no wait.
+func _use_toll(use: Dictionary, auto := false) -> void:
+	if not auto:
+		_use_spent(use, p_pos)
+	var r := float(use.get("radius", 5.5))
+	var fl := float(use.get("flinch", 0.7))
+	var broke := 0
+	if w_state == "windup" and dist() - float(beast["radius"]) <= r:
+		broke += 1
+		if use.has("stagger"):
+			_wolf_set("stagger", float(use["stagger"]))
+			_emit({ "type": "stagger", "seconds": float(use["stagger"]), "cause": "genius" })
+		else:
+			_wolf_set("flinch", fl)
+		_emit({ "type": "anim", "who": "wolf", "name": "HitReact", "speed": 1.0 })
+		if use.has("strike"):
+			_genius_hits(_genius_base() * float(use["strike"]) * g_worth, "toll", true)
+	for i in foes.size():
+		var fo: Foe = foes[i]
+		if fo.state == "windup" and fo.pos.distance_to(p_pos) - float(fo.beast["radius"]) <= r:
+			broke += 1
+			fo.set_state("stagger" if use.has("stagger") else "flinch", float(use["stagger"]) if use.has("stagger") else fl)
+			if use.has("strike"):
+				_genius_hits_other(i, _genius_base() * float(use["strike"]) * g_worth)
+	p_will = minf(float(rules["field"]["willMax"]), p_will + float(use.get("willBack", 0.0)) * (0.5 if auto else 1.0))
+	if use.has("mend") and not auto:
+		p_hp = minf(float(room["player"]["health"]), p_hp + float(use["mend"]))
+		for al in allies:
+			if not al["down"]:
+				al["hp"] = minf(float(al["hp_max"]), float(al["hp"]) + float(use["mend"]))
+	_emit({ "type": "genius-toll", "at": p_pos, "radius": r, "broke": broke, "auto": auto })
+
+## What its genius's type adds to a blow of its partner's on the locked foe: a foe exposed, an
+## opening called, the blow after a slip, the measure taken, a sight.
+func _typed_blow_k() -> float:
+	var k := 1.0
+	if now < w_exposed_until:
+		k *= w_exposed
+	if now < g_opening_until and w_state == "recover":
+		k *= g_opening
+	if now < p_punish_until:
+		k *= p_punish
+		p_punish_until = -9.0
+	if genius == null or genius.fallen or g_type not in ["defense", "ritual"]:
+		return k
+	var al: Dictionary = g_item.get("always", {})
+	var use: Dictionary = g_item.get("use", {})
+	if al.has("measure") and g_measure > 0:
+		k *= 1.0 + float(al["measure"]["per"]) * g_worth * g_measure
+	if String(use.get("effect", "")) == "sight" and now < g_sight_until:
+		if w_state in ["stagger", "recover"]:
+			k *= float(use.get("damage", 1.0))
+		elif use.has("far") and dist() >= float(use["far"]["from"]):
+			k *= float(use["far"]["damage"])
+	# a blow landed just after it was used: the item made the opening
+	var af: Dictionary = _types()["tally"]["item"]["after"]
+	if now - g_used_at <= float(af.get("seconds", 1.5)):
+		_feeds(String(af["line"]), float(af["by"]))
+		g_used_at = -9.0
+	return k
+
+## Its partner met a blow (parry, block, dodge, hurt): what its genius's type makes of that.
+func _typed_met(how: String, idx: int, dmg: float) -> void:
+	if how in ["block", "hurt"]:
+		p_struck_at = now
+	if how == "hurt":
+		p_hurt_at = now
+		p_hurt_dmg = dmg
+	if genius == null or genius.fallen:
+		return
+	match g_type:
+		"weapon":
+			var sig: Dictionary = g_weapon.get("sig", {})
+			if how == "parry" and g_in_hand and sig.has("afterParry"):
+				g_riposte_until = now + float(sig["afterParry"]["seconds"])
+			if how == "hurt" and sig.has("score"):
+				g_score = mini(int(sig["score"]["max"]), g_score + 1)
+		"defense", "ritual":
+			var al: Dictionary = g_item.get("always", {})
+			var use: Dictionary = g_item.get("use", {})
+			var worked := false       # what is always true of it did its work
+			match how:
+				"parry":
+					worked = al.has("parryWindow")
+					if al.has("parryWill"):
+						p_will = minf(float(rules["field"]["willMax"]), p_will + float(al["parryWill"]) * g_worth)
+						worked = true
+					# a parry in a lamp's light, or of a sighted foe, staggers it longer
+					var more := 0.0
+					if use.has("stagger") and String(use.get("effect", "")) == "light" and _in_lamp(p_pos):
+						more += float(use["stagger"])
+					if use.has("stagger") and String(use.get("effect", "")) == "sight" and now < g_sight_until and idx < 0:
+						more += float(use["stagger"])
+					if more > 0.0:
+						if idx < 0 and w_state == "stagger":
+							w_duration += more
+						elif idx >= 0 and idx < foes.size() and (foes[idx] as Foe).state == "stagger":
+							(foes[idx] as Foe).duration += more
+				"block":
+					worked = al.has("block")
+				"dodge":
+					worked = al.has("dodge")
+					# a blow slipped leaves the foe looking at where its partner was
+					if not p_slip.is_empty() and use.has("punish"):
+						p_punish_until = now + float(use["punish"]["seconds"])
+						p_punish = float(use["punish"]["damage"])
+				"hurt":
+					worked = al.has("hurt")
+			# an astrolabe takes the measure of a strike that was answered
+			if al.has("measure") and idx < 0 and how in ["parry", "block", "dodge"]:
+				g_measure = mini(int(al["measure"]["max"]), g_measure + 1)
+				worked = true
+			if worked:
+				_feeds(String(al.get("feeds", "free")), float(_types()["tally"]["item"]["always"]))
+
+## What a weapon genius learns from a fight, in place of orders carried out: blows landed with
+## it in the hand (from a stand, or not), blows turned with it, blows it added from the shoulder.
+func _typed_learns(what: String, e: Dictionary) -> void:
+	if g_type != "weapon" or g_weapon.is_empty():
+		return
+	var T: Dictionary = _types()["tally"]["weapon"]
+	var row: Dictionary = {}
+	match what:
+		"hit":
+			if e.get("hand", false):
+				row = T["set"] if e.get("stand", false) else T["hit"]
+		"turn":
+			if e.get("hand", false):
+				row = T["turn"]
+		"with":
+			row = T["with"]
+	if not row.is_empty():
+		_feeds(String(row["line"]), float(row["by"]))
+
+## The turn of a genius that takes no orders: it is with its partner.
+func _update_typed(_dt: float) -> void:
+	g_pos = p_pos
+	g_order = "guard"
+	var foe_up := w_state not in ["down", "absent"]
+	var G: Dictionary = Data.genius()["fight"]["great"]
+	# the move only the great have: a weapon's second hand, an item's wall
+	if not g_great.is_empty() and now >= g_great_at and foe_up and g_will >= float(G.get("will", 18.0)) and dist() <= float(G.get("reach", 9.0)):
+		_genius_great_move()
+	if g_type == "weapon":
+		return
+	var use: Dictionary = g_item.get("use", {})
+	# a door stands its time; a lamp burns its time, and what stands in a kept flame burns
+	if not g_door.is_empty() and now >= float(g_door["until"]):
+		g_door = {}
+		_emit({ "type": "genius-door-end" })
+	if not g_lamp.is_empty():
+		if now >= float(g_lamp["until"]):
+			g_lamp = {}
+			_emit({ "type": "genius-lamp-end" })
+		elif use.has("burn") and now - float(g_lamp["tick"]) >= 0.5:
+			g_lamp["tick"] = now
+			var d := _genius_base() * float(use["burn"]) * 0.5 * g_worth
+			if foe_up and w_pos.distance_to(g_lamp["at"]) <= float(g_lamp["radius"]) + float(beast["radius"]):
+				_genius_hits(d, "lamp")
+			for i in foes.size():
+				if (foes[i] as Foe).alive() and (foes[i] as Foe).pos.distance_to(g_lamp["at"]) <= float(g_lamp["radius"]):
+					_genius_hits_other(i, d)
+	# an hour-bell tolls of itself when a strike is wound up at its partner
+	if use.has("auto") and now >= g_auto_at and w_state == "windup" and w_target == -1 and dist() - float(beast["radius"]) <= float(use.get("radius", 5.5)):
+		g_auto_at = now + float(use["auto"]) * g_twait
+		_use_toll(use, true)
+
+# --- a companion's role: the one thing only it does
+
+func _held() -> bool:
+	return genius != null and not genius.fallen and now < g_held_until
+
+## Is the foe the genius's still: held, or throwing a strike it wound up at the genius while it
+## was held? A strike begun at the genius is the genius's: it is never turned on its partner
+## half thrown, when nobody could read it.
+func _holds() -> bool:
+	if genius == null or genius.fallen or w_target != HELD:
+		return false
+	return now < g_held_until or w_state in ["windup", "strike"]
+
+func _role_move(o: Dictionary, at: Vector2) -> void:
+	var cost := float(o.get("will", 0.0))
+	g_will = maxf(0.0, g_will - cost)
+	stats["g_will_spent"] += cost
+	stats["g_moves"] += 1
+	stats["g_own"] = int(stats.get("g_own", 0)) + 1
+	g_wait[String(o["id"])] = now + float(o.get("wait", 0.0)) * g_twait
+	g_move_now = String(o.get("name", ""))
+	g_move_until = now + 1.6
+	_emit({ "type": "genius-move", "move": String(o["id"]), "name": g_move_now, "at": at })
+
+func _role_acts(foe_up: bool) -> void:
+	# a Bulwark holds the foe: it calls it onto itself, and for a while the foe goes for it
+	var k := _own("hold-it")
+	if k > 0.0 and foe_up and not passive and now >= g_held_until:
+		var o := _own_spec("hold-it")
+		if now >= float(g_wait.get("hold-it", 0.0)) and g_will >= float(o.get("will", 0.0)) + 4.0 and g_pos.distance_to(w_pos) <= float(o.get("reach", 9.0)) and w_state in ["prowl", "approach", "windup", "recover"] and w_target != HELD:
+			_role_move(o, g_pos)
+			g_held_until = now + float(o.get("seconds", 5.0)) * k
+			w_target = HELD
+			if w_state == "prowl":
+				_choose_attack()
+	# a Harrier worries it: its guard is down, and every blow on it lands for more
+	k = _own("worry")
+	if k > 0.0 and foe_up and now >= w_open_until:
+		var o2 := _own_spec("worry")
+		if now >= float(g_wait.get("worry", 0.0)) and g_will >= float(o2.get("will", 0.0)) and g_pos.distance_to(w_pos) - float(beast["radius"]) <= float(o2.get("reach", 2.6)) and w_state not in ["stagger", "pinned"]:
+			_role_move(o2, w_pos)
+			w_open_until = now + float(o2.get("seconds", 2.0)) * k
+			w_exposed_until = w_open_until
+			w_exposed = float(o2.get("exposed", 1.0))
+	# a Keeper mends: its partner, or whoever of the party is worst hurt
+	k = _own("mend")
+	if k > 0.0 and now >= g_mend_at:
+		var o3 := _own_spec("mend")
+		if g_will >= float(o3.get("will", 0.0)) + 1.0:
+			var below := float(o3.get("below", 0.7))
+			var reach := float(o3.get("reach", 5.0))
+			var hp_max := float(room["player"]["health"])
+			var who := -9
+			var worst := below
+			if p_state != "down" and p_hp / hp_max < worst and now - p_struck_at >= float(o3.get("after", 2.5)) and g_pos.distance_to(p_pos) <= reach:
+				who = -1
+				worst = p_hp / hp_max
+			for i in allies.size():
+				var al: Dictionary = allies[i]
+				if not al["down"] and float(al["hp"]) / float(al["hp_max"]) < worst and (al["pos"] as Vector2).distance_to(g_pos) <= reach:
+					who = i
+					worst = float(al["hp"]) / float(al["hp_max"])
+			if who != -9:
+				var amount := float(o3.get("health", 5.0)) * k
+				var cost := float(o3.get("will", 0.0))
+				g_will = maxf(0.0, g_will - cost)
+				stats["g_will_spent"] += cost
+				stats["g_own"] = int(stats.get("g_own", 0)) + 1
+				stats["g_mended"] = float(stats.get("g_mended", 0.0)) + amount
+				g_mend_at = now + float(o3.get("every", 2.0))
+				g_move_now = String(o3.get("name", "Mends"))
+				g_move_until = now + 1.0
+				if who == -1:
+					p_hp = minf(hp_max, p_hp + amount)
+				else:
+					allies[who]["hp"] = minf(float(allies[who]["hp_max"]), float(allies[who]["hp"]) + amount)
+				_emit({ "type": "genius-mend", "amount": amount, "who": who })
+
+## The strike a Bulwark called onto itself lands on it, out of its Will.
+func _genius_held_blow(dmg: float) -> void:
+	var o := _own_spec("hold-it")
+	var spent := dmg * float(o.get("takes", 0.45))
+	var braced := not _genius_has("brace").is_empty()
+	g_will = maxf(1.0 if braced else 0.0, g_will - spent)
+	stats["g_will_spent"] += spent
+	stats["g_guards"] += 1
+	g_regen_from = now + float(Data.genius()["will"]["regenDelayAfterHit"])
+	_emit({ "type": "genius-held-blow", "damage": dmg, "at": g_pos })
+	if g_will <= 0.0:
+		_genius_fall()
+
+## The locked foe has struck at the hero and begins to recover: a Lookout calls the opening.
+func _foe_recovers() -> void:
+	var k := _own("calls")
+	if k <= 0.0:
+		return
+	var o := _own_spec("calls")
+	if g_pos.distance_to(p_pos) > float(o.get("reach", 14.0)):
+		return
+	g_opening_until = now + w_duration
+	g_opening = 1.0 + (float(o.get("mark", 1.2)) - 1.0) * k
+	stats["g_own"] = int(stats.get("g_own", 0)) + 1
+	_emit({ "type": "genius-move", "move": "calls", "name": "Now", "at": w_pos })
+
+## Another foe stands under the lock (the next of the pack, or one come back): what was done
+## to the last is not on it. An astrolabe that keeps its measures keeps them by kind of beast.
+func _foe_changed(was: String) -> void:
+	w_open_until = -9.0
+	w_exposed_until = -9.0
+	w_weak_until = -9.0
+	g_opening_until = -9.0
+	g_sight_until = -9.0
+	g_held_until = -9.0
+	var ms: Dictionary = g_item.get("always", {}).get("measure", {})
+	if not ms.is_empty():
+		var keeps: bool = ms.get("keeps", false)
+		if keeps:
+			g_measures[was] = maxi(int(g_measures.get(was, 0)), g_measure)
+		g_measure = int(g_measures.get(String(beast.get("id", "")), 0)) if keeps else 0
 
 func dist() -> float:
 	return p_pos.distance_to(w_pos)
@@ -841,7 +1776,9 @@ func input(action: String) -> void:
 		return
 	if not allowed.is_empty() and action not in allowed:
 		return
-	if action == "order":
+	# The genius's key means what its type means (docs/genius-types.md): a companion's orders,
+	# a weapon taken in hand or let go, an item used. A companion's order is never kept waiting.
+	if action == "order" and (not genius or g_type == "companion"):
 		if genius:
 			genius.order = genius.next_order()
 			if genius.order == "hold":
@@ -853,13 +1790,14 @@ func input(action: String) -> void:
 		return
 	# Pressed a little early (mid-swing, mid-dodge, mid-flinch): remember it briefly and fire
 	# it the moment it is allowed, so no press is lost.
-	if action in ["attack", "technique", "dodge", "pattern", "block-down", "tech1", "tech2", "tech3"] and _busy(action):
+	if action in ["attack", "technique", "dodge", "pattern", "block-down", "tech1", "tech2", "tech3", "order"] and _busy(action):
 		p_queued = action
 		p_queued_until = now + float(room.get("inputBufferSeconds", 0.25))
 		if action == "block-down":
 			p_block_held = true
 		return
 	match action:
+		"order": _genius_key_pressed()
 		"attack": _press_attack()
 		"attack-up":
 			if p_state == "draw":
@@ -883,8 +1821,9 @@ func input(action: String) -> void:
 			if p_state in ["reload", "draw"]:
 				p_state = "free"
 			if p_state == "free" and not p_fainted:
-				# on ground its genius has lit, a wind-up is read sooner: the moment is longer
-				p_parry_until = now + float(room["parry"]["window"]) * float(style.get("guard", 1.0)) * (g_lit if now < g_lit_until else 1.0)
+				# on ground its genius has lit, a wind-up is read sooner: the moment is longer; and
+				# longer or shorter for what its genius is (a sure hand, a lookout, a blade with no guard)
+				p_parry_until = now + float(room["parry"]["window"]) * float(style.get("guard", 1.0)) * (g_lit if now < g_lit_until else 1.0) * _parry_k()
 		"block-up":
 			p_block_held = false
 		"stance":
@@ -917,6 +1856,8 @@ func input(action: String) -> void:
 				p_lock = not p_lock
 
 func _busy(action: String) -> bool:
+	if action == "order":
+		return _key_busy()
 	match p_state:
 		"free":
 			return action == "dodge" and now < p_dodge_ready_at
@@ -957,19 +1898,24 @@ func _can_start_action() -> bool:
 	if p_state == "attack":
 		var s: Dictionary = combo[p_combo]
 		# A shot has no active window: it can be cancelled once it has fired.
-		return p_timer >= float(s["startup"]) + float(s.get("active", 0.0))
+		return p_timer >= _startup(s) + float(s.get("active", 0.0))
 	return false
 
 func _press_attack() -> void:
 	if p_state == "pattern":
 		_pattern_press()
 		return
+	# A weapon genius with too little Will left for a blow leaves the hand of itself, and the
+	# press goes to the weapon that was put away.
+	if g_in_hand and not _hand_can_strike() and (p_state == "free" or (p_state == "attack" and _can_start_action())):
+		_let_go(true)
 	if ranged:
 		if style.has("draw"):
 			if p_state == "free" or (p_state == "attack" and _can_start_action()):
 				p_state = "draw"
 				p_timer = 0.0
 				p_draw = 0.0
+				p_draw_k = _hand_cut_begins(true)
 				_face_target_if_near()
 				_emit({ "type": "draw-start" })
 				_emit({ "type": "anim", "who": "player", "name": "2H_Ranged_Aiming", "speed": 1.0 })
@@ -985,7 +1931,7 @@ func _press_attack() -> void:
 		return
 	if p_state == "attack":
 		var s: Dictionary = combo[p_combo]
-		if p_timer < float(s["startup"]) + float(s["active"]):
+		if p_timer < _startup(s) + float(s["active"]):
 			p_buffer = true
 			return
 		if p_combo < combo.size() - 1:
@@ -1000,8 +1946,7 @@ func _press_attack() -> void:
 
 ## The bow looses at the draw it has: a full draw hits for the shot's full damage, a snap shot for its least.
 func _loose() -> void:
-	var d: Dictionary = style["draw"]
-	p_charge = clampf(p_draw / float(d["seconds"]), 0.0, 1.0)
+	p_charge = clampf(p_draw / draw_seconds(), 0.0, 1.0)
 	p_state = "free"
 	_start_swing(0)
 	_emit({ "type": "draw-release", "charge": p_charge })
@@ -1032,8 +1977,11 @@ func _start_swing(i: int) -> void:
 	if ranged and p_ammo_max > 0:
 		p_ammo -= 1
 		stats["shots"] = int(stats.get("shots", 0)) + 1
+	p_startup_k = 1.0
+	if g_in_hand:
+		_hand_swing_starts()
 	var sw: Dictionary = combo[i]
-	_emit({ "type": "anim", "who": "player", "name": sw["anim"], "duration": float(sw["startup"]) + float(sw.get("active", 0.0)) + float(sw["recovery"]) })
+	_emit({ "type": "anim", "who": "player", "name": sw["anim"], "duration": _startup(sw) + float(sw.get("active", 0.0)) + float(sw["recovery"]) })
 
 ## Swings go toward the wolf when locked on; unlocked, toward whichever foe is close, of the
 ## pack or the locked one; otherwise where you steer.
@@ -1083,7 +2031,7 @@ func _press_dodge() -> void:
 	var d: Dictionary = room["dodge"]
 	if now < p_dodge_ready_at or not (p_state == "free" or p_state in ["reload", "draw"] or _can_start_action()):
 		return
-	var dcost := float(d["will"]) * _b("dodgeCost", 1.0) * (float(kit["stance"].get("dodgeCost", 1.0)) if p_stance else 1.0)
+	var dcost := float(d["will"]) * _b("dodgeCost", 1.0) * (float(kit["stance"].get("dodgeCost", 1.0)) if p_stance else 1.0) * _always_k("dodge", "will")
 	if p_fainted or p_will < dcost:
 		_emit({ "type": "no-will" })
 		return
@@ -1133,7 +2081,7 @@ func _press_pattern() -> void:
 		cues.append(now + float(P["leadIn"]) + k * period)
 	# The Tolls are taken when the Pattern fires, whether it lands or not.
 	var tolls := PatternTerms.take_tolls(self, terms)
-	chain = { "cues": cues, "next": 0, "hit": 0, "period": period, "window": float(P["cueWindowMs"]) / 1000.0,
+	chain = { "cues": cues, "next": 0, "hit": 0, "period": period, "window": float(P["cueWindowMs"]) / 1000.0 * _always_k("chain"),
 		"multiplier": pattern_multiplier(), "effect": pattern_form()["effect"] }
 	p_state = "pattern"
 	p_timer = 0.0
@@ -1280,7 +2228,7 @@ func _update_will(dt: float) -> void:
 	var blocking := _blocking()
 	var dw := 0.0
 	if p_stance: dw -= float(room["stance"]["willPerSecond"])
-	var regen_factor := _b("willRegen", 1.0)
+	var regen_factor := _b("willRegen", 1.0) * _lamp_k("willRegen", p_pos)
 	if blocking: dw -= float(room["block"]["willPerSecond"])
 	if not p_stance and not blocking and p_state != "pattern": dw += float(F["regenOpen"]) * (0.5 if p_leaking else 1.0) * regen_factor
 	if _b("regenHealth", 0.0) > 0.0 and p_hp > 0.0:
@@ -1304,10 +2252,14 @@ func _update_player(dt: float, move: Vector2) -> void:
 			var speed := float(P["runSpeed"])
 			if _blocking(): speed = float(P["blockMoveSpeed"])
 			if p_stance: speed *= float(kit["stance"].get("move", P["stanceMoveFactor"] if kit["stance"]["effect"] == "power" else 1.0))
+			if now < p_haste_until:
+				speed *= p_haste
 			var target_vel := move.limit_length(1.0) * speed
 			var accel := float(P.get("acceleration", 20.0))
 			p_vel = p_vel.move_toward(target_vel, accel * speed * dt)
 			p_pos = _clamp_in(p_pos + p_vel * dt)
+			if p_vel.length() > 0.4:
+				p_moved_at = now
 			var want := p_facing
 			if p_lock and w_state != "down" and w_state != "absent":
 				want = _angle_to(p_pos, w_pos)
@@ -1324,7 +2276,7 @@ func _update_player(dt: float, move: Vector2) -> void:
 			# Drawn, you walk; the bow looses on its own a little past full draw.
 			var speed_d := float(P["runSpeed"]) * 0.45
 			p_pos = _clamp_in(p_pos + move * speed_d * dt)
-			if p_draw >= float(d["seconds"]) + float(d.get("holdAfter", 0.5)):
+			if p_draw >= draw_seconds() + float(d.get("holdAfter", 0.5)):
 				_loose()
 		"reload":
 			if p_timer >= p_reload_t:
@@ -1333,23 +2285,30 @@ func _update_player(dt: float, move: Vector2) -> void:
 				_emit({ "type": "reloaded" })
 		"attack":
 			var s: Dictionary = combo[p_combo]
-			var st := float(s["startup"])
+			var st := _startup(s)
 			var ac := float(s.get("active", 0.0))
 			if not ranged and p_timer < st + ac and dist() > float(P["radius"]) + float(beast["radius"]) + 0.3:
 				p_pos = _clamp_in(p_pos + Vector2.from_angle(p_facing) * float(s["lunge"]) / (st + ac) * dt)
 			if not p_hit_done and p_timer >= st:
 				p_hit_done = true
+				# a weapon genius in the hand adds what its path gives it to the blow
+				var hk := _hand_blow() if g_in_hand else 1.0
+				var hp_before := w_hp
+				var hits_before: int = stats["hits"]
+				var winding := w_state == "windup"
 				if ranged and style.get("cone", false):
 					# Scatter: everything in the cone takes it, and is thrown back.
 					_emit({ "type": "shot", "from": p_pos, "to": p_pos + Vector2.from_angle(p_facing) * float(s["range"]), "hit": true, "cone": true })
-					_resolve_swing(_shot_damage(s), float(s["range"]), float(s["arc"]), false, float(s.get("knockback", 0.0)))
+					_resolve_swing(_shot_damage(s) * hk, float(s["range"]), float(s["arc"]), false, float(s.get("knockback", 0.0)))
 				elif ranged:
-					_resolve_shot(_shot_damage(s), float(s["range"]), float(s["arc"]))
+					_resolve_shot(_shot_damage(s) * hk, float(s["range"]), float(s["arc"]))
 				else:
 					var kb := float(s.get("knockback", 0.0))
-					_resolve_swing(float(s["damage"]), float(s["reach"]), float(s["arc"]), s.get("breaks", false), kb)
+					_resolve_swing(float(s["damage"]) * hk, float(s["reach"]), float(s["arc"]), s.get("breaks", false), kb)
 					if s.has("burnSeconds") and w_state not in ["down", "absent"] and _in_arc(p_pos, p_facing, w_pos, float(s["reach"]) + float(beast["radius"]), float(s["arc"])):
 						w_burn_until = maxf(w_burn_until, now) + float(s["burnSeconds"])
+				if g_in_hand:
+					_hand_blow_done(int(stats["hits"]) > hits_before, w_hp < hp_before, winding)
 			if p_buffer and p_timer >= st + ac and (ranged or p_combo < combo.size() - 1):
 				_start_swing(0 if ranged else p_combo + 1)
 			elif p_timer >= st + ac + float(s["recovery"]):
@@ -1371,10 +2330,16 @@ func _update_player(dt: float, move: Vector2) -> void:
 			var d: Dictionary = room["dodge"]
 			var dur := float(d["duration"])
 			var k := clampf(1.0 - p_timer / dur, 0.0, 1.0)
-			p_pos = _clamp_in(p_pos + p_dodge_dir * float(d["distance"]) * _b("dodgeDistance", 1.0) / dur * 1.6 * k * dt)
+			if p_slip.is_empty():
+				p_pos = _clamp_in(p_pos + p_dodge_dir * float(d["distance"]) * _b("dodgeDistance", 1.0) / dur * 1.6 * k * dt)
+			else:
+				p_pos = _clamp_in(p_pos + (p_slip["dir"] as Vector2) * float(d["distance"]) * float(p_slip["distance"]) / dur * 1.6 * k * dt)
+			p_moved_at = now
 			if p_timer >= dur:
 				p_state = "free"
-				p_dodge_ready_at = now + float(d["cooldown"])
+				if p_slip.is_empty():
+					p_dodge_ready_at = now + float(d["cooldown"])
+				p_slip = {}
 		"flinch":
 			if p_timer >= float(P["flinchTime"]):
 				p_state = "free"
@@ -1497,8 +2462,11 @@ func _resolve_shot(damage: float, rng_m: float, arc: float, breaks := false) -> 
 func p_invulnerable() -> bool:
 	if p_state != "dodge":
 		return false
+	# the coat's slip is untouchable from its first moment
+	if not p_slip.is_empty():
+		return p_timer <= float(p_slip["iframes"])
 	var d: Dictionary = room["dodge"]
-	return p_timer >= float(d["iframeStart"]) and p_timer <= float(d["iframeEnd"])
+	return p_timer >= float(d["iframeStart"]) and p_timer <= float(d["iframeEnd"]) + _always_add("dodge", "iframes")
 
 func _resolve_swing(damage: float, reach: float, arc: float, breaks: bool, knockback: float) -> bool:
 	damage *= gear_damage
@@ -1542,11 +2510,11 @@ func _resolve_swing(damage: float, reach: float, arc: float, breaks: bool, knock
 func _guarded(dmg: float, from_pattern := false) -> float:
 	if from_pattern or not beast.has("guard") or guard_open():
 		return dmg
-	return roundf(dmg * float(beast["guard"]))
+	return roundf(dmg * minf(1.0, float(beast["guard"]) * _lamp_k("found", w_pos)))
 
 ## Is a guarded beast open now? (Always true of a beast with no guard.)
 func guard_open() -> bool:
-	return not beast.has("guard") or (room.get("guard", {}).get("open", ["stagger"]) as Array).has(w_state)
+	return not beast.has("guard") or now < w_open_until or (room.get("guard", {}).get("open", ["stagger"]) as Array).has(w_state)
 
 func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
 	dmg = _guarded(dmg, from_pattern)
@@ -1559,12 +2527,17 @@ func _damage_wolf(dmg: float, from_pattern: bool, heavy: bool) -> void:
 		dmg = roundf(dmg * float(tech.get("crit", 1.5)))
 	if now < w_mark_until:
 		dmg = roundf(dmg * w_mark_factor)
+	if not from_pattern:
+		dmg = roundf(dmg * _typed_blow_k())
 	w_hp = maxf(w_floor, w_hp - dmg)
 	stats["hits"] += 1
 	stats["damage_dealt"] += dmg
+	if g_in_hand and p_state == "attack":
+		stats["hand_hits"] = int(stats.get("hand_hits", 0)) + 1
+		stats["hand_damage"] = float(stats.get("hand_damage", 0.0)) + dmg
 	p_combo_count += 1
 	stats["longest_combo"] = maxi(stats["longest_combo"], p_combo_count)
-	_emit({ "type": "hit", "damage": dmg, "pattern": from_pattern, "heavy": heavy, "staggered": w_state == "stagger", "combo": p_combo, "crit": crit, "dist": dist(), "technique": p_state == "technique" })
+	_emit({ "type": "hit", "damage": dmg, "pattern": from_pattern, "heavy": heavy, "staggered": w_state == "stagger", "combo": p_combo, "crit": crit, "dist": dist(), "technique": p_state == "technique", "hand": g_in_hand and p_state == "attack", "stand": _stands() })
 	_genius_after_hit(dmg, from_pattern)
 	if gear_trait.has("willOnHit"):
 		p_will = minf(float(rules["field"]["willMax"]), p_will + float(gear_trait["willOnHit"]))
@@ -1617,12 +2590,16 @@ func _spawn_wolf() -> void:
 	w_pattern_hits = 0
 	w_pattern_used = false
 	p_struck_this_foe = false
+	_foe_changed(String(beast.get("id", "")))
 	_wolf_prowl()
 
 func _wolf_set(state: String, duration: float) -> void:
 	w_state = state
 	w_timer = 0.0
 	w_duration = duration
+	# a Hunter comes at once when the foe staggers
+	if state == "stagger" and _own("opening") > 0.0:
+		g_hunt_at = minf(g_hunt_at, now)
 
 func _wolf_prowl() -> void:
 	var pr: Dictionary = beast["prowl"]
@@ -1638,6 +2615,9 @@ func provoke() -> void:
 func _tpos() -> Vector2:
 	if w_target >= 0 and w_target < allies.size() and not allies[w_target]["down"]:
 		return allies[w_target]["pos"]
+	# held by a Bulwark, it goes for the genius
+	if _holds():
+		return g_pos
 	return p_pos
 
 func _tdist() -> float:
@@ -1652,6 +2632,8 @@ func _choose_attack() -> void:
 			standing.append(i)
 	if not standing.is_empty() and rng.randf() < 0.35:
 		w_target = standing[rng.randi() % standing.size()]
+	if _held():
+		w_target = HELD
 	var options: Array = []
 	var total := 0.0
 	for a in beast["attacks"]:
@@ -1671,6 +2653,10 @@ func _choose_attack() -> void:
 func _update_wolf(dt: float) -> void:
 	w_timer += dt
 	var b := beast
+	# a Bulwark's hold has ended (or it has fallen): the foe is after its partner again. A
+	# strike already wound up at the genius is thrown at the genius first (_holds).
+	if w_target == HELD and not _holds():
+		w_target = -1
 	match w_state:
 		"absent":
 			return
@@ -1721,20 +2707,29 @@ func _update_wolf(dt: float) -> void:
 				w_pos = _clamp_in(w_pos + Vector2.from_angle(w_facing) * lunge)
 			if not w_hit_done:
 				var mouth := w_pos + Vector2.from_angle(w_facing) * (float(b["radius"]) + 0.4)
-				if mouth.distance_to(p_pos) <= float(room["player"]["radius"]) + 1.0:
+				if _holds():
+					# the strike a Bulwark called onto itself is the genius's: it lands on it, or
+					# on nobody (its partner, striking from beside it, is not bitten in passing)
+					if mouth.distance_to(g_pos) <= 1.4:
+						w_hit_done = true
+						_genius_held_blow(float(w_attack["damage"]))
+				elif mouth.distance_to(p_pos) <= float(room["player"]["radius"]) + 1.0:
 					w_hit_done = true
 					_resolve_bite()
 				else:
 					for i in allies.size():
 						if not allies[i]["down"] and mouth.distance_to(allies[i]["pos"]) <= 1.3:
 							w_hit_done = true
-							_hurt_ally(i, float(w_attack["damage"]), -1)
+							_hurt_ally(i, float(w_attack["damage"]) * (w_weak if now < w_weak_until else 1.0), -1)
 							break
 			if w_timer >= w_duration:
-				if not w_hit_done:
+				if not w_hit_done and w_target != HELD:
 					_emit({ "type": "evade", "how": "out of reach" })
 					stats["evades"] += 1
+				var struck_at_hero := w_target == -1
 				_wolf_set("recover", float(w_attack["recover"]))
+				if struck_at_hero:
+					_foe_recovers()
 		"recover", "flinch":
 			if w_timer >= w_duration:
 				_wolf_prowl()
@@ -2003,6 +2998,10 @@ func _ally_strike(i: int, tgt: int, dmg: float, heavy: bool, pattern := false) -
 ## were blocking, else it lands.
 func _hurt_ally(i: int, dmg: float, from_idx := -1) -> void:
 	var al: Dictionary = allies[i]
+	# a shield set for whoever is struck first, or standing as a door; a lamp's shelter
+	if _item_takes(dmg, i):
+		return
+	dmg = roundf(dmg * _lamp_k("shelter", al["pos"]))
 	match String(al.get("state", "")):
 		"parry":
 			_emit({ "type": "ally-parry", "who": i, "foe": from_idx })
@@ -2066,6 +3065,7 @@ func _resolve_bite_from(a: Dictionary, from_pos: Vector2, idx: int) -> void:
 	if p_invulnerable():
 		stats["evades"] += 1
 		_emit({ "type": "evade", "how": "dodged" })
+		_typed_met("dodge", idx, 0.0)
 		return
 	if now < ward_until:
 		ward_until = -9.0
@@ -2090,25 +3090,35 @@ func _resolve_bite_from(a: Dictionary, from_pos: Vector2, idx: int) -> void:
 			(foes[idx] as Foe).set_state("stagger", float(pr["staggerSeconds"]))
 			_emit({ "type": "foe-stagger", "foe": idx })
 		parried_until = now + float(room["pattern"]["afterParrySeconds"])
-		_emit({ "type": "parry", "foe": idx })
+		_emit({ "type": "parry", "foe": idx, "hand": g_in_hand })
 		_emit({ "type": "anim", "who": "player", "name": "Block_Hit", "speed": 1.3 })
+		_typed_met("parry", idx, 0.0)
 		return
 	var dmg := _genius_on_struck(float(a["damage"]) * _b("damageTaken", 1.0), from_pos, idx)
+	# a strike with the weight taken out of it (an arrow in its wind-up), and a lamp's shelter
+	if idx < 0 and now < w_weak_until:
+		dmg *= w_weak
+	dmg *= _lamp_k("shelter", p_pos)
 	if _genius_turns(dmg, idx):
+		return
+	if _item_takes(dmg, -1):
 		return
 	if not (_blocking() and facing_wolf) and _genius_guards(dmg):
 		return
 	_genius_debt_paid(dmg, idx)
 	if _blocking() and facing_wolf:
-		dmg *= float(room["block"]["damageFactor"])
-		p_will = maxf(0.0, p_will - float(room["block"]["willPerBlockedHit"]))
+		dmg *= float(room["block"]["damageFactor"]) * _always_k("block", "damage")
+		p_will = maxf(0.0, p_will - float(room["block"]["willPerBlockedHit"]) * _always_k("block", "will"))
 		stats["blocks"] += 1
-		_emit({ "type": "block", "damage": dmg })
+		_emit({ "type": "block", "damage": dmg, "hand": g_in_hand })
 		_emit({ "type": "anim", "who": "player", "name": "Block_Hit", "speed": 1.2 })
+		_typed_met("block", idx, dmg)
 	else:
+		dmg *= _always_k("hurt")
 		stats["hurts"] += 1
 		p_struck_this_foe = true
 		_emit({ "type": "hurt", "damage": dmg })
+		_typed_met("hurt", idx, dmg)
 		p_combo_count = 0
 		if not (p_stance and kit["stance"].get("noFlinch", false)):
 			p_pos = _clamp_in(p_pos + (p_pos - from_pos).normalized() * float(a["knockback"]))
@@ -2123,6 +3133,11 @@ func _resolve_bite_from(a: Dictionary, from_pos: Vector2, idx: int) -> void:
 		second_heart_used = true
 		p_hp = 1.0
 		_emit({ "type": "second-heart" })
+	# an open hand catches its partner once a fight, when a blow would fell them
+	if p_hp == 0.0 and not g_fall_caught and genius and not genius.fallen and g_item.get("always", {}).has("catchFall"):
+		g_fall_caught = true
+		p_hp = float(g_item["always"]["catchFall"])
+		_emit({ "type": "genius-caught-fall" })
 	if p_hp == 0.0:
 		p_state = "down"
 		p_stance = false
@@ -2336,7 +3351,7 @@ func _damage_other(i: int, dmg: float, heavy: bool) -> void:
 	stats["hits"] += 1
 	stats["damage_dealt"] += dmg
 	p_combo_count += 1
-	_emit({ "type": "foe-hit", "foe": i, "damage": dmg, "heavy": heavy, "dist": fo.pos.distance_to(p_pos) })
+	_emit({ "type": "foe-hit", "foe": i, "damage": dmg, "heavy": heavy, "dist": fo.pos.distance_to(p_pos), "hand": g_in_hand and p_state == "attack", "stand": _stands() })
 	if fo.hp == 0.0:
 		stats["wolves_down"] += 1
 		fo.set_state("down", 99.0)
@@ -2401,4 +3416,5 @@ func swap_target(i: int) -> void:
 	w_slow_until = -9.0
 	w_mark_until = -9.0
 	foes[i] = old
+	_foe_changed(String(old.beast.get("id", "")))
 	_emit({ "type": "retarget", "foe": i })

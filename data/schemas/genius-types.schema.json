@@ -1,0 +1,2561 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "title": "genius-types",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "types",
+  "ages",
+  "caps",
+  "tally",
+  "weapon",
+  "items",
+  "roles",
+  "companions",
+  "need"
+ ],
+ "properties": {
+  "$comment": {
+   "type": "string"
+  },
+  "types": {
+   "type": "object",
+   "required": [
+    "weapon",
+    "defense",
+    "ritual",
+    "companion"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "$comment": {
+     "type": "string"
+    },
+    "weapon": {
+     "type": "object",
+     "required": [
+      "name",
+      "classes",
+      "key",
+      "says",
+      "keySays"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "name": {
+       "type": "string",
+       "minLength": 1
+      },
+      "keySays": {
+       "type": "string",
+       "minLength": 5
+      },
+      "classes": {
+       "type": "array",
+       "items": {
+        "type": "string",
+        "enum": [
+         "animal",
+         "monster",
+         "creature",
+         "item",
+         "weapon",
+         "armor"
+        ]
+       },
+       "minItems": 1
+      },
+      "key": {
+       "type": "string",
+       "enum": [
+        "take",
+        "use",
+        "order"
+       ]
+      },
+      "says": {
+       "type": "string",
+       "minLength": 20
+      }
+     }
+    },
+    "defense": {
+     "type": "object",
+     "required": [
+      "name",
+      "classes",
+      "key",
+      "says",
+      "keySays"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "name": {
+       "type": "string",
+       "minLength": 1
+      },
+      "keySays": {
+       "type": "string",
+       "minLength": 5
+      },
+      "classes": {
+       "type": "array",
+       "items": {
+        "type": "string",
+        "enum": [
+         "animal",
+         "monster",
+         "creature",
+         "item",
+         "weapon",
+         "armor"
+        ]
+       },
+       "minItems": 1
+      },
+      "key": {
+       "type": "string",
+       "enum": [
+        "take",
+        "use",
+        "order"
+       ]
+      },
+      "says": {
+       "type": "string",
+       "minLength": 20
+      }
+     }
+    },
+    "ritual": {
+     "type": "object",
+     "required": [
+      "name",
+      "classes",
+      "key",
+      "says",
+      "keySays"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "name": {
+       "type": "string",
+       "minLength": 1
+      },
+      "keySays": {
+       "type": "string",
+       "minLength": 5
+      },
+      "classes": {
+       "type": "array",
+       "items": {
+        "type": "string",
+        "enum": [
+         "animal",
+         "monster",
+         "creature",
+         "item",
+         "weapon",
+         "armor"
+        ]
+       },
+       "minItems": 1
+      },
+      "key": {
+       "type": "string",
+       "enum": [
+        "take",
+        "use",
+        "order"
+       ]
+      },
+      "says": {
+       "type": "string",
+       "minLength": 20
+      }
+     }
+    },
+    "companion": {
+     "type": "object",
+     "required": [
+      "name",
+      "classes",
+      "key",
+      "says",
+      "keySays"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "name": {
+       "type": "string",
+       "minLength": 1
+      },
+      "keySays": {
+       "type": "string",
+       "minLength": 5
+      },
+      "classes": {
+       "type": "array",
+       "items": {
+        "type": "string",
+        "enum": [
+         "animal",
+         "monster",
+         "creature",
+         "item",
+         "weapon",
+         "armor"
+        ]
+       },
+       "minItems": 1
+      },
+      "key": {
+       "type": "string",
+       "enum": [
+        "take",
+        "use",
+        "order"
+       ]
+      },
+      "says": {
+       "type": "string",
+       "minLength": 20
+      }
+     }
+    }
+   }
+  },
+  "ages": {
+   "type": "object",
+   "required": [
+    "young",
+    "half-grown",
+    "grown",
+    "prime",
+    "great",
+    "apex"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "$comment": {
+     "type": "string"
+    },
+    "young": {
+     "type": "object",
+     "required": [
+      "worth",
+      "wait"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "worth": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "wait": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      }
+     }
+    },
+    "half-grown": {
+     "type": "object",
+     "required": [
+      "worth",
+      "wait"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "worth": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "wait": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      }
+     }
+    },
+    "grown": {
+     "type": "object",
+     "required": [
+      "worth",
+      "wait"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "worth": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "wait": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      }
+     }
+    },
+    "prime": {
+     "type": "object",
+     "required": [
+      "worth",
+      "wait"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "worth": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "wait": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      }
+     }
+    },
+    "great": {
+     "type": "object",
+     "required": [
+      "worth",
+      "wait"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "worth": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "wait": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      }
+     }
+    },
+    "apex": {
+     "type": "object",
+     "required": [
+      "worth",
+      "wait"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "worth": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "wait": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      }
+     }
+    }
+   }
+  },
+  "caps": {
+   "type": "object",
+   "required": [
+    "parryWindow"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "$comment": {
+     "type": "string"
+    },
+    "parryWindow": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    }
+   }
+  },
+  "tally": {
+   "type": "object",
+   "required": [
+    "weapon",
+    "item"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "$comment": {
+     "type": "string"
+    },
+    "weapon": {
+     "type": "object",
+     "required": [
+      "hit",
+      "set",
+      "turn",
+      "with",
+      "stand"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "hit": {
+       "type": "object",
+       "required": [
+        "line",
+        "by"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "line": {
+         "type": "string",
+         "enum": [
+          "guard",
+          "hunt",
+          "hold",
+          "free"
+         ]
+        },
+        "by": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "seconds": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        }
+       }
+      },
+      "set": {
+       "type": "object",
+       "required": [
+        "line",
+        "by"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "line": {
+         "type": "string",
+         "enum": [
+          "guard",
+          "hunt",
+          "hold",
+          "free"
+         ]
+        },
+        "by": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "seconds": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        }
+       }
+      },
+      "turn": {
+       "type": "object",
+       "required": [
+        "line",
+        "by"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "line": {
+         "type": "string",
+         "enum": [
+          "guard",
+          "hunt",
+          "hold",
+          "free"
+         ]
+        },
+        "by": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "seconds": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        }
+       }
+      },
+      "with": {
+       "type": "object",
+       "required": [
+        "line",
+        "by"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "line": {
+         "type": "string",
+         "enum": [
+          "guard",
+          "hunt",
+          "hold",
+          "free"
+         ]
+        },
+        "by": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "seconds": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        }
+       }
+      },
+      "stand": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      }
+     }
+    },
+    "item": {
+     "type": "object",
+     "required": [
+      "use",
+      "always",
+      "after"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "use": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "always": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "after": {
+       "type": "object",
+       "required": [
+        "line",
+        "by"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "line": {
+         "type": "string",
+         "enum": [
+          "guard",
+          "hunt",
+          "hold",
+          "free"
+         ]
+        },
+        "by": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "seconds": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "weapon": {
+   "type": "object",
+   "required": [
+    "inHand",
+    "take",
+    "rest",
+    "with",
+    "great",
+    "bases"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "$comment": {
+     "type": "string"
+    },
+    "rest": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "inHand": {
+     "type": "object",
+     "required": [
+      "young",
+      "half-grown",
+      "grown",
+      "prime",
+      "great",
+      "apex"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "young": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "half-grown": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "grown": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "prime": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "great": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "apex": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      }
+     }
+    },
+    "take": {
+     "type": "object",
+     "required": [
+      "retake",
+      "drawCut"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "retake": {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 1
+      },
+      "drawCut": {
+       "type": "object",
+       "required": [
+        "seconds",
+        "startup",
+        "damage",
+        "rest"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "seconds": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "startup": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "damage": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "rest": {
+         "type": "number",
+         "minimum": 0
+        }
+       }
+      }
+     }
+    },
+    "with": {
+     "type": "object",
+     "required": [
+      "name",
+      "every",
+      "damage"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "name": {
+       "type": "string"
+      },
+      "every": {
+       "type": "integer",
+       "minimum": 1
+      },
+      "damage": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      }
+     }
+    },
+    "great": {
+     "type": "object",
+     "required": [
+      "name",
+      "effect"
+     ],
+     "properties": {
+      "name": {
+       "type": "string"
+      },
+      "effect": {
+       "type": "string",
+       "enum": [
+        "stagger",
+        "ward",
+        "double",
+        "flood",
+        "reckon"
+       ]
+      }
+     },
+     "additionalProperties": {
+      "type": "number"
+     }
+    },
+    "bases": {
+     "type": "object",
+     "minProperties": 1,
+     "additionalProperties": {
+      "type": "object",
+      "required": [
+       "style",
+       "willPerBlow",
+       "held",
+       "inHand",
+       "paths"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "style": {
+        "type": "string",
+        "minLength": 1
+       },
+       "willPerBlow": {
+        "type": "number",
+        "minimum": 0
+       },
+       "held": {
+        "type": "object",
+        "required": [
+         "length"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "length": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         },
+         "grip": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+         },
+         "flip": {
+          "type": "boolean"
+         },
+         "upright": {
+          "type": "boolean"
+         }
+        }
+       },
+       "inHand": {
+        "type": "string",
+        "minLength": 10
+       },
+       "great": {
+        "type": "object",
+        "required": [
+         "name",
+         "effect"
+        ],
+        "properties": {
+         "name": {
+          "type": "string"
+         },
+         "effect": {
+          "type": "string",
+          "enum": [
+           "stagger",
+           "ward",
+           "double",
+           "flood",
+           "reckon"
+          ]
+         }
+        },
+        "additionalProperties": {
+         "type": "number"
+        }
+       },
+       "paths": {
+        "type": "object",
+        "minProperties": 3,
+        "maxProperties": 3,
+        "additionalProperties": {
+         "type": "object",
+         "required": [
+          "name",
+          "text"
+         ],
+         "additionalProperties": false,
+         "properties": {
+          "name": {
+           "type": "string",
+           "minLength": 1
+          },
+          "text": {
+           "type": "string",
+           "minLength": 20
+          },
+          "damage": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "parryWindow": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "heavyOn": {
+           "type": "integer",
+           "minimum": 1
+          },
+          "afterParry": {
+           "type": "object",
+           "required": [
+            "seconds",
+            "damage"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "seconds": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            },
+            "damage": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            },
+            "free": {
+             "type": "boolean"
+            }
+           }
+          },
+          "score": {
+           "type": "object",
+           "required": [
+            "per",
+            "max"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "per": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            },
+            "max": {
+             "type": "integer",
+             "minimum": 1
+            }
+           }
+          },
+          "firstFullDraw": {
+           "type": "object",
+           "required": [
+            "damage",
+            "rest"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "damage": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            },
+            "rest": {
+             "type": "number",
+             "minimum": 0
+            }
+           }
+          },
+          "onWindup": {
+           "type": "object",
+           "required": [
+            "weaken"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "weaken": {
+             "type": "number",
+             "minimum": 0,
+             "maximum": 1
+            }
+           }
+          },
+          "fullDraw": {
+           "type": "object",
+           "required": [
+            "slow",
+            "seconds"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "slow": {
+             "type": "number",
+             "exclusiveMinimum": 0,
+             "maximum": 1
+            },
+            "seconds": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            }
+           }
+          },
+          "shot": {
+           "type": "object",
+           "additionalProperties": {
+            "type": "number"
+           }
+          },
+          "swing": {
+           "type": "object",
+           "additionalProperties": {
+            "type": "number"
+           }
+          },
+          "far": {
+           "type": "object",
+           "required": [
+            "from",
+            "to",
+            "damage"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "from": {
+             "type": "number"
+            },
+            "to": {
+             "type": "number"
+            },
+            "damage": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            }
+           }
+          },
+          "everyNth": {
+           "type": "object",
+           "required": [
+            "n",
+            "damage"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "n": {
+             "type": "integer",
+             "minimum": 2
+            },
+            "damage": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            }
+           }
+          },
+          "still": {
+           "type": "object",
+           "required": [
+            "seconds",
+            "damage"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "seconds": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            },
+            "damage": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "items": {
+   "type": "object",
+   "minProperties": 2,
+   "properties": {
+    "$comment": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "type",
+     "worn",
+     "wornAs",
+     "always",
+     "use",
+     "paths"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "type": {
+      "type": "string",
+      "enum": [
+       "defense",
+       "ritual"
+      ]
+     },
+     "worn": {
+      "type": "string",
+      "enum": [
+       "arm",
+       "hand",
+       "back",
+       "side",
+       "shoulder",
+       "belt"
+      ]
+     },
+     "wornAs": {
+      "type": "string",
+      "minLength": 1
+     },
+     "always": {
+      "type": "object",
+      "required": [
+       "name",
+       "text",
+       "feeds"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "name": {
+        "type": "string",
+        "minLength": 1
+       },
+       "text": {
+        "type": "string",
+        "minLength": 10
+       },
+       "feeds": {
+        "type": "string",
+        "enum": [
+         "guard",
+         "hunt",
+         "hold",
+         "free"
+        ]
+       },
+       "block": {
+        "type": "object",
+        "required": [
+         "damage",
+         "will"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "damage": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         },
+         "will": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         }
+        }
+       },
+       "parryWindow": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "dodge": {
+        "type": "object",
+        "required": [
+         "will",
+         "iframes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "will": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         },
+         "iframes": {
+          "type": "number",
+          "minimum": 0
+         }
+        }
+       },
+       "hurt": {
+        "type": "number",
+        "exclusiveMinimum": 0,
+        "maximum": 1
+       },
+       "measure": {
+        "type": "object",
+        "required": [
+         "per",
+         "max"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "per": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         },
+         "max": {
+          "type": "integer",
+          "minimum": 1
+         },
+         "keeps": {
+          "type": "boolean"
+         }
+        }
+       },
+       "chain": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "parryWill": {
+        "type": "number",
+        "minimum": 0
+       },
+       "with": {
+        "type": "object",
+        "required": [
+         "every",
+         "damage"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "every": {
+          "type": "integer",
+          "minimum": 1
+         },
+         "damage": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         }
+        }
+       },
+       "catchFall": {
+        "type": "integer",
+        "minimum": 1
+       }
+      }
+     },
+     "use": {
+      "type": "object",
+      "required": [
+       "name",
+       "short",
+       "effect",
+       "feeds",
+       "text",
+       "wait",
+       "will"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "name": {
+        "type": "string",
+        "minLength": 1
+       },
+       "short": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 16
+       },
+       "effect": {
+        "type": "string",
+        "enum": [
+         "set",
+         "catch",
+         "slip",
+         "light",
+         "sight",
+         "toll"
+        ]
+       },
+       "feeds": {
+        "type": "string",
+        "enum": [
+         "guard",
+         "hunt",
+         "hold",
+         "free"
+        ]
+       },
+       "text": {
+        "type": "string",
+        "minLength": 20
+       },
+       "wait": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "will": {
+        "type": "number",
+        "minimum": 0
+       },
+       "grows": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       },
+       "seconds": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "blows": {
+        "type": "integer",
+        "minimum": 1
+       },
+       "takes": {
+        "type": "number",
+        "minimum": 0
+       },
+       "allies": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "ground": {
+        "type": "object",
+        "required": [
+         "radius",
+         "seconds"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "radius": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         },
+         "seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         }
+        }
+       },
+       "reach": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "flinch": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "missWait": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "missWill": {
+        "type": "number",
+        "minimum": 0
+       },
+       "open": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "exposed": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "strike": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "knockback": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "allyReach": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "distance": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "iframes": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "willBack": {
+        "type": "number",
+        "minimum": 0
+       },
+       "haste": {
+        "type": "object",
+        "required": [
+         "seconds",
+         "speed"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         },
+         "speed": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         }
+        }
+       },
+       "punish": {
+        "type": "object",
+        "required": [
+         "seconds",
+         "damage"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         },
+         "damage": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         }
+        }
+       },
+       "late": {
+        "type": "object",
+        "required": [
+         "seconds",
+         "back"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         },
+         "back": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+         }
+        }
+       },
+       "radius": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "parryWindow": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "stagger": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "at": {
+        "type": "string",
+        "enum": [
+         "foe",
+         "partner"
+        ]
+       },
+       "found": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "shelter": {
+        "type": "number",
+        "exclusiveMinimum": 0,
+        "maximum": 1
+       },
+       "burn": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "willRegen": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "damage": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "far": {
+        "type": "object",
+        "required": [
+         "from",
+         "damage"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "from": {
+          "type": "number"
+         },
+         "damage": {
+          "type": "number",
+          "exclusiveMinimum": 0
+         }
+        }
+       },
+       "mend": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       },
+       "auto": {
+        "type": "number",
+        "exclusiveMinimum": 0
+       }
+      }
+     },
+     "great": {
+      "type": "object",
+      "required": [
+       "name",
+       "effect"
+      ],
+      "properties": {
+       "name": {
+        "type": "string"
+       },
+       "effect": {
+        "type": "string",
+        "enum": [
+         "stagger",
+         "ward",
+         "double",
+         "flood",
+         "reckon"
+        ]
+       }
+      },
+      "additionalProperties": {
+       "type": "number"
+      }
+     },
+     "paths": {
+      "type": "object",
+      "minProperties": 3,
+      "maxProperties": 3,
+      "additionalProperties": {
+       "type": "object",
+       "required": [
+        "name",
+        "text"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "name": {
+         "type": "string",
+         "minLength": 1
+        },
+        "text": {
+         "type": "string",
+         "minLength": 20
+        },
+        "use": {
+         "type": "object",
+         "required": [],
+         "additionalProperties": false,
+         "properties": {
+          "name": {
+           "type": "string",
+           "minLength": 1
+          },
+          "short": {
+           "type": "string",
+           "minLength": 1,
+           "maxLength": 16
+          },
+          "effect": {
+           "type": "string",
+           "enum": [
+            "set",
+            "catch",
+            "slip",
+            "light",
+            "sight",
+            "toll"
+           ]
+          },
+          "feeds": {
+           "type": "string",
+           "enum": [
+            "guard",
+            "hunt",
+            "hold",
+            "free"
+           ]
+          },
+          "text": {
+           "type": "string",
+           "minLength": 20
+          },
+          "wait": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "will": {
+           "type": "number",
+           "minimum": 0
+          },
+          "grows": {
+           "type": "array",
+           "items": {
+            "type": "string"
+           }
+          },
+          "seconds": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "blows": {
+           "type": "integer",
+           "minimum": 1
+          },
+          "takes": {
+           "type": "number",
+           "minimum": 0
+          },
+          "allies": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "ground": {
+           "type": "object",
+           "required": [
+            "radius",
+            "seconds"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "radius": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            },
+            "seconds": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            }
+           }
+          },
+          "reach": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "flinch": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "missWait": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "missWill": {
+           "type": "number",
+           "minimum": 0
+          },
+          "open": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "exposed": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "strike": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "knockback": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "allyReach": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "distance": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "iframes": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "willBack": {
+           "type": "number",
+           "minimum": 0
+          },
+          "haste": {
+           "type": "object",
+           "required": [
+            "seconds",
+            "speed"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "seconds": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            },
+            "speed": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            }
+           }
+          },
+          "punish": {
+           "type": "object",
+           "required": [
+            "seconds",
+            "damage"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "seconds": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            },
+            "damage": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            }
+           }
+          },
+          "late": {
+           "type": "object",
+           "required": [
+            "seconds",
+            "back"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "seconds": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            },
+            "back": {
+             "type": "number",
+             "exclusiveMinimum": 0,
+             "maximum": 1
+            }
+           }
+          },
+          "radius": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "parryWindow": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "stagger": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "at": {
+           "type": "string",
+           "enum": [
+            "foe",
+            "partner"
+           ]
+          },
+          "found": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "shelter": {
+           "type": "number",
+           "exclusiveMinimum": 0,
+           "maximum": 1
+          },
+          "burn": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "willRegen": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "damage": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "far": {
+           "type": "object",
+           "required": [
+            "from",
+            "damage"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "from": {
+             "type": "number"
+            },
+            "damage": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            }
+           }
+          },
+          "mend": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "auto": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          }
+         }
+        },
+        "always": {
+         "type": "object",
+         "required": [],
+         "additionalProperties": false,
+         "properties": {
+          "name": {
+           "type": "string",
+           "minLength": 1
+          },
+          "text": {
+           "type": "string",
+           "minLength": 10
+          },
+          "feeds": {
+           "type": "string",
+           "enum": [
+            "guard",
+            "hunt",
+            "hold",
+            "free"
+           ]
+          },
+          "block": {
+           "type": "object",
+           "required": [
+            "damage",
+            "will"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "damage": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            },
+            "will": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            }
+           }
+          },
+          "parryWindow": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "dodge": {
+           "type": "object",
+           "required": [
+            "will",
+            "iframes"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "will": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            },
+            "iframes": {
+             "type": "number",
+             "minimum": 0
+            }
+           }
+          },
+          "hurt": {
+           "type": "number",
+           "exclusiveMinimum": 0,
+           "maximum": 1
+          },
+          "measure": {
+           "type": "object",
+           "required": [
+            "per",
+            "max"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "per": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            },
+            "max": {
+             "type": "integer",
+             "minimum": 1
+            },
+            "keeps": {
+             "type": "boolean"
+            }
+           }
+          },
+          "chain": {
+           "type": "number",
+           "exclusiveMinimum": 0
+          },
+          "parryWill": {
+           "type": "number",
+           "minimum": 0
+          },
+          "with": {
+           "type": "object",
+           "required": [
+            "every",
+            "damage"
+           ],
+           "additionalProperties": false,
+           "properties": {
+            "every": {
+             "type": "integer",
+             "minimum": 1
+            },
+            "damage": {
+             "type": "number",
+             "exclusiveMinimum": 0
+            }
+           }
+          },
+          "catchFall": {
+           "type": "integer",
+           "minimum": 1
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "roles": {
+   "type": "object",
+   "required": [
+    "shade",
+    "favourWait",
+    "bulwark",
+    "hunter",
+    "harrier",
+    "keeper",
+    "lookout"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "$comment": {
+     "type": "string"
+    },
+    "shade": {
+     "type": "object",
+     "required": [
+      "pure",
+      "other"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "pure": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      },
+      "other": {
+       "type": "number",
+       "exclusiveMinimum": 0
+      }
+     }
+    },
+    "favourWait": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "bulwark": {
+     "type": "object",
+     "required": [
+      "name",
+      "does",
+      "supplies",
+      "lacks",
+      "stands",
+      "numbers",
+      "favours",
+      "own"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "name": {
+       "type": "string",
+       "minLength": 1
+      },
+      "does": {
+       "type": "string",
+       "minLength": 5
+      },
+      "supplies": {
+       "type": "string",
+       "minLength": 2
+      },
+      "lacks": {
+       "type": "string",
+       "minLength": 20
+      },
+      "stands": {
+       "type": "string",
+       "enum": [
+        "front",
+        "foe",
+        "flank",
+        "side",
+        "back"
+       ]
+      },
+      "numbers": {
+       "type": "object",
+       "required": [],
+       "additionalProperties": false,
+       "properties": {
+        "will": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "damage": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "interval": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "speed": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "guardCost": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "guardCooldown": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        }
+       }
+      },
+      "favours": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      },
+      "own": {
+       "type": "object",
+       "required": [
+        "id",
+        "name",
+        "text"
+       ],
+       "properties": {
+        "id": {
+         "type": "string",
+         "enum": [
+          "hold-it",
+          "opening",
+          "worry",
+          "mend",
+          "calls"
+         ]
+        },
+        "name": {
+         "type": "string",
+         "minLength": 1
+        },
+        "text": {
+         "type": "string",
+         "minLength": 20
+        }
+       },
+       "additionalProperties": {
+        "type": "number"
+       }
+      }
+     }
+    },
+    "hunter": {
+     "type": "object",
+     "required": [
+      "name",
+      "does",
+      "supplies",
+      "lacks",
+      "stands",
+      "numbers",
+      "favours",
+      "own"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "name": {
+       "type": "string",
+       "minLength": 1
+      },
+      "does": {
+       "type": "string",
+       "minLength": 5
+      },
+      "supplies": {
+       "type": "string",
+       "minLength": 2
+      },
+      "lacks": {
+       "type": "string",
+       "minLength": 20
+      },
+      "stands": {
+       "type": "string",
+       "enum": [
+        "front",
+        "foe",
+        "flank",
+        "side",
+        "back"
+       ]
+      },
+      "numbers": {
+       "type": "object",
+       "required": [],
+       "additionalProperties": false,
+       "properties": {
+        "will": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "damage": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "interval": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "speed": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "guardCost": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "guardCooldown": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        }
+       }
+      },
+      "favours": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      },
+      "own": {
+       "type": "object",
+       "required": [
+        "id",
+        "name",
+        "text"
+       ],
+       "properties": {
+        "id": {
+         "type": "string",
+         "enum": [
+          "hold-it",
+          "opening",
+          "worry",
+          "mend",
+          "calls"
+         ]
+        },
+        "name": {
+         "type": "string",
+         "minLength": 1
+        },
+        "text": {
+         "type": "string",
+         "minLength": 20
+        }
+       },
+       "additionalProperties": {
+        "type": "number"
+       }
+      }
+     }
+    },
+    "harrier": {
+     "type": "object",
+     "required": [
+      "name",
+      "does",
+      "supplies",
+      "lacks",
+      "stands",
+      "numbers",
+      "favours",
+      "own"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "name": {
+       "type": "string",
+       "minLength": 1
+      },
+      "does": {
+       "type": "string",
+       "minLength": 5
+      },
+      "supplies": {
+       "type": "string",
+       "minLength": 2
+      },
+      "lacks": {
+       "type": "string",
+       "minLength": 20
+      },
+      "stands": {
+       "type": "string",
+       "enum": [
+        "front",
+        "foe",
+        "flank",
+        "side",
+        "back"
+       ]
+      },
+      "numbers": {
+       "type": "object",
+       "required": [],
+       "additionalProperties": false,
+       "properties": {
+        "will": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "damage": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "interval": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "speed": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "guardCost": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "guardCooldown": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        }
+       }
+      },
+      "favours": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      },
+      "own": {
+       "type": "object",
+       "required": [
+        "id",
+        "name",
+        "text"
+       ],
+       "properties": {
+        "id": {
+         "type": "string",
+         "enum": [
+          "hold-it",
+          "opening",
+          "worry",
+          "mend",
+          "calls"
+         ]
+        },
+        "name": {
+         "type": "string",
+         "minLength": 1
+        },
+        "text": {
+         "type": "string",
+         "minLength": 20
+        }
+       },
+       "additionalProperties": {
+        "type": "number"
+       }
+      }
+     }
+    },
+    "keeper": {
+     "type": "object",
+     "required": [
+      "name",
+      "does",
+      "supplies",
+      "lacks",
+      "stands",
+      "numbers",
+      "favours",
+      "own"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "name": {
+       "type": "string",
+       "minLength": 1
+      },
+      "does": {
+       "type": "string",
+       "minLength": 5
+      },
+      "supplies": {
+       "type": "string",
+       "minLength": 2
+      },
+      "lacks": {
+       "type": "string",
+       "minLength": 20
+      },
+      "stands": {
+       "type": "string",
+       "enum": [
+        "front",
+        "foe",
+        "flank",
+        "side",
+        "back"
+       ]
+      },
+      "numbers": {
+       "type": "object",
+       "required": [],
+       "additionalProperties": false,
+       "properties": {
+        "will": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "damage": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "interval": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "speed": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "guardCost": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "guardCooldown": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        }
+       }
+      },
+      "favours": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      },
+      "own": {
+       "type": "object",
+       "required": [
+        "id",
+        "name",
+        "text"
+       ],
+       "properties": {
+        "id": {
+         "type": "string",
+         "enum": [
+          "hold-it",
+          "opening",
+          "worry",
+          "mend",
+          "calls"
+         ]
+        },
+        "name": {
+         "type": "string",
+         "minLength": 1
+        },
+        "text": {
+         "type": "string",
+         "minLength": 20
+        }
+       },
+       "additionalProperties": {
+        "type": "number"
+       }
+      }
+     }
+    },
+    "lookout": {
+     "type": "object",
+     "required": [
+      "name",
+      "does",
+      "supplies",
+      "lacks",
+      "stands",
+      "numbers",
+      "favours",
+      "own"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "name": {
+       "type": "string",
+       "minLength": 1
+      },
+      "does": {
+       "type": "string",
+       "minLength": 5
+      },
+      "supplies": {
+       "type": "string",
+       "minLength": 2
+      },
+      "lacks": {
+       "type": "string",
+       "minLength": 20
+      },
+      "stands": {
+       "type": "string",
+       "enum": [
+        "front",
+        "foe",
+        "flank",
+        "side",
+        "back"
+       ]
+      },
+      "numbers": {
+       "type": "object",
+       "required": [],
+       "additionalProperties": false,
+       "properties": {
+        "will": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "damage": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "interval": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "speed": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "guardCost": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        },
+        "guardCooldown": {
+         "type": "number",
+         "exclusiveMinimum": 0
+        }
+       }
+      },
+      "favours": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      },
+      "own": {
+       "type": "object",
+       "required": [
+        "id",
+        "name",
+        "text"
+       ],
+       "properties": {
+        "id": {
+         "type": "string",
+         "enum": [
+          "hold-it",
+          "opening",
+          "worry",
+          "mend",
+          "calls"
+         ]
+        },
+        "name": {
+         "type": "string",
+         "minLength": 1
+        },
+        "text": {
+         "type": "string",
+         "minLength": 20
+        }
+       },
+       "additionalProperties": {
+        "type": "number"
+       }
+      }
+     }
+    }
+   }
+  },
+  "companions": {
+   "type": "object",
+   "minProperties": 1,
+   "properties": {
+    "$comment": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "role",
+     "paths"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "role": {
+      "type": "string",
+      "enum": [
+       "bulwark",
+       "hunter",
+       "harrier",
+       "keeper",
+       "lookout"
+      ]
+     },
+     "paths": {
+      "type": "object",
+      "minProperties": 3,
+      "maxProperties": 3,
+      "additionalProperties": {
+       "type": "object",
+       "required": [
+        "shade",
+        "text"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "shade": {
+         "type": "string",
+         "enum": [
+          "bulwark",
+          "hunter",
+          "harrier",
+          "keeper",
+          "lookout"
+         ]
+        },
+        "text": {
+         "type": "string",
+         "minLength": 10
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "need": {
+   "type": "object",
+   "required": [
+    "bulwark",
+    "hunter",
+    "harrier",
+    "keeper",
+    "lookout",
+    "slow",
+    "words"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "$comment": {
+     "type": "string"
+    },
+    "slow": {
+     "type": "object",
+     "required": [
+      "from",
+      "to"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "from": {
+       "type": "number"
+      },
+      "to": {
+       "type": "number"
+      }
+     }
+    },
+    "words": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "string"
+       }
+      ]
+     }
+    },
+    "bulwark": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "number"
+     }
+    },
+    "hunter": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "number"
+     }
+    },
+    "harrier": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "number"
+     }
+    },
+    "keeper": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "number"
+     }
+    },
+    "lookout": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "number"
+     }
+    }
+   }
+  }
+ }
+}

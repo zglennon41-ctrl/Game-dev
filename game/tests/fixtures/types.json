@@ -1,0 +1,32 @@
+{
+  "$comment": "What the tests' own three bases (game/tests/fixtures/bases) are, as data/genius-types.json says it of the game's: laid over the game's types for the whole test run, so a test of the rules of the three types names only these and a change to a real base's numbers is never a failing test of the engine. tedge is a weapon (a blade), tlamp a ritual item (a light set down), trun a companion (a Hunter). The tests of each effect of an item, each property of a weapon and each role's own thing put their own numbers on a fight directly.",
+  "weapon": {
+    "tedge": {
+      "style": "blade", "willPerBlow": 4.0, "held": { "length": 0.9 },
+      "inHand": "A test blade: three cuts.",
+      "paths": {
+        "tedge-a": { "name": "The answer", "text": "After a parry made with it, its next blow lands twice as hard and costs it nothing.", "afterParry": { "seconds": 1.5, "damage": 2.0, "free": true } },
+        "tedge-b": { "name": "The score", "text": "Every blow its partner takes is scored, up to three; the next blow that lands pays them back.", "score": { "per": 0.5, "max": 3 } },
+        "tedge-c": { "name": "No guard", "text": "Every cut is half again as heavy, the third throws the foe back, and the moment to parry is halved.", "damage": 1.5, "parryWindow": 0.5, "heavyOn": 3 }
+      }
+    }
+  },
+  "items": {
+    "tlamp": {
+      "type": "ritual", "worn": "side", "wornAs": "At your side",
+      "always": { "name": "Nothing comes unseen", "text": "A blow taken whole lands for a fifth less.", "feeds": "free", "hurt": 0.8 },
+      "use": { "name": "Set it down", "short": "Set it down", "effect": "light", "feeds": "hold", "text": "It lights a circle where you stand: inside it the moment to parry is twice as long.", "wait": 10.0, "will": 10.0, "radius": 4.0, "seconds": 6.0, "parryWindow": 2.0, "stagger": 0.5, "grows": ["seconds"] },
+      "paths": {
+        "tlamp-a": { "name": "Shelter", "text": "Blows at those standing in its light land for half.", "use": { "shelter": 0.5 } },
+        "tlamp-b": { "name": "Flame", "text": "What stands against its partner in its light burns.", "use": { "burn": 1.0 } },
+        "tlamp-c": { "name": "Finder", "text": "It is set at the foe's feet, and a guarded foe in its light is found out.", "use": { "at": "foe", "found": 2.0 } }
+      }
+    }
+  },
+  "companions": {
+    "trun": { "role": "hunter", "paths": {
+      "trun-a": { "shade": "keeper", "text": "It mends between bites." },
+      "trun-b": { "shade": "hunter", "text": "It keeps to the hunt." },
+      "trun-c": { "shade": "lookout", "text": "It calls the strike." } } }
+  }
+}
