@@ -665,8 +665,8 @@
       "by": "wear",
       "at": [
         0.0,
-        0.2,
-        -0.02
+        0.4,
+        -0.05
       ],
       "turn": [
         0,
@@ -1088,6 +1088,7 @@
         }
       }
     },
+    "moth": { "role": "lookout", "paths": { "moth-candle": { "shade": "hunter", "text": "It goes where the fire is: heavier into every opening." }, "moth-emperor": { "shade": "bulwark", "text": "It opens its eyes at the foe: the foe looks at it, and not at you." }, "moth-moon": { "shade": "lookout", "text": "It keeps its one far light in view: the moment to parry is longer still." } } },
     "fog": {
       "role": "harrier",
       "paths": {
@@ -1102,6 +1103,23 @@
         "fog-shifting-fog": {
           "shade": "harrier",
           "text": "It cannot be pinned: the guard is down longer."
+        }
+      }
+    },
+    "carp": {
+      "role": "bulwark",
+      "paths": {
+        "carp-weir-leaper": {
+          "shade": "bulwark",
+          "text": "It does not go round: it holds the foe longer."
+        },
+        "carp-still-water": {
+          "shade": "keeper",
+          "text": "It makes the place it stays in deep: it mends who rests by it."
+        },
+        "carp-silt-reader": {
+          "shade": "lookout",
+          "text": "It feels it in the floor: it calls the strike."
         }
       }
     }

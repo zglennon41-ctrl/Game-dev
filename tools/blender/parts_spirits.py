@@ -16,6 +16,7 @@ hang as parts because data/genius-bodies.json (featureSockets) gives each a plac
 the back, and the breast.
 """
 import math
+import os
 import sys
 
 import bpy  # noqa: F401  (mathutils comes with it)
@@ -31,38 +32,43 @@ import spirits_kit as sk
 
 def shadow_cloak_part():
     """The Lurker's cloak, on its back: a ragged mantle of ink over the shoulders, a hood thrown
-    back with nothing in it, the hem streaming behind, and one line of the field along its edge."""
+    back with nothing in it, the hem streaming behind, and one line of the field along its edge.
+    Shaded round, as the Lurker's own cloak is."""
     ink, edge = mat("ink"), mat("ink_edge")
     items = [(g.tongue([(0, -0.14, 0.0), (0, -0.02, 0.035), (0, 0.14, 0.03), (0, 0.3, 0.0)], [0.2, 0.26, 0.24, 0.1], thick=0.3, normal=Z), ink)]
     flaps, hem = None, None
     for s in (1, -1):
         pts = [Vector((s * 0.07, 0.03, 0.02)), Vector((s * 0.13, 0.04, -0.07)), Vector((s * 0.155, 0.07, -0.2)), Vector((s * 0.15, 0.12, -0.31))]
-        flaps = g.merge(flaps, g.tongue(pts, [0.3, 0.32, 0.24, 0.03], thick=0.16, normal=(s, 0, 0.35)))
-        hem = g.merge(hem, g.tube([pts[1] + Vector((s * 0.012, -0.16, 0)), pts[2] + Vector((s * 0.012, -0.12, 0)), pts[3] + Vector((s * 0.006, -0.01, 0))], [0.005, 0.005, 0.002], n=3))
+        flaps = g.merge(flaps, g.tongue(sk.curve(pts, n=2), [0.3, 0.32, 0.32, 0.29, 0.24, 0.14, 0.03], thick=0.16, normal=(s, 0, 0.35)))
+        hem = g.merge(hem, g.tube(sk.curve([pts[1] + Vector((s * 0.012, -0.16, 0)), pts[2] + Vector((s * 0.012, -0.12, 0)), pts[3] + Vector((s * 0.006, -0.01, 0))], n=3), 0.0055, n=4))
     items += [(flaps, ink), (hem, field("hem", 1.8))]
-    tat = None
-    for i, (x, L) in enumerate(((-0.1, 0.2), (-0.04, 0.3), (0.03, 0.25), (0.1, 0.19))):
+    tat = [None, None]
+    for i, (x, L) in enumerate(((-0.12, 0.18), (-0.075, 0.27), (-0.03, 0.32), (0.02, 0.26), (0.065, 0.3), (0.11, 0.2))):
         b0 = Vector((x, 0.25, 0.0))
-        tat = g.merge(tat, g.tongue([b0, b0 + Vector((x * 0.3, L * 0.5, 0.03)), b0 + Vector((x * 0.5, L, 0.07 + 0.02 * (i % 2)))], [0.075, 0.06, 0.004], thick=0.25, normal=Z))
-    items.append((tat, edge))
-    # the hood, thrown back, and the dark in it
-    hood = g.loft([g.ring((0, y, z), rx, rz, n=8, u=X, v=Z) for y, z, rx, rz in ((-0.17, 0.04, 0.085, 0.07), (-0.1, 0.07, 0.1, 0.085), (0.0, 0.085, 0.075, 0.06), (0.09, 0.1, 0.03, 0.025), (0.14, 0.12, 0.004, 0.004))])
-    items += [(hood, ink), (g.ico((0, -0.165, 0.045), 0.062, sub=1, scale=(1.0, 0.4, 0.85)), mat("void")),
-              (sk.hoop((0, -0.172, 0.042), 0.086, 0.071, 0.009, n=10, u=X, v=Z, sides=3), edge)]
-    return [kit._part("shadow-cloak", items)]
+        tat[i % 2] = g.merge(tat[i % 2], sk.strand(sk.curve([b0, b0 + Vector((x * 0.3, L * 0.5, 0.03)), b0 + Vector((x * 0.5, L, 0.07 + 0.02 * (i % 2)))], n=3), 0.07, n=6, swell=0.2, flat=0.4))
+    items += [(tat[0], edge), (tat[1], ink)]
+    # the hood, thrown back, the dark in it, and the turned edge of it
+    hood = g.loft([g.ring((0, y, z), rx, rz, n=14, u=X, v=Z) for y, z, rx, rz in ((-0.17, 0.04, 0.085, 0.07), (-0.1, 0.07, 0.1, 0.085), (0.0, 0.085, 0.075, 0.06), (0.09, 0.1, 0.03, 0.025), (0.14, 0.12, 0.004, 0.004))])
+    items += [(hood, ink), (g.ico((0, -0.165, 0.045), 0.062, sub=2, scale=(1.0, 0.4, 0.85)), mat("void")),
+              (sk.hoop((0, -0.172, 0.042), 0.086, 0.071, 0.009, n=16, u=X, v=Z, sides=5), edge)]
+    return [g.pieces("shadow-cloak", items, smooth=True)]
 
 
 def watching_eye_part():
     """The Lurker's eye, on its brow: one great eye, upright, lidded in ink, with the dark standing up off it."""
     c = Vector((0, -0.012, 0.075))
-    items = relics._eye(c, 0.046, lids=mat("ink"))
+    items = [(g.ico(c, 0.05, sub=2, scale=(1.0, 0.45, 1.0)), field("eyes", 3.5)), (g.ico(c + Vector((0, -0.018, 0)), 0.021, sub=2, scale=(0.5, 0.5, 1.7)), mat("eye_dark"))]
+    lids = None
+    for sgn in (1, -1):
+        lids = g.merge(lids, g.tongue(sk.curve([c + Vector((-0.062, -0.005, 0)), c + Vector((0, -0.025, sgn * 0.047)), c + Vector((0.062, -0.005, 0))], n=3), [0.008, 0.02, 0.028, 0.031, 0.028, 0.02, 0.008], thick=0.5, normal=(0, -1, sgn * 0.6)))
+    items.append((lids, mat("ink")))
     lash = None
     for i, (x, L) in enumerate(((-0.05, 0.07), (-0.018, 0.11), (0.018, 0.1), (0.05, 0.065))):
         b0 = c + Vector((x, 0.01, 0.04))
-        lash = g.merge(lash, g.tongue([b0, b0 + Vector((x * 0.5, 0.02, L * 0.6)), b0 + Vector((x * 0.9, 0.05, L))], [0.03, 0.022, 0.003], thick=0.3, normal=(0, -1, 0.3)))
+        lash = g.merge(lash, sk.strand(sk.curve([b0, b0 + Vector((x * 0.5, 0.02, L * 0.6)), b0 + Vector((x * 0.9, 0.05, L))], n=3), 0.03, n=5, swell=0.2))
     items.append((lash, mat("ink_edge")))
-    items.append((sk.hoop(c + Vector((0, 0.006, 0)), 0.064, 0.066, 0.007, n=10, u=X, v=Z, sides=3), mat("ink")))
-    return [kit._part("watching-eye", items)]
+    items.append((sk.hoop(c + Vector((0, 0.006, 0)), 0.066, 0.068, 0.007, n=16, u=X, v=Z, sides=5), mat("ink")))
+    return [g.pieces("watching-eye", items, smooth=True)]
 
 
 def ember_part():
@@ -113,23 +119,22 @@ def glow_part():
 
 
 def mist_part():
-    """The Fog's mist, at its breast: a wreath of it, darker under and paler on top, and two
-    long shreds of it trailing back along the flanks."""
+    """The Fog's mist, at its breast: a wreath of it, darker under and paler on top, round as the
+    Fog's own rolls are, and two long shreds of it trailing back along the flanks."""
     mist, dark, pale = mat("mist"), mat("mist_dark"), mat("mist_pale")
-    lo, mid, hi = None, None, None
+    lo, mid, hi = [], [], []
     for i in range(7):          # round the breast, from flank to flank
         a = math.pi * (1.08 + 0.84 * i / 6)          # from the left flank, round the front, to the right
         p = Vector((0.15 * math.cos(a), 0.11 * math.sin(a) + 0.04, 0.0))
         r = 0.06 + 0.012 * math.sin(i * 2.1)
-        lo = g.merge(lo, g.ico(p + Vector((0, 0, -0.03)), r, sub=1, scale=(1.15, 1.0, 0.7), rot=(0, 0, a)))
-        if i % 2 == 0:
-            hi = g.merge(hi, g.ico(p + Vector((0, 0.0, 0.03)), r * 0.72, sub=1, scale=(1.15, 1.0, 0.6), rot=(0, 0, a)))
-        else:
-            mid = g.merge(mid, g.ico(p + Vector((0, -0.01, 0.01)), r * 0.85, sub=1, scale=(1.15, 1.0, 0.7), rot=(0, 0, a)))
+        lo.append((p + Vector((0, 0, -0.03)), r, (1.15, 1.0, 0.7), a))
+        (hi if i % 2 == 0 else mid).append((p + Vector((0, 0.0 if i % 2 == 0 else -0.01, 0.03 if i % 2 == 0 else 0.01)), r * (0.72 if i % 2 == 0 else 0.85), (1.15, 1.0, 0.65), a))
+    trail, bits = None, None
     for s in (1, -1):
-        mid = g.merge(mid, g.tongue([(s * 0.15, 0.05, 0.0), (s * 0.19, 0.2, 0.02), (s * 0.18, 0.36, -0.01), (s * 0.15, 0.5, 0.03)], [0.1, 0.085, 0.06, 0.006], thick=0.5, normal=(s, 0, 0.3)))
-        hi = g.merge(hi, g.ico((s * 0.2, 0.44, 0.07), 0.028, sub=0, scale=(1.3, 1.0, 0.7)), g.ico((s * 0.17, 0.56, 0.1), 0.02, sub=0, scale=(1.3, 1.0, 0.7)))
-    return [kit._part("mist", [(lo, dark), (mid, mist), (hi, pale)])]
+        trail = g.merge(trail, sk.strand(sk.curve([(s * 0.15, 0.05, 0.0), (s * 0.19, 0.2, 0.02), (s * 0.18, 0.36, -0.01), (s * 0.15, 0.52, 0.03)], n=3), 0.1, n=7, swell=0.25, flat=0.6))
+        bits = g.merge(bits, g.ico((s * 0.2, 0.44, 0.07), 0.028, sub=1, scale=(1.3, 1.0, 0.7)), g.ico((s * 0.17, 0.56, 0.1), 0.02, sub=1, scale=(1.3, 1.0, 0.7)))
+    items = [(sk.cloud(lo, res=0.02), dark), (sk.cloud(mid, res=0.02), mist), (sk.cloud(hi, res=0.02), pale), (trail, mist), (bits, pale)]
+    return [g.pieces("mist", [it for it in items if it[0]], smooth=True)]
 
 
 PARTS = {"shadow-cloak": shadow_cloak_part, "watching-eye": watching_eye_part, "ember": ember_part, "horns": horns_part, "glow": glow_part, "mist": mist_part}
@@ -139,7 +144,31 @@ def register(k):
     k.PARTS.update(PARTS)
 
 
+GIFTS = {"lurker": ("shadow-cloak", "watching-eye"), "fiend": ("ember", "horns"), "ember": ("ember", "glow"), "fog": ("mist", "glow")}
+
+
+def build_gift(base, feature):
+    """A base's own make of its gift, game/assets/genius/gifts/<base>-<feature>.glb: what the game
+    hangs for that base's gift and for nothing else (the shared part of the name is left as it is)."""
+    kit.reset()
+    objs = PARTS[feature]()
+    path = os.path.join(kit.OUT, "gifts", "%s-%s.glb" % (base, feature))
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    bpy.ops.object.select_all(action="DESELECT")
+    for o in objs:
+        o.select_set(True)
+    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_apply=True, export_yup=True)
+    kit.log("wrote", os.path.relpath(path, kit.ROOT), "%d KB" % (os.path.getsize(path) // 1024))
+
+
 if __name__ == "__main__":
     register(kit)
-    for name in [a for a in sys.argv[1:] if a in PARTS] or list(PARTS):
-        kit.build_part(name)
+    if sys.argv[1:2] == ["gifts"]:          # parts_spirits.py gifts lurker fog [feature ...]
+        want = [a for a in sys.argv[2:] if a in PARTS]
+        for base in [a for a in sys.argv[2:] if a in GIFTS] or list(GIFTS):
+            for feature in GIFTS[base]:
+                if not want or feature in want:
+                    build_gift(base, feature)
+    else:
+        for name in [a for a in sys.argv[1:] if a in PARTS] or list(PARTS):
+            kit.build_part(name)

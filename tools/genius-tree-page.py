@@ -91,6 +91,10 @@ def main():
     ap.add_argument('--out', required=True)
     ap.add_argument('--shots', default='')
     ap.add_argument('--worn', default='', help='a folder of pictures of a genius in the hand or worn, named for its base (blade.png, coat.png) or companion.png')
+    ap.add_argument('--check', nargs=2, metavar=('BEFORE', 'AFTER'), default=None,
+                    help="the line check's numbers before and after the second pass (tools/genius-line-check.py --json)")
+    ap.add_argument('--moving', default='', help='a folder of moving portraits, <base>.webp (tools/genius-moving.py), each with a <base>.txt naming the forms shown')
+    ap.add_argument('--new', default='', help='the ids of the bases that are new, comma separated')
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
 
@@ -129,6 +133,26 @@ def main():
                 im.thumbnail((640, 640), Image.LANCZOS)
                 im.save(os.path.join(args.out, 'img', 'worn-%s.jpg' % key), quality=86, optimize=True)
                 worn[key] = im.size
+
+    new = {x for x in args.new.split(',') if x}
+    moving = {}
+    if args.moving and os.path.isdir(args.moving):
+        from PIL import Image
+        import shutil
+        os.makedirs(os.path.join(args.out, 'img'), exist_ok=True)
+        names = {n['id']: n['name'] for b in bases for n in
+                 [b['settled']] + b['paths'] + [q for p in b['paths'] for q in p['prongs']] + [f for p in b['paths'] for q in p['prongs'] for f in q['finishes']]}
+        for f in sorted(os.listdir(args.moving)):
+            key, ext = os.path.splitext(f)
+            if ext.lower() == '.webp' and key in by_id:
+                src = os.path.join(args.moving, f)
+                shutil.copyfile(src, os.path.join(args.out, 'img', '%s-moving.webp' % key))
+                im = Image.open(src)
+                im.seek(0)
+                im.convert('RGB').save(os.path.join(args.out, 'img', '%s-moving.jpg' % key), quality=84, optimize=True)   # for one who has asked for less motion
+                txt = os.path.join(args.moving, key + '.txt')
+                ids = open(txt).read().replace('\n', ',').split(',') if os.path.exists(txt) else []
+                moving[key] = (im.size, [names[i.strip()] for i in ids if i.strip() in names])
 
     def beside(b):
         """What this base does beside its partner (data/genius-types.json), for its header."""
@@ -204,7 +228,7 @@ def main():
     for cid, cname, one in CLASSES:
         group = [b for b in bases if b['class'] == cid]
         nav.append('<div class="navgroup"><span class="navlabel">%s</span>%s</div>'
-                   % (e(cname), ''.join('<a href="#%s">%s</a>' % (b['id'], e(b['name'])) for b in group)))
+                   % (e(cname), ''.join('<a href="#%s"%s>%s</a>' % (b['id'], ' class="new"' if b['id'] in new else '', e(b['name'])) for b in group)))
         for b in group:
             bid = b['id']
             if bid in cells:
@@ -217,8 +241,8 @@ def main():
             shapes = ', '.join(k.capitalize() for k in top(calls.get('shape', {})))
             bloods = ', '.join(e(blood_name.get(k, k)) for k in top(calls.get('blood', {})))
             s = b['settled']
-            sec = ['<section class="base" id="%s"><header class="bhead"><p class="eyebrow">%s</p><h2>%s</h2><p class="soul">%s</p>'
-                   % (bid, e(one), e(b['name']), e(b['soul']))]
+            sec = ['<section class="base" id="%s"><header class="bhead"><p class="eyebrow">%s%s</p><h2>%s</h2><p class="soul">%s</p>'
+                   % (bid, '<b class="newmark">New</b> ' if bid in new else '', e(one), e(b['name']), e(b['soul']))]
             sec.append('<div class="facts"><div><h3>The spark</h3><p>%s</p></div>' % e(b['spark']))
             sec.append('<div><h3>Its Starter</h3><div class="settled">%s<div class="txt"><p><strong>%s.</strong> %s</p><p class="sub"><em>Its sign.</em> %s</p><p class="sub"><em>Its habit.</em> %s</p></div></div></div>'
                        % (pic(bid, s['id'], s['name']), e(s['name']), e(s['text']), e(s['sign']), e(s['habit'])))
@@ -232,6 +256,11 @@ def main():
                 w, h = lives[bid]
                 sec.append('<figure class="life"><img loading="lazy" src="img/%s-life.jpg" width="%d" height="%d" alt="Six ages of one %s, each beside its partner, from the %s to the %s at its apex."><figcaption>One life in the game, beside its partner, down the first road: %s, %s, %s, %s, then the %s grown great, and at its apex. The partner wears its echo.</figcaption></figure>'
                            % (bid, w, h, e(b['name']), e(s['name']), e(f0['name']), e(s['name']), e(p0['name']), e(q0['name']), e(f0['name']), e(f0['name'])))
+            if bid in moving:
+                (w, h), shown = moving[bid]
+                who = ', '.join(shown[:-1]) + (' and ' if len(shown) > 1 else '') + shown[-1] if shown else 'a few of its forms'
+                sec.append('<figure class="life"><picture><source media="(prefers-reduced-motion: reduce)" srcset="img/%s-moving.jpg"><img loading="lazy" src="img/%s-moving.webp" width="%d" height="%d" alt="%s, moving as the game moves them."></picture><figcaption>As the game moves them: %s. What blinks, beats, sways and gutters does so on its own; nothing here is a drawn animation.</figcaption></figure>'
+                           % (bid, bid, w, h, e(who), e(who)))
             if bid in cells:
                 sec.append(chart(b))
             sec.append('<div class="paths">')
@@ -291,6 +320,40 @@ def main():
                 kind('companion', 'Companion', e(T['companion']['says']),
                      [shot('companion', 'A companion at its post')],
                      [role_row(rid) for rid in R if isinstance(R[rid], dict) and 'name' in R[rid]])))
+    measured = ''
+    if args.check:
+        with open(args.check[0]) as f:
+            was = json.load(f)
+        with open(args.check[1]) as f:
+            now = json.load(f)
+        def cell(b0, b1, key, pct=False):
+            show = (lambda v: '%d%%' % round(v * 100)) if pct else (lambda v: '%d' % v)
+            met = (b1[key] >= 0.9) if pct else (b1[key] == 0)
+            before = '<s>%s</s> ' % show(b0[key]) if b0 is not None else ''
+            return '<td class="%s">%s<b>%s</b></td>' % ('met' if met else 'unmet', before, show(b1[key]))
+        rows, tot = [], {'was': [0, 0, 0.0, 0], 'now': [0, 0, 0.0, 0]}
+        for b in sorted(bases, key=lambda b: ([c[0] for c in CLASSES].index(b['class']), b['name'])):
+            bid = b['id']
+            if bid not in now:
+                continue
+            b0, b1 = was.get(bid), now[bid]
+            for k, v in (('was', b0), ('now', b1)):
+                if v is not None:
+                    tot[k][0] += v['alike']; tot[k][1] += v['dark']; tot[k][2] += v['colour']; tot[k][3] += 1
+            rows.append('<tr><th scope="row"><a href="#%s">%s</a>%s</th>%s%s%s</tr>'
+                        % (bid, e(b['name']), ' <i>new</i>' if b0 is None else '', cell(b0, b1, 'alike'), cell(b0, b1, 'dark'), cell(b0, b1, 'colour', True)))
+        if rows:
+            w, n = tot['was'], tot['now']
+            pct = lambda t: '%d%%' % round(100 * t[2] / max(1, t[3]))
+            sums = ('<dl class="sums"><div><dt>Pairs of forms too alike in outline</dt><dd><s>%d</s> <b>%d</b></dd></div>'
+                    '<div><dt>Forms too dark to read</dt><dd><s>%d</s> <b>%d</b></dd></div>'
+                    '<div><dt>Paths told apart by colour alone</dt><dd><s>%s</s> <b>%s</b></dd></div></dl>' % (w[0], n[0], w[1], n[1], pct(w), pct(n)))
+            measured = ('<section class="base" id="measured"><header class="bhead"><p class="eyebrow">The second pass</p><h2>Every line, looked at again</h2>'
+                        '<p class="soul">Each line is held to three questions a stranger could answer from across a room: are two of its forms the same black shape, is any too dark to read by lamplight, and can its three Paths be told apart by colour alone.</p></header>'
+                        '%s<div class="tablewrap"><table class="meas"><thead><tr><th scope="col">Line</th><th scope="col">Too alike</th><th scope="col">Too dark</th><th scope="col">Paths by colour</th></tr></thead><tbody>%s</tbody></table></div>'
+                        '<p class="sub">Struck through is the number before the pass; beside it, the number now. The aim for every line is none alike, none dark, and nine forms in ten landing on their own Path by colour. The check counts %d lines now and counted %d before.</p></section>'
+                        % (sums, ''.join(rows), n[3], w[3]))
+            nav.insert(0, '<div class="navgroup"><a href="#measured">The second pass</a></div>')
     nav.insert(0, '<div class="navgroup"><span class="navlabel">First</span><a href="#types">The three types</a></div>')
 
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'genius-tree-page.html')) as f:
@@ -298,7 +361,7 @@ def main():
     seen = ('Each picture is the form as the game draws it today, brought up close; tap one to look closer. '
             'The row under each base shows one life at its true sizes. '
             'Every form has a body of its own: no two on a line are the same shape.') if cells else ''
-    page = (page.replace('__NAV__', ''.join(nav)).replace('__BODY__', types + '\n'.join(out) + hybrids).replace('__SPRITES__', ''.join(css))
+    page = (page.replace('__NAV__', ''.join(nav)).replace('__BODY__', types + measured + '\n'.join(out) + hybrids).replace('__SPRITES__', ''.join(css))
             .replace('__SEEN__', seen).replace('__TOTAL__', str(31 * len(bases))).replace('__NBASE__', str(len(bases))))
     with open(os.path.join(args.out, 'genius-tree.html'), 'w') as f:
         f.write(page)

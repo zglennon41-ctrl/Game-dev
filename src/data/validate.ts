@@ -13,7 +13,7 @@ export const TREE_LEANS: Record<string, string[]> = {
   pattern: ['fires', 'sworn'], bonds: ['classmate', 'shade', 'named'], quests: ['linework', 'salvage', 'hunt', 'escort', 'writ', 'deep-run'],
 };
 /** The bases the specification names. */
-export const TREE_ROSTER = ['wolf', 'hawk', 'stag', 'tortoise', 'fox', 'imp', 'lurker', 'fiend', 'demon', 'drake', 'sprite', 'homunculus', 'ember', 'fog', 'lantern', 'astrolabe', 'bell', 'blade', 'gun', 'bow', 'shield', 'gauntlet', 'coat'];
+export const TREE_ROSTER = ['wolf', 'hawk', 'stag', 'tortoise', 'fox', 'imp', 'lurker', 'fiend', 'demon', 'drake', 'sprite', 'homunculus', 'ember', 'fog', 'lantern', 'astrolabe', 'bell', 'blade', 'gun', 'bow', 'shield', 'gauntlet', 'coat', 'moth', 'carp'];
 
 const read = (f: string) => JSON.parse(readFileSync(f, 'utf8'));
 
