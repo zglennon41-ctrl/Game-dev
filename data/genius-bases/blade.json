@@ -59,6 +59,26 @@
    "short-blade",
    "watching-eye"
   ],
+  "body": {
+   "blade": {
+    "kind": "slab",
+    "shape": "knife",
+    "len": 0.27,
+    "width": 0.052,
+    "thick": 0.007
+   },
+   "hilt": {
+    "len": 0.17,
+    "wrap": "leather",
+    "metal": "brass"
+   },
+   "guard": "none",
+   "pommel": "none",
+   "eye": [
+    "blade",
+    1.0
+   ]
+  },
   "silhouette": "relic-knife"
  },
  "paths": [
@@ -80,6 +100,31 @@
    "features": [
     "edge"
    ],
+   "body": {
+    "blade": {
+     "kind": "sword",
+     "len": 0.95,
+     "width": 0.019,
+     "thick": 0.01,
+     "tip": 0.2,
+     "taper": 0.6,
+     "fuller": false
+    },
+    "hilt": {
+     "len": 0.19,
+     "wrap": "wire",
+     "metal": "steel"
+    },
+    "guard": [
+     "cup",
+     0.8
+    ],
+    "pommel": "scent",
+    "eye": [
+     "guard",
+     0.9
+    ]
+   },
    "prongs": [
     {
      "id": "blade-parrying",
@@ -99,6 +144,25 @@
      "features": [
       "broad-guard"
      ],
+     "body": {
+      "blade": {
+       "len": 0.9,
+       "width": 0.026,
+       "taper": 0.7
+      },
+      "hilt": {
+       "len": 0.2
+      },
+      "guard": [
+       "wide",
+       1.0
+      ],
+      "pommel": "ball",
+      "eye": [
+       "guard",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "blade-answer",
@@ -117,7 +181,34 @@
        },
        "features": [
         "pulse"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "len": 1.02,
+         "width": 0.034,
+         "taper": 0.75,
+         "fuller": true
+        },
+        "hilt": {
+         "len": 0.24
+        },
+        "guard": [
+         "sail",
+         1.35
+        ],
+        "pommel": [
+         "disc",
+         1.1
+        ],
+        "cut": [
+         "pulse",
+         1.2
+        ],
+        "eye": [
+         "guard",
+         1.25
+        ]
+       }
       },
       {
        "id": "blade-reading-edge",
@@ -136,7 +227,32 @@
        },
        "features": [
         "sight-glass"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "len": 1.2,
+         "width": 0.02,
+         "taper": 0.5,
+         "tip": 0.3
+        },
+        "hilt": {
+         "len": 0.22
+        },
+        "guard": [
+         "ring",
+         1.2
+        ],
+        "pommel": "scent",
+        "cut": [
+         "line",
+         1.2
+        ],
+        "eye": [
+         "guard",
+         1.5
+        ],
+        "lens": 1.0
+       }
       }
      ]
     },
@@ -158,6 +274,24 @@
      "features": [
       "fangs"
      ],
+     "body": {
+      "blade": {
+       "len": 1.05,
+       "width": 0.015,
+       "taper": 0.3,
+       "tip": 0.42,
+       "thick": 0.011
+      },
+      "guard": [
+       "cup",
+       0.62
+      ],
+      "hang": [
+       "tassel",
+       0.9
+      ],
+      "cloth": "cloth_rag"
+     },
      "finishes": [
       {
        "id": "blade-quick-mercy",
@@ -176,7 +310,38 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "len": 0.84,
+         "width": 0.016,
+         "taper": 0.35,
+         "tip": 0.36,
+         "steel": "bright"
+        },
+        "hilt": {
+         "len": 0.18,
+         "wrap": "bone",
+         "metal": "steel"
+        },
+        "guard": [
+         "disc",
+         0.72
+        ],
+        "pommel": [
+         "disc",
+         0.9
+        ],
+        "cut": [
+         "core",
+         1.2
+        ],
+        "hang": null,
+        "eye": [
+         "pommel",
+         1.0
+        ]
+       }
       },
       {
        "id": "blade-lunge",
@@ -195,7 +360,28 @@
        },
        "features": [
         "long-legs"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "len": 1.5,
+         "width": 0.016,
+         "taper": 0.4,
+         "tip": 0.5
+        },
+        "hilt": {
+         "len": 0.24
+        },
+        "guard": [
+         "cup",
+         0.78
+        ],
+        "pommel": "spike",
+        "hang": [
+         "tassel",
+         1.5
+        ],
+        "pose": "slant"
+       }
       }
      ]
     },
@@ -217,6 +403,40 @@
      "features": [
       "grip"
      ],
+     "body": {
+      "blade": {
+       "kind": "saber",
+       "steel": "oak",
+       "len": 0.82,
+       "width": 0.05,
+       "thick": 0.014,
+       "curve": 0.05,
+       "tip": 0.12,
+       "taper": 0.9,
+       "fuller": false
+      },
+      "hilt": {
+       "len": 0.3,
+       "wrap": "dark",
+       "metal": "brass"
+      },
+      "guard": [
+       "wood",
+       1.0
+      ],
+      "pommel": "none",
+      "edge": "blunt",
+      "eye": [
+       "blade",
+       1.0
+      ],
+      "hang": [
+       "tassel",
+       1.0
+      ],
+      "cloth": "tie",
+      "pose": "up"
+     },
      "silhouette": "relic-woodsword",
      "finishes": [
       {
@@ -237,6 +457,34 @@
        "features": [
         "old-eyes"
        ],
+       "body": {
+        "blade": {
+         "steel": "pale",
+         "len": 1.08,
+         "width": 0.062,
+         "thick": 0.02,
+         "curve": 0.03,
+         "taper": 0.95,
+         "tip": 0.08
+        },
+        "hilt": {
+         "len": 0.42
+        },
+        "guard": "none",
+        "pommel": "knot",
+        "cut": [
+         "bands",
+         1.0
+        ],
+        "eye": [
+         "knot",
+         1.2
+        ],
+        "hang": [
+         "tassel",
+         1.4
+        ]
+       },
        "silhouette": "relic-woodsword"
       },
       {
@@ -256,7 +504,33 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "steel": "bright",
+         "len": 1.08,
+         "width": 0.05,
+         "curve": 0.07,
+         "taper": 0.85,
+         "tip": 0.2,
+         "thick": 0.011,
+         "fuller": true
+        },
+        "hilt": {
+         "len": 0.34
+        },
+        "guard": [
+         "disc",
+         1.0
+        ],
+        "pommel": "cap",
+        "edge": null,
+        "spine": [
+         "oak",
+         1.0
+        ],
+        "hang": null
+       }
       }
      ]
     }
@@ -283,6 +557,29 @@
    "features": [
     "maw"
    ],
+   "body": {
+    "blade": {
+     "kind": "slab",
+     "shape": "cleaver",
+     "len": 0.62,
+     "width": 0.085,
+     "thick": 0.014
+    },
+    "hilt": {
+     "len": 0.2,
+     "wrap": "dark",
+     "metal": "iron"
+    },
+    "guard": [
+     "block",
+     1.0
+    ],
+    "pommel": "ring",
+    "eye": [
+     "blade",
+     1.1
+    ]
+   },
    "prongs": [
     {
      "id": "blade-chain-blade",
@@ -302,6 +599,19 @@
      "features": [
       "chain"
      ],
+     "body": {
+      "blade": {
+       "len": 0.82,
+       "width": 0.08
+      },
+      "hilt": {
+       "len": 0.24
+      },
+      "spine": [
+       "rings",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "blade-last-beat",
@@ -320,7 +630,38 @@
        },
        "features": [
         "pulse"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "len": 1.12,
+         "width": 0.1,
+         "thick": 0.016
+        },
+        "hilt": {
+         "len": 0.42,
+         "wrap": "red"
+        },
+        "pommel": [
+         "ring",
+         1.4
+        ],
+        "spine": [
+         "rings",
+         1.6
+        ],
+        "edge": [
+         "light",
+         1.3
+        ],
+        "cut": [
+         "pulse",
+         1.0
+        ],
+        "eye": [
+         "blade",
+         1.4
+        ]
+       }
       },
       {
        "id": "blade-tempered-edge",
@@ -339,7 +680,30 @@
        },
        "features": [
         "ember"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "len": 0.96,
+         "width": 0.085,
+         "steel": "dark"
+        },
+        "hilt": {
+         "len": 0.3
+        },
+        "pommel": "ball",
+        "spine": [
+         "rings",
+         0.6
+        ],
+        "edge": [
+         "temper",
+         1.2
+        ],
+        "eye": [
+         "blade",
+         1.2
+        ]
+       }
       }
      ]
     },
@@ -361,6 +725,20 @@
      "features": [
       "notches"
      ],
+     "body": {
+      "blade": {
+       "len": 0.8,
+       "width": 0.09
+      },
+      "hilt": {
+       "wrap": "worn"
+      },
+      "pommel": "none",
+      "edge": [
+       "notched",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "blade-old-notch",
@@ -379,7 +757,31 @@
        },
        "features": [
         "scorched"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "len": 1.02,
+         "width": 0.11,
+         "steel": "dark"
+        },
+        "hilt": {
+         "len": 0.34
+        },
+        "pommel": "spike",
+        "edge": [
+         "old-notch",
+         1.0
+        ],
+        "hang": [
+         "chain",
+         1.0
+        ],
+        "eye": [
+         "blade",
+         1.3
+        ],
+        "coat": "ember"
+       }
       },
       {
        "id": "blade-brush-hook",
@@ -398,7 +800,30 @@
        },
        "features": [
         "talons"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "shape": "hook",
+         "len": 0.8,
+         "width": 0.085,
+         "steel": "green"
+        },
+        "hilt": {
+         "len": 0.5,
+         "wrap": "green"
+        },
+        "guard": "none",
+        "pommel": "cap",
+        "edge": null,
+        "spine": [
+         "hook",
+         1.0
+        ],
+        "eye": [
+         "blade",
+         1.2
+        ]
+       }
       }
      ]
     },
@@ -420,6 +845,29 @@
      "features": [
       "broad-chest"
      ],
+     "body": {
+      "blade": {
+       "kind": "board",
+       "len": 0.86,
+       "width": 0.1,
+       "thick": 0.012,
+       "taper": 0.92,
+       "tip": 0.16,
+       "fuller": true
+      },
+      "hilt": {
+       "len": 0.26
+      },
+      "guard": [
+       "bar",
+       1.3
+      ],
+      "pommel": "disc",
+      "eye": [
+       "guard",
+       1.1
+      ]
+     },
      "finishes": [
       {
        "id": "blade-wall-of-one",
@@ -438,7 +886,36 @@
        },
        "features": [
         "wall-plate"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "point": "round",
+         "len": 1.26,
+         "width": 0.135,
+         "tip": 0.14,
+         "thick": 0.016
+        },
+        "hilt": {
+         "len": 0.45
+        },
+        "guard": [
+         "bar",
+         1.9
+        ],
+        "pommel": [
+         "disc",
+         1.3
+        ],
+        "cut": [
+         "plates",
+         1.0
+        ],
+        "eye": [
+         "guard",
+         1.4
+        ],
+        "pose": "planted"
+       }
       },
       {
        "id": "blade-bar",
@@ -457,7 +934,41 @@
        },
        "features": [
         "door"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "kind": "slab",
+         "shape": "bar",
+         "len": 1.5,
+         "width": 0.11,
+         "thick": 0.02,
+         "steel": "grey"
+        },
+        "hilt": {
+         "len": 0.36
+        },
+        "guard": [
+         "block",
+         1.2
+        ],
+        "pommel": [
+         "ring",
+         1.3
+        ],
+        "cut": [
+         "plates",
+         1.1
+        ],
+        "hang": [
+         "endring",
+         1.0
+        ],
+        "eye": [
+         "blade",
+         1.5
+        ],
+        "pose": "cross"
+       }
       }
      ]
     }
@@ -484,6 +995,35 @@
    "features": [
     "ledger"
    ],
+   "body": {
+    "blade": {
+     "kind": "saber",
+     "len": 0.88,
+     "width": 0.06,
+     "curve": 0.09,
+     "tip": 0.22,
+     "taper": 0.9,
+     "fuller": false
+    },
+    "hilt": {
+     "len": 0.21,
+     "wrap": "leather",
+     "metal": "brass"
+    },
+    "guard": [
+     "knuckle",
+     1.0
+    ],
+    "pommel": "cap",
+    "cut": [
+     "tally",
+     1.0
+    ],
+    "eye": [
+     "guard",
+     1.0
+    ]
+   },
    "prongs": [
     {
      "id": "blade-pack-cutter",
@@ -503,6 +1043,19 @@
      "features": [
       "fangs"
      ],
+     "body": {
+      "blade": {
+       "kind": "slab",
+       "shape": "belly",
+       "len": 0.86,
+       "width": 0.07,
+       "curve": 0.16
+      },
+      "cut": [
+       "tally",
+       0.75
+      ]
+     },
      "finishes": [
       {
        "id": "blade-name-taker",
@@ -521,7 +1074,30 @@
        },
        "features": [
         "voice"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "len": 1.16,
+         "width": 0.085,
+         "curve": 0.2
+        },
+        "hilt": {
+         "len": 0.3
+        },
+        "pommel": "ball",
+        "cut": [
+         "names",
+         1.2
+        ],
+        "hang": [
+         "whetstone",
+         1.0
+        ],
+        "eye": [
+         "guard",
+         1.3
+        ]
+       }
       },
       {
        "id": "blade-skinning-knife",
@@ -541,6 +1117,27 @@
        "features": [
         "grip"
        ],
+       "body": {
+        "blade": {
+         "len": 0.3,
+         "width": 0.055,
+         "curve": 0.05,
+         "thick": 0.008
+        },
+        "hilt": {
+         "len": 0.17,
+         "wrap": "bone"
+        },
+        "guard": "none",
+        "pommel": "ring",
+        "cut": null,
+        "eye": [
+         "blade",
+         1.15
+        ],
+        "eyelook": "old",
+        "show": 1.6
+       },
        "silhouette": "relic-knife"
       }
      ]
@@ -563,6 +1160,26 @@
      "features": [
       "far-eyes"
      ],
+     "body": {
+      "blade": {
+       "len": 1.0,
+       "width": 0.058,
+       "curve": 0.07
+      },
+      "guard": [
+       "shell",
+       1.0
+      ],
+      "hang": [
+       "tassel",
+       1.2
+      ],
+      "cloth": "cloth_petal",
+      "eye": [
+       "guard",
+       1.35
+      ]
+     },
      "finishes": [
       {
        "id": "blade-seconds-sword",
@@ -581,7 +1198,26 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "len": 1.16,
+         "width": 0.064,
+         "curve": 0.05
+        },
+        "hilt": {
+         "len": 0.26
+        },
+        "guard": [
+         "shell",
+         1.3
+        ],
+        "pommel": "disc",
+        "spine": [
+         "glow",
+         1.3
+        ]
+       }
       },
       {
        "id": "blade-road-knife",
@@ -600,7 +1236,36 @@
        },
        "features": [
         "sheath"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "kind": "slab",
+         "shape": "clip",
+         "len": 0.52,
+         "width": 0.055,
+         "curve": 0.0
+        },
+        "hilt": {
+         "len": 0.19,
+         "wrap": "worn"
+        },
+        "guard": [
+         "bar",
+         0.6
+        ],
+        "pommel": "cap",
+        "cut": null,
+        "hang": [
+         "sheath",
+         1.0
+        ],
+        "sheathed": 0.78,
+        "eye": [
+         "guard",
+         0.9
+        ],
+        "show": 1.3
+       }
       }
      ]
     },
@@ -622,6 +1287,37 @@
      "features": [
       "dark-eyed"
      ],
+     "body": {
+      "blade": {
+       "kind": "sword",
+       "steel": "grey",
+       "len": 0.95,
+       "width": 0.036,
+       "taper": 0.9,
+       "tip": 0.24,
+       "flare": 0.14,
+       "curve": 0.0
+      },
+      "hilt": {
+       "wrap": "dark",
+       "metal": "iron"
+      },
+      "guard": [
+       "crescent",
+       1.0
+      ],
+      "pommel": "disc",
+      "cut": [
+       "tally",
+       0.6
+      ],
+      "eye": [
+       "guard",
+       1.0
+      ],
+      "eyelook": "dark",
+      "coat": "ash"
+     },
      "finishes": [
       {
        "id": "blade-heirloom",
@@ -640,7 +1336,43 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "len": 1.24,
+         "width": 0.04,
+         "flare": 0.1
+        },
+        "hilt": {
+         "len": 0.36,
+         "wrap": "worn",
+         "grooved": true
+        },
+        "guard": [
+         "crescent",
+         1.5
+        ],
+        "pommel": [
+         "eye",
+         1.3
+        ],
+        "eye": [
+         "pommel",
+         1.3
+        ],
+        "eyelook": "old",
+        "hang": [
+         [
+          "tassel",
+          1.6
+         ],
+         [
+          "wrap",
+          1.2
+         ]
+        ],
+        "cloth": "cloth_rag"
+       }
       },
       {
        "id": "blade-night-edge",
@@ -657,7 +1389,36 @@
        },
        "features": [
         "shadow-cloak"
-       ]
+       ],
+       "body": {
+        "blade": {
+         "steel": "night",
+         "len": 1.22,
+         "width": 0.05,
+         "taper": 0.7,
+         "tip": 0.3,
+         "thick": 0.004,
+         "flare": 0.0
+        },
+        "hilt": {
+         "len": 0.26,
+         "wrap": "crepe"
+        },
+        "guard": [
+         "crescent",
+         0.9
+        ],
+        "cut": null,
+        "edge": [
+         "light",
+         0.6
+        ],
+        "hang": [
+         "smoke",
+         1.2
+        ],
+        "coat": "night"
+       }
       }
      ]
     }

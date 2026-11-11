@@ -31,7 +31,8 @@
     "ruff": ["socket_throat"],
     "grip": ["socket_back"], "ledger": ["socket_body"], "broad-guard": ["socket_arm_l", "socket_arm_r"], "shell": ["socket_back"],
     "shadow-cloak": ["socket_head"],
-    "bell": ["socket_throat"]
+    "bell": ["socket_throat"],
+    "fletching": ["socket_back"]
   },
   "kinds": {
     "quadruped": { "model": "res://game/assets/quaternius/Wolf.glb", "anim": { "idle": "AnimalArmature|Idle", "walk": "AnimalArmature|Walk", "run": "AnimalArmature|Gallop" },

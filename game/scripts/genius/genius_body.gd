@@ -141,7 +141,9 @@ func _assemble(instar: int) -> void:
 	var carried: Array = []
 	if src != "" and ResourceLoader.exists(FORM_DIR % src):
 		own_body = src
-		carried = Data.form(src).get("features", [])
+		# (and it is already the picture of its own base: it does not wear that base's gift too,
+		# as a Gun carried into a hybrid's line would wear cogs on its cogs)
+		carried = Data.form(src).get("features", []) + Data.base(String(Data.form(src).get("base", ""))).get("hybrid", {}).get("gift", [])
 	if own_body != "" or ResourceLoader.exists(BODY_DIR % sil):
 		_model = load(FORM_DIR % own_body if own_body != "" else BODY_DIR % sil).instantiate()
 		add_child(_model)
