@@ -43,6 +43,8 @@ def wear_loincloth(P, size, word):
     hw, hd, yo = P.ring(P.hipz)
     P.add("loin_front", g.blade((0, yo - hd - 0.04, P.hipz + 0.12 * P.t), (0.02, yo - hd - 0.05 - 0.26 * size * P.t, P.hipz - 0.4 * size * P.t), 0.9 * hw, normal=(0, -1, 0.4), belly=0.34), m, "hips", smooth=True)
     P.add("loin_back", g.blade((0, yo + hd + 0.04, P.hipz + 0.12 * P.t), (0, yo + hd + 0.1, P.hipz - 0.34 * size * P.t), 1.2 * hw, normal=Y, belly=0.34), m, "hips", smooth=True)
+    hw2, hd2, yo2 = P.ring(P.hipz + 0.15 * P.t)        # and a girdle of the dark cloth its coat will be cut from
+    P.add("loin_girdle", hoop((0, yo2, P.hipz + 0.15 * P.t), hw2 + 0.04, hd2 + 0.04, 0.03 * P.t, n=12, sides=4), mat("cloth_coat"), "hips", smooth=True)
 
 
 @slot("wear", "breeches")
