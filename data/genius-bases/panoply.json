@@ -335,11 +335,7 @@
         "back": [
          "cloak"
         ],
-        "brow": "soft",
-        "pauldrons": [
-         "cups",
-         1.0
-        ]
+        "brow": "soft"
        }
       },
       {
@@ -563,15 +559,22 @@
      ],
      "body": {
       "build": {
-       "bow": 0.14
+       "bow": 0.16,
+       "hands": 1.25,
+       "legs": 1.12
       },
       "crest": [
        [
         "ram",
-        1.0
+        1.3
        ]
       ],
-      "chest": "prow"
+      "chest": "prow",
+      "fauld": null,
+      "pauldrons": [
+       "slab",
+       0.78
+      ]
      },
      "finishes": [
       {
@@ -594,22 +597,22 @@
        ],
        "body": {
         "build": {
-         "wide": 0.75,
-         "bow": 0.18
+         "wide": 0.85,
+         "bow": 0.2
         },
         "crest": [
          [
           "horns",
-          1.3
+          1.6
          ]
         ],
         "chest": [
          "prow",
-         1.5
+         1.8
         ],
         "pauldrons": [
          "spikes",
-         1.0
+         1.2
         ]
        }
       },
@@ -634,6 +637,7 @@
        "body": {
         "crest": null,
         "chest": "hole",
+        "fauld": "apron",
         "pauldrons": [
          "slab-one",
          1.0
@@ -650,9 +654,9 @@
      "id": "panoply-door-bearer",
      "name": "Door-bearer",
      "of": "one who brings the wall along",
-     "text": "Half a door has grown on each of its forearms, oak and iron. When it brings its arms together there is a door in the road, and it is shut.",
-     "sign": "Two tall leaves of an oak door, one on each arm, banded with iron and painted red. The helm looks over the top of them.",
-     "habit": "It shuts its arms when you sleep in the open, and sits facing outward until it is light.",
+     "text": "Half a door has grown on its forearm, oak and iron. Where it sets it down there is a door in the road, and it is shut.",
+     "sign": "The tall leaf of an oak door on its left arm, banded with iron and painted red. Its right fist hangs free, and is the size of a bucket.",
+     "habit": "It sets the door down when you sleep in the open, and sits facing outward until it is light.",
      "leans": {
       "orders": {
        "hold": 1.0
@@ -667,11 +671,8 @@
      "body": {
       "left": [
        "door",
-       1.0
-      ],
-      "right": [
-       "door",
-       1.0
+       1.0,
+       "shut"
       ],
       "chest": "hoops"
      },
@@ -680,7 +681,7 @@
        "id": "panoply-barbican",
        "name": "Barbican",
        "of": "one who decides who comes in, and is rarely asked twice",
-       "text": "It has grown turrets on its shoulders and battlements round its helm. It is a gate with a keep behind it, and it looks at everyone who passes under.",
+       "text": "The second leaf has grown, and turrets on its shoulders, and battlements round its helm. It is a gate with a keep behind it, and it looks at everyone.",
        "sign": "A round turret on each shoulder, a ring of battlements on the helm, a small red flag on one turret, and the two door-leaves below.",
        "habit": "It lets your friends pass without looking, and looks at everyone else for a long time.",
        "leans": {
@@ -707,6 +708,16 @@
         ],
         "back": [
          "flag"
+        ],
+        "left": [
+         "door",
+         1.0,
+         "shut"
+        ],
+        "right": [
+         "door",
+         1.0,
+         "shut"
         ]
        }
       },
@@ -811,8 +822,8 @@
        "id": "panoply-banked",
        "name": "Banked",
        "of": "one who has gone cold on the outside on purpose",
-       "text": "It has shut the furnace door and drawn a cloak of ash over the iron. Only a line of light round the door says the fire was never let out.",
-       "sign": "A shut iron door on its belly with a thread of light round its edge, a grey-red cloak, and a hood drawn over the helm.",
+       "text": "It has shut the furnace door and drawn a hood over its helm. Only a line of light round the door says the fire was never let out.",
+       "sign": "A shut iron door on its belly with a thread of light round its edge, a red cloak shut all round it, a capped chimney, and a hood over the helm.",
        "habit": "It lets you warm your hands at the seam of the door. It does not open it.",
        "leans": {
         "shape": {
@@ -828,17 +839,15 @@
        "body": {
         "chest": "shut-door",
         "back": [
-         "cloak"
+         "wrap",
+         "stack"
         ],
         "helm": [
          "hood",
-         0.95
+         1.1
         ],
         "crest": null,
-        "pauldrons": [
-         "slab",
-         0.85
-        ]
+        "pauldrons": null
        }
       }
      ]
@@ -964,8 +973,8 @@
        "id": "panoply-dark-lantern",
        "name": "Dark Lantern",
        "of": "one who sees without being seen to look",
-       "text": "It has shuttered the lamp and closed its helm to one slit. It stands wrapped in its cloak at the edge of the light and misses nothing.",
-       "sign": "A cloak wrapped all round it like a bell, a smooth closed helm with a single light in the slit, and a shuttered lamp held low.",
+       "text": "It has shuttered the lamp and closed its helm to one slit. It stands stooped in its cape at the edge of the light and misses nothing.",
+       "sign": "A cape drawn close, a smooth finned helm shut to one slit with a single light in it, and a shuttered lamp held out low on one arm.",
        "habit": "It opens one shutter the width of a finger, toward the thing you ought to have noticed.",
        "leans": {
         "shape": {
@@ -980,7 +989,8 @@
        ],
        "body": {
         "build": {
-         "bow": 0.1
+         "bow": 0.1,
+         "small": 0.85
         },
         "helm": [
          "sallet",
@@ -989,7 +999,13 @@
         "eyes": "one",
         "brow": "level",
         "back": [
-         "wrap"
+         "cape"
+        ],
+        "crest": [
+         [
+          "fin",
+          0.8
+         ]
         ],
         "right": [
          "dark-lamp",

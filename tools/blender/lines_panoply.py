@@ -406,8 +406,8 @@ def crest(P, spec, H):
         elif kind == "ram":         # a ram's horns, curled at the sides of the helm
             geo = None
             for s in (1, -1):
-                pts = g.spiral(c + Vector((s * (rx + 0.3 * hr), 0.25 * hr, 0.0)), 0.8 * hr * size, 0.3 * hr * size, 1.2, s * 0.6 * hr * size, n=12, axis=X * s, start=pi * 0.5)
-                geo = g.merge(geo, g.tube(pts, [0.34 * hr * size * (1.0 - 0.85 * i / 12) for i in range(13)], n=6))
+                pts = g.spiral(c + Vector((s * (rx + 0.1 * hr), 0.2 * hr, 0.45 * hr)), 0.85 * hr * size, 0.35 * hr * size, 1.15, s * 1.5 * hr * size, n=12, axis=X * s, start=pi * 0.5)
+                geo = g.merge(geo, g.tube(pts, [0.4 * hr * size * (1.0 - 0.85 * i / 12) for i in range(13)], n=6))
             P.add("horns", geo, mat("horn_ram"), "head", smooth=True)
         elif kind == "horns":       # great horns, swung forward
             geo = None
@@ -645,13 +645,19 @@ def hands(P, spec):
             y = min(P.yf(P.chestz), P.yf(P.waist)) - 0.4 * t
             x0, x1 = 0.012 * t, P.sx + 0.62 * t
             cx, w = s * (x0 + x1) / 2, x1 - x0
-            P.add("door_" + side, g.box((cx, y, zt / 2 + 0.015), (w, th, zt - 0.03)), mat("wood_door"), "chest", smooth=False)
-            P.add("door_paint_" + side, g.box((cx, y - th / 2 - 0.012 * k, zt / 2 + 0.015), (w * 0.86, 0.03 * k, zt * 0.9)), mat(acc), "chest", smooth=False)
+            # shut, the two leaves meet before it; else each stands ajar on its outer edge, and it looks out between them
+            hinge = Vector((s * x1, y + 0.25 * t, 0))
+            R = Matrix.Rotation(0.0 if word == "shut" else s * -0.95, 3, "Z")
+
+            def hung(geo):
+                return turned(geo, hinge, R)
+            P.add("door_" + side, hung(g.box((cx, y, zt / 2 + 0.015), (w, th, zt - 0.03))), mat("wood_door"), "chest", smooth=False)
+            P.add("door_paint_" + side, hung(g.box((cx, y - th / 2 - 0.012 * k, zt / 2 + 0.015), (w * 0.86, 0.03 * k, zt * 0.9))), mat("accent_light"), "chest", smooth=False)
             iron = None
             for zz in (0.14 * zt, 0.5 * zt, 0.86 * zt):
                 iron = g.merge(iron, g.box((cx, y - th / 2 - 0.03 * k, zz), (w * 1.02, 0.05 * k, 0.13 * k)))
-            P.add("door_iron_" + side, iron, mat("iron_plate_dark"), "chest", smooth=False)
-            P.add("door_ring_" + side, _hoop((s * (x0 + 0.2 * t), y - th / 2 - 0.07 * k, zt * 0.42), 0.09 * k, 0.09 * k, 0.022 * k, u=X, v=Z, n=8, sides=3), trim, "chest", smooth=False)
+            P.add("door_iron_" + side, hung(iron), light, "chest", smooth=False)
+            P.add("door_ring_" + side, hung(_hoop((s * (x0 + 0.2 * t), y - th / 2 - 0.07 * k, zt * 0.42), 0.09 * k, 0.09 * k, 0.022 * k, u=X, v=Z, n=8, sides=3)), trim, "chest", smooth=False)
         elif kind in ("tower", "wall"):
             # a shield taller than itself, planted before it: it stands on the ground, and the hand rests on its rim
             s = 1.0 if side == "l" else -1.0
@@ -659,7 +665,7 @@ def hands(P, spec):
             zt = P.armz + (0.1 if kind == "tower" else 0.3) * t
             y = min(P.yf(P.chestz), P.yf(P.waist)) - 0.42 * t
             if kind == "tower":
-                x0, x1 = 0.02 * t, P.sx + 0.62 * t
+                x0, x1 = 0.3 * t, P.sx + 0.75 * t
                 out = [(x0, 0.03), (x1, 0.03), (x1, zt - 0.22 * t), (x1 - 0.25 * t, zt), (x0 + 0.25 * t, zt), (x0, zt - 0.22 * t)]
             else:
                 x0, x1 = 0.012 * t, P.sx + 0.7 * t
