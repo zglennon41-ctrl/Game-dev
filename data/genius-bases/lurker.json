@@ -334,11 +334,28 @@
         "standing-air"
        ],
        "body": {
-        "plan": "gate",
+        "plan": "figure",
         "build": {
-         "tall": 1.1,
-         "wide": 1.15
+         "broad": 1.38,
+         "tall": 0.9,
+         "hood": 1.0,
+         "turn": 0.0,
+         "thick": 1.25,
+         "hem": 0.3
         },
+        "arms": "bar",
+        "holds": [
+         "bar",
+         1.0
+        ],
+        "chest": [
+         "keyhole",
+         1.0
+        ],
+        "ground": [
+         "sill",
+         1.0
+        ],
         "aura": [
          "veils",
          1.0
@@ -512,7 +529,8 @@
          "tall": 0.6,
          "wide": 1.1,
          "hood": 1.05,
-         "bent": 0.16
+         "bent": 0.16,
+         "turn": 0.5
         },
         "arms": "cup",
         "holds": [
@@ -522,6 +540,11 @@
         "wears": [
          "shawl",
          0.8
+        ],
+        "eyes": "slit",
+        "ground": [
+         "bed",
+         1.0
         ]
        }
       }
@@ -705,7 +728,8 @@
          "broad": 1.0,
          "lean": 0.32,
          "hem": 0.3,
-         "hood": 1.1
+         "hood": 1.1,
+         "watch": 0.0
         },
         "arms": [
          "floor",
@@ -762,7 +786,8 @@
      1.0
     ],
     "coat": "iron",
-    "accent": "lapis"
+    "accent": "lapis",
+    "thread": "pale"
    },
    "prongs": [
     {
@@ -919,8 +944,7 @@
         "aura": [
          "breath",
          1.0
-        ],
-        "coat": "ash"
+        ]
        }
       },
       {

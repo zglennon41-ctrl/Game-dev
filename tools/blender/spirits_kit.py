@@ -58,6 +58,11 @@ PALETTE.update({
     "grass_dew": _ramp("verdigris", 2, 0.9), "cloth_grey": _ramp("slate", 2, 0.9), "paper_pale": _ramp("bone", 3, 0.8),
 })
 
+# and the corner of a room, the dust on a hand, what fog is dark with and frost is white with
+PALETTE.update({
+    "plaster": _ramp("stone", 3, 0.95), "plaster_dark": _ramp("stone", 2, 0.95), "plaster_pale": _ramp("stone", 4, 0.95), "brick_dust": _ramp("earth", 3, 0.95),
+})
+
 SPREAD = 1.7        # how far across a body may be, against the height it is stood to
 
 # what is soft is shaded round; what is hard keeps its planes
@@ -442,6 +447,35 @@ def curve(points, n=4):
             out.append(0.5 * ((2 * p1) + (p2 - p0) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t + (3 * p1 - p0 - 3 * p2 + p3) * t * t * t))
     out.append(pts[-1])
     return out
+
+
+# --- the ground a thing carries: what lies or stands on a floor floats with its floor ------------
+
+def planks(c, length, width, n=4, thick=0.024, turn=0.0, seed=0):
+    """A piece of a boarded floor, the middle of its top at c: n boards along x (turned `turn`
+    about the vertical), each ending where it likes, on a dark bed. [(geometry, material)]"""
+    c = V(c)
+    w = width / n
+    geo = [None, None]
+    for i in range(n):
+        x0 = -length / 2 + 0.035 * ((i * 7 + seed) % 3)
+        x1 = length / 2 - 0.04 * ((i * 5 + seed) % 3)
+        geo[i % 2] = g.merge(geo[i % 2], g.box(((x0 + x1) / 2, -width / 2 + w * (i + 0.5), -thick / 2), (x1 - x0, w - 0.007, thick)))
+    bed = g.box((0, 0, -thick * 1.3), (length * 0.86, width * 0.9, thick * 0.7))
+    return [(shifted(turned(geo[k], turn), c), mat(name)) for k, name in ((0, "wood_grey"), (1, "wood_grey_pale"))] + [(shifted(turned(bed, turn), c), mat("wood_black"))]
+
+
+def flags(c, w, d, nx=3, ny=2, thick=0.03, turn=0.0, seed=0, names=("stone_flag", "stone_flag_pale"), bed="stone_dark"):
+    """A piece of a flagged floor, the middle of its top at c, w by d: flags of two greys, a
+    finger apart and none quite level, on a dark bed. [(geometry, material)]"""
+    c = V(c)
+    geo = [None, None]
+    for i in range(nx):
+        for j in range(ny):
+            lift = 0.004 * (((i * 3 + j * 5 + seed) % 3) - 1)
+            geo[(i + j) % 2] = g.merge(geo[(i + j) % 2], g.box((-w / 2 + w / nx * (i + 0.5), -d / 2 + d / ny * (j + 0.5), -thick / 2 + lift), (w / nx - 0.009, d / ny - 0.009, thick)))
+    under = g.box((0, 0, -thick * 1.2), (w * 0.93, d * 0.93, thick * 0.6))
+    return [(shifted(turned(geo[k], turn), c), mat(names[k])) for k in (0, 1)] + [(shifted(turned(under, turn), c), mat(bed))]
 
 
 # --- a body --------------------------------------------------------------------------------
