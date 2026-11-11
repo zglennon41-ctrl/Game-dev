@@ -88,6 +88,7 @@ func _run() -> void:
 	test_homes_lean()
 	test_genius_fight()
 	test_lines()
+	test_path_colours()
 	# the three types of genius: the tests' own bases are given types for these, and no others
 	var game_types := Data.genius_types()
 	_all_types()
@@ -3090,6 +3091,43 @@ func test_genius_fight() -> void:
 			d.drain()
 		runs.append("%.3f %.3f %.3f %s" % [d.w_hp, d.g_will, d.p_hp, str(d.g_pos)])
 	check(runs[0] == runs[1], "seeded, a fight with a genius plays out the same")
+
+## A Path's colour (docs/genius-lines.md, "The second pass"): every Path of every line has a
+## colour of its own, a ramp of the style; its forms wear it; the three of a line differ.
+func test_path_colours() -> void:
+	_all_bases()
+	var style := Style.data()
+	check((style.get("paths", []) as Array).size() >= 6 and (style["paths"] as Array).all(func(r): return (style["ramps"] as Dictionary).has(r)),
+		"the style has ramps that are a genius's Path's alone, and each is a ramp")
+	check(is_equal_approx(Style.cap_of("accent"), float(style["pathCap"])) and Style.cap_of("accent") > Style.cap_of("cloth"),
+		"a Path's colour may be more saturated than the world's cloth: the world is muted so a soul can carry colour")
+	check(Style.material_class("accent_dark") == "accent" and Style.material_class("accent2_light") == "accent",
+		"a material named accent is a Path's colour, whatever else its name says")
+	var missing: Array = []
+	var same: Array = []
+	for bid in _game_base_ids():
+		var b := Data.base(String(bid))
+		var seen: Array = []
+		for p in b["paths"]:
+			var ramp := String((p.get("body", {}) as Dictionary).get("accent", ""))
+			if ramp == "" or Style.ramp(ramp).is_empty():
+				missing.append(String(p["id"]))
+			if seen.has(ramp):
+				same.append(String(p["id"]))
+			seen.append(ramp)
+	check(missing.is_empty(), "every Path of every line has a colour that is a ramp of the style (without: %s)" % str(missing))
+	check(same.is_empty(), "the three Paths of a line have three different colours (the same as a sibling's: %s)" % str(same))
+	# a form wears its Path's colour, by the step its material names; a form with none wears none
+	var wolf := Data.base("wolf")
+	var path: Dictionary = wolf["paths"][0]
+	var fin := String(path["prongs"][0]["finishes"][0]["id"])
+	var ramp0 := String(path["body"]["accent"])
+	check(GeniusBody.accent_of(fin, "accent").is_equal_approx(Style.ramp_at(ramp0, 2)) and GeniusBody.accent_of(fin, "accent_dark").is_equal_approx(Style.ramp_at(ramp0, 1))
+		and GeniusBody.accent_of(fin, "accent_pale").is_equal_approx(Style.ramp_at(ramp0, 4)),
+		"a Final wears its Path's colour: accent is the ramp's middle, accent_dark and accent_pale its other steps")
+	check(GeniusBody.accent_of(fin, "accent2_light").is_equal_approx(Style.ramp_at(ramp0, 3)), "with no second colour of its own, accent2 is its Path's")
+	check(GeniusBody.accent_of(String(wolf["settled"]["id"]), "accent").a == 0.0 and GeniusBody.accent_of("", "accent").a == 0.0,
+		"a Starter has no Path yet, and wears no Path's colour")
 
 ## The lines (docs/genius-lines.md): a form wears what its parent wears, a
 ## form with a model of its own wears it, and the stages have the player's names.
