@@ -6,22 +6,30 @@ figure of ink, and each path gives the figure a different way to stand: broad an
 raised (the Unremarked). What a form is the picture of is built round the figure: the long
 shadow it throws, the chair it sits in, the door it has become.
 
+It stays a thing of ink and is given edges (the second pass): its cloak opens on a lining of
+its Path's colour, a thread of that colour runs along every outline that matters (the hem, the
+hood, the cuffs, the nails), its eyes are large, lidded and blink, its hood looks about, and
+what of it hangs loose sways. What lies or stands on a floor carries that floor with it.
+
 A Lurker's `body` (data/genius-bases/lurker.json):
-    plan     what kind of thing it is: blot, figure (the default), seated, robed, door, gate,
-             hatch, human, streak, corner, monolith, tree
+    plan     what kind of thing it is: blot, figure (the default), seated, robed, door, hatch,
+             human, streak, corner, monolith, tree
     build    the figure's proportions: tall, broad, hood, skirt, lean, hem, turn, reach, thick,
-             tatters, deep (each a multiple of 1; lean and turn are amounts)
-    eyes     slit, dim, old, one, wide, holes, closed, none
+             tatters, deep (each a multiple of 1; lean and turn are amounts); watch (0: its
+             hood does not look about); wisps (1: the dark comes off its shoulders)
+    thread   which step of its Path's colour its edges are: light (the default), pale
+    edge     how bold that thread is (1 is a thread; the Unremarked's is 1.6)
+    eyes     slit, dim, old, one, single, wide, holes, closed, none
     arms     hang, broad, spread, guard, long, apart, reach, lap, cup, hold, mantis, up, back,
-             wings, whisper, blade, floor, none
+             wings, whisper, blade, floor, bar, none
     legs     stilts, back, roots
-    ground   what lies or stands under and behind it: long, cohort, ring, wall
+    ground   what lies or stands under and behind it: long, cohort, ring, wall, sill, bed
     wears    mantle, collar, script, cape, shawl, rime
-    chest    maw, cold-hand, core
+    chest    maw, keyhole, cold-hand, core
     face     mask
     shoulder face, face-crowned
     head     ear, prow
-    holds    lamp, lamp-low, dark-lamp, glow, book, chain, blade
+    holds    lamp, lamp-low, dark-lamp, glow, book, chain, blade, bar
     back     chair
     aura     veils, breath, stubs
 """

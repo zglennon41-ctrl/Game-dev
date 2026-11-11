@@ -12,6 +12,12 @@ Fog has no outline of its own, so each form is given one: rolls of grey, darker 
 paler on top, gathered into a shape, with something in it that is not fog (a post, a mask,
 a lamp, a stone) and somewhere on it two eyes.
 
+Fog looks like fog (the second pass): a roll is not a thing of its own, and each part of a body
+is made as one round surface a role (spirits_kit.cloud), which breathes; its edge is ragged
+with strands that sway; its eyes blink; and each path's colour is in what its fog carries and
+wears (the cowl, the stones and lamps, the edge of the curl), with a roll of it in the fog
+itself where the fog is deepest. A form that lies on a floor carries the floor.
+
 A Fog's `body` (data/genius-bases/fog.json) names its `plan`; every form is a plan of its own.
 In the order of the tree:
     wisp
@@ -1029,17 +1035,18 @@ def plan_hound(B):
     the shape of a hound, and it has a collar."""
     roll(B, (0, -0.12, 0.5), 0.16, (0.85, 1.3, 1.0), "main")           # a deep chest
     roll(B, (0, 0.06, 0.52), 0.12, (0.8, 1.5, 0.82), "under")
-    roll(B, (0, 0.22, 0.52), 0.1, (0.75, 1.4, 0.75), "main")            # and not much behind it
+    roll(B, (0, 0.22, 0.535), 0.085, (0.7, 1.4, 0.7), "main")           # and not much behind it
     roll(B, (0, 0.0, 0.61), 0.085, (0.8, 2.6, 0.45), "trim")
     deep(B, (0, -0.1, 0.42), 0.09, (0.8, 1.4, 0.6))
     head = Vector((0, -0.37, 0.62))
-    chain(B, [(0, -0.2, 0.56), (0, -0.29, 0.6), head], 0.085, 0.08, (0.9, 1.1, 0.9), ("main",))
-    chain(B, [head + Vector((0, -0.07, -0.012)), head + Vector((0, -0.15, -0.03)), head + Vector((0, -0.21, -0.045))], 0.055, 0.03, (0.9, 1.2, 0.8), ("main",))
+    chain(B, [(0, -0.2, 0.56), (0, -0.29, 0.6), head], 0.08, 0.068, (0.9, 1.1, 0.9), ("main",))
+    chain(B, [head + Vector((0, -0.06, -0.012)), head + Vector((0, -0.13, -0.03)), head + Vector((0, -0.2, -0.048)), head + Vector((0, -0.26, -0.062))], 0.05, 0.026, (0.85, 1.3, 0.75), ("main",))
+    B.add(g.ico(head + Vector((0, -0.292, -0.062)), 0.015, sub=1), "void", True)
     B.add(sk.hoop((0, -0.265, 0.585), 0.075, 0.08, 0.014, n=12, u=X, v=Vector((0, 0.4, 0.92)).normalized(), sides=5), "accent", True)       # its collar
     B.add(g.ico((0, -0.3, 0.515), 0.018, sub=1, scale=(1, 0.5, 1.2)), "accent_light", True)
     ears = None
     for s in (1, -1):
-        ears = g.merge(ears, g.blade(head + Vector((s * 0.05, 0.03, 0.05)), head + Vector((s * 0.08, 0.22, 0.12)), 0.06, normal=(s, 0, 1), belly=0.3))
+        ears = g.merge(ears, g.blade(head + Vector((s * 0.045, 0.02, 0.045)), head + Vector((s * 0.085, 0.17, 0.15)), 0.07, normal=(s, 0, 1), belly=0.3))
     B.move("sway", "ears", [(ears, B.trim, True)], head + Vector((0, 0.03, 0.05)))
     for s in (1, -1):       # the legs: reaching in front, streaming behind
         tag = "l" if s > 0 else "r"

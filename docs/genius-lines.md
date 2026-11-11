@@ -745,21 +745,22 @@ What each line keeps from its Starter, and what each path adds and carries:
 
 | Line | It keeps | The three paths |
 |---|---|---|
-| Lurker | a hood of ink and two eyes in it | broad and behind, a mantle (the Back-stander's); bent and sitting, a chair and a lamp, coat `ash` (the One Who Sits Up); narrow, its collar up, coat `iron` (the Unremarked) |
+| Lurker | a hood of ink, lined, and two lidded eyes in it | broad and behind, a mantle, the maw or the door in its chest lit from inside, `amethyst` (the Back-stander's); bent and sitting, a chair, a rug and a light to sit by, coat `ash`, `gold` (the One Who Sits Up); narrow, its collar up, a bold pale edge, coat `iron`, `lapis` (the Unremarked) |
 | Fiend | two horns, a scowl, the candle on its skull | the fire let out: a maw, a mane of flame (Flare-up's); banked: ash-grey, letters, bottles and smoke, coat `ash` (Banked Coal's); a hearth: a grate, stoves and candles, coat `hearth` (the Grate-fiend's) |
 | Ember | the coal it began as, at the foot of its flame, with its eyes lit in the coal | kept: a bed, a ring, a shell (Kept Fire's); small and stubborn: thin, pale, with the things of study and signal, coat `moon` (the Rushlight's); spent at once: ragged, thrown, running (Wildfire's) |
-| Fog | rolls of grey and two eyes | the cowl: the hood of a coat with nobody in it (the Fog-shroud's); square edges, pale bands and a stone, coat `moon` (Lingering Mist's); the curl: a tail that is already leaving, coat `iron` (Shifting Fog's) |
+| Fog | rolls of grey, round and breathing, and two eyes | the cowl: the hood of a coat with nobody in it, cloth of `peacock` (the Fog-shroud's); square edges, a stone, a lamp and a name, in `gold`, coat `moon` (Lingering Mist's); the curl: a tail that is already leaving, edged in `amethyst`, coat `iron` (Shifting Fog's) |
 
 | Line | Key | Styles |
 |---|---|---|
-| Lurker | `plan` | `blot` (the Starter) `figure` `seated` `robed` `door` `gate` `hatch` `human` `streak` `corner` `monolith` `tree` |
-| | `build` | `tall` `broad` `hood` `skirt` `lean` `hem` `turn` `reach` `thick` `tatters` `deep` |
-| | `eyes` | `slit` `dim` `old` `one` `wide` `holes` `closed` `none` |
-| | `arms` | `hang` `broad` `spread` `guard` `long` `apart` `reach` `lap` `cup` `hold` `mantis` `up` `back` `wings` `whisper` `blade` `floor` `none` |
-| | `legs` `ground` | `stilts` `back` `roots`; `long` `cohort` `ring` `wall` |
-| | `wears` `chest` `face` | `mantle` `collar` `script` `cape` `shawl` `rime`; `maw` `cold-hand` `core`; `mask` |
+| Lurker | `plan` | `blot` (the Starter) `figure` `seated` `robed` `door` `hatch` `human` `streak` `corner` `monolith` `tree` |
+| | `build` | `tall` `broad` `hood` `skirt` `lean` `hem` `turn` `reach` `thick` `tatters` `deep`; `watch` (0: its hood does not look about); `wisps` |
+| | `thread` `edge` | which step of its Path's colour its edges are (`light`, `pale`), and how bold (1 is a thread) |
+| | `eyes` | `slit` `dim` `old` `one` `single` `wide` `holes` `closed` `none` |
+| | `arms` | `hang` `broad` `spread` `guard` `long` `apart` `reach` `lap` `cup` `hold` `mantis` `up` `back` `wings` `whisper` `blade` `floor` `bar` `none` |
+| | `legs` `ground` | `stilts` `back` `roots`; `long` `cohort` `ring` `wall` `sill` `bed` |
+| | `wears` `chest` `face` | `mantle` `collar` `script` `cape` `shawl` `rime`; `maw` `keyhole` `cold-hand` `core`; `mask` |
 | | `shoulder` `head` `back` | `face` `face-crowned`; `ear` `prow`; `chair` |
-| | `holds` `aura` | `lamp` `lamp-low` `dark-lamp` `glow` `book` `chain` `blade`; `veils` `breath` `stubs` |
+| | `holds` `aura` | `lamp` `lamp-low` `dark-lamp` `glow` `book` `chain` `blade` `bar`; `veils` `breath` `stubs` |
 | Fiend | `plan` | `wick` (the Starter) `imp` `ball` `bottle` `stove` `candle` |
 | | `build` | `belly` `tall` `head` `legs` `lean` `dive` `lift` `horn` `ear` |
 | | `eyes` `mouth` `horns` | `scowl` `wide` `old` `sleepy` `shut` `white`; `grin` `maw` `scowl` `lamp` `none`; `curved` `stub` `long` `swept` `ram` |
@@ -784,16 +785,18 @@ its crown, or it would fill the room: `spirits_kit.py` never lets a body be more
 times as far across as the height its `ref_top` stands it to.
 
 **Their gifts** are parts, written by `tools/blender/parts_spirits.py` to
-`game/assets/genius/parts/<feature>.glb`:
+`game/assets/genius/parts/<feature>.glb` (and, as a base's own make of one,
+`python tools/blender/parts_spirits.py gifts lurker fog` writes
+`game/assets/genius/gifts/<base>-<feature>.glb` and leaves the shared part alone):
 
 | Base | Gift | What it is | Where it hangs |
 |---|---|---|---|
-| Lurker | `shadow-cloak` | a ragged mantle of ink, a hood thrown back, the hem streaming | the back (`socket_back`) |
+| Lurker | `shadow-cloak` | a ragged mantle of ink, shaded round, a hood thrown back, the hem streaming | the back (`socket_back`) |
 | | `watching-eye` | one great eye, lidded in ink, the dark standing up off it | the brow (`socket_eyes`) |
 | Fiend | `ember` | a split coal, its flame up either side of whatever carries it | the light (`socket_light`) |
 | | `horns` | long, swept, ridged, ringed with the field at the root | the head (`socket_head`) |
 | Ember | `ember`, `glow` | the coal, and a rayed halo of the field round it | the light, both |
-| Fog | `mist`, `glow` | a wreath of fog at the breast, trailing down the flanks; the halo | the breast (`socket_body`); the light |
+| Fog | `mist`, `glow` | a wreath of fog at the breast, round as the Fog's own rolls, trailing down the flanks; the halo | the breast (`socket_body`); the light |
 
 **What was changed outside these files, and why.**
 
@@ -809,6 +812,119 @@ times as far across as the height its `ref_top` stands it to.
   and not yet drawn from a ramp: `ash` `ash_dark` `ash_pale` `brick` `wax_red` `rust` `soot`
   `clinker` `clinker_light` `pane` `stone_grave` `timber` `mask_pale` `veil` `steam`
   `stubble` `grass_dry`.
+
+### The Lurker and the Fog: the second pass
+
+Line check, before and after: the Lurker 1 alike, 1 unchanged, 7 dark, colour 73% → **0, 0, 0,
+100%**; the Fog 0, 0, 0, colour 60% → **0, 0, 0, 100%**.
+
+**The Lurker stays a thing of ink, and is given edges.** Every hooded form is built from the
+same pieces (`spirits_lurker.py`: `cloak`, `lining`, `hood`, `eyes_of`, `sleeve`, `hand_of`,
+`tatters`), so the rule is kept in one place:
+
+- The cloak opens down its front on a **lining** of its Path's colour, narrow at the breast
+  and wide at the hem. A **thread** of that colour runs down each edge of the opening, round
+  the hem, round the opening of the hood and round each cuff; the hood is lined with it; each
+  finger ends in a nail of it. That is the tenth to a third of it that is coloured.
+- Its **eyes** are half again as large, lit by the field, and lidded (a lid lowered over a
+  long eye is the Lurker thinking). They blink. The hood is a piece of its own and looks
+  slowly about, and what is in it or on it (a mask, a prow, an ear) rides it.
+- Sleeves and legs are the lighter of its two darks and the folds of the cloak go by turns,
+  so a pose reads without anything being made pale.
+
+| Path | Colour | Every form of it has | Its second value |
+|---|---|---|---|
+| Back-stander | `amethyst` | the lining, the threads, a mantle dagged with it | something in its chest lit from inside by the field: the maw (Blow-eater), the hollow with a small light in it (the Hollow Behind), light under the door and at the keyhole (Door-shadow), a keyhole in its breast (Dark Threshold), the cellar's light round the hatch (Cellar-keeper) |
+| The One Who Sits Up | `gold` | the lining, the threads | the things of a vigil: the rug, the chair's knobs, the candle and its stick, the lamp, the shawl, the bed's blanket, the book's boards, the second face's crown |
+| The Unremarked | `lapis` | a deep blue lining | its edge is the pale step of the colour and bold (`thread: pale`, `edge: 1.6`): a blue-black figure drawn in a pale blue line |
+
+*Its anatomy*, in a sentence: a Lurker is a choice of magic carried through, a hood, a cloak
+and two hands of shadow with nothing in them, afloat; where a form has legs they are a
+shadow's (stilts, or folded the wrong way, with hands for feet), and where it is some other
+thing (a door, a tree, your outline, a clot in a corner) it is that thing made of the same
+dark, with the same eyes.
+
+*What lies or stands on a floor carries its floor* (rule 5), a grey thing with shreds of the
+same dark hanging under it: the Small Shadow (one flagstone, and its shadow on it), the Long
+Shadow and the Last in Line (the boards the shadow lies along), the Shadow of the Cohort (the
+round of floor the twelve stand on), the Door-shadow (the doorway and its step), the Dark
+Threshold (the sill; it bars the door, a bar across its hands), the Cellar-keeper (the flags
+round the hatch, and the lid), the One Who Sits Up (the rug under its chair), the Name-stalker
+(the wall and the floor at its foot), the Thing in the Corner (two walls and a lip of
+ceiling), the Quiet at Your Back (a round of road, with the rings on it), the Count One Short
+(the sod it is rooted in). The Vigil's three stand on the ground themselves. The Shot-shadow
+is given no ground: it flies, beside the arrow it goes with. The Long-reaching Shadow's hands
+are no longer on a floor: its arms hang below it and sway.
+
+*What moves*: the hood (`turn_head`; not the Name-stalker's, which is at a wall), the eyes
+(`blink_`), the hem in four pieces and every arm that holds nothing (`sway_`), the Dark
+Ahead's arms (`glide_`), the cape, the chain, the ribbon, the boughs, a lamp under a swaying
+arm (`sway_`), a candle or a low lamp's flame (`flick_`), the lamp, the glow, the heart, the
+maw, the keyhole, the core, the road's rings (`pulse_`), the mask, the twelve in three
+companies, the breath (`bob_`), the second face and the eye in the corner (`turn_`, and their
+eyes blink).
+
+**The Fog is made of cloud.** A roll is no longer a thing of its own. `roll()` only notes a
+ball; when the form is done each part of it is made as one round surface a role
+(`spirits_kit.cloud`: a metaball skin, thinned to a budget of corners), so that a bank has
+one soft outline and not a line round every roll. A part breathes (`pulse_fog...`), and the
+eyes and the dark round them ride it. `ragged()` and `wisps()` are the strands at its edge,
+thin enough at their ends to see past, and they sway. What is not fog in a form (a cowl, a
+stone, a post, a window) is hard-edged and still.
+
+| Path | Colour | Held in | In the fog itself |
+|---|---|---|---|
+| Fog-shroud | `peacock` | the cowl: dark without, bright within, a thread round its opening, two tails that sway; and the rope on a pile, the border of the pall, the webs of a hand, a candle's dish | a dark roll of it low in the bank |
+| Lingering Mist | `gold` | a name cut in every stone and gilded; lamps and their posts; an ear-trumpet, gateposts' caps, a bollard, boundary flags, a plumb-bob, curtain ties, a painted waymark | a pale roll of it, as if a lamp were in the fog |
+| Shifting Fog | `amethyst` | the edge of every curl; the mouths, the voice's rings, a hound's collar, a window's frame, a ledger's boards, a flood-gauge, the rim of the ice | a dark roll of it under the blue |
+
+A Path keeps to one coat shift: the Fog-shroud none (Choke-damp's `slate` and Black Damp's
+`night` are gone; Black Damp is dark by a material of its own, `mist_black`), Lingering Mist
+`moon`, Shifting Fog `iron` (Night-frost's `frost` and Black Ice's `night` are gone; needles
+and ferns are `frost_white`, which no coat shifts). One form is off its Path's shift on
+purpose: Rising Water has `coat: null`, its partner's own water, because under `iron` brown
+water would be slate.
+
+*Its anatomy*: fog is weather that has taken a habit; it has no body but its rolls, which are
+one surface and breathe, and each form's sign is something the fog does to a place (lies on
+it, stands in a gap, comes over a quay) or carries from one. The Driven Mist is fog in the
+shape of a hound, on purpose: a deep chest, a long head, legs that are streamers, a collar.
+
+*Its floor forms and their floors*: Ground-veil (a sod of open ground, a fence standing clear
+of it), Black Damp (a cellar's flags and the first of its stairs, which it has come up),
+Black Ice (the top step, and its joints seen through the ice), Trail-keeper (the path),
+Lost-road (a round of road), Night-frost (the flag it settled on), Sea-fret (the quay),
+Sudden Clearing (the sill), Hoar (the window it grows on).
+
+*What moves*: every bank and limb of fog (`pulse_fog`, `_a`, `_b`, `_figs`, `_shape`,
+`_anvil`), ragged edges, wisps, curls, the cowl's tails, a hung lantern, a ledger, flags,
+tassels, ears, a hound's legs (`sway_`), shreds, steam, bubbles, salt, rain (`bob_`), flames
+and the storm's bolts (`flick_`), the storm's ring (`spin_`), a cold place, a low sun, old
+prints, ripples, a voice's rings (`pulse_`), and the eyes of every one (`blink_`).
+
+**Still weak.** The Lurker: a floating form is small in its cell and in the world, and its
+face smaller; the Hollow Behind faces you, with its second face at the side of its head (that
+it stands the other way is not shown); the Long Shadow and the Last in Line use one device;
+the Dark Threshold no longer shows the still air; the Second Assailant is the nearest to dark
+(0.17 against 0.165). The Fog: `mist` is drawn as water is, so every roll has a highlight
+(it wants a class of its own in `data/style.json`); the dark round an eye reads as
+spectacles; the Trail-keeper is a caterpillar on a board and the Smother a stack of blankets;
+the Calling Mist's faces are uncanny rather than nearly-known; Sudden Clearing has one eye,
+as its sign says, where every other Fog has two; Harbour Fog and Ground-veil are within a
+tenth of the size an object may be.
+
+**What was changed outside the two lines' files, and why.**
+
+- `spirits_kit.py`, by adding only: `cloud`, `strand`, `curve` (fog and smoke), `Body.move`
+  and the writing of moving pieces in `Body.export` (a body with none is written as it
+  was), `planks` and `flags` (a floor), and colours for a floor, a corner, brick dust, black
+  mist and white frost, each on a ramp.
+- `parts_spirits.py`: the Lurker's `shadow-cloak` and `watching-eye` and the Fog's `mist`
+  are shaded round, and `gifts <base>...` writes a base's own make to
+  `game/assets/genius/gifts/` without touching the shared parts. Only
+  `lurker-shadow-cloak`, `lurker-watching-eye` and `fog-mist` were rebuilt.
+- Nothing in the game's scripts, `genius_lines.py`, `genius_kit.py`, `data/style.json` or
+  `data/genius-looks.json`.
 
 ## The wolf's kin: the Fox, the Stag, the Drake
 
@@ -854,7 +970,7 @@ page.
   skeleton or clips of its own. The Drake is the weakest for it: its legs and chest are a
   wolf's, so the Sky path can read as a winged hound, and its wings do not beat. The
   Harriers read as small griffins, not hawks on foot.
-- **Dark on dark.** A night coat on a dark ground: the Lurker by nature; the Imp's
+- **Dark on dark.** A night coat on a dark ground: the Imp's
   Night-clerk, Lights-out Imp, Bondsman and Whipping-imp; the Drake's Lamp-hoarder,
   Slag-jaw, Smoke-drake, Chimney-wyrm and Wing-shadow; the Coat's Shadow and Listening
   paths on a black sample coat; bows and the Smoke-pole branch at night.
@@ -867,11 +983,12 @@ page.
   Flare-up, Pyre-dancer and Brush-burner are one imp in three moods; Oath-scorch, Mark of
   the Sworn and Vendetta differ by what they wear. Ember: Kept Fire, Circle-flame,
   Tempering Flame. Bow: Omen-bow, The Twitch, Oath-bow.
-- **Reads as something else.** Fog: Mist of the Named Dead (a boulder), Sea-fret (fish),
-  Hoar (a white plant), and its rolls are faceted, so fog looks a little like rock.
+- **Reads as something else.** Fog: the Trail-keeper (a caterpillar on a board), the Smother
+  (a stack of blankets), the Sea-fret's three streamers (three fingers); and every roll of
+  fog has a highlight on it, because `mist` is drawn as water is.
   Hawk: the Passenger's shoulder reads as a draped stand. Sprite: the Collar-rider's face is
   lost between hair and collar. Drake: Kiln-throat's glazed jaw reads as big teeth.
-- **A face you cannot see.** The Hollow Behind's and the Writ-riddler's second faces are at
+- **A face you cannot see.** The Writ-riddler's second face is at
   the back of the head; Hill-fire has none in view; the Whipping-imp's welts are on its
   back.
 - **Small in its cell or in the world.** The Clasp (the Coat's Starter) is the weakest of
@@ -883,8 +1000,9 @@ page.
 - **No pose of its own.** The small people move by their base body's clips, so what is in a
   hand hangs at the side. A bow is edge-on from in front and behind. A Standing Gun in the
   hand brings its legs, its shield and its walls with it.
-- **Floats where it should lie.** Ground-veil, Black Damp, Black Ice and Grass-fire float at
-  the shoulder with their ground, because their bases float.
+- **Floats where it should lie.** Grass-fire floats at the shoulder with its ground, because
+  its base floats. The Lurker's and the Fog's floor forms float too, each now with the piece
+  of floor it lies on (their section lists them); a Small Shadow carries one flagstone.
 - **Light.** The game shows every lit surface at one brightness, so a large lit area glares;
   light is kept to edges and small things except where a form is all light on purpose.
 
