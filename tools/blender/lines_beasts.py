@@ -2046,8 +2046,8 @@ def harrier_crest(B, items, style, size, level):
             d = Vector((sx * 0.36, 0.86, 0.4 - 0.5 * abs(sx))).normalized()
             Ln = (0.3 - 0.06 * abs(sx)) * size * h
             q = g.merge(q, g.tube([b0, b0 + d * Ln * 0.5 + Vector((0, 0, 0.01)), b0 + d * Ln], [0.006 * h, 0.005 * h, 0.004 * h], n=4))
-            pd = g.merge(pd, g.blade(b0 + d * Ln * 0.78, b0 + d * Ln * 1.18, 0.04 * h, normal=(sx * 0.5, -0.3, 1), belly=0.5, thick=0.012))
-        items += [(put(q), dark, False), (put(pd), lit or mat("accent_light"))]
+            pd = g.merge(pd, g.blade(b0 + d * Ln * 0.74, b0 + d * Ln * 1.16, 0.048 * h, normal=(sx * 0.5, -0.3, 1), belly=0.5, thick=0.012))
+        items += [(put(q), dark, False), (put(pd), mat("accent_light"))]
     elif style == "fan":
         # a fan stood up along the crown, brow to nape, as tall as its head
         cr, tp = None, None
