@@ -6,6 +6,10 @@
     "cohortSize": 12
   },
   "arrival": {
+    "card": {
+      "title": "Alexandria",
+      "sub": "The Academy  ·  Day 1, {weekday} of {season}"
+    },
     "speaker": "varga",
     "lines": [
       "There you are. You're taller. A year does that.",

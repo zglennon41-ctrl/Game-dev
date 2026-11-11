@@ -25,6 +25,7 @@ var _feat_i := 0
 var _form_node: Node3D
 var _pick := -1   # which of the bowl's three the player took (-1: settled)
 var _tick_t := 0.0
+var _side := 1.0  # the side of the bowl the camera keeps to: the one the partner is not standing on
 
 func _init(a: Academy, h: Dictionary) -> void:
 	ac = a
@@ -53,6 +54,7 @@ static func _sequence(result: String, was: String, surprise: bool, n: int) -> Ar
 
 func start() -> void:
 	phase = "intro"
+	_side = camera_side(ac.fight.p_pos.x - World.BOWL.x)
 	world.cine = true
 	world.cine_speed = 1.6
 	_cam_side()
@@ -78,8 +80,14 @@ func _go(p: String) -> void:
 			world.genius_goal_radius = 1.2
 			sfx.play("pattern", 0.7)
 		"name":
+			ac._clear_big()
 			ac.show_card(form, World.SHAPE_COLORS[hero["shape"]], "FIRST FORM")
 			ac.ask_name(form["name"], func(n: String): _named(n))
+
+## The camera keeps to the side of the bowl the partner is not on, so that they never stand
+## between it and what comes out of the fire.
+static func camera_side(partner_x: float) -> float:
+	return -1.0 if partner_x > 0.0 else 1.0
 
 func Rite_fill(s: String) -> String:
 	return ac.fill(s)
@@ -184,7 +192,7 @@ func _landed(dt: float) -> void:
 func _genius(dt: float) -> void:
 	# The orb spirals in, tighter and tighter, and the fire takes it.
 	world.genius_goal_radius = maxf(0.0, 1.2 - t * 0.45)
-	world.cine_pos = World.BOWL + Vector3(2.2, 2.4, 4.4)
+	world.cine_pos = World.BOWL + Vector3(2.2 * _side, 2.4, 4.4)
 	world.cine_look = World.BOWL + Vector3(0, 1.6, 0)
 	world._g_pulse = 0.3 + 0.2 * sin(t * 12.0)
 	if t > 2.8:
@@ -206,18 +214,24 @@ func _making(dt: float) -> void:
 	var col: Color = World.SHAPE_COLORS[hero["shape"]].lightened(0.15)
 	world.light_pillar(minf(9.0, t * 6.0), col)
 	world._shake = minf(0.12, 0.02 + t * 0.025)
-	world.cine_pos = World.BOWL + Vector3(0, 2.0 + t * 0.4, 5.6 - t * 0.2)
+	world.cine_pos = World.BOWL + Vector3(1.6 * _side, 2.0 + t * 0.4, 5.6 - t * 0.2)
 	world.cine_look = World.BOWL + Vector3(0, 2.2 + t * 0.2, 0)
 	var feats: Array = form["features"]
 	# Each feature is called out of the light, one after another, each a note higher.
 	if _feat_i < feats.size() and t > 1.0 + _feat_i * 0.85:
 		var lbl := Rite.feature_label(String(feats[_feat_i]))
-		world.floater(World.BOWL + Vector3(randf_range(-0.9, 0.9), 2.6 + _feat_i * 0.35, 0.6), lbl.to_upper(), col.lightened(0.3), 64, 2.6, 0.35)
+		# (to one side of the light and the other in turn, each a step higher: never one over another)
+		world.floater(World.BOWL + feature_spot(_feat_i), lbl.to_upper(), col.lightened(0.3), 56, 2.6, 0.3)
 		sfx.play("cue-hit", 0.8 + 0.18 * _feat_i)
 		_feat_i += 1
 	if t > 1.4 + feats.size() * 0.85 + 0.8:
 		_burst_form()
 		_go("form")
+
+## Where a feature's word stands as it is called out of the light: left and right of the
+## column in turn, each higher than the last.
+static func feature_spot(i: int) -> Vector3:
+	return Vector3(-1.9 if i % 2 == 0 else 1.9, 2.3 + i * 0.5, 0.6)
 
 func _burst_form() -> void:
 	var col: Color = World.SHAPE_COLORS[hero["shape"]].lightened(0.15)
@@ -237,7 +251,7 @@ func _burst_form() -> void:
 	world.flame(Color(1.0, 0.65, 0.3), 0.7, 3.0)
 	sfx.play("heavy", 0.6)
 	sfx.play("done", 1.0)
-	world.cine_pos = World.BOWL + Vector3(1.0, 2.0, 4.6)
+	world.cine_pos = World.BOWL + Vector3(2.6 * _side, 2.0, 4.2)
 	world.cine_look = World.BOWL + Vector3(0, 2.3, 0)
 	world.cine_speed = 2.0
 	var feats: Array = form["features"].map(func(f): return Rite.feature_label(String(f)))

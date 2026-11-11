@@ -42,6 +42,7 @@ var portrait_dist := 3.6
 var portrait_frame := ""    # the creator's framing: wide, full, half or face (data/creation.json, stage.frames); "" is the title's
 var portrait_shift := 0.0   # the part of the screen's width a panel covers on the right: the figure centres in what is left
 var cine := false            # a scene holds the camera (the rite)
+var hush_names := false      # someone is speaking: the names over heads stand down
 var cine_pos := Vector3.ZERO
 var cine_look := Vector3.ZERO
 var cine_speed := 2.0
@@ -4568,8 +4569,43 @@ func add_figure(body: String, at: Vector2, facing: float, title: String, sub: St
 	_figures.append(fig)
 	return fig
 
+## Names over heads never run through each other: nearest first, a name shows only if its
+## place on the screen is clear of every nearer name that shows. `rects` are the names' screen
+## rectangles, nearest first; the answer is which of them may show.
+static func declutter(rects: Array) -> Array:
+	var shown: Array = []
+	var out: Array = []
+	for r in rects:
+		var ok := true
+		for s in shown:
+			if (s as Rect2).intersects(r as Rect2):
+				ok = false
+				break
+		out.append(ok)
+		if ok:
+			shown.append(r)
+	return out
+
 ## People turn to look at the hero when they come near, and their names show.
 func _update_figures(f: Fight, dt: float) -> void:
+	# which names have room: nearest to the hero first
+	var order: Array = _figures.filter(func(g): return (f.p_pos - g["pos"]).length() < 7.0)
+	order.sort_custom(func(a, b): return (f.p_pos - a["pos"]).length_squared() < (f.p_pos - b["pos"]).length_squared())
+	var rects: Array = []
+	var vp_h := get_viewport().get_visible_rect().size.y
+	for g in order:
+		var gl: Label3D = g["label"]
+		var sp := camera.unproject_position(gl.global_position)
+		# a name is two lines of capitals: about so wide and so tall on the screen
+		var longest := 0
+		for line in gl.text.split("\n"):
+			longest = maxi(longest, line.length())
+		var px := vp_h * gl.pixel_size * gl.font_size
+		var sz := Vector2(longest * px * 0.62 + 12.0, px * 2.9 + 8.0)
+		rects.append(Rect2(sp - sz / 2.0, sz) if not camera.is_position_behind(gl.global_position) else Rect2(-9999, -9999 - rects.size() * 10, 1, 1))
+	var room := declutter(rects)
+	for i in order.size():
+		order[i]["label_room"] = room[i]
 	for fig in _figures:
 		var d: float = (f.p_pos - fig["pos"]).length()
 		var want: float = (f.p_pos - fig["pos"]).angle() if d < 4.5 else fig["home"]
@@ -4577,6 +4613,8 @@ func _update_figures(f: Fight, dt: float) -> void:
 		(fig["node"] as Node3D).rotation.y = _yaw(fig["facing"])
 		var l: Label3D = fig["label"]
 		var a := clampf((7.0 - d) / 3.0, 0.0, 1.0)
+		if not fig.get("label_room", true) or hush_names:
+			a = 0.0
 		# In a scene, names stand down, and no one stands between the camera and what matters.
 		var node: Node3D = fig["node"]
 		if cine:

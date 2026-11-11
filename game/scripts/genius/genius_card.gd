@@ -172,6 +172,12 @@ func _stand(info: Dictionary) -> void:
 	# a portrait is to see it by: its own colours first, the Shape's along the edge
 	body.set_rim(0.3)
 	_pivot.add_child(body)
+	_pivot.scale = Vector3.ONE * portrait_scale(body.stands * body.art_size)
+
+## A portrait is to see it by: a genius that stands very small (a godling, a kit) is brought up
+## to fill a fair part of the frame; one that already does is left at its own size.
+static func portrait_scale(height: float) -> float:
+	return clampf(0.56 / maxf(height, 0.05), 1.0, 2.8)
 
 func restyle(info: Dictionary) -> void:
 	_stand(info)
