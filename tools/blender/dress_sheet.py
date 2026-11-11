@@ -14,13 +14,15 @@ import math
 import os
 import sys
 
-import bpy
 import numpy as np
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import body_kit as bk  # noqa: E402
-import style  # noqa: E402
-import wardrobe  # noqa: E402
+DRAW = "--draw" in sys.argv      # the second half, in a Python that has PIL (Blender's has none)
+HOMES = ["alexandria", "columbia", "cahokia", "lunden", "colonia", "tiber", "khemet", "baghdad", "varanasi", "jiangnan", "kazan", "timbuktu", "edo"]
+if not DRAW:
+    import bpy
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import body_kit as bk  # noqa: E402
+    import style  # noqa: E402
 
 W, H = 260, 470          # one view
 SS = 2                   # drawn larger and brought down, for soft edges
@@ -114,29 +116,36 @@ def draw(pts, cols, yaw, height):
 
 
 def card(home, sex, wear, anim, at, out):
-    from PIL import Image
+    """Build one body and keep its triangles (Blender's half)."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     body = bk.Body(home, sex).build()
     tones = json.load(open(os.path.join(bk.ROOT, "data", "creation.json")))["look"]["skinTones"]
     pal = json.load(open(os.path.join(bk.ROOT, "data", "bodies.json")))["homes"][home].get("palette", ["olive"])
     skin = tuple(tones[pal[len(pal) // 2]])
     pts, cols = triangles(body, wear, anim, at, skin)
+    np.savez_compressed(os.path.join(out, "%s-%s-%s.npz" % (home, sex, wear)), pts=pts.astype(np.float32), cols=cols.astype(np.float32))
     tris = {o.name: len(o.data.polygons) for o in body.r.skinned if o.name.startswith("Dress_")}
+    print("[dress_sheet]", home, sex, wear, "faces", tris, flush=True)
+
+
+def picture(out, name):
+    """One body's card from its triangles: front and back, and the same as a white shape."""
+    from PIL import Image
+    d = np.load(os.path.join(out, name + ".npz"))
     img = Image.new("RGB", (W * 2, H), BACK)
     msk = Image.new("L", (W * 2, H), 0)
     for i, yaw in enumerate((-0.45, math.pi + 0.6)):
-        a, b = draw(pts, cols, yaw, 2.5)
+        a, b = draw(d["pts"], d["cols"], yaw, 2.5)
         img.paste(a, (i * W, 0))
         msk.paste(b, (i * W, 0))
-    img.save(os.path.join(out, "%s-%s-%s.png" % (home, sex, wear)))
-    msk.save(os.path.join(out, "%s-%s-%s.mask.png" % (home, sex, wear)))
-    print("[dress_sheet]", home, sex, wear, "faces", tris, flush=True)
+    img.save(os.path.join(out, name + ".png"))
+    msk.save(os.path.join(out, name + ".mask.png"))
 
 
 def sheet(out, wear):
     """Every card of one wear in OUT_DIR, a column a home: the men over the women."""
     from PIL import Image, ImageFilter
-    homes = [h for h in bk.HOMES if os.path.exists(os.path.join(out, "%s-m-%s.png" % (h, wear))) or os.path.exists(os.path.join(out, "%s-f-%s.png" % (h, wear)))]
+    homes = [h for h in HOMES if os.path.exists(os.path.join(out, "%s-m-%s.png" % (h, wear))) or os.path.exists(os.path.join(out, "%s-f-%s.png" % (h, wear)))]
     if not homes:
         return
     for kind, mode in (("", "RGB"), (".mask", "L")):
@@ -152,12 +161,20 @@ def sheet(out, wear):
 
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if "=" not in a]
+    args = [a for a in sys.argv[1:] if "=" not in a and a != "--draw"]
     kv = dict(a.split("=", 1) for a in sys.argv[1:] if "=" in a)
     out = args[0]
     os.makedirs(out, exist_ok=True)
     wear = kv.get("wear", "plain")
-    for home in args[1:]:
-        for sex in ([kv["sex"]] if "sex" in kv else ["m", "f"]):
-            card(home, sex, wear, kv.get("anim", "Idle"), float(kv.get("at", "0.0")), out)
-    sheet(out, wear)
+    sexes = [kv["sex"]] if "sex" in kv else ["m", "f"]
+    if DRAW:
+        for home in args[1:]:
+            for sex in sexes:
+                picture(out, "%s-%s-%s" % (home, sex, wear))
+        sheet(out, wear)
+    else:
+        import subprocess
+        for home in args[1:]:
+            for sex in sexes:
+                card(home, sex, wear, kv.get("anim", "Idle"), float(kv.get("at", "0.0")), out)
+        subprocess.run(["python3", os.path.abspath(__file__), "--draw"] + sys.argv[1:], check=False)

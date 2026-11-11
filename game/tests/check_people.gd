@@ -72,8 +72,9 @@ func _init() -> void:
 		var dress: Dictionary = homes.get(home, {}).get("dress", {})
 		if not dress.is_empty():
 			var pieces := inst.find_children("Dress_*", "MeshInstance3D", true, false)
-			if pieces.size() < dress.get("pieces", []).size():
-				missing.append("(dress: %d of %d pieces)" % [pieces.size(), dress.get("pieces", []).size()])
+			# every piece worn one way is one mesh: Dress_all, and Dress_some__in_<ways> for the rest
+			if pieces.is_empty() or inst.find_child("Dress_all", true, false) == null:
+				missing.append("(dress: no Dress_all)")
 			for pc in pieces:
 				# rigid pieces (buttons, a badge, knots, tools, pauldrons, pteruges) hang from bones
 				var rigid := false
@@ -83,8 +84,12 @@ func _init() -> void:
 				if not rigid and (pc as MeshInstance3D).skin == null:
 					missing.append("(dress piece %s not skinned)" % pc.name)
 					break
-			if dress.has("headgear") and inst.find_child("Headgear_*", true, false) == null:
-				missing.append("(headgear %s)" % dress["headgear"]["type"])
+			var hgs: Variant = dress.get("headgear", [])
+			if hgs is Dictionary:
+				hgs = [hgs]
+			for hg in hgs:
+				if String(hg.get("sex", body.get_slice("-", 1))) == body.get_slice("-", 1) and inst.find_child("Headgear_%s*" % String(hg["type"]), true, false) == null:
+					missing.append("(headgear %s)" % hg["type"])
 		# the face: the eyes, the brows and the lashes hang from the head; the rest is the body's own
 		for fc in ["Eye_l", "Eye_r", "Brow_l", "Brow_r", "Lash_l", "Lash_r"]:
 			if inst.find_child(fc, true, false) == null:

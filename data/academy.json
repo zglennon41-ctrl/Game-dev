@@ -1406,7 +1406,7 @@
       "name": "Captain Ada Rourke",
       "title": "Marshal · Columbia's school",
       "shape": "cast",
-      "body": "alexandria-m",
+      "body": "columbia-f",
       "weapon": "pistol",
       "discipline": "marshal",
       "lines": {
@@ -1420,7 +1420,7 @@
       "name": "Pilot Oyelaran Tane",
       "title": "Pilot · Cahokia's school",
       "shape": "bind",
-      "body": "alexandria-m",
+      "body": "cahokia-m",
       "weapon": "hook",
       "discipline": "pilot",
       "lines": {
@@ -1434,7 +1434,7 @@
       "name": "Dockmaster Wren Halloway",
       "title": "Aeronaut · Lunden's school",
       "shape": "turn",
-      "body": "alexandria-f",
+      "body": "lunden-f",
       "weapon": "rapier",
       "discipline": "aeronaut",
       "lines": {
@@ -1448,7 +1448,7 @@
       "name": "Hearthkeeper Odile Sayre",
       "title": "Make · keeps the hall's Patterns",
       "shape": "make",
-      "body": "alexandria-m",
+      "body": "alexandria-f",
       "after": "discipline",
       "lines": {
         "default": "The hearth is lit. Sit when you want your Pattern looked at; a Pattern is not a thing you write once.",
@@ -1460,7 +1460,7 @@
       "name": "Foreman Ilse Brandt",
       "title": "Engineer · Colonia's school",
       "shape": "make",
-      "body": "alexandria-m",
+      "body": "colonia-f",
       "weapon": "hammer",
       "discipline": "engineer",
       "lines": {
@@ -1474,7 +1474,7 @@
       "name": "Centurion Lucan Petra",
       "title": "Legionary · Tiber's school",
       "shape": "anchor",
-      "body": "alexandria-m",
+      "body": "tiber-m",
       "weapon": "shield",
       "discipline": "legionary",
       "lines": {
@@ -1488,7 +1488,7 @@
       "name": "Keeper Neferet Ode",
       "title": "Grower · Khemet's school",
       "shape": "make",
-      "body": "alexandria-f",
+      "body": "khemet-f",
       "weapon": "ward-staff",
       "discipline": "grower",
       "lines": {
@@ -1502,7 +1502,7 @@
       "name": "Master Idris Fahd",
       "title": "Geometer · Baghdad's school",
       "shape": "read",
-      "body": "alexandria-f",
+      "body": "baghdad-m",
       "weapon": "astrolabe",
       "discipline": "geometer",
       "lines": {
@@ -1516,7 +1516,7 @@
       "name": "Elder Asha Rai",
       "title": "Ascetic · Varanasi's school",
       "shape": "anchor",
-      "body": "alexandria-m",
+      "body": "varanasi-f",
       "weapon": "unarmed",
       "discipline": "ascetic",
       "lines": {
@@ -1530,7 +1530,7 @@
       "name": "Examiner Lin Shu",
       "title": "Examiner · Jiangnan's school",
       "shape": "bind",
-      "body": "alexandria-f",
+      "body": "jiangnan-f",
       "weapon": "fan",
       "discipline": "examiner",
       "lines": {
@@ -1544,7 +1544,7 @@
       "name": "Khan's Rider Aigul Bek",
       "title": "Rider · Kazan's school",
       "shape": "cast",
-      "body": "alexandria-f",
+      "body": "kazan-f",
       "weapon": "horse-bow",
       "discipline": "rider",
       "lines": {
@@ -1558,7 +1558,7 @@
       "name": "Librarian Sekou Diallo",
       "title": "Archivist · Timbuktu's school",
       "shape": "read",
-      "body": "alexandria-m",
+      "body": "timbuktu-m",
       "weapon": "book",
       "discipline": "archivist",
       "lines": {
@@ -1572,7 +1572,7 @@
       "name": "Master Hana Mori",
       "title": "Blade · Edo's school",
       "shape": "turn",
-      "body": "alexandria-m",
+      "body": "edo-f",
       "weapon": "katana",
       "discipline": "blade",
       "lines": {

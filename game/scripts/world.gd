@@ -583,6 +583,7 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 	var hair := String(look.get("hair", "crop"))
 	var beard := String(look.get("beard", "none"))
 	var col := hair_color(String(look.get("hair_color", "brown")))
+	var wear := _dress_home(node, look)      # how the home's dress is worn: plain, formal, or as a master
 	# A headband leaves the crown bare (data/creation.json, look.openHeadgear): the hair shows under it.
 	var covers := headgear
 	if headgear:
@@ -592,7 +593,7 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 			covers = false
 			for hg in worn:
 				var kind := String(hg.name).trim_prefix("Headgear_").get_slice("_", 0)
-				if not open_kinds.has(kind):
+				if dress_worn(String(hg.name), wear) and not open_kinds.has(kind):
 					covers = true
 	node.scale = Vector3.ONE * clampf(float(look.get("stature", 1.0)), 0.85, 1.2)
 	for a in node.find_children("*", "BoneAttachment3D", true, false):
@@ -616,11 +617,89 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 			var head := n.contains("Helmet") or n.contains("Hat") or n.contains("Hood") or n.begins_with("Headgear_")
 			var cape := n.contains("Cape")
 			if head:
-				a.visible = headgear
+				a.visible = headgear and dress_worn(n, wear)
 			elif cape:
 				a.visible = look.get("cape", true)
 				if a.visible and not hero.is_empty():
 					_tint_cape(a, hero, String(look.get("cape_color", "shape")))
+
+## Whether a piece of a home's dress is worn this way: a piece named ..__in_formal_master is
+## worn in formal dress and by a master, and one with no such mark always.
+static func dress_worn(name: String, wear: String) -> bool:
+	var at := name.find("__in_")
+	return at < 0 or name.substr(at + 5).split("_").has(wear)
+
+## A colour of the dress data: a ramp and a step ("indigo:1.5"), or three numbers.
+static func dress_color(v: Variant) -> Color:
+	if v is Array and (v as Array).size() >= 3:
+		return Color(v[0], v[1], v[2]).linear_to_srgb()
+	var pts: Array = Style.ramp(String(v).get_slice(":", 0))
+	if pts.is_empty():
+		return Color(0.4, 0.4, 0.4)
+	var s := clampf(float(String(v).get_slice(":", 1)), 0.0, float(pts.size() - 1))
+	return (pts[int(floor(s))] as Color).lerp(pts[mini(int(floor(s)) + 1, pts.size() - 1)], s - floor(s))
+
+## The option of its home's dress a look names (data/bodies.json, dress.options): the first
+## when it names none; "master" is an Instructor's. Someone the player did not dress takes one
+## of the plain ones by their name (dress_pick).
+static func dress_option(home: String, look: Dictionary) -> Dictionary:
+	var opts: Array = Data.bodies.get(home, {}).get("dress", {}).get("options", [])
+	var id := String(look.get("dress", ""))
+	if id == "master":
+		return { "id": "master", "wear": "master" }
+	for o in opts:
+		if String(o["id"]) == id:
+			return o
+	if look.has("dress_pick"):
+		var plain: Array = opts.filter(func(o): return String(o.get("wear", "plain")) == "plain")
+		if not plain.is_empty():
+			return plain[int(look["dress_pick"]) % plain.size()]
+	return opts[0] if not opts.is_empty() else { "wear": "plain" }
+
+## The home's dress as the look wears it: the pieces of that way of wearing it shown, the
+## others hidden, and the option's colours dyed in. Returns the way it is worn.
+func _dress_home(node: Node3D, look: Dictionary) -> String:
+	var meshes := node.find_children("*", "MeshInstance3D", true, false)
+	var home := ""
+	for m in meshes:
+		var mi: MeshInstance3D = m
+		if home == "" and mi.mesh != null and String(mi.name).begins_with("Dress_"):
+			for i in mi.mesh.get_surface_count():
+				var mat := mi.get_active_material(i)
+				if mat != null and String(mat.resource_name).begins_with("dress_"):
+					home = String(mat.resource_name).get_slice("_", 1)
+					break
+	if home == "":
+		return "plain"
+	var opt := dress_option(home, look)
+	var wear := String(opt.get("wear", "plain"))
+	var dyes: Dictionary = opt.get("colors", {})
+	var prefix := "dress_%s_" % home
+	for m in meshes:
+		var mi: MeshInstance3D = m
+		if String(mi.name).begins_with("Dress_"):
+			mi.visible = dress_worn(String(mi.name), wear)
+		if mi.mesh == null:
+			continue
+		for i in mi.mesh.get_surface_count():
+			var mat := mi.get_active_material(i)
+			if mat == null or not String(mat.resource_name).begins_with(prefix) or not (mat is ShaderMaterial):
+				continue
+			# the colour it was made in is kept, so an option taken off gives it back
+			var key := "dress_base_%d" % i
+			if not mi.has_meta(key):
+				mi.set_meta(key, (mat as ShaderMaterial).get_shader_parameter("albedo"))
+			var want: Color = mi.get_meta(key)
+			var rest := String(mat.resource_name).substr(prefix.length())
+			for cname in dyes:
+				if rest == String(cname) or rest.begins_with(String(cname) + "_"):
+					want = Style.conform_named(dress_color(dyes[cname]), String(mat.resource_name))
+			if (mat as ShaderMaterial).get_shader_parameter("albedo") != want:
+				var t: ShaderMaterial = (mat as ShaderMaterial).duplicate()
+				t.set_shader_parameter("albedo", want)
+				t.resource_name = mat.resource_name
+				mi.set_surface_override_material(i, t)
+	return wear
 
 ## The colour a genius's echo is drawn in on its partner: the main colour of the coat it
 ## wears (genius_look.gd), or the partner's Shape colour for a genius with no look of its own.
@@ -720,7 +799,7 @@ func look_for(name: String) -> Dictionary:
 	var sts: Array = L.get("statures", { "middling": 1.0 }).values()
 	var tones: Array = L.get("skinTones", { "olive": [] }).keys()
 	var builds: Array = L.get("builds", { "fit": 0.0 }).values()
-	return { "headgear": (h / 7) % 5 < 2, "cape": (h / 11) % 3 != 0, "cape_color": "plain",
+	return { "headgear": (h / 7) % 5 < 3, "cape": (h / 11) % 4 == 0, "cape_color": "plain", "dress_pick": (h / 29) % 5,
 		"hair": hairs[h % hairs.size()], "beard": beards[(h / 3) % beards.size()] if (h / 13) % 3 == 0 else beards[0],
 		"hair_color": cols[(h / 5) % cols.size()], "stature": sts[(h / 17) % sts.size()],
 		"skin": tones[(h / 19) % tones.size()], "build": builds[(h / 23) % builds.size()] }

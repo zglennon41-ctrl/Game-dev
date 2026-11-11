@@ -238,18 +238,30 @@ def _folds(ob, z_top, z_hem, amp, n, phase=0.0, yo=0.0, cx=0.0):
         p.y += dy / r * d
 
 
-def _cut(ob, keep, edge=None, t=0.012):
+def _cut(ob, keep, edge=None, t=0.012, memo=None):
     """Faces cut out of a garment (an open front, a vent behind), the cloth beside the cut in
-    the trim (edge), and the whole given a thickness so the opening has an inside."""
+    the trim (edge), and the whole given a thickness so the opening has an inside. `memo`
+    keeps which faces went on the first build, so every build is cut alike (the builds are
+    one mesh's shape keys)."""
     bm = bmesh.new()
     bm.from_mesh(ob.data)
-    gone = []
-    for f in bm.faces:
-        c = f.calc_center_median()
-        if not keep(c, f.normal):
-            gone.append(f)
-        elif edge and edge(c, f.normal):
-            f.material_index = 1
+    bm.faces.ensure_lookup_table()
+    if memo is not None and "gone" in memo:
+        gone = [bm.faces[i] for i in memo["gone"]]
+        for i in memo["edge"]:
+            bm.faces[i].material_index = 1
+    else:
+        gone, edged = [], []
+        for f in bm.faces:
+            c = f.calc_center_median()
+            if not keep(c, f.normal):
+                gone.append(f)
+            elif edge and edge(c, f.normal):
+                f.material_index = 1
+                edged.append(f.index)
+        if memo is not None:
+            memo["gone"] = [f.index for f in gone]
+            memo["edge"] = edged
     if gone:
         bmesh.ops.delete(bm, geom=gone, context="FACES")
     bmesh.ops.solidify(bm, geom=bm.faces[:], thickness=t)
@@ -488,7 +500,10 @@ def dress_pieces(body, objs, build, slot):
                         if vent > 0.0 and c.y > yo_w and c.z < z_waist - 0.12 and abs(c.x) < vent * _ease((z_waist - 0.12 - c.z) / max(1e-6, z_waist - 0.12 - hem)):
                             return False
                         return True
-                    _cut(ob, keep, (lambda c, nr: c.y < yo_w and c.z < z_open + 0.03 and abs(c.x) < gap(c.z) + 0.045) if (trim and open_w > 0.0) else None)
+                    if not hasattr(body, "dress_cuts"):
+                        body.dress_cuts = {}
+                    _cut(ob, keep, (lambda c, nr: c.y < yo_w and c.z < z_open + 0.03 and abs(c.x) < gap(c.z) + 0.045) if (trim and open_w > 0.0) else None,
+                         memo=body.dress_cuts.setdefault(ob.name, {}))
             put(nm, ob, "trunk", cname, trim, finish=finish)
             if t != "vest":
                 sleeves(piece.get("sleeves", 6 if long else 2), cname, piece, trim if piece.get("cuffTrim", True) else None)
