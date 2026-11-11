@@ -96,7 +96,8 @@
     "wears": [
      "mantle",
      1.0
-    ]
+    ],
+    "accent": "amethyst"
    },
    "prongs": [
     {
@@ -411,7 +412,8 @@
      "chair": 1.0
     },
     "eyes": "slit",
-    "coat": "ash"
+    "coat": "ash",
+    "accent": "gold"
    },
    "prongs": [
     {
@@ -759,7 +761,8 @@
      "collar",
      1.0
     ],
-    "coat": "iron"
+    "coat": "iron",
+    "accent": "lapis"
    },
    "prongs": [
     {

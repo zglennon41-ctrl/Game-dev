@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "The one style (docs/style.md)",
   "type": "object",
-  "required": ["cap", "accentCap", "skinCap", "tolerance", "ramps", "accents", "loud", "materials", "shading", "ink", "lights", "film", "genius", "effects", "motion", "type", "interface"],
+  "required": ["cap", "accentCap", "pathCap", "skinCap", "tolerance", "ramps", "accents", "paths", "loud", "materials", "shading", "ink", "lights", "film", "genius", "effects", "motion", "type", "interface"],
   "additionalProperties": false,
   "definitions": {
     "hex": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
@@ -20,6 +20,7 @@
     "$comment": { "type": "string" },
     "cap": { "$ref": "#/definitions/unit" },
     "accentCap": { "$ref": "#/definitions/unit" },
+    "pathCap": { "$ref": "#/definitions/unit" },
     "skinCap": { "$ref": "#/definitions/unit" },
     "tolerance": { "type": "number", "minimum": 0, "maximum": 0.2 },
     "ramps": {
@@ -28,6 +29,7 @@
       "additionalProperties": { "type": "array", "items": { "$ref": "#/definitions/hex" }, "minItems": 5, "maxItems": 5 }
     },
     "accents": { "type": "array", "items": { "type": "string" } },
+    "paths": { "type": "array", "items": { "type": "string" } },
     "loud": {
       "type": "object",
       "required": ["shapes", "telegraph", "unshaped"],

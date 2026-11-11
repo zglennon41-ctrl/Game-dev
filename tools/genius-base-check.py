@@ -25,6 +25,8 @@ LEANS = {
     "quests": {"linework", "salvage", "hunt", "escort", "writ", "deep-run"},
 }
 CALLS = {"seed", "shape", "blood"}
+with open(os.path.join(ROOT, "data", "style.json")) as _f:
+    RAMPS = set(json.load(_f)["ramps"])
 SIGNATURES = {}    # a path's two heaviest leans -> the path that has them
 FIRSTS = {}        # a path's heaviest lean -> the paths that lean on it first
 
@@ -96,6 +98,10 @@ def check(path, known_features, seeds, bloods, bodies, all_ids, all_names):
             say("%s: no body %s in game/assets/genius/bodies" % (nd["id"], nd["silhouette"]))
         if need_leans:
             leans(nd["id"], nd.get("leans", {}))
+        # a Path's colour is a ramp of the style (docs/genius-lines.md, "A Path's colour")
+        for k in ("accent", "accent2"):
+            if isinstance(nd.get("body"), dict) and nd["body"].get(k) is not None and nd["body"][k] not in RAMPS:
+                say("%s: its body's %s is %s, which is not a ramp of data/style.json" % (nd["id"], k, nd["body"][k]))
 
     if b["silhouette"] not in bodies:
         say("no body %s in game/assets/genius/bodies (a base may name one that is still to be built: list it in toBuild)" % b["silhouette"]) if b["silhouette"] not in b.get("toBuild", []) else None

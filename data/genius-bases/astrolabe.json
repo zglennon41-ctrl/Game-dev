@@ -108,7 +108,8 @@
      "eye",
      1.1
     ],
-    "held": 0.22
+    "held": 0.22,
+    "accent": "peacock"
    },
    "prongs": [
     {
@@ -481,7 +482,8 @@
     ],
     "carry": null,
     "held": 0.24,
-    "coat": "moon"
+    "coat": "moon",
+    "accent": "lapis"
    },
    "prongs": [
     {
@@ -848,7 +850,8 @@
     ],
     "carry": null,
     "held": 0.24,
-    "coat": "hearth"
+    "coat": "hearth",
+    "accent": "madder"
    },
    "prongs": [
     {

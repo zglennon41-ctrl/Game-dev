@@ -135,7 +135,8 @@
     ],
     "mouth": null,
     "eyes": "lit",
-    "coat": "blood"
+    "coat": "blood",
+    "accent": "madder"
    },
    "prongs": [
     {
@@ -774,7 +775,8 @@
      "script",
      0.4
     ],
-    "eyes": "lit"
+    "eyes": "lit",
+    "accent": "lapis"
    },
    "prongs": [
     {
@@ -1292,7 +1294,8 @@
     ],
     "mouth": null,
     "eyes": "lit",
-    "coat": "ash"
+    "coat": "ash",
+    "accent": "gold"
    },
    "prongs": [
     {

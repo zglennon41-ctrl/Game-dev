@@ -93,7 +93,8 @@
     "sight": [
      "long",
      1.0
-    ]
+    ],
+    "accent": "jade"
    },
    "prongs": [
     {
@@ -438,7 +439,8 @@
     "sight": [
      "lens",
      0.7
-    ]
+    ],
+    "accent": "marigold"
    },
    "prongs": [
     {
@@ -819,7 +821,8 @@
     "sight": [
      "lens",
      1.0
-    ]
+    ],
+    "accent": "lapis"
    },
    "silhouette": "engine-sentinel",
    "prongs": [

@@ -504,6 +504,23 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   and tone of the game." The style is the art bible's lamplight gothic, held as data and
   applied to everything the game draws and moves; an asset that is off it is a bug.
   `docs/style.md`.
+- **The second pass on the lines** (owner, 2026-11-11, on seeing all 682 bodies): "I want
+  a few more companion forms and I want you to do a tightening pass for detail,
+  readability, and path uniqueness. I want each one to be intelligent, thoughtful, and
+  cool. Also fix the way that the clothing is sitting. I think a full garment won't be easy
+  with the mechanics but smaller accessory type genius may solve the problem. Also I want
+  probably 50% graphics precision. Don't be afraid to use color to highlight path changes
+  and textures. Make sure the anatomy makes sense or if its a magical universe choice lean
+  in." And: take the initiative, refine and expand it in a meaningful way. So: every Path
+  of every line has **a colour of its own**, and the world stays muted so that a soul may
+  carry colour; a body **moves** (wings, tails, flames, eyes that blink); a form must read
+  on a dark ground and be a different black shape from its neighbours, and that is
+  measured; a body is either sound in its anatomy or leans into its magic on purpose; a
+  genius that is a garment is **worn as a small piece** (a mantle on the shoulders), not as
+  the whole garment; and there are three more companions, the **Moth**, the **Octopus** and
+  the **Carp**. The readings taken (which companions, what "50% graphics precision" means)
+  and the calls they leave are in `docs/genius-lines.md`, "The second pass", and
+  `docs/decisions-needed.md`.
 - **The Academy is a solo, offline game of its own** (owner, 2026-11-05). Every character
   plays it alone before entering a server; it introduces the world, the gameplay and the
   character systems, and gives the field and the genius time to grow into something unique.

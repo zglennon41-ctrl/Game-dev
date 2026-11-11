@@ -90,6 +90,10 @@ def mat(name, color=None, rough=None, metallic=None):
     m = bpy.data.materials.get(name)
     if m:
         return m
+    if name not in PALETTE and color is None:
+        log("NOT IN THE PALETTE:", name, "(it will be a plain grey)")
+    if not name.startswith("field") and not style.material_class(name):
+        log("NO CLASS:", name, "says nothing of what it is made of (data/style.json, materials.words): the style check will fail it")
     c, r, mt = PALETTE.get(name, ((0.3, 0.3, 0.3), 0.8, 0.0))
     c = style.conform(name, tuple(color or c))[:3]      # on the ramps of what its name says it is (docs/style.md)
     m = bpy.data.materials.new(name)

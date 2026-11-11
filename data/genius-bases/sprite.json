@@ -138,7 +138,8 @@
     ],
     "mouth": null,
     "coat": "hearth",
-    "eyes": "lit"
+    "eyes": "lit",
+    "accent": "marigold"
    },
    "prongs": [
     {
@@ -739,7 +740,8 @@
     "chest": null,
     "mouth": null,
     "coat": "moon",
-    "eyes": "lit"
+    "eyes": "lit",
+    "accent": "lapis"
    },
    "prongs": [
     {
@@ -1268,7 +1270,8 @@
      "wide",
      0.6
     ],
-    "eyes": "lit"
+    "eyes": "lit",
+    "accent": "jade"
    },
    "prongs": [
     {

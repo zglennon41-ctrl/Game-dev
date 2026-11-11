@@ -596,6 +596,10 @@ func _sheet(what: String) -> void:
 		push_error("no such base: " + what)
 		get_tree().quit(1)
 		return
+	# --only=<form id>,<form id>: these forms and no others (quick to look at while working on a few)
+	if _args.has("only"):
+		var wanted := str(_args["only"]).split(",")
+		tree = tree.filter(func(f): return wanted.has(String(f["id"])) or wanted.has(String(f["id"]).get_slice(":", 1)))
 	const COLS := 8
 	const ROWS := 4
 	const HIGH := 300.0       # far above the room, where nothing else is
@@ -751,7 +755,29 @@ func _sheet(what: String) -> void:
 	place.call(cell, true)
 	if _args.has("shots"):
 		await get_tree().create_timer(1.2).timeout
+		if _args.has("plain"):
+			Engine.time_scale = 0.0      # nothing moves between the three pictures
+			await RenderingServer.frame_post_draw
+			await RenderingServer.frame_post_draw
 		await _shot("sheet")
+		if _args.has("plain"):
+			# --plain: and once more as white shapes on black (mask.png), so that a tool can tell
+			# what is the form and what is not, whatever its colours (tools/genius-line-check.py)
+			for d in discs:
+				d.visible = false
+			var white := StandardMaterial3D.new()
+			white.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			white.albedo_color = Color.WHITE
+			for b in bodies:
+				for m in (b as Node).find_children("*", "MeshInstance3D", true, false):
+					(m as MeshInstance3D).material_override = white
+					(m as MeshInstance3D).material_overlay = null
+			world._env.background_mode = Environment.BG_COLOR
+			world._env.background_color = Color.BLACK
+			world._env.glow_enabled = false
+			await RenderingServer.frame_post_draw
+			await RenderingServer.frame_post_draw
+			get_viewport().get_texture().get_image().save_png("%s/mask.png" % _args["shots"])
 		var out := FileAccess.open("%s/sheet.json" % _args["shots"], FileAccess.WRITE)
 		out.store_string(JSON.stringify({ "base": what, "cols": COLS, "rows": ROWS, "cell": cell, "forms": ids }))
 		out.close()

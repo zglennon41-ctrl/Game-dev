@@ -88,7 +88,8 @@
     "rim": "marginals",
     "neck": "out",
     "legs": "set",
-    "coat": "slate"
+    "coat": "slate",
+    "accent": "lapis"
    },
    "prongs": [
     {
@@ -466,7 +467,8 @@
     "carry": [
      "cairn",
      1.0
-    ]
+    ],
+    "accent": "gold"
    },
    "prongs": [
     {
@@ -864,7 +866,8 @@
     "marks": [
      "dust",
      1.0
-    ]
+    ],
+    "accent": "jade"
    },
    "prongs": [
     {

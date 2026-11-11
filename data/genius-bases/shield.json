@@ -114,7 +114,8 @@
     "grown": [
      "spine"
     ],
-    "stands": 1.45
+    "stands": 1.45,
+    "accent": "lapis"
    },
    "prongs": [
     {
@@ -488,7 +489,8 @@
      "bar",
      "peep"
     ],
-    "stands": 1.4
+    "stands": 1.4,
+    "accent": "madder"
    },
    "prongs": [
     {
@@ -863,7 +865,8 @@
      "ribs"
     ],
     "lean": 24,
-    "stands": 1.0
+    "stands": 1.0,
+    "accent": "jade"
    },
    "prongs": [
     {

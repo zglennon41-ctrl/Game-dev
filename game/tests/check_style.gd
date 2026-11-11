@@ -62,6 +62,8 @@ func check_data() -> void:
 	var cap := float(d["cap"])
 	for rn in d["ramps"]:
 		var limit := float(d["accentCap"]) if (d["accents"] as Array).has(rn) else cap
+		if (d.get("paths", []) as Array).has(rn):
+			limit = float(d["pathCap"])
 		var last := -1.0
 		for c in Style.ramp(rn):
 			if Style.saturation(c) > limit + 0.005:

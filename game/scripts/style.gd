@@ -153,10 +153,13 @@ static func conform(c: Color, cls: String) -> Color:
 static func cap_of(cls: String) -> float:
 	if cls == "skin":
 		return float(data()["skinCap"])
+	var most := float(data()["cap"])
 	for rn in class_spec(cls).get("ramps", []):
-		if (data()["accents"] as Array).has(rn):
-			return float(data()["accentCap"])
-	return float(data()["cap"])
+		if (data().get("paths", []) as Array).has(rn):
+			most = maxf(most, float(data().get("pathCap", most)))     # a genius's Path colours
+		elif (data()["accents"] as Array).has(rn):
+			most = maxf(most, float(data()["accentCap"]))
+	return most
 
 ## Whether a class may shine with a light of its own: the field, the lit, the moon on water.
 static func glows(cls: String) -> bool:

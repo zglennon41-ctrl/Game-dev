@@ -95,7 +95,12 @@ def conform_srgb(c, cls):
     if not cls or not d['materials']['classes'].get(cls, {}).get('ramps'):
         return tuple(c[:3])
     p, dist = _nearest(c, cls)
-    cap = d['accentCap'] if any(r in d['accents'] for r in d['materials']['classes'][cls]['ramps']) else d['cap']
+    ramps = d['materials']['classes'][cls]['ramps']
+    cap = d['cap']
+    if any(r in d['accents'] for r in ramps):
+        cap = max(cap, d['accentCap'])
+    if any(r in d.get('paths', []) for r in ramps):
+        cap = max(cap, d.get('pathCap', cap))       # a genius's Path colours
     if dist <= d.get('tolerance', 0.03) and saturation(c) <= cap:
         return tuple(c[:3])
     return p

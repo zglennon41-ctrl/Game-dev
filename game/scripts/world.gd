@@ -4197,7 +4197,8 @@ func _held_at(what: String) -> Node3D:
 		_held_body = _g_body
 		_held_nodes = {}
 	if not _held_nodes.has(what):
-		_held_nodes[what] = _g_body._model.find_child(what, true, false)
+		# a piece made for wearing is its own place: it is made where it is worn, and as it lies there
+		_held_nodes[what] = _g_body.worn_piece if what == "wear" and _g_body.worn_piece else _g_body._model.find_child(what, true, false)
 	return _held_nodes[what] as Node3D
 
 func _update_form(f: Fight, dt: float) -> void:
@@ -4250,6 +4251,7 @@ func _update_form(f: Fight, dt: float) -> void:
 		var held: Node3D = _held_at(String(mount["by"])) if not mount.is_empty() else null
 		var bone := _p_skel.find_bone(String(mount.get("bone", ""))) if held else -1
 		if held and bone >= 0:
+			_g_body.set_worn(true)
 			# a shield that is its genius is the shield on that arm: the carried one is not drawn
 			if _offhand and is_instance_valid(_offhand) and String(mount.get("hides", "")) == "offhand":
 				_offhand.visible = false
@@ -4273,6 +4275,8 @@ func _update_form(f: Fight, dt: float) -> void:
 			return
 	if not _g_form.scale.is_equal_approx(Vector3.ONE):
 		_g_form.scale = Vector3.ONE
+	if _g_body and is_instance_valid(_g_body):
+		_g_body.set_worn(false)
 	var walker := _g_body != null and _g_body.walks()
 	var side := Vector2.from_angle(f.p_facing + (2.2 if walker else 1.9))
 	var want := _v3(f.p_pos + side * (1.1 if walker else 0.8), 0.0 if walker else 1.5 + 0.08 * sin(_clock * 2.4))

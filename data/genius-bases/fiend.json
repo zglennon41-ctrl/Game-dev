@@ -96,7 +96,8 @@
     "horns": [
      "curved",
      1.1
-    ]
+    ],
+    "accent": "madder"
    },
    "prongs": [
     {
@@ -504,7 +505,8 @@
      "heap",
      1.0
     ],
-    "coat": "ash"
+    "coat": "ash",
+    "accent": "amethyst"
    },
    "prongs": [
     {
@@ -877,7 +879,8 @@
      "grate",
      1.0
     ],
-    "coat": "hearth"
+    "coat": "hearth",
+    "accent": "marigold"
    },
    "prongs": [
     {

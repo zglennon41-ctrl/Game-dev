@@ -974,6 +974,73 @@ def export(r, sockets, path):
 # The lines
 # ======================================================================================
 
+# --- what moves, and what is worn (docs/genius-lines.md, "What moves", "A worn piece") -------
+
+MOVES = ("beat", "glide", "sway", "wave", "wag", "spin", "flick", "pulse", "bob", "turn", "blink")
+
+
+def set_origin(ob, pivot):
+    """Put a piece's own origin at a point of the model: that is what it turns about. (For a
+    piece that still stands where it was made, with no parent.)"""
+    p = Vector(pivot)
+    ob.data.transform(Matrix.Translation(-p))
+    ob.location = p
+    return ob
+
+
+def child_of(ob, parent):
+    """Make one piece ride another, each staying where it stands."""
+    bpy.context.view_layer.update()
+    ob.parent = parent
+    ob.matrix_parent_inverse = parent.matrix_world.inverted()
+    return ob
+
+
+def moving(kind, what, items, pivot, smooth=True, side="", n=None, parent=None):
+    """A piece of a body that the game moves by its name: <kind>_<what>[_l|_r][_<n>], about
+    `pivot` (a wing's root, the hook a lamp hangs by, the base of a flame, the middle of an
+    eye). items: [(geometry, material), ...] made where the piece stands in the model.
+
+      beat   a wing: it flaps about the way the body faces (give side "l" or "r")
+      glide  the same, slow and shallow: a wing held out, a fin
+      sway   what hangs or trails: a slow pendulum
+      wave   one piece of a chain that nods, each after the one before (n: its place, from 0)
+      wag    the same from side to side: a fish's body, a tail
+      spin   it turns about its own up (side "r" turns the other way)
+      flick  a flame: it stretches and gutters along its own up
+      pulse  it breathes: a little larger, a little smaller
+      bob    it rises and falls along its own up
+      turn   a head that looks about: slowly left and right about its own up
+      blink  an eye: now and then it shuts along its own up (all of a body's together)
+
+    A piece's own up is Blender's Z as it is made (do not turn the object; turn the geometry).
+    Pieces of one chain are made children of one another with parent=, root first."""
+    assert kind in MOVES, kind
+    name = "%s_%s%s%s" % (kind, what, "_" + side if side else "", "_%d" % n if n is not None else "")
+    ob = g.pieces(name, items, smooth=smooth)
+    set_origin(ob, pivot)
+    if parent is not None:
+        child_of(ob, parent)
+    return ob
+
+
+def worn(objects, at=(0, 0, 0), rot=None):
+    """The piece of a genius that is shown when it is worn, in place of everything else of it
+    (a mantle on the shoulders where a whole coat would not sit): an empty named worn that
+    holds the objects. It is made at `at`, turned `rot`, and that place is put on the place it
+    is worn (data/genius-types.json, mounts) as it lies: so make the piece where it would sit on
+    a person standing at the origin facing -Y, and give the point of them it hangs from (the
+    nape of the neck, say). Returns the empty and the objects, all to be exported."""
+    e = bpy.data.objects.new("worn", None)
+    e.empty_display_size = 0.05
+    bpy.context.collection.objects.link(e)
+    e.matrix_world = Matrix.Translation(Vector(at)) @ (rot.to_4x4() if rot is not None else Matrix.Identity(4))
+    for ob in objects:
+        if ob.parent is None:
+            child_of(ob, e)
+    return [e] + list(objects)
+
+
 def export_objects(objects, sockets, path, ref=STAND):
     """A body with no rig: its meshes and its sockets (empties), and ref_top at the height
     the game should stand it to."""
@@ -1081,7 +1148,24 @@ def _palette_kept(base_id):
     needed) is its own from then on."""
     fam = _FAMILY.get(base_id)
     if fam:
-        _OWN[fam].update({k: v for k, v in PALETTE.items() if _BASE.get(k) != v})
+        _OWN[fam].update({k: v for k, v in PALETTE.items() if _BASE.get(k) != v and not k.startswith("accent")})
+
+
+ACCENT_STEPS = (("", 2), ("_deep", 0), ("_dark", 1), ("_light", 3), ("_pale", 4))
+
+
+def accent(spec):
+    """A Path's colour, for the form about to be built (docs/genius-lines.md, "A Path's
+    colour"): the body's `accent` names a ramp of data/style.json, and the materials accent,
+    accent_deep, accent_dark, accent_light and accent_pale are its five steps (accent2* the
+    same of `accent2`). A builder asks for mat("accent_dark") and need know nothing else; the
+    game puts the same colours on at load, from the data, so a Path's colour can be changed
+    without a rebuild."""
+    import style
+    for key in ("accent", "accent2"):
+        ramp = spec.get(key) or spec.get("accent") or "bone"
+        for suffix, step in ACCENT_STEPS:
+            PALETTE[key + suffix] = (tuple(style.ramp(ramp, step)[:3]), 0.7, 0.0)
 
 
 def merged(parent, own):
@@ -1124,6 +1208,7 @@ def build_base(base_id, only=None):
     for form_id, level, spec in forms_of(base):
         if only and form_id not in only:
             continue
+        accent(spec)
         BUILDERS[base_id](form_id, level, spec, base)
     _palette_kept(base_id)
 

@@ -99,7 +99,8 @@
      "dust",
      "pack"
     ],
-    "stands": 1.3
+    "stands": 1.3,
+    "accent": "marigold"
    },
    "prongs": [
     {
@@ -471,7 +472,8 @@
      ]
     ],
     "coat": "night",
-    "stands": 1.3
+    "stands": 1.3,
+    "accent": "amethyst"
    },
    "prongs": [
     {
@@ -812,7 +814,8 @@
     "grown": [
      "buttons"
     ],
-    "stands": 1.3
+    "stands": 1.3,
+    "accent": "peacock"
    },
    "prongs": [
     {

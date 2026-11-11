@@ -108,7 +108,8 @@
     "pose": [
      "low",
      0.9
-    ]
+    ],
+    "accent": "madder"
    },
    "prongs": [
     {
@@ -551,7 +552,8 @@
      1.0
     ],
     "back": null,
-    "coat": "hearth"
+    "coat": "hearth",
+    "accent": "jade"
    },
    "prongs": [
     {
@@ -1025,7 +1027,8 @@
     ],
     "build": {
      "neck": 1.1
-    }
+    },
+    "accent": "gold"
    },
    "prongs": [
     {

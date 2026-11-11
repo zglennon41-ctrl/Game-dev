@@ -109,7 +109,8 @@
     "pose": [
      "aside",
      0.8
-    ]
+    ],
+    "accent": "jade"
    },
    "prongs": [
     {
@@ -548,7 +549,8 @@
      "sack",
      0.9
     ],
-    "coat": "hearth"
+    "coat": "hearth",
+    "accent": "gold"
    },
    "prongs": [
     {
@@ -993,7 +995,8 @@
     "tip": [
      "light",
      1.0
-    ]
+    ],
+    "accent": "amethyst"
    },
    "prongs": [
     {

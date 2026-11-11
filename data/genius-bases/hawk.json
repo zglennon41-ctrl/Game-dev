@@ -107,7 +107,8 @@
     "build": {
      "head": 0.94,
      "chest": 0.94
-    }
+    },
+    "accent": "lapis"
    },
    "prongs": [
     {
@@ -515,7 +516,8 @@
      "chest": 1.15,
      "head": 1.05
     },
-    "down": null
+    "down": null,
+    "accent": "gold"
    },
    "prongs": [
     {
@@ -903,7 +905,8 @@
     "down": null,
     "build": {
      "chest": 0.96
-    }
+    },
+    "accent": "madder"
    },
    "prongs": [
     {

@@ -119,7 +119,8 @@
       "bark",
       1.0
      ]
-    ]
+    ],
+    "accent": "jade"
    },
    "prongs": [
     {
@@ -492,7 +493,8 @@
       1.0
      ]
     ],
-    "coat": "blood"
+    "coat": "blood",
+    "accent": "madder"
    },
    "prongs": [
     {
@@ -891,7 +893,8 @@
       1.1
      ]
     ],
-    "coat": "moon"
+    "coat": "moon",
+    "accent": "amethyst"
    },
    "prongs": [
     {

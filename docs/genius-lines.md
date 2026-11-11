@@ -174,6 +174,168 @@ bash tools/genius-tree-page.sh wolf                 # the page of the whole tree
    built like a wall). They could go further from the animal: say how far.
 5. **The Baby**: one for everyone, or one that already leans toward what it will be.
 
+## The second pass
+
+> "I want a few more companion forms and I want you to do a tightening pass for detail,
+> readability, and path uniqueness. I want each one to be intelligent, thoughtful, and cool.
+> Also fix the way that the clothing is sitting. I think a full garment won't be easy with
+> the mechanics but smaller accessory type genius may solve the problem. Also I want
+> probably 50% graphics precision. Don't be afraid to use color to highlight path changes
+> and textures. Make sure the anatomy makes sense or if its a magical universe choice lean
+> in." (owner, 2026-11-11, on seeing all 682 bodies)
+
+The first pass gave every form a body. This one holds every body to seven rules, each of
+which can be looked at or measured. A family's worker builds to all seven.
+
+### 1. A Path's colour
+
+The world is muted so that a soul may carry colour. Each Path of a line has **one colour
+of its own**, and every form under it wears that colour, so that a line's three Paths can be
+told apart at the size of a thumbnail before their shapes can.
+
+- It is data: the Path's `body.accent` names a ramp of `data/style.json`, and its forms
+  inherit it (a form may name its own, a neighbour of its Path's, where its sign calls for
+  it). `accent2` is a second colour for a form that needs one (a Final's trim).
+- In the model it is the materials named `accent`, `accent_deep`, `accent_dark`,
+  `accent_light` and `accent_pale` (the ramp's five steps; `accent2*` the same of the
+  second). The builder's `mat("accent_dark")` is already the right colour
+  (`genius_lines.accent`), and the game puts the colour on again at load from the data, so
+  a Path's colour is changed in the JSON with no rebuild.
+- Eight ramps are a genius's alone and may be more saturated than anything else in the
+  world (`paths`, `pathCap` 0.72): `madder` (blood, pursuit, what will not be let go),
+  `marigold` (the hearth, warmth, company), `gold` (an oath, a hoard, a watch-light),
+  `jade` (the wild, patience, mending), `peacock` (water, the road, finding the way),
+  `lapis` (night, cold, the long view), `amethyst` (secrets, omens, what is not said) and
+  `rose` (likeness, affection, play). Any other ramp may be a Path's colour too.
+- **How much, and where.** Between a tenth and a third of what can be seen of the form,
+  and in the same kind of place down the whole Path: a wolf's saddle, mask and socks; a
+  bird's wing-bars and tail; a coat's lining and collar; a lamp's enamel; a blade's grip and
+  tassel. It is never the light (the field's light is the partner's Shape colour and
+  nothing else) and never the whole body (the body is still its partner's coat).
+- **It marks the change.** An Advancement keeps its Path's colour and takes its own step or
+  pattern of it (banded where its Path was plain; `accent_pale` where its Path was
+  `accent_dark`); a Final may add `accent2`. A pattern is geometry in an accent material:
+  bars, bands, spots, eye-spots, chevrons, a stripe down the spine.
+- A Path keeps to one coat shift or none, so that the coat does not argue with its colour.
+
+| Line | Its three Paths and their colours |
+|---|---|
+| Astrolabe | Sighting-glass `peacock` · Orrery `lapis` · Almanac `madder` |
+| Bell | Rally-bell `marigold` · Hour-bell `lapis` · Alarm-bell `madder` |
+| Blade | Duelling Blade `lapis` · Cleaver `madder` · Scored Blade `gold` |
+| Bow | Hunting Bow `jade` · War Bow `madder` · Singing Bow `amethyst` |
+| Coat | Travelling Coat `marigold` · Shadow-coat `amethyst` · Listening Coat `peacock` |
+| Drake | Hoard-drake `gold` · Fire-drake `madder` · Sky-drake `lapis` |
+| Ember | Kept Fire `marigold` · Rushlight `peacock` · Wildfire `madder` |
+| Fiend | Flare-up `madder` · Banked Coal `amethyst` · Grate-fiend `marigold` |
+| Fog | Fog-shroud `peacock` · Lingering Mist `gold` · Shifting Fog `amethyst` |
+| Fox | Gone-away `jade` · Cache-fox `gold` · Fire-tail `amethyst` |
+| Gauntlet | Maker's Hand `gold` · Fighting Fist `madder` · Open Hand `jade` |
+| Gun | Long Gun `jade` · Repeater `marigold` · Standing Gun `lapis` |
+| Hawk | High Circler `lapis` · Eyrie-holder `gold` · Stooper `madder` |
+| Homunculus | Clay Apprentice `marigold` · Likeness `rose` · Clay Bearer `peacock` |
+| Imp | Debt-collector `madder` · Stickler `lapis` · Surety `gold` |
+| Lantern | Wayfinder `peacock` · Watch-lamp `marigold` · Kept Flame `amethyst` |
+| Lurker | Back-stander `amethyst` · The One Who Sits Up `gold` · The Unremarked `lapis` |
+| Shield | Wall-shield `lapis` · Gate-shield `madder` · Shelter-shield `jade` |
+| Sprite | Hob `marigold` · Lore-sprite `lapis` · Pixy `jade` |
+| Stag | Tilter `madder` · Wood-walker `jade` · Watch-hart `gold` |
+| Tortoise | Stone-back `lapis` · Cairn-back `gold` · The Unhurried `jade` |
+| Wolf | Counting Wolf `marigold` · Third-day Wolf `madder` · Night-watch `lapis` |
+
+### 2. It reads on a dark ground
+
+The game is lamplit and most of its grounds are dark. A form whose lit surface is dim on
+average is lost on them (the line check's `dark`). Nothing is fixed by making the whole
+body pale; a dark thing is given an edge: a pale or coloured trim along its outline, a
+lighter underside, eyes a size larger, a seam of the field where two dark surfaces meet, a
+thing of another value held or worn. The Lurker is the model case: it must stay a thing of
+ink and still be seen.
+
+### 3. A different black shape
+
+Every form on a line is a different outline from every other, and from its parent. The
+line check lays each pair of outlines one on the other (`alike`: they overlap by four
+fifths or more) and each form on its parent (`unchanged`). Told apart only by what it
+carries is not enough: change the build, the carriage, the great part, the pose.
+
+### 4. Half again the precision
+
+"50% graphics precision" is read as half again as precise as the first pass: not final
+art, but no longer a sketch. What it is spent on, in this order: the **face** (eyes with
+lids that blink, a mouth, a brow: the form should look as if it is thinking); **hands,
+feet, claws, hooves**; **the outline** (a curve that shows as facets is given more
+segments; flesh is shaded round); then **surface** (pattern in the Path's colour, and the
+grain the style lays on by what a thing is made of). The sizes: a rigged body under 300 KB
+(was 200), an object under 120 KB (was 80).
+
+### 5. Anatomy that is sound, or magic leaned into
+
+A body is either what it says it is, with the joints and the weight of that animal or
+thing, or it is a magical choice made on purpose and carried all the way. Nothing may be
+one animal wearing another's parts by accident. Each family's section says which for each
+line, in a sentence. The known cases: the Drake (a hound with wings: it is to be a true
+drake, long in the neck and the tail, low and splayed, its wings rooted at the shoulder and
+beating); the Hawk's Harriers (griffins by accident: to be griffins on purpose, or birds
+on foot); what floats and should lie (a pool, black ice, a grass-fire); a fish and an
+octopus in the air (a choice: they swim in the field, and everything about them says so).
+
+### 6. What moves
+
+A body with no clips for a thing can still move it. A piece of the model named
+`<kind>_<what>[_l|_r][_<n>]` is moved by the game about its own origin
+(`genius_lines.moving` makes one):
+
+| Kind | What it does | For |
+|---|---|---|
+| `beat` | flaps about the way the body faces (`_l`, `_r`) | a wing |
+| `glide` | the same, slow and shallow | a wing held out, a fin, a sail |
+| `sway` | a slow pendulum | a lamp on a hook, a tassel, a cloak's hem, a tail at rest |
+| `wave` | nods, each piece of a chain after the one before (`_<n>`) | an arm of an octopus, a feeler, a long tail |
+| `wag` | the same from side to side | a fish's body and tail |
+| `spin` | turns about its own up (`_r` the other way) | a wheel, a ring, a vane |
+| `flick` | stretches and gutters along its own up | a flame |
+| `pulse` | breathes | a throat, a bell of a jellyfish, a heart of light |
+| `bob` | rises and falls along its own up | what floats beside it |
+| `turn` | looks slowly left and right | a head, an eye on a stalk |
+| `blink` | shuts now and then, all of a body's together | an eye |
+
+The larger a body stands the slower it moves. A piece that rides a rigged body's bone is a
+separate mesh parented to that bone. **Every companion blinks**, and every form has at
+least one thing that moves; a form that is alive should not be perfectly still.
+
+### 7. A worn piece
+
+A genius that is worn (`data/genius-types.json`, `mounts`) and whose body will not sit on a
+person as it is made has a piece for wearing: an empty named `worn` holding it
+(`genius_lines.worn`). Worn, the game shows that piece and nothing else of it; let go, the
+rest and not the piece. The Coat is the case: a whole garment cannot follow a body that
+has no bones for it, so a Coat is worn as a **mantle**: its own collar and a short cape
+across the shoulders, in its Path's colour, carrying its form's sign. The piece is made
+where it would sit on a person standing at the origin, facing the way the kit faces, and
+`worn` stands at the nape of the neck.
+
+### The line check
+
+```
+godot --path . --resolution 1600x900 -- --sheet=wolf --plain --shots=DIR/sheet-wolf
+python3 tools/genius-line-check.py DIR --detail             # every sheet in DIR
+python3 tools/genius-line-check.py DIR wolf --against before.json
+godot --path . --resolution 1600x900 -- --sheet=wolf --only=wolf-wall-wolf,wolf-grey-shield --shots=DIR
+```
+
+It reads the game's own pictures of a line and says how many pairs are `alike`, how many
+forms are `unchanged` from their parents, how many are `dark` (lit to under a sixth of
+full brightness on average, or three fifths of it nearly black), and how often a form's
+colour puts it in its own Path (`colour`: 100% is every form; a third is chance). A
+finished line has no alike pair, no unchanged form, no dark form, and its Paths told by
+colour nine times in ten.
+
+Before this pass, over the 22 lines and 682 forms: **213 pairs alike** (the Coat 64, the
+Tortoise 48, the Shield 45, the Wolf 9, the Blade 8), **18 unchanged**, **37 dark** (the
+Coat 9, the Lurker 7, the Hawk 5, the Imp 5), and the Paths **told by colour 57%** of the
+time (the Stag 23%, the Ember 27%, the Fox 40%).
+
 ## The armors: the Shield, the Gauntlet, the Coat
 
 `tools/blender/lines_armors.py` builds the Shield and loads the Gauntlet

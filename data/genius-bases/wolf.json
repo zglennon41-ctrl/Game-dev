@@ -108,7 +108,8 @@
     "maw": [
      "fangs",
      0.8
-    ]
+    ],
+    "accent": "marigold"
    },
    "prongs": [
     {
@@ -568,7 +569,8 @@
     "maw": [
      "fangs",
      1.0
-    ]
+    ],
+    "accent": "madder"
    },
    "prongs": [
     {
@@ -1067,7 +1069,8 @@
      "quills",
      0.6
     ],
-    "coat": "night"
+    "coat": "night",
+    "accent": "lapis"
    },
    "prongs": [
     {

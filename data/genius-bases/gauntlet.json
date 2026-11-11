@@ -105,7 +105,8 @@
      "loupe",
      "tools"
     ],
-    "stands": 1.0
+    "stands": 1.0,
+    "accent": "gold"
    },
    "prongs": [
     {
@@ -492,7 +493,8 @@
      "knuckles"
     ],
     "grown": [],
-    "stands": 1.0
+    "stands": 1.0,
+    "accent": "madder"
    },
    "prongs": [
     {
@@ -871,7 +873,8 @@
     "grown": [
      "glow"
     ],
-    "stands": 1.0
+    "stands": 1.0,
+    "accent": "jade"
    },
    "prongs": [
     {

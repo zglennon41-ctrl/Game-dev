@@ -80,7 +80,8 @@
     "shadow-cloak"
    ],
    "body": {
-    "plan": "coat"
+    "plan": "coat",
+    "accent": "peacock"
    },
    "prongs": [
     {
@@ -290,7 +291,8 @@
    ],
    "body": {
     "plan": "pillar",
-    "coat": "moon"
+    "coat": "moon",
+    "accent": "gold"
    },
    "prongs": [
     {
@@ -496,7 +498,8 @@
    ],
    "body": {
     "plan": "swirl",
-    "coat": "iron"
+    "coat": "iron",
+    "accent": "amethyst"
    },
    "prongs": [
     {

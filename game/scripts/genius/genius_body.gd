@@ -101,6 +101,12 @@ var _model: Node3D
 var _wings: Array = []
 var _spinners: Array = []
 var _t := 0.0
+## What moves of a body that has no clips for it (docs/genius-lines.md, "What moves"): a piece
+## of the model named for how it moves, <kind>_<what>[_l|_r][_<n>], about its own origin.
+const MOVES := ["beat", "glide", "sway", "wave", "wag", "spin", "flick", "pulse", "bob", "turn", "blink"]
+var _movers: Array = []            # [node, kind, its rest, phase, side, place in its chain, the way the body faces in its frame]
+var worn_piece: Node3D = null      # what is shown of it when it is worn, in place of the rest (a piece named worn)
+var is_worn := false
 
 static var _shader: Shader
 
@@ -148,6 +154,9 @@ func _assemble(instar: int) -> void:
 		_model = load(FORM_DIR % own_body if own_body != "" else BODY_DIR % sil).instantiate()
 		add_child(_model)
 		uses_art = true
+		worn_piece = _model.find_child("worn", true, false) as Node3D
+		if worn_piece:
+			worn_piece.visible = false
 		_art_sockets(_model)
 		anim = _model.find_child("AnimationPlayer", true, false)
 		if anim == null and own_body != "" and ResourceLoader.exists(BODY_DIR % sil):
@@ -327,12 +336,41 @@ func _adopt_art(n: Node) -> void:
 				t.albedo_color = color.darkened(0.7)
 				mi.set_surface_override_material(i, t)
 				_field_surfaces.append([mi, i, _field])
+			elif mat and mat is StandardMaterial3D and String(mat.resource_name).begins_with("accent"):
+				# its Path's colour, from the data: a designer changes a Path's colour without a rebuild
+				var ac := accent_of(own_body, String(mat.resource_name))
+				if ac.a > 0.0:
+					var am := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
+					am.albedo_color = Color(ac.r, ac.g, ac.b, (mat as StandardMaterial3D).albedo_color.a)
+					mi.set_surface_override_material(i, am)
 			elif mat and mat is StandardMaterial3D and look.get("colors", {}).has(String(mat.resource_name)):
 				# its own coat, and its markings: shown in the marking's colour, or hidden in the coat's
 				var c := (mat as StandardMaterial3D).duplicate() as StandardMaterial3D
 				c.albedo_color = _worn(look["colors"][String(mat.resource_name)])
 				mi.set_surface_override_material(i, c)
 				painted += 1
+	# What moves by its name: wings that beat, a tail that sways, a flame, an eye that blinks.
+	var moved := {}
+	for c in n.find_children("*", "Node3D", true, false):
+		var nm := String(c.name)
+		if not nm.contains("_") or not MOVES.has(nm.get_slice("_", 0)):
+			continue
+		var node := c as Node3D
+		# a piece that rides a bone is a mesh under its attachment: the mesh is what moves
+		if c is BoneAttachment3D:
+			if c.get_child_count() == 0 or not (c.get_child(0) is Node3D):
+				continue
+			node = c.get_child(0) as Node3D
+		if moved.has(node) or (node.get_parent() is BoneAttachment3D and moved.has(node.get_parent())):
+			continue
+		moved[node] = true
+		moved[c] = true
+		var last := nm.get_slice("_", nm.get_slice_count("_") - 1)
+		var numbered := last.is_valid_int()
+		var group := nm.trim_suffix("_" + last) if numbered else nm
+		var facing := (_rest_xf(node, n).basis.orthonormalized().inverse() * Vector3(0, 0, 1)).normalized()
+		_movers.append([node, nm.get_slice("_", 0), node.transform, float(absi(group.hash()) % 1000) / 1000.0 * TAU,
+			-1.0 if group.ends_with("_r") else 1.0, int(last) if numbered else 0, facing])
 	# The character's left is +X: the left wing rises with a positive turn about the way it faces.
 	for side in [["wing_l", 1.0], ["wing_r", -1.0]]:
 		var w: Node = n.find_child(side[0], true, false)
@@ -346,6 +384,34 @@ func _adopt_art(n: Node) -> void:
 			# the axis it beats about: the model's forward, seen from the wing's own frame
 			w3.set_meta("wing_axis", (_rest_xf(w3, n).basis.orthonormalized().inverse() * Vector3(0, 0, 1)).normalized())
 			_wings.append(w3)
+
+## The colour of a Path, on a form of it (docs/genius-lines.md, "A Path's colour"): the form's
+## body.accent names a ramp of data/style.json, and a material named accent is that ramp's
+## middle; accent_deep, accent_dark, accent_light and accent_pale are its other steps.
+## accent2* are the same of body.accent2. Transparent black where the form names none.
+static func accent_of(form_id: String, material: String) -> Color:
+	var body: Dictionary = Data.form(form_id).get("body", {}) if form_id != "" else {}
+	var ramp := String(body.get("accent", ""))
+	if material.begins_with("accent2"):
+		ramp = String(body.get("accent2", ramp))
+	if ramp == "" or Style.ramp(ramp).is_empty():
+		return Color(0, 0, 0, 0)
+	var step := 2
+	for pair in [["_deep", 0], ["_dark", 1], ["_light", 3], ["_pale", 4]]:
+		if material.ends_with(String(pair[0])):
+			step = int(pair[1])
+	return Style.ramp_at(ramp, step)
+
+## Worn, a genius that has a piece made for wearing (a mantle where the whole coat would not
+## sit) shows that piece and nothing else of itself; let go, the rest and not the piece.
+func set_worn(on: bool) -> void:
+	if worn_piece == null or on == is_worn:
+		return
+	is_worn = on
+	for c in worn_piece.get_parent().get_children():
+		if c is Node3D and c != worn_piece:
+			(c as Node3D).visible = not on
+	worn_piece.visible = on
 
 ## Its partner's coat, as this form wears it (data/genius-looks.json, shifts): a form may wear
 ## the coat darker, paler, greyer or warmer than it was born, and it is still that coat.
@@ -611,6 +677,44 @@ func _process(dt: float) -> void:
 			(w as Node3D).transform = rest * Transform3D(Basis(w.get_meta("wing_axis") as Vector3, beat), Vector3.ZERO)
 		else:
 			(w as Node3D).rotation.z = beat
+	if not _movers.is_empty():
+		var blinking := fmod(_t, 4.3) < 0.11 or fmod(_t + 1.7, 7.1) < 0.11
+		var pace := 1.0 / sqrt(clampf(stands, 0.3, 3.0) / 0.6)      # the larger it is, the slower it moves
+		for mv in _movers:
+			var node := mv[0] as Node3D
+			if not is_instance_valid(node):
+				continue
+			var rest: Transform3D = mv[2]
+			var ph: float = mv[3]
+			var side: float = mv[4]
+			var along := float(mv[5]) * 0.9                            # a chain's wave runs down it
+			var turn := Basis.IDENTITY
+			match String(mv[1]):
+				"beat":      # a wing: about the way the body faces
+					turn = Basis(mv[6] as Vector3, side * (0.3 + 0.42 * sin(_t * 13.0 * pace)))
+				"glide":     # a wing held out, a fin: the same, slow and shallow
+					turn = Basis(mv[6] as Vector3, side * (0.08 + 0.16 * sin(_t * 2.4 * pace + ph)))
+				"sway":      # what hangs or trails: a pendulum about its own origin
+					turn = Basis.from_euler(Vector3(0.1 * sin(TAU * _t / 2.6 + ph), 0.0, 0.06 * sin(TAU * _t / 3.4 + ph * 1.7)))
+				"wave":      # a limb of many pieces, nodding one after the other
+					turn = Basis(Vector3.RIGHT, 0.16 * sin(TAU * _t / 2.2 * pace - along + ph))
+				"wag":       # the same from side to side: a fish's body, a tail
+					turn = Basis(Vector3.UP, 0.2 * sin(TAU * _t / 1.6 * pace - along + ph))
+				"spin":
+					turn = Basis(Vector3.UP, side * _t * 1.2 + ph)
+				"flick":     # a flame
+					var f := sin(_t * 11.0 + ph) * sin(_t * 7.3 + ph * 2.0)
+					turn = Basis.from_scale(Vector3(1.0 - 0.05 * f, 1.0 + 0.14 * f, 1.0 - 0.05 * f))
+				"pulse":     # what breathes
+					turn = Basis.from_scale(Vector3.ONE * (1.0 + 0.045 * sin(TAU * _t / 3.2 + ph)))
+				"turn":      # a head that looks about
+					turn = Basis(Vector3.UP, 0.4 * sin(_t * 0.37 + ph) * sin(_t * 0.23 + ph * 2.1))
+				"blink":     # an eye: all of a body's blink together
+					turn = Basis.from_scale(Vector3(1.0, 0.08 if blinking else 1.0, 1.0))
+			if String(mv[1]) == "bob":
+				node.transform = Transform3D(rest.basis, rest.origin + rest.basis.y.normalized() * 0.02 * sin(TAU * _t / 2.4 + ph))
+			else:
+				node.transform = rest * Transform3D(turn, Vector3.ZERO)
 	if _spinners.is_empty():
 		for n in find_children("*", "MeshInstance3D", true, false):
 			if n.has_meta("spin"):

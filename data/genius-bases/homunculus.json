@@ -118,7 +118,8 @@
     "chest": "heart",
     "belt": [
      "pouch"
-    ]
+    ],
+    "accent": "marigold"
    },
    "prongs": [
     {
@@ -618,7 +619,8 @@
     "head": "seam",
     "chest": "heart",
     "right": "short-blade",
-    "coat": "moon"
+    "coat": "moon",
+    "accent": "rose"
    },
    "prongs": [
     {
@@ -1132,7 +1134,8 @@
     "back": [
      "pack-frame"
     ],
-    "coat": "slate"
+    "coat": "slate",
+    "accent": "peacock"
    },
    "prongs": [
     {

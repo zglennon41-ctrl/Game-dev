@@ -116,7 +116,8 @@
      "eye",
      1.0
     ],
-    "held": 0.3
+    "held": 0.3,
+    "accent": "marigold"
    },
    "prongs": [
     {
@@ -478,7 +479,8 @@
     "face": "none",
     "carry": null,
     "held": 0.28,
-    "coat": "frost"
+    "coat": "frost",
+    "accent": "lapis"
    },
    "prongs": [
     {
@@ -855,7 +857,8 @@
      "hammer"
     ],
     "held": 0.3,
-    "coat": "blood"
+    "coat": "blood",
+    "accent": "madder"
    },
    "prongs": [
     {

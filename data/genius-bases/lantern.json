@@ -131,7 +131,8 @@
      "girth": 0.85,
      "curious": 0.0
     },
-    "held": 0.3
+    "held": 0.3,
+    "accent": "peacock"
    },
    "prongs": [
     {
@@ -584,7 +585,8 @@
      "h": 0.8
     },
     "held": 0.28,
-    "coat": "hearth"
+    "coat": "hearth",
+    "accent": "marigold"
    },
    "prongs": [
     {
@@ -1085,7 +1087,8 @@
      "curious": 0.0
     },
     "held": 0.3,
-    "coat": "moon"
+    "coat": "moon",
+    "accent": "amethyst"
    },
    "prongs": [
     {

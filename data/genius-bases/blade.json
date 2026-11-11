@@ -123,7 +123,8 @@
     "eye": [
      "guard",
      0.9
-    ]
+    ],
+    "accent": "lapis"
    },
    "prongs": [
     {
@@ -578,7 +579,8 @@
     "eye": [
      "blade",
      1.1
-    ]
+    ],
+    "accent": "madder"
    },
    "prongs": [
     {
@@ -1022,7 +1024,8 @@
     "eye": [
      "guard",
      1.0
-    ]
+    ],
+    "accent": "gold"
    },
    "prongs": [
     {
