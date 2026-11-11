@@ -937,7 +937,7 @@ func _lineage(what: String) -> void:
 			var phome := String(sdef[0].get("home", "cahokia"))
 			var pbody := "%s-%s" % [phome, "f" if k % 2 == 0 else "m"]
 			var partner_hero := { "shape": "anchor", "blood": "", "city": phome, "body": pbody, "genius": sdef[0] }
-			var pn: Node3D = load(world._person_model(pbody)).instantiate()
+			var pn: Node3D = Shapes.wake(load(world._person_model(pbody)).instantiate())
 			world.add_child(pn)
 			world.toonify(pn)
 			var plook := { "headgear": not homes_row.is_empty(), "cape": true, "cape_color": "plain", "hair": "braid", "hair_color": "black", "skin": Creation.skin_of(phome, 5 + k) }

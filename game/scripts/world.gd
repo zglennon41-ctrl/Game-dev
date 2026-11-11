@@ -294,7 +294,7 @@ var _glow_light: OmniLight3D = null
 func build_hero(hero: Dictionary) -> void:
 	if _player:
 		_player.queue_free()
-	_player = load(_person_model(hero.get("body", "Knight"))).instantiate()
+	_player = Shapes.wake(load(_person_model(hero.get("body", "Knight"))).instantiate())
 	add_child(_player)
 	toonify(_player)
 	_contact_under(_player)
@@ -445,7 +445,7 @@ func set_foe(spec: Dictionary) -> void:
 		_wolf.scale = Vector3.ONE * WOLF_SCALE * float(spec.get("wolf_scale", 1.0))
 		_w_anims = WOLF_ANIMS
 	else:
-		_wolf = load(_person_model(spec.get("body", "Knight"))).instantiate()
+		_wolf = Shapes.wake(load(_person_model(spec.get("body", "Knight"))).instantiate())
 		_w_anims = PERSON_ANIMS
 		dress(_wolf, spec["look"] if not spec.get("look", {}).is_empty() else look_for(String(spec.get("name", ""))))
 		var skel: Skeleton3D = _wolf.find_child("Skeleton3D", true, false)
@@ -4348,7 +4348,7 @@ func set_allies(specs: Array) -> void:
 		(a["node"] as Node).queue_free()
 	_ally_nodes.clear()
 	for sp in specs:
-		var n: Node3D = load(_person_model(sp.get("body", "Knight"))).instantiate()
+		var n: Node3D = Shapes.wake(load(_person_model(sp.get("body", "Knight"))).instantiate())
 		add_child(n)
 		toonify(n)
 		_contact_under(n)
@@ -4521,7 +4521,7 @@ func set_marker(at: Variant) -> void:
 ## `partner` is what a person is beyond their look, where they have a genius of their own: their
 ## Shape, blood, city and genius, so they wear its echo and it stands by them.
 func add_figure(body: String, at: Vector2, facing: float, title: String, sub: String, weapon := "", tint := Color(0, 0, 0, 0), look := {}, partner := {}) -> Dictionary:
-	var n: Node3D = load(_person_model(body)).instantiate()
+	var n: Node3D = Shapes.wake(load(_person_model(body)).instantiate())
 	_place_root.add_child(n)
 	toonify(n)
 	_contact_under(n)

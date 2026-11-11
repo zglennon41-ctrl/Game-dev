@@ -21,7 +21,7 @@ func _ready() -> void:
 	_run.call_deferred()
 
 func _figure(body: String, look: Dictionary, col: int, row: int, cols: int, rows: int, turn: float, anim: String, at: float, cell: Vector2) -> void:
-	var n: Node3D = load(world._person_model(body)).instantiate()
+	var n: Node3D = Shapes.wake(load(world._person_model(body)).instantiate())
 	world.add_child(n)
 	world.toonify(n)
 	world.dress(n, look, {})

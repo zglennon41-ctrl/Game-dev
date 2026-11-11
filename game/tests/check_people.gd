@@ -27,7 +27,7 @@ func _init() -> void:
 			printerr(body, ": does not load")
 			ok = false
 			continue
-		var inst: Node = scene.instantiate()
+		var inst: Node = Shapes.wake(scene.instantiate())
 		var ap: AnimationPlayer = inst.find_child("AnimationPlayer", true, false)
 		var skel: Skeleton3D = inst.find_child("Skeleton3D", true, false)
 		var missing: Array[String] = []
@@ -63,6 +63,9 @@ func _init() -> void:
 		for sk in SOCKETS:
 			if skel == null or skel.find_bone(sk) < 0:
 				missing.append(sk)
+		# its shape keys are packed small at import (game/scripts/shapes.gd): the .import file names the script
+		if not FileAccess.get_file_as_string(path + ".import").contains("people_import.gd"):
+			missing.append("(import_script people_import.gd in its .import file)")
 		var body_mesh: MeshInstance3D = inst.find_child("Body", true, false)
 		if body_mesh == null or body_mesh.find_blend_shape_by_name("lean") < 0 or body_mesh.find_blend_shape_by_name("heavy") < 0:
 			missing.append("(lean/heavy shape keys)")

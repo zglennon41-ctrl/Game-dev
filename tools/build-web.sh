@@ -4,6 +4,14 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p build/web
+# People must be imported with a display, or their shape keys are not packed small
+# (game/scripts/shapes.gd) and the game data is 140 MB larger than the page can hold.
+people_mb() { find .godot/imported -name '*-[fm].glb-*.scn' -printf '%s\n' 2>/dev/null | awk '{s+=$1}END{print int(s/1e6)}'; }
+if [ "$(people_mb)" -gt 150 ] && command -v xvfb-run >/dev/null; then
+	for f in game/assets/people/*-[fm].glb; do rm -f ".godot/imported/$(basename "$f")-"*; done
+	xvfb-run -a -s "-screen 0 1280x720x24" godot --path . --import >/dev/null 2>&1 || true
+fi
+[ "$(people_mb)" -le 150 ] || echo "WARNING: people are not packed ($(people_mb) MB); open the project in the Godot editor once, then build again."
 godot --headless --path . --export-release "Web" build/web/index.html
 cd build/web
 gzip -9 -c index.wasm > engine.gz.wasm
