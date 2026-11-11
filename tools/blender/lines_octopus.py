@@ -469,8 +469,8 @@ class Octo:
         self.static.append(band(E + e * re * 0.04, re * 1.12, re * 0.13, field("eye", 2.6), axis=e, n=10, sides=3, u=up))
         d = re * 0.5
         dome = turn([(re, -re * 0.1), (re * 0.95, d * 0.3), (re * 0.72, d * 0.72), (re * 0.36, d * 0.95), (0.0, d)], E, e, "eye_gold", n=8, u=up)
-        wide, tall = (0.94, 0.52) if st != "wide" else (0.72, 0.64)
-        pupil = blob(E + e * d * 0.25, 1.0, "pupil_bar", n=6, m=4, scale=(re * wide, re * tall, d * 0.88), axis=e, u=sv)
+        wide, tall = (0.94, 0.52) if st != "wide" else (0.85, 0.64)
+        pupil = blob(E, 1.0, "pupil_bar", n=8, m=4, scale=(re * wide, re * tall, d * 1.12), axis=e, u=sv)
         self.mover("blink", "eye", [dome, pupil], E, side=side, rot=Matrix((sv, -e, up)).transposed())
         lid = {"bar": 0.2, "wide": 0.0, "half": 0.42}.get(st, 0.2) if lid is None else lid
         if lid > 0.0:       # a lid: its own skin, drawn part of the way down
@@ -578,7 +578,7 @@ class Octo:
         if s == "bone":
             return "D" if i in (2, 5) else ("P" if i == 8 else "S")
         if s in ("glass", "weather"):
-            return "P" if i <= 1 else ("D" if i == 2 else ("L" if i >= 8 else "S"))
+            return "P" if (i <= 2 or i == 6) else ("L" if i >= 9 else "S")
         if s == "deep":
             return "L" if i == 3 else ("D" if i in (6, 7) else "S")
         if s == "inked":
@@ -1393,18 +1393,18 @@ def _many_hands(O):
     """Round, mottled, every arm full: a lamp, a cup, somebody's coat; and one arm empty, held a little toward you."""
     O.lid_slant = 1.0
     O.body()
-    lamp = O.arm(2, 100, [(0.3, 8, -34), (0.25, 44, 0), (0.15, 20, 0), (0.3, 215, 0)], L=1.3, n=12, suckers=(0.68, 1.0))
+    lamp = O.arm(3, 110, [(0.2, 0, 0), (0.3, 40, -8), (0.2, 25, 0), (0.3, 215, 0)], L=1.3, n=12, suckers=(0.68, 1.0))
     hook = lamp.centre(0.2) - Z * 0.02
     O.mover("sway", "lamp", p_lamp(hook, 1.0), hook, parent=lamp)
-    cup = O.arm(3, 106, [(0.5, 30, 14), (0.1, -44, 0), (0.4, 0, 335)], L=1.15, n=13)
+    cup = O.arm(2, 96, [(0.5, 22, -8), (0.1, -44, 0), (0.4, 0, -335)], L=1.15, n=13)
     parts, wisps = p_cup(cup.centre(0.4) + Z * 0.012, 0.95)
     O.hold(cup, parts + wisps)
     O.arm(0, 80, [(0.5, 12, 26), (0.28, 30, 0), (0.22, 80, 0)], L=1.05, n=12, suckers=(0.3, 1.0), pieces=3, still=0.2)     # the empty one
     coat = O.arm(1, 84, [(0.5, 12, 30), (0.5, 40, 10)], L=1.0, n=10, pieces=1, still=0.4)
     O.hold(coat, p_coat(coat, 0.46, 0.9, drop=0.2))
-    O.arm(4, 62, [(0.45, -30, 0), (0.55, 250, 10)], L=0.9, n=10, suckers=(0.6, 1.0))
-    O.arm(5, 58, [(0.5, -20, 0), (0.5, 230, -10)], L=0.9, n=10)
-    O.pair(3, 34, [(0.5, 10, 0), (0.5, 200, 0)], L=0.85, n=8, pieces=1)
+    O.arm(4, 62, [(0.45, -30, 0), (0.55, 250, 10)], L=0.9, n=9, pieces=1)
+    O.arm(5, 58, [(0.5, -20, 0), (0.5, 230, -10)], L=0.9, n=9, pieces=1)
+    O.pair(3, 34, [(0.5, 10, 0), (0.5, 200, 0)], L=0.85, n=7, pieces=1)
 
 
 @pose("cup-bearer")
@@ -1507,7 +1507,7 @@ def _holdfast(O):
         a0 = -AZ[i]
         pts = helix(top + Vector((0, 0, -0.05)), -Z, 0.095, a0 + (30 if sweep > 0 else -30), sweep, drop, n=8, u=Vector((0, -1, 0)), r1=0.075)
         O.arm_pts(i, pts, toward=ax, wave=False, n=12, tipr=0.01)
-    O.arm(2, 98, [(0.25, 16, -30), (0.4, 34, 14), (0.35, -58, 0)], L=2.4, r=1.15, n=16, still=0.2, pieces=3, suckers=(0.5, 1.0), tipr=0.014)
+    O.arm(2, 94, [(0.3, 6, -24), (0.4, 20, 12), (0.3, -34, 0)], L=2.3, r=1.15, n=16, still=0.2, pieces=3, suckers=(0.5, 1.0), tipr=0.014)
     O.arm(1, 70, [(0.5, 10, 20), (0.5, 230, 0)], L=0.95, n=10)
 
 
@@ -1968,7 +1968,7 @@ def _chandelier(O):
     O.body(mantle=False)
     O.mantle(window=(13, 14, 15, 0, 1))
     N, ax, R, H = O.mantle_at, O.mantle_axis, O.mantle_R, O.mantle_H
-    O.mover("pulse", "thought", [blob(N + ax * H * 0.45, 0.045, field("thought", 3.2), n=8, m=5)], N + ax * H * 0.45, parent="mantle")
+    O.mover("pulse", "thought", [blob(N + ax * H * 0.45, 0.032, field("thought", 3.2), n=8, m=5)], N + ax * H * 0.45, parent="mantle")
     for i in range(8):
         O.arm(i, 76, [(0.3, -26, 0), (0.42, 142, 0), (0.28, 16, 0)], L=1.05, n=10, pieces=2 if i < 4 else 1, still=0.34, tipr=0.011, lit=(0.5, 0.62) if i == 2 else None, suckers=(0.4, 0.75) if i in (0, 1) else None)
     O.web(to=0.3, sag=0.2)
