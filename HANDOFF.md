@@ -657,6 +657,12 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   adapted wolf figures. The stag is the most glaring example especially at the higher
   levels." Read as: a line built by reshaping the Wolf's body (the Stag, the Fox, the
   Hawk's Harriers) gets a body of its own, with its own animal's anatomy; the Stag first.
+- **The Harriers are birds on foot** (owner, 2026-11-12): "Birds on foot. I think things
+  like griffins would be good hybrid lines." The Hawk's three Harriers become long-legged
+  birds that hunt on the ground, not a wolf's body with a beak. A griffin (and things like
+  it: a beast made of two) belongs to the hybrids: a hybrid may be its own creature, not
+  only one base wearing another's gift. Which pairs, and how far that goes, is not yet
+  settled.
 
 ## 10. What good looks like
 
