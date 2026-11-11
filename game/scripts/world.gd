@@ -769,10 +769,14 @@ func look_for(name: String) -> Dictionary:
 	var sts: Array = L.get("statures", { "middling": 1.0 }).values()
 	var tones: Array = L.get("skinTones", { "olive": [] }).keys()
 	var builds: Array = L.get("builds", { "fit": 0.0 }).values()
-	return { "headgear": (h / 7) % 5 < 2, "cape": (h / 11) % 3 != 0, "cape_color": "plain",
+	var rng := RandomNumberGenerator.new()
+	rng.seed = h
+	var out := Creation.face_of(rng, "alexandria")      # a face of their own, the same every time
+	out.merge({ "headgear": (h / 7) % 5 < 2, "cape": (h / 11) % 3 != 0, "cape_color": "plain",
 		"hair": hairs[h % hairs.size()], "beard": beards[(h / 3) % beards.size()] if (h / 13) % 3 == 0 else beards[0],
 		"hair_color": cols[(h / 5) % cols.size()], "stature": sts[(h / 17) % sts.size()],
-		"skin": tones[(h / 19) % tones.size()], "build": builds[(h / 23) % builds.size()] }
+		"skin": tones[(h / 19) % tones.size()], "build": builds[(h / 23) % builds.size()] })
+	return out
 
 ## Recolour an attachment's meshes, keeping the cel shading when it has it. The colour is
 ## brought onto the ramps of what it is (cloth, unless said).

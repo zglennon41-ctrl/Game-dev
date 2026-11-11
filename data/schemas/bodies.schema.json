@@ -89,6 +89,131 @@
                 }
               }
             }
+          },
+          "eyes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hairColors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hair": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "marks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "faces": {
+      "type": "object",
+      "required": [
+        "presets",
+        "sliders"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "presets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "details"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "age": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 0.5
+              },
+              "details": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": -1.6,
+                  "maximum": 1.6
+                }
+              },
+              "m": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": -1.6,
+                  "maximum": 1.6
+                }
+              },
+              "f": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": -1.6,
+                  "maximum": 1.6
+                }
+              }
+            }
+          },
+          "minItems": 6
+        },
+        "sliders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "details"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "age": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 0.5
+              },
+              "details": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": -1.6,
+                  "maximum": 1.6
+                }
+              },
+              "m": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": -1.6,
+                  "maximum": 1.6
+                }
+              },
+              "f": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": -1.6,
+                  "maximum": 1.6
+                }
+              }
+            }
           }
         }
       }

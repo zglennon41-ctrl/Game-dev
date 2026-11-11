@@ -21,7 +21,11 @@
         "builds",
         "sexes",
         "statures",
-        "capeColors"
+        "capeColors",
+        "faces",
+        "brows",
+        "eyeColors",
+        "lips"
       ],
       "properties": {
         "hair": {
@@ -109,6 +113,73 @@
             "build",
             "stature"
           ]
+        },
+        "faces": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 6
+        },
+        "brows": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lips": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "marks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "eyeColors": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "lipColors": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "lipStrength": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "faceStrength": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "faceSliders": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          }
         }
       }
     },
