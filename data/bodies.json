@@ -174,7 +174,38 @@
           "name": "the Academy's brass tag",
           "text": "A brass tag on a grey loop, the cohort's number stamped in it: the same on every genius the Academy has raised."
         }
-      }
+      },
+      "eyes": [
+        "dark",
+        "brown",
+        "brown",
+        "hazel",
+        "green",
+        "grey",
+        "blue",
+        "amber"
+      ],
+      "hairColors": [
+        "black",
+        "brown",
+        "brown",
+        "chestnut",
+        "fair",
+        "red"
+      ],
+      "hair": [
+        "crop",
+        "short",
+        "curls",
+        "bob",
+        "long",
+        "tail",
+        "braid",
+        "knot"
+      ],
+      "marks": [
+        "kohl"
+      ]
     },
     "columbia": {
       "name": "Columbia",
@@ -379,7 +410,32 @@
           "name": "a marshal's star",
           "text": "A brass star on a blue rosette. In Columbia what stands beside you is sworn in with you."
         }
-      }
+      },
+      "eyes": [
+        "brown",
+        "brown",
+        "hazel",
+        "blue",
+        "grey",
+        "dark"
+      ],
+      "hairColors": [
+        "brown",
+        "brown",
+        "chestnut",
+        "black",
+        "fair",
+        "red"
+      ],
+      "hair": [
+        "short",
+        "crop",
+        "tail",
+        "long",
+        "braid",
+        "curls"
+      ],
+      "marks": []
     },
     "cahokia": {
       "name": "Cahokia",
@@ -583,7 +639,30 @@
           "name": "a river sash",
           "text": "The pilots' woven sash in ochre and red, knotted and left long, so it can be seen from the far bank."
         }
-      }
+      },
+      "eyes": [
+        "dark",
+        "dark",
+        "brown",
+        "amber"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown"
+      ],
+      "hair": [
+        "twins",
+        "long",
+        "braid",
+        "tail",
+        "crest",
+        "crop"
+      ],
+      "marks": [
+        "chin-lines",
+        "cheek-bars"
+      ]
     },
     "lunden": {
       "name": "Lunden",
@@ -783,7 +862,31 @@
           "name": "a docker's scarf",
           "text": "A red scarf knotted at the throat against the fog."
         }
-      }
+      },
+      "eyes": [
+        "blue",
+        "grey",
+        "grey",
+        "green",
+        "hazel",
+        "brown"
+      ],
+      "hairColors": [
+        "brown",
+        "chestnut",
+        "fair",
+        "red",
+        "black"
+      ],
+      "hair": [
+        "short",
+        "crop",
+        "bob",
+        "tail",
+        "curls",
+        "knot"
+      ],
+      "marks": []
     },
     "colonia": {
       "name": "Colonia",
@@ -1019,7 +1122,29 @@
           "name": "a works lens",
           "text": "A lens from the engine-works on a leather tab. Everything in Colonia is looked at closely."
         }
-      }
+      },
+      "eyes": [
+        "brown",
+        "hazel",
+        "blue",
+        "grey",
+        "dark"
+      ],
+      "hairColors": [
+        "brown",
+        "chestnut",
+        "black",
+        "fair"
+      ],
+      "hair": [
+        "crop",
+        "short",
+        "crest",
+        "tail",
+        "braid",
+        "knot"
+      ],
+      "marks": []
     },
     "tiber": {
       "name": "Tiber",
@@ -1240,7 +1365,29 @@
           "name": "a bronze disc",
           "text": "A bronze disc on a red cord: what a child of the old walls is given, and gives."
         }
-      }
+      },
+      "eyes": [
+        "brown",
+        "brown",
+        "dark",
+        "hazel",
+        "green"
+      ],
+      "hairColors": [
+        "black",
+        "brown",
+        "brown",
+        "chestnut"
+      ],
+      "hair": [
+        "crop",
+        "short",
+        "curls",
+        "knot",
+        "braid",
+        "bob"
+      ],
+      "marks": []
     },
     "khemet": {
       "name": "Khemet",
@@ -1262,8 +1409,8 @@
           "head-oval": 0.3,
           "mouth-upperlip-volume": 0.5,
           "mouth-lowerlip-volume": 0.5,
-          "eye-trans": 0.5,
-          "forehead-scale-vert": 0.5
+          "forehead-scale-vert": 0.5,
+          "eye-trans-out": 0.5
         },
         "m": {},
         "f": {}
@@ -1432,7 +1579,31 @@
           "name": "a growers' collar",
           "text": "A broad collar in bands of gold and green, as the growers of the black fields wear."
         }
-      }
+      },
+      "eyes": [
+        "dark",
+        "dark",
+        "brown",
+        "amber"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown"
+      ],
+      "hair": [
+        "rows",
+        "locs",
+        "coils",
+        "crop",
+        "bob",
+        "braid",
+        "curls"
+      ],
+      "marks": [
+        "kohl",
+        "eye-red"
+      ]
     },
     "baghdad": {
       "name": "Baghdad",
@@ -1617,7 +1788,33 @@
           "name": "a jewel on blue cloth",
           "text": "A drop of gold on a fold of blue cloth, from the house of figures."
         }
-      }
+      },
+      "eyes": [
+        "dark",
+        "brown",
+        "brown",
+        "hazel",
+        "amber",
+        "green"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown",
+        "chestnut"
+      ],
+      "hair": [
+        "curls",
+        "short",
+        "long",
+        "braid",
+        "knot",
+        "tail"
+      ],
+      "marks": [
+        "kohl",
+        "brow-dot"
+      ]
     },
     "varanasi": {
       "name": "Varanasi",
@@ -1884,7 +2081,31 @@
           "name": "a string of saffron beads",
           "text": "Saffron beads from the steps, strung by hand, one larger than the rest."
         }
-      }
+      },
+      "eyes": [
+        "dark",
+        "dark",
+        "brown",
+        "hazel"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown"
+      ],
+      "hair": [
+        "long",
+        "braid",
+        "knot",
+        "topknot",
+        "short",
+        "curls"
+      ],
+      "marks": [
+        "brow-dot",
+        "kohl",
+        "brow-line"
+      ]
     },
     "jiangnan": {
       "name": "Jiangnan",
@@ -2086,7 +2307,29 @@
           "name": "a jade ring",
           "text": "A jade ring on a plum cord with a tassel, as a scholar hangs at the belt."
         }
-      }
+      },
+      "eyes": [
+        "dark",
+        "dark",
+        "brown",
+        "black"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown"
+      ],
+      "hair": [
+        "topknot",
+        "knot",
+        "long",
+        "tail",
+        "bob",
+        "braid"
+      ],
+      "marks": [
+        "eye-red"
+      ]
     },
     "kazan": {
       "name": "Kazan",
@@ -2292,7 +2535,32 @@
           "name": "a tuft of fur on an ochre band",
           "text": "Fur from the first winter under an ochre band: the steppe's way of saying this one rides with us."
         }
-      }
+      },
+      "eyes": [
+        "brown",
+        "dark",
+        "hazel",
+        "grey",
+        "green"
+      ],
+      "hairColors": [
+        "black",
+        "brown",
+        "brown",
+        "chestnut",
+        "red"
+      ],
+      "hair": [
+        "twins",
+        "braid",
+        "crest",
+        "tail",
+        "crop",
+        "long"
+      ],
+      "marks": [
+        "cheek-bars"
+      ]
     },
     "timbuktu": {
       "name": "Timbuktu",
@@ -2468,7 +2736,31 @@
           "name": "a satchel for one page",
           "text": "A leather satchel no bigger than a hand on an indigo strap, to carry one page in."
         }
-      }
+      },
+      "eyes": [
+        "dark",
+        "dark",
+        "brown",
+        "black"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown"
+      ],
+      "hair": [
+        "coils",
+        "locs",
+        "rows",
+        "crop",
+        "curls",
+        "braid"
+      ],
+      "marks": [
+        "cheek-cuts",
+        "kohl",
+        "brow-line"
+      ]
     },
     "edo": {
       "name": "Edo",
@@ -2642,7 +2934,195 @@
           "name": "a knotted cord",
           "text": "A cord knotted in two loops with two white tails, tied the way the sword schools tie a hip."
         }
-      }
+      },
+      "eyes": [
+        "dark",
+        "dark",
+        "brown",
+        "black"
+      ],
+      "hairColors": [
+        "black",
+        "black",
+        "brown"
+      ],
+      "hair": [
+        "topknot",
+        "tail",
+        "long",
+        "knot",
+        "bob",
+        "crop"
+      ],
+      "marks": [
+        "eye-red"
+      ]
     }
+  },
+  "faces": {
+    "presets": [
+      {
+        "id": "fine",
+        "details": {
+          "chin-width": -0.5,
+          "chin-jaw-drop": -0.3,
+          "head-oval": 0.4,
+          "cheek-bones": 0.4,
+          "eye-scale": 0.45,
+          "nose-scale-horiz": -0.4,
+          "nose-scale-depth": -0.2,
+          "nose-point": 0.25,
+          "mouth-upperlip-volume": 0.3,
+          "mouth-lowerlip-volume": 0.4,
+          "mouth-scale-horiz": -0.2,
+          "eyebrows-angle": 0.2
+        }
+      },
+      {
+        "id": "broad",
+        "details": {
+          "head-square": 0.6,
+          "chin-width": 0.7,
+          "chin-bones": 0.5,
+          "chin-jaw-drop": 0.4,
+          "nose-scale-horiz": 0.5,
+          "nose-volume": 0.4,
+          "eye-scale": -0.3,
+          "mouth-scale-horiz": 0.4,
+          "mouth-upperlip-volume": -0.3,
+          "eyebrows-trans": -0.4
+        }
+      },
+      {
+        "id": "long",
+        "details": {
+          "head-rectangular": 0.3,
+          "chin-height": 0.6,
+          "cheek-volume": -0.6,
+          "nose-scale-vert": 0.5,
+          "nose-hump": 0.6,
+          "nose-point": -0.3,
+          "eye-scale": -0.2,
+          "eye-corner2": -0.4,
+          "mouth-upperlip-volume": -0.4,
+          "mouth-lowerlip-volume": -0.3,
+          "mouth-scale-horiz": 0.2,
+          "head-scale-horiz": -0.3
+        }
+      },
+      {
+        "id": "soft",
+        "details": {
+          "head-round": 0.35,
+          "cheek-volume": 0.35,
+          "chin-width": 0.2,
+          "chin-height": -0.25,
+          "chin-prominent": -0.2,
+          "nose-scale-vert": -0.4,
+          "nose-point": 0.5,
+          "nose-scale-depth": -0.3,
+          "eye-scale": 0.35,
+          "eye-trans-out": 0.3,
+          "mouth-upperlip-volume": 0.5,
+          "mouth-lowerlip-volume": 0.5,
+          "mouth-scale-horiz": -0.3
+        }
+      },
+      {
+        "id": "sharp",
+        "details": {
+          "head-invertedtriangular": 0.5,
+          "chin-triangle": 0.5,
+          "cheek-bones": 0.7,
+          "cheek-volume": -0.3,
+          "eye-corner2": 0.6,
+          "eye-height2": -0.2,
+          "nose-scale-horiz": -0.4,
+          "nose-greek": 0.3,
+          "eyebrows-angle": 0.6,
+          "mouth-angles": 0.3,
+          "mouth-cupidsbow": 0.5
+        }
+      },
+      {
+        "id": "weathered",
+        "age": 0.35,
+        "details": {
+          "head-age": 0.5,
+          "eye-bag": 0.6,
+          "mouth-laugh-lines": 0.7,
+          "nose-scale-vert": 0.3,
+          "nose-volume": 0.3,
+          "ear-scale": 0.3,
+          "mouth-upperlip-volume": -0.4,
+          "eyebrows-trans": -0.3,
+          "cheek-volume": -0.3
+        }
+      },
+      {
+        "id": "high",
+        "details": {
+          "head-diamond": 0.6,
+          "cheek-bones": 0.9,
+          "cheek-trans": 0.4,
+          "eye-trans-out": 0.35,
+          "nose-curve": -0.4,
+          "mouth-lowerlip-volume": 0.5,
+          "chin-prominent": 0.4,
+          "chin-width": -0.2
+        }
+      },
+      {
+        "id": "grave",
+        "details": {
+          "head-rectangular": 0.6,
+          "eyebrows-angle": -0.5,
+          "eyebrows-trans": -0.3,
+          "eye-eyefold": -0.6,
+          "eye-height2": -0.3,
+          "nose-greek": 0.6,
+          "nose-scale-vert": 0.3,
+          "mouth-angles": -0.4,
+          "mouth-scale-horiz": 0.2,
+          "chin-bones": 0.4,
+          "chin-cleft": 0.5
+        }
+      }
+    ],
+    "sliders": [
+      {
+        "id": "jaw",
+        "details": {
+          "chin-width": 0.9,
+          "chin-jaw-drop": 0.4,
+          "chin-bones": 0.4
+        }
+      },
+      {
+        "id": "nose",
+        "details": {
+          "nose-scale-vert": 0.6,
+          "nose-scale-horiz": 0.6,
+          "nose-scale-depth": 0.6,
+          "nose-volume": 0.3
+        }
+      },
+      {
+        "id": "eyes",
+        "details": {
+          "eye-scale": 0.9,
+          "eye-height2": 0.4
+        }
+      },
+      {
+        "id": "lips",
+        "details": {
+          "mouth-upperlip-volume": 0.9,
+          "mouth-lowerlip-volume": 0.9,
+          "mouth-upperlip-height": 0.3,
+          "mouth-lowerlip-height": 0.3
+        }
+      }
+    ]
   }
 }

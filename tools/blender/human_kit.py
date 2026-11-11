@@ -18,6 +18,8 @@ from mathutils.kdtree import KDTree
 import people_kit as pk
 import human as hu
 import head as hd
+import faces as fc
+import hair as hr
 
 # The three builds the player's slider blends: (muscle, weight) on MakeHuman's scales.
 BUILD_FORMS = {"lean": (0.32, 0.36), "fit": (0.62, 0.5), "heavy": (0.98, 0.68)}
@@ -149,6 +151,8 @@ class HumanBody:
         self._tables = {}
         self._weights = None
         self._landmarks()
+        # the face: its shapes as keys, its finish, and what sits on it (faces.py)
+        self.visage = fc.Faces(self, ancestry, details, BUILD_FORMS["fit"])
 
     # --- landmarks ----------------------------------------------------------------------
 
@@ -452,63 +456,8 @@ class HumanBody:
     # --- what hangs from the head ---------------------------------------------------------
 
     def head_pieces(self, mats):
-        """The eyeballs (white, iris, pupil), the brows laid on the brow's bone, the lashes."""
-        out = []
-        R = self.eye_r
-        fem = self.body.sex == "f"
-        bvh = self.bvh("all", "fit")
-        for s, sg in (("l", 1.0), ("r", -1.0)):
-            c = self.eye[s]
-            bm = bmesh.new()
-            bmesh.ops.create_uvsphere(bm, u_segments=20, v_segments=14, radius=R)
-            bmesh.ops.rotate(bm, cent=(0, 0, 0), matrix=Matrix.Rotation(math.pi / 2, 3, "X"), verts=bm.verts)
-            for f in bm.faces:
-                ang = math.acos(max(-1.0, min(1.0, -f.calc_center_median().normalized().y)))
-                f.material_index = 2 if ang < 0.2 else (1 if ang < 0.52 else 0)
-                f.smooth = True
-            bmesh.ops.translate(bm, vec=c, verts=bm.verts)
-            me = bpy.data.meshes.new("Eye_" + s)
-            bm.to_mesh(me)
-            bm.free()
-            for m in (mats["eye_white"], mats["iris"], mats["pupil"]):
-                me.materials.append(m)
-            ob = bpy.data.objects.new("Eye_" + s, me)
-            bpy.context.collection.objects.link(ob)
-            out.append(ob)
-            # the brow: a ribbon on the skin, thick at the root, arched past the middle, thin at the tail
-            n = 12
-            thick = (0.26 if fem else 0.34) * R
-            rows = [[], [], []]
-            for i in range(n):
-                t = i / (n - 1.0)
-                x = c.x + sg * (-1.25 + 3.3 * t) * R
-                z = c.z + ((1.5 if fem else 1.38) + (0.5 if fem else 0.36) * math.sin(min(1.0, t / 0.68) * math.pi / 2) - 0.45 * max(0.0, t - 0.68) / 0.32) * R
-                half = thick * (0.7 + 0.3 * math.sin(min(1.0, t / 0.2) * math.pi / 2)) * (1.0 - 0.75 * max(0.0, t - 0.5) / 0.5)
-                for j, dz in enumerate((half, 0.0, -half)):
-                    hit, nrm, _, _ = bvh.ray_cast(Vector((x, -2.0, z + dz)), Vector((0, 1, 0)))
-                    if hit is None:
-                        hit, nrm = Vector((x, c.y - R, z + dz)), Vector((0, -1, 0))
-                    rows[j].append(hit + nrm * (0.0016 if j == 1 else 0.0006))
-            bm = bmesh.new()
-            vs = [[bm.verts.new(p) for p in row] for row in rows]
-            for j in range(2):
-                for i in range(n - 1):
-                    f = bm.faces.new((vs[j][i], vs[j][i + 1], vs[j + 1][i + 1], vs[j + 1][i]))
-                    f.smooth = True
-            bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
-            if sum(f.normal.y for f in bm.faces) > 0:
-                bmesh.ops.reverse_faces(bm, faces=bm.faces[:])
-            out.append(pk._bm_object("Brow_" + s, bm, mats["hair"]))
-            # the lashes: MakeHuman's own strips along the lids, both faces shown
-            fit = self.humans["fit"]
-            faces = [f for f, g in zip(self.base.faces, self.base.face_groups) if g and g.startswith("helper-%s-eyelashes" % s)]
-            used = sorted({i for f in faces for i in f})
-            remap = {i: j for j, i in enumerate(used)}
-            quads = [tuple(remap[i] for i in f) for f in faces]
-            back = [tuple(i + len(used) for i in q[::-1]) for q in quads]
-            lash = hu.mesh_object("Lash_" + s, np.concatenate([fit.v[used], fit.v[used]]), quads + back, [mats["lash"]])
-            out.append(lash)
-        return out
+        """The eyes and their lids, the brows, the lashes, and the marks (faces.py)."""
+        return fc.head_pieces(self, mats, self.visage)
 
     def head_surface(self):
         """The head and neck as their own mesh (no ears, no inside of the mouth), for the hair
@@ -529,9 +478,11 @@ class HumanBody:
         surf = self.head_surface()
         (x0, x1), (y0, y1), (z0, z1) = self.head_box
         centre = Vector((0.0, (y0 + y1) / 2 + 0.01, z0 + 0.5 * self.head_h))
-        ratio = self.head_h / hd.HEAD_HEIGHT
-        pieces = hd.hair(surf, centre, self.body.sex, lambda key: ratio if key == "headLength" else 1.0, mat)
+        pieces = hr.hair(surf, centre, self.body.sex, self.head_h, mat, back_y=lambda z: self.front_y(0.0, z, back=True))
         bpy.data.objects.remove(surf)
+        for p in pieces:
+            if p.name.startswith("Beard_"):
+                self.visage.carry(p)
         return pieces, centre
 
     def sockets(self):

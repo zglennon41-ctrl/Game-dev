@@ -194,19 +194,44 @@ static func skin_of(city: String, spark: int) -> String:
 static func look_of(city: String, spark: int) -> Dictionary:
 	var st: Dictionary = Data.creation.get("look", {}).get("start", {})
 	var skin := skin_of(city, spark)
-	var hairs: Array = st.get("hair", ["crop"])
-	var cols: Array = (st.get("hairColors", ["brown"]) as Array).duplicate()
-	if (st.get("fairSkins", []) as Array).has(skin):
+	var home: Dictionary = Data.bodies.get(city, {})
+	var hairs: Array = home.get("hair", st.get("hair", ["crop"]))
+	var cols: Array = (home.get("hairColors", st.get("hairColors", ["brown"])) as Array).duplicate()
+	if not home.has("hairColors") and (st.get("fairSkins", []) as Array).has(skin):
 		cols.append_array(st.get("fairHairColors", []))
 	var b: Array = st.get("build", [0.0, 0.0])
 	var h: Array = st.get("stature", [1.0, 1.0])
 	var rng := RandomNumberGenerator.new()
 	rng.seed = spark * 2654435761 + 97
-	return { "headgear": true, "cape": false, "cape_color": "shape", "beard": "none",
+	var look := { "headgear": true, "cape": false, "cape_color": "shape", "beard": "none",
 		"sex": "m" if spark % 2 == 0 else "f", "skin": skin,
 		"hair": hairs[rng.randi() % hairs.size()], "hair_color": cols[rng.randi() % cols.size()],
 		"build": snappedf(rng.randf_range(float(b[0]), float(b[1])), 0.05),
 		"stature": snappedf(rng.randf_range(float(h[0]), float(h[1])), 0.01) }
+	look.merge(face_of(rng, city))
+	return look
+
+## A face drawn at random, from what the home's people most often have (data/bodies.json: eyes,
+## marks) and from every shape, brow and feature the bodies carry (data/creation.json, look):
+## for a new life, for "surprise me", and for everyone the player did not make.
+static func face_of(rng: RandomNumberGenerator, city: String) -> Dictionary:
+	var L: Dictionary = Data.creation.get("look", {})
+	var st: Dictionary = L.get("start", {})
+	var home: Dictionary = Data.bodies.get(city, {})
+	var shapes: Array = L.get("faces", ["own"])
+	var brows: Array = L.get("brows", ["soft"])
+	var eyes: Array = home.get("eyes", L.get("eyeColors", { "dark": [] }).keys())
+	var strengths: Array = L.get("faceStrength", { "plain": 0.8 }).values()
+	var out := { "face": shapes[rng.randi() % shapes.size()], "face_strength": snappedf(rng.randf_range(float(strengths.min()), float(strengths.max())), 0.05),
+		"brows": brows[rng.randi() % brows.size()], "eye_color": eyes[rng.randi() % eyes.size()], "lips": "bare", "marks": [], "face_set": {} }
+	var far := float(st.get("faceSlider", 0.4))
+	for k in L.get("faceSliders", {}):
+		out["face_set"][k] = snappedf(rng.randf_range(-far, far), 0.05)
+	if rng.randf() < float(st.get("markChance", 0.3)):
+		var marks: Array = (L.get("marks", []) as Array) + (home.get("marks", []) as Array)
+		if not marks.is_empty():
+			out["marks"] = [marks[rng.randi() % marks.size()]]
+	return out
 
 static func weapon(id: String) -> Dictionary:
 	return Data.by_id(Data.weapons, id)

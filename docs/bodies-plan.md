@@ -346,6 +346,68 @@ clean tree: `python tools/blender/body_kit.py all` (then `godot --headless --pat
 Still weak: cloth is skinned, not simulated (a long skirt follows the legs; a cloak takes a
 share of them); the game's own cloak (the creator's Cloak) is drawn over the dress and is off
 by default now; trims are bands of colour, with no woven pattern yet.
+## Faces, eyes and hair (the owner, 2026-11-10 night: "more work and variety; beautiful characters")
+
+One home and one sex were one face. Now every body carries, as shape keys the game blends
+(`tools/blender/faces.py`, `tools/blender/hair.py`; the lists in `data/bodies.json`, `faces`,
+and `data/creation.json`, `look`):
+
+- **Eight face shapes** over the home's own (fine, broad, long, soft, sharp, weathered,
+  high-boned, grave), each a set of MakeHuman's detail targets laid over the home's form, with
+  a slider for how strongly it is drawn; and **four features set one by one** (jaw, nose, eyes,
+  lips). The shapes are kept to the face: the skull under the hair does not move, so every cap
+  and hat still fits, and the brows, lashes, beards and marks take each shape from the skin
+  under them; the eyes move and grow with their sockets.
+- **The skin's finish.** The face's normals are smoothed so the cel bands fall as planes; the
+  creases the cavity bake darkened are lightened on the face; the cheeks, the nose, the ears
+  and the chin are a little warmer (the vertex colour's hue: the toon shader multiplies it in;
+  its red is still the occlusion).
+- **Eyes**: rings about the gaze (a true round pupil and iris), a darker rim to the iris, a
+  catch-light, a white that is not white and is shaded under the lid; eye colour is the
+  look's (`eye_color`; a blood that shows in the eyes still shows over it). Lashes are cut
+  short. A closed lid lies inside each eye and the shape key `blink` brings it out:
+  `game/scripts/blink.gd` blinks everyone.
+- **Brows** in six shapes (shape keys on the one ribbon), **lips** bare or in five colours,
+  **marks** (freckles, a mole, a beauty mark, two scars for everyone; kohl, a mark between the
+  brows, lines on the chin, ochre under the eyes, cuts on the cheek, red at the eyes, a white
+  line down the brow where a home wears them: `homes.<id>.marks`). Marks are small meshes
+  laid on the skin, `Mark_<id>`, shown by `look.marks`.
+- **Hair**: fourteen styles and shaved (cropped, short and parted, curls, coils, rows, locs,
+  to the jaw, long, tied back, braided, two braids, knotted, topknot, crest). A cap is thin
+  and broken at the hairline, full at the crown, and furrowed the way the hair is combed;
+  falls, plaits and locs are their own pieces. **Beards**: stubble, moustache, chin beard,
+  short, full. A home names the hair, hair colours and eyes its people most often have; a
+  new life, "Surprise me" and every classmate and instructor are drawn from them
+  (`Creation.face_of`), so a cohort is twelve people.
+
+The look saves it all on the character: `face`, `face_strength`, `face_set` (jaw, nose, eyes,
+lips), `brows`, `eye_color`, `lips`, `marks`, with `hair` and `beard` as before; `World.dress`
+draws it the same in the creator, the Academy and a fight.
+
+Rebuild every person from a clean tree: `python tools/blender/body_kit.py all` (bpy venv),
+then `godot --headless --path . --import`. A model is about half again its size before
+(4.3 MB to about 6.3 MB): the face keys are stored sparse, the beards carry them.
+
+## Dress as culture (the owner, 2026-11-07: the outfits mark the culture they grew up in)
+
+`tools/blender/wardrobe.py` dresses each home from `data/bodies.json` (`dress`): a culture
+line, colours, pieces and headgear. Pieces are shells on the body's own rings (tunic, vest,
+coat, robe, kaftan, kilt, wrap-skirt, cuirass, apron, hakama, greaves, boots, sandals, belt,
+sash, obi, collar, scarf, wrap, gloves) with trim bands at hem, cuff or collar, cuffs and
+stripes; rigid pieces hang from bones (buttons, a badge, a sash's knot and tails, tools at
+the belt, pauldrons, pteruges); the headgear hangs from the head (cap with a peak, hat with a
+band, folded turban with a jewel, tall fur hat, scholar's cap, hood, headband, crested
+helm, goggles on any). The thirteen outfits as written: Alexandria's grey with a brass
+collar; Columbia's marshal coat, brass buttons, star, gun belt, boots and brimmed hat;
+Cahokia's oilskin, striped sash, boots and knit cap; Lunden's docker's jacket, red scarf,
+gloves, peaked cap with goggles; Colonia's leather apron over rust, tools, gauntlets, cap
+with goggles; Tiber's red tunic, bronze cuirass, pauldrons, pteruges, greaves, sandals,
+crested helm; Khemet's white linen, striped sash, broad gold collar, headband; Baghdad's
+deep-blue robe with gold at hem and cuff, sash, folded turban with a jewel; Varanasi's
+saffron wraps, headband; Jiangnan's plum robe with white cuffs, jade belt, scholar's cap;
+Kazan's belted kaftan with ochre trim, wrap, cuffed boots, fur hat; Timbuktu's indigo boubou
+with gold collar, satchel strap, white cap; Edo's dark kimono with white collar, hakama, obi.
+Every line of it is the owner's to rewrite.
 
 ## Order of work
 

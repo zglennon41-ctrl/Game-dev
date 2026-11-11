@@ -878,10 +878,15 @@ class Body:
 
     def build(self):
         self.parts = self.shape_keys()
+        if self.HUMAN:      # the face's shapes, and its normals smoothed for the bands (faces.py)
+            self.human.visage.key_body(self.parts["Body"])
+            self.human.visage.smooth_normals(self.parts["Body"])
         # the finish: folds in the hanging garments, the cavity occlusion in every mesh
         # (the garments' folds are the wardrobe's, made as each is cut)
         for name, ob in self.parts.items():
             bake_cavity(ob)
+        if self.HUMAN:
+            self.human.visage.paint_skin(self.parts["Body"])
         self.weight(self.parts)
         if self.HUMAN:
             self.hang([(e, "head") for e in self.human.head_pieces(self.mats)])

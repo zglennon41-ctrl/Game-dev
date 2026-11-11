@@ -223,18 +223,20 @@ static func make_cohort(seed_value: int, h: Dictionary) -> Array:
 ## A classmate's look, drawn with the cohort: most go bare-headed so their faces and hair show.
 static func random_look(rng: RandomNumberGenerator, city := "") -> Dictionary:
 	var L: Dictionary = Data.creation.get("look", {})
-	var hairs: Array = L.get("hair", ["crop"])
+	var hairs: Array = Data.bodies.get(city, {}).get("hair", L.get("hair", ["crop"]))
 	var beards: Array = L.get("beards", ["none"])
-	var cols: Array = L.get("hairColors", { "brown": [] }).keys()
+	var cols: Array = Data.bodies.get(city, {}).get("hairColors", L.get("hairColors", { "brown": [] }).keys())
 	var sts: Array = L.get("statures", { "middling": 1.0 }).values()
 	var tones: Array = Data.bodies.get(city, {}).get("palette", L.get("skinTones", { "olive": [] }).keys())
 	var builds: Array = L.get("builds", { "fit": 0.0 }).values()
 	var sexes: Array = L.get("sexes", { "m": "", "f": "" }).keys()
 	var sex: String = sexes[rng.randi() % sexes.size()]
-	return { "headgear": rng.randf() < 0.3, "cape": rng.randf() < 0.6, "cape_color": ["city", "plain", "shape"][rng.randi() % 3],
+	var face := Creation.face_of(rng, city)      # a face of their own: shape, brow, eyes, a mark
+	face.merge({ "headgear": rng.randf() < 0.3, "cape": rng.randf() < 0.6, "cape_color": ["city", "plain", "shape"][rng.randi() % 3],
 		"hair": hairs[rng.randi() % hairs.size()], "beard": (beards[rng.randi() % beards.size()] if rng.randf() < 0.35 else beards[0]) if sex == "m" else beards[0],
 		"hair_color": cols[rng.randi() % cols.size()], "stature": sts[rng.randi() % sts.size()],
-		"sex": sex, "skin": tones[rng.randi() % tones.size()], "build": builds[rng.randi() % builds.size()] }
+		"sex": sex, "skin": tones[rng.randi() % tones.size()], "build": builds[rng.randi() % builds.size()] })
+	return face
 
 static func _shuffle(a: Array, rng: RandomNumberGenerator) -> void:
 	for i in range(a.size() - 1, 0, -1):

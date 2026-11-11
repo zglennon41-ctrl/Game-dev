@@ -641,6 +641,83 @@ func _leaf_body(v: VBoxContainer) -> void:
 func _leaf_face(v: VBoxContainer) -> void:
 	var look: Dictionary = hero["look"]
 	var L: Dictionary = Data.creation.get("look", {})
+	var roll := _flow(v, "")
+	_chip(roll, "Surprise me", func():
+		var rng := RandomNumberGenerator.new()
+		rng.randomize()
+		var keep := { "sex": look.get("sex", "m"), "skin": look.get("skin", ""), "build": look.get("build", 0.0), "stature": look.get("stature", 1.0),
+			"headgear": false, "cape": look.get("cape", true), "cape_color": look.get("cape_color", "shape") }
+		var fresh := Creation.look_of(String(hero["city"]), rng.randi() % 100000)
+		fresh.merge(keep, true)
+		if String(fresh["sex"]) == "m" and rng.randf() < float(L.get("start", {}).get("beardChance", 0.35)):
+			var bs: Array = L.get("beards", ["none"])
+			fresh["beard"] = bs[rng.randi() % bs.size()]
+		hero["look"] = fresh
+		look_changed.emit(hero)
+		_draw_reveal())
+	_line(v, "A whole face at once, from what the people of %s most often have. Everything under it is yours to change." % String(_home().get("name", hero["city"])), DIM)
+
+	var shape := String(look.get("face", "own"))
+	_section(v, "FACE", _label("faces", shape))
+	var frow := _flow(v, "")
+	for fs in L.get("faces", ["own"]):
+		var fid: String = fs
+		_chip(frow, _label("faces", fid), func(): _look_set("face", fid), shape == fid)
+	if shape != "own":
+		_slider(v, "How strongly", "faceStrength", L.get("faceStrength", { "plain": 0.8 }), 0.05, float(look.get("face_strength", 0.8)), func(x: float):
+			look["face_strength"] = x
+			look_changed.emit(hero))
+	if not (look.get("face_set", {}) is Dictionary):
+		look["face_set"] = {}
+	var sliders: Dictionary = L.get("faceSliders", {})
+	for sk in sliders:
+		var sid: String = sk
+		_slider(v, _label("faceSliders", sid), "lipsShape" if sid == "lips" else sid, sliders[sid], 0.05, float(look.get("face_set", {}).get(sid, 0.0)), func(x: float):
+			var fs2: Dictionary = (look.get("face_set", {}) as Dictionary).duplicate()   # a look once shared is not changed under another
+			fs2[sid] = x
+			look["face_set"] = fs2
+			look_changed.emit(hero))
+
+	var eye_now := String(look.get("eye_color", "dark"))
+	_section(v, "EYES", _label("eyeColors", eye_now))
+	var erow := _flow(v, "")
+	for ec in L.get("eyeColors", {}):
+		var eid: String = ec
+		var e: Array = L["eyeColors"][eid]
+		_swatch(erow, Color(e[0], e[1], e[2]).lightened(0.12), eye_now == eid, _label("eyeColors", eid), func(): _look_set("eye_color", eid))
+	var brows_now := String(look.get("brows", "soft"))
+	var browrow := _flow(v, "Brows")
+	for bw in L.get("brows", ["soft"]):
+		var bwid: String = bw
+		_chip(browrow, _label("brows", bwid), func(): _look_set("brows", bwid), brows_now == bwid)
+
+	var lips_now := String(look.get("lips", "bare"))
+	_section(v, "LIPS", _label("lips", lips_now))
+	var lrow := _flow(v, "")
+	var tn: Array = L.get("skinTones", {}).get(String(look.get("skin", "")), [0.62, 0.46, 0.33])
+	var tone_now := Color(tn[0], tn[1], tn[2])
+	for lp in L.get("lips", ["bare"]):
+		var lid: String = lp
+		_swatch(lrow, World.lips_color(tone_now, lid), lips_now == lid, _label("lips", lid), func(): _look_set("lips", lid))
+
+	var marks_now: Array = (look.get("marks", []) as Array).duplicate() if look.get("marks", []) is Array else []
+	var offered: Array = (L.get("marks", []) as Array) + (_home().get("marks", []) as Array)
+	if not offered.is_empty():
+		var names: Array = marks_now.map(func(m): return _label("marks", String(m)))
+		_section(v, "MARKS", ", ".join(names) if not names.is_empty() else "None")
+		var mrow := _flow(v, "")
+		for mk in offered:
+			var mid: String = mk
+			_chip(mrow, _label("marks", mid), func():
+				var next: Array = marks_now.duplicate()
+				if next.has(mid):
+					next.erase(mid)
+				else:
+					next.append(mid)
+				_look_set("marks", next), marks_now.has(mid))
+		if not (_home().get("marks", []) as Array).is_empty():
+			_line(v, "The last of these are worn in %s." % String(_home().get("name", hero["city"])), DIM)
+
 	var hair := String(look.get("hair", "crop"))
 	_section(v, "HAIR", _label("hair", hair))
 	var hrow := _flow(v, "")
@@ -670,7 +747,7 @@ func _leaf_face(v: VBoxContainer) -> void:
 	var b := Creation.blood(hero["blood"])
 	if String(b.get("shows", "")) != "":
 		feats.append("Your blood shows as %s." % b["shows"])
-	feats.append("The eyes, and whatever your blood puts in them, are not yours to choose.")
+	feats.append("What your blood puts in the eyes is not yours to choose: where it shows there, it shows over their colour.")
 	_section(v, "WHAT YOU DID NOT CHOOSE", "")
 	_line(v, " ".join(feats), DIM)
 

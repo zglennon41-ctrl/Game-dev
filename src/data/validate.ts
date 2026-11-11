@@ -187,6 +187,24 @@ export function validateData(dir = 'data', opts: { basesDir?: string } = {}): Pr
   // Every home with a body has a palette of tones the creator knows, and every city answer a home.
   const tones = new Set(Object.keys(D('creation').look.skinTones));
   for (const [hid, h] of Object.entries<any>(D('bodies').homes)) for (const t of h.palette) need('bodies.json', tones, t, `tone of ${hid}`);
+  // The creator offers the face shapes and sliders the bodies are built with, and a home's eyes, hair and hair colours are the creator's.
+  {
+    const look = D('creation').look;
+    const faces = D('bodies').faces ?? { presets: [], sliders: [] };
+    const shapes = new Set<string>(['own', ...faces.presets.map((p: any) => p.id)]);
+    for (const f of look.faces ?? []) need('creation.json', shapes, f, 'face shape');
+    const sliders = new Set<string>(faces.sliders.map((p: any) => p.id));
+    for (const f of Object.keys(look.faceSliders ?? {})) need('creation.json', sliders, f, 'face slider');
+    const eyes = new Set(Object.keys(look.eyeColors ?? {})), hair = new Set<string>(look.hair), cols = new Set(Object.keys(look.hairColors));
+    const marks = new Set(Object.keys(look.labels?.marks ?? {}));
+    for (const m of look.marks ?? []) need('creation.json', marks, m, 'mark');
+    for (const [hid, h] of Object.entries<any>(D('bodies').homes)) {
+      for (const e of h.eyes ?? []) need('bodies.json', eyes, e, `eye colour of ${hid}`);
+      for (const e of h.hair ?? []) need('bodies.json', hair, e, `hair of ${hid}`);
+      for (const e of h.hairColors ?? []) need('bodies.json', cols, e, `hair colour of ${hid}`);
+      for (const e of h.marks ?? []) need('bodies.json', marks, e, `mark of ${hid}`);
+    }
+  }
   // Every detail of a home's form names a MakeHuman target the kit has, and the ancestry sums to one.
   const targetDir = join(dir, '..', 'tools', 'blender', 'makehuman', 'targets');
   if (existsSync(targetDir)) {
@@ -200,6 +218,9 @@ export function validateData(dir = 'data', opts: { basesDir?: string } = {}): Pr
       if (Math.abs(sum - 1) > 0.02) problems.push({ file: 'bodies.json', message: `${hid}: the ancestry sums to ${sum.toFixed(2)}, not 1` });
       for (const part of ['details', 'm', 'f']) for (const k of Object.keys(h.form[part] ?? {})) if (!known(k)) problems.push({ file: 'bodies.json', message: `${hid}: no MakeHuman target for the detail ${k}` });
     }
+    // The face shapes are made of the same targets.
+    const faces = D('bodies').faces ?? { presets: [], sliders: [] };
+    for (const f of [...faces.presets, ...faces.sliders]) for (const part of ['details', 'm', 'f']) for (const k of Object.keys(f[part] ?? {})) if (!known(k)) problems.push({ file: 'bodies.json', message: `face ${f.id}: no MakeHuman target for the detail ${k}` });
   }
   const homes = new Set(Object.keys(D('bodies').homes));
   for (const an of D('creation').questions[0].answers) if (an.city) need('creation.json', homes, an.city, 'home body');
