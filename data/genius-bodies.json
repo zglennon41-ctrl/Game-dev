@@ -100,6 +100,7 @@
     "engine-flier": { "kind": "flier", "build": "bird", "artSize": 0.75, "carries": ["wings", "beak", "gears", "sight-glass"] },
     "engine-stove": { "kind": "construct", "build": "lantern", "artSize": 0.95, "carries": ["ember", "broad-chest"] },
     "daemon-wick": { "kind": "humanoid", "scale": [0.9, 0.8, 0.9], "artSize": 0.85, "carries": ["ember", "horns", "tail"] },
+    "daemon-prince": { "kind": "humanoid", "scale": [0.9, 0.9, 0.9], "artSize": 0.92, "carries": ["horns", "wings", "tail", "cloven-hooves"] },
     "daemon-whisper": { "kind": "humanoid", "scale": [0.8, 0.8, 0.8], "hover": true, "artSize": 0.8, "carries": ["second-face"] },
     "aspect-frost": { "kind": "aspect", "build": "flame", "hover": true, "carries": ["cold-core"] },
     "aspect-wisps": { "kind": "aspect", "build": "flame", "hover": true, "carries": ["ember", "lantern"] },
