@@ -55,7 +55,7 @@ OWN = {
     "fur_sable": ((0.1, 0.07, 0.05), 0.95, 0.0), "fur_ermine": ((0.6, 0.57, 0.48), 0.9, 0.0), "cloth_sable": ((0.028, 0.026, 0.036), 0.85, 0.0),
     "cloth_white": ((0.62, 0.6, 0.53), 0.8, 0.0), "horn_demon": ((0.26, 0.17, 0.085), 0.4, 0.0), "horn_hoof": ((0.035, 0.03, 0.03), 0.35, 0.0),
     "brass_gilt": ((0.72, 0.5, 0.15), 0.3, 0.85), "brass_crown": ((0.6, 0.42, 0.15), 0.35, 0.85), "wood_door": ((0.2, 0.12, 0.06), 0.8, 0.0),
-    "wood_yoke": ((0.3, 0.2, 0.11), 0.8, 0.0), "stone_dust": ((0.5, 0.48, 0.44), 0.95, 0.0), "hide_shadow": ((0.03, 0.028, 0.035), 0.8, 0.0),
+    "wood_yoke": ((0.3, 0.2, 0.11), 0.8, 0.0), "stone_dust": ((0.4, 0.41, 0.44), 0.95, 0.0), "wood_ebony": ((0.05, 0.042, 0.05), 0.6, 0.0), "smoke_pale": ((0.16, 0.15, 0.2), 1.0, 0.0), "hide_shadow": ((0.03, 0.028, 0.035), 0.8, 0.0),
     "leaf_vine": ((0.12, 0.22, 0.1), 0.8, 0.0), "petal_rose": ((0.5, 0.12, 0.16), 0.7, 0.0), "cloth_velvet": ((0.07, 0.03, 0.05), 0.9, 0.0),
     "mask_domino": ((0.02, 0.02, 0.025), 0.5, 0.0),
 }
@@ -64,8 +64,8 @@ OWN = {
 # the Final (grounded proportions: a small adult, not a doll). hock: how far its legs are a goat's.
 STAGE = [dict(age=0.2, head=1.82, legs=0.74, arms=0.96, limbs=1.22, hands=1.2, feet=1.0, hock=0.85),
          dict(age=0.3, head=1.5, legs=0.86, arms=1.0, limbs=1.1, hands=1.1, hock=0.95),
-         dict(age=0.4, head=1.3, legs=0.94, arms=1.02, hock=1.0),
-         dict(age=0.5, head=1.14, legs=1.0, arms=1.04, hock=1.0)]
+         dict(age=0.4, head=1.3, legs=0.94, arms=1.02, hock=1.0, faces=0.9),
+         dict(age=0.5, head=1.14, legs=1.0, arms=1.04, hock=1.0, faces=0.82)]
 FACE = {"ear-shape-pointed": 1.0, "ear-scale": 0.9, "ear-wing": 0.7, "cheek-bones": 0.8, "cheek-volume": -0.5, "nose-hump": 0.5, "nose-scale-vert": 0.3,
         "nose-point": -0.4, "chin-prominent": 0.5, "chin-triangle": 0.6, "head-invertedtriangular": 0.5, "eye-corner2": 0.6, "head-fat": -0.4,
         "forehead-scale-vert": 0.3}
@@ -437,7 +437,7 @@ def legs(P, size, word):
         P.wear(m, P.material("under"), 0.016)
     elif style == "smoke":
         m = low & (z < P.kneez - 0.02)
-        P.paint(m, mat("shade"))
+        P.paint(m, mat("smoke_pale"))
         P.v[m] += P.n[m] * (noise(P.v0[m], 17.0) * 0.03)[:, None]
     for sd in ("l", "r"):
         if style != "smoke":
@@ -707,6 +707,9 @@ HORNS_ODD = {
 }
 
 
+HORN_K = 1.4        # how much larger a Demon's horns are than the small people's: they are its outline
+
+
 def horn(path, r0, ridged=0.0, n=6, blunt=0.04, split=0.62, snapped=False, up=None):
     """One horn along a path: (its dark length, its pale point). It tapers, and a ridged one
     is ringed as a ram's or an antelope's is."""
@@ -742,24 +745,26 @@ def grow_horns(P, specs, s, k, word, tag):
         where, pts, r0, ridged = spec[:4]
         snapped = len(spec) > 4 and spec[4] == "snapped"
         root = horn_root(P, where)
-        scale = k if where != "temple" else 0.6 + 0.4 * k
+        scale = k * HORN_K if where != "temple" else (0.6 + 0.4 * k) * 1.2
         path = [Vector((s * (root.x + q[0] * hr * scale), root.y + q[1] * hr * scale, root.z + q[2] * hr * scale)) for q in pts]
-        path = spline(path, 3) if len(path) < 9 else path
-        a, b = horn(path, r0 * hr * (0.7 + 0.3 * k), ridged, snapped=snapped, up=(X * s if where == "temple" else None))
+        path = spline(path, 2) if len(path) < 9 else path
+        a, b = horn(path, r0 * hr * (0.7 + 0.3 * k) * 1.2, ridged, snapped=snapped, up=(X * s if where == "temple" else None))
         dark, pale = g.merge(dark, a), g.merge(pale, b)
+        P.horn_tip = getattr(P, "horn_tip", {})
+        P.horn_tip.setdefault(tag, path[-1])
         if word == "banded" or (word == "iron" and snapped):
             m = len(path)
             for f in ((0.22, 0.42) if not snapped else (0.9,)):
                 i = max(1, min(m - 2, int(f * (m - 1))))
                 d = (path[i + 1] - path[i - 1]).normalized()
                 u = d.cross(Z if abs(d.dot(Z)) < 0.9 else X).normalized()
-                rr = r0 * hr * (0.7 + 0.3 * k) * ((1 - i / (m - 1)) ** 0.8 if not snapped else 1.0 - 0.3 * i / (m - 1)) * 1.12
+                rr = r0 * hr * (0.7 + 0.3 * k) * 1.2 * ((1 - i / (m - 1)) ** 0.8 if not snapped else 1.0 - 0.3 * i / (m - 1)) * 1.12
                 bands = g.merge(bands, hoop(path[i], rr, rr, rr * 0.2, u=u, v=d.cross(u), n=8, sides=4))
-    P.add("horn_" + tag, dark, mat("horn_demon"), "head", smooth=False)
+    P.add("horn_" + tag, dark, mat("horn_demon"), "head", smooth=True)
     tip = {"gilt": mat("brass_gilt"), "ember": field("horn", 2.6)}.get(word, mat("bone"))
-    P.add("horn_tip_" + tag, pale, tip, "head", smooth=False)
+    P.add("horn_tip_" + tag, pale, tip, "head", smooth=True)
     if bands:
-        P.add("horn_bands_" + tag, bands, mat("accent_light") if word == "banded" else mat("metal_iron_light"), "head", smooth=False)
+        P.add("horn_bands_" + tag, bands, mat("accent_light") if word == "banded" else mat("metal_iron_light"), "head", smooth=True)
 
 
 @slot("horns", *(list(HORNS) + list(HORNS_ODD)))
@@ -773,14 +778,26 @@ def horns(P, size, word):
         left = right = HORNS[style]
     grow_horns(P, left, 1, size, word, "l")
     grow_horns(P, right, -1, size, word, "r")
+    if word == "gate":          # half of the last gate it came through, still hanging from its left horn
+        hr = P.hr
+        top = P.horn_tip["l"] + Vector((-0.1 * hr, 0, -0.5 * hr))
+        bars, cross = None, None
+        for i in range(4):
+            x = top.x + (i - 1.5) * 0.36 * hr
+            bars = g.merge(bars, g.tube([Vector((x, top.y, top.z + 0.1 * hr)), Vector((x, top.y + 0.04 * hr, top.z - (1.7 - 0.3 * (i % 2)) * hr))], 0.055 * hr, n=4))
+        for dz in (-0.2, -1.0):
+            cross = g.merge(cross, g.box(top + Vector((0, 0.02 * hr, dz * hr)), (1.5 * hr, 0.07 * hr, 0.14 * hr)))
+        ring = hoop(P.horn_tip["l"] + Vector((0, 0, -0.3 * hr)), 0.2 * hr, 0.26 * hr, 0.035 * hr, u=X, v=Z, n=8, sides=4)
+        P.rider("sway", "gate", [(bars, "metal_iron_light"), (cross, "metal_iron_light"), (ring, "brass_crown")], P.horn_tip["l"], "head", smooth=False)
 
 
 @slot("horns", "mono")
 def horns_mono(P, size, word):
     """One horn, from the middle of the brow."""
     hr = P.hr
+    size *= 1.3
     root = horn_root(P, "mid")
-    path = spline([root, root + Vector((0, -0.2, 0.7)) * hr * size, root + Vector((0, -0.12, 1.7)) * hr * size], 4)
+    path = spline([root, root + Vector((0, -0.2, 0.7)) * hr * size, root + Vector((0, -0.12, 1.7)) * hr * size], 3)
     a, b = horn(path, 0.19 * hr, 0.14)
     P.add("horn_mid", a, mat("horn_demon"), "head", smooth=False)
     P.add("horn_mid_tip", b, mat("bone"), "head", smooth=False)
@@ -797,12 +814,12 @@ def horns_ring(P, size, word):
         front = max(0.0, -math.sin(a))
         d = Vector((math.cos(a), math.sin(a) * 1.08, 0))
         b0 = c + d * hr * 0.84
-        tall = (0.7 + 0.75 * front) * hr * size
-        path = spline([b0, b0 + d * hr * 0.2 + Vector((0, 0, tall * 0.5)), b0 + d * hr * 0.06 + Vector((0, 0, tall))], 3)
-        x, y = horn(path, 0.13 * hr, 0.0)
+        tall = (0.95 + 1.0 * front) * hr * size
+        path = spline([b0, b0 + d * hr * 0.26 + Vector((0, 0, tall * 0.5)), b0 + d * hr * 0.08 + Vector((0, 0, tall))], 2)
+        x, y = horn(path, 0.15 * hr, 0.0)
         dark, pale = g.merge(dark, x), g.merge(pale, y)
-    P.add("horn_ring", dark, mat("horn_demon"), "head", smooth=False)
-    P.add("horn_ring_tips", pale, mat("bone"), "head", smooth=False)
+    P.add("horn_ring", dark, mat("horn_demon"), "head", smooth=True)
+    P.add("horn_ring_tips", pale, mat("bone"), "head", smooth=True)
     P.add("horn_ring_band", hoop(c + Vector((0, 0, 0.02 * hr)), hr * 0.86, hr * 0.94, 0.06 * hr, n=14, sides=4), mat("horn_demon"), "head", smooth=False)
 
 
@@ -847,11 +864,11 @@ def horns_wreath(P, size, word):
         out = Vector((math.cos(ang), math.sin(ang) * 1.08, 0))
         b0 = c + out * hr * 0.92 + Vector((0, 0, -0.14 * hr * math.sin(ang) ** 2))
         kind = kinds[i % len(kinds)]
-        path = spline([b0 + out * q[0] * hr * size + Vector((0, 0, q[2] * hr * size)) for q in kind], 3)
+        path = spline([b0 + out * q[0] * hr * size * 1.2 + Vector((0, 0, q[2] * hr * size * 1.2)) for q in kind], 2)
         x, y = horn(path, (0.11 + 0.03 * (i % 3)) * hr, 0.1 * (i % 2))
         dark, pale = g.merge(dark, x), g.merge(pale, y)
-    P.add("horn_wreath", dark, mat("horn_demon"), "head", smooth=False)
-    P.add("horn_wreath_tips", pale, mat("bone"), "head", smooth=False)
+    P.add("horn_wreath", dark, mat("horn_demon"), "head", smooth=True)
+    P.add("horn_wreath_tips", pale, mat("bone"), "head", smooth=True)
 
 
 # ======================================================================================
@@ -892,16 +909,18 @@ def wing_root(P, s):
     return Vector((s * 0.1 * P.t, P.rear(backz) + 0.01, backz))
 
 
-@slot("wings", "buds", "cape", "high", "half", "spread", "cloak", "tails", "stubs")
+@slot("wings", "buds", "cape", "high", "half", "spread", "cloak", "tails", "fan", "stubs")
 def wings(P, size, word):
     """Its wings, as its Path wears them: buds that beat to no purpose; a cape over its
     shoulders; a collar standing behind its head (high); half open; spread; a cloak to the
-    ground; the tails of its coat; stubs that never grew. They mantle (glide), or beat."""
-    style = P._style
+    ground; the tails of its coat (fan: spread behind it like a courtier's skirts; odd: one a
+    tail and one a cape); stubs that never grew. They mantle (glide), or beat."""
     k = P.t * size
     t = P.t
-    beat = style == "buds"
     for tag, s in (("l", 1), ("r", -1)):
+        style = P._style
+        if word == "odd":
+            style = "cape" if s > 0 else "tails"
         R = wing_root(P, s)
         sw = P.sx
         back = R.y
@@ -927,7 +946,7 @@ def wings(P, size, word):
             body = R + Vector((0, 0.03, -0.72)) * k
             bars = 2 if word == "barred" else 0
         elif style == "cape":
-            # folded over its shoulders: the wrist stands above the shoulder, the fingers hang down its back
+            # folded over its shoulders: the wrist stands above the shoulder, a finger down before it, the rest down its back
             W = at(sw * 0.8, P.army + 0.03 * t, P.armz + 0.34 * k)
             E = at(sw * 0.4, back + 0.14 * t, P.armz - 0.22 * t)
             hemz = P.hipz + (0.34 - 0.5 * size) * t
@@ -939,9 +958,9 @@ def wings(P, size, word):
                 tips[3] = at(sw * 0.56, back + 0.27 * t, hemz + 0.05 * t)
             trim = word == "trimmed"
         elif style == "high":
-            # mantled: the wrists up behind its head like the points of a collar
-            W = at(sw * 0.8, back + 0.06 * t, P.crown + 0.3 * P.hh * size)
-            E = at(sw * 0.42, back + 0.16 * t, P.armz - 0.2 * t)
+            # mantled: the wrists up behind its ears like the points of a collar
+            W = at(sw * 0.95, back + 0.04 * t, P.chin + 0.74 * P.hh * size)
+            E = at(sw * 0.5, back + 0.16 * t, P.armz - 0.16 * t)
             hemz = P.hipz - 0.1 * t * size
             fy = P.front(P.armz - 0.1 * t, sw * 0.6)
             tips = [at(sw * 0.66, fy - 0.09 * t, P.armz - 0.2 * k), at(sw + 0.3 * k, P.army, P.armz - 0.36 * k), at(sw + 0.18 * k, back + 0.22 * t, hemz + 0.3 * t), at(sw * 0.6, back + 0.29 * t, hemz),
@@ -955,18 +974,26 @@ def wings(P, size, word):
             rx = sw + 0.34 * k
             tips = [at(0.16, P.front(P.chestz) - 0.34 * t, hemz + 0.3), at(rx * 0.86, P.army - 0.34 * t, hemz + 0.1), at(rx, P.army + 0.1 * t, hemz), at(rx * 0.74, back + 0.4 * t, hemz + 0.06),
                     at(-0.1 * t, back + 0.5 * t, hemz + 0.12)]
+        elif style == "fan":
+            # the tails of its coat held out behind it, as a courtier holds a skirt
+            W = at(0.18 * t, back + 0.1 * t, P.hipz + 0.3 * t)
+            E = at(0.12 * t, back + 0.06 * t, P.J["chest"].z + 0.44 * t)
+            tips = [at(sw + 0.52 * k, back + 0.06 * t, P.hipz + 0.16 * t), at(sw + 0.42 * k, back + 0.36 * t, P.hipz - 0.36 * t), at(sw * 0.7 + 0.1 * k, back + 0.62 * t, P.hipz - 0.62 * t),
+                    at(0.03 * t, back + 0.54 * t, P.hipz - 0.5 * t)]
+            trim = True
         else:
             # the tails of its coat: folded shut down its back, the wrist in the small of it
-            W = at(0.2 * t, back + 0.1 * t, P.hipz + 0.34 * t)
-            E = at(0.13 * t, back + 0.06 * t, P.J["chest"].z + 0.44 * t)
-            hemz = max(P.hockz - 0.1, P.hipz - 0.86 * t * size)
-            tips = [at(sw * 0.5 + 0.22 * k, back + 0.02 * t, P.hipz + 0.12 * t), at(sw * 0.36 + 0.3 * k, back + 0.3 * t, (P.hipz + hemz) / 2), at(0.2 * t + 0.14 * k, back + 0.52 * t * size, hemz), at(0.04 * t, back + 0.26 * t, (P.hipz + hemz) / 2 + 0.2 * t)]
+            W = at(0.17 * t, back + 0.1 * t, P.hipz + 0.3 * t)
+            E = at(0.12 * t, back + 0.06 * t, P.J["chest"].z + 0.44 * t)
+            hemz = max(P.hockz - 0.2, P.hipz - 0.95 * t * size)
+            tips = [at(0.36 * t + 0.08 * k, back + 0.14 * t, P.hipz - 0.08 * t), at(0.34 * t + 0.1 * k, back + 0.36 * t * size, (P.hipz + hemz) / 2 - 0.1 * t), at(0.16 * t + 0.05 * k, back + 0.5 * t * size, hemz),
+                    at(0.03 * t, back + 0.22 * t, (P.hipz + hemz) / 2 + 0.1 * t)]
         items = wing_geo(P, R, E, W, tips, s, body=body, torn=torn, bars=bars, trim=trim)
-        if style == "tails" and word != "lined":      # the tails of a coat are a step darker than its waistcoat
+        if style in ("tails", "fan") and word != "lined":      # the tails of a coat are a step darker than its waistcoat
             items = [(geo, "accent_dark" if m == "accent" else m) for geo, m in items]
         if word == "parti" and s < 0:
             items = [(geo, "cloth_coat" if m in ("accent", "accent_dark") else m) for geo, m in items]
-        P.rider("beat" if beat else "glide", "wing", items, R, "chest", side=tag, smooth=False)
+        P.rider("beat" if style == "buds" else "glide", "wing", items, R, "chest", side=tag, smooth=False)
 
 
 # ======================================================================================
@@ -996,7 +1023,7 @@ def tail(P, size, word):
     hz = P.hipz - 0.04 * P.t
     b0 = Vector((0, P.rear(hz) - 0.03, hz))
     side = 0.14 if style in ("curl", "tuft") else 0.06
-    pts = spline([b0 + Vector((side * q[0] * t, q[0] * t, q[1] * t)) for q in line], 3)
+    pts = spline([b0 + Vector((side * q[0] * t, q[0] * t, max(q[1] * t, 0.14 - b0.z))) for q in line], 3)        # (it does not go through the ground)
     m = len(pts)
     radii = [r0 * P.t * (1.0 - 0.62 * i / (m - 1)) for i in range(m)]
     tip, d = pts[-1], (pts[-1] - pts[-2]).normalized()
@@ -1024,7 +1051,7 @@ def tail(P, size, word):
         for i in range(4):
             q = tip + d * (0.1 + 0.16 * i) * t + Vector((0.05 * (i % 2), 0, 0.06 * i * t))
             puffs = g.merge(puffs, g.ico(q, (0.11 - 0.018 * i) * t, sub=1))
-        ends.append((puffs, "shade"))
+        ends.append((puffs, "smoke_pale"))
     whole = [(g.tube(pts, radii, n=6), "main")] + ends
     if style == "flame":                       # the tail keeps still, and the flame at its end does not
         for i, (geo, m_) in enumerate(whole):

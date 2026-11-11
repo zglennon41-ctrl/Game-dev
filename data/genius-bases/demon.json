@@ -185,13 +185,14 @@
      ],
      "body": {
       "build": {
-       "legs": 1.08,
-       "neck": 0.6,
-       "bow": -0.04
+       "legs": 1.16,
+       "neck": 0.7,
+       "bow": -0.05,
+       "wide": -0.15
       },
       "horns": [
        "lyre",
-       1.0
+       1.1
       ],
       "crown": [
        "mended",
@@ -199,6 +200,11 @@
       ],
       "wings": [
        "high",
+       1.5
+      ],
+      "hair": null,
+      "right": [
+       "cane",
        1.0
       ],
       "wear": [
@@ -242,7 +248,8 @@
          "wide": 0.35,
          "shoulders": 0.5,
          "neck": 0.5,
-         "bow": -0.05
+         "bow": -0.05,
+         "faces": 0.66
         },
         "horns": [
          "ring",
@@ -251,11 +258,11 @@
         "crown": null,
         "back": [
          "throne",
-         1.0
+         1.1
         ],
         "wings": [
          "cape",
-         1.15,
+         1.3,
          "trimmed"
         ],
         "wear": [
@@ -272,6 +279,7 @@
          "chain-of-office",
          1.0
         ],
+        "right": null,
         "tail": [
          "spade",
          1.15
@@ -326,15 +334,16 @@
         "brow": null,
         "face": null,
         "wings": [
-         "high",
-         1.25
+         "cape",
+         0.8
         ],
+        "right": null,
         "wear": [
          "doublet",
          "breeches",
          [
           "ruff",
-          1.2
+          1.5
          ],
          [
           "sash",
@@ -375,8 +384,8 @@
      ],
      "body": {
       "build": {
-       "legs": 1.04,
-       "bow": 0.03,
+       "legs": 1.0,
+       "bow": 0.1,
        "wide": 0.2
       },
       "horns": [
@@ -385,7 +394,7 @@
       ],
       "back": [
        "door",
-       1.0,
+       0.86,
        "shut"
       ],
       "wings": [
@@ -395,7 +404,7 @@
       ],
       "belt": [
        "key",
-       1.0
+       1.3
       ],
       "wear": [
        "doublet",
@@ -425,8 +434,10 @@
        ],
        "body": {
         "build": {
-         "legs": 1.1,
-         "bow": 0.0
+         "legs": 1.14,
+         "bow": 0.0,
+         "wide": 0.3,
+         "faces": 0.7
         },
         "horns": [
          "swept",
@@ -434,13 +445,9 @@
          "banded"
         ],
         "crown": null,
-        "belt": [
-         "crown",
-         1.0
-        ],
         "back": [
          "door",
-         1.15,
+         1.2,
          "ajar"
         ],
         "wings": [
@@ -454,6 +461,10 @@
         ],
         "brow": "glad",
         "mouth": "smile",
+        "belt": [
+         "crown",
+         1.2
+        ],
         "wear": [
          "doublet",
          "breeches",
@@ -492,7 +503,8 @@
          "limbs": 1.15,
          "legs": 1.0,
          "bow": 0.04,
-         "muscle": 0.5
+         "muscle": 0.5,
+         "faces": 0.66
         },
         "horns": [
          "broken",
@@ -900,11 +912,12 @@
        "body": {
         "build": {
          "belly": 1.0,
-         "wide": 0.7,
+         "wide": 1.0,
          "fat": 0.8,
-         "legs": 0.92,
-         "limbs": 1.15,
-         "neck": -0.4
+         "legs": 0.82,
+         "limbs": 1.2,
+         "neck": -0.5,
+         "head": 1.1
         },
         "horns": [
          "stubs",
@@ -961,12 +974,13 @@
      ],
      "body": {
       "build": {
-       "legs": 1.06,
-       "neck": 0.3
+       "legs": 1.14,
+       "neck": 0.5,
+       "wide": -0.25
       },
       "horns": [
        "both-ways",
-       1.0
+       1.3
       ],
       "face": [
        "goatee",
@@ -987,7 +1001,7 @@
       "wings": [
        "tails",
        1.0,
-       "parti"
+       "odd"
       ]
      },
      "finishes": [
@@ -1026,6 +1040,7 @@
         ],
         "wear": [
          "shirt",
+         "waistcoat",
          [
           "gown",
           1.0
@@ -1034,10 +1049,7 @@
          "bands",
          "cuffs"
         ],
-        "wings": [
-         "tails",
-         1.1
-        ],
+        "wings": null,
         "brow": "level"
        }
       },
@@ -1092,7 +1104,7 @@
         "wings": [
          "tails",
          1.3,
-         "parti"
+         "odd"
         ]
        }
       }
@@ -1120,15 +1132,23 @@
       },
       "horns": [
        "curled",
-       1.0,
+       1.15,
        "banded"
       ],
       "chest": [
        "flower",
-       1.0
+       1.4
       ],
       "hair": [
        "slick",
+       1.0
+      ],
+      "wings": [
+       "fan",
+       1.0
+      ],
+      "right": [
+       "cane",
        1.0
       ],
       "wear": [
@@ -1209,8 +1229,8 @@
          ]
         ],
         "wings": [
-         "tails",
-         1.0
+         "fan",
+         1.2
         ],
         "chest": null
        }
@@ -1272,6 +1292,7 @@
         ],
         "mouth": "set",
         "chest": null,
+        "right": null,
         "eyes": [
          "narrow",
          1.0
@@ -1382,10 +1403,6 @@
        "harness",
        "pauldron",
        "paint"
-      ],
-      "skin": [
-       "stone-dust",
-       0.5
       ]
      },
      "finishes": [
@@ -1471,7 +1488,7 @@
          [
           "sash",
           1.0,
-          "accent"
+          "accent_light"
          ],
          "paint"
         ],
@@ -1502,19 +1519,21 @@
      ],
      "body": {
       "build": {
-       "hands": 1.6,
-       "forearms": 1.3,
-       "arm_girth": 1.25,
+       "hands": 1.8,
+       "forearms": 1.35,
+       "arm_girth": 1.3,
        "wide": 0.7,
-       "shoulders": 0.8,
-       "arms": 1.08,
+       "shoulders": 1.0,
+       "arms": 1.2,
        "muscle": 0.8,
-       "bow": 0.06
+       "bow": 0.02,
+       "legs": 0.9
       },
       "horns": [
        "low",
-       1.1
+       1.3
       ],
+      "wings": null,
       "wear": [
        "war-kilt",
        [
@@ -1717,7 +1736,8 @@
          "whip",
          1.6,
          "tuft"
-        ]
+        ],
+        "wings": null
        }
       },
       {
@@ -1767,14 +1787,19 @@
          1.3
         ],
         "wear": [
-         "loincloth"
+         "loincloth",
+         "paint"
         ],
         "legs": "smoke",
         "arms": [
          "smoke",
          1.0
         ],
-        "brow": "glad"
+        "brow": "glad",
+        "wings": [
+         "stubs",
+         1.2
+        ]
        }
       }
      ]

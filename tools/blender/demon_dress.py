@@ -23,7 +23,7 @@ def buttons(P, n, z0, z1, material="brass_gilt", x=0.0, out=0.05):
     for i in range(n):
         z = z0 + (z1 - z0) * (i + 0.5) / n
         geo = g.merge(geo, g.ico((x, P.front(z, x) - out, z), 0.024 * P.t, sub=0, scale=(1, 0.5, 1)))
-    P.add("buttons", geo, mat(material), "chest", smooth=False)
+    P.add("buttons", geo, mat(material), "chest", smooth=True)
 
 
 def arm_row(P, x):
@@ -293,7 +293,7 @@ def wear_war_kilt(P, size, word):
         studs = g.merge(studs, g.ico(base.lerp(tip, 0.72) + d * 0.03, 0.026 * P.t, sub=0))
     P.add("kilt_a", a_geo, mat("accent"), "hips", smooth=False)
     P.add("kilt_b", b_geo, mat("accent_dark"), "hips", smooth=False)
-    P.add("kilt_studs", studs, mat("brass_crown"), "hips", smooth=False)
+    P.add("kilt_studs", studs, mat("brass_crown"), "hips", smooth=True)
 
 
 @slot("wear", "paint")
@@ -320,14 +320,15 @@ def skin_marks(P, size, word):
     """Plaster and stone dust set on whatever of it faces up; or its ribs standing out."""
     x, z = P.v0[:, 0], P.v0[:, 2]
     if P._style == "stone-dust":
-        up = (P.n[:, 2] > 0.25) & ~P.headv & (z > P.chestz - 0.2 * P.t * size)
+        up = (P.n[:, 2] > 0.25) & ~P.headv & (z > P.chestz - 0.2 * P.t * size) & (np.abs(x) < P.sx + 0.24 * size)
         P.paint(up, mat("stone_dust"))
         P.v[up] += P.n[up] * (np.abs(noise(P.v0[up], 19.0)) * 0.03 * size)[:, None]
     else:
         side = P.trunk(P.hipz + 0.34 * P.t, P.chestz + 0.12 * P.t) & (np.abs(x) > 0.08 * P.t)
         gap = np.mod(z, 0.1 * P.t) < 0.045 * P.t
-        P.paint(side & gap, mat("hide_shadow"))
-        P.v[side & ~gap] += P.n[side & ~gap] * 0.02
+        P.v[side & gap] -= P.n[side & gap] * 0.015
+        P.v[side & ~gap] += P.n[side & ~gap] * 0.03
+        P.paint(side & ~gap, mat("bone"))
 
 
 # ======================================================================================
@@ -450,7 +451,7 @@ def door_leaf(c, w, h, t, paint, R=None, bars=False):
     items = [(g.box(c, (w, t, h), rot=R), paint)]
     grooves, iron = None, None
     for k in (-1, 0, 1):
-        for sy in (1, -1):
+        for sy in (1,):
             grooves = g.merge(grooves, g.box(at((k * w * 0.25, sy * t * 0.5, 0)), (w * 0.025, t * 0.12, h * 0.94), rot=R))
     for zz in ((-0.3, 0.3) if not bars else (-0.34, 0.0, 0.34)):
         for sy in (1, -1):
@@ -458,9 +459,9 @@ def door_leaf(c, w, h, t, paint, R=None, bars=False):
     studs = None
     for zz in ((-0.3, 0.3) if not bars else (-0.34, 0.0, 0.34)):
         for k in (-0.36, 0.0, 0.36):
-            studs = g.merge(studs, g.ico(at((k * w, t * 0.7, zz * h)), w * 0.035, sub=0), g.ico(at((k * w, -t * 0.7, zz * h)), w * 0.035, sub=0))
+            studs = g.merge(studs, g.ico(at((k * w, t * 0.7, zz * h)), w * 0.035, sub=0))
     ring = hoop(at((w * 0.3, t * 0.75, -0.02 * h)), w * 0.09, w * 0.09, w * 0.02, u=R @ X, v=R @ Z, n=8, sides=3)
-    return items + [(grooves, "void"), (iron, "metal_iron"), (studs, "metal_iron_light"), (ring, "brass_crown")]
+    return items + [(grooves, "accent_deep"), (iron, "metal_iron_light"), (studs, "brass_crown"), (ring, "brass_crown")]
 
 
 def _back_y(P, z):
@@ -473,24 +474,24 @@ def back_door(P, size, word):
     Path's colour. shut; or ajar: a hand open, and the light of the field through the gap."""
     w = (2 * P.sx + 0.26) * size
     h = (P.neckz - P.hipz) * 1.5 * size
-    zc = P.hipz - 0.06 * P.t + h / 2
+    zc = P.hipz - (0.34 if word != "ajar" else 0.06) * P.t + h / 2        # shut, it is carried low, like a load
     y = _back_y(P, P.chestz) + 0.16 * P.t
     c = Vector((0, y, zc))
     t = 0.06 * P.t
     frame = g.merge(g.box(c + Vector((-(w / 2 + 0.035), 0, 0)), (0.07, t * 1.5, h + 0.07)), g.box(c + Vector(((w / 2 + 0.035), 0, 0)), (0.07, t * 1.5, h + 0.07)),
                     g.box(c + Vector((0, 0, h / 2 + 0.035)), (w + 0.2, t * 1.7, 0.08)), g.box(c + Vector((0, 0, -h / 2 - 0.02)), (w + 0.14, t * 1.5, 0.05)))
-    P.add("door_frame", frame, mat("wood_door"), "chest", smooth=False)
+    P.add("door_frame", frame, mat("wood_ebony"), "chest", smooth=False)
     if word == "ajar":
-        ang = 0.5
+        ang = 0.85
         R = Matrix.Rotation(ang, 3, "Z")
         hinge = c + Vector((-w / 2, 0, 0))
         leaf_c = hinge + R @ Vector((w / 2, 0, 0))
         for i, (geo, m) in enumerate(door_leaf(leaf_c, w, h, t, "accent", R=R)):
-            P.add("door_%d" % i, geo, P.material(m), "chest", smooth=False)
+            P.add("door_%d" % i, geo, P.material(m), "chest", smooth=m == "brass_crown")
         P.add("door_light", g.box(c + Vector((0, -t * 0.2, 0)), (w * 0.96, t * 0.3, h * 0.97)), field("door", 2.4), "chest", smooth=False)
     else:
         for i, (geo, m) in enumerate(door_leaf(c + Vector((0, t * 0.2, 0)), w, h, t, "accent")):
-            P.add("door_%d" % i, geo, P.material(m), "chest", smooth=False)
+            P.add("door_%d" % i, geo, P.material(m), "chest", smooth=m == "brass_crown")
 
 
 @slot("back", "throne")
@@ -500,12 +501,12 @@ def back_throne(P, size, word):
     w = (2 * P.sx + 0.2) * size
     z0, z1 = P.hipz + 0.05 * P.t, P.crown + 0.5 * P.hh * size
     y = _back_y(P, P.chestz) + 0.14 * P.t
-    wood = mat("wood_door")
+    wood = mat("wood_ebony")
     c = Vector((0, y, (z0 + z1) / 2))
     h = z1 - z0
     P.add("throne_back", g.box(c, (w, 0.07 * P.t, h)), wood, "chest", smooth=False)
-    P.add("throne_cushion", g.box(c + Vector((0, -0.03 * P.t, 0.02 * h)), (w * 0.74, 0.07 * P.t, h * 0.74)), mat("accent"), "chest", smooth=True)
-    P.add("throne_cushion_back", g.box(c + Vector((0, 0.03 * P.t, 0.02 * h)), (w * 0.74, 0.05 * P.t, h * 0.74)), mat("accent_dark"), "chest", smooth=False)
+    P.add("throne_cushion", g.box(c + Vector((0, -0.03 * P.t, 0.02 * h)), (w * 0.86, 0.07 * P.t, h * 0.86)), mat("accent"), "chest", smooth=False)
+    P.add("throne_cushion_back", g.box(c + Vector((0, 0.03 * P.t, 0.02 * h)), (w * 0.86, 0.05 * P.t, h * 0.86)), mat("accent_dark"), "chest", smooth=False)
     posts, knobs, studs = None, None, None
     for s in (1, -1):
         px = s * (w / 2 + 0.03)
@@ -517,8 +518,8 @@ def back_throne(P, size, word):
     crest = g.merge(crest, g.blade((w * 0.36, y, z1 - 0.01), (0, y, z1 + 0.2 * h), 0.2 * P.t, normal=Y, belly=0.5, thick=0.06 * P.t))
     P.add("throne_posts", posts, wood, "chest", smooth=False)
     P.add("throne_crest", crest, wood, "chest", smooth=False)
-    P.add("throne_knobs", knobs, mat("brass_crown"), "chest", smooth=False)
-    P.add("throne_studs", studs, mat("brass_crown"), "chest", smooth=False)
+    P.add("throne_knobs", knobs, mat("brass_crown"), "chest", smooth=True)
+    P.add("throne_studs", studs, mat("brass_crown"), "chest", smooth=True)
 
 
 @slot("back", "spines")
@@ -568,7 +569,7 @@ def chest_worn(P, size, word):
             if fr > 0.5:
                 p.y = P.front(p.z, p.x) - 0.045
             links = g.merge(links, g.ico(p, 0.036 * P.t, sub=0, scale=(1.2, 1.0, 0.8)))
-        P.add("chain_links", links, mat("brass_gilt"), "chest", smooth=False)
+        P.add("chain_links", links, mat("brass_gilt"), "chest", smooth=True)
         j = Vector((0, P.front(zc - 0.06 * P.t) - 0.06, zc - 0.08 * P.t))
         P.add("chain_jewel_set", disc(j, 0.075 * P.t, normal=Y, thick=0.02, n=8), mat("brass_gilt"), "chest", smooth=False)
         P.add("chain_jewel", g.ico(j + Vector((0, -0.016, 0)), 0.04 * P.t, sub=0), field("jewel", 2.4), "chest", smooth=False)
@@ -667,7 +668,7 @@ def arms(P, size, word):
         P.add("gilt_band", hoop((-P.ex + 0.02, P.army, P.armz), row[1] + 0.035, row[2] + 0.035, 0.026, u=Y, v=Z, n=8, sides=4), mat("brass_crown"), "lowerarm.r", smooth=False)
     elif style == "smoke":
         m = P.arm & (ax > P.ex + 0.04)
-        P.paint(m, mat("shade"))
+        P.paint(m, mat("smoke_pale"))
         P.v[m] += P.n[m] * (noise(P.v0[m], 17.0) * 0.03)[:, None]
     else:
         rr = 0.085 * P.b.get("limbs", 1.0) * P.b.get("arm_girth", 1.0)
@@ -701,13 +702,21 @@ def held(P, size, word):
         P.hold(side, "cup", [(bowl, mat("brass_gilt")), (stem, mat("brass_gilt")), (disc((0, -0.01, 0.31), 0.118 * s, normal=Z, thick=0.02, n=8), field("wine", 2.0))])
 
 
+@slot("right", "cane")
+def held_cane(P, size, word):
+    """A cane with a gilt knob, carried and not leaned on."""
+    L = (P.armz - (P.wx - P.sx) - 0.16) * size
+    P.hold("r", "cane", [(g.tube([Vector((0.0, -0.03, 0.16)), Vector((0.0, -0.1, -L))], [0.026, 0.02], n=6), mat("wood_ebony")),
+                         (g.ico(Vector((0.0, -0.03, 0.2)), 0.06, sub=1), mat("brass_gilt")), (g.tube([Vector((0.0, -0.1, -L)), Vector((0.0, -0.104, -L - 0.07))], [0.024, 0.018], n=6), mat("brass_gilt"))])
+
+
 @slot("left", "door-shield")
 def held_door(P, size, word):
     """The door, come round onto its arm: barred across in iron, and bolted."""
     w = (2 * P.sx + 0.2) * size * 0.8
     h = (P.neckz - P.hipz) * 1.32 * size
     c = Vector((-0.3 * w, -0.26, 0.3 * h))
-    items = door_leaf(c, w, h, 0.08 * P.t, "wood_door", bars=True)
+    items = door_leaf(c, w, h, 0.08 * P.t, "accent", bars=True)
     bolt = g.box(c + Vector((0.1 * w, -0.08 * P.t, 0.0)), (w * 0.5, 0.05 * P.t, 0.06 * P.t))
     P.hold("l", "doorshield", [(geo, P.material(m)) for geo, m in items] + [(bolt, mat("metal_iron_light"))])
 
@@ -723,15 +732,15 @@ def around_mouths(P, size, word):
     c = Vector((0, P.hcy, P.eye.z + 0.4 * hr))
     for i in range(5):
         a = math.pi * (0.05 + 0.9 * i / 4.0)             # an arc over it, from its right to its left
-        q = c + Vector((math.cos(a) * 2.5 * hr, -0.3 * hr - 0.2 * hr * math.sin(a), math.sin(a) * 1.7 * hr + 0.25 * hr * (i % 2)))
-        w = (0.34 + 0.08 * (i % 3)) * hr * size
+        q = c + Vector((math.cos(a) * 2.7 * hr, -0.3 * hr - 0.2 * hr * math.sin(a), math.sin(a) * 2.0 * hr + 0.3 * hr * (i % 2)))
+        w = (0.5 + 0.1 * (i % 3)) * hr * size
         maw = g.ico(q, 1.0, sub=1, scale=(w, w * 0.34, w * (0.3 + 0.16 * (i % 2))))
         lips = [q + Vector((w * 1.08 * math.cos(b), -w * 0.16, w * (0.36 + 0.16 * (i % 2)) * math.sin(b))) for b in [2 * math.pi * k / 10 for k in range(11)]]
         teeth = None
         for k in range(4):
             t = -1.0 + 2.0 * (k + 0.5) / 4
             teeth = g.merge(teeth, g.box(q + Vector((t * w * 0.7, -w * 0.3, w * 0.14)), (w * 0.26, w * 0.1, w * 0.2)))
-        P.rider("bob", "mouth", [(maw, "maw"), (g.tube(lips, [w * 0.13] * len(lips), n=4, caps=False), "main"), (teeth, "bone")], q, "chest", n=i)
+        P.rider("bob", "mouth", [(maw, "maw"), (g.tube(lips, [w * 0.16] * len(lips), n=4, caps=False), "accent_light"), (teeth, "bone")], q, "chest", n=i)
 
 
 @slot("around", "smoke-edges")
@@ -745,7 +754,7 @@ def around_smoke(P, size, word):
         for k in range(3):
             d = Vector((math.sin(i * 2.1 + k * 2.4), 0.6 * math.cos(i * 1.3 + k * 1.9), math.cos(i * 0.7 + k * 2.2) * 0.8)) * r * 0.9 * size
             puffs = g.merge(puffs, g.ico(Vector(p) + d, r * (0.8 - 0.14 * k) * size, sub=1))
-        P.add("smoke_%d" % i, puffs, mat("shade") if i % 2 else mat("shade_edge"), bone, smooth=True)
+        P.add("smoke_%d" % i, puffs, mat("smoke_pale"), bone, smooth=True)
     embers = None
     for i in range(7):
         p = Vector(spots[i % len(spots)][0]) + Vector((0.12 * math.sin(i * 1.9), 0.1 * math.cos(i * 2.3), 0.16 + 0.05 * (i % 3)))
