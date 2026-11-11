@@ -997,6 +997,7 @@ void light() {
 
 var _toon_shader: Shader = null
 var _detail_cache: Dictionary = {}
+var _grain_as := ""       # -- --grain=world or none (toonify)
 
 ## Which class a material is, by its name (data/style.json, materials): skin, coat, cloth,
 ## leather, wood, stone, iron, brass, bone, glass, growth, earth, water, eye, ink, the field's
@@ -1192,6 +1193,14 @@ func toonify(node: Node, place := false, kind := "") -> void:
 	if _toon_shader == null:
 		_toon_shader = Shader.new()
 		_toon_shader.code = TOON
+		# -- --grain=world: every grain laid as a place's is (its class's, in the world's space),
+		# which is how a body's was laid before it had its own; --grain=none: no grain on a body.
+		# To look at the difference.
+		for a in OS.get_cmdline_user_args():
+			if a.begins_with("--grain="):
+				_grain_as = a.get_slice("=", 1)
+	if _grain_as == "world":
+		place = true
 	var meshes := node.find_children("*", "MeshInstance3D", true, false)
 	if node is MeshInstance3D:
 		meshes.append(node)
@@ -1237,9 +1246,14 @@ func toonify(node: Node, place := false, kind := "") -> void:
 			var body = null
 			if not place:
 				body = (grains.get("%d|%d" % [mi.get_instance_id(), i], {}) as Dictionary).duplicate()
+				if _grain_as == "none":
+					body = {}
 				if body.has("scale"):
 					body["scale"] = float(body["scale"]) * fit * unit
 			_surface_look(t, cls, mi, body, i)
+			if OS.get_cmdline_user_args().has("--grain-tell") and i == 0:      # DEBUG
+				var bx := (xfs[m] as Transform3D).basis if xfs.has(m) else Basis()
+				print("GRAIN %s | %s | mesh %s | %s | boned %s rest %s | verts %d | unit %.3f fit %.2f | x>%s y>%s z>%s | %s" % [node.name, kind, mi.name, sm.resource_name, _boned(mi), t.get_shader_parameter("use_rest"), (mi.mesh as ArrayMesh).surface_get_array_len(0) if mi.mesh is ArrayMesh else -1, unit, fit, bx.x.normalized().snapped(Vector3.ONE * 0.1), bx.y.normalized().snapped(Vector3.ONE * 0.1), bx.z.normalized().snapped(Vector3.ONE * 0.1), body])
 			if sm.emission_enabled:
 				var glow := sm.emission
 				var energy := sm.emission_energy_multiplier
