@@ -256,21 +256,9 @@ def _add(r, name, geo, weights, material, smooth=None):
 
 
 def _weld(r):
-    """The wolf comes with every face's corners its own (it was made flat): weld them, so the
-    body is one skin, shaded round, and a third the size on disk."""
-    import bmesh
-    me = r.mesh.data
-    bm = bmesh.new()
-    bm.from_mesh(me)
-    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-4)
-    bm.to_mesh(me)
-    bm.free()
-    for name in ("custom_normal", "sharp_face", "sharp_edge"):
-        if name in me.attributes:
-            me.attributes.remove(me.attributes[name])
-    for p in me.polygons:
-        p.use_smooth = True
-    me.update()
+    """One welded skin, shaded round (beast_kit's)."""
+    r.weld()
+
 
 
 def _spine_w(r, geo):
