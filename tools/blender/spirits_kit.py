@@ -60,7 +60,8 @@ PALETTE.update({
 
 # and the corner of a room, the dust on a hand, what fog is dark with and frost is white with
 PALETTE.update({
-    "plaster": _ramp("stone", 3, 0.95), "plaster_dark": _ramp("stone", 2, 0.95), "plaster_pale": _ramp("stone", 4, 0.95), "brick_dust": _ramp("earth", 3, 0.95),
+    "plaster": _ramp("stone", 2, 0.95), "plaster_dark": _ramp("stone", 1, 0.95), "plaster_pale": _ramp("stone", 3, 0.95), "brick_dust": _ramp("earth", 3, 0.95),
+    "stone_worn": _ramp("stone", 1, 0.95),
 })
 
 SPREAD = 1.7        # how far across a body may be, against the height it is stood to

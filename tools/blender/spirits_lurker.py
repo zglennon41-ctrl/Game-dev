@@ -83,10 +83,12 @@ class Fig:
         self.hands = {}
         self.elbows = {}
         self.final = False        # its hands are given where they are (not on the upright figure)
+        self.floor = self.hem - 0.21     # where the floor is, for one that stands on a floor of its own
         self.head = None          # its hood, where that is a piece of its own that looks about
         self.arm_mv = {}          # its arms, where they sway: what hangs from a hand rides one
         # the thread along its edges: a step of its Path's colour (the Unremarked's is the pale one)
         self.thread = "accent_" + str(B.spec.get("thread", "light"))
+        self.tw = float(B.spec.get("edge", 1.0))        # and how bold that thread is
 
     def hand(self, tag, default=None):
         """Where a hand is, in the finished body."""
@@ -187,9 +189,9 @@ def lining(F, top=0.548, wide=0.62, m=5):
         right.append(outer[-1] + Vector((0, -0.003, 0)))
     F.put(g.loft(rows), "accent", True)
     for edge in (left, right):
-        F.put(g.tube(edge, 0.0055, n=5), F.thread, True)
+        F.put(g.tube(edge, 0.0055 * F.tw, n=5), F.thread, True)
     y, zz, rx, ry = _row(F, *PROF[-1])
-    F.put(sk.hoop((0, y, zz + 0.004), rx + 0.004, ry + 0.004, 0.0065, n=N, sides=5), F.thread, True)
+    F.put(sk.hoop((0, y, zz + 0.004), rx + 0.004, ry + 0.004, 0.0065 * F.tw, n=N, sides=5), F.thread, True)
 
 
 def cloak(F, n=N, lined=True):
@@ -280,9 +282,9 @@ def hood(F, eyes="slit", cowl=True, void=True, watch=True, n=N):
     a, b = _pleats(rings[::-1], n)
     items = [(a, B.main, True), (b, B.under, True)]
     if void:
-        items.append((g.ico(H(0, -0.079, 0.672), 0.087 * k, sub=2, scale=(0.96, 0.42, 1.16), rot=(0, 0, F.turn)), "accent", True))
+        items.append((g.ico(H(0, -0.08, 0.672), 0.084 * k, sub=2, scale=(0.95, 0.42, 1.16), rot=(0, 0, F.turn)), "accent", True))
         items.append((g.ico(H(0, -0.085, 0.672), 0.077 * k, sub=2, scale=(0.92, 0.43, 1.17), rot=(0, 0, F.turn)), "void", True))
-        items.append((sk.hoop(H(0, -0.097, 0.672), 0.084 * k, 0.102 * k, 0.0065 * k, n=18, u=sk.rotz(X, F.turn), v=Z, sides=5), F.thread, True))
+        items.append((sk.hoop(H(0, -0.098, 0.672), 0.082 * k, 0.1 * k, 0.005 * k * F.tw, n=18, u=sk.rotz(X, F.turn), v=Z, sides=5), F.thread, True))
     stat, blink = eyes_of(F, eyes)
     items += stat
     if watch:
@@ -341,11 +343,11 @@ def sleeve(F, sh, el, wr, w=1.0, cuff=True):
     """A sleeve from a shoulder by an elbow to a wrist, wider at the cuff, with a thread of its
     Path's colour round it. [(geometry, material, smooth)]"""
     sh, el, wr = V(sh), V(el), V(wr)
-    items = [(g.tube([sh, (sh + el) * 0.5, el, (el + wr) * 0.5, wr], [0.052 * w, 0.048 * w, 0.043 * w, 0.045 * w, 0.052 * w], n=8), F.B.main, True)]
+    items = [(g.tube([sh, (sh + el) * 0.5, el, (el + wr) * 0.5, wr], [0.052 * w, 0.048 * w, 0.043 * w, 0.045 * w, 0.052 * w], n=8), F.B.under, True)]
     if cuff:
         d = (wr - el).normalized()
         u, v = g._frame(d)
-        items.append((sk.hoop(wr, 0.053 * w, 0.053 * w, 0.0065, n=10, u=u, v=v, sides=5), F.thread, True))
+        items.append((sk.hoop(wr, 0.053 * w, 0.053 * w, 0.0065 * F.tw, n=10, u=u, v=v, sides=5), F.thread, True))
     return items
 
 
@@ -476,7 +478,7 @@ def plan_figure(B, spec):
         tatters(F, L=0.6 if legs else (0.78 if spec.get("ground") else 1.0))
     for st, size in each(spec.get("arms", "hang")):
         arms(F, st, size)
-    if bd.get("wisps", 1.0):
+    if bd.get("wisps", 0.0):
         wisps(F)
     B.frame(F.top, front=-0.13, mid=F.zsh - 0.08, half=0.17 * F.broad)
     B.socket("socket_eyes", F.P(F.hood_at(0, -0.128, 0.682)))
@@ -633,7 +635,7 @@ def plan_door(B, spec):
     # the doorway: two posts, a lintel, a step
     B.add(g.merge(g.box((w + 0.055, 0.01, z0 + h / 2), (0.06, 0.1, h)), g.box((-(w + 0.055), 0.01, z0 + h / 2), (0.06, 0.1, h))), "wood_grey", False)
     B.add(g.box((0, 0.01, z0 + h + 0.03), (2 * w + 0.24, 0.12, 0.06)), "wood_grey_pale", False)
-    B.extend(sk.flags((0, -0.03, z0), 2 * w + 0.32, 0.28, nx=2, ny=1, thick=0.045, names=("stone_step", "stone_flag_pale")))
+    B.extend(sk.flags((0, -0.03, z0), 2 * w + 0.32, 0.28, nx=2, ny=1, thick=0.045, names=("stone_step", "stone_worn")))
     # the leaf
     zs = z0 + h * 0.58          # its shoulders: the rail its hood stands on
     leaf = g.merge(g.box((w - 0.03, 0, (z0 + zs) / 2), (0.05, 0.034, zs - z0)), g.box((-(w - 0.03), 0, (z0 + zs) / 2), (0.05, 0.034, zs - z0)), g.box((0, 0, zs), (2 * w - 0.01, 0.036, 0.055)))
@@ -707,7 +709,6 @@ def plan_hatch(B, spec):
         items[-2] = (items[-2][0], "brick_dust", True)       # brick dust on what would be its fingers
         B.extend(items)
         F.hands["l" if s > 0 else "r"] = wr
-    wisps(F)
     hangs(B, [(-0.3, -0.25, zf - 0.045), (0.32, -0.2, zf - 0.045), (0.3, 0.26, zf - 0.045), (-0.32, 0.2, zf - 0.045), (0.0, 0.0, zf - 0.04)], L=0.12)
     top = F.P(Vector((0, 0, F.top))).z
     B.frame(top, front=-0.14, mid=0.4, half=0.28)
@@ -780,16 +781,16 @@ def plan_streak(B, spec):
     B.add(g.tube(pts, rr, n=10), main, True)
     B.add(g.tube([p + Z * (r + 0.001) for p, r in zip(pts[2:13], rr[2:13])], 0.006, n=4), F.thread, True)       # a thread along its back
     # the hood, low and forward
-    hc = Vector((0, -0.3, 0.5))
-    B.add(g.ico(hc, 0.1, sub=2, scale=(0.95, 1.25, 0.86)), main)
-    fc = Vector((0, -0.375, 0.478))
+    hc = Vector((0, -0.27, 0.545))
+    B.add(g.ico(hc, 0.105, sub=2, scale=(0.95, 1.05, 0.92)), main)
+    fc = Vector((0, -0.365, 0.535))
     B.add(g.ico(fc + Vector((0, 0.03, 0.004)), 0.082, sub=2, scale=(0.95, 0.5, 0.8)), "accent", True)
     B.add(g.ico(fc + Vector((0, 0.022, 0.002)), 0.072, sub=2, scale=(0.92, 0.5, 0.78)), "void", True)
     B.add(sk.hoop(fc + Vector((0, 0.004, 0)), 0.073, 0.06, 0.006, n=16, u=X, v=Vector((0, -0.3, 0.95)).normalized(), sides=5), F.thread, True)
     e = fc + Vector((0, -0.016, 0.004))
     B.move("blink", "eyes", [(sk.eye_pair(e, 0.03, 0.024, scale=(1.2, 0.45, 0.55), slant=0.28), field("eyes", 3.8), True)], e)
     for s in (1, -1):
-        sh, el, wr = Vector((s * 0.1, -0.1, 0.52)), Vector((s * 0.17, -0.34, 0.47)), Vector((s * 0.11, -0.6, 0.44))
+        sh, el, wr = Vector((s * 0.1, -0.1, 0.5)), Vector((s * 0.19, -0.34, 0.42)), Vector((s * 0.13, -0.6, 0.37))
         B.extend(limb(F, sh, el, wr, d=Vector((-s * 0.1, -1, -0.12)), w=0.95, finger=1.25, hook=0.7))
         F.hands["l" if s > 0 else "r"] = wr
     stream = [None, None]
@@ -802,14 +803,14 @@ def plan_streak(B, spec):
     B.move("sway", "stream_a", [(stream[0], under, True)], spine[2])
     B.move("sway", "stream_b", [(stream[1], main, True)], spine[3])
     # what was sent
-    a0, a1 = Vector((-0.02, -0.2, 0.36)), Vector((-0.02, -0.84, 0.385))
+    a0, a1 = Vector((-0.24, 0.0, 0.3)), Vector((-0.24, -0.8, 0.325))
     d = (a1 - a0).normalized()
-    B.add(g.tube([a0, a1], 0.0065, n=5), "wood_grey_pale", False)
-    B.add(g.cone(a1, a1 + d * 0.06, 0.018, n=4), "metal_iron_light", False)
+    B.add(g.tube([a0, a1], 0.008, n=5), "wood_grey_pale", False)
+    B.add(g.cone(a1, a1 + d * 0.08, 0.024, n=4), "metal_iron_light", False)
     fl = None
     for i in range(3):
         n = Vector((math.cos(i * 2.1), 0, math.sin(i * 2.1)))
-        fl = g.merge(fl, g.blade(a0 + d * 0.01, a0 + d * 0.11 + n * 0.012, 0.05, normal=n.cross(d), belly=0.35))
+        fl = g.merge(fl, g.blade(a0 + d * 0.01 + n * 0.03, a0 + d * 0.16 + n * 0.008, 0.06, normal=n.cross(d), belly=0.3))
     B.add(fl, "accent_light", False)
     F.top, F.zsh, F.neck = 0.62, 0.52, 0.5
     B.frame(0.62, front=-0.4, mid=0.5, half=0.16)
@@ -824,21 +825,21 @@ def plan_corner(B, spec):
     main, under = B.main, B.under
     F = Fig(B, {"hem": 0.2, "tall": 1.0})
     c = Vector((0, 0, 0.78))
-    # the corner it keeps to: broken off where the plaster ends
-    A = Vector((0.2, 0.26, 1.02))
-    back = [A, Vector((-0.5, 0.26, 1.02)), Vector((-0.54, 0.26, 0.86)), Vector((-0.4, 0.26, 0.74)), Vector((-0.24, 0.26, 0.8)), Vector((-0.1, 0.26, 0.62)), Vector((0.06, 0.26, 0.7)), Vector((0.2, 0.26, 0.52))]
-    side = [A, Vector((0.2, 0.26, 0.52)), Vector((0.2, 0.1, 0.66)), Vector((0.2, -0.06, 0.6)), Vector((0.2, -0.2, 0.76)), Vector((0.2, -0.36, 0.84)), Vector((0.2, -0.4, 1.02))]
-    top = [A, Vector((0.2, -0.4, 1.02)), Vector((0.04, -0.3, 1.02)), Vector((-0.16, -0.16, 1.02)), Vector((-0.3, -0.02, 1.02)), Vector((-0.5, 0.26, 1.02))]
+    # the corner it keeps to, and goes about with: two walls broken off where the plaster ends,
+    # the cornice along the top of them, and a lip of the ceiling
+    A = Vector((0.2, 0.26, 1.05))
+    back = [A, Vector((-0.52, 0.26, 1.05)), Vector((-0.55, 0.26, 0.84)), Vector((-0.42, 0.26, 0.7)), Vector((-0.26, 0.26, 0.78)), Vector((-0.1, 0.26, 0.56)), Vector((0.06, 0.26, 0.66)), Vector((0.2, 0.26, 0.46))]
+    side = [A, Vector((0.2, 0.26, 0.46)), Vector((0.2, 0.1, 0.62)), Vector((0.2, -0.06, 0.54)), Vector((0.2, -0.2, 0.72)), Vector((0.2, -0.36, 0.82)), Vector((0.2, -0.42, 1.05))]
 
-    def slab(poly, n, t=0.03):
+    def slab(poly, n, t=0.035):
         n = V(n)
         m = len(poly)
         verts = [p for p in poly] + [p + n * t for p in poly]
         return verts, [tuple(range(m - 1, -1, -1)), tuple(range(m, 2 * m))] + [(i, (i + 1) % m, m + (i + 1) % m, m + i) for i in range(m)]
-    B.add(slab(back, Y), "plaster", False)
-    B.add(slab(side, X), "plaster_dark", False)
-    B.add(slab(top, Z), "plaster_pale", False)
-    B.add(g.merge(g.tube([A + Vector((-0.01, -0.012, -0.012)), Vector((-0.5, 0.248, 1.008))], 0.012, n=4), g.tube([A + Vector((-0.012, -0.01, -0.012)), Vector((0.188, -0.4, 1.008))], 0.012, n=4)), "plaster_pale", False)
+    B.add(slab(back, Y), "plaster_dark", False)
+    B.add(slab(side, X), "plaster", False)
+    B.add(g.merge(g.box((-0.16, 0.2, 1.065), (0.74, 0.14, 0.03)), g.box((0.15, -0.08, 1.065), (0.13, 0.7, 0.03))), "plaster", False)
+    B.add(g.merge(g.box((-0.16, 0.24, 1.03), (0.72, 0.03, 0.03)), g.box((0.18, -0.08, 1.03), (0.03, 0.66, 0.03))), "plaster_pale", False)
     # the clot
     B.add(g.ico(c, 0.2, sub=2, scale=(1.15, 0.95, 0.72)), main)
     lobes = None
@@ -846,7 +847,7 @@ def plan_corner(B, spec):
         lobes = g.merge(lobes, g.ico(c + Vector((dx, dy, dz)), r, sub=2, scale=(1.1, 1.0, 0.8), rot=(0, 0, i)))
     B.add(lobes, under)
     strands = None
-    for tip in (Vector((-0.44, 0.25, 0.98)), Vector((0.19, -0.3, 0.98)), Vector((0.18, 0.24, 1.0))):
+    for tip in (Vector((-0.44, 0.25, 0.98)), Vector((0.19, -0.3, 0.98)), Vector((0.18, 0.24, 1.02))):
         d = tip - c
         strands = g.merge(strands, g.tube([c + d * 0.3, c + d * 0.65 + Z * 0.02, tip], [0.03, 0.016, 0.006], n=5))
     B.add(strands, main, True)
@@ -902,7 +903,10 @@ def plan_tree(B, spec):
     its Path's colour still on it, and two eyes like holes in the hedge."""
     main, under = B.main, B.under
     F = Fig(B, {"hem": 0.2, "tall": 1.0})
-    B.add(g.lathe([(0.11, 0.06), (0.085, 0.2), (0.075, 0.5), (0.07, 0.8), (0.08, 0.92), (0.06, 1.02), (0.0, 1.08)], n=12), main)
+    bark = [g.ring((0, 0, zz), r, r, n=12) for r, zz in ((0.11, 0.06), (0.085, 0.2), (0.075, 0.5), (0.07, 0.8), (0.08, 0.92), (0.06, 1.02), (0.004, 1.08))]
+    a, b = _pleats(bark, 12)
+    B.add(a, main, True)
+    B.add(b, under, True)
     roots = None
     for i in range(6):
         a = 2 * math.pi * i / 6 + 0.3
@@ -920,15 +924,16 @@ def plan_tree(B, spec):
     for s, lift in ((1, 0.0), (-1, 0.08)):
         b0, b1, b2 = Vector((s * 0.06, 0, 0.82)), Vector((s * 0.2, -0.02, 0.98 + lift)), Vector((s * 0.3, 0.0, 1.2 + lift))
         B.add(g.tube([b0, b1, b2], [0.04, 0.028, 0.012], n=6), main, True)
-        twigs, leaves = None, None
+        twigs, leaves, pale = None, None, None
         for j, (dx, dy, dz) in enumerate(((0.12, -0.03, 0.14), (0.02, 0.05, 0.2), (-0.06, -0.04, 0.17))):
             tip = b2 + Vector((s * dx, dy, dz)) * 1.2
             twigs = g.merge(twigs, g.tube([b2, b2 + Vector((s * dx, dy, dz)) * 0.6, tip], [0.012, 0.008, 0.002], n=4))
-            leaves = g.merge(leaves, g.blade(tip, tip + Vector((s * 0.03, -0.01, -0.1)), 0.06, normal=Y), g.blade(tip - Vector((s * dx, dy, dz)) * 0.5, tip - Vector((s * dx, dy, dz)) * 0.5 + Vector((-s * 0.05, -0.01, -0.09)), 0.05, normal=Y))
+            leaves = g.merge(leaves, g.blade(tip, tip + Vector((s * 0.04, -0.01, -0.14)), 0.085, normal=Y))
+            pale = g.merge(pale, g.blade(tip - Vector((s * dx, dy, dz)) * 0.5, tip - Vector((s * dx, dy, dz)) * 0.5 + Vector((-s * 0.06, -0.01, -0.12)), 0.075, normal=Y))
         tw2 = b1 + Vector((s * 0.02, 0, 0.02))
         twigs = g.merge(twigs, g.tube([tw2, tw2 + Vector((s * 0.13, -0.04, 0.02)), tw2 + Vector((s * 0.2, -0.06, 0.1))], [0.014, 0.009, 0.002], n=4))
-        leaves = g.merge(leaves, g.blade(tw2 + Vector((s * 0.2, -0.06, 0.1)), tw2 + Vector((s * 0.22, -0.07, 0.0)), 0.06, normal=Y))
-        B.move("sway", "bough", [(twigs, under, True), (leaves, "accent", False)], b2, side="l" if s > 0 else "r")
+        leaves = g.merge(leaves, g.blade(tw2 + Vector((s * 0.2, -0.06, 0.1)), tw2 + Vector((s * 0.23, -0.07, -0.04)), 0.085, normal=Y))
+        B.move("sway", "bough", [(twigs, under, True), (leaves, "accent", False), (pale, F.thread, False)], b2, side="l" if s > 0 else "r")
         F.hands["l" if s > 0 else "r"] = b2
     # eyes like two holes in the hedge
     holes, rims, lights = None, None, None
@@ -957,9 +962,10 @@ def legs_stilts(B, F, size):
         hip = Vector((s * 0.035, 0.0, F.hem + 0.02))
         knee = hip + Vector((s * 0.015, -0.02, -0.26 * size))
         foot = hip + Vector((s * 0.02, 0.0, -0.52 * size))
-        B.add(g.tube([hip, knee, foot], [0.03, 0.021, 0.013], n=6), B.main, True)
-        B.add(g.tongue([foot + Vector((0, 0.02, 0)), foot + Vector((0, -0.08, -0.015))], [0.04, 0.008], thick=0.5, normal=Z), B.under)
+        B.add(g.tube([hip, knee, foot], [0.03, 0.021, 0.013], n=6), B.under, True)
+        B.add(g.tongue([foot + Vector((0, 0.02, 0)), foot + Vector((0, -0.08, -0.015))], [0.04, 0.008], thick=0.5, normal=Z), B.main)
         B.add(sk.hoop(knee, 0.025, 0.025, 0.005, n=8, sides=4), F.thread, True)
+    F.floor = F.hem + 0.02 - 0.52 * size - 0.02
 
 
 def legs_back(B, F, size):
@@ -969,10 +975,11 @@ def legs_back(B, F, size):
         knee = hip + Vector((s * 0.05, 0.2 * size, -0.12 * size))
         ank = hip + Vector((s * 0.06, -0.06 * size, -0.36 * size))
         foot = hip + Vector((s * 0.06, 0.02 * size, -0.52 * size))
-        B.add(g.tube([hip, knee, ank, foot], [0.036, 0.025, 0.018, 0.013], n=6), B.main, True)
-        B.add(g.ico(knee, 0.03, sub=1), B.under, True)
+        B.add(g.tube([hip, knee, ank, foot], [0.036, 0.025, 0.018, 0.013], n=6), B.under, True)
+        B.add(g.ico(knee, 0.03, sub=1), B.main, True)
         B.add(sk.hoop(ank, 0.022, 0.022, 0.005, n=8, sides=4), F.thread, True)
         B.extend(hand_of(F, foot + Vector((0, 0.01, 0)), Vector((0, -1, -0.2)), k=0.8, hook=0.35, n=3, spread=0.02))
+    F.floor = F.hem + 0.04 - 0.52 * size - 0.05
 
 
 def legs_roots(B, F, size):
@@ -987,12 +994,12 @@ def legs_roots(B, F, size):
 def ground_long(B, F, size):
     """It stretches long across the boards of a floor, and there are eyes in it. The boards are the
     floor it lies on, and go where it goes."""
-    z0 = F.hem - 0.24
-    B.extend(sk.planks((-0.36 * size, 0.07 * size, z0 - 0.014), 1.08 * size, 0.56 * size, n=4, turn=-0.2))
-    pts = [Vector((0, 0.02, z0)), Vector((-0.2, 0.06, z0 - 0.005)), Vector((-0.48, 0.14, z0 - 0.01)), Vector((-0.78, 0.2, z0 - 0.01))]
+    z0 = F.floor + 0.014
+    B.extend(sk.planks((-0.3 * size, 0.06 * size, z0 - 0.014), 0.92 * size, 0.5 * size, n=4, turn=-0.2))
+    pts = [Vector((0, 0.02, z0)), Vector((-0.18, 0.05, z0 - 0.004)), Vector((-0.42, 0.12, z0 - 0.008)), Vector((-0.68, 0.17, z0 - 0.008))]
     pts = [Vector((p.x * size, p.y * size, p.z)) for p in pts]
     B.add(g.tongue(pts, [0.24 * size, 0.34 * size, 0.27 * size, 0.03], thick=0.1, normal=Z), B.main)
-    B.add(g.tongue([Vector((0, 0, F.hem)), Vector((-0.03, 0.01, F.hem - 0.12)), pts[0]], [0.1, 0.12, 0.2], thick=0.5, normal=-Y), B.main)
+    B.add(g.tongue([Vector((0, 0, min(F.hem, z0 + 0.24))), Vector((-0.02, 0.01, z0 + 0.1)), pts[0]], [0.1, 0.12, 0.2], thick=0.5, normal=-Y), B.main)
     # the eyes in it: each on a swell of the shadow, looking up the room
     eyes, lids, swell = None, None, None
     for i, t in enumerate((0.3, 0.56, 0.8)):
@@ -1004,12 +1011,12 @@ def ground_long(B, F, size):
     B.add(swell, B.under)
     B.move("blink", "eyes_long", [(eyes, field("eyes", 3.2), True)], pts[0] + (pts[3] - pts[0]) * 0.56 + Vector((0, -0.06, 0.044)))
     B.add(lids, F.thread, True)
-    hangs(B, [Vector((x * size, y * size, z0 - 0.045)) for x, y in ((-0.05, 0.1), (-0.35, -0.08), (-0.6, 0.22), (-0.78, 0.05))], L=0.1)
+    hangs(B, [Vector((x * size, y * size, z0 - 0.045)) for x, y in ((-0.02, 0.1), (-0.3, -0.08), (-0.5, 0.2), (-0.66, 0.04))], L=0.1)
 
 
 def ground_cohort(B, F, size):
     """Twelve small shapes stand round its hem, on the round of floor they share."""
-    zf = F.hem - 0.27
+    zf = F.floor
     B.add(sk.disc((0, 0, zf - 0.035), 0.4 * size, thick=0.035, n=18, squash=0.86), "stone_flag", False)
     B.add(sk.hoop((0, 0, zf + 0.001), 0.22 * size, 0.19 * size, 0.008, n=18, sides=4), "stone_flag_pale", False)
     groups = [[None, None, None] for _ in range(3)]
@@ -1019,10 +1026,10 @@ def ground_cohort(B, F, size):
         h = 1.0 + 0.2 * ((i * 5) % 3)
         c = d * 0.31 * size + Z * zf
         grp = groups[i % 3]
-        grp[0] = g.merge(grp[0], g.lathe([(0.0, 0.0), (0.036, 0.01), (0.03, 0.07 * h), (0.04, 0.1 * h), (0.031, 0.135 * h), (0.0, 0.16 * h)], n=8, centre=c))
-        grp[1] = g.merge(grp[1], sk.hoop(c + Z * 0.074 * h, 0.032, 0.032, 0.006, n=8, sides=4))
+        grp[0] = g.merge(grp[0], g.lathe([(0.0, 0.0), (0.036, 0.01), (0.03, 0.07 * h), (0.04, 0.1 * h), (0.031, 0.135 * h), (0.0, 0.16 * h)], n=6, centre=c))
+        grp[1] = g.merge(grp[1], sk.hoop(c + Z * 0.074 * h, 0.032, 0.032, 0.006, n=6, sides=3))
         if d.y < 0.3:
-            grp[2] = g.merge(grp[2], sk.eye_pair(c + Vector((d.x * 0.02, -0.036, 0.108 * h)), 0.013, 0.008, scale=(1, 0.6, 1), slant=0.0))
+            grp[2] = g.merge(grp[2], g.ico(c + Vector((d.x * 0.02 + 0.013, -0.036, 0.108 * h)), 0.008, sub=0), g.ico(c + Vector((d.x * 0.02 - 0.013, -0.036, 0.108 * h)), 0.008, sub=0))
     for j, grp in enumerate(groups):
         B.move("bob", "cohort_" + "abc"[j], [(grp[0], B.under, True), (grp[1], F.thread, True), (grp[2], field("eyes", 2.6), True)], (0, 0, zf))
     hangs(B, [(0.2, 0.1, zf - 0.06), (-0.22, 0.05, zf - 0.06), (0.0, -0.2, zf - 0.06)], L=0.1)
@@ -1044,7 +1051,7 @@ def ground_ring(B, F, size):
 def ground_wall(B, F, size):
     """The wall it listens at, and the floor at the foot of it."""
     x = 0.36
-    zf = F.hem - 0.3
+    zf = F.floor - 0.09
     rows = [None, None]
     for r in range(6):
         for c in range(3):
@@ -1058,8 +1065,8 @@ def ground_wall(B, F, size):
 
 def ground_sill(B, F, size):
     """The sill it keeps: a worn stone step, as wide as a door, and it stands on it."""
-    zf = F.hem - 0.25
-    B.extend(sk.flags((0, -0.02, zf), 0.86 * size, 0.3, nx=3, ny=1, thick=0.055, names=("stone_step", "stone_flag_pale")))
+    zf = F.floor
+    B.extend(sk.flags((0, -0.02, zf), 0.86 * size, 0.3, nx=3, ny=1, thick=0.055, names=("stone_step", "stone_worn")))
     hangs(B, [(x * size, 0.0, zf - 0.07) for x in (-0.34, -0.12, 0.14, 0.34)], L=0.11)
 
 
@@ -1119,13 +1126,14 @@ def wears_script(B, F, size):
 def wears_cape(B, F, size):
     """The cloak thrown back behind it, as if it had moved: it shows its lining at the edges, and sways."""
     z = F.zsh
-    over, lining_ = None, None
+    over, lining_, edge = None, None, None
     for s in (1, -1):
         pts = [Vector((s * 0.1, 0.06, z + 0.02)), Vector((s * 0.2, 0.22 * size, z - 0.04)), Vector((s * 0.25, 0.46 * size, z - 0.16)), Vector((s * 0.18, 0.66 * size, z - 0.24))]
         over = g.merge(over, g.tongue(pts, [0.16, 0.24, 0.2, 0.02], thick=0.2, normal=(s * 0.4, 0, 1)))
-        lining_ = g.merge(lining_, g.tongue([p + Vector((s * 0.02, 0.012, -0.016)) for p in pts], [0.18, 0.27, 0.23, 0.03], thick=0.12, normal=(s * 0.4, 0, 1)))
+        edge = g.merge(edge, g.tube([p + Vector((s * w * 0.56, 0, 0.004)) for p, w in zip(pts, (0.16, 0.24, 0.2, 0.02))], 0.006 * F.tw, n=4))
+        lining_ = g.merge(lining_, g.tongue([p + Vector((s * 0.02, 0.012, -0.016)) for p in pts], [0.2, 0.3, 0.26, 0.04], thick=0.12, normal=(s * 0.4, 0, 1)))
     mid = [Vector((0, 0.08, z + 0.02)), Vector((0, 0.3 * size, z - 0.08)), Vector((0, 0.56 * size, z - 0.22)), Vector((0, 0.78 * size, z - 0.3))]
-    F.mv("sway", "cape", [(over, B.under, True), (g.tongue(mid, [0.2, 0.26, 0.2, 0.02], thick=0.2, normal=Z), B.main, True), (lining_, "accent", True)], (0, 0.07, z + 0.02))
+    F.mv("sway", "cape", [(over, B.under, True), (g.tongue(mid, [0.2, 0.26, 0.2, 0.02], thick=0.2, normal=Z), B.under, True), (lining_, "accent", True), (edge, F.thread, True)], (0, 0.07, z + 0.02))
 
 
 def wears_shawl(B, F, size):
@@ -1156,7 +1164,7 @@ def wears_rime(B, F, size):
         d = Vector((math.cos(a), -math.sin(a) * 0.5, 0))
         b = d * 0.15 * F.broad + Z * (F.zsh + 0.03)
         geo = g.merge(geo, sk.crystal(b, b + d * 0.04 + Z * 0.08 * size, 0.014, n=4))
-    F.put(geo, "ice_pale")
+    F.put(geo, "ice_pale", True)
 
 
 def chest_maw(B, F, size):
@@ -1172,7 +1180,7 @@ def chest_maw(B, F, size):
         rim = g.merge(rim, g.blade(p + Vector((0.02 * math.cos(a), 0, 0.02 * math.sin(a))), p + Vector((-0.085 * math.cos(a), -0.014, -0.07 * math.sin(a))) * 1.0, 0.045 * size, normal=-Y, belly=0.25))
     F.put(rim, B.under)
     low = c + Vector((0, -0.02, -0.02 * size))
-    F.mv("pulse", "maw", [(g.ico(low, 0.042 * size, sub=2, scale=(1.5 * F.broad, 0.3, 0.7)), field("maw", 2.0), True)], low)
+    F.mv("pulse", "maw", [(g.ico(low, 0.024 * size, sub=2, scale=(1.5 * F.broad, 0.3, 0.7)), field("maw", 1.3), True)], low)
 
 
 def chest_keyhole(B, F, size):
@@ -1357,7 +1365,7 @@ def holds_bar(B, F, size):
     bands = None
     for x in (-L + 0.03, -L * 0.45, L * 0.45, L - 0.03):
         bands = g.merge(bands, g.box(mid + Vector((x, 0, 0)), (0.03, 0.058, 0.068)))
-    B.add(bands, "metal_iron", False)
+    B.add(bands, "wood_black", False)
     B.add(g.merge(g.box(mid + Vector((-L - 0.006, 0, 0)), (0.014, 0.056, 0.066)), g.box(mid + Vector((L + 0.006, 0, 0)), (0.014, 0.056, 0.066))), F.thread, False)
     F.bar = (mid, L)
 
@@ -1383,9 +1391,9 @@ def aura_veils(B, F, size):
 
 def aura_breath(B, F, size):
     """Your breath shows when it is near."""
-    c = F.P(F.hood_at(0, -0.17, 0.63))
+    c = F.P(F.hood_at(0, -0.19, 0.59))
     geo = None
-    for i, (dy, dz, r) in enumerate(((0.0, 0.0, 0.018), (-0.06, 0.02, 0.026), (-0.13, 0.055, 0.034))):
+    for i, (dy, dz, r) in enumerate(((0.0, 0.0, 0.011), (-0.05, 0.012, 0.015), (-0.11, 0.035, 0.02))):
         geo = g.merge(geo, sk.cloud([(c + Vector((0.012 * i, dy * size, dz * size)), r * size * 1.2, (1.2, 1.0, 0.8)), (c + Vector((0.012 * i + r, dy * size - r * 0.5, dz * size + r * 0.3)), r * size * 0.8)], res=0.012))
     B.move("bob", "breath", [(geo, "veil", True)], c)
 
