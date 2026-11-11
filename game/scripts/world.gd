@@ -4590,7 +4590,10 @@ static func declutter(rects: Array) -> Array:
 func _update_figures(f: Fight, dt: float) -> void:
 	# which names have room: nearest to the hero first
 	var order: Array = _figures.filter(func(g): return (f.p_pos - g["pos"]).length() < 7.0)
-	order.sort_custom(func(a, b): return (f.p_pos - a["pos"]).length_squared() < (f.p_pos - b["pos"]).length_squared())
+	order.sort_custom(func(a, b):
+		if a.get("lead", false) != b.get("lead", false):
+			return a.get("lead", false)
+		return (f.p_pos - a["pos"]).length_squared() < (f.p_pos - b["pos"]).length_squared())
 	var rects: Array = []
 	var vp_h := get_viewport().get_visible_rect().size.y
 	for g in order:
@@ -4622,7 +4625,7 @@ func _update_figures(f: Fight, dt: float) -> void:
 			node.visible = camera.global_position.distance_to(node.global_position + Vector3(0, 1.0, 0)) > 2.6
 		else:
 			node.visible = true
-		l.modulate.a = move_toward(l.modulate.a, a, dt * 3.0)
+		l.modulate.a = move_toward(l.modulate.a, a, dt * (3.0 if a > l.modulate.a else 7.0))
 		l.outline_modulate.a = l.modulate.a * 0.8
 
 ## Put the camera straight behind the hero along the current yaw, with no glide in.

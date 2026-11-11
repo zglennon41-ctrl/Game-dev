@@ -98,6 +98,7 @@ func _run() -> void:
 	test_types_items()
 	test_types_roles()
 	test_types_need_and_bots()
+	test_first_hour()
 	Data.use_types(game_types)
 	test_blood_marks()
 	test_life_features()
@@ -4157,3 +4158,55 @@ func test_types_need_and_bots() -> void:
 				broke.append(fid)
 	check(broke.is_empty(), "every base of the game fights through with a bot at its key (%s)" % ", ".join(broke))
 	check(unused.is_empty(), "and a bot finds a use for every weapon and item (%s)" % ", ".join(unused))
+
+## The Academy's first hour: the pieces of its presentation that can be checked without a screen.
+func test_first_hour() -> void:
+	# the objective in two parts
+	var o := Academy.split_objective("Lesson 1 · Hold: find Yardmaster Bask in the Yard (the west door of the quad). Meet your cohort on the way.")
+	check(o[0] == "LESSON 1 · HOLD" and String(o[1]).begins_with("Find Yardmaster Bask"), "the objective splits into a heading and what to do")
+	o = Academy.split_objective("Day 2 · Rest in the Dormitory (the east door of the quad).")
+	check(o[0] == "DAY 2" and String(o[1]).begins_with("Rest in the Dormitory"), "a day's objective takes the day as its heading")
+	o = Academy.split_objective("Settled. The line is waiting; the Academy is yours to walk.")
+	check(o[0] == "" and String(o[1]).begins_with("Settled."), "and a line with no heading is left whole")
+	# the day's card and the place's name
+	check(Academy.day_card_sub("Tuesday", "the Thaw", "") == "Tuesday of the Thaw", "a day known for nothing has no dangling mark on its card")
+	check(Academy.day_card_sub("Friday", "the Thaw", "Rally night in the cities") == "Friday of the Thaw  ·  Rally night in the cities", "and a day known for something says so")
+	check(not Academy.place_card_may_show(1.0, false) and not Academy.place_card_may_show(0.3, false) and not Academy.place_card_may_show(0.0, true) and Academy.place_card_may_show(0.0, false),
+		"the place's name never shows with the day's card, nor while the night passes")
+	# a step done
+	check(Academy.step_done_line(0, 4, 1) == "1 of 4 done" and Academy.step_done_line(3, 4, 1) == "Lesson 1 learned", "a step done says how far through; the last names the lesson learned")
+	# a conversation's frame: off the shoulder, on the speaker, clear of an Instructor's genius
+	var f := Academy.talk_frame(Vector2(0, 8), Vector2(2, 7))
+	var cam := Vector2((f[0] as Vector3).x, (f[0] as Vector3).z)
+	var line := (Vector2(2, 7) - cam).normalized()
+	var off := absf((Vector2(0, 8) - cam).cross(line))
+	check(off > 0.8 and (cam - Vector2(0, 8)).length() < 3.5 and (f[1] as Vector3).x == 2.0, "the camera stands off the listener's shoulder and looks at the speaker (%.2f m clear)" % off)
+	var fa := Academy.talk_frame(Vector2(0, 0), Vector2(0, -3), Vector2(1.6, -2.2))
+	var fb := Academy.talk_frame(Vector2(0, 0), Vector2(0, -3), Vector2(-1.6, -2.2))
+	check((fa[0] as Vector3).x < 0.0 and (fb[0] as Vector3).x > 0.0, "and takes the shoulder away from a genius sitting by its Instructor")
+	# names over heads
+	var room := World.declutter([Rect2(100, 100, 200, 50), Rect2(150, 120, 200, 50), Rect2(400, 100, 200, 50), Rect2(320, 110, 60, 50)])
+	check(room == [true, false, true, true], "names over heads give way to nearer names they would run through (and only to names that show)")
+	# the rite's staging
+	check(RiteScene.camera_side(1.5) == -1.0 and RiteScene.camera_side(-1.5) == 1.0, "the rite's camera keeps to the side of the bowl the partner is not on")
+	var spots := [RiteScene.feature_spot(0), RiteScene.feature_spot(1), RiteScene.feature_spot(2)]
+	check(spots[0].x < 0.0 and spots[1].x > 0.0 and spots[2].y - spots[0].y >= 0.9, "a genius's features are called to either side of the light, never one over another")
+	check(GeniusCard.portrait_scale(0.2) > 2.0 and is_equal_approx(GeniusCard.portrait_scale(0.8), 1.0), "a very small genius is brought up in its portrait; a larger one is left alone")
+	# the arrival's card is in the data, and the way-marker finds its way
+	check(String(Data.academy["arrival"].get("card", {}).get("title", "")) != "", "the arrival names the place (data/academy.json, arrival.card)")
+	var a := Academy.new()
+	a.hero = Creation.generate([0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "", 3)
+	a.cohort = Academy.make_cohort(42, a.hero)
+	a.progress = { "seed": 42, "arrived": true, "done": [], "met": [], "day": 1, "rested_after": "", "place": "quad", "record": { "talks": 0 } }
+	a._doors = Data.academy["places"]["quad"]["doors"]
+	var g := a.guide_goal()
+	check(String(g.get("label", "")) == "The Yard" and (g["pos"] as Vector2).x < -10.0, "on the first day the way-marker stands on the Yard's door")
+	a.progress["place"] = "yard"
+	a._doors = Data.academy["places"]["yard"]["doors"]
+	a._people = [{ "kind": "instructor", "id": "bask", "name": "Bask", "pos": Vector2(1, 2) }]
+	check(a.guide_goal().get("pos", Vector2.ZERO) == Vector2(1, 2), "and in the yard, over the Yardmaster")
+	a.progress["done"] = ["hold"]
+	check(String(a.guide_goal().get("label", "")) == "The Quad", "after the lesson it points the way back out, toward the dormitory")
+	a.progress["arrived"] = false
+	check(a.guide_goal().is_empty(), "and it says nothing before the newcomer has arrived")
+	a.free()

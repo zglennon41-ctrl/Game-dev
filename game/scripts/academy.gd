@@ -495,6 +495,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 		ilook.merge({ "dress": "master", "headgear": true, "cape": false }, true)
 		ilook.merge(data.get("look", {}), true)
 		var fig := world.add_figure(data["body"], at, (spawn - at).angle(), data["name"], data.get("title", ""), "", Color(0, 0, 0, 0), ilook)
+		fig["lead"] = true    # an Instructor's name shows before a classmate's beside them
 		_people.append({ "kind": "instructor", "id": data["id"], "name": data["name"], "pos": at })
 		if data.has("genius"):
 			fight.w_state = "idle"
@@ -1399,7 +1400,8 @@ func update(events: Array, dt: float) -> void:
 		# The lost thing is the errand: within reach it wins over whoever stands beside it.
 		if _lost_at != Vector2.INF and (fight.p_pos - _lost_at).length() < 2.0:
 			_target = { "kind": "find", "pos": _lost_at }
-	_prompt.visible = not _target.is_empty()
+	# (the day's great card has the screen to itself)
+	_prompt.visible = not _target.is_empty() and _big.modulate.a < 0.05
 	if _prompt.visible:
 		match _target["kind"]:
 			"door": _prompt_label.text = ("E   " + ("Enter " if door_open(_target["door"]) else "Try ") + String(_target["door"]["label"]))
@@ -1995,8 +1997,9 @@ func _step_done_card(s: Dictionary) -> void:
 	_step_card.modulate.a = 0.0
 	_step_tw = _step_card.create_tween()
 	_step_tw.tween_property(_step_card, "modulate:a", 1.0, Style.t("quick"))
-	_step_tw.tween_interval(1.5 if last else 0.9)
-	_step_tw.tween_property(_step_card, "modulate:a", 0.0, Style.t("arrive"))
+	# (gone before the next step's words come up in the same place: the step holds one second)
+	_step_tw.tween_interval(1.5 if last else 0.55)
+	_step_tw.tween_property(_step_card, "modulate:a", 0.0, Style.t("arrive") if last else Style.t("quick"))
 
 var _step_tw: Tween
 
