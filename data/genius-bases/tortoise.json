@@ -47,7 +47,13 @@
   "habit": "It walks to the one warm flagstone in any room and stays there until carried.",
   "features": [
    "shell"
-  ]
+  ],
+  "body": {
+   "shell": "young",
+   "rim": "lip",
+   "neck": "peek",
+   "legs": "tucked"
+  }
  },
  "paths": [
   {
@@ -69,6 +75,21 @@
    "features": [
     "stone-skin"
    ],
+   "body": {
+    "build": {
+     "girth": 1.2,
+     "stance": 1.1,
+     "dome": 1.04
+    },
+    "shell": [
+     "stones",
+     1.0
+    ],
+    "rim": "marginals",
+    "neck": "out",
+    "legs": "set",
+    "coat": "slate"
+   },
    "prongs": [
     {
      "id": "tortoise-ridge-shell",
@@ -85,6 +106,17 @@
      "features": [
       "plated"
      ],
+     "body": {
+      "build": {
+       "girth": 1.25,
+       "stance": 1.12,
+       "dome": 0.94
+      },
+      "shell": [
+       "ridges",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "tortoise-hundred-scar",
@@ -100,7 +132,28 @@
        },
        "features": [
         "iron-hide"
-       ]
+       ],
+       "body": {
+        "build": {
+         "girth": 1.3,
+         "stance": 1.14,
+         "dome": 0.92,
+         "width": 1.05
+        },
+        "shell": [
+         "iron",
+         1.3
+        ],
+        "jaw": [
+         "old",
+         1.0
+        ],
+        "marks": [
+         "hoop",
+         1.0
+        ],
+        "coat": "iron"
+       }
       },
       {
        "id": "tortoise-anvil-back",
@@ -119,7 +172,25 @@
        },
        "features": [
         "brass-plate"
-       ]
+       ],
+       "body": {
+        "build": {
+         "girth": 1.42,
+         "stance": 1.16,
+         "dome": 0.8,
+         "flat": 0.8,
+         "width": 1.08
+        },
+        "shell": [
+         "ridges",
+         0.7
+        ],
+        "carry": [
+         "anvil",
+         1.2
+        ],
+        "coat": "iron"
+       }
       }
      ]
     },
@@ -138,6 +209,20 @@
      "features": [
       "ring"
      ],
+     "body": {
+      "build": {
+       "girth": 1.15,
+       "dome": 1.02
+      },
+      "shell": [
+       "dome",
+       1.0
+      ],
+      "rim": [
+       "ward",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "tortoise-ward-on-four-legs",
@@ -156,7 +241,22 @@
        },
        "features": [
         "standing-air"
-       ]
+       ],
+       "body": {
+        "build": {
+         "girth": 1.25,
+         "stance": 1.1,
+         "legs": 1.18
+        },
+        "rim": [
+         "ward",
+         1.4
+        ],
+        "carry": [
+         "ward",
+         1.2
+        ]
+       }
       },
       {
        "id": "tortoise-sworn-stone",
@@ -172,7 +272,25 @@
        },
        "features": [
         "ledger"
-       ]
+       ],
+       "body": {
+        "build": {
+         "girth": 1.25,
+         "dome": 0.9
+        },
+        "rim": [
+         "ward",
+         1.0
+        ],
+        "carry": [
+         "stele",
+         1.2
+        ],
+        "jaw": [
+         "old",
+         0.8
+        ]
+       }
       }
      ]
     },
@@ -194,6 +312,29 @@
      "features": [
       "fangs"
      ],
+     "body": {
+      "build": {
+       "dome": 0.8,
+       "length": 1.08,
+       "head": 1.25,
+       "beak": 1.2,
+       "legs": 0.85,
+       "wedge": 0.12
+      },
+      "shell": [
+       "stones",
+       0.8
+      ],
+      "rim": [
+       "spikes",
+       0.8
+      ],
+      "neck": "in",
+      "jaw": [
+       "hook",
+       1.3
+      ]
+     },
      "finishes": [
       {
        "id": "tortoise-second-beat-snapper",
@@ -209,7 +350,38 @@
        },
        "features": [
         "ring"
-       ]
+       ],
+       "body": {
+        "build": {
+         "dome": 0.74,
+         "length": 1.15,
+         "head": 1.4,
+         "beak": 1.2,
+         "legs": 0.9,
+         "wedge": 0.1,
+         "tail": 1.6
+        },
+        "shell": [
+         "ridges",
+         0.8
+        ],
+        "rim": [
+         "serrated",
+         0.8
+        ],
+        "neck": [
+         "long",
+         1.0
+        ],
+        "jaw": [
+         "gape",
+         1.0
+        ],
+        "tail": [
+         "long",
+         1.2
+        ]
+       }
       },
       {
        "id": "tortoise-patient-jaw",
@@ -228,7 +400,33 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "build": {
+         "dome": 0.85,
+         "length": 1.1,
+         "head": 1.6,
+         "beak": 1.3,
+         "legs": 0.85,
+         "girth": 1.35,
+         "wedge": 0.14,
+         "stance": 1.1,
+         "neck": 0.7
+        },
+        "rim": [
+         "spikes",
+         1.0
+        ],
+        "neck": "out",
+        "jaw": [
+         "chain",
+         1.0
+        ],
+        "marks": [
+         "hoop",
+         1.1
+        ]
+       }
       }
      ]
     }
@@ -255,6 +453,21 @@
    "features": [
     "set-feet"
    ],
+   "body": {
+    "build": {
+     "flat": 0.9,
+     "stance": 1.05
+    },
+    "shell": [
+     "dome",
+     1.0
+    ],
+    "legs": "set",
+    "carry": [
+     "cairn",
+     1.0
+    ]
+   },
    "prongs": [
     {
      "id": "tortoise-waymark-tortoise",
@@ -274,6 +487,25 @@
      "features": [
       "dial"
      ],
+     "body": {
+      "build": {
+       "flat": 0.7,
+       "dome": 0.9,
+       "width": 1.06,
+       "length": 1.02
+      },
+      "shell": "worn",
+      "carry": [
+       [
+        "gnomon",
+        1.0
+       ],
+       [
+        "pebbles",
+        1.0
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "tortoise-keystone-of-the-post",
@@ -292,7 +524,25 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "build": {
+         "flat": 0.7,
+         "dome": 0.92,
+         "width": 1.08,
+         "girth": 1.2
+        },
+        "carry": [
+         [
+          "post",
+          1.15
+         ],
+         [
+          "pebbles",
+          1.0
+         ]
+        ]
+       }
       },
       {
        "id": "tortoise-old-milestone",
@@ -311,7 +561,36 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "build": {
+         "flat": 0.75,
+         "dome": 0.95,
+         "neck": 1.2
+        },
+        "carry": [
+         [
+          "milestone",
+          1.15
+         ],
+         [
+          "pebbles",
+          1.2
+         ]
+        ],
+        "jaw": [
+         "old",
+         1.2
+        ],
+        "neck": [
+         "high",
+         0.8
+        ],
+        "marks": [
+         "dust",
+         1.0
+        ]
+       }
       }
      ]
     },
@@ -330,6 +609,30 @@
      "features": [
       "broad-chest"
      ],
+     "body": {
+      "build": {
+       "flat": 0.6,
+       "dome": 0.85,
+       "width": 1.14,
+       "length": 1.06,
+       "girth": 1.2,
+       "stance": 1.08
+      },
+      "shell": [
+       "dome",
+       0.8
+      ],
+      "carry": [
+       [
+        "packs",
+        1.0
+       ],
+       [
+        "pebbles",
+        0.9
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "tortoise-wagon-tortoise",
@@ -345,7 +648,26 @@
        },
        "features": [
         "wheels"
-       ]
+       ],
+       "body": {
+        "build": {
+         "flat": 0.55,
+         "dome": 0.85,
+         "width": 1.16,
+         "length": 1.12,
+         "girth": 1.25
+        },
+        "carry": [
+         [
+          "wagon",
+          1.1
+         ],
+         [
+          "pebbles",
+          0.9
+         ]
+        ]
+       }
       },
       {
        "id": "tortoise-hearth-on-its-back",
@@ -361,7 +683,30 @@
        },
        "features": [
         "ember"
-       ]
+       ],
+       "body": {
+        "build": {
+         "flat": 0.55,
+         "dome": 0.88,
+         "width": 1.16,
+         "girth": 1.3
+        },
+        "carry": [
+         [
+          "hearth",
+          1.15
+         ],
+         [
+          "pebbles",
+          0.9
+         ]
+        ],
+        "marks": [
+         "soot",
+         1.0
+        ],
+        "coat": "ember"
+       }
       }
      ]
     },
@@ -380,6 +725,27 @@
      "features": [
       "cold-core"
      ],
+     "body": {
+      "build": {
+       "dome": 1.12,
+       "width": 0.95,
+       "neck": 1.25,
+       "head": 0.95
+      },
+      "shell": [
+       "lit",
+       1.0
+      ],
+      "neck": [
+       "high",
+       0.75
+      ],
+      "jaw": [
+       "old",
+       1.3
+      ],
+      "coat": "ash"
+     },
      "finishes": [
       {
        "id": "tortoise-of-the-old-hall",
@@ -395,7 +761,28 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "build": {
+         "dome": 1.15,
+         "width": 1.0,
+         "neck": 1.25
+        },
+        "rim": [
+         "plaques",
+         1.15
+        ],
+        "carry": [
+         [
+          "lamps",
+          1.2
+         ],
+         [
+          "cairn",
+          0.8
+         ]
+        ]
+       }
       },
       {
        "id": "tortoise-still-shell",
@@ -411,7 +798,24 @@
        },
        "features": [
         "quiet-place"
-       ]
+       ],
+       "body": {
+        "build": {
+         "dome": 0.82,
+         "round": 0.62,
+         "legs": 0.7
+        },
+        "shell": "smooth",
+        "rim": "none",
+        "neck": "hidden",
+        "legs": "tucked",
+        "jaw": null,
+        "carry": [
+         "balance",
+         1.0
+        ],
+        "coat": "moon"
+       }
       }
      ]
     }
@@ -436,6 +840,32 @@
    "features": [
     "old-eyes"
    ],
+   "body": {
+    "build": {
+     "legs": 1.45,
+     "length": 1.08,
+     "width": 0.94,
+     "dome": 0.92,
+     "neck": 1.25
+    },
+    "shell": [
+     "dome",
+     0.9
+    ],
+    "neck": [
+     "high",
+     1.0
+    ],
+    "legs": "worn",
+    "jaw": [
+     "old",
+     0.9
+    ],
+    "marks": [
+     "dust",
+     1.0
+    ]
+   },
    "prongs": [
     {
      "id": "tortoise-map-back",
@@ -452,6 +882,19 @@
      "features": [
       "map-shell"
      ],
+     "body": {
+      "build": {
+       "legs": 1.4,
+       "flat": 0.78,
+       "width": 1.08,
+       "length": 1.1,
+       "dome": 0.85
+      },
+      "shell": [
+       "map",
+       1.0
+      ]
+     },
      "finishes": [
       {
        "id": "tortoise-chart-of-the-deep",
@@ -470,7 +913,25 @@
        },
        "features": [
         "dial"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.35,
+         "flat": 0.72,
+         "width": 1.12,
+         "length": 1.12,
+         "dome": 0.85
+        },
+        "shell": [
+         "map",
+         0.6
+        ],
+        "carry": [
+         "dial",
+         1.2
+        ],
+        "coat": "night"
+       }
       },
       {
        "id": "tortoise-salvors-tortoise",
@@ -486,7 +947,30 @@
        },
        "features": [
         "tunnel-ear"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.3,
+         "flat": 0.78,
+         "width": 1.1
+        },
+        "shell": [
+         "map",
+         0.8
+        ],
+        "neck": [
+         "low",
+         1.1
+        ],
+        "jaw": [
+         "trumpet",
+         1.2
+        ],
+        "carry": [
+         "salvage",
+         1.1
+        ]
+       }
       }
      ]
     },
@@ -508,6 +992,30 @@
      "features": [
       "horn-brow"
      ],
+     "body": {
+      "build": {
+       "legs": 1.2,
+       "wedge": 0.3,
+       "girth": 1.3,
+       "length": 1.1,
+       "head": 1.1,
+       "stance": 1.08
+      },
+      "shell": [
+       "stones",
+       0.9
+      ],
+      "rim": [
+       "spikes",
+       0.7
+      ],
+      "neck": "out",
+      "jaw": [
+       "horn",
+       1.0
+      ],
+      "marks": null
+     },
      "finishes": [
       {
        "id": "tortoise-trophy-shell",
@@ -523,7 +1031,25 @@
        },
        "features": [
         "crown"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.2,
+         "wedge": 0.3,
+         "girth": 1.4,
+         "length": 1.12,
+         "width": 1.08
+        },
+        "jaw": [
+         "horn",
+         1.25
+        ],
+        "carry": [
+         "teeth",
+         1.2
+        ],
+        "coat": "blood"
+       }
       },
       {
        "id": "tortoise-moss-back",
@@ -542,7 +1068,32 @@
        },
        "features": [
         "roots"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.15,
+         "wedge": 0.18,
+         "girth": 1.3,
+         "dome": 1.05
+        },
+        "shell": [
+         "moss",
+         1.1
+        ],
+        "jaw": [
+         "horn",
+         0.9
+        ],
+        "carry": [
+         "garden",
+         1.15
+        ],
+        "marks": [
+         "weeds",
+         1.0
+        ],
+        "coat": "moss"
+       }
       }
      ]
     },
@@ -561,6 +1112,40 @@
      "features": [
       "webbed"
      ],
+     "body": {
+      "build": {
+       "legs": 0.7,
+       "dome": 0.74,
+       "width": 1.16,
+       "length": 1.1,
+       "round": 0.7,
+       "neck": 1.1,
+       "head": 0.9
+      },
+      "shell": "soft",
+      "rim": "none",
+      "legs": [
+       "web",
+       1.0
+      ],
+      "neck": [
+       "long",
+       0.7
+      ],
+      "jaw": [
+       "snorkel",
+       1.0
+      ],
+      "marks": [
+       "mud",
+       1.0
+      ],
+      "carry": [
+       "reeds",
+       1.0
+      ],
+      "coat": "ember"
+     },
      "finishes": [
       {
        "id": "tortoise-river-jaw",
@@ -579,7 +1164,48 @@
        },
        "features": [
         "fins"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 0.75,
+         "dome": 0.8,
+         "width": 1.18,
+         "length": 1.2,
+         "round": 0.65,
+         "head": 1.3,
+         "beak": 1.3
+        },
+        "shell": [
+         "ridges",
+         0.7
+        ],
+        "rim": [
+         "serrated",
+         1.0
+        ],
+        "legs": [
+         "web",
+         1.2
+        ],
+        "neck": [
+         "long",
+         0.8
+        ],
+        "jaw": [
+         "notched",
+         1.0
+        ],
+        "tail": [
+         "keel",
+         1.2
+        ],
+        "marks": [
+         "mud",
+         0.7
+        ],
+        "carry": null,
+        "coat": "slate"
+       }
       },
       {
        "id": "tortoise-bog-lure",
@@ -595,7 +1221,41 @@
        },
        "features": [
         "lantern-jaw"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 0.7,
+         "dome": 0.74,
+         "width": 1.18,
+         "length": 1.12,
+         "round": 0.7,
+         "head": 1.35
+        },
+        "legs": [
+         "web",
+         1.1
+        ],
+        "neck": "out",
+        "jaw": [
+         "lure",
+         1.2
+        ],
+        "marks": [
+         [
+          "mud",
+          0.8
+         ],
+         [
+          "weeds",
+          1.2
+         ]
+        ],
+        "carry": [
+         "reeds",
+         0.8
+        ],
+        "coat": "night"
+       }
       }
      ]
     }

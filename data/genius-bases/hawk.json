@@ -51,7 +51,20 @@
   "features": [
    "wings",
    "beak"
-  ]
+  ],
+  "body": {
+   "pose": "fledge",
+   "wings": [
+    "stub",
+    1.0
+   ],
+   "tail": "short",
+   "down": 1.0,
+   "feet": [
+    "dangle",
+    1.0
+   ]
+  }
  },
  "paths": [
   {
@@ -75,6 +88,27 @@
    "features": [
     "far-eyes"
    ],
+   "body": {
+    "pose": "soar",
+    "wings": [
+     "long",
+     1.0
+    ],
+    "tail": [
+     "fan",
+     1.0
+    ],
+    "eyes": [
+     "far",
+     1.3
+    ],
+    "feet": "tucked",
+    "down": null,
+    "build": {
+     "head": 0.94,
+     "chest": 0.94
+    }
+   },
    "prongs": [
     {
      "id": "hawk-wind-hover",
@@ -94,6 +128,27 @@
      "features": [
       "sleek-coat"
      ],
+     "body": {
+      "pose": "hover",
+      "wings": [
+       "pointed",
+       1.0
+      ],
+      "tail": [
+       "spread",
+       1.0
+      ],
+      "sleek": 1,
+      "feet": [
+       "dangle",
+       0.9
+      ],
+      "build": {
+       "chest": 0.92,
+       "body": 1.05
+      },
+      "coat": "moon"
+     },
      "finishes": [
       {
        "id": "hawk-storm-kite",
@@ -112,7 +167,28 @@
        },
        "features": [
         "smoke"
-       ]
+       ],
+       "body": {
+        "pose": "soar",
+        "wings": [
+         "kite",
+         1.0
+        ],
+        "tail": [
+         "fork",
+         1.3
+        ],
+        "aura": [
+         "smoke",
+         1.0
+        ],
+        "feet": "tucked",
+        "coat": "slate",
+        "build": {
+         "chest": 0.9,
+         "body": 1.1
+        }
+       }
       },
       {
        "id": "hawk-line-falcon",
@@ -131,7 +207,24 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "pose": "soar",
+        "wings": [
+         "pointed",
+         1.12
+        ],
+        "tail": [
+         "long",
+         1.0
+        ],
+        "carry": [
+         "lamp",
+         1.3
+        ],
+        "feet": "tucked",
+        "coat": "hearth"
+       }
       }
      ]
     },
@@ -150,6 +243,26 @@
      "features": [
       "dark-eyed"
      ],
+     "body": {
+      "pose": "soar",
+      "wings": [
+       "round",
+       1.0
+      ],
+      "tail": [
+       "fan",
+       0.9
+      ],
+      "eyes": [
+       "dark",
+       1.7
+      ],
+      "build": {
+       "head": 1.2,
+       "chest": 1.05
+      },
+      "coat": "night"
+     },
      "finishes": [
       {
        "id": "hawk-owl-eyed-hawk",
@@ -168,7 +281,35 @@
        },
        "features": [
         "watching-eye"
-       ]
+       ],
+       "body": {
+        "pose": "hover",
+        "wings": [
+         "round",
+         1.15
+        ],
+        "tail": [
+         "fan",
+         0.8
+        ],
+        "head": [
+         "owl",
+         1.0
+        ],
+        "eyes": [
+         "owl",
+         1.15
+        ],
+        "feet": [
+         "dangle",
+         1.2
+        ],
+        "build": {
+         "head": 1.5,
+         "chest": 1.18,
+         "neck": 0.7
+        }
+       }
       },
       {
        "id": "hawk-quiet-wing",
@@ -184,7 +325,32 @@
        },
        "features": [
         "quiet-place"
-       ]
+       ],
+       "body": {
+        "pose": "soar",
+        "wings": [
+         "soft",
+         1.05
+        ],
+        "tail": [
+         "long",
+         1.1
+        ],
+        "eyes": [
+         "dark",
+         1.4
+        ],
+        "aura": [
+         "hush",
+         1.0
+        ],
+        "coat": "ash",
+        "build": {
+         "head": 1.15,
+         "chest": 0.95
+        },
+        "tips": 0
+       }
       }
      ]
     },
@@ -206,6 +372,28 @@
      "features": [
       "old-eyes"
      ],
+     "body": {
+      "pose": "soar",
+      "wings": [
+       "broad",
+       1.0
+      ],
+      "tail": [
+       "square",
+       1.15
+      ],
+      "head": [
+       "white",
+       1.0
+      ],
+      "eyes": [
+       "old",
+       1.2
+      ],
+      "build": {
+       "chest": 1.05
+      }
+     },
      "finishes": [
       {
        "id": "hawk-tiercel-of-the-deep-run",
@@ -221,7 +409,30 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "pose": "soar",
+        "wings": [
+         "broad",
+         1.15
+        ],
+        "aura": [
+         "cold",
+         1.3
+        ],
+        "carry": [
+         "rings",
+         1.2
+        ],
+        "feet": [
+         "dangle",
+         1.1
+        ],
+        "coat": "iron",
+        "build": {
+         "chest": 1.12
+        }
+       }
       },
       {
        "id": "hawk-salvage-kite",
@@ -240,7 +451,27 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "pose": "hover",
+        "wings": [
+         "kite",
+         1.0
+        ],
+        "tail": [
+         "fork",
+         0.8
+        ],
+        "feet": [
+         "glow",
+         1.2
+        ],
+        "carry": [
+         "bright",
+         1.3
+        ],
+        "coat": "hearth"
+       }
       }
      ]
     }
@@ -265,6 +496,27 @@
    "features": [
     "set-feet"
    ],
+   "body": {
+    "pose": "perch",
+    "wings": "folded",
+    "tail": [
+     "fan",
+     1.0
+    ],
+    "feet": [
+     "set",
+     1.0
+    ],
+    "perch": [
+     "stone",
+     1.0
+    ],
+    "build": {
+     "chest": 1.15,
+     "head": 1.05
+    },
+    "down": null
+   },
    "prongs": [
     {
      "id": "hawk-mantler",
@@ -284,6 +536,20 @@
      "features": [
       "wing-cloak"
      ],
+     "body": {
+      "pose": "mantle",
+      "wings": [
+       "cloak",
+       1.0
+      ],
+      "perch": [
+       "stone",
+       1.1
+      ],
+      "build": {
+       "chest": 1.2
+      }
+     },
      "finishes": [
       {
        "id": "hawk-post-eagle",
@@ -302,7 +568,24 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "pose": "mantle",
+        "wings": [
+         "cloak",
+         1.15
+        ],
+        "perch": [
+         "iron",
+         1.2
+        ],
+        "build": {
+         "chest": 1.25,
+         "head": 1.05,
+         "beak": 1.15
+        },
+        "coat": "ember"
+       }
       },
       {
        "id": "hawk-lord-of-the-broken-tower",
@@ -318,7 +601,33 @@
        },
        "features": [
         "stone-skin"
-       ]
+       ],
+       "body": {
+        "pose": "mantle",
+        "wings": [
+         "cloak",
+         1.3
+        ],
+        "perch": [
+         "tower",
+         1.15
+        ],
+        "build": {
+         "chest": 1.35,
+         "shoulders": 1.2,
+         "head": 1.1,
+         "beak": 1.2
+        },
+        "head": [
+         "crest",
+         1.2
+        ],
+        "aura": [
+         "dust",
+         1.0
+        ],
+        "coat": "slate"
+       }
       }
      ]
     },
@@ -337,6 +646,20 @@
      "features": [
       "plated"
      ],
+     "body": {
+      "pose": "perch",
+      "wings": [
+       "shield",
+       1.0
+      ],
+      "perch": [
+       "stone",
+       1.0
+      ],
+      "build": {
+       "chest": 1.2
+      }
+     },
      "finishes": [
       {
        "id": "hawk-broken-pinion",
@@ -355,7 +678,21 @@
        },
        "features": [
         "scorched"
-       ]
+       ],
+       "body": {
+        "pose": "soar",
+        "wings": [
+         "broken",
+         1.0
+        ],
+        "perch": null,
+        "feet": "tucked",
+        "build": {
+         "chest": 1.18,
+         "pitch": 4
+        },
+        "coat": "blood"
+       }
       },
       {
        "id": "hawk-iron-feather",
@@ -374,7 +711,23 @@
        },
        "features": [
         "iron-hide"
-       ]
+       ],
+       "body": {
+        "pose": "perch",
+        "wings": [
+         "ironshield",
+         1.3
+        ],
+        "perch": [
+         "stone",
+         1.2
+        ],
+        "build": {
+         "chest": 1.3,
+         "beak": 1.15
+        },
+        "coat": "iron"
+       }
       }
      ]
     },
@@ -396,6 +749,30 @@
      "features": [
       "voice"
      ],
+     "body": {
+      "pose": "soar",
+      "wings": [
+       "broad",
+       1.08
+      ],
+      "head": [
+       "call",
+       1.2
+      ],
+      "aura": [
+       "flock",
+       1.0
+      ],
+      "tail": [
+       "wedge",
+       1.1
+      ],
+      "perch": null,
+      "feet": "tucked",
+      "build": {
+       "chest": 1.15
+      }
+     },
      "finishes": [
       {
        "id": "hawk-passengers-hawk",
@@ -411,7 +788,32 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "pose": "perch",
+        "wings": [
+         "shelter",
+         0.62
+        ],
+        "perch": [
+         "shoulder",
+         1.0
+        ],
+        "eyes": [
+         "old",
+         1.2
+        ],
+        "head": null,
+        "aura": null,
+        "feet": [
+         "grip",
+         1.1
+        ],
+        "build": {
+         "chest": 1.2
+        },
+        "coat": "moon"
+       }
       },
       {
        "id": "hawk-cohort-eagle",
@@ -430,7 +832,32 @@
        },
        "features": [
         "crown"
-       ]
+       ],
+       "body": {
+        "pose": "soar",
+        "wings": [
+         "broad",
+         1.2
+        ],
+        "head": [
+         "crown",
+         1.3
+        ],
+        "aura": [
+         "flock",
+         2.0
+        ],
+        "tail": [
+         "wedge",
+         1.25
+        ],
+        "build": {
+         "chest": 1.32,
+         "beak": 1.2,
+         "shoulders": 1.1
+        },
+        "coat": "hearth"
+       }
       }
      ]
     }
@@ -457,6 +884,27 @@
    "features": [
     "talons"
    ],
+   "body": {
+    "pose": "dive",
+    "wings": [
+     "pointed",
+     0.9
+    ],
+    "sweep": 0.95,
+    "dihedral": 0.3,
+    "feet": [
+     "strike",
+     1.5
+    ],
+    "tail": [
+     "fan",
+     0.8
+    ],
+    "down": null,
+    "build": {
+     "chest": 0.96
+    }
+   },
    "prongs": [
     {
      "id": "hawk-fist-falcon",
@@ -473,6 +921,21 @@
      "features": [
       "talon-grip"
      ],
+     "body": {
+      "pose": "lean",
+      "wings": "folded",
+      "feet": [
+       "grip",
+       1.25
+      ],
+      "perch": [
+       "glove",
+       1.0
+      ],
+      "build": {
+       "chest": 1.02
+      }
+     },
      "finishes": [
       {
        "id": "hawk-thunder-stoop",
@@ -491,7 +954,26 @@
        },
        "features": [
         "ring"
-       ]
+       ],
+       "body": {
+        "pose": "stoop",
+        "wings": "tucked",
+        "sleek": 1,
+        "feet": [
+         "strike",
+         1.6
+        ],
+        "perch": null,
+        "aura": [
+         "ring",
+         1.2
+        ],
+        "coat": "moon",
+        "build": {
+         "chest": 1.08,
+         "beak": 1.15
+        }
+       }
       },
       {
        "id": "hawk-jessed-falcon",
@@ -507,7 +989,33 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "pose": "soar",
+        "dihedral": null,
+        "sweep": null,
+        "wings": [
+         "pointed",
+         1.15
+        ],
+        "feet": [
+         "dangle",
+         1.1
+        ],
+        "perch": null,
+        "carry": [
+         "jesses",
+         1.3
+        ],
+        "head": [
+         "plume",
+         1.2
+        ],
+        "coat": "blood",
+        "build": {
+         "chest": 1.05
+        }
+       }
       }
      ]
     },
@@ -530,6 +1038,16 @@
       "ground-claws",
       "crest"
      ],
+     "body": {
+      "rig": "ground",
+      "build": {
+       "legs": 1.15,
+       "neck": 1.1
+      },
+      "crest": 1.0,
+      "wings": 1.0,
+      "fan": 1.0
+     },
      "silhouette": "beast-ground-hunter",
      "finishes": [
       {
@@ -549,7 +1067,22 @@
        },
        "features": [
         "long-legs"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.3,
+         "girth": 0.92,
+         "neck": 1.3,
+         "pitch": 0.62,
+         "waist": 0.85
+        },
+        "crest": 0.8,
+        "grown": [
+         "sickle",
+         1.2
+        ],
+        "coat": "night"
+       }
       },
       {
        "id": "hawk-bramble-harrier",
@@ -568,7 +1101,24 @@
        },
        "features": [
         "tunnel-ear"
-       ]
+       ],
+       "body": {
+        "build": {
+         "legs": 1.12,
+         "chest": 1.15,
+         "neck": 1.05
+        },
+        "crest": 1.3,
+        "tufts": [
+         "turned",
+         1.2
+        ],
+        "grown": [
+         "brambles",
+         1.1
+        ],
+        "coat": "moss"
+       }
       }
      ]
     },
@@ -590,6 +1140,27 @@
      "features": [
       "ledger"
      ],
+     "body": {
+      "pose": "soar",
+      "dihedral": null,
+      "sweep": null,
+      "wings": [
+       "pointed",
+       1.0
+      ],
+      "carry": [
+       "case",
+       1.3
+      ],
+      "tail": [
+       "streamers",
+       1.0
+      ],
+      "feet": "tucked",
+      "build": {
+       "chest": 0.98
+      }
+     },
      "finishes": [
       {
        "id": "hawk-writ-falcon",
@@ -605,7 +1176,36 @@
        },
        "features": [
         "brass-plate"
-       ]
+       ],
+       "body": {
+        "pose": "soar",
+        "wings": [
+         "pointed",
+         1.15
+        ],
+        "carry": [
+         [
+          "plate",
+          1.3
+         ],
+         [
+          "writ",
+          1.2
+         ]
+        ],
+        "feet": [
+         "dangle",
+         1.1
+        ],
+        "tail": [
+         "streamers",
+         1.2
+        ],
+        "coat": "hearth",
+        "build": {
+         "chest": 1.1
+        }
+       }
       },
       {
        "id": "hawk-shades-falcon",
@@ -621,7 +1221,37 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "pose": "hover",
+        "wings": [
+         "soft",
+         1.0
+        ],
+        "carry": [
+         "case",
+         1.1
+        ],
+        "aura": [
+         [
+          "underwing",
+          1.3
+         ],
+         [
+          "hush",
+          1.0
+         ]
+        ],
+        "tail": [
+         "streamers",
+         1.3
+        ],
+        "coat": "ash",
+        "eyes": [
+         "dark",
+         1.3
+        ]
+       }
       }
      ]
     }
