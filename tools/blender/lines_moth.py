@@ -1386,7 +1386,7 @@ def build_body():
 def gift_dust_wings():
     """The Moth's gift, on the back of whatever it has joined: two broad wings, an eye on each,
     in the colour of the Path it is on. They beat."""
-    L = 0.4
+    L = 0.5
     out = []
     for side, sgn in (("l", 1),):
         fore, hind = Wing(WINGS["broad"][0], -12), Wing(WINGS["broad"][1], 0)
@@ -1394,7 +1394,7 @@ def gift_dust_wings():
             w.paint(lambda s, t, i, j, w=w: "accent_pale" if i >= w.ns - 1 else ("accent_dark" if i == w.ns - 3 else ("fur_ruff" if i == 0 else None)))
         fore.eye(0.5, 0.5, 0.16, ((1.0, "accent_pale"), (0.8, "scale_black"), (0.6, "accent"), (0.36, "scale_black")))
         root = Vector((0.03, 0.0, 0.0))
-        dih = math.radians(10)
+        dih = math.radians(34)
         eu, ev, en = Vector((math.cos(dih), 0, math.sin(dih))), Vector((0, -1, 0)), Vector((-math.sin(dih), 0, math.cos(dih)))
         raw = Raw()
         flip = lambda p: Vector((sgn * p.x, p.y, p.z))
