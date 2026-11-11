@@ -3194,6 +3194,24 @@ func test_lines() -> void:
 		if not ok:
 			wrong.append(id)
 		body.queue_free()
+	# a form with a way of resting (one clip of its model's own: docs/genius-lines.md, "How it
+	# rests") is first seen in it, gets up to walk by its base body's clips, and takes its rest
+	# again when it has stood a while
+	if forms.has("wolf-hearth-wolf") and ResourceLoader.exists("res://game/assets/genius/forms/wolf-hearth-wolf.glb"):
+		var hf: Dictionary = forms["wolf-hearth-wolf"]
+		var rb := GeniusBody.build({ "form": "wolf-hearth-wolf", "silhouette": hf["silhouette"], "expression": hf["expression"], "features": hf["features"], "instar": 3, "look": GeniusLook.born(7) }, Color.ORANGE, 3)
+		add_child(rb)
+		var began := rb.anim != null and rb.anim.has_animation(GeniusBody.REST) and rb.anim.current_animation == GeniusBody.REST
+		rb.move_at(2.0)
+		rb._process(0.02)
+		var walked := rb.anim != null and rb.anim.current_animation == String(rb.anim_names.get("walk", "-"))
+		rb.move_at(0.0)
+		var stood := rb.anim != null and rb.anim.current_animation == String(rb.anim_names.get("idle", "-"))
+		rb._process(GeniusBody.rest_after() + 0.1)
+		rb.move_at(0.0)
+		check(began and walked and stood and rb.anim.current_animation == GeniusBody.REST,
+			"a form with a way of resting begins in it, gets up to walk, stands, and rests again when it has stood a while (%s %s %s)" % [began, walked, stood])
+		rb.queue_free()
 	# a hybrid keeps its first base's body: each of its forms wears a form of the first, a form
 	# carried across from the second wearing the one it took the place of
 	var firsts := Data.tree_of("trun").map(func(f): return String(f["id"]))
