@@ -1,0 +1,1380 @@
+{
+ "id": "angel",
+ "name": "Angel",
+ "class": "creature",
+ "expression": "kith",
+ "silhouette": "kith-angel",
+ "soul": "The soul of one who answers to something larger than themselves, and is hard to live with for it.",
+ "spark": "The mote keeps just above your head, where you cannot look at it. You feel it there most when you are about to do the easier thing.",
+ "nature": {
+  "pattern": {
+   "sworn": 0.8
+  },
+  "bonds": {
+   "classmate": 0.6
+  },
+  "orders": {
+   "guard": 0.6
+  },
+  "fights": {
+   "blocks": 0.4
+  }
+ },
+ "calls": {
+  "seed": {
+   "watches-from-above": 0.8,
+   "stands-between": 0.5,
+   "with-a-voice": 0.3
+  },
+  "shape": {
+   "anchor": 0.6,
+   "bind": 0.5,
+   "read": 0.3
+  },
+  "blood": {
+   "demigod": 0.8,
+   "winged": 0.6,
+   "hearth-hears": 0.4,
+   "lamplighters": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Haloed",
+  "gift": [
+   "halo",
+   "wings"
+  ],
+  "text": "It answers to something above you both, and it has started expecting you to."
+ },
+ "newFeatures": [
+  {
+   "id": "halo",
+   "slot": "head",
+   "label": "a ring of the field's light over its head"
+  },
+  {
+   "id": "six-wings",
+   "slot": "surface",
+   "label": "six wings, four of them to hide behind"
+  },
+  {
+   "id": "face-of-light",
+   "slot": "surface",
+   "label": "a light where its face was"
+  },
+  {
+   "id": "great-hands",
+   "slot": "surface",
+   "label": "hands large enough to stand in"
+  },
+  {
+   "id": "herald-horn",
+   "slot": "surface",
+   "label": "a horn that is heard through walls"
+  },
+  {
+   "id": "paper-wings",
+   "slot": "surface",
+   "label": "wings of written paper"
+  },
+  {
+   "id": "endless-scroll",
+   "slot": "surface",
+   "label": "a scroll with no end, wound round it"
+  },
+  {
+   "id": "balance",
+   "slot": "surface",
+   "label": "a pair of scales that will not be tipped"
+  },
+  {
+   "id": "true-beam",
+   "slot": "surface",
+   "label": "a beam that comes to level whatever hangs from it"
+  },
+  {
+   "id": "plucked-wing",
+   "slot": "surface",
+   "label": "a wing plucked to pay what was short"
+  },
+  {
+   "id": "blade-feathers",
+   "slot": "surface",
+   "label": "feathers gone to blades"
+  },
+  {
+   "id": "blindfold",
+   "slot": "surface",
+   "label": "a band tied over its eyes"
+  }
+ ],
+ "settled": {
+  "id": "angel-scruple",
+  "name": "Scruple",
+  "text": "A hand high and mostly down, under a ring of your light that is too big for it and slips. It already knows what you ought to do. It cannot yet make you.",
+  "sign": "More down than feather. The halo sits crooked over one eye, and it pushes it back up with both hands.",
+  "habit": "When you tell a small lie it looks at its feet until you take it back.",
+  "features": [
+   "halo",
+   "wings"
+  ],
+  "body": {
+   "build": {
+    "belly": 0.25
+   },
+   "hair": "down",
+   "eyes": "wide",
+   "brows": "raised",
+   "mouth": "small",
+   "halo": [
+    "slipped",
+    1.5
+   ],
+   "wings": [
+    [
+     "stubs",
+     1.0,
+     "down"
+    ]
+   ],
+   "robe": [
+    "smock",
+    1.0
+   ]
+  }
+ },
+ "paths": [
+  {
+   "id": "angel-shoulder-angel",
+   "name": "Shoulder-angel",
+   "of": "one who chose whose side they are on, once, and for good",
+   "text": "It learned from you that a side is a thing you take once. It stands at your shoulder now and has not looked at the question since.",
+   "sign": "It keeps just behind your shoulder with one wing a little raised over you, as a hand is held round a candle in a draught.",
+   "habit": "When someone speaks ill of you it does not answer. It moves to stand between you and them.",
+   "leans": {
+    "bonds": {
+     "classmate": 1.0
+    },
+    "fights": {
+     "blocks": 0.7
+    },
+    "orders": {
+     "guard": 0.5
+    }
+   },
+   "features": [
+    "broad-guard"
+   ],
+   "body": {
+    "build": {
+     "belly": 0.0,
+     "wide": 0.25
+    },
+    "hair": "cropped",
+    "eyes": "open",
+    "brows": "level",
+    "mouth": "closed",
+    "halo": [
+     "ring",
+     1.0
+    ],
+    "wings": [
+     [
+      "mantled",
+      1.0,
+      "feather"
+     ]
+    ],
+    "marks": [
+     "coverts",
+     "accent"
+    ],
+    "robe": [
+     "tunic",
+     1.0
+    ],
+    "over": [
+     "sash"
+    ],
+    "left": [
+     "buckler",
+     1.0
+    ],
+    "accent": "gold"
+   },
+   "prongs": [
+    {
+     "id": "angel-mantle-wing",
+     "name": "Mantle-wing",
+     "of": "one who puts their own body in the way and thinks nothing of it",
+     "text": "Its wings have grown broad enough to stand behind, and it holds them there. What was coming at you arrives at it instead.",
+     "sign": "Two wings held forward and closed like doors, gold along the shoulder. Its face shows in the gap between them, calm.",
+     "habit": "In a crowd it opens one wing a hand's width, on whichever side the door is.",
+     "leans": {
+      "fights": {
+       "blocks": 1.0
+      },
+      "orders": {
+       "guard": 0.5
+      }
+     },
+     "features": [
+      "wing-cloak"
+     ],
+     "body": {
+      "wings": [
+       [
+        "closed",
+        1.0,
+        "feather"
+       ]
+      ],
+      "marks": [
+       "coverts",
+       "accent_light"
+      ],
+      "robe": [
+       "robe",
+       1.0
+      ],
+      "over": [
+       "sash",
+       "hem"
+      ],
+      "left": null
+     },
+     "finishes": [
+      {
+       "id": "angel-covert",
+       "name": "Covert",
+       "of": "one who has made of themselves a place for others to shelter",
+       "text": "It has six wings and shows you almost none of itself. Two cover its face, two its feet, and whoever it has decided to keep stands under the last two.",
+       "sign": "Six wings and no face to be seen: a pair folded over the eyes, a pair over the feet, a pair held out. Only the halo looks at you.",
+       "habit": "It parts the upper pair to look at you, briefly, and closes them again as if it had been rude.",
+       "leans": {
+        "fights": {
+         "blocks": 1.0
+        },
+        "company": {
+         "party": 0.6
+        }
+       },
+       "features": [
+        "six-wings"
+       ],
+       "body": {
+        "wings": [
+         [
+          "over-face",
+          1.0,
+          "feather"
+         ],
+         [
+          "spread",
+          1.0,
+          "feather"
+         ],
+         [
+          "over-feet",
+          1.0,
+          "feather"
+         ]
+        ],
+        "halo": [
+         "ring",
+         1.25
+        ],
+        "eyes": "shut"
+       }
+      },
+      {
+       "id": "angel-iron-pinion",
+       "name": "Iron Pinion",
+       "of": "one who has stood in the way so long they have hardened there",
+       "text": "Its feathers have gone to plate one at a time, each where a blow landed. It does not fly much now. It has found it does not need to move.",
+       "sign": "Wings of grey steel, each feather a plate edged in gold, planted point down on either side of it like a pavise. They ring when struck.",
+       "habit": "It taps a wingtip on the ground twice before a fight, the way a mason tries a stone.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "fights": {
+         "blocks": 0.8
+        }
+       },
+       "features": [
+        "tower-shield"
+       ],
+       "body": {
+        "build": {
+         "wide": 0.5
+        },
+        "wings": [
+         [
+          "planted",
+          1.0,
+          "steel"
+         ]
+        ],
+        "marks": [
+         "coverts",
+         "accent"
+        ],
+        "over": [
+         "sash",
+         "hem",
+         "pauldrons"
+        ],
+        "halo": [
+         "plate",
+         1.0
+        ],
+        "brows": "stern"
+       }
+      }
+     ]
+    },
+    {
+     "id": "angel-lamp-holder",
+     "name": "Lamp-holder",
+     "of": "one who holds the light while another does the work, and counts that work",
+     "text": "It holds the light so that you have both hands free. It has never once asked to be the one holding the tools.",
+     "sign": "A lamp on a staff half as tall again as itself, held dead still, and its wings folded shut behind it so they throw no shadow on your work.",
+     "habit": "It moves the light before you ask, to the place you are about to look.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      },
+      "bonds": {
+       "classmate": 0.5
+      }
+     },
+     "features": [
+      "lantern"
+     ],
+     "body": {
+      "build": {
+       "wide": 0.0
+      },
+      "wings": [
+       [
+        "folded",
+        0.8,
+        "feather"
+       ]
+      ],
+      "marks": [
+       "coverts",
+       "accent_dark"
+      ],
+      "robe": [
+       "robe",
+       1.0
+      ],
+      "over": [
+       "sash",
+       "cowl"
+      ],
+      "left": null,
+      "right": [
+       "lamp-staff",
+       1.0
+      ],
+      "eyes": "lowered"
+     },
+     "finishes": [
+      {
+       "id": "angel-unsleeping",
+       "name": "Unsleeping",
+       "of": "one who has watched over someone so long they have forgotten how to stop",
+       "text": "It kept watch so many nights that its wings opened eyes of their own to share the work. None of them close. One of them is always on you.",
+       "sign": "Every long feather carries an open eye of your light. Its own two eyes are shut; they are the only ones that ever are.",
+       "habit": "It sleeps standing, facing you, wings spread. Nothing about the room changes when it does.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "company": {
+         "alone": 0.5
+        }
+       },
+       "features": [
+        "watching-eye"
+       ],
+       "body": {
+        "wings": [
+         [
+          "display",
+          1.0,
+          "eyed"
+         ]
+        ],
+        "eyes": "shut",
+        "right": null,
+        "halo": [
+         "ring",
+         0.9
+        ]
+       }
+      },
+      {
+       "id": "angel-beacon",
+       "name": "Beacon",
+       "of": "one who would rather be seen by than seen",
+       "text": "It held the light up until there was no telling where its arm ended. Where its face was there is a lamp now, and it sees by shining.",
+       "sign": "A lamp where its head should be, burning your colour behind glass, and four narrow wings of light held out like the arms of a signal.",
+       "habit": "It turns its light on whoever in the room has gone quiet.",
+       "leans": {
+        "quests": {
+         "deep-run": 1.0
+        },
+        "company": {
+         "party": 0.5
+        }
+       },
+       "features": [
+        "face-of-light"
+       ],
+       "body": {
+        "face": "lamp",
+        "hair": "bare",
+        "wings": [
+         [
+          "signal-up",
+          1.0,
+          "light"
+         ],
+         [
+          "signal-down",
+          1.0,
+          "light"
+         ]
+        ],
+        "right": null,
+        "halo": null,
+        "over": [
+         "sash",
+         "hem",
+         "collar"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "angel-buttress",
+     "name": "Buttress",
+     "of": "one who gets a shoulder under whoever is going down",
+     "text": "When you stagger it is already under your arm. It learned the weight of you early and has never mentioned it.",
+     "sign": "Broad in the arm and the back, with its wings set down and out behind it like the props of a wall. It stands close enough to lean on.",
+     "habit": "It walks half a step behind whoever is limping and matches their pace without being seen to.",
+     "leans": {
+      "fights": {
+       "hurts": 1.0
+      },
+      "bonds": {
+       "classmate": 0.5
+      }
+     },
+     "features": [
+      "broad-chest"
+     ],
+     "body": {
+      "build": {
+       "wide": 0.7,
+       "arm_girth": 1.25,
+       "shoulders": 0.5
+      },
+      "wings": [
+       [
+        "braced",
+        1.0,
+        "feather"
+       ]
+      ],
+      "marks": [
+       "coverts",
+       "accent"
+      ],
+      "robe": [
+       "tunic",
+       0.9
+      ],
+      "over": [
+       "sash",
+       "bracers"
+      ],
+      "left": null
+     },
+     "finishes": [
+      {
+       "id": "angel-upholding-hands",
+       "name": "Upholding Hands",
+       "of": "one who has carried others so long that carrying is what is left of them",
+       "text": "There is no body to it now: two great hands, a wing at each wrist and your light between them, held a little open at the height you would fall from.",
+       "sign": "Two hands as large as it once was, palms up, each winged at the wrist, and the halo turning slowly in the space between them.",
+       "habit": "The hands close a little when you climb anything, and open again when you are down.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "quests": {
+         "escort": 0.6
+        }
+       },
+       "features": [
+        "great-hands"
+       ],
+       "body": {
+        "shape": "hands"
+       }
+      },
+      {
+       "id": "angel-arch-bearer",
+       "name": "Arch-bearer",
+       "of": "one on whom everything rests, who has decided that is all right",
+       "text": "It carries an arch of stone on its two raised wings and has done for longer than is reasonable. Everything of yours that stands, stands on it.",
+       "sign": "Its wings go straight up like pillars and bear a pointed arch of grey stone over its head, with the halo hung in it like a lamp.",
+       "habit": "When you put down something heavy it nods once, as one bearer to another.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        },
+        "orders": {
+         "hold": 0.6
+        }
+       },
+       "features": [
+        "bastion"
+       ],
+       "body": {
+        "wings": [
+         [
+          "pillars",
+          1.0,
+          "feather"
+         ]
+        ],
+        "bears": "arch",
+        "halo": [
+         "hung",
+         1.0
+        ],
+        "robe": [
+         "robe",
+         1.0
+        ],
+        "over": [
+         "sash",
+         "hem"
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "angel-clarion",
+   "name": "Clarion",
+   "of": "one who says the true thing whether or not it is wanted",
+   "text": "It learned from you that a thing known must be said. It brings the word at once, to whoever it is for, and does not wait to be thanked.",
+   "sign": "Wings swept high behind it as if it had only just landed, a long horn held upright at its side, and its mouth already open.",
+   "habit": "It clears its throat before you have decided to speak. Then it looks at you until you do.",
+   "leans": {
+    "pattern": {
+     "sworn": 1.0
+    },
+    "quests": {
+     "escort": 0.7
+    },
+    "company": {
+     "party": 0.4
+    }
+   },
+   "features": [
+    "voice"
+   ],
+   "body": {
+    "build": {
+     "belly": 0.0,
+     "wide": -0.15
+    },
+    "hair": "swept",
+    "eyes": "wide",
+    "brows": "raised",
+    "mouth": "open",
+    "halo": [
+     "tilted",
+     1.0
+    ],
+    "wings": [
+     [
+      "raised",
+      1.0,
+      "feather"
+     ]
+    ],
+    "marks": [
+     "tips",
+     "accent"
+    ],
+    "robe": [
+     "tunic",
+     1.0
+    ],
+    "over": [
+     "tabard"
+    ],
+    "right": [
+     "trumpet",
+     1.0
+    ],
+    "coat": "moon",
+    "accent": "rose"
+   },
+   "prongs": [
+    {
+     "id": "angel-dawn-horn",
+     "name": "Dawn-horn",
+     "of": "one who wakes the house because someone must, and is forgiven by noon",
+     "text": "It is up before you and sees no reason you should not know it. What it has to say is usually that it is time.",
+     "sign": "A horn longer than itself, flared like a lily, carried against one shoulder with a rose pennon hanging from it.",
+     "habit": "At first light it draws breath, looks at you asleep, and waits exactly as long as it can bear to.",
+     "leans": {
+      "pattern": {
+       "sworn": 1.0
+      },
+      "company": {
+       "party": 0.6
+      }
+     },
+     "features": [
+      "herald-horn"
+     ],
+     "body": {
+      "hair": "curls",
+      "wings": [
+       [
+        "half",
+        0.9,
+        "feather"
+       ]
+      ],
+      "marks": [
+       "tips",
+       "accent_light"
+      ],
+      "over": [
+       "tabard",
+       "baldric"
+      ],
+      "right": [
+       "great-horn",
+       1.0
+      ]
+     },
+     "finishes": [
+      {
+       "id": "angel-unblown-horn",
+       "name": "Unblown Horn",
+       "of": "one whose warning has outlasted any need to be seen giving it",
+       "text": "The herald is gone and the horn has stayed. It hangs in the air on six small wings and sounds without being blown, once, when it matters.",
+       "sign": "A great pale horn, bell forward, with three pairs of wings along its length and your light far down in its throat.",
+       "habit": "It turns its mouth toward whoever is about to make a mistake and holds there, silent, to see if that will do.",
+       "leans": {
+        "pattern": {
+         "sworn": 1.0
+        },
+        "range": {
+         "far": 0.6
+        }
+       },
+       "features": [
+        "ring"
+       ],
+       "body": {
+        "shape": "horn"
+       }
+      },
+      {
+       "id": "angel-shutter-opener",
+       "name": "Shutter-opener",
+       "of": "one who brings morning into a room whether or not it was asked for",
+       "text": "Where it goes it is morning, and everyone can see what was done in the night. It does not think of this as unkind.",
+       "sign": "Four wings fanned up and out like a sunrise, rose at every tip, under a halo with rays. Shadows lean away from it.",
+       "habit": "It opens shutters. Any shutters, anyone's.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "ground": {
+         "line": 0.5
+        }
+       },
+       "features": [
+        "crown"
+       ],
+       "body": {
+        "wings": [
+         [
+          "sunrise",
+          1.0,
+          "feather"
+         ],
+         [
+          "sunrise-low",
+          1.0,
+          "feather"
+         ]
+        ],
+        "halo": [
+         "rayed",
+         1.3
+        ],
+        "right": null,
+        "robe": [
+         "robe",
+         1.0
+        ],
+        "over": [
+         "tabard"
+        ],
+        "mouth": "closed"
+       }
+      }
+     ]
+    },
+    {
+     "id": "angel-word-bearer",
+     "name": "Word-bearer",
+     "of": "one who will carry a hard word they did not write to one who does not want it",
+     "text": "It carries what was said, exactly as it was said, to the one it was said for. It has never opened a letter and never softened one.",
+     "sign": "A sealed case across its back and an open scroll in its hand, the loose end trailing. Its wings are long and narrow, a courier's.",
+     "habit": "It says your last sentence back to you under its breath, to be sure it has it right.",
+     "leans": {
+      "quests": {
+       "escort": 1.0
+      },
+      "ground": {
+       "line": 0.5
+      }
+     },
+     "features": [
+      "pages"
+     ],
+     "body": {
+      "hair": "bound",
+      "mouth": "small",
+      "wings": [
+       [
+        "swift",
+        1.0,
+        "feather"
+       ]
+      ],
+      "marks": [
+       "tips",
+       "accent_dark"
+      ],
+      "over": [
+       "tabard",
+       "case"
+      ],
+      "right": [
+       "scroll",
+       1.0
+      ]
+     },
+     "finishes": [
+      {
+       "id": "angel-open-letter",
+       "name": "Open Letter",
+       "of": "one who has nothing in them they would not say in front of everyone",
+       "text": "Its wings are pages now, written on both sides, and anyone may read them. It decided long ago to have nothing in it that could not be read aloud.",
+       "sign": "Two great wings of folded paper, ruled and written in rose ink, creased like a letter that has been read many times.",
+       "habit": "It holds a wing up to the lamp so you can read what you said last year. It does not comment.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        },
+        "shape": {
+         "read": 0.5
+        }
+       },
+       "features": [
+        "paper-wings"
+       ],
+       "body": {
+        "wings": [
+         [
+          "pages",
+          1.0,
+          "paper"
+         ]
+        ],
+        "robe": [
+         "robe",
+         1.0
+        ],
+        "right": [
+         "quill",
+         1.0
+        ],
+        "over": [
+         "tabard"
+        ]
+       }
+      },
+      {
+       "id": "angel-postscript",
+       "name": "Postscript",
+       "of": "one who cannot let a thing rest until it has been said properly",
+       "text": "The scroll has no end now. It winds round the angel from heel to halo, and it is still writing, because someone is still wrong.",
+       "sign": "Wound round and round in its own scroll like a ribbon on a pole, with only its face and its writing hand left free.",
+       "habit": "It lets you finish. It always lets you finish. Then it lifts one finger.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "pattern": {
+         "sworn": 0.6
+        }
+       },
+       "features": [
+        "endless-scroll"
+       ],
+       "body": {
+        "robe": [
+         "wound",
+         1.0
+        ],
+        "over": null,
+        "wings": [
+         [
+          "nubs",
+          1.0,
+          "feather"
+         ]
+        ],
+        "right": [
+         "quill",
+         1.0
+        ],
+        "eyes": "lowered",
+        "brows": "level",
+        "mouth": "line"
+       }
+      }
+     ]
+    },
+    {
+     "id": "angel-forewarner",
+     "name": "Forewarner",
+     "of": "one who says don't while there is time, and is never thanked for what does not happen",
+     "text": "It sees where a thing is going one step before you do and puts a hand up. Most of what it has saved you from you will never know about.",
+     "sign": "One hand always a little raised, palm out, and its wings half open and uneven, like someone about to step in front of a cart.",
+     "habit": "It touches your sleeve before stairs, ice, and certain people.",
+     "leans": {
+      "fights": {
+       "dodges": 1.0
+      },
+      "ground": {
+       "quiet": 0.5
+      }
+     },
+     "features": [
+      "far-eyes"
+     ],
+     "body": {
+      "build": {
+       "hands": 1.3
+      },
+      "hair": "cropped",
+      "mouth": "small",
+      "wings": [
+       [
+        "uneven",
+        1.0,
+        "feather"
+       ]
+      ],
+      "marks": [
+       "tips",
+       "accent"
+      ],
+      "over": [
+       "tabard",
+       "cowl"
+      ],
+      "right": null,
+      "pose": "hand-up"
+     },
+     "finishes": [
+      {
+       "id": "angel-be-not-afraid",
+       "name": "Be-not-afraid",
+       "of": "one who has frightened people with the truth so often they begin by saying sorry",
+       "text": "It is too bright to look at and it knows. What it has to tell you is true and not easy, so it begins every time by asking you not to be afraid.",
+       "sign": "No face: a light where the face would be, in a ring of six wings, and one hand held up with the palm out.",
+       "habit": "It dims itself when a child comes into the room, as far as it can, which is not far.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "fights": {
+         "dodges": 0.6
+        }
+       },
+       "features": [
+        "face-of-light",
+        "six-wings"
+       ],
+       "body": {
+        "face": "light",
+        "hair": "bare",
+        "wings": [
+         [
+          "rise",
+          1.0,
+          "feather"
+         ],
+         [
+          "spread",
+          1.0,
+          "feather"
+         ],
+         [
+          "fall",
+          1.0,
+          "feather"
+         ]
+        ],
+        "halo": [
+         "rayed",
+         1.5
+        ],
+        "robe": [
+         "robe",
+         1.0
+        ]
+       }
+      },
+      {
+       "id": "angel-quiet-word",
+       "name": "Quiet Word",
+       "of": "one who learned that a hard thing lands best said once, quietly, in private",
+       "text": "It gave up the horn. It found that the true thing said once, quietly, at your ear, does more than any amount of morning.",
+       "sign": "Smaller than it was. One wing is cupped forward beside its mouth like a hand, and it leans in. Its halo is no bigger than a coin.",
+       "habit": "It waits until you are alone. Then it says one sentence, and does not repeat it.",
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        },
+        "company": {
+         "alone": 0.6
+        }
+       },
+       "features": [
+        "quiet-place"
+       ],
+       "body": {
+        "build": {
+         "bow": 0.1,
+         "small": 0.74,
+         "hands": 1.0
+        },
+        "wings": [
+         [
+          "whisper",
+          1.0,
+          "feather"
+         ]
+        ],
+        "halo": [
+         "coin",
+         1.0
+        ],
+        "eyes": "lowered",
+        "brows": "soft",
+        "pose": null
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "angel-weigher",
+   "name": "Weigher",
+   "of": "one who believes people should get what they have earned, themselves first",
+   "text": "It learned from you that things have a weight and someone has to say what it is. It weighs you first, and hardest.",
+   "sign": "It hangs upright with its wings folded straight down its back like a gown, and a small pair of scales in one hand, level.",
+   "habit": "It watches how you divide a thing, a loaf or a blame, and it knows whether the shares were even.",
+   "leans": {
+    "quests": {
+     "writ": 1.0
+    },
+    "ground": {
+     "quiet": 0.7
+    },
+    "fights": {
+     "parries": 0.5
+    }
+   },
+   "features": [
+    "balance"
+   ],
+   "body": {
+    "build": {
+     "belly": 0.0,
+     "legs": 1.06,
+     "neck": 0.3,
+     "wide": -0.1
+    },
+    "hair": "bound",
+    "eyes": "lowered",
+    "brows": "stern",
+    "mouth": "line",
+    "halo": [
+     "plate",
+     1.0
+    ],
+    "wings": [
+     [
+      "folded",
+      1.1,
+      "feather"
+     ]
+    ],
+    "marks": [
+     "bars",
+     "accent"
+    ],
+    "robe": [
+     "gown",
+     1.0
+    ],
+    "over": [
+     "stole"
+    ],
+    "left": [
+     "scales",
+     1.0
+    ],
+    "coat": "iron",
+    "accent": "lapis"
+   },
+   "prongs": [
+    {
+     "id": "angel-counterweight",
+     "name": "Counterweight",
+     "of": "one who puts their own weight on whichever side is lighter",
+     "text": "Where the pans are not level it puts itself in the lighter one. It does not ask first whether the lighter side was in the right. It finds that out after.",
+     "sign": "The scales are as wide as its wings now, and it carries the beam across its shoulders like a yoke, a pan hanging on either side.",
+     "habit": "It sits down next to whoever in the room has the fewest friends.",
+     "leans": {
+      "quests": {
+       "writ": 1.0
+      },
+      "bonds": {
+       "named": 0.5
+      }
+     },
+     "features": [
+      "chain"
+     ],
+     "body": {
+      "wings": [
+       [
+        "low",
+        1.0,
+        "feather"
+       ]
+      ],
+      "marks": [
+       "bars",
+       "accent_light"
+      ],
+      "left": null,
+      "bears": "yoke",
+      "over": [
+       "stole",
+       "cord"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "angel-level-beam",
+       "name": "Level Beam",
+       "of": "one who has weighed so long they no longer lean either way",
+       "text": "It is the scales now. The beam is a pair of wings held dead level, the pans hang from the tips, and whatever is put in one, it tells the truth of.",
+       "sign": "No body: an upright of bone, a pair of wings for a beam, two pans on chains. It never quite stops trembling toward level.",
+       "habit": "It dips, very slightly, toward whoever in the room is not saying something.",
+       "leans": {
+        "quests": {
+         "writ": 1.0
+        },
+        "ground": {
+         "quiet": 0.6
+        }
+       },
+       "features": [
+        "true-beam"
+       ],
+       "body": {
+        "shape": "beam"
+       }
+      },
+      {
+       "id": "angel-makeweight",
+       "name": "Makeweight",
+       "of": "one who makes up the difference out of their own pocket and says the count was right",
+       "text": "When the measure comes up short it pulls a feather and lays it in the pan. One wing is nearly bare. It says the count came out right.",
+       "sign": "One wing whole and one plucked almost to the quill, and a pan heaped with its own feathers held level before it.",
+       "habit": "It pays the difference when you are not looking, and is offended if you notice.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "bonds": {
+         "classmate": 0.5
+        }
+       },
+       "features": [
+        "plucked-wing"
+       ],
+       "body": {
+        "wings": [
+         [
+          "plucked",
+          1.0,
+          "feather"
+         ]
+        ],
+        "bears": null,
+        "left": [
+         "pan",
+         1.0
+        ],
+        "brows": "soft"
+       }
+      }
+     ]
+    },
+    {
+     "id": "angel-point-down",
+     "name": "Point-down",
+     "of": "one who could, and has decided not to yet",
+     "text": "It has a sword and it keeps it point down. It would like you to notice both of those things.",
+     "sign": "A sword as long as it is tall, hung point down from one hand, lower than its feet. Its wings are half open and perfectly still.",
+     "habit": "When you are angry it turns the blade a quarter, so the flat faces whoever you are angry at.",
+     "leans": {
+      "fights": {
+       "parries": 1.0
+      },
+      "orders": {
+       "hold": 0.5
+      }
+     },
+     "features": [
+      "edge"
+     ],
+     "body": {
+      "wings": [
+       [
+        "half",
+        1.0,
+        "feather"
+       ]
+      ],
+      "marks": [
+       "bars",
+       "accent_dark"
+      ],
+      "left": null,
+      "right": [
+       "sword-down",
+       1.0
+      ],
+      "over": [
+       "stole",
+       "gorget"
+      ],
+      "eyes": "open"
+     },
+     "finishes": [
+      {
+       "id": "angel-sentence",
+       "name": "Sentence",
+       "of": "one who, having heard everything, does what follows",
+       "text": "It heard all of it, and it was sorry, and it lifted the sword anyway. It does this exactly as often as it must, and it remembers every time.",
+       "sign": "Its feathers have gone to blades, lapis at the root and bright at the edge, and the sword is no longer point down.",
+       "habit": "Afterward it cleans the blade itself and will not be helped.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "fights": {
+         "parries": 0.6
+        }
+       },
+       "features": [
+        "blade-feathers"
+       ],
+       "body": {
+        "wings": [
+         [
+          "raised",
+          1.0,
+          "blades"
+         ]
+        ],
+        "right": [
+         "sword-up",
+         1.0
+        ],
+        "over": [
+         "stole",
+         "gorget",
+         "pauldrons"
+        ]
+       }
+      },
+      {
+       "id": "angel-reprieve",
+       "name": "Reprieve",
+       "of": "one who knows exactly what is deserved, and has learned how seldom it helps",
+       "text": "It knows exactly what you deserve. It has tied the sword into its scabbard with a cord, and it would like you to do better.",
+       "sign": "The sword hangs at its hip, bound into the scabbard with a knotted lapis cord. Its wings are open for the first time, and wide.",
+       "habit": "It gives everyone one more chance than you would, and keeps exact count of the chances.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        },
+        "fights": {
+         "parries": 0.5
+        }
+       },
+       "features": [
+        "sheath"
+       ],
+       "body": {
+        "wings": [
+         [
+          "wide",
+          1.0,
+          "feather"
+         ]
+        ],
+        "right": null,
+        "belt": "sword-bound",
+        "brows": "soft",
+        "mouth": "closed",
+        "over": [
+         "stole"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "angel-blind-hearing",
+     "name": "Blind Hearing",
+     "of": "one who will not look at who you are until they have heard what you did",
+     "text": "It has tied its eyes so that it cannot see whose case it is. It listens instead, and it is very hard to lie to something that is only listening.",
+     "sign": "A lapis band tied over its eyes, the ends hanging down its back, and its wings cupped forward like hands behind ears.",
+     "habit": "It turns its ear, not its face, toward whoever is speaking, and nods at the true parts.",
+     "leans": {
+      "ground": {
+       "quiet": 1.0
+      },
+      "shape": {
+       "read": 0.5
+      }
+     },
+     "features": [
+      "blindfold"
+     ],
+     "body": {
+      "face": "blindfold",
+      "wings": [
+       [
+        "cupped",
+        1.0,
+        "feather"
+       ]
+      ],
+      "marks": [
+       "bars",
+       "accent"
+      ],
+      "over": [
+       "stole",
+       "cowl"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "angel-eye-wheel",
+       "name": "Eye-wheel",
+       "of": "one who looks at everyone for exactly the same length of time",
+       "text": "It took its eyes from its face and set them round a wheel, and a second wheel inside the first, so that no eye rests on anyone longer than on anyone else.",
+       "sign": "No body: two rings of bone turning one inside the other, both rims set with open eyes of your light, on four small wings.",
+       "habit": "It turns a little faster when someone in the room is being let off lightly.",
+       "leans": {
+        "ground": {
+         "quiet": 1.0
+        },
+        "shape": {
+         "read": 0.6
+        }
+       },
+       "features": [
+        "wheels"
+       ],
+       "body": {
+        "shape": "wheel"
+       }
+      },
+      {
+       "id": "angel-level-gaze",
+       "name": "Level Gaze",
+       "of": "one who can look straight at what you did and still be standing next to you after",
+       "text": "It pushed the band up off its eyes at last and looked. It saw exactly what you were, all of it, and it is still here.",
+       "sign": "The blindfold pushed up on its brow like a headband, eyes of plain light that hold on you, and wings held out dead level like a rule.",
+       "habit": "It holds your eye a moment longer than is comfortable. Then, usually, it nods.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "bonds": {
+         "classmate": 0.5
+        }
+       },
+       "features": [
+        "far-eyes"
+       ],
+       "body": {
+        "face": "band-up",
+        "eyes": "light",
+        "brows": "level",
+        "wings": [
+         [
+          "level",
+          1.0,
+          "feather"
+         ]
+        ],
+        "left": [
+         "scales",
+         0.8
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

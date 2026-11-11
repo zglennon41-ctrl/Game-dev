@@ -228,6 +228,7 @@ told apart at the size of a thumbnail before their shapes can.
 
 | Line | Its three Paths and their colours |
 |---|---|
+| Angel | Shoulder-angel `gold` · Clarion `rose` · Weigher `lapis` |
 | Astrolabe | Sighting-glass `peacock` · Orrery `lapis` · Almanac `madder` |
 | Bell | Rally-bell `marigold` · Hour-bell `lapis` · Alarm-bell `madder` |
 | Blade | Duelling Blade `lapis` · Cleaver `madder` · Scored Blade `gold` |
@@ -1520,6 +1521,8 @@ its back: the game sets it by height, and a fish is long and low. Its face is it
 eyes do not turn to look at anything. The game's grain lays round scales on the fins as on the body (a fin is the coat's trim, and is named for it). By colour the Under-the-Ice reads as a Silt-reader: its floe is the largest thing in its picture, and it is slate.
 ## The Demon (`tools/blender/lines_demon.py`, `demon_dress.py`, `demon_gifts.py`)
 
+## The Angel (`tools/blender/lines_angel.py`)
+
 > "Add three more: one angel line, one demon line, and one line specifically for elementals
 > with a humanoid form like tiny demigods." (owner, 2026-11-11)
 
@@ -1715,3 +1718,95 @@ is crude at the hip where the wrap does not cover it; the Sundown is
 the one the line check reads as another Path by colour (a red sun); a great or apex
 Elemental is lit from inside by the light the game puts under the great, which sits at its
 waist, not its feet.
+The soul of one who answers to something larger than themselves, and is hard to live with
+for it: the picture of conscience. A companion, a Keeper, and it floats. It belongs to this
+world and to no church: its halo is the field's light, so it is the colour of its partner's
+Shape, and that is the one thing of it that is its partner's and not its own.
+
+**Its anatomy** is a magical choice, made on purpose and carried all the way: a small
+person (an adult, a forearm tall; a child only as the Starter) whose wings are rooted
+between the shoulder blades as a third pair of limbs, each with its own shoulder, elbow and
+wrist and three ranks of feathers on them (the long feathers, the coverts over their roots,
+the lesser coverts over those). It does not walk: its robe falls past its feet, and what it
+carries may hang lower than it stands. Four Finals stop being people, as the old pictures
+of such things did: two hands, a horn, a pair of scales, a wheel of eyes.
+
+It is built on the small people's kit (`lines_people.Person`, on the people's bones, moved
+by the three clips of `bodies/kith-angel.glb`), with what that kit has not got written
+here: wings, a halo, a face made to be read small, pieces the game moves, and a way to stand
+a form otherwise than at ease.
+
+| Path | What it is at a glance, and what never changes down it | Colour | Coat |
+|---|---|---|---|
+| **Shoulder-angel** (the one who has chosen whose side they are on) | sturdy, level-browed, its mouth shut; its wings held *round* things (mantled, closed like doors, braced, borne as pillars); a sash of its colour at the waist and its colour on the **coverts** of the wing | `gold` | its partner's own, unshifted: it wears your colours as they are |
+| **Clarion** (the one who brings the word whether or not it is wanted) | slight, brows up, mouth open; its wings *raised* (swept up, fanned like a sunrise, long and narrow); a herald's tabard of its colour with a pale disc on the breast, and its colour on the **tips** of the long feathers | `rose` | `moon`: bleached toward morning |
+| **Weigher** (the one who believes in what is deserved) | tall and narrow in a gown with a train and a standing collar, brows drawn down, mouth a line; its wings *composed* (folded like a gown, half open and still, held level as a rule); a stole of its colour with pale ends, and its colour in **bars** across the long feathers; a halo that stands upright behind the head | `lapis` | `iron`: a judge's dark |
+
+An Advancement takes its own step of its Path's colour on the wing (`marks`: the zone, then
+`accent`, `accent_light` or `accent_dark`), and a new thing in its hands or on its back.
+
+The body's keys (a slot holds a style, `[style, size]`, or a list of them):
+
+| Key | What it is | Styles |
+|---|---|---|
+| `build` | the small people's proportions, against its stage's own | as theirs; and `small` (how tall it stands against its stage: the Quiet Word is 0.74) |
+| `hair` | | `down` (the fledgling's) `cropped` `swept` `curls` `bound` `long` `bare` |
+| `eyes` | each eye its own piece, which blinks | `open` `wide` `lowered` `shut` `light` |
+| `brows` | the temperament | `level` `raised` `stern` `soft` |
+| `mouth` | | `closed` `small` `open` `line` |
+| `face` | what is over the face, or in place of it | `blindfold` `band-up` `light` (a light in a cowl) `lamp` (a lamp where the head was) |
+| `halo` | the field's light | `slipped` (too big, and over one eye) `ring` `tilted` `plate` (upright behind the head) `rayed` `coin` `hung` |
+| `wings` | pairs, the upper first: `[pose, size, make]` | makes: `down` `feather` `steel` `blades` `paper` `light` `eyed`. Poses (`POSES`): `stubs` `nubs` `raised` `half` `spread` `wide` `level` `folded` `low` `braced` `planted` `pillars` `closed` `over-face` `over-feet` `display` `sunrise` `sunrise-low` `rise` `fall` `signal-up` `signal-down` `swift` `cupped` `pages`; and four that are not the same on both sides: `mantled` `uneven` `whisper` `plucked` |
+| `marks` | where its Path's colour lies on the wing, and which step | `[coverts \| tips \| bars \| edge, accent \| accent_light \| accent_dark]` |
+| `robe` | its partner's coat | `smock` `tunic` `robe` `gown` `wound` (its own scroll, wound round it) |
+| `over` | what is worn over it; where its Path's colour is on the body | `sash` `hem` `tabard` `stole` `cord` `collar` `baldric` `case` `cowl` `pauldrons` `bracers` `gorget` |
+| `right`, `left` | what is in each hand | `buckler` `lamp-staff` `trumpet` `great-horn` `scroll` `quill` `scales` `pan` `sword-down` `sword-up` |
+| `belt`, `bears` | | `sword-bound`; `arch` (on its two raised wings) `yoke` (the beam of its scales, across its shoulders) |
+| `pose` | how it stands otherwise than at ease (`STANCES`) | `hand-up` |
+| `shape` | a Final that is no longer a person | `hands` `horn` `beam` `wheel` |
+| `coat` | how its partner's coat is worn | the shifts in `data/genius-looks.json` |
+
+A wing's pose is data too (`POSES`): the bones of its arm, which part of the arm carries
+the long feathers, the way they point at the shoulder and at the tip, how long they are, how
+far the wing is swung back or forward. A new pose is one line.
+
+Three things this line had to learn:
+
+- **The game inks every piece that stands clear of another**, and on a face a few pixels
+  across that is the whole face: an eyeball that stands proud of its lids is drawn as a
+  pair of spectacles. So the pieces of a face lie *in* the skin (an eye within its lids, a
+  brow and a mouth with their middles on the surface), and then they take no ink.
+- **A form can stand otherwise than its kind stands** though it has no clips of its own.
+  The game moves it as far from its rest as the idle is from the base body's rest; so the
+  rest is made the one which, moved so, comes to the pose wanted (`Angel.repose`). The
+  Forewarner and Be-not-afraid hold one hand up, palm out, and still breathe and walk.
+- **The field's light is its partner's Shape colour, and a Shape may be gold or blue or
+  rose.** So a Path's colour has to cover enough of a form to outvote the halo: a tenth of
+  it is too little on a body this white.
+
+**What moves**: every wing (`glide_wing_l/r`; the Starter's `beat`; a second and third pair
+`wing2`, `wing3`), each eye (`blink_eye_l/r`), the halo (`bob_`, `sway_` where it has
+slipped or hangs, `spin_` where it has rays, `pulse_` where it stands upright), and what
+hangs: `sway_sash`, `sway_cord`, `sway_pennon`, `sway_lamp`, `sway_scales`, `sway_pan`,
+`sway_scroll`, `sway_band` (a blindfold's ends), `sway_knot`. The Beacon's lamp `pulse_`s
+and its flame `flick_`s; the light that is Be-not-afraid's face `pulse_`s. Of the four that
+are not people: the Upholding Hands `bob_`, their halo `spin_`s; the Unblown Horn's throat
+`pulse_`s and its pennon `sway_`s; the Level Beam's beam `sway_`s with its pans hung from it;
+the Eye-wheel's two rings `spin_` against each other. The Arch-bearer's wings do not move:
+they bear a load. Six forms do not blink, on purpose: the Covert (its face is under its
+wings), the Unsleeping (its own eyes are the only ones that are ever shut), the Beacon and
+Be-not-afraid (a lamp, a light), and the horn, the scales and the hands, which have no
+eyes; the Eye-wheel's never rest.
+
+**What it gives a hybrid** (`python tools/blender/lines_angel.py gifts`): its halo
+(`gifts/angel-halo.glb`: a rayed ring of the field over the head, which bobs) and its wings
+(`gifts/angel-wings.glb`: white, raised, their coverts in the wearer's own Path's colour,
+which glide). `halo` is a feature of this base's own.
+
+**What is still weak**: the faces are right in kind and small in fact: at the size of a
+sheet's cell a temperament is two dots and a line, and it is the wings and the stance that
+say who this is. The raised hand of the Forewarner is seen against its own white wing. The
+robe is one stiff skirt on the hips, as every small person's is: it does not swing. The
+Makeweight's bare wing and the Reprieve's bound sword are small things on large forms.
+Hands at ease are the kit's half-closed hands; only the two that hold a hand up were stood
+otherwise, and nothing may sway from a hand that has been.

@@ -1105,7 +1105,23 @@
         }
       }
     },
-    "moth": { "role": "lookout", "paths": { "moth-candle": { "shade": "hunter", "text": "It goes where the fire is: heavier into every opening." }, "moth-emperor": { "shade": "bulwark", "text": "It opens its eyes at the foe: the foe looks at it, and not at you." }, "moth-moon": { "shade": "lookout", "text": "It keeps its one far light in view: the moment to parry is longer still." } } },
+    "moth": {
+      "role": "lookout",
+      "paths": {
+        "moth-candle": {
+          "shade": "hunter",
+          "text": "It goes where the fire is: heavier into every opening."
+        },
+        "moth-emperor": {
+          "shade": "bulwark",
+          "text": "It opens its eyes at the foe: the foe looks at it, and not at you."
+        },
+        "moth-moon": {
+          "shade": "lookout",
+          "text": "It keeps its one far light in view: the moment to parry is longer still."
+        }
+      }
+    },
     "fog": {
       "role": "harrier",
       "paths": {
@@ -1154,6 +1170,23 @@
         "carp-silt-reader": {
           "shade": "lookout",
           "text": "It feels it in the floor: it calls the strike."
+        }
+      }
+    },
+    "angel": {
+      "role": "keeper",
+      "paths": {
+        "angel-shoulder-angel": {
+          "shade": "keeper",
+          "text": "It has chosen whose side it is on: it mends more."
+        },
+        "angel-clarion": {
+          "shade": "lookout",
+          "text": "It says so before it happens: it calls the strike."
+        },
+        "angel-weigher": {
+          "shade": "hunter",
+          "text": "It believes in what is deserved: heavier into every opening."
         }
       }
     }
