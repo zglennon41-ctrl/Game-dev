@@ -79,7 +79,8 @@
             "power": { "$ref": "#/definitions/unit" },
             "least": { "type": "number", "exclusiveMinimum": 0 },
             "most": { "type": "number", "exclusiveMinimum": 0 },
-            "sharp": { "type": "number", "minimum": 1, "maximum": 16 }
+            "sharp": { "type": "number", "minimum": 1, "maximum": 16 },
+            "along": { "type": "array", "items": { "type": "string", "minLength": 2 } }
           }
         },
         "classes": {
