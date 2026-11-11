@@ -962,8 +962,11 @@
         ],
         "trim": [
          "piping",
-         "collar"
+         "collar",
+         "cuffs",
+         "hem2"
         ],
+        "tone": "light",
         "brow": 20
        }
       },

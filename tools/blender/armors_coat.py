@@ -687,13 +687,13 @@ def grow(C, style, size, spec):
         rows = ((0.02, 13, 0.22), (0.14, 15, 0.26), (0.3, 15, 0.22))[: 2 + (size > 1.2)]
         k = size
         if worn:                   # worn, a ruff of it lying on the shoulders
-            rows, k = ((0.035, 13, 0.1),), 0.62
+            rows, k = ((0.03, 19, 0.11), (0.09, 17, 0.1)), 0.62      # (two rows of narrow tufts, lying down: fur, not plates)
         for row, (d, n, Lb) in enumerate(rows):
             for i in range(n):
                 a = -PI * 0.86 + 2 * PI * 0.86 * i / (n - 1)
                 b0 = C.at(d, a, 0.0)
                 nrm = C.normal(d, a)
-                C.add(g.blade(b0, b0 + nrm * 0.1 * k + Vector((0, 0, -Lb * (size if not worn else 1.0))), 0.17 * k, normal=nrm + Vector((0, 0, 0.5)), belly=0.4), mat("pelt_dark") if (i + row) % 2 else mat("pelt_light"), smooth=True)
+                C.add(g.blade(b0, b0 + nrm * 0.1 * k + Vector((0, 0, -Lb * (size if not worn else 1.0))), 0.17 * k if not worn else 0.062, normal=nrm + Vector((0, 0, 0.5)), belly=0.4 if not worn else 0.3), mat("pelt_dark") if (i + row) % 2 else mat("pelt_light"), smooth=True)
     elif style == "rime":          # frost that does not melt
         n, h = (9, 1.0) if not worn else (7, 0.42)
         for i in range(n):
@@ -1344,11 +1344,11 @@ class Mantle(Coat):
             self.move("sway", "hood", bag, (0.0, rings[0][0].y - 0.06 * k, L + 0.06))
             self.band(0.035, 0.035, 0.03, 0.5)
         elif style == "fur":                               # a collar of pelt, lying out over the shoulders
-            for i in range(13):
-                a = -2.5 + 5.0 * i / 12
+            for i in range(19):
+                a = -2.5 + 5.0 * i / 18
                 b0 = self.rim(a, 0.03, 0.0, 0.0)
                 tip = self.rim(a, 0.02 - 0.02 * (i % 2), 0.0, (0.13 + 0.03 * (i % 2)) * size)
-                self.add(g.blade(b0, tip, 0.11, normal=Vector((0, 0, 1)), belly=0.45), mat("pelt_dark") if i % 2 else mat("pelt_light"), smooth=True)
+                self.add(g.blade(b0, tip, 0.07, normal=Vector((0, 0, 1)), belly=0.45), mat("pelt_dark") if i % 2 else mat("pelt_light"), smooth=True)
         else:
             raise ValueError("no such collar: " + str(style))
         if style in ("ear", "ears"):  # the rims of two ears, standing behind its wearer's own

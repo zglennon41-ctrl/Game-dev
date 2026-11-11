@@ -445,7 +445,7 @@ how each holds itself, which is its form's habit:
 | Oilskin | a sou'wester and a bell of a cape, its sleeves held out to shake itself |
 | Pilot's Coat | leaning, its hem dragged aside by the current, one sleeve pointing the channel |
 | The Lent Coat | narrow in the shoulder, its sleeves empty and flat, open and bowed round someone who is not there |
-| Road-coat | seen from the side, in mid-stride, its skirts swept back |
+| Road-coat | leaning far into its stride, one sleeve swung forward and one back, its skirts swept out behind |
 | Thousand-mile Coat | tall under a pack-frame, a staff in its hand |
 | Many Pockets | short and broad, a fist on its hip, a candle end held out |
 | Hide-coat | broad, a pelt over its shoulders, its arms held away from it |
