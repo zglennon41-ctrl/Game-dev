@@ -357,7 +357,11 @@ func go(place_id: String, quiet := false, from := "") -> void:
 			continue
 		var data: Dictionary = Data.by_id(Data.academy["instructors"], ins["id"])
 		var at := Vector2(ins["at"][0], ins["at"][1])
-		var fig := world.add_figure(data["body"], at, (spawn - at).angle(), data["name"], data.get("title", ""))
+		# an Instructor wears their home's dress as a master of it does, hat and all
+		var ilook: Dictionary = world.look_for(String(data["name"]))
+		ilook.merge({ "dress": "master", "headgear": true, "cape": false }, true)
+		ilook.merge(data.get("look", {}), true)
+		var fig := world.add_figure(data["body"], at, (spawn - at).angle(), data["name"], data.get("title", ""), "", Color(0, 0, 0, 0), ilook)
 		_people.append({ "kind": "instructor", "id": data["id"], "name": data["name"], "pos": at })
 		if data.has("genius"):
 			fight.w_state = "idle"

@@ -1,5 +1,5 @@
 {
-  "comment": "The bodies of the thirteen homes (docs/bodies-plan.md): a carving brief for each face, the face parameters the body kit reads for the masculine and feminine body (multipliers on the base carving: brow ridge, nose length and width, lips, ears, jaw width, head length, cheekbones), and the skin palette offered at creation (tone ids from data/creation.json, look.skinTones). Every sentence is the owner's to rewrite. dress: the home's outfit as pieces the body kit builds as shells on the body's own rings (tunic, coat, robe, kilt, cuirass, apron, hakama, greaves, boots, belt, sash, collar) in named colours, and a headgear piece hung from the head (cap, hat, turban, furhat), which the look's headgear toggle shows or hides. culture: a line on the outfit, the owner's to rewrite. pieces may carry trim (a band colour at hem, cuff or collar), cuffs, stripes (alternate bands), wide, count; types: tunic, vest, coat, robe, kaftan, kilt, wrapskirt, cuirass, apron, hakama, greaves, boots, sandals, belt, sash, obi, collar, scarf, wrap, gloves, buttons, badge, sashknot, toolloop, pauldrons, pteruges. headgear: cap (peak, goggles), hat (trim band), turban (trim, jewel), furhat, scholarcap, hood, headband, helm (crest), with goggles on any. form is the human each home's people are built from (tools/blender/human.py, MakeHuman's CC0 base and targets): ancestry is the mix of MakeHuman's three ancestry forms (they sum to one), details are MakeHuman's detail targets by short name with a value from -1 to 1 (nose-hump 0.4 is nose-hump-incr at 0.4; a negative value is the opposite target; a name without l- or r- is both sides; head-oval and its like take 0 to 1), m and f add to or override the details for one sex. The brief is the sentence the details were written from. dress.trapping: what the home puts on a genius raised there (game/assets/genius/trappings/<home>.glb, tools/blender/genius_trappings.py), by name and in a sentence.",
+  "comment": "The bodies of the thirteen homes (docs/bodies-plan.md): a carving brief for each face, the face parameters the body kit reads for the masculine and feminine body (multipliers on the base carving: brow ridge, nose length and width, lips, ears, jaw width, head length, cheekbones), and the skin palette offered at creation (tone ids from data/creation.json, look.skinTones). Every sentence is the owner's to rewrite. dress: the home's outfit as pieces the body kit builds as shells on the body's own rings (tunic, coat, robe, kilt, cuirass, apron, hakama, greaves, boots, belt, sash, collar) in named colours, and a headgear piece hung from the head (cap, hat, turban, furhat), which the look's headgear toggle shows or hides. culture: a line on the outfit, the owner's to rewrite. pieces may carry trim (a band colour at hem, cuff or collar), cuffs, stripes (alternate bands), wide, count; types: tunic, vest, coat, robe, kaftan, kilt, wrapskirt, cuirass, apron, hakama, greaves, boots, sandals, belt, sash, obi, collar, scarf, wrap, gloves, buttons, badge, sashknot, toolloop, pauldrons, pteruges. headgear: cap (peak, goggles), hat (trim band), turban (trim, jewel), furhat, scholarcap, hood, headband, helm (crest), with goggles on any. form is the human each home's people are built from (tools/blender/human.py, MakeHuman's CC0 base and targets): ancestry is the mix of MakeHuman's three ancestry forms (they sum to one), details are MakeHuman's detail targets by short name with a value from -1 to 1 (nose-hump 0.4 is nose-hump-incr at 0.4; a negative value is the opposite target; a name without l- or r- is both sides; head-oval and its like take 0 to 1), m and f add to or override the details for one sex. The brief is the sentence the details were written from. dress.trapping: what the home puts on a genius raised there (game/assets/genius/trappings/<home>.glb, tools/blender/genius_trappings.py), by name and in a sentence. dress (docs/bodies-plan.md, Dress as culture; cut by tools/blender/wardrobe.py): culture, silhouette, chord and signature say it in words; colors names each colour by a ramp of data/style.json and a step (indigo:1.25); stuff says what each is made of (the grain follows); under is what is painted on the body beneath (shirt, legs, shoes: a colour's name, or bare; m and f may differ); pieces is what is worn, each for both sexes or one (sex) and always or in some of the three ways of wearing (in: plain, formal, master: an Instructor's); headgear likewise, one or a list; options are what the creator's Dress page offers (id, name, text, wear, and colors to dye over the home's own).",
   "homes": {
     "alexandria": {
       "name": "Alexandria",
@@ -26,39 +26,148 @@
         "f": {}
       },
       "dress": {
-        "culture": "The Academy's grey, the same on everyone who passes through; a brass collar for the cohort, boots for the line.",
+        "culture": "The Academy's grey, the same on everyone who passes through: a high-collared tunic under a tabard bordered in brass thread, the cohort's brass tag at the breast, boots for the line. An Instructor wears it long, with the shoulder cape and the chain.",
+        "silhouette": "a tabard hanging square before and behind over a high collar",
+        "chord": "slate grey, ink, brass",
+        "chordColors": [
+          "main",
+          "dark",
+          "brass"
+        ],
+        "signature": "the cohort's brass tag; the Instructor's chain of office",
         "colors": {
-          "main": [
-            0.3,
-            0.28,
-            0.33
-          ],
-          "second": [
-            0.16,
-            0.15,
-            0.17
-          ],
-          "metal": [
-            0.6,
-            0.5,
-            0.28
-          ]
+          "main": "slate:2.3",
+          "tabard": "slate:1.2",
+          "dark": "ink:3.0",
+          "leather": "leather:0.9",
+          "brass": "brass:2.6"
+        },
+        "stuff": {
+          "main": "wool",
+          "tabard": "wool",
+          "dark": "wool"
+        },
+        "under": {
+          "shirt": "dark",
+          "legs": "dark",
+          "shoes": "leather"
         },
         "pieces": [
           {
             "type": "tunic",
             "color": "main",
-            "sleeves": 2,
-            "trim": "metal"
+            "sleeves": 6,
+            "collar": "stand",
+            "trim": "dark",
+            "in": [
+              "plain",
+              "formal"
+            ],
+            "sex": "m"
+          },
+          {
+            "type": "tunic",
+            "color": "main",
+            "sleeves": 6,
+            "collar": "stand",
+            "trim": "dark",
+            "hem": 0.8,
+            "flare": 1.2,
+            "in": [
+              "plain",
+              "formal"
+            ],
+            "sex": "f"
+          },
+          {
+            "type": "coat",
+            "color": "main",
+            "sleeves": 6,
+            "collar": "stand",
+            "trim": "dark",
+            "hem": 0.22,
+            "flare": 1.2,
+            "bell": 0.04,
+            "in": [
+              "master"
+            ]
+          },
+          {
+            "type": "tabard",
+            "color": "tabard",
+            "trim": "brass",
+            "band2": true,
+            "hem": 0.62,
+            "border": 0.035,
+            "sex": "m"
+          },
+          {
+            "type": "tabard",
+            "color": "tabard",
+            "trim": "brass",
+            "band2": true,
+            "hem": 0.5,
+            "border": 0.035,
+            "sex": "f"
           },
           {
             "type": "belt",
-            "color": "second"
+            "color": "leather",
+            "trim": "brass"
+          },
+          {
+            "type": "badge",
+            "color": "brass",
+            "x": 0.1
           },
           {
             "type": "boots",
-            "color": "second",
-            "cuffs": "main"
+            "color": "leather",
+            "cuffs": "dark",
+            "top": 4
+          },
+          {
+            "type": "mantle",
+            "color": "main",
+            "trim": "brass",
+            "drop": 0.2,
+            "in": [
+              "formal",
+              "master"
+            ]
+          },
+          {
+            "type": "chain",
+            "color": "brass",
+            "trim": "brass",
+            "in": [
+              "master"
+            ],
+            "off": 0.07
+          }
+        ],
+        "options": [
+          {
+            "id": "working",
+            "name": "The yard's grey",
+            "text": "What every first-year is issued.",
+            "wear": "plain"
+          },
+          {
+            "id": "ash",
+            "name": "Ash grey",
+            "text": "The older issue, undyed: some cohorts keep it.",
+            "wear": "plain",
+            "colors": {
+              "main": "stone:2.5",
+              "tabard": "stone:1.1"
+            }
+          },
+          {
+            "id": "formal",
+            "name": "Hall dress",
+            "text": "With the shoulder cape, for the hall and the Gate.",
+            "wear": "formal"
           }
         ],
         "trapping": {
@@ -96,70 +205,176 @@
         "f": {}
       },
       "dress": {
-        "culture": "The marshals' city: a long dark-blue coat with brass buttons and a star at the breast, cream cuffs, a gun belt, tall boots, and the broad-brimmed hat with a band.",
+        "culture": "The marshals' city: a long dark-blue coat open over the gun belt, cream at collar, cuff and facing, brass buttons in two rows and a star at the breast, a red neckerchief, tall boots, and the broad hat. The women ride in a short jacket and a long split skirt. A Captain adds the epaulettes, the red sash and the cavalry cape.",
+        "silhouette": "a broad flat hat over a long coat that flares to the calf",
+        "chord": "navy, cream, brass",
+        "chordColors": [
+          "main",
+          "cream",
+          "brass"
+        ],
+        "signature": "the marshal's star and the gun slung low on the thigh",
         "colors": {
-          "main": [
-            0.14,
-            0.18,
-            0.36
-          ],
-          "second": [
-            0.82,
-            0.74,
-            0.55
-          ],
-          "metal": [
-            0.72,
-            0.6,
-            0.28
-          ],
-          "leather": [
-            0.3,
-            0.2,
-            0.12
-          ]
+          "main": "indigo:1.25",
+          "cream": "bone:3.2",
+          "grey": "slate:2.2",
+          "red": "oxblood:2.7",
+          "brass": "brass:2.8",
+          "leather": "leather:1.4"
+        },
+        "stuff": {
+          "main": "wool",
+          "cream": "linen",
+          "grey": "wool",
+          "red": "linen"
+        },
+        "under": {
+          "shirt": "cream",
+          "legs": "grey",
+          "shoes": "leather"
         },
         "pieces": [
           {
             "type": "coat",
             "color": "main",
-            "hem": 0.55,
+            "hem": 0.36,
+            "flare": 1.32,
+            "open": 0.11,
+            "vent": 0.07,
             "sleeves": 6,
-            "cuffs": "second",
-            "trim": "second"
+            "cuffs": "cream",
+            "trim": "cream",
+            "border": 0.04,
+            "collar": "stand",
+            "sex": "m"
           },
           {
-            "type": "collar",
-            "color": "second"
+            "type": "tunic",
+            "color": "main",
+            "hem": 0.95,
+            "flare": 1.3,
+            "sleeves": 6,
+            "cuffs": "cream",
+            "trim": "cream",
+            "border": 0.035,
+            "collar": "stand",
+            "sex": "f"
+          },
+          {
+            "type": "wrapskirt",
+            "color": "grey",
+            "from": 2,
+            "hem": 0.3,
+            "flare": 1.4,
+            "pleats": 8,
+            "sex": "f"
           },
           {
             "type": "buttons",
-            "color": "metal",
-            "count": 5
+            "color": "brass",
+            "count": 4,
+            "rows": 2,
+            "to": 4
           },
           {
             "type": "badge",
-            "color": "metal"
+            "color": "brass",
+            "shape": "star",
+            "x": 0.12
+          },
+          {
+            "type": "scarf",
+            "color": "red"
           },
           {
             "type": "belt",
-            "color": "leather"
+            "color": "leather",
+            "trim": "brass",
+            "at": 2.4,
+            "tilt": -0.05
           },
           {
-            "type": "toolloop",
-            "color": "leather"
+            "type": "holster",
+            "color": "leather",
+            "trim": "brass"
           },
           {
             "type": "boots",
             "color": "leather",
-            "cuffs": "leather"
+            "cuffs": "leather",
+            "top": 3,
+            "flare": 0.025
+          },
+          {
+            "type": "pauldrons",
+            "color": "brass",
+            "in": [
+              "formal",
+              "master"
+            ]
+          },
+          {
+            "type": "sash",
+            "color": "red",
+            "in": [
+              "formal",
+              "master"
+            ],
+            "height": 0.05
+          },
+          {
+            "type": "sashknot",
+            "color": "red",
+            "side": "l",
+            "length": 0.4,
+            "in": [
+              "formal",
+              "master"
+            ]
+          },
+          {
+            "type": "cloak",
+            "color": "main",
+            "trim": "cream",
+            "hem": 0.5,
+            "border": 0.04,
+            "in": [
+              "master"
+            ]
           }
         ],
-        "headgear": {
-          "type": "hat",
-          "color": "main",
-          "trim": "second"
-        },
+        "headgear": [
+          {
+            "type": "hat",
+            "name": "Hat",
+            "color": "main",
+            "trim": "cream",
+            "brim": 2.0
+          }
+        ],
+        "options": [
+          {
+            "id": "working",
+            "name": "Marshal's blue",
+            "text": "The coat the city swears its marshals in.",
+            "wear": "plain"
+          },
+          {
+            "id": "dust",
+            "name": "Dust coat",
+            "text": "The riders' tan, for the long roads west of the river.",
+            "wear": "plain",
+            "colors": {
+              "main": "earth:2.6"
+            }
+          },
+          {
+            "id": "formal",
+            "name": "Parade dress",
+            "text": "With the epaulettes and the red sash.",
+            "wear": "formal"
+          }
+        ],
         "trapping": {
           "name": "a marshal's star",
           "text": "A brass star on a blue rosette. In Columbia what stands beside you is sworn in with you."
@@ -192,55 +407,178 @@
         "f": {}
       },
       "dress": {
-        "culture": "The river: a pilot's oilskin coat to the knee, a woven sash in ochre and red, high boots against the water, and a knit cap.",
+        "culture": "The river: a pilot's green oilcloth coat to the knee under a rain cape, a woven sash in ochre and red knotted and left long, boots to the thigh against the water, a coiled sounding line at the hip, and a knit cap. The women wear the woven shawl over a short coat and skirt. A Pilot of the school adds the long cape and the woven baldric.",
+        "silhouette": "a short cape over the shoulders, long sash-ends, boots flaring at the thigh",
+        "chord": "river green, woven ochre and red, copper",
+        "chordColors": [
+          "main",
+          "ochre",
+          "red"
+        ],
+        "signature": "the sounding line coiled at the hip; the sash left long to be seen from the far bank",
         "colors": {
-          "main": [
-            0.2,
-            0.28,
-            0.22
-          ],
-          "second": [
-            0.62,
-            0.42,
-            0.2
-          ],
-          "red": [
-            0.55,
-            0.18,
-            0.14
-          ]
+          "main": "moss:1.8",
+          "ochre": "ochre:2.7",
+          "red": "oxblood:2.4",
+          "dark": "earth:0.9",
+          "copper": "brass:2.1",
+          "leather": "umber:1.0",
+          "line": "reed:2.6"
+        },
+        "stuff": {
+          "main": "oilcloth",
+          "ochre": "wool",
+          "red": "wool",
+          "dark": "wool",
+          "line": "rope"
+        },
+        "under": {
+          "shirt": "ochre",
+          "legs": "dark",
+          "shoes": "leather"
         },
         "pieces": [
           {
             "type": "coat",
             "color": "main",
-            "hem": 0.95,
+            "hem": 0.6,
+            "flare": 1.22,
             "sleeves": 6,
-            "trim": "second"
+            "trim": "ochre",
+            "band2": true,
+            "collar": "high",
+            "sex": "m"
           },
           {
-            "type": "collar",
-            "color": "main"
+            "type": "mantle",
+            "color": "main",
+            "trim": "ochre",
+            "drop": 0.22,
+            "sex": "m"
+          },
+          {
+            "type": "tunic",
+            "color": "main",
+            "hem": 0.9,
+            "flare": 1.25,
+            "sleeves": 6,
+            "trim": "ochre",
+            "collar": "high",
+            "sex": "f"
+          },
+          {
+            "type": "wrapskirt",
+            "color": "main",
+            "from": 2,
+            "hem": 0.52,
+            "flare": 1.32,
+            "trim": "ochre",
+            "band2": true,
+            "sex": "f"
+          },
+          {
+            "type": "mantle",
+            "color": "ochre",
+            "trim": "red",
+            "drop": 0.32,
+            "reach": 0.12,
+            "sex": "f"
           },
           {
             "type": "sash",
-            "color": "second",
+            "color": "ochre",
             "stripes": "red"
           },
           {
             "type": "sashknot",
-            "color": "red"
+            "color": "red",
+            "trim": "ochre",
+            "side": "r",
+            "length": 0.45
+          },
+          {
+            "type": "coil",
+            "color": "line",
+            "trim": "leather"
           },
           {
             "type": "boots",
-            "color": "second",
-            "cuffs": "main"
+            "color": "leather",
+            "cuffs": "ochre",
+            "top": 2,
+            "flare": 0.035,
+            "sex": "m"
+          },
+          {
+            "type": "boots",
+            "color": "leather",
+            "cuffs": "ochre",
+            "top": 3,
+            "flare": 0.03,
+            "sex": "f"
+          },
+          {
+            "type": "wrap",
+            "color": "red",
+            "width": 0.09,
+            "in": [
+              "formal",
+              "master"
+            ],
+            "off": 0.05,
+            "flip": true
+          },
+          {
+            "type": "cloak",
+            "color": "main",
+            "trim": "ochre",
+            "band2": true,
+            "hem": 0.32,
+            "in": [
+              "master"
+            ]
+          },
+          {
+            "type": "brooch",
+            "color": "copper",
+            "in": [
+              "master"
+            ]
           }
         ],
-        "headgear": {
-          "type": "cap",
-          "color": "red"
-        },
+        "headgear": [
+          {
+            "type": "cap",
+            "name": "Knit cap",
+            "color": "red",
+            "trim": "ochre",
+            "roll": true
+          }
+        ],
+        "options": [
+          {
+            "id": "working",
+            "name": "River green",
+            "text": "Oilcloth the colour of the water in summer.",
+            "wear": "plain"
+          },
+          {
+            "id": "lowwater",
+            "name": "Low water",
+            "text": "The grey-green the pilots wear when the bars show.",
+            "wear": "plain",
+            "colors": {
+              "main": "verdigris:1.5",
+              "ochre": "bone:2.8"
+            }
+          },
+          {
+            "id": "formal",
+            "name": "Landing dress",
+            "text": "With the woven baldric, for coming ashore.",
+            "wear": "formal"
+          }
+        ],
         "trapping": {
           "name": "a river sash",
           "text": "The pilots' woven sash in ochre and red, knotted and left long, so it can be seen from the far bank."
@@ -274,61 +612,173 @@
         "f": {}
       },
       "dress": {
-        "culture": "Fog and docks: a docker's short charcoal jacket, a red scarf, gloves, heavy boots, and a flat cap with goggles pushed up for the airship rigging.",
+        "culture": "Fog and docks and the airship rigging: a short charcoal jacket with a fleece collar under a rigger's harness, a red scarf thrown long down the back, flared breeches bound at the calf, gauntlets, and a flat cap with goggles pushed up. The women fly in a long belted coat and a leather cap. A Dockmaster adds the greatcoat's cape and the steel chain.",
+        "silhouette": "heavy at the collar and narrow at the calf, a scarf's two ends down the back",
+        "chord": "charcoal, a red scarf, steel",
+        "chordColors": [
+          "main",
+          "red",
+          "steel"
+        ],
+        "signature": "goggles pushed up, and the rigger's harness",
         "colors": {
-          "main": [
-            0.2,
-            0.2,
-            0.24
-          ],
-          "second": [
-            0.6,
-            0.2,
-            0.16
-          ],
-          "leather": [
-            0.28,
-            0.2,
-            0.14
-          ],
-          "metal": [
-            0.6,
-            0.58,
-            0.5
-          ]
+          "main": "iron:1.4",
+          "red": "oxblood:3.0",
+          "fleece": "bone:2.7",
+          "grey": "slate:1.3",
+          "leather": "leather:1.2",
+          "steel": "steel:1.2"
+        },
+        "stuff": {
+          "main": "wool",
+          "red": "wool",
+          "fleece": "wool",
+          "grey": "wool"
+        },
+        "under": {
+          "shirt": "grey",
+          "legs": "grey",
+          "shoes": "leather"
         },
         "pieces": [
           {
-            "type": "tunic",
+            "type": "jacket",
             "color": "main",
+            "lo": 3,
             "sleeves": 6,
-            "cuffs": "leather"
+            "cuffs": "leather",
+            "sex": "m"
+          },
+          {
+            "type": "strap",
+            "color": "leather",
+            "cross": true,
+            "width": 0.045,
+            "sex": "m"
+          },
+          {
+            "type": "coat",
+            "color": "main",
+            "hem": 0.6,
+            "flare": 1.22,
+            "open": 0.09,
+            "sleeves": 6,
+            "cuffs": "leather",
+            "trim": "leather",
+            "border": 0.03,
+            "sex": "f"
+          },
+          {
+            "type": "satchel",
+            "color": "leather",
+            "trim": "steel",
+            "sex": "f"
+          },
+          {
+            "type": "furcollar",
+            "color": "fleece"
           },
           {
             "type": "scarf",
-            "color": "second"
+            "color": "red",
+            "tails": "back",
+            "trim": "fleece"
           },
           {
             "type": "belt",
-            "color": "leather"
+            "color": "leather",
+            "trim": "steel"
           },
           {
-            "type": "gloves",
-            "color": "leather"
+            "type": "trousers",
+            "color": "grey",
+            "cut": "jodhpur"
+          },
+          {
+            "type": "puttees",
+            "color": "leather",
+            "trim": "grey",
+            "sex": "m"
           },
           {
             "type": "boots",
             "color": "leather",
-            "cuffs": "main"
+            "cuffs": "leather",
+            "top": 3,
+            "flare": 0.015,
+            "sex": "f"
+          },
+          {
+            "type": "gloves",
+            "color": "leather",
+            "flare": 0.02,
+            "trim": "leather"
+          },
+          {
+            "type": "mantle",
+            "color": "main",
+            "trim": "red",
+            "drop": 0.24,
+            "in": [
+              "formal",
+              "master"
+            ]
+          },
+          {
+            "type": "chain",
+            "color": "steel",
+            "trim": "steel",
+            "in": [
+              "master"
+            ],
+            "off": 0.085
           }
         ],
-        "headgear": {
-          "type": "cap",
-          "color": "main",
-          "trim": "leather",
-          "peak": true,
-          "goggles": true
-        },
+        "headgear": [
+          {
+            "type": "cap",
+            "name": "Flat cap",
+            "color": "main",
+            "trim": "leather",
+            "peak": true,
+            "goggles": true,
+            "metal": "steel",
+            "sex": "m"
+          },
+          {
+            "type": "flightcap",
+            "name": "Flying cap",
+            "color": "leather",
+            "trim": "leather",
+            "goggles": true,
+            "metal": "steel",
+            "sex": "f"
+          }
+        ],
+        "options": [
+          {
+            "id": "working",
+            "name": "Dock charcoal",
+            "text": "The colour of the fog, with the red scarf to be found by.",
+            "wear": "plain"
+          },
+          {
+            "id": "brown",
+            "name": "Rigger's brown",
+            "text": "Oiled brown and a mustard scarf, as the upper docks wear.",
+            "wear": "plain",
+            "colors": {
+              "main": "umber:1.3",
+              "red": "ochre:2.8"
+            }
+          },
+          {
+            "id": "formal",
+            "name": "Shore dress",
+            "text": "With the short cape lined in red.",
+            "wear": "formal"
+          }
+        ],
         "trapping": {
           "name": "a docker's scarf",
           "text": "A red scarf knotted at the throat against the fog."
@@ -363,62 +813,208 @@
         "f": {}
       },
       "dress": {
-        "culture": "The engine-works: a rust tunic under a heavy leather apron, tools at the belt, gauntlet gloves, boots, and a leather cap with goggles.",
+        "culture": "The engine-works: a rust shirt with the sleeves rolled, a heavy black leather apron, gauntlets to the elbow, one shoulder guarded, a tool roll slung across the back and a hammer at the belt, a leather cap with goggles. The women wear the smock, a short apron and the tool bag, the hair tied in a red kerchief. A Foreman wears the waistcoat with brass buttons, the long shop coat and the chain.",
+        "silhouette": "a slab of apron, big gauntlets, one heavy shoulder, a roll across the back",
+        "chord": "brick rust, black leather, steel",
+        "chordColors": [
+          "main",
+          "apron",
+          "steel"
+        ],
+        "signature": "the tool roll on the back and the hammer at the belt",
         "colors": {
-          "main": [
-            0.5,
-            0.26,
-            0.12
-          ],
-          "second": [
-            0.22,
-            0.19,
-            0.16
-          ],
-          "leather": [
-            0.13,
-            0.08,
-            0.05
-          ],
-          "metal": [
-            0.6,
-            0.55,
-            0.4
-          ]
+          "main": "oxblood:1.7",
+          "apron": "umber:0.45",
+          "dark": "stone:0.9",
+          "cream": "bone:2.5",
+          "red": "oxblood:2.3",
+          "leather": "leather:1.5",
+          "steel": "steel:1.3",
+          "brass": "brass:2.4"
+        },
+        "stuff": {
+          "main": "linen",
+          "dark": "wool",
+          "cream": "linen",
+          "red": "linen"
+        },
+        "under": {
+          "shirt": "main",
+          "legs": "dark",
+          "shoes": "leather"
         },
         "pieces": [
           {
             "type": "tunic",
             "color": "main",
-            "sleeves": 2
+            "sleeves": 3,
+            "roll": "cream",
+            "sex": "m"
+          },
+          {
+            "type": "tunic",
+            "color": "main",
+            "sleeves": 3,
+            "roll": "cream",
+            "hem": 0.85,
+            "flare": 1.22,
+            "sex": "f"
+          },
+          {
+            "type": "vest",
+            "color": "dark",
+            "grow": 0.032,
+            "in": [
+              "formal",
+              "master"
+            ]
+          },
+          {
+            "type": "buttons",
+            "color": "brass",
+            "count": 5,
+            "in": [
+              "formal"
+            ]
           },
           {
             "type": "apron",
-            "color": "leather"
+            "color": "apron",
+            "hem": 0.4,
+            "in": [
+              "plain",
+              "master"
+            ],
+            "sex": "m"
+          },
+          {
+            "type": "apron",
+            "color": "apron",
+            "hem": 0.62,
+            "bib": false,
+            "in": [
+              "plain",
+              "master"
+            ],
+            "sex": "f"
           },
           {
             "type": "belt",
-            "color": "second"
+            "color": "leather",
+            "trim": "steel"
           },
           {
             "type": "toolloop",
-            "color": "metal"
+            "color": "leather",
+            "trim": "steel"
+          },
+          {
+            "type": "pauldrons",
+            "color": "leather",
+            "trim": "steel",
+            "side": "l",
+            "layers": 2,
+            "sex": "m"
+          },
+          {
+            "type": "roll",
+            "color": "leather",
+            "trim": "brass",
+            "to": 4,
+            "sex": "m"
+          },
+          {
+            "type": "strap",
+            "color": "leather",
+            "width": 0.05
+          },
+          {
+            "type": "satchel",
+            "color": "leather",
+            "trim": "brass",
+            "sex": "f"
           },
           {
             "type": "gloves",
-            "color": "leather"
+            "color": "leather",
+            "flare": 0.03,
+            "trim": "apron"
           },
           {
             "type": "boots",
-            "color": "second"
+            "color": "dark",
+            "cuffs": "leather",
+            "top": 4
+          },
+          {
+            "type": "coat",
+            "color": "dark",
+            "hem": 0.38,
+            "flare": 1.18,
+            "open": 0.14,
+            "openTo": "chest",
+            "sleeves": 6,
+            "trim": "brass",
+            "border": 0.03,
+            "grow": 0.05,
+            "cuffs": "brass",
+            "in": [
+              "master"
+            ]
+          },
+          {
+            "type": "chain",
+            "color": "brass",
+            "trim": "brass",
+            "in": [
+              "master"
+            ],
+            "off": 0.075
           }
         ],
-        "headgear": {
-          "type": "cap",
-          "color": "leather",
-          "trim": "metal",
-          "goggles": true
-        },
+        "headgear": [
+          {
+            "type": "cap",
+            "name": "Works cap",
+            "color": "leather",
+            "trim": "steel",
+            "goggles": true,
+            "metal": "steel",
+            "sex": "m"
+          },
+          {
+            "type": "kerchief",
+            "name": "Kerchief",
+            "color": "red",
+            "trim": "steel",
+            "goggles": true,
+            "metal": "steel",
+            "sex": "f"
+          }
+        ],
+        "options": [
+          {
+            "id": "working",
+            "name": "Works rust",
+            "text": "The day shift's colour, under the apron.",
+            "wear": "plain"
+          },
+          {
+            "id": "night",
+            "name": "Night shift",
+            "text": "Soot blue-grey, for the hours the furnaces are banked.",
+            "wear": "plain",
+            "colors": {
+              "main": "slate:1.7"
+            }
+          },
+          {
+            "id": "formal",
+            "name": "Guild dress",
+            "text": "The apron off, the waistcoat buttoned in brass.",
+            "wear": "formal"
+          }
+        ],
         "trapping": {
           "name": "a works lens",
           "text": "A lens from the engine-works on a leather tab. Everything in Colonia is looked at closely."
@@ -451,64 +1047,195 @@
         "f": {}
       },
       "dress": {
-        "culture": "The old walls: a legionary's red tunic under a bronze cuirass with pauldrons, pteruges at the waist, greaves, sandals, and a crested helm.",
+        "culture": "The old walls: a legionary's red tunic under a bronze cuirass with layered shoulders, studded straps at the waist, greaves, sandals, the red cloak pinned at the shoulder, and a crested helm. The women wear the tunic long under a leather breast-band and one bronze shoulder. A Centurion wears the crest across, the medals on the harness and the armlets.",
+        "silhouette": "plated shoulders, a skirt of straps, a cloak behind, a crest above",
+        "chord": "legion red, bronze, white",
+        "chordColors": [
+          "main",
+          "white",
+          "bronze"
+        ],
+        "signature": "the layered plate at the shoulders and the crest: fore and aft for the ranks, across for a Centurion",
         "colors": {
-          "main": [
-            0.62,
-            0.14,
-            0.12
-          ],
-          "second": [
-            0.42,
-            0.3,
-            0.2
-          ],
-          "metal": [
-            0.72,
-            0.62,
-            0.4
-          ]
+          "main": "oxblood:2.8",
+          "white": "bone:3.4",
+          "bronze": "brass:2.3",
+          "leather": "leather:2.0"
+        },
+        "stuff": {
+          "main": "wool",
+          "white": "linen"
+        },
+        "under": {
+          "shirt": "main",
+          "legs": "bare"
         },
         "pieces": [
           {
             "type": "tunic",
             "color": "main",
             "sleeves": 1,
-            "trim": "second"
+            "hem": 0.74,
+            "flare": 1.18,
+            "trim": "white",
+            "border": 0.035,
+            "sex": "m"
           },
           {
             "type": "cuirass",
-            "color": "metal",
-            "trim": "second"
+            "color": "bronze",
+            "trim": "leather",
+            "lo": 4,
+            "sex": "m"
           },
           {
             "type": "pauldrons",
-            "color": "metal"
+            "color": "bronze",
+            "trim": "leather",
+            "layers": 3,
+            "sex": "m"
           },
           {
             "type": "pteruges",
-            "color": "second",
-            "count": 12
+            "color": "leather",
+            "trim": "bronze",
+            "count": 12,
+            "length": 0.27,
+            "sex": "m"
+          },
+          {
+            "type": "tunic",
+            "color": "main",
+            "sleeves": 1,
+            "hem": 0.46,
+            "flare": 1.28,
+            "trim": "white",
+            "band2": true,
+            "border": 0.035,
+            "sex": "f"
+          },
+          {
+            "type": "cuirass",
+            "color": "leather",
+            "trim": "bronze",
+            "lo": 5,
+            "sex": "f"
+          },
+          {
+            "type": "pauldrons",
+            "color": "bronze",
+            "trim": "leather",
+            "layers": 2,
+            "side": "l",
+            "sex": "f"
           },
           {
             "type": "belt",
-            "color": "second"
+            "color": "leather",
+            "trim": "bronze"
           },
           {
             "type": "greaves",
-            "color": "metal"
+            "color": "bronze"
           },
           {
             "type": "sandals",
-            "color": "second"
+            "color": "leather"
+          },
+          {
+            "type": "cloak",
+            "color": "main",
+            "trim": "white",
+            "hem": 0.55,
+            "border": 0.035,
+            "arc": [
+              5,
+              175
+            ]
+          },
+          {
+            "type": "brooch",
+            "color": "bronze",
+            "x": 0.16
+          },
+          {
+            "type": "armlets",
+            "color": "bronze",
+            "at": [
+              5
+            ],
+            "in": [
+              "formal",
+              "master"
+            ]
+          },
+          {
+            "type": "strap",
+            "color": "leather",
+            "cross": true,
+            "width": 0.04,
+            "off": 0.055,
+            "in": [
+              "master"
+            ]
+          },
+          {
+            "type": "buttons",
+            "color": "bronze",
+            "count": 3,
+            "rows": 2,
+            "to": 5,
+            "in": [
+              "master"
+            ]
           }
         ],
-        "headgear": {
-          "type": "helm",
-          "color": "metal",
-          "trim": "main",
-          "crest": true
-        },
+        "headgear": [
+          {
+            "type": "helm",
+            "name": "Helm",
+            "color": "bronze",
+            "trim": "main",
+            "crest": true,
+            "in": [
+              "plain",
+              "formal"
+            ]
+          },
+          {
+            "type": "helm",
+            "name": "Helm",
+            "color": "bronze",
+            "trim": "main",
+            "crest": "across",
+            "in": [
+              "master"
+            ]
+          }
+        ],
+        "options": [
+          {
+            "id": "working",
+            "name": "Legion red",
+            "text": "The red of the first wall.",
+            "wear": "plain"
+          },
+          {
+            "id": "river",
+            "name": "River cohort",
+            "text": "The blue of the cohort that holds the bridges.",
+            "wear": "plain",
+            "colors": {
+              "main": "indigo:1.8"
+            }
+          },
+          {
+            "id": "formal",
+            "name": "Triumph dress",
+            "text": "With the bronze at the wrists.",
+            "wear": "formal"
+          }
+        ],
         "trapping": {
           "name": "a bronze disc",
           "text": "A bronze disc on a red cord: what a child of the old walls is given, and gives."
@@ -542,55 +1269,165 @@
         "f": {}
       },
       "dress": {
-        "culture": "The black fields: white linen, a kilt with a striped sash of green and gold, the broad gold collar of the growers, bare arms, and a headband.",
+        "culture": "The black fields: white linen, the men bare-chested in a pleated kilt with its stiff front panel, the women in a long straight sheath; a sash of green banded in gold hanging before, the broad gold collar of the growers, gold at the arms, sandals, and the banded head-cloth with its two lappets. A Keeper adds the pleated shoulder cape and the green mantle.",
+        "silhouette": "bare arms, a head-cloth's two lappets, a kilt with a stiff panel before",
+        "chord": "white linen, field green, gold",
+        "chordColors": [
+          "main",
+          "green",
+          "gold"
+        ],
+        "signature": "the growers' broad collar",
         "colors": {
-          "main": [
-            0.9,
-            0.84,
-            0.66
-          ],
-          "second": [
-            0.2,
-            0.42,
-            0.26
-          ],
-          "metal": [
-            0.8,
-            0.66,
-            0.26
-          ]
+          "main": "bone:3.7",
+          "green": "verdigris:2.2",
+          "gold": "brass:3.0",
+          "leather": "leather:2.4"
+        },
+        "stuff": {
+          "main": "linen",
+          "green": "linen"
+        },
+        "under": {
+          "m": {
+            "shirt": "bare"
+          },
+          "f": {
+            "shirt": "main"
+          },
+          "legs": "bare"
         },
         "pieces": [
           {
-            "type": "tunic",
-            "color": "main",
-            "sleeves": 0
-          },
-          {
             "type": "kilt",
             "color": "main",
-            "hem": 0.7,
-            "trim": "metal"
+            "from": 2,
+            "hem": 0.64,
+            "flare": 1.12,
+            "pleats": 10,
+            "band": "green",
+            "sex": "m"
+          },
+          {
+            "type": "panel",
+            "color": "main",
+            "trim": "gold",
+            "arc": [
+              246,
+              294
+            ],
+            "top": 3,
+            "bottom": 2,
+            "hem": 0.5,
+            "narrow": 0.45,
+            "flare": 1.12,
+            "grow": [
+              0.05,
+              0.05
+            ],
+            "border": 0.04,
+            "sex": "m"
+          },
+          {
+            "type": "robe",
+            "color": "main",
+            "sleeves": 0,
+            "hem": 0.16,
+            "flare": 1.06,
+            "trim": "gold",
+            "band2": true,
+            "border": 0.04,
+            "pleats": 10,
+            "folds": 0.008,
+            "sex": "f"
           },
           {
             "type": "sash",
-            "color": "second",
-            "stripes": "metal"
+            "color": "green",
+            "stripes": "gold"
+          },
+          {
+            "type": "sashknot",
+            "color": "green",
+            "trim": "gold",
+            "side": "front",
+            "length": 0.45
           },
           {
             "type": "collar",
-            "color": "metal",
-            "wide": true
+            "color": "gold",
+            "wide": 1.9
+          },
+          {
+            "type": "armlets",
+            "color": "gold",
+            "at": [
+              2
+            ]
+          },
+          {
+            "type": "armlets",
+            "color": "gold",
+            "at": [
+              5
+            ]
           },
           {
             "type": "sandals",
-            "color": "second"
+            "color": "leather"
+          },
+          {
+            "type": "mantle",
+            "color": "main",
+            "trim": "gold",
+            "drop": 0.22,
+            "in": [
+              "formal",
+              "master"
+            ]
+          },
+          {
+            "type": "cloak",
+            "color": "green",
+            "trim": "gold",
+            "band2": true,
+            "hem": 0.25,
+            "in": [
+              "master"
+            ]
           }
         ],
-        "headgear": {
-          "type": "headband",
-          "color": "metal"
-        },
+        "headgear": [
+          {
+            "type": "headcloth",
+            "name": "Head-cloth",
+            "color": "main",
+            "trim": "green"
+          }
+        ],
+        "options": [
+          {
+            "id": "working",
+            "name": "Field green",
+            "text": "White linen and the green of the first growth.",
+            "wear": "plain"
+          },
+          {
+            "id": "flood",
+            "name": "Flood season",
+            "text": "The river's blue in the sash, for the months the fields are under water.",
+            "wear": "plain",
+            "colors": {
+              "green": "indigo:2.4"
+            }
+          },
+          {
+            "id": "formal",
+            "name": "Harvest dress",
+            "text": "With the pleated shoulder cape.",
+            "wear": "formal"
+          }
+        ],
         "trapping": {
           "name": "a growers' collar",
           "text": "A broad collar in bands of gold and green, as the growers of the black fields wear."
@@ -624,48 +1461,158 @@
         "f": {}
       },
       "dress": {
-        "culture": "The house of figures: a deep-blue layered robe with gold at hem and cuff, a sash, and a folded turban with a jewel at the brow.",
+        "culture": "The house of figures: a deep teal robe worn open over cream, gold in two bands at hem and cuff, wide trousers gathered at the ankle, an ochre sash with a brass astrolabe hung from it, and a great folded turban with a jewel at the brow. The women wear the knee-length coat over the same wide trousers, and a veil down the back under a gold band. A Master wears the figured square on the breast, the dark mantle and the chain.",
+        "silhouette": "a great round turban over a column of robe; wide trousers gathered at the ankle",
+        "chord": "deep teal, cream, gold",
+        "chordColors": [
+          "main",
+          "cream",
+          "gold"
+        ],
+        "signature": "the brass astrolabe at the sash",
         "colors": {
-          "main": [
-            0.16,
-            0.3,
-            0.5
-          ],
-          "second": [
-            0.9,
-            0.8,
-            0.55
-          ],
-          "metal": [
-            0.85,
-            0.7,
-            0.3
-          ]
+          "main": "verdigris:1.35",
+          "cream": "bone:3.3",
+          "ochre": "ochre:2.4",
+          "dark": "ink:2.6",
+          "gold": "brass:3.0"
+        },
+        "stuff": {
+          "main": "robe",
+          "cream": "linen",
+          "ochre": "linen",
+          "dark": "robe"
+        },
+        "under": {
+          "shirt": "cream",
+          "legs": "cream",
+          "shoes": "ochre"
         },
         "pieces": [
           {
-            "type": "robe",
+            "type": "coat",
             "color": "main",
             "hem": 0.2,
+            "flare": 1.28,
+            "open": 0.12,
+            "openTo": "neck",
             "sleeves": 6,
-            "trim": "metal",
-            "cuffs": "metal"
+            "bell": 0.07,
+            "cuffs": "gold",
+            "trim": "gold",
+            "band2": true,
+            "sex": "m"
+          },
+          {
+            "type": "tunic",
+            "color": "main",
+            "hem": 0.6,
+            "flare": 1.32,
+            "sleeves": 6,
+            "bell": 0.06,
+            "cuffs": "gold",
+            "trim": "gold",
+            "band2": true,
+            "front": "placket",
+            "sex": "f"
+          },
+          {
+            "type": "trousers",
+            "color": "cream",
+            "cut": "baggy",
+            "trim": "gold"
           },
           {
             "type": "sash",
-            "color": "second"
+            "color": "ochre"
           },
           {
             "type": "sashknot",
-            "color": "second"
+            "color": "ochre",
+            "side": "l",
+            "length": 0.3
+          },
+          {
+            "type": "disc",
+            "color": "gold",
+            "trim": "dark"
+          },
+          {
+            "type": "patch",
+            "color": "main",
+            "trim": "gold",
+            "size": 0.17,
+            "in": [
+              "formal",
+              "master"
+            ],
+            "off": 0.045
+          },
+          {
+            "type": "cloak",
+            "color": "dark",
+            "trim": "gold",
+            "band2": true,
+            "hem": 0.2,
+            "in": [
+              "master"
+            ]
+          },
+          {
+            "type": "chain",
+            "color": "gold",
+            "trim": "gold",
+            "in": [
+              "master"
+            ],
+            "off": 0.06
           }
         ],
-        "headgear": {
-          "type": "turban",
-          "color": "second",
-          "trim": "main",
-          "jewel": true
-        },
+        "headgear": [
+          {
+            "type": "turban",
+            "name": "Turban",
+            "color": "cream",
+            "trim": "main",
+            "jewel": true,
+            "metal": "gold",
+            "tail": true,
+            "size": 1.1,
+            "sex": "m"
+          },
+          {
+            "type": "veil",
+            "name": "Veil",
+            "color": "cream",
+            "trim": "gold",
+            "band": true,
+            "length": 1.0,
+            "sex": "f"
+          }
+        ],
+        "options": [
+          {
+            "id": "working",
+            "name": "Teal of the house",
+            "text": "The colour of the tiled court where the figures are taught.",
+            "wear": "plain"
+          },
+          {
+            "id": "wine",
+            "name": "Night school",
+            "text": "Wine red, for those who read the sky instead.",
+            "wear": "plain",
+            "colors": {
+              "main": "oxblood:1.5"
+            }
+          },
+          {
+            "id": "formal",
+            "name": "Disputation dress",
+            "text": "With the figured square on the breast.",
+            "wear": "formal"
+          }
+        ],
         "trapping": {
           "name": "a jewel on blue cloth",
           "text": "A drop of gold on a fold of blue cloth, from the house of figures."
@@ -698,43 +1645,241 @@
         "f": {}
       },
       "dress": {
-        "culture": "The steps: a saffron cloth wrapped to the shin and another across the chest, a sash, bare feet, and a headband; ash where the night sat.",
+        "culture": "The steps: saffron cloth and little else. The men go bare-chested in a cloth wrapped to the shin with its pleats falling before, another thrown across one shoulder, prayer beads at the neck and the arm, barefoot. The women wear it to the ankle with the end drawn across the breast and down the back. An Elder adds the white shawl, a second string of beads and the veil.",
+        "silhouette": "bare shoulders and feet, a cloth across one shoulder and down the back",
+        "chord": "saffron, ash white, dark beads",
+        "chordColors": [
+          "main",
+          "white",
+          "beads"
+        ],
+        "signature": "the prayer beads",
         "colors": {
-          "main": [
-            0.9,
-            0.52,
-            0.16
-          ],
-          "second": [
-            0.92,
-            0.88,
-            0.74
-          ]
+          "main": "saffron:3.4",
+          "white": "bone:3.6",
+          "beads": "umber:1.2",
+          "gold": "brass:2.6"
+        },
+        "stuff": {
+          "main": "linen",
+          "white": "linen"
+        },
+        "under": {
+          "m": {
+            "shirt": "bare"
+          },
+          "f": {
+            "shirt": "main"
+          },
+          "legs": "bare",
+          "feet": "bare"
         },
         "pieces": [
           {
+            "type": "wrapskirt",
+            "color": "main",
+            "from": 2,
+            "hem": 0.3,
+            "flare": 1.15,
+            "pleats": 9,
+            "band": "white",
+            "sex": "m"
+          },
+          {
+            "type": "panel",
+            "color": "main",
+            "arc": [
+              252,
+              288
+            ],
+            "top": 3,
+            "bottom": 2,
+            "hem": 0.22,
+            "narrow": 0.5,
+            "grow": [
+              0.045,
+              0.045
+            ],
+            "pleats": 14,
+            "folds": 0.012,
+            "sex": "m"
+          },
+          {
+            "type": "wrap",
+            "color": "main",
+            "width": 0.17,
+            "off": 0.016,
+            "sex": "m"
+          },
+          {
             "type": "tunic",
-            "color": "second",
-            "sleeves": 0
+            "color": "main",
+            "lo": 5,
+            "sleeves": 1,
+            "trim": "white",
+            "sex": "f"
           },
           {
             "type": "wrapskirt",
             "color": "main",
-            "hem": 0.3
+            "from": 3,
+            "hem": 0.14,
+            "flare": 1.16,
+            "pleats": 9,
+            "trim": "white",
+            "band2": true,
+            "sex": "f"
           },
           {
             "type": "wrap",
-            "color": "main"
+            "color": "main",
+            "width": 0.2,
+            "off": 0.045,
+            "sex": "f"
+          },
+          {
+            "type": "cloak",
+            "color": "main",
+            "trim": "white",
+            "arc": [
+              20,
+              95
+            ],
+            "hem": 0.72,
+            "border": 0.035,
+            "grow": [
+              0.04,
+              0.07
+            ],
+            "follow": 0.2,
+            "sex": "f"
           },
           {
             "type": "sash",
-            "color": "main"
+            "color": "white",
+            "height": 0.045,
+            "sex": "m"
+          },
+          {
+            "type": "sashknot",
+            "color": "white",
+            "side": "l",
+            "length": 0.3,
+            "sex": "m"
+          },
+          {
+            "type": "beads",
+            "color": "beads",
+            "trim": "gold",
+            "count": 18,
+            "to": 5,
+            "off": 0.02,
+            "sex": "m"
+          },
+          {
+            "type": "beads",
+            "color": "beads",
+            "trim": "gold",
+            "count": 18,
+            "to": 5,
+            "off": 0.07,
+            "sex": "f"
+          },
+          {
+            "type": "armlets",
+            "color": "beads",
+            "at": [
+              2
+            ],
+            "sex": "m"
+          },
+          {
+            "type": "armlets",
+            "color": "gold",
+            "at": [
+              5
+            ],
+            "sex": "f"
+          },
+          {
+            "type": "mantle",
+            "color": "white",
+            "trim": "main",
+            "drop": 0.3,
+            "reach": 0.12,
+            "in": [
+              "master"
+            ]
+          },
+          {
+            "type": "beads",
+            "color": "beads",
+            "trim": "gold",
+            "count": 24,
+            "to": 4,
+            "spread": 0.95,
+            "off": 0.1,
+            "in": [
+              "formal",
+              "master"
+            ]
           }
         ],
-        "headgear": {
-          "type": "headband",
-          "color": "main"
-        },
+        "headgear": [
+          {
+            "type": "headband",
+            "name": "Headband",
+            "color": "main",
+            "tails": true,
+            "sex": "m"
+          },
+          {
+            "type": "headband",
+            "name": "Brow jewel",
+            "color": "main",
+            "jewel": true,
+            "metal": "gold",
+            "sex": "f",
+            "in": [
+              "plain",
+              "formal"
+            ]
+          },
+          {
+            "type": "veil",
+            "name": "Veil",
+            "color": "main",
+            "trim": "white",
+            "length": 0.8,
+            "sex": "f",
+            "in": [
+              "master"
+            ]
+          }
+        ],
+        "options": [
+          {
+            "id": "working",
+            "name": "Saffron",
+            "text": "The colour of the steps at dawn.",
+            "wear": "plain"
+          },
+          {
+            "id": "maroon",
+            "name": "Maroon",
+            "text": "The darker cloth of the upper steps, where the silent ones sit.",
+            "wear": "plain",
+            "colors": {
+              "main": "oxblood:2.3"
+            }
+          },
+          {
+            "id": "formal",
+            "name": "Festival dress",
+            "text": "With the long second string of beads.",
+            "wear": "formal"
+          }
+        ],
         "trapping": {
           "name": "a string of saffron beads",
           "text": "Saffron beads from the steps, strung by hand, one larger than the rest."
@@ -767,48 +1912,176 @@
         "f": {}
       },
       "dress": {
-        "culture": "The examination halls: a long plum robe with wide white-cuffed sleeves, a jade belt, and the scholar's square cap.",
+        "culture": "The examination halls: a long plum robe crossed at the breast, its great sleeves cuffed in white, a jade belt with a jade ring and tassel hung from it, and the scholar's black cap. The women wear a white crossed jacket and a plum skirt tied high under the arms with long jade ribbons. Those who have passed wear the figured square on breast and back and the cap with two wings; an Examiner adds the cloud collar.",
+        "silhouette": "great hanging sleeves, a straight fall to the floor, and for the passed a cap with two wings",
+        "chord": "plum, white, jade",
+        "chordColors": [
+          "main",
+          "white",
+          "jade"
+        ],
+        "signature": "the jade ring and tassel at the belt; the square of rank",
         "colors": {
-          "main": [
-            0.36,
-            0.14,
-            0.3
-          ],
-          "second": [
-            0.92,
-            0.9,
-            0.84
-          ],
-          "jade": [
-            0.35,
-            0.6,
-            0.45
-          ]
+          "main": "plum:1.6",
+          "white": "bone:3.8",
+          "jade": "verdigris:3.0",
+          "black": "ink:1.3",
+          "gold": "ochre:3.0"
+        },
+        "stuff": {
+          "main": "robe",
+          "white": "linen",
+          "jade": "linen",
+          "black": "robe"
+        },
+        "under": {
+          "shirt": "white",
+          "legs": "white",
+          "shoes": "black"
         },
         "pieces": [
           {
             "type": "robe",
             "color": "main",
-            "hem": 0.25,
+            "hem": 0.17,
+            "flare": 1.14,
             "sleeves": 6,
-            "wide": true,
-            "cuffs": "second",
-            "trim": "second"
-          },
-          {
-            "type": "belt",
-            "color": "jade"
+            "bell": 0.14,
+            "bellFrom": 2,
+            "cuffs": "white",
+            "trim": "white",
+            "front": "cross",
+            "border": 0.03,
+            "sex": "m"
           },
           {
             "type": "collar",
-            "color": "second"
+            "color": "white",
+            "sex": "m"
+          },
+          {
+            "type": "belt",
+            "color": "jade",
+            "trim": "black",
+            "height": 0.035,
+            "sex": "m"
+          },
+          {
+            "type": "tunic",
+            "color": "white",
+            "sleeves": 6,
+            "bell": 0.12,
+            "bellFrom": 2,
+            "cuffs": "main",
+            "trim": "main",
+            "front": "cross",
+            "sex": "f",
+            "grow": 0.045
+          },
+          {
+            "type": "wrapskirt",
+            "color": "main",
+            "from": 5,
+            "hem": 0.14,
+            "flare": 1.28,
+            "pleats": 12,
+            "band": "jade",
+            "sex": "f"
+          },
+          {
+            "type": "sashknot",
+            "color": "jade",
+            "trim": "white",
+            "side": "front",
+            "at": 5,
+            "length": 0.55,
+            "sex": "f"
+          },
+          {
+            "type": "tassel",
+            "color": "jade",
+            "trim": "white",
+            "x": 0.11
+          },
+          {
+            "type": "patch",
+            "color": "jade",
+            "trim": "gold",
+            "size": 0.19,
+            "in": [
+              "formal",
+              "master"
+            ],
+            "off": 0.045
+          },
+          {
+            "type": "mantle",
+            "color": "jade",
+            "trim": "gold",
+            "drop": 0.15,
+            "reach": 0.09,
+            "in": [
+              "master"
+            ]
           }
         ],
-        "headgear": {
-          "type": "scholarcap",
-          "color": "main",
-          "trim": "main"
-        },
+        "headgear": [
+          {
+            "type": "scholarcap",
+            "name": "Scholar's cap",
+            "color": "black",
+            "trim": "black",
+            "sex": "m",
+            "in": [
+              "plain"
+            ]
+          },
+          {
+            "type": "headband",
+            "name": "Hair band",
+            "color": "jade",
+            "jewel": true,
+            "metal": "gold",
+            "sex": "f",
+            "in": [
+              "plain"
+            ]
+          },
+          {
+            "type": "wingcap",
+            "name": "Winged cap",
+            "color": "black",
+            "trim": "black",
+            "span": 0.3,
+            "in": [
+              "formal",
+              "master"
+            ]
+          }
+        ],
+        "options": [
+          {
+            "id": "working",
+            "name": "Plum of the halls",
+            "text": "What a candidate wears to sit the papers.",
+            "wear": "plain"
+          },
+          {
+            "id": "celadon",
+            "name": "Celadon",
+            "text": "The green-blue of the southern colleges.",
+            "wear": "plain",
+            "colors": {
+              "main": "verdigris:1.7"
+            }
+          },
+          {
+            "id": "formal",
+            "name": "Passed",
+            "text": "The square of rank and the winged cap, as one who has passed may wear.",
+            "wear": "formal"
+          }
+        ],
         "trapping": {
           "name": "a jade ring",
           "text": "A jade ring on a plum cord with a tassel, as a scholar hangs at the belt."
@@ -843,56 +2116,178 @@
         "f": {}
       },
       "dress": {
-        "culture": "The steppe: a belted brown kaftan to the thigh with ochre trim, a cloth across the chest, riding boots with cuffs, and a tall fur hat.",
+        "culture": "The steppe: a gold-ochre riding coat crossed at the breast and flaring from a red sash to the knee, dark fur at its collar, cuffs and hem, tall boots with felt tops, a quiver across the back, and a fur hat with a pointed red crown. The women wear it to the calf under a red sleeveless jacket, the hat with its flaps down. A Khan's Rider adds the string of brass coins and the red cloak edged in fur.",
+        "silhouette": "a coat flaring like a bell from the sash, thick fur at every edge, a pointed hat, a quiver behind",
+        "chord": "gold ochre, dark fur, red",
+        "chordColors": [
+          "main",
+          "fur",
+          "red"
+        ],
+        "signature": "the quiver across the back",
         "colors": {
-          "main": [
-            0.44,
-            0.28,
-            0.14
-          ],
-          "second": [
-            0.72,
-            0.5,
-            0.22
-          ],
-          "fur": [
-            0.26,
-            0.2,
-            0.15
-          ]
+          "main": "ochre:2.3",
+          "fur": "umber:0.9",
+          "red": "oxblood:2.4",
+          "cream": "bone:2.6",
+          "dark": "earth:1.0",
+          "leather": "leather:1.6",
+          "brass": "brass:2.5"
+        },
+        "stuff": {
+          "main": "wool",
+          "red": "wool",
+          "cream": "felt",
+          "dark": "wool"
+        },
+        "under": {
+          "shirt": "red",
+          "legs": "dark",
+          "shoes": "leather"
         },
         "pieces": [
           {
             "type": "kaftan",
             "color": "main",
-            "hem": 0.75,
+            "hem": 0.6,
+            "flare": 1.5,
             "sleeves": 6,
-            "trim": "second",
-            "cuffs": "second"
+            "cuffs": "fur",
+            "trim": "fur",
+            "border": 0.08,
+            "front": "cross",
+            "sex": "m"
           },
           {
-            "type": "wrap",
-            "color": "second"
+            "type": "kaftan",
+            "color": "main",
+            "hem": 0.34,
+            "flare": 1.42,
+            "sleeves": 6,
+            "cuffs": "fur",
+            "trim": "fur",
+            "border": 0.08,
+            "front": "cross",
+            "sex": "f"
           },
           {
-            "type": "belt",
-            "color": "fur"
+            "type": "vest",
+            "color": "red",
+            "trim": "fur",
+            "grow": 0.04,
+            "lo": 3,
+            "sex": "f"
+          },
+          {
+            "type": "furcollar",
+            "color": "fur",
+            "radius": 0.042
+          },
+          {
+            "type": "sash",
+            "color": "red",
+            "height": 0.075,
+            "sex": "m"
           },
           {
             "type": "sashknot",
-            "color": "second"
+            "color": "red",
+            "side": "r",
+            "length": 0.36,
+            "sex": "m"
+          },
+          {
+            "type": "belt",
+            "color": "leather",
+            "trim": "brass",
+            "sex": "f"
           },
           {
             "type": "boots",
-            "color": "fur",
-            "cuffs": "second"
+            "color": "leather",
+            "cuffs": "cream",
+            "top": 3,
+            "flare": 0.022
+          },
+          {
+            "type": "roll",
+            "color": "leather",
+            "trim": "brass",
+            "arrows": true,
+            "flip": true,
+            "to": 3,
+            "taper": 1.25,
+            "radius": 0.045
+          },
+          {
+            "type": "beads",
+            "color": "brass",
+            "trim": "brass",
+            "count": 14,
+            "to": 5,
+            "off": 0.06,
+            "in": [
+              "formal",
+              "master"
+            ]
+          },
+          {
+            "type": "cloak",
+            "color": "red",
+            "trim": "fur",
+            "hem": 0.36,
+            "border": 0.08,
+            "in": [
+              "master"
+            ]
           }
         ],
-        "headgear": {
-          "type": "furhat",
-          "color": "fur",
-          "trim": "second"
-        },
+        "headgear": [
+          {
+            "type": "furhat",
+            "name": "Fur hat",
+            "color": "fur",
+            "trim": "red",
+            "crown": true,
+            "point": true,
+            "tall": 0.5,
+            "sex": "m"
+          },
+          {
+            "type": "furhat",
+            "name": "Fur hat",
+            "color": "fur",
+            "trim": "red",
+            "crown": true,
+            "point": true,
+            "tall": 0.5,
+            "flaps": true,
+            "sex": "f"
+          }
+        ],
+        "options": [
+          {
+            "id": "working",
+            "name": "Summer grass",
+            "text": "The gold of the steppe in the dry months.",
+            "wear": "plain"
+          },
+          {
+            "id": "winter",
+            "name": "Winter sky",
+            "text": "The blue coat, as the northern herds wear.",
+            "wear": "plain",
+            "colors": {
+              "main": "indigo:2.0"
+            }
+          },
+          {
+            "id": "formal",
+            "name": "Gathering dress",
+            "text": "With the string of brass coins.",
+            "wear": "formal"
+          }
+        ],
         "trapping": {
           "name": "a tuft of fur on an ochre band",
           "text": "Fur from the first winter under an ochre band: the steppe's way of saying this one rides with us."
@@ -925,56 +2320,150 @@
         "f": {}
       },
       "dress": {
-        "culture": "The library: a wide indigo boubou with gold at the collar and hem, a leather satchel strap, and the round white cap.",
+        "culture": "The library: a wide indigo robe with sleeves like wings, gold at the neck and in two bands at the hem, a leather satchel on its strap for the one page, sandals, and the white cloth wound high on the head and under the chin. The women wear it to the knee over a dark wrapper, and the tall head-tie. A Librarian carries the scroll case on the back and wears the white shawl.",
+        "silhouette": "the widest of the homes: sleeves like wings, and a high-wound head",
+        "chord": "indigo, white, gold",
+        "chordColors": [
+          "main",
+          "white",
+          "gold"
+        ],
+        "signature": "the satchel for one page; the Librarian's scroll case",
         "colors": {
-          "main": [
-            0.16,
-            0.22,
-            0.5
-          ],
-          "second": [
-            0.92,
-            0.9,
-            0.8
-          ],
-          "metal": [
-            0.85,
-            0.7,
-            0.32
-          ],
-          "leather": [
-            0.35,
-            0.22,
-            0.12
-          ]
+          "main": "indigo:2.6",
+          "dark": "indigo:1.0",
+          "white": "bone:3.8",
+          "gold": "brass:3.1",
+          "leather": "leather:2.2"
+        },
+        "stuff": {
+          "main": "robe",
+          "dark": "robe",
+          "white": "linen"
+        },
+        "under": {
+          "shirt": "white",
+          "legs": "white"
         },
         "pieces": [
           {
             "type": "robe",
             "color": "main",
-            "hem": 0.25,
-            "sleeves": 6,
-            "wide": true,
-            "trim": "metal"
+            "hem": 0.2,
+            "flare": 1.42,
+            "sleeves": 4,
+            "bell": 0.2,
+            "bellFrom": 0,
+            "trim": "gold",
+            "band2": true,
+            "front": "placket",
+            "sex": "m"
+          },
+          {
+            "type": "tunic",
+            "color": "main",
+            "hem": 0.62,
+            "flare": 1.5,
+            "sleeves": 3,
+            "bell": 0.2,
+            "bellFrom": 0,
+            "trim": "gold",
+            "band2": true,
+            "sex": "f"
+          },
+          {
+            "type": "wrapskirt",
+            "color": "dark",
+            "from": 2,
+            "hem": 0.16,
+            "flare": 1.12,
+            "trim": "gold",
+            "border": 0.035,
+            "sex": "f"
           },
           {
             "type": "collar",
-            "color": "metal",
-            "wide": 1.3
+            "color": "gold",
+            "wide": 1.35
           },
           {
-            "type": "wrap",
-            "color": "leather"
+            "type": "strap",
+            "color": "leather",
+            "width": 0.045,
+            "off": 0.05
+          },
+          {
+            "type": "satchel",
+            "color": "leather",
+            "trim": "gold"
           },
           {
             "type": "sandals",
             "color": "leather"
+          },
+          {
+            "type": "roll",
+            "color": "leather",
+            "trim": "gold",
+            "to": 4,
+            "radius": 0.045,
+            "flip": true,
+            "in": [
+              "formal",
+              "master"
+            ]
+          },
+          {
+            "type": "mantle",
+            "color": "white",
+            "trim": "gold",
+            "drop": 0.27,
+            "reach": 0.13,
+            "in": [
+              "master"
+            ]
           }
         ],
-        "headgear": {
-          "type": "cap",
-          "color": "second"
-        },
+        "headgear": [
+          {
+            "type": "tagelmust",
+            "name": "Wound cloth",
+            "color": "white",
+            "trim": "main",
+            "sex": "m"
+          },
+          {
+            "type": "gele",
+            "name": "Head-tie",
+            "color": "main",
+            "trim": "gold",
+            "sex": "f"
+          }
+        ],
+        "options": [
+          {
+            "id": "working",
+            "name": "Indigo",
+            "text": "The dye the library's roads are known by.",
+            "wear": "plain"
+          },
+          {
+            "id": "white",
+            "name": "White of the Friday",
+            "text": "The white robe, the head wound in indigo.",
+            "wear": "plain",
+            "colors": {
+              "main": "bone:3.5",
+              "white": "indigo:2.0"
+            }
+          },
+          {
+            "id": "formal",
+            "name": "Reading dress",
+            "text": "With the scroll case, as for a public reading.",
+            "wear": "formal"
+          }
+        ],
         "trapping": {
           "name": "a satchel for one page",
           "text": "A leather satchel no bigger than a hand on an indigo strap, to carry one page in."
@@ -1006,47 +2495,147 @@
         "f": {}
       },
       "dress": {
-        "culture": "The sword schools: a dark kimono with a white collar, the hakama's wide pleats, and an obi knotted at the hip; no hat, the hair tied.",
+        "culture": "The sword schools: a white jacket crossed at the breast, black pleated hakama to the ankle, and the red blade-sash knotted at the hip. The men wear the stiff grey shoulders that stand out past the arms; the women tie their sleeves back with a red cord crossed behind and the sash in a great bow at the back. No hat, the hair tied; a Master wears the black over-coat and the broad straw hat of the road.",
+        "silhouette": "wide stiff shoulders over wide pleated legs; from behind, a crossed cord and a great bow",
+        "chord": "white over black, a red sash",
+        "chordColors": [
+          "hakama",
+          "top",
+          "red"
+        ],
+        "signature": "the blade-sash",
         "colors": {
-          "main": [
-            0.14,
-            0.14,
-            0.2
-          ],
-          "second": [
-            0.9,
-            0.88,
-            0.82
-          ],
-          "obi": [
-            0.55,
-            0.45,
-            0.3
-          ]
+          "top": "bone:3.5",
+          "hakama": "ink:2.7",
+          "grey": "slate:1.7",
+          "red": "oxblood:2.9",
+          "straw": "reed:3.0"
+        },
+        "stuff": {
+          "top": "linen",
+          "hakama": "robe",
+          "grey": "linen",
+          "red": "linen"
+        },
+        "under": {
+          "shirt": "top",
+          "legs": "hakama",
+          "shoes": "top"
         },
         "pieces": [
           {
             "type": "tunic",
-            "color": "main",
+            "color": "top",
             "sleeves": 5,
-            "wide": true,
-            "trim": "second"
+            "bell": 0.06,
+            "front": "cross",
+            "trim": "grey",
+            "sex": "m"
           },
           {
-            "type": "collar",
-            "color": "second"
+            "type": "wings",
+            "color": "grey",
+            "reach": 0.15,
+            "sex": "m"
+          },
+          {
+            "type": "tunic",
+            "color": "top",
+            "sleeves": 6,
+            "bell": 0.1,
+            "bellFrom": 2,
+            "front": "cross",
+            "trim": "red",
+            "sex": "f"
+          },
+          {
+            "type": "strap",
+            "color": "red",
+            "cross": true,
+            "width": 0.035,
+            "off": 0.04,
+            "sex": "f"
           },
           {
             "type": "hakama",
-            "color": "main"
+            "color": "hakama"
           },
           {
             "type": "obi",
-            "color": "obi"
+            "color": "red",
+            "height": 0.06,
+            "sex": "m"
           },
           {
             "type": "sashknot",
-            "color": "obi"
+            "color": "red",
+            "side": "l",
+            "length": 0.26,
+            "sex": "m"
+          },
+          {
+            "type": "obi",
+            "color": "red",
+            "height": 0.085,
+            "at": 3.4,
+            "sex": "f"
+          },
+          {
+            "type": "bow",
+            "color": "red",
+            "sex": "f"
+          },
+          {
+            "type": "coat",
+            "color": "hakama",
+            "hem": 0.6,
+            "flare": 1.15,
+            "open": 0.13,
+            "openTo": "neck",
+            "sleeves": 5,
+            "bell": 0.09,
+            "trim": "grey",
+            "border": 0.03,
+            "grow": 0.05,
+            "in": [
+              "formal",
+              "master"
+            ],
+            "cuffTrim": false
+          }
+        ],
+        "headgear": [
+          {
+            "type": "kasa",
+            "name": "Straw hat",
+            "color": "straw",
+            "trim": "hakama",
+            "in": [
+              "master"
+            ]
+          }
+        ],
+        "options": [
+          {
+            "id": "working",
+            "name": "White and black",
+            "text": "The school's practice dress.",
+            "wear": "plain"
+          },
+          {
+            "id": "indigo",
+            "name": "Indigo school",
+            "text": "The dyed jacket of the schools by the harbour.",
+            "wear": "plain",
+            "colors": {
+              "top": "indigo:1.7"
+            }
+          },
+          {
+            "id": "formal",
+            "name": "Visiting dress",
+            "text": "With the black over-coat.",
+            "wear": "formal"
           }
         ],
         "trapping": {

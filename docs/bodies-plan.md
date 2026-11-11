@@ -285,26 +285,67 @@ What it does not do yet: expressions (MakeHuman has the targets for them), finge
 (the hand is one piece on the rig), per-character face variation inside a home, and
 garments sewn as cloth rather than shells.
 
-## Dress as culture (the owner, 2026-11-07: the outfits mark the culture they grew up in)
+## Dress as culture (the owner, 2026-11-07: the outfits mark the culture they grew up in; 2026-11-10: "the design of the clothing should be more distinct")
 
-`tools/blender/wardrobe.py` dresses each home from `data/bodies.json` (`dress`): a culture
-line, colours, pieces and headgear. Pieces are shells on the body's own rings (tunic, vest,
-coat, robe, kaftan, kilt, wrap-skirt, cuirass, apron, hakama, greaves, boots, sandals, belt,
-sash, obi, collar, scarf, wrap, gloves) with trim bands at hem, cuff or collar, cuffs and
-stripes; rigid pieces hang from bones (buttons, a badge, a sash's knot and tails, tools at
-the belt, pauldrons, pteruges); the headgear hangs from the head (cap with a peak, hat with a
-band, folded turban with a jewel, tall fur hat, scholar's cap, hood, headband, crested
-helm, goggles on any). The thirteen outfits as written: Alexandria's grey with a brass
-collar; Columbia's marshal coat, brass buttons, star, gun belt, boots and brimmed hat;
-Cahokia's oilskin, striped sash, boots and knit cap; Lunden's docker's jacket, red scarf,
-gloves, peaked cap with goggles; Colonia's leather apron over rust, tools, gauntlets, cap
-with goggles; Tiber's red tunic, bronze cuirass, pauldrons, pteruges, greaves, sandals,
-crested helm; Khemet's white linen, striped sash, broad gold collar, headband; Baghdad's
-deep-blue robe with gold at hem and cuff, sash, folded turban with a jewel; Varanasi's
-saffron wraps, headband; Jiangnan's plum robe with white cuffs, jade belt, scholar's cap;
-Kazan's belted kaftan with ochre trim, wrap, cuffed boots, fur hat; Timbuktu's indigo boubou
-with gold collar, satchel strap, white cap; Edo's dark kimono with white collar, hakama, obi.
-Every line of it is the owner's to rewrite.
+The test of a home's dress: **black out the figures and you can still name the home; blur the
+sheet and you can still name it by colour.** So each home has a silhouette of its own, a colour
+chord of its own (two colours and a metal, from the style's ramps, worn in the same places) and
+a signature piece that says what the home does. `data/bodies.json` (`dress`) is the design and
+`tools/blender/wardrobe.py` cuts it; every line is the owner's to rewrite.
+
+| Home | Silhouette | Chord | Signature |
+| --- | --- | --- | --- |
+| Alexandria | a tabard hanging square before and behind over a high collar | slate grey, ink, brass | the cohort's brass tag; an Instructor's chain |
+| Columbia (Marshal) | a broad flat hat over a long coat flaring to the calf (women: short jacket, long split skirt) | navy, cream, brass | the star, and the gun slung low on the thigh |
+| Cahokia (Pilot) | a short rain cape, long sash-ends, boots flaring at the thigh (women: the woven shawl) | river green, woven ochre and red, copper | the sounding line coiled at the hip |
+| Lunden (Aeronaut) | heavy fleece collar, flared breeches bound at the calf, a scarf's two ends down the back (women: the long flying coat) | charcoal, a red scarf, steel | goggles pushed up; the rigger's harness |
+| Colonia (Engineer) | a slab of apron, gauntlets, one heavy shoulder, a roll across the back (women: smock, short apron, kerchief) | brick rust, black leather, steel | the tool roll and the hammer |
+| Tiber (Legionary) | plated shoulders, a skirt of straps, a cloak behind, a crest above | legion red, bronze, white | layered shoulder plate; the crest (across, for a Centurion) |
+| Khemet (Grower) | bare arms, a head-cloth's two lappets, a kilt with a stiff panel (women: the long sheath) | white linen, field green, gold | the growers' broad collar |
+| Baghdad (Geometer) | a great turban over a robe worn open; wide trousers gathered at the ankle (women: knee coat, veil) | deep teal, cream, gold | the brass astrolabe at the sash |
+| Varanasi (Ascetic) | bare shoulders and feet, a cloth across one shoulder and down the back | saffron, ash white, dark beads | the prayer beads |
+| Jiangnan (Examiner) | great hanging sleeves, a straight fall to the floor (women: white jacket, skirt tied high) | plum, white, jade | the jade ring and tassel; the square of rank and the winged cap for those who have passed |
+| Kazan (Rider) | a coat flaring like a bell from the sash, fur at every edge, a pointed hat | gold ochre, dark fur, red | the quiver across the back |
+| Timbuktu (Archivist) | the widest: sleeves like wings, a high-wound head (women: the tall head-tie) | indigo, white, gold | the satchel for one page; a Librarian's scroll case |
+| Edo (Blade) | stiff shoulders that stand past the arms over wide pleated legs (women: a crossed cord and a great bow behind) | white over black, a red sash | the blade-sash |
+
+How the data says it:
+
+- `colors` names each colour by a ramp and a step (`"indigo:1.25"`); `stuff` says what each is
+  made of (wool, linen, robe, leather...), which goes into the material's name so the game's
+  surface grain follows it. `under` is what is painted on the body beneath: a shirt and legs
+  in one of the colours, or `bare` (Khemet's and Varanasi's men go bare-chested; legs are bare
+  under a kilt).
+- `pieces` lists what is worn. A piece may be for one sex (`sex`), so the men's and the
+  women's dress of a home are the same culture and not the same garment; and for some of the
+  three ways of wearing the dress (`in`: `plain`, `formal`, `master`). **Rank shows**: a
+  first-year's dress is plain; formal dress adds a layer; an Instructor (`master`) wears the
+  same culture grown rich: the long version, the cloak or mantle, the chain of office.
+  The Academy's twelve Discipline instructors now each wear their own home's dress as masters
+  (`data/academy.json`, `body`; `academy.gd` gives them the look `dress: master`).
+- `headgear` is one entry or a list, by sex and by way of wearing (Tiber's crest turns across
+  for a Centurion; Jiangnan's winged cap is for those who have passed).
+- `options` are what the creator's Dress page offers: the working dress, a second dye of it,
+  and the formal dress, each with a name and a line (`look.dress`). People the player did not
+  dress take one of the plain ones by their name, so a crowd of one home is not all one colour.
+
+How it is cut: soft pieces are shells on the body's own rings, laid on its surface, folded
+toward the hem, and weighted like the body under them; an open coat or a hanging sheet has a
+thickness; what stands off the body (a cloak, a mantle) hangs from the trunk and takes a
+share of what moves under it; a hard piece (a holster, a roll, a chain) rides one bone. All
+the pieces of one way of wearing end as one mesh (`Dress_all`, `Dress_some__in_<ways>`), and
+each headgear is one mesh (`Headgear_<type>`), so a body is a handful of draw calls. The game
+shows the meshes of the way a look wears the dress and dyes the option's colours in
+(`World._dress_home`).
+
+To look at it: `python tools/blender/dress_sheet.py OUT_DIR <home ...> [wear=master]` draws
+bodies front and back with no game (and the white-shape and blurred sheets beside them);
+`game/tests/dress_sheet.tscn` is the same as the game draws it. To rebuild every person from a
+clean tree: `python tools/blender/body_kit.py all` (then `godot --headless --path . --import`).
+
+Still weak: cloth is skinned, not simulated (a long skirt follows the legs; a cloak takes a
+share of them); the game's own cloak (the creator's Cloak) is drawn over the dress and is off
+by default now; trims are bands of colour, with no woven pattern yet.
 
 ## Order of work
 

@@ -35,7 +35,7 @@ import wardrobe  # noqa: E402
 import human_kit as hk  # noqa: E402
 
 ROOT = pk.ROOT
-OUT = os.path.join(ROOT, "game", "assets", "people")
+OUT = os.environ.get("WILDLINE_PEOPLE_OUT") or os.path.join(ROOT, "game", "assets", "people")   # elsewhere, to try a build
 SCRATCH = pk.SCRATCH
 
 HOMES = ["alexandria", "columbia", "cahokia", "lunden", "colonia", "tiber", "khemet", "baghdad", "varanasi", "jiangnan", "kazan", "timbuktu", "edo"]
@@ -284,7 +284,7 @@ def rings_y(table, x):
 def home_dress(home):
     import json
     try:
-        return json.load(open(os.path.join(ROOT, "data", "bodies.json")))["homes"][home].get("dress", {})
+        return json.load(open(os.environ.get("WILDLINE_BODIES") or os.path.join(ROOT, "data", "bodies.json")))["homes"][home].get("dress", {})
     except (KeyError, OSError):
         return {}
 
@@ -542,10 +542,23 @@ class Body:
         names = ["skin", "tunic", "trousers", "boots", "lips"]
         mats = [self.mats[n] for n in names]
         slot = {n: i for i, n in enumerate(names)}
-        bare = any(p.get("type") == "sandals" for p in home_dress(self.home).get("pieces", []))
-        objs = {"Body": self.human.body_object(build, mats, slot, bare)}
+        # under the dress the body is painted as the home says (dress.under): a shirt and legs
+        # in one of its colours, or bare
+        D = home_dress(self.home)
+        under = wardrobe.under_for(D, self.sex)
+
+        def painted(key, default):
+            v = under.get(key)
+            if v == "bare":
+                return self.mats["skin"]
+            if v and v in D.get("colors", {}):
+                return wardrobe.material(self.home, D, v)
+            return self.mats[default]
+        mats = [self.mats["skin"], painted("shirt", "tunic"), painted("legs", "trousers"), painted("shoes", "boots"), self.mats["lips"]]
+        objs = {"Body": self.human.body_object(build, mats, slot, wardrobe.goes_bare(D, self.sex))}
         self.head_box = self.human.head_box
         self.dress_pieces(objs, build, None, slot)
+        wardrobe.join_dress(self, objs)
         return objs
 
     def build_anatomy(self, build):
@@ -700,6 +713,7 @@ class Body:
                     self.human.weight_body(ob)
                 else:
                     self.human.weight_like_body(ob)
+                    wardrobe.weigh(self, name, ob)
                 skin_to(ob, r.arm)
                 r.skinned.append(ob)
             return
@@ -865,9 +879,8 @@ class Body:
     def build(self):
         self.parts = self.shape_keys()
         # the finish: folds in the hanging garments, the cavity occlusion in every mesh
+        # (the garments' folds are the wardrobe's, made as each is cut)
         for name, ob in self.parts.items():
-            if name.startswith("Dress_") and any(w in name for w in ("coat", "robe", "kaftan", "kilt", "wrapskirt", "hakama", "tunic", "vest")):
-                displace_folds(ob, 0.006, 9.0, 14.0, float(hash(name) % 7))
             bake_cavity(ob)
         self.weight(self.parts)
         if self.HUMAN:

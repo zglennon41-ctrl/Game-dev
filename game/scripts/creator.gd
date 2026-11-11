@@ -322,7 +322,7 @@ func _reveal() -> void:
 		keep_name = Creation.name_for(hero["city"], spark)
 	hero["name"] = keep_name
 	if not hero.has("look"):
-		hero["look"] = { "headgear": true, "cape": true, "cape_color": "shape" }
+		hero["look"] = { "headgear": true, "cape": false, "cape_color": "shape" }
 	# a skin of another home's palette does not follow the character to a new home
 	var palette: Array = _palette()
 	if not palette.is_empty() and not palette.has(String(hero["look"].get("skin", ""))):
@@ -681,6 +681,16 @@ func _leaf_dress(v: VBoxContainer) -> void:
 	var home := _home()
 	_section(v, "THE DRESS OF %s" % String(hero["city"]).to_upper(), "")
 	_line(v, String(home.get("dress", {}).get("culture", "What your home wears.")))
+	# the ways the home's dress is worn: its working colours, a second dye, the formal dress
+	var opts: Array = home.get("dress", {}).get("options", [])
+	if opts.size() > 1:
+		var now: Dictionary = World.dress_option(String(hero.get("city", "")), look)
+		_section(v, "WORN AS", String(now.get("name", "")))
+		var orow := _flow(v, "")
+		for o in opts:
+			var oid := String(o["id"])
+			_chip(orow, String(o.get("name", oid)), func(): _look_set("dress", oid), String(now.get("id", "")) == oid)
+		_line(v, String(now.get("text", "")))
 	var wear := _flow(v, "Wearing")
 	if _headgear_name() != "":
 		_chip(wear, _headgear_name(), func(): _look_set("headgear", not look.get("headgear", true)), look.get("headgear", true))
@@ -701,15 +711,29 @@ func _leaf_dress(v: VBoxContainer) -> void:
 
 ## What the home wears on the head, by name; "" where it wears nothing.
 func _headgear_name() -> String:
-	var hg: Variant = _home().get("dress", {}).get("headgear", null)
-	if not (hg is Dictionary):
+	var hg := _headgear()
+	if hg.is_empty():
 		return ""
-	return _label("headgear", String(hg.get("type", "hat")))
+	return String(hg.get("name", _label("headgear", String(hg.get("type", "hat")))))
+
+## The headgear this character's home gives this body, as it is dressed now ({} for none).
+func _headgear() -> Dictionary:
+	var hgs: Variant = _home().get("dress", {}).get("headgear", null)
+	if hgs is Dictionary:
+		hgs = [hgs]
+	if not (hgs is Array):
+		return {}
+	var body := String(hero.get("body", ""))
+	var wear := String(World.dress_option(String(hero.get("city", "")), hero.get("look", {})).get("wear", "plain"))
+	for h in hgs:
+		if String(h.get("sex", body.get_slice("-", 1))) == body.get_slice("-", 1) and (not h.has("in") or (h["in"] as Array).has(wear)):
+			return h
+	return {}
 
 ## Does the home's headgear cover the crown (a headband does not)?
 func _headgear_covers() -> bool:
-	var hg: Variant = _home().get("dress", {}).get("headgear", null)
-	return hg is Dictionary and not (Data.creation.get("look", {}).get("openHeadgear", []) as Array).has(String(hg.get("type", "")))
+	var hg := _headgear()
+	return not hg.is_empty() and not (Data.creation.get("look", {}).get("openHeadgear", []) as Array).has(String(hg.get("type", "")))
 
 ## The cloak's colours as the world dyes them (World.cape_color_for): cloth, on the ramps.
 func _cape_color(which: String) -> Color:
