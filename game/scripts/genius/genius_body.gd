@@ -218,16 +218,23 @@ func _assemble(instar: int) -> void:
 		slot_count[slot] = i + 1
 		# A hybrid's gift hangs from the giver's own part where it has made one (the Imp's horns
 		# are not the Drake's): gifts/<giver>-<feature>.glb, or else the part every base shares.
+		# And a giver may make its gift again for one base it sits badly on (the Hawk's wings on a
+		# Shield are the shield's own metal, not a bird's wings stuck to a plate):
+		# gifts/<giver>-<feature>-on-<first base>.glb, hung where featureSockets says under that name.
 		var part_path := PART_DIR % f
+		var own_key := "%s-%s" % [giver, f]
 		if giver != "" and gift.has(f) and ResourceLoader.exists(GIFT_DIR % [giver, f]):
 			part_path = GIFT_DIR % [giver, f]
+			var on_key := "%s-on-%s" % [f, fid.get_slice("+", 0)]
+			if ResourceLoader.exists(GIFT_DIR % [giver, on_key]):
+				part_path = GIFT_DIR % [giver, on_key]
+				own_key = "%s-%s" % [giver, on_key]
 		if ResourceLoader.exists(part_path):
 			# A part made for a paired slot (limbs, arms) goes on every socket the body has for it;
 			# some features name their own sockets (a beak at the mouth, hands at the wrists).
 			# (a giver's own make of a part may hang somewhere of its own: the Lurker's cloak down
 			# the back where the Coat's is on the head; featureSockets, "<giver>-<feature>")
 			var place_of: Dictionary = cfg.get("featureSockets", {})
-			var own_key := "%s-%s" % [giver, f]
 			var named: Array = place_of.get(own_key if part_path != PART_DIR % f and place_of.has(own_key) else f, []).filter(func(sn): return sockets.has(sn))
 			var targets: Array = named if not named.is_empty() else (socks.filter(func(sn): return sockets.has(sn)) if socks.size() > 1 else [socks[0]])
 			if targets.is_empty():
@@ -239,6 +246,13 @@ func _assemble(instar: int) -> void:
 				if is_right(String(sn)):
 					art.scale.x = -1.0
 				_adopt_art(art)
+				# A part of several pieces says where each goes: a piece named at_<socket> hangs
+				# on that socket (a head at the top, a wing at each side), where the body has it.
+				for piece in art.get_children():
+					var where := String(piece.name).trim_prefix("at_")
+					if String(piece.name).begins_with("at_") and sockets.has(where):
+						art.remove_child(piece)
+						_socket(where).add_child(piece)
 			parts_from_art.append(f)
 		else:
 			_placeholder_part(f, slot, socks)
