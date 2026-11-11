@@ -52,7 +52,7 @@ Demon = None        # the Person the Demon is (made when lines_people is loaded)
 # (The three roles of the coat are hide_demon, cloth_linen and cloth_coat: data/genius-looks.json.)
 OWN = {
     "hide_demon": ((0.08, 0.14, 0.1), 0.6, 0.0), "cloth_linen": ((0.48, 0.44, 0.28), 0.9, 0.0), "cloth_coat": ((0.03, 0.05, 0.045), 0.85, 0.0),
-    "fur_sable": ((0.1, 0.07, 0.05), 0.95, 0.0), "fur_ermine": ((0.6, 0.57, 0.48), 0.9, 0.0), "cloth_sable": ((0.028, 0.026, 0.036), 0.85, 0.0),
+    "fur_sable": ((0.15, 0.105, 0.075), 0.95, 0.0), "fur_ermine": ((0.6, 0.57, 0.48), 0.9, 0.0), "cloth_sable": ((0.028, 0.026, 0.036), 0.85, 0.0),
     "cloth_white": ((0.62, 0.6, 0.53), 0.8, 0.0), "horn_demon": ((0.26, 0.17, 0.085), 0.4, 0.0), "horn_hoof": ((0.035, 0.03, 0.03), 0.35, 0.0),
     "brass_gilt": ((0.72, 0.5, 0.15), 0.3, 0.85), "brass_crown": ((0.6, 0.42, 0.15), 0.35, 0.85), "wood_door": ((0.2, 0.12, 0.06), 0.8, 0.0),
     "wood_yoke": ((0.3, 0.2, 0.11), 0.8, 0.0), "stone_dust": ((0.4, 0.41, 0.44), 0.95, 0.0), "wood_ebony": ((0.05, 0.042, 0.05), 0.6, 0.0), "smoke_pale": ((0.16, 0.15, 0.2), 1.0, 0.0), "hide_shadow": ((0.03, 0.028, 0.035), 0.8, 0.0),
@@ -456,7 +456,7 @@ def legs(P, size, word):
 
 # how far the upper lid comes down over the eye (0 none, 1 shut), and how far the lower comes up
 LIDS = {"lit": (0.16, 0.0), "big": (0.0, 0.0), "wide": (0.0, 0.0), "hooded": (0.4, 0.0), "narrow": (0.3, 0.24), "far": (0.12, 0.0)}
-EYE_SIZE = {"lit": 1.6, "big": 1.8, "wide": 1.85, "hooded": 1.6, "narrow": 1.5, "far": 1.65}
+EYE_SIZE = {"lit": 1.42, "big": 1.62, "wide": 1.66, "hooded": 1.42, "narrow": 1.34, "far": 1.48}
 # each brow, for the character's left: (how high its inner end, its outer end, how heavy); the right the same unless given
 BROWS = {"level": ((0.0, 0.02, 1.0),), "proud": ((0.06, 0.26, 0.9),), "wry": ((0.12, 0.42, 0.9), (-0.02, 0.0, 1.0)), "fierce": ((-0.2, 0.22, 1.35),),
          "glad": ((0.2, 0.3, 0.8),), "calm": ((0.14, 0.06, 0.8),), "sad": ((0.3, 0.0, 0.9),)}
@@ -779,15 +779,15 @@ def horns(P, size, word):
     grow_horns(P, left, 1, size, word, "l")
     grow_horns(P, right, -1, size, word, "r")
     if word == "gate":          # half of the last gate it came through, still hanging from its left horn
-        hr = P.hr
-        top = P.horn_tip["l"] + Vector((-0.1 * hr, 0, -0.5 * hr))
+        hr = P.t * 0.42
+        top = P.horn_tip["l"] + Vector((0.1 * hr, 0, -0.5 * hr))
         bars, cross = None, None
         for i in range(4):
             x = top.x + (i - 1.5) * 0.36 * hr
-            bars = g.merge(bars, g.tube([Vector((x, top.y, top.z + 0.1 * hr)), Vector((x, top.y + 0.04 * hr, top.z - (1.7 - 0.3 * (i % 2)) * hr))], 0.055 * hr, n=4))
-        for dz in (-0.2, -1.0):
-            cross = g.merge(cross, g.box(top + Vector((0, 0.02 * hr, dz * hr)), (1.5 * hr, 0.07 * hr, 0.14 * hr)))
-        ring = hoop(P.horn_tip["l"] + Vector((0, 0, -0.3 * hr)), 0.2 * hr, 0.26 * hr, 0.035 * hr, u=X, v=Z, n=8, sides=4)
+            bars = g.merge(bars, g.tube([Vector((x, top.y, top.z + 0.1 * hr)), Vector((x, top.y + 0.04 * hr, top.z - (1.9 - 0.3 * (i % 2)) * hr))], 0.06 * hr, n=4))
+        for dz in (-0.2, -1.1):
+            cross = g.merge(cross, g.box(top + Vector((0, 0.02 * hr, dz * hr)), (1.5 * hr, 0.08 * hr, 0.16 * hr)))
+        ring = hoop(P.horn_tip["l"] + Vector((0, 0, -0.3 * hr)), 0.2 * hr, 0.26 * hr, 0.04 * hr, u=X, v=Z, n=8, sides=4)
         P.rider("sway", "gate", [(bars, "metal_iron_light"), (cross, "metal_iron_light"), (ring, "brass_crown")], P.horn_tip["l"], "head", smooth=False)
 
 
