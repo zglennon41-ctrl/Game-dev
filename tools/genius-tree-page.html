@@ -74,13 +74,15 @@ __SPRITES__
 .node.n0 img { width: 84px; height: auto; border: 1px solid var(--rule); border-radius: 3px; background: var(--shot) }
 .node.n0 .mote { width: 18px; height: 18px; border-radius: 50%; background: var(--brass-hi); box-shadow: 0 0 14px 5px var(--brass) }
 .node.n0 { font-family: var(--display); font-size: 13px; letter-spacing: .04em; color: var(--dim) }
-.node i { position: absolute; bottom: 0; left: 50%; height: 12px; border-left: 1px solid var(--brass) }                        /* the drop to its children's bar */
+.node i { position: absolute; bottom: 0; left: 50%; height: 12px; border-left: 1px solid var(--brass) }
+/* a Path's own colour: under every form of it on the chart, and over its column below */
+.node.pc .pic { border-bottom: 4px solid var(--pc) }                        /* the drop to its children's bar */
 .life { margin: 18px 0 0 }
 .life img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 3px; background: var(--shot) }
 .life figcaption { font-family: var(--ui); font-size: 14px; color: var(--dim); margin-top: 6px; max-width: 90ch }
 .life + .life { margin-top: 26px }
 .paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 18px; margin-top: 20px; align-items: start }
-.path { min-width: 0; background: var(--plate); border: 1px solid var(--rule); border-top: 3px solid var(--brass); padding: 14px 14px 6px; display: flex; flex-direction: column; gap: 10px }
+.path { min-width: 0; background: var(--plate); border: 1px solid var(--rule); border-top: 4px solid var(--pc, var(--brass)); padding: 14px 14px 6px; display: flex; flex-direction: column; gap: 10px }
 .form { display: flex; gap: 12px; align-items: flex-start }
 .l2 > .pic { width: 112px }
 .fname { margin: 0; font-weight: 600 }
