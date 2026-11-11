@@ -663,6 +663,12 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   it: a beast made of two) belongs to the hybrids: a hybrid may be its own creature, not
   only one base wearing another's gift. Which pairs, and how far that goes, is not yet
   settled.
+- **The first thirty minutes** (owner, 2026-11-12): "Take a general improvement pass. Start
+  with how the game load, check for any bugs, or UI failures", then "Improve the first 30
+  minutes and introduction screens." Read as: the title, the questionnaire, the creator,
+  the night the field wakes, the recruiter, the year, the gate and the first lesson are
+  what a new player judges the game by, and get their own pass for presentation, pacing,
+  clarity and feel. Words changed in that pass are drafts for the owner to rewrite.
 
 ## 10. What good looks like
 
