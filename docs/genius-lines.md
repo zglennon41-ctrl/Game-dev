@@ -225,6 +225,7 @@ told apart at the size of a thumbnail before their shapes can.
 | Bell | Rally-bell `marigold` · Hour-bell `lapis` · Alarm-bell `madder` |
 | Blade | Duelling Blade `lapis` · Cleaver `madder` · Scored Blade `gold` |
 | Bow | Hunting Bow `jade` · War Bow `madder` · Singing Bow `amethyst` |
+| Carp | Weir-leaper `jade` · Still-water Carp `madder` · Silt-reader `amethyst` |
 | Coat | Travelling Coat `marigold` · Shadow-coat `amethyst` · Listening Coat `peacock` |
 | Drake | Hoard-drake `gold` · Fire-drake `madder` · Sky-drake `lapis` |
 | Ember | Kept Fire `marigold` · Rushlight `peacock` · Wildfire `madder` |
@@ -1219,3 +1220,87 @@ above, not from in front. Cells are a tenth of a wing across, so a pattern finer
 hole is square-cornered. Wings that are held upright and `beat` turn in their own plane
 (the game beats a wing about the way the body faces): it reads as a slow fanning, and a true
 flap about the body's own length would want a kind of its own.
+
+## The Carp (`tools/blender/lines_carp.py`)
+
+A fish that swims in the air at its partner's shoulder: the one who goes up against the
+current as a matter of course. **Its anatomy is a magical choice, made on purpose and
+carried all the way: the field is its water.** It hangs a little across the way it faces, as
+a fish holds station in a current. It has a carp's parts in a carp's places (one fin down
+the back, a pair at the shoulder, a pair and a single one under the belly, the tail;
+gill-covers that breathe; barbels at the corners of a thick-lipped mouth that opens forward
+and down) and nothing for the ground: no legs, no perch. What it has about it is what a fish
+in water has about it: spray, a wave at its head, fry, weed, ice. One thing on it is not a
+fish's: it has lids, and it blinks. It is a soul.
+
+The Weir-leaper's climb ends at the edge of a dragon, as the old story of the carp and the
+gate has it, and that is on purpose too. The Horn-bud is a carp with two buds of new antler.
+Past-the-Gate is a carp's head, and a carp's round mild eye, on a body grown long: antlers,
+a mane down its neck, a saw of fin down its back, four fins held like limbs, whiskers that
+stream back along it, and a pearl of the field under its chin.
+
+**How it is built.** A carp is a spine with a skin about it. The spine is a `pose` (how it
+turns from nose to tail); the skin is sixteen points round it at each of twenty stations,
+its girth by its `shape`. The skin is laid in scales, a diamond about every other point,
+the front half of each the coat and the rear half the coat's trim, so the rows show; a mark
+colours whole scales in two steps of the Path's colour. The body is cut behind the gills and
+behind the belly, and each piece reaches a little way inside the one before it, narrower,
+like the joints of a lobster's tail, so no gap opens where it bends. It is not rigged, and a
+form is under 120 KB.
+
+| Key | What it is | Styles |
+|---|---|---|
+| `build` | proportions | `len` (metres of the model, nose to the root of the tail) `depth` `width` `head` `eye` (each a multiple of 1); `size` (how large the game stands it: a Path's carp of size 1 is 0.7 m long) |
+| `shape` | what kind of fish | `carp` `slim` `bull` (a blunt head, heavy shoulders) `flat` (a flat head: a fish of the bottom) `tench` `round` (a float) `long` (a dragon's) |
+| `pose` | how it holds itself, and half of what makes each form a different outline | `level` `bow` `climb` `rear` `rise` `dart` `bank` `broadside` `turn` `sway` `hang` `burst` `present` (a bow, the crown shown) `nose-down` `arch` `thrash` `lean` `crescent` `curl` `dragon` |
+| `tail` | | `fan` `fork` `scythe` `veil` `paddle` `eel` `banner` `closed` `ragged` `foam` |
+| `dorsal` | the fin of the back | `sail` `low` `round` `veil` `folded` `ragged` `foam` `mane` `ridge` `spines` `dragon` (a mane on the neck, a ridge behind) `none` |
+| `fins` | the fins of the shoulder (the belly's follow them) | `paddle` `fan` `swept` `veil` `shelter` `foam` `folded` `wing` `claw` |
+| `finmark` | how the Path marks every fin | `rays` (every other ray the colour) `roots` (pale, the colour at the root: a koi's) `edge` (dark, lit along the margin) `plain` |
+| `barbels` | | `none` `short` `long` `feelers` (two pair, out in front) `plumb` (straight down) `lash` `white` `dragon` |
+| `mouth` | | `lips` `gape` (round and open, turned up to a hand) `wide` (a slit across a flat head) `ring` (a ring of the field held in it) |
+| `eyes`, `brow` | the eye, and the lid over it: what it is thinking | eyes `round` `old` `up` `top` `small`; brow `keen` `calm` `mild` `heavy` `stern` `sleepy` |
+| `scales` | | `net` `coin` (large, on the shoulder) `small` `armour` `plates` (a belly in bands) `none` |
+| `marks` | the Path's colour on the skin | `stripe` `bands` `dash` `shoulder` · `patches` `saddle` `mask` `collar` `lips` `faded` `brocade` · `back` `spots` `sheen` `worn` (the field shows through) · on the fins `tips` `wingbars` |
+| `head` | what the head has grown | `buds` `antlers` `prow` (a ship's stem of stone) `cap` (the crane's red crown) |
+| `carry` | what it has about it | `scuff` `spray` `eddy` `wake` `fry` · `weed` `seal` `rime` `pane` `shards` `drops` · `tremor` `stone` `rod` `shiplamp` `barnacles` `chain` `coin` `mudball` · `pearl` |
+
+**What each Path keeps.** The **Weir-leaper** (`jade`) wears its colour as a stripe down the
+spine and in the rays of every fin; its body is bent or climbing, its whiskers lengthen with
+every stage, and the fin of its back turns from a sail to a ridge, a mane, a row of spines.
+The **Still-water Carp** (`madder`, a coat gone to `frost`) is a koi: a deep pale body, the
+colour in patches on the skin and at the root of every fin, which are otherwise pale. The **Silt-reader** (`amethyst`, a coat gone to `slate`) is a
+fish of the bottom: a flat head, small eyes under heavy lids, long feelers, the colour dark
+over the whole back and bright along the margin of every fin.
+
+**Its light.** The eyes; from the Advancement, the line down each side by which a fish feels
+the current, which is a face of the skin itself; and a Final has one thing more that is its
+own (the pearl, the ring it carries, the ship's lamp, the coin of sky, the eyes of its fry,
+the worn places on the Salve-carp's sides, the rings from the Ground-shaker's tail).
+
+**What moves.** `wag_body_0` and `_1` and the tail `wag_body_2` (a dragon has one piece more),
+each the child of the one before, so that it swims where it hangs; `glide_fin_l` and `_r`,
+the fins of the shoulder; `pulse_gill_l` and `_r`; `blink_eye_l` and `_r`; `sway_barbel_l`
+and `_r` (and `sway_barbel2_*`); and of what it carries, `bob_fry_0` to `_2`, `bob_pearl`,
+`bob_coin`, `pulse_ring`, `pulse_tremor`, `sway_rod`, `sway_seal`, `sway_weed_<n>`,
+`sway_chain`.
+
+**Where it hangs.** The game holds a genius that floats by its origin, at its partner's
+shoulder. A carp is made with its belly at its origin and the middle of everything it is over
+it, so it swims at the shoulder at every stage; what hangs from it (plumb whiskers, a chain)
+hangs below, by no more than 0.3 m. `ref_top` is not the crown of its head: it is set from
+`size` so that the game stands the fish at the length it should be.
+
+**Its gifts** (`python tools/blender/lines_carp.py gifts`): `carp-fins`, a swept sail of a fin
+down the back, and `carp-tail`, a forked tail on a scaled stem; both rayed in the wearer's own
+Path's colour.
+
+**What is still weak.** The sheet measures a body at one moment and pictures it at another,
+and a carp swims between the two: a long form's tail may touch the edge of its cell, and the
+Fingerling (the smallest, in the first column, which the sheet's measure favours least) is
+small in its. The Fingerling is 0.4 m long, not the length of a finger: smaller, the ink line
+is most of it. Whiskers are thin, and at a distance the ink makes dark lines of them. The
+Skimmer's wings are flat, so it is posed banking; level, from in front, they are edge-on. The
+wave at the Shoal-head's head can read as a hoop. A great carp's mantle of light stands off
+its back: the game sets it by height, and a fish is long and low. Its face is its lids: the
+eyes do not turn to look at anything. The game's grain lays round scales on the fins as on the body (a fin is the coat's trim, and is named for it). By colour the Under-the-Ice reads as a Silt-reader: its floe is the largest thing in its picture, and it is slate.
