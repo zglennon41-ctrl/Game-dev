@@ -1,4 +1,4 @@
-"""WILDLINE genius lines: the Fiend (docs/genius-evolutions.md, "The things with no flesh").
+"""WILDLINE genius lines: the Fiend (docs/genius-evolutions.md, "The spirits").
 
 A wick with a temper. The Starter is a candle flame with two horns and a scowl; from there it
 is a soot-black imp with a candle melted to its skull, and each path does a different thing

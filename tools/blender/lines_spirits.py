@@ -1,6 +1,6 @@
 """WILDLINE genius lines, the things with no flesh: the Lurker (a shadow), the Fiend (a wick),
-the Ember (a flame) and the Fog (weather). docs/genius-evolutions.md, "The things with no
-flesh", says what each line's `body` may say.
+the Ember (a flame) and the Fog (weather). docs/genius-evolutions.md, "The spirits", says
+what each line's `body` may say.
 
     python tools/blender/genius_lines.py lurker
     python tools/blender/genius_lines.py fiend fiend-wick-fiend fiend-stove-devil

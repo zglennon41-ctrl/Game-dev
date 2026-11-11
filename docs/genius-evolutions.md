@@ -157,13 +157,21 @@ bash tools/genius-tree-page.sh wolf                 # the page of the whole tree
    built like a wall). They could go further from the animal: say how far.
 5. **The Baby**: one for everyone, or one that already leans toward what it will be.
 
-## The things with no flesh: the Lurker, the Fiend, the Ember, the Fog
+## The spirits: the Lurker, the Fiend, the Ember, the Fog
 
-`tools/blender/lines_spirits.py` (one file a line: `spirits_lurker.py`, `spirits_fiend.py`,
-`spirits_ember.py`, `spirits_fog.py`; what they share is `spirits_kit.py`). None has a rig: a
-body is built as pieces and written as one object with sockets. Each has a `plan` (what kind
-of thing the form is), and round the plan the slots below. A child with a new `plan` restates
-its `build`.
+The things with no flesh: shadow, wick, flame, weather. `tools/blender/lines_spirits.py`
+(one file a line: `spirits_lurker.py`, `spirits_fiend.py`, `spirits_ember.py`,
+`spirits_fog.py`; what they share is `spirits_kit.py`). None has a rig: a body is built as
+pieces and written as one object with sockets. Each has a `plan` (what kind of thing the
+form is), and round the plan the slots below. A child with a new `plan` restates its `build`.
+
+**How each floats or stands.** The Fiend walks at its partner's heel (an imp on two legs, a
+stove on three); its bodies are built standing on the ground. The Lurker, the Ember and the
+Fog float at the shoulder, as their silhouettes do, and so does whatever a form of theirs
+stands on: the Vigil's chair, the Camp-fire's ring of stones, the Sea-fret's quay are part
+of the body and go where it goes. Each is a piece of its own ground, with rolls or tatters
+under it, so that it reads as one thing carried and not as furniture in the air. Every body
+is set down on its lowest point.
 
 What each line keeps from its Starter, and what each path adds and carries:
 
@@ -207,7 +215,29 @@ cowl. And a thing that is low and long (a streak, a line of fire, a pool) is not
 its crown, or it would fill the room: `spirits_kit.py` never lets a body be more than 1.7
 times as far across as the height its `ref_top` stands it to.
 
-Their gifts are parts (`tools/blender/parts_spirits.py`): the Lurker's `shadow-cloak` and
-`watching-eye`, the Fiend's `ember` and `horns`, the Ember's `ember` and `glow`, the Fog's
-`mist` and `glow`. The cloak and the mist are surfaces; they hang because
-`data/genius-bodies.json` (`featureSockets`) gives them a place: the back, and the breast.
+**Their gifts** are parts, written by `tools/blender/parts_spirits.py` to
+`game/assets/genius/parts/<feature>.glb`:
+
+| Base | Gift | What it is | Where it hangs |
+|---|---|---|---|
+| Lurker | `shadow-cloak` | a ragged mantle of ink, a hood thrown back, the hem streaming | the back (`socket_back`) |
+| | `watching-eye` | one great eye, lidded in ink, the dark standing up off it | the brow (`socket_eyes`) |
+| Fiend | `ember` | a split coal, its flame up either side of whatever carries it | the light (`socket_light`) |
+| | `horns` | long, swept, ridged, ringed with the field at the root | the head (`socket_head`) |
+| Ember | `ember`, `glow` | the coal, and a rayed halo of the field round it | the light, both |
+| Fog | `mist`, `glow` | a wreath of fog at the breast, trailing down the flanks; the halo | the breast (`socket_body`); the light |
+
+**What was changed outside these files, and why.**
+
+- `data/genius-bodies.json`, `featureSockets`: `shadow-cloak` and `mist` are given a place
+  (the back, the breast). They are surfaces, and a surface hangs nothing unless it has one.
+- `game/assets/genius/parts/`: `ember`, `glow`, `horns` and `watching-eye` are rebuilt
+  bolder, and `mist` and `shadow-cloak` are new. These are the shared parts: a wolf that
+  comes by horns any other way wears these too, and `glow`, `horns` and `shadow-cloak` are
+  also other bases' gifts.
+- Nothing in the game's scripts, in `genius_lines.py`, `genius_kit.py` or
+  `data/genius-looks.json`.
+- `spirits_kit.py` adds materials the kits did not have, named for what they are made of
+  and not yet drawn from a ramp: `ash` `ash_dark` `ash_pale` `brick` `wax_red` `rust` `soot`
+  `clinker` `clinker_light` `pane` `stone_grave` `timber` `mask_pale` `veil` `steam`
+  `stubble` `grass_dry`.

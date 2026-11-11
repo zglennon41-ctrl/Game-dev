@@ -1,4 +1,4 @@
-"""WILDLINE genius lines: the Ember (docs/genius-evolutions.md, "The things with no flesh").
+"""WILDLINE genius lines: the Ember (docs/genius-evolutions.md, "The spirits").
 
 Fire with nothing under it. The Starter is one coal with a small flame and two eyes; from there
 it is a flame with a heart, the coal it began as at its foot with its eyes lit in the coal, and
