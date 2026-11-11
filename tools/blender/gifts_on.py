@@ -16,7 +16,8 @@ The Hawk on a Shield: the shield is the breast of an eagle displayed. Wings of p
 from behind its rim, feathers of cut steel fanned from straight up to out and down; a
 raptor's head of brass and iron stands over the top edge and looks about; two taloned feet
 hang open under it. Everything is the shield's own metal; the field is in the eyes and at
-the tips of the longest feathers.
+the tips of the longest feathers. On its partner's arm the wings are shut down its rim and
+the feet drawn up (pieces named aloft and furled: the game shows the one or the other).
 """
 import math
 import os
@@ -43,6 +44,15 @@ def piece(name, items, pivot=(0, 0, 0)):
 def at(socket, objects):
     """The pieces that hang on one socket of the body."""
     e = kit.free_socket("at_" + socket, (0, 0, 0))
+    for o in objects:
+        o.parent = e
+    return e
+
+
+def when(state, objects):
+    """Pieces that show only while the genius goes free ("aloft") or only while it is worn or
+    held ("furled"): the game shows the one or the other."""
+    e = kit.free_socket(state, (0, 0, 0))
     for o in objects:
         o.parent = e
     return e
@@ -96,6 +106,30 @@ def shield_wing(sg):
     return piece("glide_wing_%s" % ("l" if sg > 0 else "r"), items, pivot=(0, 0.03, -0.04))
 
 
+def shield_wing_shut(sg):
+    """The same wing shut, as it lies when the shield is on an arm: down the rim from the
+    knuckle, the long feathers one over the other like the plates of a tasset, a hand's
+    breadth proud of the edge."""
+    iron, steel, brass = mat("metal_iron"), mat("metal_iron_light"), mat("metal_brass")
+    front = (0, -1, 0.0)
+    flights, coverts, scales = None, None, None
+    for i in range(6):
+        t = i / 5.0
+        b = Vector((sg * (0.0 + 0.012 * i), 0.03 - 0.004 * i, 0.07 - 0.03 * i))
+        tip = Vector((sg * (0.035 + 0.02 * t), 0.05, -0.2 - 0.3 * t))
+        flights = g.merge(flights, g.blade(b, tip, 0.085, thick=0.012, normal=front, belly=0.5))
+    for i in range(5):
+        t = i / 4.0
+        b = Vector((sg * (0.005 + 0.012 * i), 0.012, 0.1 - 0.035 * i))
+        coverts = g.merge(coverts, g.blade(b, b + Vector((sg * 0.035, 0.012, -0.17)), 0.085, thick=0.014, normal=front, belly=0.45))
+    for i in range(4):
+        b = Vector((sg * (0.004 + 0.01 * i), -0.002, 0.125 - 0.035 * i))
+        scales = g.merge(scales, g.blade(b, b + Vector((sg * 0.03, 0.006, -0.085)), 0.07, thick=0.012, normal=front, belly=0.45))
+    bone = g.tube([(-sg * 0.03, 0.02, -0.08), (-sg * 0.012, 0.01, 0.07), (sg * 0.02, 0.006, 0.145), (sg * 0.06, 0.012, 0.11)], [0.022, 0.024, 0.022, 0.006], n=5)
+    knuckle = g.ico((sg * 0.012, -0.004, -0.005), 0.034, sub=1, scale=(0.9, 0.8, 1.2))
+    return piece("shut_wing_%s" % ("l" if sg > 0 else "r"), [(flights, steel), (coverts, iron), (scales, brass), (bone, brass), (knuckle, iron)])
+
+
 def shield_head():
     """The head, made at the middle of the shield's top edge: a mantle of hackles over the
     rim, a neck, a raptor's head that looks out over the face, brow down, bill hooked."""
@@ -129,6 +163,21 @@ def shield_head():
     return [collar, head]
 
 
+def shield_talons_shut():
+    """The feet drawn up and clenched under the shield's lower edge, as a bird carries them
+    flying: two fists of brass and four black hooks each, close to the plate."""
+    brass, claw, steel = mat("metal_brass"), mat("metal_dark"), mat("metal_iron_light")
+    toes, claws, cuffs = None, None, None
+    for sg in (1, -1):
+        foot = Vector((sg * 0.06, -0.02, 0.015))
+        cuffs = g.merge(cuffs, g.blade(foot + Vector((0, 0.01, 0.07)), foot + Vector((0, -0.02, -0.01)), 0.07, thick=0.016, normal=(0, -1, 0.2), belly=0.4))
+        for dx, dy in ((0.03, -0.035), (0.0, -0.045), (-0.03, -0.035), (0.0, 0.03)):
+            end = foot + Vector((dx, dy, -0.022))
+            toes = g.merge(toes, g.tube([foot, end], [0.02, 0.016], n=5))
+            claws = g.merge(claws, g.tongue([end, end + Vector((dx * 0.2, dy * 0.2, -0.03)), end + Vector((-dx * 0.5, -dy * 0.5, -0.055))], [0.028, 0.022, 0.002], thick=0.8))
+    return [piece("shut_talons", [(cuffs, steel), (toes, brass), (claws, claw)])]
+
+
 def shield_talons():
     """The feet, made at the foot of the shield's back: two legs in trousers of plate come
     from behind its lower edge, and each foot hangs open, three hooked claws forward and one
@@ -154,11 +203,13 @@ def shield_talons():
 
 
 def hawk_wings_on_shield():
-    return [at("socket_arm_l", [shield_wing(1)]), at("socket_arm_r", [shield_wing(-1)]), at("socket_head", shield_head())]
+    return [at("socket_arm_l", [when("aloft", [shield_wing(1)]), when("furled", [shield_wing_shut(1)])]),
+            at("socket_arm_r", [when("aloft", [shield_wing(-1)]), when("furled", [shield_wing_shut(-1)])]),
+            at("socket_head", shield_head())]
 
 
 def hawk_talons_on_shield():
-    return [at("socket_tail", shield_talons())]
+    return [at("socket_tail", [when("aloft", shield_talons()), when("furled", shield_talons_shut())])]
 
 
 # giver, first base -> feature -> its builder

@@ -115,6 +115,7 @@ const REST := "rest"
 var _movers: Array = []            # [node, kind, its rest, phase, side, place in its chain, the way the body faces in its frame]
 var worn_piece: Node3D = null      # what is shown of it when it is worn, in place of the rest (a piece named worn)
 var is_worn := false
+var _furling: Array = []           # pieces of its parts that show only free (aloft*) or only worn (furled*)
 
 static var _shader: Shader
 
@@ -246,6 +247,10 @@ func _assemble(instar: int) -> void:
 				if is_right(String(sn)):
 					art.scale.x = -1.0
 				_adopt_art(art)
+				for piece in art.find_children("*", "Node3D", true, false):
+					if String(piece.name).begins_with("aloft") or String(piece.name).begins_with("furled"):
+						(piece as Node3D).visible = String(piece.name).begins_with("aloft")
+						_furling.append(piece)
 				# A part of several pieces says where each goes: a piece named at_<socket> hangs
 				# on that socket (a head at the top, a wing at each side), where the body has it.
 				for piece in art.get_children():
@@ -441,10 +446,18 @@ static func accent_of(form_id: String, material: String) -> Color:
 
 ## Worn, a genius that has a piece made for wearing (a mantle where the whole coat would not
 ## sit) shows that piece and nothing else of itself; let go, the rest and not the piece.
+## A part may be made twice over, for a genius going free and for one on its partner (wings
+## spread, and wings shut along a shield's rim): pieces named aloft show while it is free, and
+## pieces named furled while it is worn or held.
 func set_worn(on: bool) -> void:
-	if worn_piece == null or on == is_worn:
+	if on == is_worn:
 		return
 	is_worn = on
+	for f in _furling:
+		if is_instance_valid(f):
+			(f as Node3D).visible = on == String(f.name).begins_with("furled")
+	if worn_piece == null:
+		return
 	for c in worn_piece.get_parent().get_children():
 		if c is Node3D and c != worn_piece:
 			(c as Node3D).visible = not on
