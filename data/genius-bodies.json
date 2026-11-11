@@ -33,7 +33,8 @@
     "shadow-cloak": ["socket_head"],
     "bell": ["socket_throat"],
     "fletching": ["socket_back"],
-    "mist": ["socket_body"], "lurker-shadow-cloak": ["socket_back"]
+    "mist": ["socket_body"], "lurker-shadow-cloak": ["socket_back"],
+    "carp-fins": ["socket_back"]
   },
   "kinds": {
     "quadruped": { "model": "res://game/assets/quaternius/Wolf.glb", "anim": { "idle": "AnimalArmature|Idle", "walk": "AnimalArmature|Walk", "run": "AnimalArmature|Gallop" },
@@ -116,6 +117,7 @@
     "beast-riverhorse": { "kind": "quadruped", "artSize": 0.8, "carries": ["maw", "broad-chest"] },
     "beast-gazelle": { "kind": "quadruped", "artSize": 1.15, "carries": ["horns", "long-legs"] },
     "beast-mongoose": { "kind": "quadruped", "artSize": 0.5, "carries": ["fangs", "tail"] },
+    "beast-moth": { "kind": "flier", "build": "bird", "hover": true, "artSize": 1.0, "carries": ["dust-wings", "antennae"] },
     "beast-horse": { "kind": "quadruped", "artSize": 1.3, "carries": ["long-legs", "tail"] },
     "beast-camel": { "kind": "quadruped", "artSize": 1.45, "carries": ["long-legs", "tail"] },
     "beast-carp": { "kind": "flier", "build": "bird", "hover": true, "artSize": 0.7, "carries": ["fins", "broad-chest"] },

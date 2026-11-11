@@ -12,6 +12,17 @@ static func discipline_of(city: String) -> String:
 			return d["id"]
 	return "marshal"
 
+## The weapons a character's school teaches: those of the city whose Discipline they took. A
+## home with no school of its own (Alexandria) took another city's Discipline at creation,
+## so its school's weapons are that city's. Never empty: a choice with nothing in it is a wall.
+static func school_weapons(hero: Dictionary) -> Array:
+	var school := String(Data.discipline_kits.get(String(hero.get("discipline", "")), {}).get("city", ""))
+	for city in [school, String(hero.get("city", ""))]:
+		var out := Data.weapons.filter(func(w): return w["city"] == city)
+		if not out.is_empty():
+			return out
+	return Data.weapons.duplicate()
+
 static func question(i: int) -> Dictionary:
 	return Data.creation["questions"][i]
 

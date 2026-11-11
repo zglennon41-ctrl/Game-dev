@@ -221,8 +221,7 @@
       "maw"
      ],
      "body": {
-      "plan": "maw",
-      "coat": "slate"
+      "plan": "maw"
      },
      "finishes": [
       {
@@ -241,8 +240,7 @@
         "dark-eyed"
        ],
        "body": {
-        "plan": "pool",
-        "coat": "night"
+        "plan": "pool"
        }
       },
       {
@@ -580,8 +578,7 @@
       "rime"
      ],
      "body": {
-      "plan": "frost",
-      "coat": "frost"
+      "plan": "frost"
      },
      "silhouette": "aspect-frost",
      "finishes": [
@@ -620,8 +617,7 @@
         "sleek-coat"
        ],
        "body": {
-        "plan": "blackice",
-        "coat": "night"
+        "plan": "blackice"
        }
       }
      ]
@@ -665,7 +661,7 @@
        ],
        "body": {
         "plan": "flood",
-        "coat": "hearth"
+        "coat": null
        },
        "silhouette": "aspect-flood"
       },
