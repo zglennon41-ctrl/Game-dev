@@ -316,11 +316,9 @@ thing, or it is a magical choice made on purpose and carried all the way. Nothin
 one animal wearing another's parts by accident. Each family's section says which for each
 line, in a sentence. The known cases: the Drake (was a hound with wings; rebuilt on
 2026-11-11 as a true drake, and again on 2026-11-12 to the Wolf's standard: standing on
-thick legs, a larger head, wings that are an event, rooted at the shoulder); the Hawk's Harriers (griffins by accident: to be griffins on purpose, or birds
-2026-11-11 as a true drake, long in the neck and the tail, low and splayed, its wings
-rooted at the shoulder); the Stag (was a wolf on stilts with antlers; rebuilt on 2026-11-12
-as three deer: "The Stag"); the Hawk's Harriers (griffins by accident: to be griffins on purpose, or birds
-on foot); what floats and should lie (a pool, black ice, a grass-fire); a fish and an
+thick legs, a larger head, wings that are an event, rooted at the shoulder); the Stag (was a wolf on stilts with antlers; rebuilt on 2026-11-12
+as three deer: "The Stag"); the Hawk's Harriers (were griffins by accident, a wolf's body
+with a beak; rebuilt on 2026-11-12 as birds on foot: "The Harriers"); what floats and should lie (a pool, black ice, a grass-fire); a fish and an
 octopus in the air (a choice: they swim in the field, and everything about them says so).
 
 ### 6. What moves
@@ -524,7 +522,8 @@ Neither is on the wolf's rig. A tortoise is its shell: one object the game walks
 dome, a rim, four legs and a neck that comes out or stays in. A hawk is a body on the wing
 with two wings the game beats (`wing_l`, `wing_r`; it is built at the bottom of the stroke),
 or the same bird perched with its wings shut. The Harrier and its two Finals are ground
-hunters in the tree, so they are a hawk that runs, built on the wolf's rig (`"rig": "ground"`).
+hunters in the tree, so they are a hawk that runs (`"rig": "ground"`): see "The Harriers"
+below.
 
 The Tortoise:
 
@@ -564,7 +563,7 @@ The Hawk:
 | `carry` | what it has been given | `lamp` `case` `plate` `writ` `bright` `jesses` `rings` |
 | `aura` | | `smoke` `hush` `ring` `cold` `underwing` `flock` `dust` |
 | `sleek` `down` `iron` `stance` | | feathers laid flat; a nestling's down (a size); which wing is iron; how wide it stands |
-| on the ground rig | the wolf's `build`, and | `crest` `wings` `fan` `bill` (sizes); `tufts`; `grown`: `sickle` `brambles` |
+| on the ground rig | the Hawk's `build`, `tail` and `eyes`, and | `stance`: `upright` `low` `proud`; `crest`: `swept` `quills` `fan`; `wings`: `folded` `tucked` `half`; `tufts`: `turned`; `grown`: `sickle` `brambles`; `track` (how wide it stands) |
 
 Its three paths: the High Circler's is the bird on the wing, told apart by the wing itself
 (long, pointed, round and owl-eyed, broad and white-headed); the Eyrie-holder's is the bird
@@ -579,8 +578,38 @@ with the rest by `genius_lines.py gifts`): the Hawk's `wings` and `talons`, the 
 A sheet's cells are measured before they are scaled, and a wide wing reaches into its
 neighbour's: look at the Hawk with `--cell=7`.
 
+### The Harriers: birds on foot
+
+The owner, 2026-11-12: "Birds on foot. I think things like griffins would be good hybrid
+lines." The Harrier and its two Finals were a wolf's four-legged body with a beak; they are
+now the Hawk itself, stood on two legs. Everything of the bird is made by the same makers as
+the birds on the wing (`bird_feathers`, `bird_head`, `bird_tail`, `bird_folded`, `bird_wing`:
+the same feathers, the same face, the same coat roles), on a spine that is given its own
+curve (`STANCES`: the body's pitch and the way the spine runs from tail to bill).
+
+Of the wolf they keep the skeleton and the clips, and no skin. A hound's hind leg and a
+bird's leg are the same three bones, so the wolf's hind legs are the bird's legs: hip to
+knee (hidden in the flank feathers), knee back to the ankle (the "knee that bends the wrong
+way", in feathered trousers), ankle down to the foot (long, bare, scaled), and a foot of
+three toes before and one behind, each with its talon. The wolf's spine, neck and head
+bones are stood up under the bird's; its tail bones carry the tail feathers; its forelegs
+carry nothing, because a bird's forelegs are its wings. So it stands, walks, runs and
+strikes by the wolf's clips, on two legs.
+
+| Form | The bird | What is its own |
+|---|---|---|
+| Harrier | a harrier on the ground, a roadrunner: upright, head high on a raised neck, wings folded, a long tail for a rudder | a shaggy crest laid back, tipped in the Path's colour |
+| Heel-hawk | a secretary bird stalking: the longest legs, its back level, neck reached out and down so its head is at knee height, tail up behind for balance, night coat | a secretary's quills at the nape; the inner toe carried clear of the ground with a sickle claw (a seriema's) |
+| Bramble-harrier | a small terror bird: short thick legs, breast out, a heavy head and a deep bill, moss coat | a fan of a crest as tall as its head; wings half out for balance (`glide_wing_l`, `glide_wing_r`: the game moves them); one ear-tuft turned; burrs and a bramble across its back |
+
+The Path's colour (madder) is in the same places on all three: the trousers, the bare skin
+about the eye, the crest. What is still weak: the gait is a hound's hind legs (it reads as a
+bird striding, but the stride was not made for a foot this long, and a foot can sink or lift
+a little); the toes do not flex; the folded wings do not move; the three do not blink (no
+Hawk does).
+
 Both lines are built, all thirty-one of each. An unrigged body here is under 120 KB; the
-three on the wolf's rig are under 200.
+three Harriers are under 230.
 ## The small people: the Imp, the Sprite, the Homunculus
 
 Built by `tools/blender/lines_people.py` (with `people_dress.py`, `people_things.py`,
@@ -1374,7 +1403,8 @@ page.
   one wolf reshaped. Outlines change by proportion, carriage and what is grown; none has a
   skeleton or clips of its own. The Drake is the weakest for it: its legs and chest are a
   wolf's, so the Sky path can read as a winged hound, and its wings do not beat. The
-  Harriers read as small griffins, not hawks on foot.
+  Harriers were small griffins; since 2026-11-12 they are birds on foot with a skin of
+  their own on the wolf's bones ("The Harriers").
 - **The Stag** (after its rebuild): it still walks by the wolf's clips, and a deer's foreleg
   on them is one stiff piece from the elbow down (the knee is modelled and does not bend). Its
   lying down (the Quiet Hart) is a dog's, forelegs out in front, where a deer folds them under.

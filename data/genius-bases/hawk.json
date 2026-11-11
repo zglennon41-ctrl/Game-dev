@@ -1043,13 +1043,23 @@
      ],
      "body": {
       "rig": "ground",
+      "pose": null,
+      "sweep": null,
+      "dihedral": null,
+      "feet": null,
+      "stance": "upright",
       "build": {
-       "legs": 1.15,
-       "neck": 1.1
+       "legs": 1.15
       },
-      "crest": 1.0,
-      "wings": 1.0,
-      "fan": 1.0
+      "crest": [
+       "swept",
+       1.5
+      ],
+      "wings": "folded",
+      "tail": [
+       "long",
+       1.0
+      ]
      },
      "silhouette": "beast-ground-hunter",
      "finishes": [
@@ -1072,14 +1082,21 @@
         "long-legs"
        ],
        "body": {
+        "stance": "low",
         "build": {
          "legs": 1.3,
-         "girth": 0.92,
-         "neck": 1.3,
-         "pitch": 0.62,
-         "waist": 0.85
+         "neck": 1.5,
+         "chest": 0.9,
+         "body": 1.1,
+         "head": 0.95,
+         "beak": 1.1,
+         "tail": 1.2
         },
-        "crest": 0.8,
+        "crest": [
+         "quills",
+         1.2
+        ],
+        "wings": "tucked",
         "grown": [
          "sickle",
          1.2
@@ -1106,12 +1123,28 @@
         "tunnel-ear"
        ],
        "body": {
+        "stance": "proud",
         "build": {
-         "legs": 1.12,
-         "chest": 1.15,
-         "neck": 1.05
+         "legs": 0.85,
+         "neck": 0.8,
+         "chest": 1.25,
+         "head": 1.35,
+         "beak": 1.4,
+         "feet": 1.2,
+         "tail": 0.8
         },
-        "crest": 1.3,
+        "crest": [
+         "fan",
+         1.0
+        ],
+        "wings": [
+         "half",
+         1.0
+        ],
+        "tail": [
+         "fan",
+         1.0
+        ],
         "tufts": [
          "turned",
          1.2

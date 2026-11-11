@@ -1041,7 +1041,9 @@ class Bird:
     """A hawk's numbers and its spine, level (the body along -Y), and the way from there
     to where it stands in the pose it holds."""
 
-    def __init__(self, level, spec):
+    def __init__(self, level, spec, angles=None):
+        # angles: for one that stands on the ground, the way its spine runs at each station
+        # (degrees above level, where it stands) in place of one bend from body to head
         b = dict(HAWK_STAGE[min(4, max(1, level))])
         for k, v in spec.get("build", {}).items():
             b[k] = b.get(k, 1.0) * v if k in HAWK_TIMES else v
@@ -1064,7 +1066,7 @@ class Bird:
                 kr = b["head"]
             kx = b["shoulders"] if i in (CHEST, SHOULDER) else 1.0
             self.r.append((rx * kr * kx, rz * kr))
-            a = bend * share
+            a = bend * share if angles is None else math.radians(angles[i]) - self.pitch
             if i > 0:
                 am = (a + prev_a) / 2
                 self.C.append(self.C[-1] + Vector((0, -math.cos(am), math.sin(am))) * (s - prev_s) * klen)
@@ -1937,152 +1939,364 @@ def _fold_side(B, items, side, size, tips):
     items.extend(keep[:half] if side > 0 else keep[half:])
 
 
-# --- the Hawk that came down to run: on the wolf's rig, as its base body is ----------------
+# --- the Hawk that came down to run: a bird on foot, on the wolf's bones -------------------
+#
+# The Harrier and its Finals are the Hawk itself (its body, its feathers, its face, its wings,
+# its tail: the same makers as the birds on the wing), stood on two long legs. Of the wolf
+# they keep the skeleton and the clips and nothing else: the wolf's hind legs are the bird's
+# legs (hip to knee, knee to ankle, ankle to foot: a hound's hind leg and a bird's leg are the
+# same three bones), its spine and neck are stood up under the bird's, its tail carries the
+# tail feathers, and its forelegs carry nothing (a bird's forelegs are its wings).
+
+# what a ground hunter is, against a hawk of its stage
+GROUND = {"neck": 2.3, "tail": 1.45, "feet": 1.5, "chest": 1.08}
+# how it stands: the pitch of its body, then the way its spine runs at each station from the
+# root of the tail to the bill (degrees above level)
+STANCES = {
+    "upright": (26, (26, 26, 26, 30, 54, 80, 72, 8, 0, 0)),         # a harrier on the ground, a roadrunner: head high on a raised neck
+    "low": (5, (-16, 0, 5, 0, -14, -32, -36, -22, -16, -16)),       # a stalker: its back level, its neck reached out and down, its tail up behind for balance
+    "proud": (36, (30, 36, 36, 44, 64, 86, 80, 2, -8, -8)),         # a terror bird: breast out, a heavy head carried over it
+}
+SPINE_BONES = ("Back", "Torso", "Torso2", "Torso3", "Neck1", "Neck2", "Neck3", "Head")
+LEG_BONES = ("BackLeg", "BackUpperLeg", "BackLowerLeg")
+TAIL_BONES = ("Tail1", "Tail2", "Tail3", "Tail4")
+
+
+def _chain_w(names, joints, p, soft=0.5):
+    """Which bones of a chain carry a point: names[i] runs from joints[i] to joints[i + 1];
+    soft is how far either side of a joint two bones share it (in bone lengths)."""
+    best, s = 1e9, 0.0
+    for i in range(len(joints) - 1):
+        a, ab = joints[i], joints[i + 1] - joints[i]
+        f = max(0.0, min(1.0, (p - a).dot(ab) / max(1e-9, ab.length_squared)))
+        dist = (p - (a + ab * f)).length
+        if dist < best - 1e-7:
+            best, s = dist, i + f
+    ws = [(nm, max(0.0, min(1.0, (0.5 + soft - abs(s - (j + 0.5))) / (2 * soft)))) for j, nm in enumerate(names)]
+    tot = sum(w for _, w in ws)
+    if tot < 1e-6:
+        return [(names[0] if s < 1 else names[-1], 1.0)]
+    return [(nm, w / tot) for nm, w in ws if w > 1e-4]
+
+
+def _strip(r):
+    """Take the wolf's own skin away: every face of it, and its materials."""
+    import bmesh
+    me = r.mesh.data
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    bmesh.ops.delete(bm, geom=list(bm.verts), context="VERTS")
+    bm.to_mesh(me)
+    bm.free()
+    me.materials.clear()
+    me.update()
+
+
+def _stand_bones(r, places):
+    """Put bones where a body of another shape has them (where it stands; they keep the way they lie)."""
+    def fn(ebs):
+        for name, p in places.items():
+            eb = ebs[name]
+            d = r.MAinv @ Vector(p) - eb.head
+            eb.head = eb.head + d
+            eb.tail = eb.tail + d
+    r._edit(fn)
+
+
+def _lay(r, name, items, M, weights):
+    """[(geometry, material[, smooth]), ...] laid on the bones, one part for each material:
+    set where it stands by M, and carried by one bone (its name) or by weights(point)."""
+    groups = {}
+    for it in items:
+        geo, m = it[0], it[1]
+        if not geo or not geo[0]:
+            continue
+        smooth = it[2] if len(it) > 2 else m.name.startswith(SOFT)
+        key = (m.name, smooth)
+        if key not in groups:
+            groups[key] = [None, m, smooth]
+        groups[key][0] = g.merge(groups[key][0], geo)
+    for i, (geo, m, smooth) in enumerate(groups.values()):
+        verts = [M @ V(p) for p in geo[0]]
+        w = weights if isinstance(weights, str) else [weights(p) for p in verts]
+        GL._add(r, "%s_%d" % (name, i), (verts, list(geo[1])), w, m, smooth=smooth)
+
+
+def harrier_crest(B, items, style, size, level):
+    """What stands on its head (the head's own frame: x left, y back, z up)."""
+    h = B.b["head"]
+    dark, mid = mat("feather_dark"), mat("feather_mid")
+    put = lambda geo: B.at(HEAD, geo)  # noqa: E731
+    lit = field("tips", 2.2) if level >= 4 else None
+    if style == "swept":
+        # a shaggy crest laid back from the brow, as a roadrunner carries it
+        cr, tp = None, None
+        for i, (dx, y, Ln) in enumerate(((0.0, -0.035, 0.15), (-0.02, -0.01, 0.17), (0.02, -0.01, 0.17), (0.0, 0.02, 0.2), (-0.016, 0.04, 0.15), (0.016, 0.04, 0.15))):
+            b0 = Vector((dx * h, y * h, 0.05 * h))
+            t0 = b0 + Vector((dx * 1.6, 0.86, 0.5)) * Ln * size * h
+            cr = g.merge(cr, g.blade(b0, t0, 0.042 * h, normal=(dx * 6, -0.5, 1), belly=0.42))
+            tp = g.merge(tp, g.blade(b0.lerp(t0, 0.66), b0.lerp(t0, 1.05), 0.034 * h, normal=(dx * 6, -0.5, 1), belly=0.4, thick=0.012))
+        items += [(put(cr), mid), (put(tp), mat("accent"))]
+    elif style == "quills":
+        # long quills from the nape, each ending in a paddle: a secretary's pens behind its ear
+        q, pd = None, None
+        for i in range(7):
+            sx = (i - 3) / 3.0
+            b0 = Vector((sx * 0.03 * h, 0.04 * h, 0.03 * h - abs(sx) * 0.012 * h))
+            d = Vector((sx * 0.36, 0.86, 0.4 - 0.5 * abs(sx))).normalized()
+            Ln = (0.3 - 0.06 * abs(sx)) * size * h
+            q = g.merge(q, g.tube([b0, b0 + d * Ln * 0.5 + Vector((0, 0, 0.01)), b0 + d * Ln], [0.006 * h, 0.005 * h, 0.004 * h], n=4))
+            pd = g.merge(pd, g.blade(b0 + d * Ln * 0.74, b0 + d * Ln * 1.16, 0.048 * h, normal=(sx * 0.5, -0.3, 1), belly=0.5, thick=0.012))
+        items += [(put(q), dark, False), (put(pd), mat("accent_light"))]
+    elif style == "fan":
+        # a fan stood up along the crown, brow to nape, as tall as its head
+        cr, tp = None, None
+        n = 8
+        for i in range(n):
+            t = i / (n - 1.0)
+            a = math.radians(118 - 92 * t)
+            d = Vector((0.0, math.cos(a), math.sin(a)))
+            b0 = Vector((0, (-0.05 + 0.1 * t) * h, 0.048 * h))
+            Ln = (0.17 + 0.07 * math.sin(t * math.pi)) * size * h
+            sx = 0.3 * (1 if i % 2 else -1)
+            cr = g.merge(cr, g.blade(b0, b0 + d * Ln, 0.05 * h, normal=(1, 0, 0), belly=0.5, thick=0.016))
+            tp = g.merge(tp, g.blade(b0 + d * Ln * 0.7 + X * sx * 0.004, b0 + d * Ln * 1.08 + X * sx * 0.004, 0.04 * h, normal=(1, 0, 0), belly=0.42, thick=0.022))
+        items += [(put(cr), mat("accent")), (put(tp), lit or mat("accent_pale"))]
+
+
+def harrier_legs(B, r, spec, legs, tarsus, K):
+    """Two legs a bird walks on (built where it stands, before it is brought to size): the
+    thigh in its feathers against the flank, the feathered shank back to the ankle (the knee
+    that bends the wrong way is its ankle), the long scaled foot-bone down from it, and a
+    foot of three toes before and one behind, each with its talon."""
+    b = B.b
+    c, kf = b["chest"], b["feet"]
+    pale, leg, talon = mat("feather_pale"), mat("beak"), mat("talon")
+    grown = dict(GL.each(spec.get("grown")))
+    feet = {}
+    for s, tag in ((1, "L"), (-1, "R")):
+        hip, knee, ankle, foot = legs[tag]
+        li = []
+        li.append((g.tube([hip + Vector((0, 0.0, 0.04)), hip.lerp(knee, 0.85) + Vector((s * 0.012, 0, 0)), knee.lerp(ankle, 0.5), ankle + Vector((0, 0, 0.012))],
+                          [0.044 * c, 0.05 * c, 0.036 * c, 0.016 * kf], n=7), pale))
+        # its trousers, in its Path's colour: two rows of feathers hanging round the shank to the ankle
+        tr, tr2 = None, None
+        for k_ in range(7):
+            a = 2 * math.pi * (k_ + 0.5) / 7
+            o = Vector((math.cos(a), math.sin(a), 0))
+            b0 = hip.lerp(knee, 0.9) + o * 0.046 * c
+            tr = g.merge(tr, g.blade(b0, knee.lerp(ankle, 0.6) + o * 0.05 * c, 0.06 * c, normal=o, belly=0.5))
+            a += math.pi / 7
+            o = Vector((math.cos(a), math.sin(a), 0))
+            b0 = knee.lerp(ankle, 0.42) + o * 0.034 * c
+            tr2 = g.merge(tr2, g.blade(b0, knee.lerp(ankle, 1.02) + o * 0.036 * c, 0.05 * c, normal=o, belly=0.45))
+        li += [(tr, mat("accent_dark"), True), (tr2, mat("accent"), True)]
+        li.append((g.tube([ankle, foot + Vector((0, 0.006, 0.006 * kf))], [0.0125 * kf, 0.011 * kf], n=6), leg, False))
+        li.append((g.ico(ankle, 0.02 * kf, sub=1), leg, False))
+        sc = None
+        for k_ in range(6):
+            q = ankle.lerp(foot, 0.14 + 0.135 * k_)
+            sc = g.merge(sc, g.box(q + Vector((0, -0.0115 * kf, 0)), (0.021 * kf, 0.008 * kf, tarsus * 0.085)))
+        li.append((sc, mat("horn_ridge"), False))
+        toes, claws = None, None
+        for dx, dy in ((s * 0.55, 0.83), (0.0, 1.0), (-s * 0.5, 0.86), (-s * 0.12, -0.8)):
+            d = Vector((dx, -dy, 0)).normalized()
+            Lt = (0.066 if dy > 0 else 0.042) * kf * (1.15 if dx == 0 else 1.0)
+            k1 = foot + d * Lt * 0.55 + Z * 0.004 * kf
+            tip = foot + d * Lt - Z * 0.003 * kf
+            toes = g.merge(toes, g.tube([foot + Z * 0.004 * kf, k1, tip], [0.0115 * kf, 0.0095 * kf, 0.008 * kf], n=5))
+            if "sickle" in grown and dx * s < 0 and dy > 0:
+                # the inner toe is carried clear of the ground, and its claw is a hook as long as the toe: a seriema's, and it is for the back of a leg
+                sz = grown["sickle"] * kf
+                b0 = k1 + Z * 0.012 * kf
+                claws = g.merge(claws, g.tongue([b0, b0 + d * 0.028 * sz + Z * 0.05 * sz, b0 + d * 0.075 * sz + Z * 0.042 * sz, b0 + d * 0.098 * sz - Z * 0.012 * sz],
+                                                [0.022 * sz, 0.02 * sz, 0.013 * sz, 0.001], thick=0.7, normal=Z))
+                continue
+            claws = g.merge(claws, g.tongue([tip, tip + d * 0.02 * kf + Z * 0.01 * kf, tip + d * 0.04 * kf - Z * (tip.z - 0.002)], [0.014 * kf, 0.011 * kf, 0.001], thick=0.7, normal=Z))
+        li += [(toes, leg, False), (claws, talon, False)]
+        names = [n_ + "." + tag for n_ in LEG_BONES]
+        joints = [hip * K, knee * K, ankle * K, foot * K]
+        _lay(r, "leg_" + tag.lower(), li, Matrix.Scale(K, 4), lambda p, names=names, joints=joints: _chain_w(names, joints, p, soft=0.16))
+        feet[tag] = foot * K
+    return feet
+
 
 def harrier(form_id, level, spec, base):
-    """The Harrier and its Finals: a coursing bird-beast, lean and deep in the chest on long
-    bare legs, a hooked bill, a crest from brow to shoulder, its wings half out for balance,
-    a fan of feathers for a tail. It runs with the wolf's clips, as beast-ground-hunter does."""
-    bk = GL.bk
+    """The Harrier and its Finals: a hawk that hunts on foot. `stance` is how it stands
+    (STANCES); `build` is the Hawk's; `crest` swept, quills or fan; `wings` folded, tucked or
+    half (half out for balance: the game moves them); `tail` the Hawk's; `tufts`; `grown`
+    sickle, brambles; `track` how wide it stands."""
     opt, each = GL.opt, GL.each
     _, r = kit._wolf()
-    GL._weld(r)
-    c = PALETTE
-    r.recolor("Main", "feather_dark", c["feather_dark"][0], rough=0.9)
-    r.recolor("Main_Light", "feather_pale", c["feather_pale"][0], rough=0.85)
-    r.recolor("Eyes_Black", "field_eyes", (0.03, 0.03, 0.03), rough=0.3, emission=(1, 1, 1), strength=3.0)
-    r.recolor("Nose", "beak", c["beak"][0], rough=0.4)
-    head = r.family("Head", "Ear1.L", "Ear1.R")
-    r.leg_length(-0.45)
-    r.leg_girth(0.74)
-    top = r.top(r.bone("Torso2").y)
-    r.scale(bk.TORSO, (0, 0, top), (0.82, 1.0, 0.86))
-    r.scale_along(head, r.bone("Neck3"), r.bone("Head") - r.bone("Neck3"), 1.25)
-    r.scale(head, r.bone("Neck3"), (0.84, 1.0, 0.9))
-    tufts = opt(spec.get("tufts"))
-    for i, ear in enumerate(("Ear1.L", "Ear1.R")):
-        r.scale(r.family(ear), r.bone(ear), 0.35 if not tufts[0] else (0.5, 1.0, 1.5 * tufts[1]))
-    if tufts[0]:
-        # one ear-tuft always turned to the undergrowth
-        r.rotate(r.family("Ear1.R"), r.bone("Ear1.R"), Y, -1.1)
-    GL.stage(r, level)
-    GL.build(r, spec.get("build", {}))
-    # the wolf's tail goes; a fan of feathers stands in its place
-    r.lengthen_chain(r.family("Tail1"), [], 0.28)
-    r.scale(r.family("Tail1"), r.bone("Tail1"), (0.55, 1.0, 0.55))
-    r.settle()
-    kit._wolf_marks(r, ("feather_dark", "feather_pale"), ("socks", "mask", "saddle", "tailtip"))
-    A = GL.Anat(r)
-    spots = GL._spots(r, A)
-    add = lambda r_, name, geo, weights, material: GL._add(r_, name, geo, weights, material, smooth=material.name.startswith(SOFT))  # noqa: E731
+    r.arm.data.pose_position = "REST"       # built at rest: what rides a bone is put where the bone rests
+    bpy.context.view_layer.update()
+    _strip(r)
+    stance = opt(spec.get("stance", "upright"))[0] or "upright"
+    pitch, angles = STANCES[stance]
+    build = dict(GROUND)
+    for k_, v in spec.get("build", {}).items():
+        build[k_] = build.get(k_, 1.0) * v if k_ in HAWK_TIMES else v
+    build["pitch"] = pitch
+    B = Bird(level, {"build": build, "pose": "perch"}, angles=angles)
+    b = B.b
+    h, L = b["head"], b["legs"]
     dark, mid, pale = mat("feather_dark"), mat("feather_mid"), mat("feather_pale")
-    # the bill: hooked over the muzzle, and the muzzle its colour
-    n = A.nose
-    GL._paint(r, lambda p, nm: p.y < n.y + 0.12, mat("beak"))
-    kb = num(spec.get("bill", 1.0))
-    upper = g.tongue([(0, n.y + 0.36, n.z + 0.13), (0, n.y + 0.04, n.z + 0.09), (0, n.y - 0.1 * kb, n.z - 0.03)], [0.26, 0.22, 0.09], thick=0.75, normal=(0, 0, 1))
-    hook = g.tongue([(0, n.y - 0.07 * kb, n.z - 0.02), (0, n.y - 0.15 * kb, n.z - 0.13), (0, n.y - 0.1 * kb, n.z - 0.27 * kb)], [0.1, 0.07, 0.01], thick=0.8, normal=(0, -1, 0.3))
-    add(r, "bill", upper, "Head", mat("beak"))
-    add(r, "bill_hook", hook, "Head", mat("talon"))
-    # the crest: feathers down the midline from the brow to the shoulders, the tallest on the crown
-    ksz = num(spec.get("crest", 1.0))
-    crest, ctip = None, None
-    hb = A.head
-    for y, Ln in ((hb.y - 0.12, 0.3), (hb.y + 0.1, 0.56), (A.n3.y, 0.52), (A.n2.y, 0.44), (A.n1.y, 0.36), (A.t3.y, 0.28)):
-        z = r.top(y, half_width=0.12) - 0.05
-        for dx in (-0.07, 0.0, 0.07):
-            b0 = Vector((dx, y, z))
-            t0 = b0 + Vector((dx * 1.5, Ln * 0.75, Ln * 0.72)) * ksz
-            crest = g.merge(crest, g.blade(b0, t0, 0.16, normal=(dx * 4, -0.5, 1), belly=0.4))
-            ctip = g.merge(ctip, g.blade(b0.lerp(t0, 0.76), b0.lerp(t0, 1.04), 0.1, normal=(dx * 4, -0.5, 1), belly=0.4, thick=0.02))
-    add(r, "crest", crest, "Neck3", mid)
-    add(r, "crest_tips", ctip, "Neck3", pale if level < 4 else field("tips", 2.2))
-    # the wings, half out for balance
-    kw = num(spec.get("wings", 1.0)) or 1.0
-    for s, tag in ((1, "l"), (-1, "r")):
-        root = Vector((s * (r.side(A.t3.y, A.withers - 0.3) + 0.02), A.t3.y + 0.05, A.withers - 0.28))
-        el = root + Vector((s * 0.34, 0.2, 0.2)) * kw
-        wr = root + Vector((s * 0.52, 0.78, 0.1)) * kw
-        tip = root + Vector((s * 0.5, 1.25, -0.1)) * kw
-        add(r, "wingbone_" + tag, g.tube([root, el, wr, tip], [0.09, 0.075, 0.055, 0.02], n=5), "Torso3", dark)
-        sec, prim, bar = None, None, None
-        nrm = Vector((s * 0.8, 0, 0.6))
-        for i in range(7):
-            t = i / 6.0
-            b0 = root.lerp(el, t * 2) if t < 0.5 else el.lerp(wr, t * 2 - 1)
-            Ln = (0.62 + 0.25 * math.sin(t * math.pi)) * kw
-            sec = g.merge(sec, g.blade(b0, b0 + Vector((s * 0.05, 0.55, -0.82)).normalized() * Ln, 0.3 * kw, normal=nrm, belly=0.55, thick=0.03))
-            bar = g.merge(bar, g.blade(b0 + Vector((0, 0.06, -0.3 * kw)), b0 + Vector((0, 0.1, -0.46 * kw)), 0.26 * kw, normal=nrm, belly=0.5, thick=0.04))
-        for i in range(5):
-            b0 = wr.lerp(tip, i / 5.0)
-            d = Vector((s * (0.1 - 0.04 * i), 0.92, -0.38 + 0.06 * i)).normalized()
-            prim = g.merge(prim, g.blade(b0, b0 + d * (0.95 + 0.1 * i) * kw, 0.2 * kw, normal=nrm, belly=0.55, thick=0.03))
-        add(r, "wing_sec_" + tag, sec, "Torso3", mid)
-        add(r, "wing_bar_" + tag, bar, "Torso3", pale)
-        add(r, "wing_prim_" + tag, prim, "Torso3", dark)
-    # the tail's fan
-    tb = r.bone("Tail1")
-    fan, band_ = None, None
-    kt = num(spec.get("fan", 1.0)) or 1.0
-    for i in range(7):
-        a = math.radians(-36 + 12 * i)
-        d = Vector((math.sin(a), math.cos(a), 0.12 - 0.02 * abs(i - 3)))
-        bl = g.blade(tb, tb + d * 1.25 * kt, 0.3, normal=(0, 0, 1), belly=0.7)
-        fan = g.merge(fan, bl)
-        band_ = g.merge(band_, g.blade(tb + d * 1.0 * kt, tb + d * 1.28 * kt, 0.24, normal=(0, 0, 1), belly=0.4, thick=0.03))
-    add(r, "tail_fan", fan, "Tail1", mid)
-    add(r, "tail_band", band_, "Tail1", pale)
-    # long bare legs, feathered to the hock, and hooked claws
-    GL._legs_painted(r, A, 0.95, mat("beak"))
-    for tag, foot, bone in GL.FEET:
-        f = r.bone(foot)
-        cl = None
-        for dx in (-0.09, 0.0, 0.09):
-            cl = g.merge(cl, g.tongue([(f.x + dx, f.y - 0.1, 0.12), (f.x + dx * 1.3, f.y - 0.3, 0.17), (f.x + dx * 1.4, f.y - 0.42, 0.02)], [0.05, 0.04, 0.004], thick=0.7, normal=(0, 0, 1)))
-        add(r, "claws_" + tag, cl, bone, mat("talon"))
-        up = r.bone({"fl": "FrontUpperLeg.L", "fr": "FrontUpperLeg.R", "bl": "BackUpperLeg.L", "br": "BackUpperLeg.R"}[tag])
-        tr = None
-        for k in range(5):
-            a = 2 * math.pi * k / 5
-            b0 = Vector((up.x + math.cos(a) * 0.1, up.y + 0.05 + math.sin(a) * 0.12, up.z - 0.1))
-            tr = g.merge(tr, g.blade(b0, b0 + Vector((math.cos(a) * 0.05, math.sin(a) * 0.05, -0.42)), 0.2, normal=(math.cos(a), math.sin(a), 0.2), belly=0.45))
-        add(r, "trousers_" + tag, tr, {"fl": "FrontUpperLeg.L", "fr": "FrontUpperLeg.R", "bl": "BackUpperLeg.L", "br": "BackUpperLeg.R"}[tag], pale)
+    # where it stands: its hips over its feet, at the height its legs carry them, and the
+    # whole of it brought to the kit's height by the crown of its head (one that carries its
+    # head low is as big as its legs make it)
+    femur, tibia, tarsus, pad = 0.07, 0.19 * L, 0.25 * L, 0.012 * b["feet"]
+    hipz = pad + 0.98 * tarsus + 0.866 * tibia + femur
+    R = Matrix.Rotation(-B.pitch, 4, "X")
+    h0 = R @ B.L(BELLY, 0, 0.02, -0.4 * B.r[BELLY][1])
+    MU = Matrix.Translation(Vector((0, 0.03 - h0.y, hipz - h0.z))) @ R
+    crown = (MU @ B.L(HEAD, 0, 0, B.r[HEAD][1])).z
+    K = STAND / max(crown, hipz * 1.5)
+    B.M = Matrix.Scale(K, 4) @ MU
+    B.size = K
+    W = B.W
+    hx = 0.5 * B.r[BELLY][0]
+    wide = float(spec.get("track", 1.0))
+    legs = {}
+    for s, tag in ((1, "L"), (-1, "R")):
+        hip = Vector((s * hx, 0.03, hipz))
+        knee = hip + Vector((s * 0.014, -0.085, -femur))
+        ankle = knee + Vector((s * 0.004, 0.5 * tibia, -0.866 * tibia))
+        foot = Vector((s * (hx + 0.028) * wide, ankle.y - 0.2 * tarsus, pad))
+        legs[tag] = (hip, knee, ankle, foot)
+    # the wolf's bones, stood as the bird stands
+    r.scale([], (0, 0, 0), STAND / 2.6, spatial=True)
+    tail_dir = B.Wd(-B.T[0])
+    tail_len = 0.36 * b["tail"] * K
+    places = {"Back": W(B.C[RUMP]), "Torso": W(B.C[BELLY]), "Torso2": W(B.C[CHEST]), "Torso3": W(B.C[SHOULDER]),
+              "Neck1": W(B.C[SHOULDER].lerp(B.C[NECK], 0.5)), "Neck2": W(B.C[NECK]), "Neck3": W(B.C[NAPE]), "Head": W(B.C[HEAD])}
+    for i in range(1, 9):
+        places["Tail%d" % i] = W(B.C[0]) + tail_dir * tail_len * (i - 1) / 4.0
+    wing_root = {}
+    for s, tag in ((1, "L"), (-1, "R")):
+        hip, knee, ankle, foot = [p * K for p in legs[tag]]
+        places.update({"BackShoulder." + tag: hip, "BackLeg." + tag: hip, "BackUpperLeg." + tag: knee, "BackLowerLeg." + tag: ankle,
+                       "IKBackLeg." + tag: foot, "FFB." + tag: foot + Vector((0, -0.03, 0))})
+        sh = W(B.skin(SHOULDER, math.radians(90 - s * 55), 0.92))
+        wing_root[tag] = sh
+        places.update({"FrontShoulder." + tag: sh, "FrontUpperLeg." + tag: sh, "FrontLowerLeg." + tag: sh + Vector((0, 0.04, -0.04)),
+                       "IKFrontLeg." + tag: sh + Vector((0, 0.08, -0.08)), "FF." + tag: sh + Vector((0, 0.06, -0.09))})
+        for i in range(1, 5):
+            places["Ear%d.%s" % (i, tag)] = W(B.L(HEAD, s * 0.04 * h, 0.0, (0.04 + 0.01 * i) * h))
+    _stand_bones(r, places)
+    spine_j = [places[n_] for n_ in SPINE_BONES] + [W(B.C[BILL])]
+    spine_w = lambda p: _chain_w(SPINE_BONES, spine_j, p)  # noqa: E731
+    tail_j = [places["Tail%d" % i] for i in range(1, 6)]
+    tail_w = lambda p: _chain_w(TAIL_BONES, tail_j, p)  # noqa: E731
+    # the body, the neck and the head as one skin: dark above, pale below, the hood a marking
+    n = 8
+    rings = [[B.C[i] + X * math.cos(2 * math.pi * k_ / n + math.pi / n) * B.r[i][0] + B.U[i] * math.sin(2 * math.pi * k_ / n + math.pi / n) * B.r[i][1] for k_ in range(n)] for i in range(len(B.C))]
+    geo = g.loft(rings)
+    verts = [W(p) for p in geo[0]]
+    GL._add(r, "body", (verts, list(geo[1])), [spine_w(p) for p in verts], dark, smooth=True)
+    me = r.mesh.data        # (nothing of the wolf's is left in its slots: the skin is the first)
+    me.materials.clear()
+    me.materials.append(dark)
+    for p in me.polygons:
+        p.material_index = 0
+    sides = (len(B.C) - 1) * n
+    kit.paint(r.mesh, lambda c_, nm, i: i < sides and i // n <= NECK and i % n in (4, 5, 6), pale)
+    kit.paint(r.mesh, lambda c_, nm, i: i < sides and i // n >= NECK and i % n not in (4, 5, 6), mark("hood", dark))
+    items, head_items, tail_items = [], [], []
+    bird_feathers(B, items, bool(spec.get("sleek")), 0.0)
+    # the neck's hackles: three rows lying down it, dark behind and pale at the throat
+    for s0, s1, t, Ln in ((SHOULDER, NECK, 0.35, 0.085), (NECK, NECK, 0.0, 0.075), (NECK, NAPE, 0.55, 0.06)):
+        for i in range(6):
+            a = 2 * math.pi * (i + 0.5) / 6
+            base = B.skin(s0, a, 0.97).lerp(B.skin(s1, a, 0.97), t)
+            Tt = B.T[s0].lerp(B.T[s1], t).normalized()
+            d = B.out(s0, a).lerp(B.out(s1, a), t).normalized()
+            items.append((g.blade(base + Tt * 0.02, base - Tt * Ln * b["neck"] ** 0.5 + d * 0.012, 0.05 * b["chest"] ** 0.5, normal=d, belly=0.5), dark if math.sin(a) > -0.3 else pale))
+    # the face is the Hawk's, with bare skin about the eye in its Path's colour
+    estyle, esize = opt(spec.get("eyes"))
+    bird_head(B, head_items, None, 1.0, estyle, esize or 1.0)
+    skin_ = None
+    for s in (1, -1):
+        skin_ = g.merge(skin_, g.ico((s * 0.044 * h, -0.03 * h, 0.0), 0.03 * h, sub=1, scale=(0.34, 1.25, 0.85)))
+    head_items.append((B.at(HEAD, skin_), mat("accent_light"), True))
+    for style, size in each(spec.get("crest")):
+        harrier_crest(B, head_items, style, size, level)
+    for style, size in each(spec.get("tufts")):
+        # ear-tufts; turned: one of them always to the undergrowth
+        tf = None
+        for s in (1, -1):
+            b0 = Vector((s * 0.046 * h, 0.0, 0.04 * h))
+            d = Vector((s * 0.4, 0.3, 0.85)) if not (style == "turned" and s < 0) else Vector((s * 1.0, -0.1, 0.25))
+            tf = g.merge(tf, g.blade(b0, b0 + d.normalized() * 0.11 * size * h, 0.04 * h, normal=(0, -1, 0.2), belly=0.4))
+        head_items.append((B.at(HEAD, tf), dark))
+    tstyle, tsize = opt(spec.get("tail", "long"))
+    bird_tail(B, tail_items, tstyle or "long", tsize or 1.0)
+    # the wings: folded along its sides, or half out for balance
+    tips = spec.get("tips")
+    if tips is None:
+        tips = {1: 0, 2: 0, 3: 3, 4: 9}[min(4, max(1, level))]
+    wstyle, wsize = opt(spec.get("wings", "folded"))
+    late = []
+    wrist = {tag: p + Vector(((1 if tag == "L" else -1) * 0.02, 0.06, -0.02)) for tag, p in wing_root.items()}
+    if wstyle == "half":
+        for sg, tag in ((1, "L"), (-1, "R")):
+            ob = bird_wing(B, "round", 0.7 * wsize, sg, tips, wing_pitch=1.0, dihedral=float(spec.get("dihedral", -0.55)), sweep=float(spec.get("sweep", 0.7)))
+            ob.name = "glide_wing_" + tag.lower()
+            late.append((ob, "Torso3"))
+            wrist[tag] = wing_root[tag] + Vector((sg * 0.12, 0.1, 0.0)) * (K / 0.6)
+    else:
+        bird_folded(B, items, 1.0 if wstyle == "tucked" else 0.0, wsize, min(3, tips))
     for style, size in each(spec.get("grown")):
-        if style == "sickle":
-            # it goes for the back of the leg: a great hooked claw carried clear of the ground on each hind foot
-            for tag, foot, bone in GL.FEET[2:]:
-                f = r.bone(foot)
-                s = 1 if f.x > 0 else -1
-                b0 = Vector((f.x - s * 0.1, f.y - 0.02, 0.2))
-                geo = g.tongue([b0, b0 + Vector((-s * 0.06, -0.22, 0.34)) * size, b0 + Vector((-s * 0.08, -0.5, 0.22)) * size, b0 + Vector((-s * 0.08, -0.6, -0.08)) * size], [0.1, 0.085, 0.06, 0.006], thick=0.7, normal=(0, 0.4, 1))
-                add(r, "sickle_" + tag, geo, bone, mat("talon"))
-        elif style == "brambles":
-            # burrs in its breast feathers, and the bramble it came through still on its back
+        if style == "brambles":
+            # burrs in its breast feathers, and the bramble it came through still across its back
             burr = None
             for i in range(9):
-                a = i * 2.39996
-                p = Vector((0.2 * math.cos(a) * (0.5 + 0.5 * (i % 3) / 2), A.chest_y + 0.02 + 0.05 * (i % 2), A.sh.z + 0.05 + 0.28 * math.sin(a)))
-                burr = g.merge(burr, g.ico(p, 0.065 * size, sub=0))
-            add(r, "burrs", burr, "Torso3", mat("bark_thorn"))
-            for j, sx in enumerate((1, -1)):
-                pts = [Vector((sx * 0.3, A.t3.y + 0.1, A.withers - 0.2)), Vector((sx * 0.12, A.t3.y + 0.5, A.withers + 0.22 * size)), Vector((-sx * 0.2, A.t2.y + 0.3, A.withers + 0.1)), Vector((-sx * 0.42, A.t1.y + 0.3, A.withers - 0.3))]
-                geo = g.tube(pts, [0.035, 0.03, 0.025, 0.012], n=5)
-                th, lf = None, None
-                for k in range(8):
-                    t = (k + 0.5) / 8.0
-                    q = pts[0].lerp(pts[1], t * 3) if t < 1 / 3 else (pts[1].lerp(pts[2], t * 3 - 1) if t < 2 / 3 else pts[2].lerp(pts[3], t * 3 - 2))
-                    d = Vector((math.cos(k * 2.4), math.sin(k * 1.7), 0.8)).normalized()
-                    th = g.merge(th, g.cone(q, q + d * 0.14, 0.022, n=4))
-                    if k % 3 == 0:
-                        lf = g.merge(lf, g.blade(q, q + Vector((d.x, d.y, 0.3)).normalized() * 0.3, 0.16, normal=(0, 0, 1), belly=0.5))
-                add(r, "bramble_%d" % j, g.merge(geo, th), GL._spine_w(r, g.merge(geo, th)), mat("bark_thorn"))
-                add(r, "bramble_leaf_%d" % j, lf, GL._spine_w(r, lf), mat("leaf"))
-        elif style == "low":
-            pass
-    k = STAND / A.skull
-    r.uniform(k)
-    sockets = {name: kit.bone_socket(r.arm, name, bone, Vector(at) * k, rot(k) if callable(rot) else rot) for name, (bone, at, rot) in spots.items()}
+                a = math.radians(-150 + 15 * i)
+                si = CHEST if i % 2 else BELLY
+                burr = g.merge(burr, g.ico(B.skin(si, a, 1.04) + B.T[si] * (0.02 * (i % 3) - 0.02), 0.013 * size, sub=0))
+            items.append((burr, mat("bark_thorn"), False))
+            for sx in (1, -1):
+                at = lambda si, deg, k_=1.13: B.skin(si, math.radians(90 + sx * (deg - 90)), k_)  # noqa: E731
+                pts = [at(SHOULDER, 0, 1.2), at(SHOULDER, 50), at(CHEST, 95), at(CHEST if sx > 0 else BELLY, 140), at(BELLY, 185, 1.1)]
+                th, lf = g.tube(pts, [0.007, 0.006, 0.006, 0.005, 0.003], n=5), None
+                for k_ in range(8):
+                    t = (k_ + 0.5) / 8.0 * (len(pts) - 1)
+                    q = pts[int(t)].lerp(pts[min(len(pts) - 1, int(t) + 1)], t - int(t))
+                    d = (q - B.C[CHEST]).normalized() + Vector((math.cos(k_ * 2.4), math.sin(k_ * 1.7), 0)) * 0.6
+                    th = g.merge(th, g.cone(q, q + d.normalized() * 0.028 * size, 0.005, n=4))
+                    if k_ % 3 == 1:
+                        lf = g.merge(lf, g.blade(q, q + d.normalized() * 0.06 * size, 0.034, normal=(q - B.C[CHEST]).normalized(), belly=0.5))
+                items += [(th, mat("bark_thorn"), False), (lf, mat("leaf"))]
+    _lay(r, "dress", items, B.M, spine_w)
+    _lay(r, "head", head_items, B.M, "Head")
+    _lay(r, "tail", tail_items, B.M, tail_w)
+    feet = harrier_legs(B, r, spec, legs, tarsus, K)
+    # the sockets, each on the bone that carries its place
+    nr = B.r[NECK]
+    Rn = (B.M.to_3x3().normalized() @ Matrix((X, -B.T[NECK], B.U[NECK])).transposed())
+    table = {
+        "socket_head": ("Head", W(B.L(HEAD, 0, 0, B.r[HEAD][1])), None), "socket_eyes": ("Head", W(B.L(HEAD, 0, -0.057 * h, 0.006 * h)), None),
+        "socket_mouth": ("Head", W(B.L(HEAD, 0, -0.083 * h, -0.016 * h)), None), "socket_grip": ("Head", W(B.L(HEAD, 0, -0.1 * h, -0.03 * h)), kit.ACROSS_MOUTH),
+        "socket_throat": ("Neck2", W(B.L(NECK, 0, 0, -nr[1])), None), "socket_light": ("Torso3", W(B.L(SHOULDER, 0, 0, -B.r[SHOULDER][1] - 0.02)), None),
+        "socket_back": ("Torso3", W(B.L(SHOULDER, 0, 0.04, B.r[SHOULDER][1])), None), "socket_body": ("Torso2", W(B.L(CHEST, 0, 0, -B.r[CHEST][1])), None),
+        "socket_tail": ("Tail1", W(B.C[0]), None),
+        "socket_arm_l": ("Torso3", W(B.L(SHOULDER, B.r[SHOULDER][0], 0, 0.3 * B.r[SHOULDER][1])), None),
+        "socket_arm_r": ("Torso3", W(B.L(SHOULDER, -B.r[SHOULDER][0], 0, 0.3 * B.r[SHOULDER][1])), None),
+        "socket_collar": ("Neck2", W(B.C[NECK]), Rn @ Matrix.Diagonal((nr[0] * K * 1.12 / 0.1, 1.0, nr[1] * K * 1.12 / 0.1))),
+        "socket_limb_fl": ("Torso3", wrist["L"], None), "socket_limb_fr": ("Torso3", wrist["R"], None),
+        "socket_limb_bl": ("BackLowerLeg.L", feet["L"] + Vector((0, 0, 0.03)), None), "socket_limb_br": ("BackLowerLeg.R", feet["R"] + Vector((0, 0, 0.03)), None),
+        "socket_hand_l": ("BackLowerLeg.L", feet["L"] + Vector((0, -0.02, 0.03)), kit.HAND_ON_PAW_L), "socket_hand_r": ("BackLowerLeg.R", feet["R"] + Vector((0, -0.02, 0.03)), kit.HAND_ON_PAW_R),
+    }
+    sockets = {name: kit.bone_socket(r.arm, name, bone, at, rot) for name, (bone, at, rot) in table.items()}
     sockets["ref_top"] = kit.free_socket("ref_top", (0, 0, STAND))
+    # what the game moves by its name rides its bone
+    for i, (ob, bone) in enumerate(late):
+        at = Matrix.Translation(ob.matrix_world.translation.copy())
+        ob.parent = r.arm
+        ob.parent_type = "BONE"
+        ob.parent_bone = bone
+        bpy.context.view_layer.update()
+        ob.matrix_world = at
+        sockets["piece_%d" % i] = ob
     GL.export(r, sockets, os.path.join(GL.OUT, form_id + ".glb"))
 
 
