@@ -388,3 +388,26 @@ played the arc); barks stay as floating text. Still to be played rather than dec
     flame; (e) a family's weak forms are listed at the end of its section; (f) the kin's
     grey of age is paler than the Wolf's.
 
+85. **The second pass on the lines** (owner's direction, 2026-11-11; mine to build;
+    `docs/genius-lines.md`, "The second pass"). The readings taken, each yours to overrule:
+    (a) **"A few more companion forms" is three new companions**, each a whole line: the
+    **Moth** (a magical creature, a Lookout: in Greek one word is both the soul and the
+    moth, and the game is lamplit), the **Octopus** (a monster, a Keeper: it has hands
+    enough, and it is the cleverest thing that is nothing like us) and the **Carp** (an
+    animal, a Bulwark: it holds its place in the current, and one of its Paths climbs
+    toward the dragon as the old story of the gate has it). That makes sixteen companions:
+    four Bulwarks and three of every other role. Which three, their classes and their
+    roles are all open. (b) **"50% graphics precision" is read as half again as precise**
+    as the first pass (faces first, then hands and feet, outlines, surface), not as a
+    setting to render at half quality; if it meant the other, say so. (c) **Every Path
+    has a colour of its own**, from eight ramps that only a genius may wear and that may
+    be more saturated (0.72) than the rest of the world (0.5): the world stays muted so
+    that a soul can carry colour. The 66 colours chosen are in that section's table; any
+    of them is one word in a base's file. (d) **A Coat is worn as a mantle**, not as a
+    whole coat: the whole coat is still what stands at the rite, the Gate and on its page.
+    (e) **The Drake is to be a true drake** (low, long, splayed, winged at the shoulder),
+    and a fish and an octopus swim in the air on purpose. (f) **Bodies move**: every
+    companion blinks; wings beat, lamps and tails sway, flames gutter. (g) A line is held
+    to numbers (`tools/genius-line-check.py`): outlines too alike, forms too dark, Paths
+    told apart by colour; the thresholds are mine.
+

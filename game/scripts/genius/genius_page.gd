@@ -309,6 +309,14 @@ func _tree_section(v: Control, g: Genius) -> void:
 		col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		col.add_theme_constant_override("separation", 2)
 		cols.add_child(col)
+		# the Path's own colour, over its column (docs/genius-lines.md, "A Path's colour")
+		var path_col := GeniusBody.accent_of(String(path["id"]), "accent_light")
+		if path_col.a > 0.0:
+			var band := ColorRect.new()
+			band.color = path_col
+			band.custom_minimum_size = Vector2(0, 4)
+			band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			col.add_child(band)
 		_tree_form(col, path, 0, here, road, next, play)
 		for prong_id in path["children"]:
 			var prong := Data.form(String(prong_id))
