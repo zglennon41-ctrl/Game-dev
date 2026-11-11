@@ -32,10 +32,16 @@ import genius_kit as kit  # noqa: E402
 from genius_kit import mat, field, PALETTE  # noqa: E402
 
 GL = None           # genius_lines, whichever way it was started (set in register)
-REF = 0.62          # how high the game's measure of it stands over a fish of size 1
-N = 14              # points round the body
+REF = 0.43          # how high the game's measure of it stands over a fish of size 1 (a Path's carp is 0.7 m long)
 FLOAT = 0.17        # how far the lowest of it hangs above its own origin
 YAW = -0.3          # it never hangs dead ahead: a fish holding station is always a little across
+# The points round the body, from the keel of the belly up its left side, over the back and
+# down its right: sixteen, with one narrow face on each side where the line runs by which a
+# fish feels the current (the field shows there, when it is old enough).
+_SIDE = [-math.pi / 2, -1.08, -0.6, -0.16, 0.04, 0.2, 0.62, 1.08]
+ANG = _SIDE + [math.pi / 2] + [math.pi - a for a in reversed(_SIDE[1:])]
+N = len(ANG)
+LINE_K = (4, 11)    # the faces of the line: left, right
 
 PALETTE.update({
     # the look's roles for the carp (data/genius-looks.json, beast-carp): its partner's coat
@@ -218,6 +224,7 @@ def obj(name, items, frame=None, parent=None):
     bm = bmesh.new()
     bm.from_mesh(ob.data)
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0003)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)       # the skin is made a face at a time: only whole can it tell its outside
     bm.to_mesh(ob.data)
     bm.free()
     if frame is not None:
@@ -251,13 +258,13 @@ def plate(outline, normal, thick, parity=None):
     return geos if parity else geos[0]
 
 
-def tori(centre, normal, r, thick, n=16, sides=5, arc=1.0, start=0.0):
-    """A ring (or part of one) about a point, facing along normal."""
+def tori(centre, normal, r, thick, n=16, sides=5, arc=1.0, start=0.0, flat=1.0):
+    """A ring (or part of one) about a point, facing along normal; flat squashes it up and down."""
     nrm = V(normal).normalized()
     u = nrm.cross(Z if abs(nrm.z) < 0.9 else X).normalized()
     v = nrm.cross(u).normalized()
     m = max(3, int(n * arc))
-    pts = [V(centre) + (u * math.cos(start + 2 * math.pi * arc * i / m) + v * math.sin(start + 2 * math.pi * arc * i / m)) * r for i in range(m + 1)]
+    pts = [V(centre) + (u * math.cos(start + 2 * math.pi * arc * i / m) + v * (math.sin(start + 2 * math.pi * arc * i / m) * flat)) * r for i in range(m + 1)]
     return g.tube(pts, [thick] * (m + 1), n=sides, caps=arc < 0.999)
 
 
@@ -279,91 +286,131 @@ def _in(t, a, patches, k=1.0):
     return False
 
 
-def painter(spec, fish):
-    """What each face of the skin is made of, from the form's scales and marks: returns
-    (materials, paint(i, k, t, a) -> index)."""
-    names = ["scale", "scale_pale", "fin", "accent", "accent_dark", "accent_light", "accent_pale", "accent2", "accent2_light", "scale_ink", "hide_lip"]
-    mats = [mat(n) for n in names]
+def painter(spec, fish, level):
+    """What the skin is made of, from the form's scales and marks. The skin is laid in scales:
+    a diamond about every other point of it, its front half the coat and its rear half the
+    coat's darker trim, so that the rows show; a mark colours whole scales, in two steps of
+    the Path's colour. The belly and the line of the side are laid plain. Returns (materials,
+    paint(t, a, half, i, k) -> index): t and a the middle of the scale, half "front", "rear",
+    "whole" (the belly) or "line"."""
+    names = ["scale", "scale_pale", "fin", "accent", "accent_dark", "accent_light", "accent_pale", "accent_deep", "accent2", "accent2_light",
+             "accent2_dark", "scale_ink", "hide_lip", "bone_barbel"]
+    mats = [mat(n) for n in names] + [field("line", 1.6)]
     ix = {n: i for i, n in enumerate(names)}
+    ix["field"] = len(names)
     scales = spec.get("scales", "net")
     marks = {m[0]: float(m[1]) for m in GL.each(spec.get("marks"))}
     carry = {m[0]: float(m[1]) for m in GL.each(spec.get("carry"))}
+    lit = (level >= 3 or "line" in marks) and "unlit" not in marks
+    zone = {"coin": (fish.ht * 0.98, 0.64), "none": (2.0, 2.0), "plates": (fish.ht * 1.04, 0.95)}.get(scales, (fish.ht * 1.04, 0.95))
 
-    def paint(i, k, t, a):
+    def paint(t, a, half, i, k):
         s = math.sin(a)
         top = abs(math.atan2(math.sin(a - math.pi / 2), math.cos(a - math.pi / 2)))      # how far round from the back
-        base = "scale"
-        if s < -0.5:
+        if half == "line":
+            if fish.ht * 1.12 < t < 0.94:
+                return ix["field"] if lit else ix["fin"]
+            half = "whole"
+        scaled = zone[0] < t < zone[1] and half != "whole"
+        rear = scaled and half == "rear"
+
+        def two(front, back):
+            return back if rear else front
+
+        base = two("scale", "fin")
+        if half == "whole" and s < -0.55:
             base = "scale_pale"
-        elif scales in ("net", "small", "armour") and fish.ht * 1.05 < t < 0.93 and (i + k) % 2 == 0 and s > -0.5:
-            base = "fin"
-        elif scales == "coin" and fish.ht < t < 0.56 and (i + k) % 2 == 0 and s > -0.3:
-            base = "fin"
-        if scales == "plates" and s < -0.5:
-            base = "scale_pale" if i % 2 else "hide_lip"
-        if "scuff" in carry and t < 0.06:
+            if scales == "plates" and i % 2:
+                base = "bone_barbel"          # a belly in bands, as a dragon's is
+        if "scuff" in carry and t < 0.07:
             base = "scale_pale"
         # the Path's colour
-        if "back" in marks and s > 0.3 and t > 0.04:
-            base = "accent_dark" if (i + k) % 2 or scales == "none" else "accent"
-        if "stripe" in marks and top < 0.34 * marks["stripe"] and 0.12 < t < 0.985:
-            base = "accent"
-        if "bands" in marks and s > -0.35 and any(lo < t < lo + 0.055 for lo in (0.33, 0.47, 0.61, 0.75, 0.87)):
-            base = "accent_dark"
-        if "dash" in marks and 0.3 < t < 0.9 and 0.5 < s < 0.93 and i % 2 == 0:
+        if "back" in marks and s > 0.34 and t > 0.05:
+            base = two("accent_dark", "accent_deep")
+        if "stripe" in marks and top < 0.36 * marks["stripe"] and 0.1 < t < 0.985:
+            base = two("accent", "accent_dark")
+        if "bands" in marks and s > -0.4 and any(lo < t < lo + 0.06 * marks["bands"] for lo in (0.33, 0.47, 0.61, 0.75, 0.87)):
+            base = two("accent_dark", "accent_deep")
+        if "dash" in marks and 0.3 < t < 0.9 and 0.45 < s < 0.95 and i % 2 == 0:
             base = "accent_light"
-        if "shoulder" in marks and fish.ht * 0.8 < t < fish.ht * 1.5 and s > -0.1:
-            base = "accent_dark"
+        if "shoulder" in marks and fish.ht * 0.85 < t < fish.ht * 1.6 and s > -0.2:
+            base = two("accent", "accent_dark")
         if "patches" in marks and _in(t, a, PATCHES, marks["patches"]):
-            base = "accent"
+            base = two("accent", "accent_dark")
         if "faded" in marks and _in(t, a, PATCHES, 1.0):
-            base = "accent_pale"
-        if "saddle" in marks and 0.3 < t < 0.68 and s > 0.1:
+            base = two("accent_pale", "accent_light")
+        if "saddle" in marks and 0.3 < t < 0.7 and s > 0.05:
+            base = two("accent", "accent_dark")
+        if "mask" in marks and t < fish.ht * 0.84 and s > -0.1:
             base = "accent"
-        if "mask" in marks and t < fish.ht * 0.82 and s > -0.05:
-            base = "accent"
-        if "crown" in marks and ((t - fish.ht * 0.52) / 0.062) ** 2 + (top / 0.82) ** 2 < 1.0:
+        if "crown" in marks and ((t - fish.ht * 0.52) / 0.07) ** 2 + (top / 0.9) ** 2 < 1.0:
             base = "accent"
         if "brocade" in marks:
             if _in(t, a, PATCHES, 1.05):
-                base = "accent"
+                base = two("accent", "accent_dark")
             if _in(t, a, PATCHES2, 1.0):
-                base = "accent2"
+                base = two("accent2", "accent2_dark")
             if _in(t, a, PATCHES3, 1.0):
                 base = "scale_ink"
-        if "collar" in marks and fish.ht * 1.0 < t < fish.ht * 1.26:
-            base = "accent"
-        if "spots" in marks and 0.3 < t < 0.92 and -0.2 < s < 0.3 and i % 3 == 0:
+        if "collar" in marks and fish.ht * 1.0 < t < fish.ht * 1.3:
+            base = two("accent", "accent_dark")
+        if "spots" in marks and 0.3 < t < 0.92 and -0.3 < s < 0.34 and i % 3 == 0 and half != "whole":
             base = "accent_light"
-        if "sheen" in marks and -0.45 < s < 0.3 and (i + 2 * k) % 3 == 0 and t > fish.ht:
+        if "sheen" in marks and -0.5 < s < 0.34 and (i + 2 * k) % 3 == 0 and t > fish.ht:
             base = "accent2_light"
-        if "worn" in marks and 0.3 < t < 0.62 and abs(s) < 0.55:
-            base = "accent_pale" if (i + k) % 2 else "accent2_light"
+        if "worn" in marks and 0.3 < t < 0.64 and abs(s) < 0.6:
+            base = "accent_pale" if (i // 2 + k // 2) % 2 else "accent2_light"
         return ix[base]
 
     return mats, paint
 
 
-def skin_piece(name, fish, ts, mats, paint, i0, cap0=True, cap1=True):
+def skin_piece(fish, ts, mats, paint, i0, cap0=True, cap1=True, tuck=0.0):
     """One piece of the body's skin, between two stations: an object's worth of geometry by
-    material. i0: the count of the first ring, so the pattern runs on from piece to piece."""
-    rings = [[fish.skin(t, 2 * math.pi * k / N) for k in range(N)] for t in ts]
+    material. i0: the count of the first ring, so the scales run on from piece to piece.
+    tuck: how far its front end reaches inside the piece before it, narrower, like the joint
+    of a lobster's tail, so that no gap opens where it turns."""
+    rings = [[fish.skin(t, a) for a in ANG] for t in ts]
     by = {}
+
+    def tri(mi, a, b, c):
+        vs, fs = by.setdefault(mi, ([], []))
+        o = len(vs)
+        vs += [a, b, c]
+        fs.append((o, o + 1, o + 2))
+
     for j in range(len(rings) - 1):
-        tm = (ts[j] + ts[j + 1]) / 2.0
+        i = i0 + j
+        t0, t1 = ts[j], ts[j + 1]
         for k in range(N):
-            mi = paint(i0 + j, k, tm, 2 * math.pi * (k + 0.5) / N)
-            vs, fs = by.setdefault(mi, ([], []))
-            o = len(vs)
-            vs += [rings[j][k], rings[j][(k + 1) % N], rings[j + 1][(k + 1) % N], rings[j + 1][k]]
-            fs.append((o, o + 1, o + 2, o + 3))
+            k1 = (k + 1) % N
+            A, B, C, D = rings[j][k], rings[j][k1], rings[j + 1][k1], rings[j + 1][k]
+            am = (ANG[k] + (ANG[k + 1] if k + 1 < N else ANG[0] + 2 * math.pi)) / 2.0
+            if k in LINE_K or math.sin(am) < -0.55:
+                mi = paint((t0 + t1) / 2.0, am, "line" if k in LINE_K else "whole", i, k)
+                tri(mi, A, B, C)
+                tri(mi, A, C, D)
+            elif (i + k) % 2 == 0:        # the rear half of the scale about A, the front half of the one about C
+                tri(paint(t0, ANG[k], "rear", i, k), A, B, D)
+                tri(paint(t1, ANG[k1], "front", i + 1, k1), B, C, D)
+            else:                         # the same of B and of D
+                tri(paint(t0, ANG[k1], "rear", i, k1), A, B, C)
+                tri(paint(t1, ANG[k], "front", i + 1, k), A, C, D)
+    first = rings[0]
+    if tuck:
+        first = [fish.skin(ts[0] - tuck, a, out=0.84) for a in ANG]
+        dark = 2      # the trim: a joint is in shadow
+        for k in range(N):
+            k1 = (k + 1) % N
+            tri(dark, first[k], first[k1], rings[0][k1])
+            tri(dark, first[k], rings[0][k1], rings[0][k])
     items = [(geo, mats[mi], True) for mi, geo in by.items()]
-    for cap, ring, flip in ((cap0, rings[0], True), (cap1, rings[-1], False)):
+    for cap, ring, flip in ((cap0, first, True), (cap1, rings[-1], False)):
         if cap:
             c = sum(ring, Vector((0, 0, 0))) / len(ring)
             vs = [c] + list(ring)
             fs = [((0, 1 + (k + 1) % N, 1 + k) if flip else (0, 1 + k, 1 + (k + 1) % N)) for k in range(N)]
-            items.append(((vs, fs), mats[0], True))
+            items.append(((vs, fs), mats[2 if tuck and flip else 0], True))
     return items
 
 
@@ -499,6 +546,22 @@ def dorsal_fin(fish, style, size, spec, t0, t1):
     return geos
 
 
+def anal_fin(fish, style, size, spec, t):
+    """The single fin under the tail's root: a small fan in the body's own plane."""
+    p, d, side, up = fish.at(t)
+    w, u, dn = fish.girth(t)
+    root = p - up * dn * 0.88
+    Lf = fish.L * (0.2 if style == "veil" else 0.125) * size
+    a, b = _fin_mats(style, spec)
+    out = [root - d * Lf * 0.45]
+    for j in range(6):
+        th = -0.25 + 1.3 * j / 5
+        out.append(root + (d * math.sin(th) - up * math.cos(th)) * Lf * (0.7 + 0.3 * math.sin(j / 5 * math.pi)))
+    out.append(root + d * Lf * 0.5)
+    ga, gb = plate(out, side, fish.L * 0.01, parity=True)
+    return [(ga, a), (gb, b)]
+
+
 def side_fin(fish, style, size, spec, sg, t=None, low=-0.55):
     """A fin of the shoulder (or the belly), made at its root: returns (items, root point)."""
     t = fish.ht * 1.08 if t is None else t
@@ -524,8 +587,10 @@ def side_fin(fish, style, size, spec, sg, t=None, low=-0.55):
         along, across, Lf, wide, m = (outw * 0.75 + d * 0.2 - up * 0.63).normalized(), d, Lf * 1.25, 0.95, 8
     elif style == "foam":
         along, across, wide, m = (outw * 0.7 + d * 0.5 - up * 0.5).normalized(), (d * 0.8 - up * 0.4).normalized(), 0.75, 7
-    else:       # paddle, fan
-        along, across, wide, m = (outw * 0.72 + d * 0.48 - up * 0.5).normalized(), (d * 0.75 - up * 0.45).normalized(), (0.62 if style == "paddle" else 0.85), 7
+    elif style == "belly":      # a fin of the belly: it hangs down and back, its face outward
+        along, across, wide, m = (d * 0.62 - up * 0.74 + outw * 0.26).normalized(), (d * 0.8 + up * 0.56 + outw * 0.1).normalized(), 0.62, 5
+    else:       # paddle, fan: swept back and down, its face to the side and to what is ahead
+        along, across, wide, m = (outw * 0.56 + d * 0.62 - up * 0.55).normalized(), (-outw * 0.1 + d * 0.5 + up * 0.75).normalized(), (0.62 if style == "paddle" else 0.85), 7
     nrm = along.cross(across).normalized()
     rnd = random.Random(5)
     out = [root - across * Lf * 0.1]
@@ -558,19 +623,116 @@ def side_fin(fish, style, size, spec, sg, t=None, low=-0.55):
 # The head: eyes, mouth, whiskers, gills, and what grows on it
 # ======================================================================================
 
+BROWS = {     # how a lid sits over an eye: (its tilt, the front end down if less than none; how far above the middle its edge is; how long)
+    "keen": (-0.34, 0.3, 1.5), "calm": (0.0, 0.5, 1.45), "heavy": (0.14, 0.12, 1.6), "stern": (-0.5, 0.2, 1.6),
+    "mild": (0.16, 0.62, 1.4), "sleepy": (0.05, -0.12, 1.6),
+}
+
+
 def eye(fish, sg, style):
-    """One eye, made about its own middle: the light of it, its pupil. Returns (items, middle)."""
-    t = fish.ht * (0.46 if style != "top" else 0.5)
-    ang = {"top": 1.02, "up": 0.75, "small": 0.3}.get(style, 0.36)
+    """One eye, about its own middle: the light of it, its pupil and the glint on it. Returns
+    (the items, its middle, the way it looks, its radius, the way out of the head there)."""
+    t = fish.ht * (0.5 if style == "top" else 0.46)
+    ang = {"top": 1.0, "up": 0.74, "small": 0.3}.get(style, 0.42 - 0.13 * max(0.0, fish.eye - 1.0))
     a = ang if sg > 0 else math.pi - ang
-    c = fish.skin(t, a, out=0.93)
     p, d, side, up = fish.at(t)
-    r = fish.L * 0.03 * fish.eye * (0.62 if style == "small" else 1.0) * (0.92 if style == "old" else 1.0)
-    look = (side * sg * (0.25 if style == "top" else 0.9) + up * (0.95 if style in ("top", "up") else 0.2) - d * 0.25).normalized()
+    q = fish.skin(t, a)
+    out = (q - p).normalized()
+    r = fish.L * 0.042 * fish.eye * {"small": 0.62, "old": 0.9}.get(style, 1.0)
+    c = q - out * r * (0.4 + 0.12 * max(0.0, fish.eye - 1.0))
+    if style in ("top", "up"):
+        look = (out * 0.75 + up * 0.6 - d * 0.2).normalized()
+    else:
+        look = (out * 0.78 - d * 0.52 + up * 0.14).normalized()        # out, and on ahead: at what is coming
     items = [(g.ico(c, r, sub=2), field("eyes", 3.0), True),
-             (g.ico(c + look * r * 0.68, r * 0.52, sub=1), mat("eye_pupil"), True),
-             (g.ico(c + look * r * 0.98 + up * r * 0.2 + d * r * -0.12, r * 0.14, sub=0), mat("eye_white"), True)]
-    return items, c, look, r
+             (g.ico(c + look * r * 0.5, r * 0.62, sub=2), mat("eye_pupil"), True),
+             (g.ico(c + look * r * 1.0 + up * r * 0.4 + d * r * 0.3, r * 0.17, sub=1), mat("eye_white"), True)]
+    return items, c, look, r, out
+
+
+def eye_setting(fish, sg, spec, c, look, r, out):
+    """What an eye sits in, on the head and still: the dark rim of the socket and the lid over
+    it. The lid is what makes a fish look as if it is thinking: a fish has none, and this is a soul."""
+    p, d, side, up = fish.at(fish.ht * 0.46)
+    items = [(tori(c + out * r * 0.12, out, r * 1.1, r * 0.2, n=14, sides=5), mat("fin"), True)]
+    style = spec.get("brow", {"old": "heavy", "small": None, "top": None}.get(spec.get("eyes", "round"), "calm"))
+    if style and style in BROWS:
+        tilt, edge, length = BROWS[style]
+        fwd = (-d - out * (-d).dot(out)).normalized()
+        e_up = out.cross(fwd)
+        if e_up.dot(up) < 0:
+            e_up = -e_up
+        c1 = (fwd * math.cos(tilt) + e_up * math.sin(tilt)).normalized()
+        c2 = out.cross(c1)
+        if c2.dot(up) < 0:
+            c2 = -c2
+        h = r * 0.46
+        mid = c + c2 * (edge * r + h) + out * r * 0.42
+        M = Matrix.Identity(4)
+        for row in range(3):
+            M[row][0], M[row][1], M[row][2], M[row][3] = c1[row], out[row], c2[row], mid[row]
+        items.append((g.moved(g.ico((0, 0, 0), 1.0, sub=2, scale=(r * length * 0.6, r * 0.5, h)), M), mat("accent_dark" if "brow" in {m[0] for m in GL.each(spec.get("marks"))} else "scale"), True))
+    return items
+
+
+def mouth(fish, spec):
+    """The mouth, on the head: a carp's is thick-lipped and opens forward and down. Returns (items, the middle of it, the way it opens)."""
+    L = fish.L
+    p, d, side, up = fish.at(0.0)
+    w, u, dn = fish.girth(0.03)
+    style = spec.get("mouth", "lips")
+    lipm = mat("accent") if any(m[0] == "lips" for m in GL.each(spec.get("marks"))) else mat("hide_lip")
+    items = []
+    if style == "wide":
+        # a slit across a flat head, a lip above and a lip below, turned up a little at the corners
+        w2 = fish.girth(0.035)[0]
+        for dz, th in ((0.3, 0.017), (-0.55, 0.013)):
+            q = fish.at(0.014)[0] + up * u * dz
+            pts = [q - side * w2 * 1.2 + d * L * 0.03 + up * L * 0.012, q - side * w2 * 0.7 + d * L * 0.006, q - d * L * 0.016, q + side * w2 * 0.7 + d * L * 0.006, q + side * w2 * 1.2 + d * L * 0.03 + up * L * 0.012]
+            items.append((g.tube(spline(pts, 2), L * th, n=6), lipm, True))
+        return items, p - d * L * 0.01, -d
+    gape = style == "gape"
+    r = L * (0.03 if not gape else 0.055) * fish.head
+    nrm = (-d - up * (0.6 if not gape else -0.55)).normalized()
+    c = p - d * L * 0.004 - up * dn * (0.5 if not gape else -0.1)
+    flat = 1.0 if gape else 0.42
+    items.append((tori(c, nrm, r * 1.15, r * 0.52, n=12, sides=6, arc=0.5, start=math.pi, flat=flat), lipm, True))                    # the upper lip
+    items.append((tori(c + d * r * 0.3, nrm, r * 1.0, r * 0.42, n=12, sides=6, arc=0.5, start=0.0, flat=flat), lipm, True))           # the lower
+    items.append((g.ico(c - nrm * r * 0.35, r * 0.85, sub=1, scale=(1.0, 1.0, 1.0 if gape else 0.5)), mat("hide_maw"), True))
+    return items, c, nrm
+
+
+def gill_cover(fish, sg, spec):
+    """The cover of one gill: a curved plate lying on the head behind the eye, its rear edge
+    lifted. It breathes. Returns (items, the point it breathes about)."""
+    ht = fish.ht
+    marks = {m[0] for m in GL.each(spec.get("marks"))}
+    rings = []
+    a0, a1 = -0.95, 0.9
+    m = 6
+    for j in range(m + 1):
+        k = j / m
+        a = lerp(a0, a1, k)
+        aa = a if sg > 0 else math.pi - a
+        bulge = math.sin(k * math.pi) ** 0.6
+        tf, tr = ht * (0.8 + 0.02 * bulge), ht * (0.86 + 0.2 * bulge)
+        rings.append([fish.skin(tf, aa, out=1.0), fish.skin(tr, aa, out=1.075), fish.skin(tr, aa, out=0.97), fish.skin(tf, aa, out=0.93)])
+    pivot = fish.skin(ht * 0.8, 0.0 if sg > 0 else math.pi, out=0.98)
+    return [(g.loft(rings, caps=True), mat("accent" if "cheek" in marks else "scale_pale" if "pale-cheek" in marks else "scale"), True)], pivot
+
+
+def spline(pts, sub=3):
+    """A smooth run through points (Catmull-Rom)."""
+    pts = [V(q) for q in pts]
+    P = [pts[0]] + pts + [pts[-1]]
+    out = []
+    for i in range(1, len(P) - 2):
+        for s in range(sub):
+            x = s / sub
+            out.append(0.5 * ((2 * P[i]) + (P[i + 1] - P[i - 1]) * x + (2 * P[i - 1] - 5 * P[i] + 4 * P[i + 1] - P[i + 2]) * x * x
+                              + (3 * P[i] - P[i - 1] - 3 * P[i + 1] + P[i + 2]) * x * x * x))
+    out.append(pts[-1])
+    return out
 
 
 def barbel_points(fish, sg, style, size, which=0):
@@ -843,7 +1005,7 @@ def build_form(form_id, level, spec, base=None):
     kit.reset()
     fish = Fish(spec)
     L = fish.L
-    mats, paint = painter(spec, fish)
+    mats, paint = painter(spec, fish, level)
     mud = any(s == "mudball" for s, _ in GL.each(spec.get("carry")))
     long_body = fish.shape == "long"
     ts = list(STATIONS) if not long_body else [0.0, 0.008, 0.02, 0.04, 0.06, 0.085, 0.11] + [0.11 + 0.89 * j / 30 for j in range(1, 31)]
@@ -851,52 +1013,37 @@ def build_form(form_id, level, spec, base=None):
     cuts = [min(ts, key=lambda t: abs(t - c)) for c in cuts]
     bounds = [0.0] + cuts + [1.0]
     objects, pieces = [], {}
+    eyes = spec.get("eyes", "round")
     # the head is still; each piece behind it turns on the one before
     prev = None
     count = 0
     for n_piece, (lo, hi) in enumerate(zip(bounds, bounds[1:])):
         seg = [t for t in ts if lo - 1e-9 <= t <= hi + 1e-9]
-        items = skin_piece("skin", fish, seg, mats, paint, count, cap0=n_piece > 0, cap1=True)
+        first = n_piece == 0
+        items = skin_piece(fish, seg, mats, paint, count, tuck=0.0 if first else (0.014 if long_body else 0.035))
         count += len(seg) - 1
-        first, last = n_piece == 0, n_piece == len(bounds) - 2
         if first:
             items += head_grown(fish, spec)
-            # the mouth
-            p, d, side, up = fish.at(0.0)
-            w, u, dn = fish.girth(0.02)
-            mouth = spec.get("mouth", "lips")
-            lipm = mat("accent") if any(m[0] == "lips" for m in GL.each(spec.get("marks"))) else mat("hide_lip")
-            if mouth == "wide":
-                for dz in (0.35, -0.5):
-                    q = fish.at(0.012)[0] + up * u * dz
-                    items.append((g.tube([q - side * w * 1.5, q - d * L * 0.012, q + side * w * 1.5], [L * 0.012, L * 0.016, L * 0.012], n=6), lipm, True))
-            else:
-                r = L * (0.034 if mouth != "gape" else 0.058) * fish.head
-                c = p - d * L * 0.012 - up * dn * (0.5 if mouth != "gape" else 0.1)
-                nrm = (-d - up * (0.45 if mouth != "gape" else -0.5)).normalized()
-                items.append((tori(c, nrm, r, r * 0.42, n=12, sides=6), lipm, True))
-                items.append((g.ico(c - nrm * r * 0.25, r * 0.72, sub=1, scale=(1, 1, 1)), mat("hide_maw"), True))
-                if mouth == "ring":
-                    rc = c + nrm * r * 0.9
-                    pieces_ring = obj("pulse_ring", [(tori(rc, d, L * 0.085, L * 0.014, n=18, sides=6), field("ring", 2.6), True)], frame=at_point(rc))
-                    objects.append(pieces_ring)
-            # the rims its eyes sit in
+            its, mc, mn = mouth(fish, spec)
+            items += its
+            if spec.get("mouth") == "ring":      # what it has been given to keep, held in its lips
+                rc = mc + mn * L * 0.03
+                objects.append(obj("pulse_ring", [(tori(rc, fish.at(0.0)[1], L * 0.085, L * 0.014, n=18, sides=6), field("ring", 2.6), True)], frame=at_point(rc)))
             for sg in (1, -1):
-                its, c, look, r = eye(fish, sg, spec.get("eyes", "round"))
-                items.append((tori(c + look * r * 0.1, look, r * 1.08, r * 0.2, n=12, sides=5), mat("fin"), True))
-                if spec.get("eyes") == "old":
-                    items.append((g.ico(c + up * r * 0.5 + look * r * 0.12, r * 1.02, sub=1, scale=(1, 1, 0.62)), mat("scale"), True))
+                _, c, look, r, out = eye(fish, sg, eyes)
+                items += eye_setting(fish, sg, spec, c, look, r, out)
         # the fin of its back, and the fins of its belly, ride the piece they are on
         dstyle, dsize = (GL.each(spec.get("dorsal")) or [("sail", 1.0)])[0]
         if not mud:
             items += dorsal_fin(fish, dstyle, dsize, spec, max(lo, 0.0), hi)
         fstyle, fsize = (GL.each(spec.get("fins")) or [("paddle", 1.0)])[0]
         if not mud and not long_body:
-            for tt, sz in ((0.5, 0.55), (0.74, 0.5)):
-                if lo < tt <= hi:
-                    for sg in (1, -1):
-                        its, _ = side_fin(fish, "folded" if fstyle == "folded" else ("veil" if fstyle == "veil" else "paddle"), fsize * sz, spec, sg, t=tt, low=-1.05)
-                        items += its
+            if lo < 0.5 <= hi:            # the two fins of the belly
+                for sg in (1, -1):
+                    its, _ = side_fin(fish, "folded" if fstyle == "folded" else ("veil" if fstyle == "veil" else "belly"), fsize * 0.62, spec, sg, t=0.5, low=-1.0)
+                    items += its
+            if lo < 0.76 <= hi and fstyle != "folded":      # and the one behind them
+                items += anal_fin(fish, fstyle, fsize, spec, 0.76)
         if long_body and n_piece in (3, 5):          # a dragon has four limbs of fin
             for sg in (1, -1):
                 its, _ = side_fin(fish, "claw", fsize * 2.2, spec, sg, t=(lo + hi) / 2, low=-0.7)
@@ -910,43 +1057,31 @@ def build_form(form_id, level, spec, base=None):
     tstyle, tsize = (GL.each(spec.get("tail")) or [("fan", 1.0)])[0]
     tail_items = tail_fin(fish, tstyle, tsize, spec)
     F1 = fish.frame(1.0)
-    tail = obj("wag_body_%d" % (len(bounds) - 1), [(g.moved(geo, F1), m) for geo, m in tail_items], frame=F1, parent=prev)
+    tail = obj("wag_body_%d" % (len(bounds) - 2), [(g.moved(geo, F1), m) for geo, m in tail_items], frame=F1, parent=prev)
     objects.append(tail)
-    head = pieces["head"]
     # the eyes blink; the fins of the shoulder glide; the whiskers sway; the gills breathe
     for sg, tag in ((1, "l"), (-1, "r")):
-        its, c, look, r = eye(fish, sg, spec.get("eyes", "round"))
-        if not (mud and sg < 0):
+        its, c, look, r, out = eye(fish, sg, eyes)
+        if not (mud and sg > 0):
             objects.append(obj("blink_eye_" + tag, its, frame=at_point(c)))
         if not mud:
             fstyle, fsize = (GL.each(spec.get("fins")) or [("paddle", 1.0)])[0]
             if fstyle != "claw":
                 its, root = side_fin(fish, fstyle, fsize, spec, sg)
-                objects.append(obj("glide_fin_" + tag, its, frame=at_point(root)))
             else:
                 its, root = side_fin(fish, "claw", fsize * 2.2, spec, sg, t=fish.ht * 1.6, low=-0.7)
-                objects.append(obj("glide_fin_" + tag, its, frame=at_point(root)))
-            # the gill-cover
-            t = fish.ht * 0.98
-            gp = fish.skin(t, 0.0 if sg > 0 else math.pi, out=1.01)
-            p, d, side, up = fish.at(t)
-            w, u, dn = fish.girth(t)
-            gill = g.blade(gp + up * u * 0.55 - d * L * 0.02, gp - up * dn * 0.6 + d * L * 0.03, L * 0.09, thick=L * 0.012, normal=side * sg, belly=0.5)
-            objects.append(obj("pulse_gill_" + tag, [(gill, mat("scale_pale"))], frame=at_point(gp)))
+            objects.append(obj("glide_fin_" + tag, its, frame=at_point(root)))
+            its, pivot = gill_cover(fish, sg, spec)
+            objects.append(obj("pulse_gill_" + tag, its, frame=at_point(pivot)))
         bstyle, bsize = (GL.each(spec.get("barbels")) or [("none", 1.0)])[0]
         for which in range(2 if bstyle in ("feelers", "plumb", "dragon") else 1):
             pts, Lb = barbel_points(fish, sg, bstyle if not (bstyle == "dragon" and which) else "long", bsize, which)
             if pts and not mud:
-                radii = [Lb * 0.05 * (1.0 - 0.8 * j / (len(pts) - 1)) + 0.0015 for j in range(len(pts))]
+                pts = spline(pts, 3)
+                n = len(pts)
+                radii = [Lb * (0.05 - 0.04 * j / (n - 1)) + 0.0012 for j in range(n)]
                 bm = mat("bone_white") if bstyle == "white" else (mat("accent_pale") if bstyle in ("dragon", "lash") else mat("bone_barbel"))
                 objects.append(obj("sway_barbel%s_%s" % ("2" if which else "", tag), [(g.tube(pts, radii, n=5), bm, True)], frame=at_point(pts[0])))
-    # the line down its side by which it feels the current: the field shows there
-    if not mud:
-        for sg in (1, -1):
-            for key, (lo, hi) in (("b0", (bounds[1], bounds[2])), ("b1", (bounds[2], bounds[-1] if not long_body else bounds[3]))):
-                pts = [fish.skin(lerp(lo, hi, j / 5.0), 0.12 if sg > 0 else math.pi - 0.12, out=1.02) for j in range(6)]
-                ob = obj("line_%s_%s" % (key, "l" if sg > 0 else "r"), [(g.tube(pts, [L * 0.006] * 6, n=4), field("line", 1.5), True)], parent=pieces[key])
-                objects.append(ob)
     objects += carried(fish, spec, pieces)
     objects = [o for o in objects if o is not None]
     # the usual sockets, from where its parts are

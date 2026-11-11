@@ -58,7 +58,7 @@
     "width": 1.0,
     "head": 1.5,
     "eye": 1.9,
-    "size": 0.5
+    "size": 1.45
    },
    "shape": "carp",
    "pose": "level",
@@ -82,7 +82,8 @@
    "eyes": "round",
    "scales": "none",
    "marks": [],
-   "carry": []
+   "carry": [],
+   "brow": "mild"
   }
  },
  "paths": [
@@ -112,8 +113,8 @@
      "len": 0.56,
      "depth": 1.0,
      "width": 1.0,
-     "head": 1.0,
-     "eye": 1.0,
+     "head": 1.1,
+     "eye": 1.15,
      "size": 1.0
     },
     "shape": "carp",
@@ -149,7 +150,8 @@
       1.0
      ]
     ],
-    "accent": "jade"
+    "accent": "jade",
+    "brow": "keen"
    },
    "prongs": [
     {
@@ -650,7 +652,7 @@
      "depth": 1.2,
      "width": 1.2,
      "head": 1.0,
-     "eye": 1.0,
+     "eye": 1.15,
      "size": 1.0
     },
     "shape": "carp",
@@ -682,7 +684,8 @@
     ],
     "carry": [],
     "coat": "moon",
-    "accent": "madder"
+    "accent": "madder",
+    "brow": "calm"
    },
    "prongs": [
     {
@@ -1192,7 +1195,8 @@
     ],
     "carry": [],
     "coat": "slate",
-    "accent": "amethyst"
+    "accent": "amethyst",
+    "brow": "sleepy"
    },
    "prongs": [
     {
