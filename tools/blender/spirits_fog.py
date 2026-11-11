@@ -33,37 +33,76 @@ def _m(B, role):
     return B.role(role) if role in ("main", "under", "trim") else mat(role)
 
 
-def roll(B, p, r, sc=(1.15, 1.0, 0.65), role="main", turn=0.0):
-    """One roll of it."""
-    B.add(g.ico(p, r, sub=1, scale=sc, rot=(0, 0, turn)), _m(B, role))
+# --- what fog is made of -------------------------------------------------------------------------
+# A roll is not a thing of its own: every roll of a body is gathered, and each part of the body is
+# made as one round surface a role (spirits_kit.cloud), so that a bank has one soft outline and
+# not a line round every roll. A part breathes (pulse_fog...), and what is on it rides it.
+
+def roll(B, p, r, sc=(1.15, 1.0, 0.65), role="main", turn=0.0, part=""):
+    """One roll of it, in a part of the body ("" is the body itself)."""
+    B.fog.setdefault(part, {}).setdefault(role, []).append((V(p), r, sc, turn))
 
 
-def bank(B, c, w, d, h, seed=0.0, dark=False):
-    """A bank of it about c, w wide, d deep, h high: darker under, paler on top."""
+def bank(B, c, w, d, h, seed=0.0, dark=False, part="", deep=None):
+    """A bank of it about c, w wide, d deep, h high: darker under, paler on top, and its Path's
+    colour in it where it is deepest (`deep`: a material; None for none)."""
     c = V(c)
     lo, mid, hi = ("under", "under", "main") if dark else ("under", "main", "trim")
-    for i in range(5):
-        a = seed + 2 * math.pi * i / 5
-        r = 0.3 * w * (0.88 + 0.16 * math.sin(i * 2.1 + seed))
-        roll(B, c + Vector((w * 0.3 * math.cos(a), d * 0.3 * math.sin(a), -h * 0.26)), r, (1.0, d / w, h / w), lo, a)
-    roll(B, c, 0.36 * w, (1.0, d / w, 1.16 * h / w), mid)
+    for i in range(6):
+        a = seed + 2 * math.pi * i / 6
+        r = 0.29 * w * (0.88 + 0.16 * math.sin(i * 2.1 + seed))
+        roll(B, c + Vector((w * 0.31 * math.cos(a), d * 0.31 * math.sin(a), -h * 0.26)), r, (1.0, d / w, h / w), lo, a, part)
+    roll(B, c, 0.36 * w, (1.0, d / w, 1.16 * h / w), mid, 0.0, part)
     for i in range(4):
         a = seed + 0.8 + 2 * math.pi * i / 4
         r = 0.27 * w * (0.9 + 0.14 * math.sin(i * 1.3 + seed))
-        roll(B, c + Vector((w * 0.26 * math.cos(a), d * 0.26 * math.sin(a), h * 0.04)), r, (1.0, d / w, 1.1 * h / w), mid, a)
+        roll(B, c + Vector((w * 0.26 * math.cos(a), d * 0.26 * math.sin(a), h * 0.04)), r, (1.0, d / w, 1.1 * h / w), mid, a, part)
     for i in range(3):
         a = seed + 0.3 + 2 * math.pi * i / 3
-        roll(B, c + Vector((w * 0.14 * math.cos(a), d * 0.14 * math.sin(a), h * 0.3)), 0.22 * w, (1.0, d / w, 1.1 * h / w), hi, a)
+        roll(B, c + Vector((w * 0.14 * math.cos(a), d * 0.14 * math.sin(a), h * 0.3)), 0.22 * w, (1.0, d / w, 1.1 * h / w), hi, a, part)
+    if deep:
+        for i in range(3):
+            a = seed + 1.1 + 2 * math.pi * i / 3
+            roll(B, c + Vector((w * 0.36 * math.cos(a), -abs(d * 0.34 * math.sin(a)) - d * 0.06, -h * 0.3)), 0.2 * w, (1.0, d / w, 0.8 * h / w), deep, a, part)
+
+
+def on(B, geo, material, smooth=None, part=""):
+    """Something that lies on a part of the fog and rides it as it breathes (the dark round an eye, a lid)."""
+    if geo and geo[0]:
+        B.fog_on.setdefault(part, []).append((geo, material, smooth))
 
 
 def shreds(B, c, r, n=3, seed=0.0, role="main"):
-    """Bits of it coming away: smaller and smaller, going up."""
+    """Bits of it coming away: smaller and smaller, going up. They rise and fall."""
     geo = None
     for i in range(n):
         a = seed + i * 2.2
         p = V(c) + Vector((r * math.cos(a), r * math.sin(a), 0.03 + 0.06 * i))
-        geo = g.merge(geo, g.ico(p, 0.036 - 0.008 * i, sub=0, scale=(1.3, 1.0, 0.7), rot=(0, 0, a)))
-    B.add(geo, _m(B, role))
+        geo = g.merge(geo, g.ico(p, 0.04 - 0.008 * i, sub=1, scale=(1.3, 1.0, 0.7), rot=(0, 0, a)))
+    B.nbits += 1
+    B.move("bob", "shreds_" + "abcdefgh"[B.nbits % 8], [(geo, _m(B, role), True)], c)
+
+
+def wisps(B, strands, w=0.05, role="main", what="wisps", pivot=None, swell=0.4):
+    """Strands of it trailing off, thin enough at their ends to see past: each a line of points.
+    They sway about `pivot` (the first point of the first, if none is given)."""
+    geo = None
+    for pts in strands:
+        geo = g.merge(geo, sk.strand(sk.curve(pts, n=3), w, n=6, swell=swell))
+    return B.move("sway", what, [(geo, _m(B, role), True)], strands[0][0] if pivot is None else pivot)
+
+
+def ragged(B, c, rx, ry, n=5, L=0.16, w=0.045, seed=0.0, role="under", what="ragged", z=0.0, arc=(0.0, 2 * math.pi)):
+    """The ragged edge of a bank: strands trailing outward and down from round it."""
+    c = V(c)
+    strands = []
+    for i in range(n):
+        a = arc[0] + (arc[1] - arc[0]) * (i + 0.5) / n + 0.3 * math.sin(seed + i * 1.7)
+        d = Vector((math.cos(a), math.sin(a), 0))
+        b = c + Vector((d.x * rx, d.y * ry, z))
+        Li = L * (0.7 + 0.5 * ((i * 5 + int(seed * 3)) % 3) / 2.0)
+        strands.append([b - d * 0.04, b + d * Li * 0.5 + Z * 0.012, b + d * Li * 0.85 + Vector((-d.y, d.x, 0)) * Li * 0.25 - Z * 0.02, b + d * Li * 1.15 + Vector((-d.y, d.x, 0)) * Li * 0.5 - Z * 0.035])
+    return wisps(B, strands, w, role, what, pivot=c + Z * z)
 
 
 def moved(B, start, rx=0.0, ry=0.0, rz=0.0, about=(0, 0, 0), shift=(0, 0, 0)):
@@ -73,66 +112,146 @@ def moved(B, start, rx=0.0, ry=0.0, rz=0.0, about=(0, 0, 0), shift=(0, 0, 0)):
         B.items[i] = (sk.shifted(sk.tilted(geo, rx, ry, rz, about), shift), m, s)
 
 
-def eyes(B, c, dx, r, style="soft", patch=True):
-    """Its eyes, on a face that looks to -Y: two lit places in two darker ones."""
+def eyes(B, c, dx, r, style="soft", patch=True, part="", what="eyes", up=None, ride=True):
+    """Its eyes, on a face that looks to -Y: two lit places in two darker ones. They blink, and
+    ride the part of the fog they are in."""
     c = V(c)
+    r = r * 1.25          # larger than they were: a Fog is known by its eyes
+    lit, stat = [], []
     if style == "pits":           # two darker places, rimmed, with very little in them
-        B.add(sk.eye_pair(c, dx, r * 1.5, scale=(1.1, 0.4, 1.0), slant=0.0), "void")
+        stat.append((sk.eye_pair(c, dx, r * 1.5, scale=(1.1, 0.4, 1.0), slant=0.0), "void", True))
         rims = None
         for s in (1, -1):
-            rims = g.merge(rims, sk.hoop(c + Vector((s * dx, -0.004, 0)), r * 1.75, r * 1.65, r * 0.3, n=8, u=X, v=Z, sides=3))
-        B.add(rims, "veil", False)
-        B.add(sk.eye_pair(c + Vector((0, -r * 0.5, -r * 0.2)), dx, r * 0.55, scale=(1.0, 0.5, 1.0), slant=0.0), field("eyes", 2.4))
-        return
-    if patch:
-        B.add(sk.eye_pair(c + Vector((0, 0.008, 0)), dx, r * 1.55, scale=(1.15, 0.4, 0.95), slant=0.0), B.under)
-    if style == "old":            # old grey eyes that count: heavy-lidded
-        B.add(sk.eye_pair(c + Vector((0, -0.004, -r * 0.2)), dx, r * 0.9, scale=(1.1, 0.5, 0.7), slant=-0.1), field("eyes", 2.4))
-        lids = None
-        for s in (1, -1):
-            p = c + Vector((s * dx, -0.008, r * 0.55))
-            lids = g.merge(lids, g.tongue([p + Vector((-r * 1.5, 0, -r * 0.2)), p + Vector((0, -0.004, r * 0.3)), p + Vector((r * 1.5, 0, -r * 0.4))], [r * 0.3, r * 1.1, r * 0.3], thick=0.5, normal=(0, -1, 0.3)))
-        B.add(lids, B.trim)
-    elif style == "shut":
-        geo = None
-        for s in (1, -1):
-            geo = g.merge(geo, g.box(c + Vector((s * dx, -0.008, 0)), (r * 2.2, 0.006, r * 0.32)))
-        B.add(geo, field("eyes", 2.4))
-    elif style == "wide":
-        B.add(sk.eye_pair(c + Vector((0, -0.006, 0)), dx, r * 1.25, scale=(1.0, 0.45, 1.0), slant=0.0), field("eyes", 2.4))
+            rims = g.merge(rims, sk.hoop(c + Vector((s * dx, -0.004, 0)), r * 1.75, r * 1.65, r * 0.3, n=10, u=X, v=Z, sides=4))
+        stat.append((rims, "veil", True))
+        lit.append((sk.eye_pair(c + Vector((0, -r * 0.5, -r * 0.2)), dx, r * 0.6, scale=(1.0, 0.5, 1.0), slant=0.0), field("eyes", 2.6), True))
     else:
-        B.add(sk.eye_pair(c + Vector((0, -0.004, 0)), dx, r, scale=(1.1, 0.5, 0.85), slant=0.0), field("eyes", 2.4))
+        if patch:
+            stat.append((sk.eye_pair(c + Vector((0, 0.008, 0)), dx, r * 1.55, scale=(1.15, 0.4, 0.95), slant=0.0), B.under, True))
+        if style == "old":            # old grey eyes that count: heavy-lidded
+            lit.append((_pair(c + Vector((0, -0.004, -r * 0.2)), dx, r * 0.9, (1.1, 0.5, 0.7), -0.1), field("eyes", 2.4), True))
+            lids = None
+            for s in (1, -1):
+                p = c + Vector((s * dx, -0.008, r * 0.55))
+                lids = g.merge(lids, g.tongue([p + Vector((-r * 1.5, 0, -r * 0.2)), p + Vector((0, -0.004, r * 0.3)), p + Vector((r * 1.5, 0, -r * 0.4))], [r * 0.3, r * 1.1, r * 0.3], thick=0.5, normal=(0, -1, 0.3)))
+            stat.append((lids, B.trim, True))
+        elif style == "shut":
+            geo = None
+            for s in (1, -1):
+                geo = g.merge(geo, g.tongue([c + Vector((s * dx - r * 1.1, -0.008, 0.002)), c + Vector((s * dx, -0.01, -r * 0.3)), c + Vector((s * dx + r * 1.1, -0.008, 0.002))], [r * 0.2, r * 0.5, r * 0.2], thick=0.5, normal=(0, -1, 0.3)))
+            lit.append((geo, field("eyes", 2.4), True))
+        elif style == "wide":
+            lit.append((_pair(c + Vector((0, -0.006, 0)), dx, r * 1.25, (1.0, 0.45, 1.0), 0.0), field("eyes", 2.4), True))
+        else:
+            lit.append((_pair(c + Vector((0, -0.004, 0)), dx, r, (1.1, 0.5, 0.85), 0.0), field("eyes", 2.4), True))
+            lids = None
+            for s in (1, -1):       # a lid over each: it is awake, and in no hurry
+                p = c + Vector((s * dx, -0.006 - r * 0.25, r * 0.62))
+                lids = g.merge(lids, g.tongue([p + Vector((-r * 1.15, r * 0.2, -r * 0.25)), p + Vector((0, 0, r * 0.12)), p + Vector((r * 1.15, r * 0.2, -r * 0.25))], [r * 0.2, r * 0.75, r * 0.2], thick=0.5, normal=(0, -1, 0.3)))
+            stat.append((lids, B.under, True))
+    mv = B.move("blink", what, lit, c, up=up)
+    if ride:
+        B.fog_riders.append((mv, part))
+        for it in stat:
+            on(B, *it, part=part)
+    else:
+        for it in stat:
+            B.add(*it)
+    return mv
+
+
+def _pair(c, dx, r, scale, slant):
+    """Two round eyes either side of c (finer than the kit's: an eye's outline is looked at)."""
+    geo = None
+    for s in (1, -1):
+        geo = g.merge(geo, g.ico(V(c) + Vector((s * dx, 0, 0)), r, sub=2, scale=scale, rot=(0, s * -slant, 0)))
+    return geo
+
+
+def finish(B):
+    """Make the fog: each part of it one round surface a role, breathing; what lies on it rides it."""
+    made = {}
+    share = max(1, sum(len(balls) for roles in B.fog.values() for balls in roles.values()))
+    for part, roles in B.fog.items():
+        items, mid, n = [], Vector((0, 0, 0)), 0
+        for role, balls in roles.items():
+            keep = int(max(140, B.budget * len(balls) / share))
+            geo = sk.cloud([(p, r, sc, turn) for p, r, sc, turn in balls], res=B.res, keep=keep)
+            if geo:
+                items.append((geo, _m(B, role), True))
+            for p, r, sc, turn in balls:
+                mid += p
+                n += 1
+        items += B.fog_on.get(part, [])
+        if not items:
+            continue
+        if part.startswith("still"):
+            for it in items:
+                B.add(*it)
+        else:
+            made[part] = B.move("pulse", "fog" + ("_" + part if part else ""), items, mid / max(1, n))
+    for part, its in B.fog_on.items():
+        if part not in B.fog:
+            for it in its:
+                B.add(*it)
+    for mv, part in B.fog_riders:
+        if part in made and mv is not None:
+            mv["parent"] = made[part]
 
 
 # --- what each path keeps ----------------------------------------------------------------------
 
-def cowl(B, c, k=1.0, eye="soft", inside="under"):
-    """The hood of a coat with nobody in it, its neck at c: the Fog-shroud's line. Says where its eyes are."""
+def cowl(B, c, k=1.0, eye="soft", inside="accent", tails=True, what="eyes"):
+    """The hood of a coat with nobody in it, its neck at c: the Fog-shroud's line, and its colour:
+    the cloth is its Path's colour, darker without and brighter within, with a thread round the
+    opening and two tails of it hanging that sway. Says where its eyes are."""
     c = V(c)
     prof = ((0.0, 0.09, 0.085, 0.0), (0.08, 0.115, 0.125, 0.0), (0.16, 0.1, 0.11, 0.02), (0.22, 0.055, 0.065, 0.05), (0.265, 0.008, 0.008, 0.08))
-    B.add(g.loft([g.ring(c + Vector((0, yo * k, z * k)), rx * k, ry * k, n=10, u=X, v=Y, phase=math.pi / 10) for z, rx, ry, yo in prof]), B.main)
+    B.add(g.loft([g.ring(c + Vector((0, yo * k, z * k)), rx * k, ry * k, n=16, u=X, v=Y, phase=math.pi / 16) for z, rx, ry, yo in prof]), "accent_dark", True)
     f = c + Vector((0, -0.092 * k, 0.092 * k))
-    B.add(g.ico(f, 0.08 * k, sub=1, scale=(0.92, 0.42, 1.15)), _m(B, inside))
-    B.add(sk.hoop(f + Vector((0, -0.034 * k, 0)), 0.079 * k, 0.098 * k, 0.013 * k, n=10, u=X, v=Z, sides=4), B.trim, True)
-    e = f + Vector((0, -0.038 * k, 0.008 * k))
-    eyes(B, e, 0.03 * k, 0.0145 * k, eye, patch=False)
+    B.add(g.ico(f + Vector((0, 0.012 * k, 0)), 0.09 * k, sub=2, scale=(0.95, 0.42, 1.15)), _m(B, inside), True)
+    B.add(g.ico(f, 0.078 * k, sub=2, scale=(0.9, 0.42, 1.14)), "void", True)
+    B.add(sk.hoop(f + Vector((0, -0.03 * k, 0)), 0.081 * k, 0.1 * k, 0.009 * k, n=18, u=X, v=Z, sides=5), "accent_light", True)
+    e = f + Vector((0, -0.036 * k, 0.008 * k))
+    eyes(B, e, 0.033 * k, 0.0155 * k, eye, patch=False, what=what, ride=False)
+    if tails:
+        strands = []
+        for s in (1, -1):
+            b = c + Vector((s * 0.07 * k, -0.07 * k, 0.012 * k))
+            strands.append([b, b + Vector((s * 0.03, -0.03, -0.07)) * k, b + Vector((s * 0.02, -0.045, -0.16)) * k, b + Vector((s * 0.045, -0.04, -0.25)) * k])
+        geo = None
+        for pts in strands:
+            geo = g.merge(geo, g.tongue(sk.curve(pts, n=2), [0.05 * k, 0.05 * k, 0.046 * k, 0.042 * k, 0.036 * k, 0.03 * k, 0.012 * k], thick=0.3, normal=-Y))
+        B.move("sway", "tails" + ("" if what == "eyes" else "_b"), [(geo, "accent", True)], c + Vector((0, -0.07 * k, 0.012 * k)))
     return e
 
 
 def stone(B, c, w, h, lean=0.0, turn=0.0, thick=0.05, name=True):
-    """A round-topped stone standing at c, its face to -Y: Lingering Mist's line. Something was here."""
+    """A round-topped stone standing at c, its face to -Y: Lingering Mist's line. Something was
+    here, and its name is in the stone in its Path's colour."""
     geo = g.merge(g.box((0, 0, (h - w * 0.5) * 0.5), (w, thick, h - w * 0.5)),
-                  sk.shifted(sk.tilted(sk.disc((0, 0, 0), w * 0.5, thick=thick, n=10), rx=math.pi / 2), (0, thick / 2, h - w * 0.5)))
+                  sk.shifted(sk.tilted(sk.disc((0, 0, 0), w * 0.5, thick=thick, n=12), rx=math.pi / 2), (0, thick / 2, h - w * 0.5)))
     B.add(sk.shifted(sk.tilted(geo, ry=lean, rz=turn), c), "stone_grave", False)
-    if name:        # what was cut in it, worn
-        cut = g.merge(g.box((0, -thick / 2 - 0.002, h * 0.62), (w * 0.5, 0.004, 0.008)), g.box((0, -thick / 2 - 0.002, h * 0.5), (w * 0.36, 0.004, 0.008)))
-        B.add(sk.shifted(sk.tilted(cut, ry=lean, rz=turn), c), "ash_dark", False)
+    if name:        # what was cut in it, and gilded
+        cut = g.merge(g.box((0, -thick / 2 - 0.003, h * 0.62), (w * 0.56, 0.006, w * 0.09)), g.box((0, -thick / 2 - 0.003, h * 0.49), (w * 0.4, 0.006, w * 0.09)),
+                      sk.shifted(sk.tilted(sk.hoop((0, 0, 0), w * 0.36, w * 0.36, w * 0.035, n=10, sides=3), rx=math.pi / 2), (0, -thick / 2 - 0.002, h - w * 0.5)))
+        B.add(sk.shifted(sk.tilted(cut, ry=lean, rz=turn), c), "accent", False)
 
 
-def curl(B, c, r, turns=0.9, w=0.07, axis=Y, start=0.0, role="main", rise=0.0, n=9, end=0.25):
-    """A tail of it, curling off: Shifting Fog's line."""
-    pts = g.spiral(c, r, r * end, turns, rise, n=n, axis=axis, start=start)
-    B.add(g.tube(pts, [w * (1.0 - 0.92 * i / n) for i in range(n + 1)], n=5, flat=0.7), _m(B, role))
+def curl(B, c, r, turns=0.9, w=0.07, axis=Y, start=0.0, role="main", rise=0.0, n=9, end=0.25, what=None):
+    """A tail of it, curling off: Shifting Fog's line, edged in its colour. It sways."""
+    pts = sk.curve(g.spiral(c, r, r * end, turns, rise, n=n, axis=axis, start=start), n=2)
+    m = len(pts) - 1
+    ws = [w * (1.0 - 0.92 * i / m) for i in range(m + 1)]
+    ax = V(axis).normalized()
+    cc = V(c)
+    edge = []
+    for i, p in enumerate(pts):
+        out = (p - cc) - ax * (p - cc).dot(ax)
+        out = out.normalized() if out.length > 1e-5 else X.copy()
+        edge.append(p + out * (ws[i] * 0.92))
+    B.ncurl += 1
+    B.move("sway", what or ("curl_" + "abcdefgh"[B.ncurl % 8]), [(g.tube(pts, ws, n=7, flat=0.7), _m(B, role), True), (g.tube(edge[:-1], [max(0.0035, x * 0.16) for x in ws[:-1]], n=4), "accent_light", True)], pts[0])
 
 
 def _done(B, top, front, mid, half, eye=None, crown=None):
@@ -860,9 +979,12 @@ PLANS = {"wisp": plan_wisp, "coat": plan_coat, "layer": plan_layer, "mask": plan
 
 def build(form_id, level, spec, base):
     B = sk.Body(form_id, level, spec, base)
+    B.fog, B.fog_on, B.fog_riders, B.nbits, B.ncurl = {}, {}, [], 0, 0
+    B.budget, B.res = 1500, 0.04          # how many corners its fog may have, and how fine it is cut
     plan = spec.get("plan", "wisp")
     if plan not in PLANS:
         sk.log("no such plan", plan, "on", form_id)
         plan = "wisp"
     PLANS[plan](B)
+    finish(B)
     B.export()
