@@ -53,9 +53,9 @@ func _ready() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 	# What you are doing now, top left under nothing else.
-	Style.label(_objective, 17, Style.FG, "italic", 4)
+	Style.label(_objective, 22, Style.FG, "italic", 6)
 	_objective.position = Vector2(30, 24)
-	_objective.custom_minimum_size = Vector2(620, 0)
+	_objective.custom_minimum_size = Vector2(760, 0)
 	_objective.autowrap_mode = TextServer.AUTOWRAP_WORD
 	root.add_child(_objective)
 	# The name of the place, as you enter it.

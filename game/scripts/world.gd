@@ -3859,6 +3859,9 @@ func _door_marker(at: Vector3, label: String, locked: bool) -> void:
 	l.outline_modulate = Color(0, 0, 0, 0.8)
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	l.position = at * Vector3(0.86, 0, 0.86) + Vector3(0, 3.6, 0)
+	# A sign is for finding the door from across the yard. Up close it would fill the screen
+	# (the prompt at the foot of the screen names the door then), so it is not drawn within reach.
+	l.visibility_range_begin = 5.5
 	_place_root.add_child(l)
 
 ## The Green: rocks, the odd dead stump (a scaled column), and at the post a ring of ward-light.
