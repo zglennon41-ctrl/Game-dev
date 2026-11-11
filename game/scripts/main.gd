@@ -633,8 +633,8 @@ func _card(lines: Array, next: Callable, style := "story", auto := 0.0, capture 
 			await get_tree().process_frame
 		await _wait(0.6)
 		await _shot("card")
-		if _args.has("mouse"):
-			await _click(get_viewport().get_visible_rect().size / 2.0)
+		if _by_hand():
+			await _go_on()
 		else:
 			hud._card_go()
 
@@ -654,6 +654,34 @@ func _click(at: Vector2) -> void:
 		e.pressed = down
 		e.position = p
 		e.global_position = p
+		Input.parse_input_event(e)
+		await get_tree().process_frame
+		await get_tree().process_frame
+
+## Automated checks: --mouse, --keys or --pad presses the opening's cards and buttons as a
+## player's hand would, by events sent the way real ones arrive.
+func _by_hand() -> bool:
+	return _args.has("mouse") or _args.has("keys") or _args.has("pad")
+
+## Automated checks: go on, by whichever hand was asked for: a click in the middle of the
+## screen, Enter, or a pad's A.
+func _go_on() -> void:
+	if _args.has("mouse"):
+		await _click(get_viewport().get_visible_rect().size / 2.0)
+		return
+	for down in [true, false]:
+		var e: InputEvent
+		if _args.has("pad"):
+			var j := InputEventJoypadButton.new()
+			j.button_index = JOY_BUTTON_A
+			j.pressed = down
+			e = j
+		else:
+			var k := InputEventKey.new()
+			k.physical_keycode = KEY_ENTER
+			k.keycode = KEY_ENTER
+			k.pressed = down
+			e = k
 		Input.parse_input_event(e)
 		await get_tree().process_frame
 		await get_tree().process_frame
@@ -796,8 +824,8 @@ func _recruiter_scene() -> void:
 	if _args.has("answers"):
 		for i in lines.size():
 			await _wait(1.2)
-			if _args.has("mouse"):
-				await _click(get_viewport().get_visible_rect().size / 2.0)
+			if _by_hand():
+				await _go_on()
 			else:
 				hud._speech_t = 1.0
 				hud.speech_press()
@@ -805,16 +833,19 @@ func _recruiter_scene() -> void:
 				await _wait(0.3)
 				await _shot("recruiter")
 			if i < lines.size() - 1:
-				if _args.has("mouse"):
+				if _by_hand():
 					await _wait(0.3)
-					await _click(get_viewport().get_visible_rect().size / 2.0)
+					await _go_on()
 				else:
 					hud._speech_t = 1.0
 					hud.speech_press()
 		await _wait(0.8)
 		await _shot("recruiter-end")
-		if _args.has("mouse"):
-			await _click_button(String(r.get("go", "Go with her")))
+		if _by_hand():
+			if _args.has("mouse"):
+				await _click_button(String(r.get("go", "Go with her")))
+			else:
+				await _go_on()      # the button is the chosen one: Enter, or A, presses it
 			await _wait(0.5)
 			print("MOUSE: the recruiter's button %s" % ("works" if mode == "story" and hud.card_up() else "DID NOTHING"))
 		else:
@@ -860,8 +891,11 @@ func _academy_gate() -> void:
 		print("REACHED THE ACADEMY: %s, %s %s with a %s; Pattern %s" % [hero["name"], hero["blood"], hero["shape"], hero["weapon"], Builder.sentence(hero["pattern"])])
 		await _wait(2.5)
 		await _shot("academy")
-		if _args.has("mouse"):
-			await _click_button(String(a.get("enter", "Walk through the Gate")))
+		if _by_hand():
+			if _args.has("mouse"):
+				await _click_button(String(a.get("enter", "Walk through the Gate")))
+			else:
+				await _go_on()
 			await _wait(2.0)
 			print("MOUSE: the gate's button %s" % ("works" if mode == "academy" else "DID NOTHING"))
 		if _args.has("quit"):
