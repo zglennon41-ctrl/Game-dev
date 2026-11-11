@@ -115,7 +115,8 @@
      "waist": 1.14,
      "stance": 0.06,
      "brush": 1.3,
-     "nape": 1.25
+     "nape": 1.25,
+     "head": 1.12
     },
     "horns": [
      "broad",
@@ -134,18 +135,15 @@
      1.0
     ],
     "crane": [
-     "strike",
-     0.7
+     "level",
+     1.0
     ],
     "tail": [
-     "sweep",
-     0.8
+     "drag",
+     1.0
     ],
     "pose": null,
-    "wings": [
-     "furled",
-     0.9
-    ],
+    "wings": null,
     "plating": [
      "limbs",
      1.0
@@ -352,7 +350,7 @@
        "stance": 0.1
       },
       "tail": [
-       "sweep",
+       "drag",
        1.0
       ],
       "crane": [
@@ -1400,8 +1398,8 @@
        ],
        "body": {
         "wings": [
-         "rampant",
-         1.0
+         "mantle",
+         1.25
         ],
         "membrane": [
          "edge",
@@ -1590,8 +1588,8 @@
          1.3
         ],
         "wings": [
-         "brake",
-         1.15
+         "rampant",
+         0.95
         ],
         "membrane": [
          "barred",
