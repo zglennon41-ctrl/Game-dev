@@ -480,7 +480,8 @@
      1.2
     ],
     "carry": null,
-    "held": 0.24
+    "held": 0.24,
+    "coat": "moon"
    },
    "prongs": [
     {
@@ -846,7 +847,8 @@
      1.1
     ],
     "carry": null,
-    "held": 0.24
+    "held": 0.24,
+    "coat": "hearth"
    },
    "prongs": [
     {
@@ -1117,7 +1119,7 @@
         "carry": [
          "plumb"
         ],
-        "coat": null,
+        "coat": "hearth",
         "held": 0.5
        }
       }

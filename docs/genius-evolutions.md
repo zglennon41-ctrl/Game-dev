@@ -178,8 +178,18 @@ bell turned mouth-forward). The Lantern walks on legs it has grown.
 drawn as, in `data/genius-looks.json`). A lantern's and an astrolabe's main metal is the
 coat's first; a bell is cast in the coat's *third* (the brass of an iron-and-brass coat,
 the copper of a blued one) and hung in ironwork of its first. Glass, enamel, wax, rope,
-wood and cloth keep colours of their own. A turned thing is shaded round with crisp rims;
-a cut or forged thing keeps its planes.
+wood, cloth and a bell's teeth keep colours of their own, so that they read on any coat. A
+turned thing is shaded round with crisp rims; a cut or forged thing keeps its planes; cloth
+(a cape, a hood) is a sheet with a thickness, so that it has two faces.
+
+**Each Path wears the coat its own way** (`coat`, a shift), so that a line can be told by
+its colour before its shape: of the Lantern, the Wayfinder keeps the coat as it was born
+(its water forms and the Deep-light in blue steel, `iron`), the Watch-lamp wears it as
+copper (`hearth`), the Kept Flame as silver (`moon`); of the Astrolabe, the Sighting-glass
+as born, the Orrery pale (`moon`), the Almanac the brown of a bound book (`hearth`); of the
+Bell, the Rally-bell bronze as born, the Hour-bell silver (`frost`), the Alarm-bell red
+(`blood`). A final form may still wear its own where its sign says so (the Watch-bell is a
+dark bronze that shows no shine at night; the Passing-bell is one cold note).
 
 **It can be carried.** Every model has an empty named `carry` where a hand or a hook takes
 it: the lantern's ring, the ring on the astrolabe's throne, the bell's handle or the ring
@@ -237,4 +247,4 @@ the brow with a great lens (`far-eyes`) and its works worn at the breast (`gears
 
 `godot --headless --path . -s res://game/tests/check_items.gd` holds all ninety-three to
 this: a model of its own, `ref_top`, `carry`, the usual sockets, a light of the field, its
-feet on the ground, a `held` size; it ends "items: 93 forms, all good".
+feet on the ground, a `held` size, under 80 KB; it ends "items: 93 forms, all good".

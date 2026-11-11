@@ -145,6 +145,36 @@ def chain(a, b, size=0.02, sag=0.0):
     return geo
 
 
+def sheet(rows, thick=0.012):
+    """Cloth through rows of points (a cape, a hood: open at its edges), given a thickness.
+    An open sheet has no outside for the kit to turn its faces to, and would show from one
+    side only; this one is closed all round, so it has two faces and a hem."""
+    rows = [[V(p) for p in r] for r in rows]
+    m, n = len(rows), len(rows[0])
+
+    def normal(i, k):
+        a = rows[min(i + 1, m - 1)][k] - rows[max(i - 1, 0)][k]
+        b = rows[i][min(k + 1, n - 1)] - rows[i][max(k - 1, 0)]
+        c = a.cross(b)
+        return c.normalized() if c.length > 1e-9 else Z
+
+    o = m * n
+    verts = [p for r in rows for p in r] + [rows[i][k] + normal(i, k) * thick for i in range(m) for k in range(n)]
+    faces = []
+    for i in range(m - 1):
+        for k in range(n - 1):
+            a, b, c, d = i * n + k, i * n + k + 1, (i + 1) * n + k + 1, (i + 1) * n + k
+            faces += [(a, b, c, d), (o + d, o + c, o + b, o + a)]
+        for k in (0, n - 1):        # its two side edges
+            a, d = i * n + k, (i + 1) * n + k
+            faces.append((a, d, o + d, o + a) if k == 0 else (d, a, o + a, o + d))
+    for k in range(n - 1):          # its top edge and its hem
+        for i in (0, m - 1):
+            a, b = i * n + k, i * n + k + 1
+            faces.append((b, a, o + a, o + b) if i == 0 else (a, b, o + b, o + a))
+    return verts, faces
+
+
 def eye(c, r, metals, facing=(0, -1, 0), heavy=False, dark=False):
     """Where it is alive: an iris of the field in a dark socket, a slit down it, a lid of its
     own metal; a heavy lid for one that is old or sits up late; a dark eye, lit only in its
@@ -237,10 +267,10 @@ def finish(form_id, items, anchors, wings=None, ref=None):
     sockets["carry"] = kit.free_socket("carry", fix(anchors["carry"]))
     path = os.path.join(gl.OUT, form_id + ".glb")
     gl.export_objects(obs, sockets, path, ref=STAND)
-    size = os.path.getsize(path) // 1024
-    if size > 80:
-        log("OVER BUDGET", form_id, size, "KB")
-    return size
+    size = os.path.getsize(path)
+    if size >= 80000:               # the contract: an object under 80 KB
+        log("OVER BUDGET", form_id, size, "bytes")
+    return -(-size // 1000)
 
 
 def flame(style, c, s=1.0, lean=0.0):
@@ -798,19 +828,19 @@ def lamp_gear(spec, m, items, A, P, extra):
                 items.append((rod(c + Vector((sgn * 0.035, 0, 0)), c + Vector((sgn * (R + 0.1) * s, 0, -0.1)), 0.011), mat("soot")))
                 items.append((ball(c + Vector((sgn * (R + 0.1) * s, 0, -0.1)), 0.022, sub=0), m.main))
         elif style == "cloak":      # a hood and a half-cape, so that its light is its own business
+            # worn over one shoulder: round one side and its back, and the other side left open
             top = at(A["top"])
-            pts = []
-            for i in range(6):
-                a = math.radians(20 + 32 * i)
-                pts.append((math.cos(a), math.sin(a)))
-            rings = []
             Rc = max(R, 0.1)
-            for zf, rr in ((0.03, Rc * 0.6), (-0.1, Rc * 1.5), (-0.36 * s, Rc * 2.0), (-0.66 * s, Rc * 2.5)):
-                rings.append([top + Vector((px * rr, py * rr * 1.0 + Rc * 0.2, zf)) for px, py in pts])
-            cape = g.loft(rings, caps=False, closed=False)
-            inner = g.loft([[p * 0.985 + top * 0.015 + Vector((0, -0.006, 0)) for p in ring] for ring in reversed(rings)], caps=False, closed=False)
-            items.append((g.merge(cape, inner), mat("cloth_red"), SOFT))
-            items.append((ball(top + Vector((max(R, 0.1) * 0.6, max(R, 0.1) * 0.2, 0.02)), 0.022, sub=0), m.main))
+            rows = []
+            for j, (zf, rr) in enumerate(((0.035, 0.8), (-0.07, 1.55), (-0.3 * s, 2.3), (-0.6 * s, 2.9), (-0.9 * s, 3.3))):
+                row = []
+                for i in range(9):
+                    a = math.radians(-80 + 185 * i / 8)
+                    fold = 1.0 + 0.13 * math.sin(i * 2.4 + j) * (j / 4.0)
+                    row.append(top + Vector((math.cos(a) * Rc * rr * fold, math.sin(a) * Rc * rr * fold, zf - 0.03 * (j / 4.0) * math.cos(i * 1.9))))
+                rows.append(row)
+            items.append((sheet(rows, 0.014), mat("cloth_red"), SOFT))
+            items.append((ball(rows[0][0] + Vector((0.0, -0.012, -0.03)), 0.026, sub=0), m.main))
         elif style == "rag":        # there is a rag tucked under one foot
             items.append((g.tongue([(0.2, -0.16, 0.012), (0.27, -0.2, 0.03), (0.33, -0.2, 0.012)], [0.07, 0.09, 0.05], thick=0.3, normal=Z), mat("cloth_rag"), SOFT))
         elif style == "mirror":     # a plain bright disc behind it: nothing false keeps its shape
@@ -1398,7 +1428,7 @@ def astro_arms(spec, m, it, A):
             hip = A["low"] + Vector((0, -0.01, 0.03))
             for sg in (1, -1):
                 it.append((g.tube([hip, hip + Vector((sg * 0.07, 0, -0.16 * s)), hip + Vector((sg * 0.1, 0, -0.34 * s))], [0.014, 0.012, 0.002], n=4), m.under))
-            it.append((ball(hip, 0.024, sub=1), m.main, ROUND))
+            it.append((ball(hip, 0.024, sub=0), m.main, ROUND))
             A["low"] = hip + Vector((0, 0, -0.34 * s))
         elif style == "pantograph":  # jointed arms that draw what it has worked out
             p0 = c + Vector((R * 0.9, -0.03, -R * 0.2))
@@ -1513,8 +1543,8 @@ def astro_gear(spec, m, it, A):
             it.append((gear(p + Vector((R * 0.2, 0.034, -R * 0.56)), R * 0.2, teeth=8), m.trim))
         elif style == "dial2":      # a second, smaller dial that turns backward
             p = A["low"] + Vector((R * 0.9, -0.01, R * 0.5))
-            it.append((disc(p, R * 0.42, 0.024, n=12), m.main, ROUND))
-            it.append((f2.band(p, R * 0.42, R * 0.42, 0.011, n=12, u=X, v=Z, sides=4), m.under))
+            it.append((disc(p, R * 0.42, 0.024, n=10), m.main, ROUND))
+            it.append((f2.band(p, R * 0.42, R * 0.42, 0.011, n=10, u=X, v=Z, sides=3), m.under))
             it.append((g.blade(p + Y * -0.016, p + Y * -0.016 + Vector((-0.6, 0, 0.5)) * R * 0.36, R * 0.09, normal=(0, -1, 0), thick=0.005), field("needle", 3.0)))
             it.append((flat_bar(A.get("pivot", c) + Vector((0.05, 0.012, -R * 0.8)), p, 0.014, 0.008), m.under))
         elif style == "plumb":      # a line and a weight, to know which way is down
@@ -1732,7 +1762,7 @@ def bell_local(spec, m, bell, forward):
                 a = 2 * math.pi * (k + 0.5) / 12
                 d = Vector((math.sin(a), -math.cos(a), 0))
                 teeth = g.merge(teeth, g.cone(d * (R - bell.t * 0.5) + Z * 0.004, d * (R - bell.t * 0.2) - Z * 0.05 * s, 0.022 * s, n=4))
-            it.append((teeth, m.trim))
+            it.append((teeth, mat("bone")))     # pale on any coat: a mouth must read as a mouth
         elif style == "band":       # a painted band
             z = H * 0.42
             it.append((g.lathe([(bell.r_at(z + 0.03) + 0.004, z + 0.03), (bell.r_at(z - 0.03) + 0.004, z - 0.03)], n=12, phase=phase(12), caps=False), kit.mark("band", m.under), ROUND))
@@ -1887,7 +1917,7 @@ def bell_hang(spec, m, bell, crown, P, forward):
             for i in range(8):
                 x = (-1 if i < 4 else 1) * (R * 1.35 + (R * 2.0) * ((i % 4) / 3.0))
                 k = 0.36 + 0.07 * (i % 4 if i < 4 else 3 - i % 4)
-                sb = Bell("ship", k * (R / 0.168), m.main, n=8, hollow=False)
+                sb = Bell("ship", k * (R / 0.168), m.main, n=7, hollow=False)
                 top = c + Vector((x, 0, -thick / 2 - 0.035))
                 it += put(sb.items + [(ball(Vector((0, 0, -0.006)), 0.02 * k / 0.4, sub=0), m.under)], TR(top - Z * sb.H))
                 it.append((rod(top, top + Z * 0.04, 0.006, n=3), m.under))
@@ -1976,21 +2006,23 @@ def bell_hang(spec, m, bell, crown, P, forward):
         it.append((rod(crown, Vector((0, 0, ht + (side + 0.02) * 0.8)), 0.008), m.trim))
         ring_at(roof[1] + Z * 0.0)
     elif style == "post":           # it hangs from a post's bracket as if the bracket had been made for it
-        px = side + 0.12
-        top = crown.z + 0.3
-        it.append((g.box(Vector((px, 0.02, crown.z - H * 0.75)), (0.07, 0.07, (top - crown.z) + H * 1.5 + 0.3)), wood))
-        it.append((turned([(0.06, 0.0), (0.065, 0.015), (0.02, 0.04)], n=4, centre=(px, 0.02, top + 0.16)), m.under))
-        it.append((g.tube([Vector((px, 0.02, crown.z + 0.16)), Vector((0.03, 0, crown.z + 0.16)), Vector((0, 0, crown.z + 0.12))], [0.014, 0.012, 0.01], n=4), m.under))
-        it.append((g.tube(g.spiral(Vector((px * 0.55, 0.01, crown.z + 0.08)), 0.07, 0.014, 1.3, 0.0, n=10, axis=Y), [0.008] * 11, n=3), m.under))
-        it.append((rod(crown, Vector((0, 0, crown.z + 0.12)), 0.008), m.trim))
-        A["top"], A["carry"] = Vector((px, 0.02, top + 0.2)), Vector((0, 0, crown.z + 0.17))
-        A["post"] = Vector((px, 0.02, top + 0.2))
+        px = side + 0.1
+        top, foot = crown.z + 0.24, crown.z - H - 0.26
+        arm = crown.z + 0.14
+        it.append((g.box(Vector((px, 0.02, (top + foot) / 2)), (0.075, 0.075, top - foot)), wood))
+        it.append((turned([(0.0, 0.0), (0.1, 0.0), (0.085, 0.035), (0.0, 0.035)], n=4, centre=(px, 0.02, foot)), m.under))
+        it.append((turned([(0.07, 0.0), (0.078, 0.015), (0.03, 0.045)], n=4, centre=(px, 0.02, top)), m.under))
+        it.append((g.tube([Vector((px, 0.02, arm)), Vector((0.03, 0, arm)), Vector((0, 0, arm - 0.035))], [0.016, 0.013, 0.011], n=4), m.under))
+        it.append((g.tube(g.spiral(Vector((px * 0.55, 0.01, arm - 0.08)), 0.065, 0.014, 1.3, 0.0, n=10, axis=Y), [0.009] * 11, n=3), m.under))
+        it.append((rod(crown, Vector((0, 0, arm - 0.035)), 0.009), m.trim))
+        A["top"], A["carry"] = Vector((px, 0.02, top + 0.045)), Vector((0, 0, arm + 0.02))
+        A["post"] = Vector((px, 0.02, top + 0.045))
     elif style in ("float", "tower"):   # it rides a float, in a cage
-        fr = (0.22 if style == "float" else 0.27) * s
+        fr = (0.22 if style == "float" else 0.31) * s
         fz = crown.z - H - (0.1 if style == "float" else 0.14)
         it.append((turned([(0.0, fz - fr * 0.9), (fr * 0.5, fz - fr * 0.76), (fr, fz - fr * 0.36), (fr, fz - 0.02), (fr * 0.74, fz + 0.02), (0.0, fz + 0.02)], n=10), m.main, ROUND))
         it.append((turned([(fr + 0.003, fz - fr * 0.32), (fr + 0.003, fz - 0.04)], n=10, caps=False), kit.mark("band", m.under), ROUND))
-        topz = crown.z + (0.07 if style == "float" else 0.36)
+        topz = crown.z + (0.07 if style == "float" else 0.24)
         for k in range(4):
             a = math.pi / 4 + k * math.pi / 2
             d = Vector((math.cos(a), math.sin(a), 0))
@@ -2085,17 +2117,18 @@ def bell_gear(spec, m, it, bell, B, A, crown, forward):
                 it.append((rod(p + Vector((0.045 * math.cos(a), 0.045 * math.sin(a), -0.075)), p + Vector((0.045 * math.cos(a), 0.045 * math.sin(a), 0.075)), 0.004, n=3), m.trim))
             it.append((rod(p + Z * 0.08, crown + Vector((-(R * 0.5), 0, 0.06)), 0.004, n=3), mat("rope")))
         elif style == "cowl":       # a hood over it, falling in folds
-            rings = []
-            for zf, rr, back in ((1.12, 0.3, 0.0), (0.98, 0.72, 0.01), (0.7, 1.12, 0.02), (0.3, 1.3, 0.03), (-0.05, 1.42, 0.05)):
-                ring = []
-                for k in range(9):
-                    a = math.radians(-125 + 250 * k / 8) + math.pi
-                    fold = 1.0 + 0.07 * math.sin(k * 2.3) * (1.0 - zf)
-                    ring.append(B(Vector((math.sin(a) * bell.r_at(H * 0.6) * rr * fold, -math.cos(a) * bell.r_at(H * 0.6) * rr * fold + back, H * zf))))
-                rings.append(ring)
-            outer = g.loft(rings, caps=False, closed=False)
-            inner = g.loft([[p + (B(Vector((0, 0, H * 0.5))) - p).normalized() * 0.012 for p in ring] for ring in reversed(rings)], caps=False, closed=False)
-            it.append((g.merge(outer, inner), mat("cloth_wool"), SOFT))
+            # drawn close at the crown, open in an arch over its face, long behind
+            rows = []
+            for j, (zf, gap, open_) in enumerate(((1.0, 0.03, 16), (0.86, 0.035, 26), (0.6, 0.04, 40), (0.3, 0.05, 50), (0.0, 0.06, 56), (-0.2, 0.085, 60))):
+                row = []
+                for k in range(11):
+                    a = math.radians(open_ + (360 - 2 * open_) * k / 10)
+                    edge = 1.0 if k in (0, 10) else 0.0     # its hem stands out round the opening
+                    fold = 0.022 * math.sin(k * 2.2 + j) * (j / 5.0)
+                    rr = max(bell.r_at(H * min(1.0, max(0.0, zf))), 0.05 * s) + (gap + 0.02 * edge + fold) * s
+                    row.append(B(Vector((math.sin(a) * rr, -math.cos(a) * rr - 0.012 * edge, H * zf + (0.02 * math.cos(k * 1.7) if j == 5 else 0.0)))))
+                rows.append(row)
+            it.append((sheet(rows, 0.016 * s), mat("cloth_dark"), SOFT))
         elif style == "post-lamp":  # the post's own light
             p = A.get("post", A["top"])
             it += put(small_lamp(m), TR(p + Z * 0.0, s=1.3))

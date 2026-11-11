@@ -2,7 +2,7 @@
 ## form of the three must have a model of its own in game/assets/genius/forms, and the model
 ## must carry what the game and the contract rely on (docs/genius-evolutions.md): `ref_top`
 ## at the kit's height, `carry` (where a hand or a hook takes it), the usual sockets, a light
-## of the field somewhere on it, and it must stand on the ground.
+## of the field somewhere on it; it must stand on the ground and weigh under 80 KB.
 ## Run: godot --headless --path . -s res://game/tests/check_items.gd
 extends SceneTree
 
@@ -60,6 +60,9 @@ func _init() -> void:
 				said.append("does not stand on the ground (%.3f)" % low)
 			if not body.has("held"):
 				said.append("no held size in its body")
+			var glb := FileAccess.open(path, FileAccess.READ)
+			if glb and glb.get_length() >= 80000:
+				said.append("over 80 KB (%d bytes)" % glb.get_length())
 			count += 1
 			if said.is_empty():
 				print("%-28s stands %.2f over all, carried by %.2f, held %.2f m" % [id, high, (carry as Node3D).position.y, float(body.get("held", 0.0))])

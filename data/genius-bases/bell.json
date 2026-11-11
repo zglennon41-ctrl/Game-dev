@@ -477,7 +477,8 @@
     "tongue": "none",
     "face": "none",
     "carry": null,
-    "held": 0.28
+    "held": 0.28,
+    "coat": "frost"
    },
    "prongs": [
     {
@@ -552,7 +553,7 @@
          "doors"
         ],
         "held": 0.5,
-        "coat": null
+        "coat": "frost"
        }
       },
       {
@@ -579,7 +580,11 @@
          "post-lamp",
          "rope"
         ],
-        "held": 0.5
+        "held": 0.5,
+        "bell": [
+         "ship",
+         1.3
+        ]
        }
       }
      ]
@@ -657,7 +662,6 @@
          "fork",
          "damper"
         ],
-        "coat": "moon",
         "held": 0.45
        }
       },
@@ -767,7 +771,11 @@
         "build": {
          "tilt": 0.12
         },
-        "held": 0.55
+        "held": 0.55,
+        "bell": [
+         "ship",
+         1.12
+        ]
        }
       },
       {
@@ -846,7 +854,8 @@
      "band",
      "hammer"
     ],
-    "held": 0.3
+    "held": 0.3,
+    "coat": "blood"
    },
    "prongs": [
     {
