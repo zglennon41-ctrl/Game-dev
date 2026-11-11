@@ -4236,6 +4236,24 @@ func _update_form(f: Fight, dt: float) -> void:
 		if _g_body:
 			_g_body.move_at(0.0)
 		return
+	# A worn or carried genius sits on its partner where its kind is worn (data/genius-types.json,
+	# mounts), by the empty its own model has for that, at the size it was made.
+	if f.g_type in ["defense", "ritual"] and not genius_down and _p_skel and _g_body and is_instance_valid(_g_body) and _g_body._model:
+		var mount: Dictionary = Data.genius_types().get("mounts", {}).get(String(f.g_item.get("worn", "")), {})
+		var held: Node3D = _held_at(String(mount["by"])) if not mount.is_empty() else null
+		var bone := _p_skel.find_bone(String(mount.get("bone", ""))) if held else -1
+		if held and bone >= 0:
+			var bt := _p_skel.global_transform * _p_skel.get_bone_global_pose(bone)
+			var at: Array = mount["at"]
+			var turn: Array = mount["turn"]
+			var place := Transform3D(bt.basis.orthonormalized(), bt.origin) * Transform3D(Basis.from_euler(Vector3(deg_to_rad(turn[0]), deg_to_rad(turn[1]), deg_to_rad(turn[2]))), Vector3(at[0], at[1], at[2]))
+			var g := _g_body._local_xf(held)
+			var k := float(mount["scale"]) / maxf(0.001, _g_body._model.scale.y)
+			var fb := place.basis * g.basis.orthonormalized().inverse() * Basis.from_scale(Vector3.ONE * k)
+			_g_form.global_transform = Transform3D(fb, place.origin - fb * g.origin)
+			_g_form_pos = place.origin
+			_g_body.move_at(0.0)
+			return
 	if not _g_form.scale.is_equal_approx(Vector3.ONE):
 		_g_form.scale = Vector3.ONE
 	var walker := _g_body != null and _g_body.walks()

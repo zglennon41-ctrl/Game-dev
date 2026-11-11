@@ -2556,6 +2556,57 @@
      }
     }
    }
+  },
+  "mounts": {
+   "type": "object",
+   "properties": {
+    "$comment": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "bone",
+     "by",
+     "at",
+     "turn",
+     "scale"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "bone": {
+      "type": "string"
+     },
+     "by": {
+      "enum": [
+       "wear",
+       "carry",
+       "grip"
+      ]
+     },
+     "at": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+     },
+     "turn": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+     },
+     "scale": {
+      "type": "number",
+      "exclusiveMinimum": 0
+     }
+    }
+   }
   }
  }
 }

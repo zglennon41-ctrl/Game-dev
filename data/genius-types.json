@@ -627,6 +627,84 @@
       }
     }
   },
+  "mounts": {
+    "$comment": "Where a worn or carried genius sits on its partner (items.<base>.worn names one of these): the bone of the partner's rig it rides, which empty of the genius's own model is brought there (wear for a piece of armor, carry for an instrument: docs/genius-evolutions.md), where on the bone in metres and turned how in degrees, and how large against the size it was made. A genius whose model has no such empty, or whose place is not here, floats at its partner's side as before.",
+    "arm": {
+      "bone": "lowerarm.l",
+      "by": "wear",
+      "at": [
+        0.0,
+        0.12,
+        0.0
+      ],
+      "turn": [
+        0,
+        0,
+        0
+      ],
+      "scale": 1.0
+    },
+    "hand": {
+      "bone": "wrist.l",
+      "by": "wear",
+      "at": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "turn": [
+        0,
+        0,
+        0
+      ],
+      "scale": 1.0
+    },
+    "back": {
+      "bone": "chest",
+      "by": "wear",
+      "at": [
+        0.0,
+        0.2,
+        -0.02
+      ],
+      "turn": [
+        0,
+        0,
+        0
+      ],
+      "scale": 1.0
+    },
+    "side": {
+      "bone": "hips",
+      "by": "carry",
+      "at": [
+        0.24,
+        0.02,
+        0.04
+      ],
+      "turn": [
+        0,
+        0,
+        0
+      ],
+      "scale": 0.8
+    },
+    "belt": {
+      "bone": "hips",
+      "by": "carry",
+      "at": [
+        -0.2,
+        0.0,
+        0.12
+      ],
+      "turn": [
+        0,
+        0,
+        0
+      ],
+      "scale": 0.8
+    }
+  },
   "roles": {
     "$comment": "A companion's role (docs/genius-types.md, 'Companions'). does: what it does for its partner, in four words. lacks: the partner it balances. stands: where it keeps itself (front: between its partner and the foe; foe: on the foe; flank: behind the foe; side: at its partner's side; back: behind its partner). numbers: multipliers on its Will, the damage and interval of its blows, its speed, and what a guard costs it and how soon it guards again. favours: the moves it keeps first as it ages and makes first; the favourites of its own role come round in favourWait of their wait. own: the one thing only that role does, from the First Form at the worth of its age; a path that shades toward another role has that role's own thing too, at shade.other of its strength, and a path that keeps to its base's role has its own at shade.pure. The own things: hold-it (the foe is held on it for `seconds`: it goes for the genius, and the strike lands on the genius for `takes` of it, out of its Will), opening (its blows on a foe that is staggered or open land for `damage`, and it comes at once when the foe staggers), worry (the foe's guard is down and it takes `exposed` more for `seconds`), mend (while its partner is below `below` of their health and has not been struck for `after` seconds, every `every` seconds it gives `health` for `will` of its own), calls (while it watches, the moment to parry is `parryWindow`; when the foe begins to recover from a strike at its partner, their blows land for `mark` until it has).",
     "shade": {
