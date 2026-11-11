@@ -362,8 +362,8 @@ def hair(surf_ob, centre, sex, H, mat, back_y=None):
         if i % 9 != 0 or hairline(p, n, jag=0.0) < 0.035 * H:
             continue
         a = math.atan2(abs(p.x - c.x), -(p.y - c.y)) / math.pi
-        if a < 0.25 and p.z < c.z + 0.42 * H:
-            continue    # none down over the face
+        if a < 0.4:
+            continue    # none down over the face: the front of the crown is the cap's
         count += 1
         out_dir = Vector((p.x - c.x, p.y - c.y, 0.0))
         out_dir = out_dir.normalized() if out_dir.length > 1e-4 else Vector((0, 1, 0))
@@ -375,7 +375,7 @@ def hair(surf_ob, centre, sex, H, mat, back_y=None):
             z = p.z + (end_z - p.z) * t
             reach = r_out * (1.0 - 0.1 * t) * (0.86 if z < c.z - 0.3 * H else 1.0)
             pts.append(Vector((c.x + out_dir.x * reach, c.y + 0.03 * H + out_dir.y * reach + rnd.uniform(-0.01, 0.01) * H, z)))
-        _tube(bm, pts, [0.027 * H, 0.026 * H, 0.024 * H, 0.016 * H], segments=5)
+        _tube(bm, pts, [0.03 * H, 0.03 * H, 0.028 * H, 0.02 * H], segments=6)
     out.append(_ob("Hair_locs_fall", bm, mat))
 
     # rows: the rows end in short plaits at the nape

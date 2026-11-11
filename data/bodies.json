@@ -1424,10 +1424,10 @@
       {
         "id": "soft",
         "details": {
-          "head-round": 0.6,
-          "cheek-volume": 0.7,
+          "head-round": 0.35,
+          "cheek-volume": 0.35,
           "chin-width": 0.2,
-          "chin-height": -0.4,
+          "chin-height": -0.25,
           "chin-prominent": -0.2,
           "nose-scale-vert": -0.4,
           "nose-point": 0.5,
@@ -1436,8 +1436,7 @@
           "eye-trans-out": 0.3,
           "mouth-upperlip-volume": 0.5,
           "mouth-lowerlip-volume": 0.5,
-          "mouth-scale-horiz": -0.3,
-          "head-fat": 0.3
+          "mouth-scale-horiz": -0.3
         }
       },
       {
