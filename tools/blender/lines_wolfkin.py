@@ -2023,14 +2023,14 @@ def _drake_feet(r, A):
             top = r.bone("FrontUpperLeg" + side)
             Lb = (top - j).length
             mid = top.lerp(j, 0.42) + Vector((sg * 0.03, 0.02, 0.0))
-            _add(r, "shoulder_" + tag, g.ico(mid, Lb * 0.56, sub=2, scale=(0.56, 0.74, 1.0)), "FrontUpperLeg" + side, hide, smooth=True)
-            _add(r, "forearm_" + tag, g.tube([j + Z * 0.04, j.lerp(Vector((f.x, f.y, 0.16)), 0.5) + Y * 0.03, Vector((f.x, f.y + 0.02, 0.16))], [0.15, 0.125, 0.1], n=8), bone, hide, smooth=True)
+            _add(r, "shoulder_" + tag, g.ico(mid, Lb * 0.56, sub=1, scale=(0.56, 0.74, 1.0)), "FrontUpperLeg" + side, hide, smooth=True)
+            _add(r, "forearm_" + tag, g.tube([j + Z * 0.04, j.lerp(Vector((f.x, f.y, 0.16)), 0.5) + Y * 0.03, Vector((f.x, f.y + 0.02, 0.16))], [0.15, 0.125, 0.1], n=6), bone, hide, smooth=True)
         else:                        # the haunch: the thigh a great round, a shank under it
             hip, knee = r.bone("BackLeg" + side), r.bone("BackUpperLeg" + side)
             Lb = (hip - knee).length
             mid = hip.lerp(knee, 0.4) + Vector((sg * 0.02, 0.05, 0.02))
-            _add(r, "haunch_" + tag, g.ico(mid, Lb * 0.74, sub=2, scale=(0.5, 0.86, 1.0)), "BackLeg" + side, hide, smooth=True)
-            _add(r, "shank_" + tag, g.tube([knee, knee.lerp(j, 0.5) + Y * 0.04, j], [0.17, 0.14, 0.11], n=8), "BackUpperLeg" + side, hide, smooth=True)
+            _add(r, "haunch_" + tag, g.ico(mid, Lb * 0.74, sub=1, scale=(0.5, 0.86, 1.0)), "BackLeg" + side, hide, smooth=True)
+            _add(r, "shank_" + tag, g.tube([knee, knee.lerp(j, 0.5) + Y * 0.04, j], [0.17, 0.14, 0.11], n=6), "BackUpperLeg" + side, hide, smooth=True)
         if tag[0] == "f":           # the point of the elbow, out and back
             _add(r, "elbow_" + tag, g.cone(j + Vector((sg * 0.04, 0.05, 0.0)), j + Vector((sg * 0.15, 0.3, 0.1)), 0.08, n=5), bone, _horn_mat(), smooth=True)
 
@@ -2297,10 +2297,6 @@ def _drake_horns(style):
                 geo = g.merge(geo, curve(sg, [(0.1, 0.1, 0.2), (0.15, 0.2, 0.46), (0.07, 0.28, 0.72)], 0.06)[0])
             elif style == "sights":     # two short behind and one on the end of its snout: it sights along them
                 geo = g.merge(geo, curve(sg, [(0.0, 0.06, 0.14), (0.0, 0.1, 0.24)], 0.045, at=(0.08, 0.02, 0.2))[0])
-            if style not in ("nubs", "ring"):  # two shorter spines at the corner of each jaw
-                for k, ln in enumerate((0.22, 0.16)):
-                    b0 = P(sg * 0.262, 0.07, 0.1 - 0.085 * k)
-                    geo = g.merge(geo, g.cone(b0, b0 + Vector((sg * 0.11, ln, 0.03 - 0.04 * k)) * (S * size), 0.034 * S, n=5))
         if style == "ring":       # a pale band round the base of one horn, worn like a ring
             c = P(0.175, 0.07, 0.25)
             _add(r, "horn_ring", _hoop(c, Vector((0.12, 0.7, 0.7)), 0.07 * S, 0.022 * S, n=8, sides=4), "Head", mat("glaze_kiln"), smooth=True)
@@ -2421,6 +2417,10 @@ def _drake_ridge(style):
             return {"neck": 0.1 + 0.14 * (1.0 - t), "back": 0.24 + 0.1 * math.sin(t * math.pi), "tail": 0.26 * (1.0 - t / 0.62) + 0.04}[z] * size
         if style == "plates":
             plates(std, m, "ridge")
+        elif style == "hoard":        # broad plates, two sizes turn about, in its Path's colour: a back like a row of shields
+            a1, a2 = (mat("accent"), mat("accent_deep")) if acc else (m, m)
+            plates(lambda z, t, i: ({"neck": 0.2 + 0.2 * (1.0 - t), "back": 0.46 + 0.22 * math.sin(t * math.pi), "tail": 0.4 * (1.0 - t / 0.7) + 0.06}[z]) * size * (1.0 if i % 2 else 0.72),
+                   a1, "ridge_hoard", lean=0.16, wide=1.25, alt=a2, tail_to=0.7)
         elif style == "young":        # a ridge it has not grown into: a few plates, too big for it
             plates(lambda z, t, i: (0.3 + 0.16 * math.sin(t * math.pi)) * size, m, "ridge", every=2, zones=("back",), lean=0.2, wide=0.8)
             plates(lambda z, t, i: 0.16 * size * (1.0 - t), m, "ridge_tail", every=2, zones=("tail",), tail_to=0.5)
@@ -2533,10 +2533,11 @@ WING_K = 1.3
 WINGS = {
     "folded": dict(arm=[(0.14, 0.34, 0.42), (0.2, -0.12, 0.86)], fingers=[(0.05, 0.85, 0.2), (0.1, 1.2, -0.12), (0.13, 1.25, -0.5), (0.1, 0.85, -0.8)], inner=(0.05, 0.8, -0.1), move=None),
     "furled": dict(arm=[(0.12, 0.3, 0.3), (0.18, 0.0, 0.6)], fingers=[(0.05, 0.75, 0.1), (0.1, 1.0, -0.15), (0.12, 0.9, -0.5)], inner=(0.05, 0.7, -0.1), move=None, k=1.0),
+    "rampant": dict(arm=[(0.7, -0.1, 0.9), (1.5, -0.35, 1.7)], fingers=[(1.1, -0.3, 1.0), (1.5, 0.7, 0.6), (1.3, 1.6, -0.2), (0.8, 2.0, -1.1), (0.2, 1.7, -1.6)], inner=(0.1, 1.3, -0.3), move="beat"),
     "nubs": dict(k=1.0, arm=[(0.12, 0.14, 0.14), (0.17, 0.36, 0.2)], fingers=[(0.07, 0.28, 0.1), (0.05, 0.36, -0.05), (0.02, 0.26, -0.18)], inner=(0.02, 0.4, -0.05), move=None),
     "half": dict(arm=[(0.34, 0.12, 0.7), (0.56, 0.42, 1.25)], fingers=[(0.62, 0.25, 0.9), (0.56, 1.05, 0.5), (0.34, 1.45, -0.1), (0.1, 1.45, -0.6)], inner=(0.05, 1.1, -0.2), move="glide"),
-    "glide": dict(arm=[(0.85, -0.1, 0.62), (1.75, 0.05, 1.1)], fingers=[(1.45, 0.1, 0.62), (1.25, 0.85, 0.3), (0.72, 1.25, -0.02), (0.2, 1.35, -0.4)], inner=(0.1, 1.2, -0.05), move="glide"),
-    "mantle": dict(arm=[(0.5, 0.0, 1.0), (0.95, 0.15, 1.9)], fingers=[(0.72, -0.05, 1.1), (1.0, 0.7, 0.8), (0.85, 1.25, 0.2), (0.4, 1.45, -0.5)], inner=(0.1, 1.2, -0.3), move="beat"),
+    "glide": dict(arm=[(0.8, -0.15, 0.75), (1.7, -0.1, 1.35)], fingers=[(1.4, 0.0, 0.8), (1.3, 0.95, 0.35), (0.8, 1.5, -0.1), (0.25, 1.6, -0.6)], inner=(0.1, 1.2, -0.05), move="glide"),
+    "mantle": dict(arm=[(0.4, -0.05, 0.9), (0.7, -0.3, 1.75)], fingers=[(0.45, -0.25, 0.85), (0.75, 0.8, 0.55), (0.7, 1.5, -0.2), (0.45, 1.75, -1.0), (0.15, 1.45, -1.5)], inner=(0.1, 1.2, -0.3), move="beat"),
     "stoop": dict(arm=[(0.4, 0.3, 0.45), (0.62, 1.0, 0.76)], fingers=[(0.34, 1.5, 0.45), (0.17, 1.7, 0.1), (0.0, 1.35, -0.3)], inner=(0.05, 1.0, -0.1), move="glide"),
     "shadow": dict(arm=[(1.0, -0.4, 0.8), (2.1, -0.6, 1.35)], fingers=[(1.6, -0.6, 0.6), (1.7, 0.3, 0.1), (1.15, 1.25, -0.3), (0.5, 1.75, -0.6), (0.1, 1.85, -0.7)], inner=(0.1, 1.5, -0.4), move="glide"),
     "banner": dict(arm=[(0.6, 0.1, 0.9), (1.1, 0.4, 1.6)], fingers=[(0.5, 0.4, 1.0), (0.6, 1.5, 0.9), (0.5, 2.5, 0.3), (0.2, 1.6, -0.3)], inner=(0.05, 1.2, -0.2), move="beat"),
@@ -2996,14 +2997,40 @@ def drake_smokeback(r, A, size):
         _piece("sway", "backsmoke" + "abcd"[k], [(sm, mat("smoke_pale"), True)], pt, _bone_of(w))
 
 
+def drake_armor(r, A, size):
+    """Plates lapped down each shoulder and haunch, cut flat: it is armoured where it is struck."""
+    acc = bool(_S["spec"].get("accent"))
+    m1, m2 = (mat("accent_deep"), mat("accent")) if acc else (_horn_mat(), _horn_mat())
+    g1, g2 = None, None
+    for tag, foot, bone in gl.FEET:
+        sg = 1 if r.bone(foot).x > 0 else -1
+        side = ".L" if sg > 0 else ".R"
+        if tag[0] == "f":
+            top, low = r.bone("FrontUpperLeg" + side), r.bone(bone)
+            R, bn = (top - low).length * 0.56, "FrontUpperLeg" + side
+        else:
+            top, low = r.bone("BackLeg" + side), r.bone("BackUpperLeg" + side)
+            R, bn = (top - low).length * 0.7, "BackLeg" + side
+        for k, (f, kk) in enumerate(((0.16, 1.0), (0.44, 0.86), (0.7, 0.66))):
+            c = top.lerp(low, f) + Vector((sg * (R * 0.46 + 0.02), 0.03, R * 0.1))
+            pl = g.ico(c, R * 0.62 * kk * size, sub=1, scale=(0.26, 1.0, 0.72))
+            if k % 2:
+                g2 = g.merge(g2, pl)
+            else:
+                g1 = g.merge(g1, pl)
+        _add(r, "armor_" + tag, g1, bn, m1, smooth=False)
+        _add(r, "armor_b_" + tag, g2, bn, m2, smooth=False)
+        g1, g2 = None, None
+
+
 def _drake_tail_shapes():
     S = gl.SHAPES
     # how it carries its tail (the shapes every one of the wolf's kin has work on it too)
     S[("tail", "drag")] = lambda r, s: _trail(r, (0.4, 0.08, 0.0, 0.0, 0.0, 0.0, 0.02))
     S[("tail", "sweep")] = lambda r, s: _trail(r, (0.4, 0.08, 0.0, 0.0, 0.0, 0.0, 0.0), yaw=[0, 10 * s, 20 * s, 26 * s, 30 * s, 30 * s, 28 * s, 24 * s])
     S[("tail", "coil")] = lambda r, s: _trail(r, (0.5, 0.2, 0.06, 0.0, 0.0, 0.0, 0.0), yaw=[0, 24 * s, 40 * s, 46 * s, 50 * s, 52 * s, 54 * s, 54 * s])
-    S[("tail", "level")] = lambda r, s: _trail(r, (0.96, 0.92, 0.9, 0.9, 0.92, 0.96, 1.02))
-    S[("tail", "high")] = lambda r, s: _trail(r, (1.2, 1.45, 1.7, 1.9, 2.05, 2.15, 2.2))
+    S[("tail", "level")] = lambda r, s: _trail(r, (0.96, 0.9, 0.86, 0.9, 1.0, 1.14, 1.3), yaw=[0, 8 * s, 14 * s, 10 * s, -8 * s, -20 * s, -24 * s, -18 * s])
+    S[("tail", "high")] = lambda r, s: _trail(r, (1.2, 1.5, 1.8, 2.05, 2.2, 2.2, 2.05), yaw=[0, 6 * s, 10 * s, 6 * s, -8 * s, -16 * s, -16 * s, -10 * s])
     S[("tail", "hook")] = lambda r, s: _trail(r, (1.1, 1.3, 1.6, 2.0, 2.4, 2.6, 2.5))
     S[("tail", "lash")] = lambda r, s: _trail(r, (0.84, 0.66, 0.5, 0.38, 0.3, 0.26, 0.3), yaw=[0, -8 * s, -14 * s, -18 * s, 10 * s, 26 * s, 34 * s, 30 * s])
 
@@ -3014,7 +3041,7 @@ def _drake_styles():
         G[("horns", st)] = _drake_horns(st)
     for st in ("gate", "herald", "ruff", "crown", "crest", "beard"):
         G[("frill", st)] = _drake_frill(st)
-    for st in ("plates", "young", "spines", "flame", "sail", "beads", "pots", "crumbled", "lamps", "coins"):
+    for st in ("plates", "hoard", "young", "spines", "flame", "sail", "beads", "pots", "crumbled", "lamps", "coins"):
         G[("ridge", st)] = _drake_ridge(st)
     for st in list(WINGS) + ["flat"]:
         G[("wings", st)] = _drake_wings(st)
@@ -3022,6 +3049,7 @@ def _drake_styles():
         G[("throat", st)] = _drake_throat(st)
     for st in ("spade", "club", "hammer", "rudder", "banner", "lamp"):
         G[("tailend", st)] = _drake_tailend(st)
+    G[("plating", "limbs")] = drake_armor
     G[("shell", "vault")] = drake_shell
     G[("lies", "rubble")] = drake_rubble
     G[("lies", "soot")] = drake_soot
