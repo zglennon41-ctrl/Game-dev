@@ -156,3 +156,77 @@ bash tools/genius-tree-page.sh wolf                 # the page of the whole tree
 4. **How strange a Final may be.** The Wolf's Finals stay wolves (a Wall-wolf is a wolf
    built like a wall). They could go further from the animal: say how far.
 5. **The Baby**: one for everyone, or one that already leans toward what it will be.
+
+## The weapons: the Blade, the Gun and the Bow
+
+`tools/blender/lines_weapons.py` builds these three lines (ninety-three bodies). A weapon
+genius is its own weapon, so every form is two things in one model.
+
+**In the hand.** The model is made in the weapon kit's frame and at its scale
+(`tools/blender/weapon_kit.py`, `docs/weapons.md`): a blade runs along +Z from the hand, its
+true edge to +X; a gun's barrel runs along −Y, its top to +Z; a bow's limbs run along ±Z,
+its back to −Y and its string at +Y; the origin is the hand slot. That frame is kept in the
+model as an empty named `grip`; `grip_off` is where the second hand goes (the lower grip of
+a hilt long enough for two, a long gun's fore-end, the nock of a bowstring). To put a form
+in a hand, give the model the inverse of `grip`'s transform under the hand slot, at scale 1,
+and from there treat it as the kit's own model of that type (guns and bows take the same
+quarter turn the kit's do, `World.RANGED_MODELS`).
+
+**Floating.** It stands the way its base did: a blade hangs point-down (the wooden swords
+point-up, the Lunge at a slant, the Bar crosswise, the Wall of One planted in the ground), a
+gun rides level at the hip with its muzzle to the front, a bow stands upright with its arrow
+of light to the front; the standing guns stand on their own legs. `ref_top` is set so an
+Advancement or a Final floats at exactly the size it is in the hand at the Form it is earned
+at, a Path a tenth larger, the Starter a third larger; `show` makes one form larger still (a
+small knife, a belly-gun).
+
+The partner's coat is on the weapon by role (`data/genius-looks.json`, `bodies`): the wrap
+and the brass of a blade, the ironwork and the brass of a gun (its stock stays walnut), the
+limbs of a bow.
+
+| Line | Key | What it is | Styles |
+|---|---|---|---|
+| Blade | `blade` | the steel: `kind` `shape` `len` `width` `thick` `curve` `tip` `taper` `flare` `fuller` `steel` | kinds `sword` `saber` `board`; shapes `knife` `cleaver` `belly` `hook` `bar` `clip`; steels `steel` `bright` `grey` `night` `oak` `pale` `green` `dark` `hot` |
+| | `hilt` | `len` `wrap` `metal` `grooved` `thick` | wraps `leather` `dark` `wire` `cord` `cloth` `bone` `wood` `worn` `red` `green` `pale` `crepe` |
+| | `guard` | | `none` `bar` `droop` `wide` `sail` `cup` `shell` `disc` `knuckle` `ring` `hook` `wood` `block` `crescent` |
+| | `pommel` | | `scent` `cap` `ball` `ring` `disc` `spike` `knot` `eye` `none` |
+| | `edge` | what its edge has become | `notched` `old-notch` `light` `temper` `blunt` |
+| | `cut` | what is cut or laid into the flat | `tally` `names` `line` `core` `plates` `bands` `pulse` |
+| | `spine` | along its back | `rings` `oak` `glow` `hook` `saw` |
+| | `eye`, `eyelook`, `lens` | where its eye is, and how it looks | `blade` `guard` `pommel` `knot`; `open` `old` `closed` `dark` |
+| | `hang`, `cloth` | what hangs from it | `tassel` `whetstone` `sheath` `wrap` `smoke` `endring` `chain` |
+| | `pose`, `sheathed` | how it floats | `down` `up` `slant` `cross` `planted` |
+| Gun | `gun` | the piece: `frame` `barrel` `bore` `barrels` `muzzle` `butt` `lock` `wheel` `chambers` `closed` `hammer` `wood` | frames `pocket` `revolver` `rifle` `carbine` `pole` `wall`; locks `flint` `hammer` `cogs` `thumb` `none` |
+| | `sight`, `eyelook` | its lens, which is its eye | `lens` `long` `wide` `dark` `two` |
+| | `grows` | what it has grown or been given | `bipod` `stride` `level` `wheels` `tripod` `gimbal` `drum` `mud` `round` `rags` `works` `vanes` `screen` `frost` `rings` `wire` `patches` `smoke` `hot` `odd` `hands` `lamp` `veil` `writ` `shield` `mantlet` `walls` `horn` `flag` `badge` `wisps` |
+| | `height` | how tall it stands on its legs (0: it floats) | |
+| Bow | `bow` | the stave: `len` `bend` `recurve` `limb` `width` `thick` `wood` `belly` `grip` `lower` `shoulders` `rough` `wrap` `tips` | limbs `stave` `leaf` `paddle` `scroll`; tips `mark_tips` `horn` `bone` `brass` `horn-long` `scroll` |
+| | `string`, `draw` | | `plain` `wrapped` `dark` `ring` `tremble` `twitch` `hair` `glow` `wires` `none` |
+| | `arrow` | the arrow of light on the string | `light` `fire` `up` `many` `threads` `none` |
+| | `eye`, `eyelook` | the eye in its grip | `grip`; `open` `old` `closed` `dark` |
+| | `rides` | what rides on it | `bark` `arrows` `ear` `sinew` `vanes` `wings` `sight` `fletch` `brazier` `feet` `lamp` `quiver` `insulators` `spool` `gourd` `roots` `candle` `tip-eyes` `token` `knot` `crepe` `needle` `bands` `cloth` |
+| all | `show`, `coat` | larger or smaller than its stage; how the partner's coat is worn | a shift, as above |
+
+What each path keeps, so its line can be put back in order:
+
+| Line | Path | It is | It grows |
+|---|---|---|---|
+| Blade | Duelling Blade | slim straight steel, a cup at the hand | a wider guard, a lens, a line of light; or a needle; or, from the Wooden Sword, wood to bare steel, point up |
+| | Cleaver | a broad single edge, heavy at the point, iron | rings on its back, notches in its edge, a hook, a plated slab, a bar |
+| | Scored Blade | a curved edge, a brass bow over the knuckles, tally marks | names, a shell guard, a glowing back; or it goes grey, old, black |
+| Gun | Long Gun | a walnut rifle and a far eye | a bipod and mud, one great round, rags; a wide lens and works; a dark lens |
+| | Repeater | a wheel of chambers in a brass frame | a fanning hammer, rings of light; legs, a gimbal, wheels; a hand-cannon on a pole |
+| | Standing Gun | a wall-gun on three legs | a lamp, a writ, a shield, a mantlet taller than you, walls, a horn, a badge, a drum |
+| Bow | Hunting Bow | a flat bow, leaf-limbed, bark still on it | a wrapped string, a full draw; arrows on its back, an ear; vanes, wings |
+| | War Bow | broad in the shoulder, banded in iron, a red grip | a fan of fletchings, many arrows, fire; feet, a lamp, wires; a great eye |
+| | Singing Bow | slender, twice-curved, scrolled at the tips, a gourd to speak through | a ring of light, roots; an old eye, more eyes; a hair for a string, then none |
+
+**Their gifts**, as parts (`python tools/blender/lines_weapons.py parts`): `short-blade` (a
+real one, carried across the mouth or in the hand), `edge` (a blade swept back from each
+shoulder), `gears` (three cogs at the breast and a key to wind them), `sight-glass` (a brass
+glass borne over the brow), `far-eyes` (two great lenses on a band), `fletching` (flights of
+the field along the back; it hangs at `socket_back`, `featureSockets`). A body does not wear
+its own base's gift: a Gun carried into a hybrid's line is already the picture of a gun.
+
+Small round things (studs, knees, bags, the gourd) are shaded round: twelve points where a
+faceted ball spends sixty. It is what keeps every body under 80 KB.

@@ -652,7 +652,11 @@ func _sheet(what: String) -> void:
 	await get_tree().create_timer(1.0).timeout
 	await RenderingServer.frame_post_draw
 	var img := get_viewport().get_texture().get_image()
-	img.resize(COLS * 100, ROWS * 100, Image.INTERPOLATE_BILINEAR)
+	# two hundred dots to a cell: a blade or a bow's limb is a few fingers wide, and at a
+	# hundred it was lost against the ground and the thing was framed by its hilt alone
+	const RES := 200
+	var per := 100.0 / RES
+	img.resize(COLS * RES, ROWS * RES, Image.INTERPOLATE_BILINEAR)
 	var back := img.get_pixel(1, 1)
 	var wide: Array = []      # of each, from the middle of its cell, and how tall, in hundredths of a cell
 	var tall: Array = []
@@ -663,16 +667,16 @@ func _sheet(what: String) -> void:
 		low.append(100.0)
 	for y in img.get_height():
 		for x in img.get_width():
-			var n := (y / 100) * COLS + x / 100
+			var n := (y / RES) * COLS + x / RES
 			if n >= bodies.size():
 				continue
 			var c := img.get_pixel(x, y)
 			if absf(c.r - back.r) + absf(c.g - back.g) + absf(c.b - back.b) < 0.12:
 				continue
-			var up := (1.0 - FLOOR) * 100.0 - float(y % 100)
+			var up := (1.0 - FLOOR) * 100.0 - float(y % RES) * per
 			if up < 0.0:
 				continue      # what hangs below its ground is not counted
-			wide[n] = maxf(wide[n], absf(float(x % 100) + 0.5 - 50.0) + 1.0)
+			wide[n] = maxf(wide[n], absf((float(x % RES) + 0.5) * per - 50.0) + 1.0)
 			tall[n] = maxf(tall[n], up + 1.0)
 			low[n] = minf(low[n], up)
 	const FILL := [0.56, 0.68, 0.78, 0.9]

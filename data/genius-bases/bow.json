@@ -64,7 +64,24 @@
   "features": [
    "grip",
    "bowstring-hum"
-  ]
+  ],
+  "body": {
+   "bow": {
+    "len": 0.45,
+    "bend": 0.26,
+    "width": 0.028,
+    "thick": 0.02,
+    "rough": 1.0,
+    "wrap": "cord",
+    "tips": null,
+    "grip": 0.14
+   },
+   "string": "plain",
+   "arrow": [
+    "light",
+    0.8
+   ]
+  }
  },
  "paths": [
   {
@@ -85,6 +102,25 @@
    "features": [
     "far-eyes"
    ],
+   "body": {
+    "bow": {
+     "len": 0.72,
+     "bend": 0.3,
+     "limb": "leaf",
+     "width": 0.055,
+     "thick": 0.02,
+     "rough": 0.3,
+     "wrap": "dark",
+     "tips": "mark_tips",
+     "grip": 0.2
+    },
+    "rides": [
+     [
+      "bark",
+      1.0
+     ]
+    ]
+   },
    "prongs": [
     {
      "id": "bow-stalker",
@@ -104,6 +140,21 @@
      "features": [
       "quiet-place"
      ],
+     "body": {
+      "bow": {
+       "len": 0.8
+      },
+      "string": [
+       "wrapped",
+       1.0
+      ],
+      "rides": [
+       [
+        "bark",
+        0.8
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "bow-held-breath",
@@ -122,7 +173,26 @@
        },
        "features": [
         "cold-core"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 0.96,
+         "bend": 0.34,
+         "belly": "bone",
+         "rough": 0.0
+        },
+        "string": [
+         "plain",
+         1.0
+        ],
+        "draw": 0.36,
+        "arrow": [
+         "light",
+         1.25
+        ],
+        "rides": null,
+        "coat": "frost"
+       }
       },
       {
        "id": "bow-lone-string",
@@ -141,7 +211,23 @@
        },
        "features": [
         "dark-eyed"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 0.92,
+         "tips": "horn",
+         "wrap": "crepe",
+         "rough": 0.0
+        },
+        "string": [
+         "dark",
+         1.0
+        ],
+        "eyelook": "closed",
+        "arrow": "none",
+        "rides": null,
+        "coat": "night"
+       }
       }
      ]
     },
@@ -163,6 +249,21 @@
      "features": [
       "ledger"
      ],
+     "body": {
+      "bow": {
+       "len": 0.82
+      },
+      "rides": [
+       [
+        "bark",
+        0.8
+       ],
+       [
+        "arrows",
+        1.0
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "bow-blood-trail",
@@ -181,7 +282,26 @@
        },
        "features": [
         "tunnel-ear"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 0.94
+        },
+        "rides": [
+         [
+          "arrows",
+          0.7
+         ],
+         [
+          "ear",
+          1.3
+         ],
+         [
+          "cloth",
+          1.2
+         ]
+        ]
+       }
       },
       {
        "id": "bow-bowyers-pride",
@@ -200,7 +320,28 @@
        },
        "features": [
         "horn-brow"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 0.86,
+         "bend": 0.2,
+         "recurve": 1.3,
+         "belly": "horn",
+         "tips": "horn-long",
+         "width": 0.062,
+         "rough": 0.0
+        },
+        "rides": [
+         [
+          "sinew",
+          1.0
+         ],
+         [
+          "arrows",
+          0.7
+         ]
+        ]
+       }
       }
      ]
     },
@@ -222,6 +363,20 @@
      "features": [
       "wings"
      ],
+     "body": {
+      "bow": {
+       "len": 0.7,
+       "width": 0.04,
+       "thick": 0.015,
+       "rough": 0.0
+      },
+      "rides": [
+       [
+        "vanes",
+        1.2
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "bow-wing-shot",
@@ -240,7 +395,22 @@
        },
        "features": [
         "long-legs"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 0.78
+        },
+        "rides": [
+         [
+          "vanes",
+          1.0
+         ],
+         [
+          "wings",
+          1.0
+         ]
+        ]
+       }
       },
       {
        "id": "bow-skyline",
@@ -259,7 +429,27 @@
        },
        "features": [
         "sight-glass"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 1.02,
+         "recurve": 0.6
+        },
+        "arrow": [
+         "up",
+         1.1
+        ],
+        "rides": [
+         [
+          "vanes",
+          1.2
+         ],
+         [
+          "sight",
+          1.4
+         ]
+        ]
+       }
       }
      ]
     }
@@ -283,6 +473,27 @@
    "features": [
     "broad-chest"
    ],
+   "body": {
+    "bow": {
+     "len": 1.05,
+     "bend": 0.24,
+     "recurve": 0.6,
+     "limb": "paddle",
+     "width": 0.07,
+     "thick": 0.026,
+     "wrap": "red",
+     "tips": "horn",
+     "grip": 0.24,
+     "rough": 0.0
+    },
+    "rides": [
+     [
+      "bands",
+      1.0
+     ]
+    ],
+    "coat": "blood"
+   },
    "prongs": [
     {
      "id": "bow-volley",
@@ -302,6 +513,21 @@
      "features": [
       "fletching"
      ],
+     "body": {
+      "bow": {
+       "len": 1.15
+      },
+      "rides": [
+       [
+        "bands",
+        1.0
+       ],
+       [
+        "fletch",
+        1.0
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "bow-arrow-storm",
@@ -320,7 +546,31 @@
        },
        "features": [
         "pulse"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 1.3,
+         "width": 0.082
+        },
+        "string": [
+         "tremble",
+         1.0
+        ],
+        "arrow": [
+         "many",
+         1.0
+        ],
+        "rides": [
+         [
+          "bands",
+          1.0
+         ],
+         [
+          "fletch",
+          1.4
+         ]
+        ]
+       }
       },
       {
        "id": "bow-fire-arrow",
@@ -337,7 +587,30 @@
        },
        "features": [
         "ember"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 1.2
+        },
+        "arrow": [
+         "fire",
+         1.1
+        ],
+        "rides": [
+         [
+          "bands",
+          1.0
+         ],
+         [
+          "fletch",
+          0.7
+         ],
+         [
+          "brazier",
+          1.2
+         ]
+        ]
+       }
       }
      ]
     },
@@ -359,6 +632,22 @@
      "features": [
       "set-feet"
      ],
+     "body": {
+      "bow": {
+       "len": 1.0,
+       "lower": 0.8
+      },
+      "rides": [
+       [
+        "bands",
+        1.0
+       ],
+       [
+        "feet",
+        1.0
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "bow-tenders-bow",
@@ -377,7 +666,30 @@
        },
        "features": [
         "lantern"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 1.1
+        },
+        "rides": [
+         [
+          "bands",
+          1.0
+         ],
+         [
+          "feet",
+          1.0
+         ],
+         [
+          "lamp",
+          1.3
+         ],
+         [
+          "quiver",
+          1.2
+         ]
+        ]
+       }
       },
       {
        "id": "bow-wire-song",
@@ -396,7 +708,29 @@
        },
        "features": [
         "voice"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 1.16,
+         "wood": "steel_dark",
+         "belly": "steel",
+         "tips": "brass"
+        },
+        "string": [
+         "wires",
+         1.0
+        ],
+        "rides": [
+         [
+          "feet",
+          1.0
+         ],
+         [
+          "insulators",
+          1.0
+         ]
+        ]
+       }
       }
      ]
     },
@@ -418,6 +752,21 @@
      "features": [
       "watching-eye"
      ],
+     "body": {
+      "bow": {
+       "len": 1.0
+      },
+      "eye": [
+       "grip",
+       1.8
+      ],
+      "rides": [
+       [
+        "bands",
+        1.0
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "bow-over-the-shoulder",
@@ -436,7 +785,28 @@
        },
        "features": [
         "far-eyes"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 1.2,
+         "lower": 0.6,
+         "recurve": 0.7
+        },
+        "eye": [
+         "grip",
+         2.0
+        ],
+        "rides": [
+         [
+          "bands",
+          0.8
+         ],
+         [
+          "cloth",
+          1.3
+         ]
+        ]
+       }
       },
       {
        "id": "bow-pin-shot",
@@ -455,7 +825,30 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 1.06
+        },
+        "arrow": [
+         "threads",
+         1.0
+        ],
+        "eye": [
+         "grip",
+         1.8
+        ],
+        "rides": [
+         [
+          "bands",
+          1.0
+         ],
+         [
+          "spool",
+          1.3
+         ]
+        ]
+       }
       }
      ]
     }
@@ -479,6 +872,27 @@
    "features": [
     "voice"
    ],
+   "body": {
+    "bow": {
+     "len": 0.8,
+     "bend": 0.36,
+     "recurve": 1.6,
+     "limb": "scroll",
+     "width": 0.04,
+     "thick": 0.02,
+     "wrap": "pale",
+     "tips": "scroll",
+     "grip": 0.2,
+     "rough": 0.0
+    },
+    "rides": [
+     [
+      "gourd",
+      1.1
+     ]
+    ],
+    "coat": "moon"
+   },
    "prongs": [
     {
      "id": "bow-humming",
@@ -498,6 +912,16 @@
      "features": [
       "ring"
      ],
+     "body": {
+      "bow": {
+       "len": 0.88
+      },
+      "string": [
+       "ring",
+       1.5
+      ],
+      "arrow": "none"
+     },
      "finishes": [
       {
        "id": "bow-snare-string",
@@ -516,7 +940,26 @@
        },
        "features": [
         "roots"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 0.98
+        },
+        "string": [
+         "ring",
+         1.5
+        ],
+        "rides": [
+         [
+          "gourd",
+          1.1
+         ],
+         [
+          "roots",
+          2.0
+         ]
+        ]
+       }
       },
       {
        "id": "bow-vigil-note",
@@ -535,7 +978,27 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 1.02
+        },
+        "string": [
+         "glow",
+         1.2
+        ],
+        "rides": [
+         [
+          "gourd",
+          1.2
+         ],
+         [
+          "candle",
+          1.3
+         ]
+        ],
+        "coat": "frost"
+       }
       }
      ]
     },
@@ -557,6 +1020,16 @@
      "features": [
       "old-eyes"
      ],
+     "body": {
+      "bow": {
+       "len": 0.9
+      },
+      "eye": [
+       "grip",
+       2.2
+      ],
+      "eyelook": "old"
+     },
      "finishes": [
       {
        "id": "bow-twitch",
@@ -575,7 +1048,26 @@
        },
        "features": [
         "pulse"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 0.96
+        },
+        "string": [
+         "twitch",
+         1.8
+        ],
+        "rides": [
+         [
+          "gourd",
+          1.0
+         ],
+         [
+          "needle",
+          1.7
+         ]
+        ]
+       }
       },
       {
        "id": "bow-far-seers-bow",
@@ -594,7 +1086,26 @@
        },
        "features": [
         "watching-eye"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 1.12
+        },
+        "arrow": [
+         "up",
+         1.0
+        ],
+        "rides": [
+         [
+          "gourd",
+          1.0
+         ],
+         [
+          "tip-eyes",
+          1.2
+         ]
+        ]
+       }
       }
      ]
     },
@@ -616,6 +1127,25 @@
      "features": [
       "crown"
      ],
+     "body": {
+      "bow": {
+       "len": 0.9
+      },
+      "string": [
+       "hair",
+       1.0
+      ],
+      "rides": [
+       [
+        "gourd",
+        1.0
+       ],
+       [
+        "token",
+        1.0
+       ]
+      ]
+     },
      "finishes": [
       {
        "id": "bow-unstrung",
@@ -634,7 +1164,29 @@
        },
        "features": [
         "quiet-place"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 1.0,
+         "bend": 0.42
+        },
+        "string": "none",
+        "draw": 0.3,
+        "rides": [
+         [
+          "gourd",
+          1.0
+         ],
+         [
+          "token",
+          1.0
+         ],
+         [
+          "knot",
+          1.2
+         ]
+        ]
+       }
       },
       {
        "id": "bow-mourning-bow",
@@ -653,7 +1205,31 @@
        },
        "features": [
         "shadow-cloak"
-       ]
+       ],
+       "body": {
+        "bow": {
+         "len": 1.06
+        },
+        "string": [
+         "dark",
+         1.0
+        ],
+        "rides": [
+         [
+          "gourd",
+          1.0
+         ],
+         [
+          "crepe",
+          1.2
+         ],
+         [
+          "token",
+          0.8
+         ]
+        ],
+        "coat": "night"
+       }
       }
      ]
     }
