@@ -291,6 +291,7 @@
     "aspect-flame": { "coats": "coal", "roles": { "coal": "main", "shade_edge": "under" } },
     "aspect-wisps": { "coats": "coal", "roles": { "coal": "main", "shade_edge": "under" } },
     "aspect-frost": { "coats": "ice", "roles": { "ice": "main", "ice_dark": "under", "ice_pale": "trim" } },
+    "aspect-demigod": { "coats": "stone", "roles": { "stone_flesh": "main", "cloth_wrap": "under", "stone_band": "trim" } },
     "engine-lantern": { "coats": "brass", "roles": { "metal_brass": "main", "metal_iron": "under", "metal_dark": "trim" } },
     "engine-flier": { "coats": "brass", "roles": { "metal_brass": "main", "metal_iron": "under", "metal_dark": "trim" }, "marks": { "enamel": { "name": "an enamelled breast", "on": "main" } }, "shapes": ["long_tail"] },
     "engine-stove": { "coats": "iron", "roles": { "metal_iron": "main", "metal_iron_light": "under", "metal_brass": "trim" }, "marks": { "enamel": { "name": "an enamelled door", "on": "under" }, "band": { "name": "a painted band", "on": "main" } }, "shapes": ["heavy", "lean"] },

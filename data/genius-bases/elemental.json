@@ -1,0 +1,1293 @@
+{
+ "id": "elemental",
+ "name": "Elemental",
+ "class": "creature",
+ "expression": "aspect",
+ "silhouette": "aspect-demigod",
+ "soul": "The soul of one who is more a place or a weather than a person: you feel them come into a room before you see them.",
+ "spark": "The mote has weather of its own. The candle leans toward it, the window fogs on the inside, and now and then there is sand in your bed.",
+ "nature": {
+  "ground": {
+   "wild": 1.0,
+   "water": 0.5
+  },
+  "shape": {
+   "anchor": 0.6
+  },
+  "range": {
+   "far": 0.4
+  },
+  "pattern": {
+   "fires": 0.4
+  }
+ },
+ "calls": {
+  "seed": {
+   "never-alive": 0.6,
+   "that-burns": 0.4,
+   "watches-from-above": 0.4,
+   "stands-between": 0.3
+  },
+  "shape": {
+   "anchor": 0.6,
+   "turn": 0.5,
+   "cast": 0.5
+  },
+  "blood": {
+   "demigod": 1.0,
+   "ridgefolk": 0.4,
+   "tidewater": 0.4,
+   "reads-currents": 0.4,
+   "aerie-born": 0.3
+  }
+ },
+ "hybrid": {
+  "adj": "Weather-crowned",
+  "gift": [
+   "crown",
+   "small-weather"
+  ],
+  "text": "It has a small weather of its own and a crown nobody gave it. It behaves as if the hill were its."
+ },
+ "settled": {
+  "id": "elemental-godling",
+  "name": "Godling",
+  "text": "A hand tall, grown, and built like the statue of someone important. The air where it stands is slightly different from the rest of the room.",
+  "sign": "A grown figure a hand tall, standing on the air with its chin up. A wisp of cloud keeps to its shoulder and rains now and then.",
+  "habit": "It stands on the windowsill at dusk deciding what the weather will be. It is sometimes right.",
+  "features": [
+   "small-weather"
+  ],
+  "body": {
+   "build": {
+    "muscle": 0.7,
+    "weight": 0.5
+   },
+   "stance": "attend",
+   "hair": [
+    "wisps",
+    1.0
+   ],
+   "wear": [
+    "wrap"
+   ],
+   "around": [
+    [
+     "cloudlet",
+     1.0
+    ]
+   ],
+   "face": "steady"
+  }
+ },
+ "paths": [
+  {
+   "id": "elemental-cornerstone",
+   "name": "Cornerstone",
+   "of": "one who does not move and is leaned on",
+   "text": "It learned from you that somebody has to be the thing that stays put. People lean on it without asking, and it has never once stepped aside.",
+   "sign": "Broad, the colour of turned earth, planted on a slab of its own ground with its arms folded. Gold shows in it like ore.",
+   "habit": "It picks a spot in every room and is still there when you come back. Things get propped against it.",
+   "leans": {
+    "shape": {
+     "anchor": 1.0
+    },
+    "orders": {
+     "hold": 0.7
+    },
+    "fights": {
+     "blocks": 0.4
+    }
+   },
+   "features": [
+    "stone-skin",
+    "set-feet"
+   ],
+   "body": {
+    "accent": "gold",
+    "coat": "hearth",
+    "build": {
+     "wide": 0.7,
+     "shoulders": 0.8,
+     "limbs": 1.22,
+     "legs": 0.93,
+     "muscle": 0.9,
+     "weight": 0.6
+    },
+    "stance": "folded",
+    "flesh": [
+     "seams"
+    ],
+    "hair": [
+     "crystals",
+     1.0
+    ],
+    "wear": [
+     "wrap",
+     "sash"
+    ],
+    "under": [
+     "slab",
+     1.0
+    ],
+    "around": null,
+    "face": "steady"
+   },
+   "prongs": [
+    {
+     "id": "elemental-tor",
+     "name": "Tor",
+     "of": "one the bad weather goes round",
+     "text": "The small god of one hill, and not a large hill. Wind and blows part on it and go round, and whoever stands behind it stays dry.",
+     "sign": "Shoulders like a ridge under a mantle of flat stones, and a crown of basalt columns. It leans a little into wherever the wind is from.",
+     "habit": "It stands at the top of any stairs, facing out, as if the landing were a summit.",
+     "leans": {
+      "quests": {
+       "escort": 1.0
+      }
+     },
+     "features": [
+      "crown",
+      "broad-chest"
+     ],
+     "body": {
+      "build": {
+       "wide": 1.0,
+       "shoulders": 1.0
+      },
+      "stance": "planted",
+      "hair": null,
+      "crown": [
+       "columns",
+       1.0
+      ],
+      "wear": [
+       "wrap",
+       "sash",
+       [
+        "mantle",
+        1.0,
+        "stones"
+       ]
+      ],
+      "under": [
+       "slab",
+       1.35,
+       "tor"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "elemental-longstone",
+       "name": "Longstone",
+       "of": "one others set out from and come back to",
+       "text": "Small god of the stone people steer by. It has stood in one place so long that the paths were made to meet at it.",
+       "sign": "Tall, narrow and weathered: a standing stone with a face near the top. Smaller stones turn slowly round it, keeping their distance.",
+       "habit": "It is always where you left it, which is how the others find you.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        }
+       },
+       "features": [
+        "tunnel-ear"
+       ],
+       "body": {
+        "stance": "column",
+        "crown": null,
+        "hair": null,
+        "wear": [
+         [
+          "menhir",
+          1.0
+         ]
+        ],
+        "around": [
+         [
+          "stones",
+          1.0
+         ]
+        ],
+        "under": [
+         "slab",
+         0.75
+        ],
+        "face": "old"
+       }
+      },
+      {
+       "id": "elemental-watershed",
+       "name": "Watershed",
+       "of": "one who decides, by sitting still, which way everything runs",
+       "text": "Small god of the ridge where rain makes up its mind. A blow that reaches it runs off one side or the other, and it chose the side an hour ago.",
+       "sign": "It sits cross-legged under a peak for a crown, with snow on it, and two thin streams run off its shoulders, one each way.",
+       "habit": "It sits on the roof-ridge in rain and watches which gutter wins.",
+       "leans": {
+        "shape": {
+         "turn": 1.0
+        }
+       },
+       "features": [
+        "current"
+       ],
+       "body": {
+        "stance": "seated",
+        "crown": [
+         "peak",
+         1.0
+        ],
+        "wear": [
+         "wrap",
+         "sash"
+        ],
+        "around": [
+         [
+          "streams",
+          1.0
+         ]
+        ],
+        "under": [
+         "slab",
+         1.5,
+         "ridge"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "elemental-loam",
+     "name": "Loam",
+     "of": "one in whose company other people grow",
+     "text": "The small god of whatever comes up where it has been standing. It does nothing you can point to, and the cohort is taller this year.",
+     "sign": "Dark earth to the knees and growing from there up: moss on its shoulders, gold leaves for hair, roots trailing under its slab.",
+     "habit": "It leaves a ring of moss wherever it stood for an afternoon. The groundskeeper has stopped scrubbing them.",
+     "leans": {
+      "bonds": {
+       "classmate": 1.0
+      }
+     },
+     "features": [
+      "roots"
+     ],
+     "body": {
+      "build": {
+       "wide": 0.5,
+       "shoulders": 0.5
+      },
+      "stance": "offer",
+      "flesh": [
+       "seams",
+       "earth-legs"
+      ],
+      "hair": [
+       "leaves",
+       1.0
+      ],
+      "wear": [
+       "wrap",
+       "sash",
+       [
+        "mantle",
+        0.8,
+        "moss"
+       ]
+      ],
+      "under": [
+       "slab",
+       1.0,
+       "roots"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "elemental-harvest-home",
+       "name": "Harvest-home",
+       "of": "one who gives when the time comes and not before",
+       "text": "Small god of the last sheaf. It keeps what you have earned until the day you need it, and on that day there is more than you remembered.",
+       "sign": "A crown of wheat-ears, a sheaf in the crook of one arm and a sickle in the other hand. It is brown as a field in August.",
+       "habit": "It counts the stores each evening and puts one thing aside, and will not say for when.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        }
+       },
+       "features": [
+        "edge"
+       ],
+       "body": {
+        "stance": "carry",
+        "crown": [
+         "wheat",
+         1.0
+        ],
+        "hair": [
+         "leaves",
+         0.6
+        ],
+        "wear": [
+         [
+          "kilt",
+          1.0
+         ],
+         "sash"
+        ],
+        "left": [
+         "sheaf",
+         1.0
+        ],
+        "right": [
+         "sickle",
+         1.0
+        ]
+       }
+      },
+      {
+       "id": "elemental-thornhedge",
+       "name": "Thornhedge",
+       "of": "one who keeps the soft thing safe by being hard to get past",
+       "text": "Small god of the hedge round the garden. Whatever comes for you has to come through it, and it has grown in every direction on purpose.",
+       "sign": "Briars grow from its back in arches, each thorn as long as its hand. One flower is kept out of reach in the middle of them.",
+       "habit": "It grows across the doorway while you sleep, and draws back when you say good morning.",
+       "leans": {
+        "orders": {
+         "guard": 1.0
+        }
+       },
+       "features": [
+        "plated"
+       ],
+       "body": {
+        "accent2": "rose",
+        "stance": "guard",
+        "hair": [
+         "leaves",
+         0.8
+        ],
+        "back": [
+         [
+          "briars",
+          1.0
+         ]
+        ],
+        "chest": [
+         "flower",
+         1.0
+        ],
+        "wear": [
+         "wrap",
+         "sash",
+         [
+          "mantle",
+          0.7,
+          "moss"
+         ]
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "elemental-smoulder",
+     "name": "Smoulder",
+     "of": "one whose anger is a long way down and keeps the house warm",
+     "text": "The small god of the fire under the hill. It has been angry about one thing for years, quietly, and the floor near it is warm in winter.",
+     "sign": "Dark as slag, with seams of light where the stone has cracked, and hair that is a low flame. It sits. Its hands are always warm.",
+     "habit": "It sits against the coldest wall of the room until the wall is not the coldest.",
+     "leans": {
+      "pattern": {
+       "sworn": 1.0
+      }
+     },
+     "features": [
+      "ember"
+     ],
+     "body": {
+      "stance": "seated",
+      "flesh": [
+       "cracks",
+       "slag-limbs"
+      ],
+      "hair": [
+       "flame",
+       1.0
+      ],
+      "wear": [
+       "wrap",
+       "sash"
+      ],
+      "under": [
+       "slab",
+       1.1,
+       "magma"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "elemental-hill-smith",
+       "name": "Hill-smith",
+       "of": "one who makes what is needed and does not mention the cost",
+       "text": "Small god of the forge under the hill. What you need is ready on the morning you need it, and still warm. It does not say what it was made out of.",
+       "sign": "A hammer as long as itself over one shoulder, a leather apron, forearms banded with brass. Light shows through its knuckles.",
+       "habit": "It mends one small metal thing of yours each night and leaves it where you will find it.",
+       "leans": {
+        "shape": {
+         "make": 1.0
+        }
+       },
+       "features": [
+        "small-hands",
+        "brass-plate"
+       ],
+       "body": {
+        "stance": "shoulder",
+        "flesh": [
+         "cracks",
+         "slag-limbs",
+         "glow-hands"
+        ],
+        "hair": [
+         "flame",
+         0.7
+        ],
+        "wear": [
+         "wrap",
+         [
+          "apron",
+          1.0
+         ],
+         [
+          "bracers",
+          1.0
+         ]
+        ],
+        "right": [
+         "hammer",
+         1.0
+        ]
+       }
+      },
+      {
+       "id": "elemental-caldera",
+       "name": "Caldera",
+       "of": "one who is patient for years and then is not",
+       "text": "Small god of the mountain that was only asleep. It kept the peace for as long as the peace could be kept. This is the other thing it does.",
+       "sign": "The top of its head is open like a crater and burns. Fire runs down its shoulders in slow streams and cools black at the elbows.",
+       "habit": "It stands very still when someone is unkind to you. The air above its head shimmers.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "pattern": {
+         "fires": 0.5
+        }
+       },
+       "features": [
+        "scorched"
+       ],
+       "body": {
+        "stance": "wrath",
+        "flesh": [
+         "cracks",
+         "slag-limbs",
+         "lava"
+        ],
+        "hair": null,
+        "crown": [
+         "crater",
+         1.0
+        ],
+        "wear": [
+         "wrap",
+         "sash"
+        ],
+        "under": [
+         "cone",
+         1.0
+        ],
+        "around": [
+         [
+          "embers",
+          1.0
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "elemental-tideling",
+   "name": "Tideling",
+   "of": "one who always comes back",
+   "text": "It learned from you that going away is not the same as leaving. It is out of the room twice a day and back twice a day, and you could set a clock by it.",
+   "sign": "Long and pale as the inside of a shell, with hair that is running water. Below the knee it is a wave that never breaks.",
+   "habit": "It goes down to whatever water there is at the same two hours every day, and comes back damp and satisfied.",
+   "leans": {
+    "ground": {
+     "water": 1.0
+    },
+    "fights": {
+     "parries": 0.7
+    },
+    "orders": {
+     "free": 0.4
+    }
+   },
+   "features": [
+    "current",
+    "webbed"
+   ],
+   "body": {
+    "accent": "peacock",
+    "coat": "frost",
+    "figure": "woman",
+    "build": {
+     "wide": -0.35,
+     "legs": 1.08,
+     "limbs": 0.9,
+     "neck": 0.5,
+     "muscle": 0.45,
+     "weight": 0.4
+    },
+    "stance": "flow",
+    "flesh": [
+     "fins"
+    ],
+    "hair": [
+     "water",
+     1.0
+    ],
+    "wear": [
+     "wrap",
+     "band"
+    ],
+    "under": [
+     "wave",
+     1.0
+    ],
+    "around": null,
+    "face": "soft"
+   },
+   "prongs": [
+    {
+     "id": "elemental-meander",
+     "name": "Meander",
+     "of": "one who gets there by going round",
+     "text": "The small god of one river, and its bends. It has never gone straight at anything, and it has never failed to arrive.",
+     "sign": "It trails a long blue-green stole that loops behind it like a river seen from a hill. It does not move in straight lines.",
+     "habit": "It takes the long way round the yard, every time, and is there before you.",
+     "leans": {
+      "fights": {
+       "dodges": 1.0
+      }
+     },
+     "features": [
+      "fins"
+     ],
+     "body": {
+      "stance": "stroll",
+      "wear": [
+       "wrap",
+       "band",
+       [
+        "stole",
+        1.0
+       ]
+      ]
+     },
+     "finishes": [
+      {
+       "id": "elemental-ferry-god",
+       "name": "Ferry-god",
+       "of": "one who takes people across and comes back for the next",
+       "text": "Small god of the crossing. It has taken everyone over who asked, one at a time, and has not yet asked to be taken anywhere itself.",
+       "sign": "It stands in the stern of a boat that is only a curl of water, with a long pole in both hands and a lantern at the bow.",
+       "habit": "It waits at every doorway until the last of the party is through, counting under its breath.",
+       "leans": {
+        "quests": {
+         "escort": 1.0
+        }
+       },
+       "features": [
+        "lantern"
+       ],
+       "body": {
+        "stance": "pole",
+        "hair": [
+         "water",
+         0.7
+        ],
+        "wear": [
+         "wrap",
+         "band",
+         [
+          "stole",
+          0.5
+         ]
+        ],
+        "both": [
+         "pole",
+         1.0
+        ],
+        "under": [
+         "boat",
+         1.0
+        ]
+       }
+      },
+      {
+       "id": "elemental-spring-tide",
+       "name": "Spring Tide",
+       "of": "one who comes back all at once, with everything they went away with",
+       "text": "Small god of the tide that comes in past the marks. Above the waist it is a person. Below, it is the whole sea making up its mind.",
+       "sign": "A figure to the waist, rising out of a wave taller than itself that leans forward and does not fall. Its arms are open.",
+       "habit": "It leaves a tide-line of small shells along the skirting board, a little higher each month.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        }
+       },
+       "features": [
+        "mane"
+       ],
+       "body": {
+        "stance": "open",
+        "hair": [
+         "water",
+         1.4
+        ],
+        "wear": [
+         "band"
+        ],
+        "under": [
+         "surge",
+         1.0
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "elemental-floe",
+     "name": "Floe",
+     "of": "one who goes hard and still when pressed, and bears weight",
+     "text": "The small god of ice that will hold. Pushed, it stops moving altogether, and you find you can stand on it.",
+     "sign": "White-blue and angular on a raft of ice, with a crown of clear shards. Its breath shows, and so does yours near it.",
+     "habit": "It stands in the washbasin overnight. In the morning there is a skin of ice and a small set of footprints.",
+     "leans": {
+      "fights": {
+       "blocks": 1.0
+      }
+     },
+     "features": [
+      "rime"
+     ],
+     "body": {
+      "stance": "stiff",
+      "flesh": [
+       "rime"
+      ],
+      "hair": null,
+      "crown": [
+       "shards",
+       1.0
+      ],
+      "wear": [
+       "wrap",
+       "band",
+       [
+        "pauldrons",
+        1.0
+       ]
+      ],
+      "under": [
+       "floe",
+       1.0
+      ]
+     },
+     "finishes": [
+      {
+       "id": "elemental-berg",
+       "name": "Berg",
+       "of": "one who shows a tenth of what they are",
+       "text": "Small god of the ice that goes by with most of itself out of sight. What strikes it has struck the tenth part, and the rest has not noticed.",
+       "sign": "A small calm figure seated on the tip of a great blue block that hangs under it, nine times its size, with a cold light deep inside.",
+       "habit": "It answers questions with one word. The word turns out, a week later, to have been right.",
+       "leans": {
+        "company": {
+         "alone": 1.0
+        }
+       },
+       "features": [
+        "cold-core"
+       ],
+       "body": {
+        "stance": "seated",
+        "crown": [
+         "shards",
+         0.7
+        ],
+        "wear": [
+         "wrap",
+         "band"
+        ],
+        "under": [
+         "berg",
+         1.0
+        ]
+       }
+      },
+      {
+       "id": "elemental-glacier",
+       "name": "Glacier",
+       "of": "one who moves the valley by never stopping",
+       "text": "Small god of the ice that walks. An inch a day, every day, in one direction, and the thing in its way is no longer in its way.",
+       "sign": "It leans into a slow stride that never finishes, and a long cloak of ice drags stones along behind it.",
+       "habit": "It moves a heavy thing in your room a finger's width each night. By spring the room is arranged as it wants.",
+       "leans": {
+        "quests": {
+         "linework": 1.0
+        }
+       },
+       "features": [
+        "bastion"
+       ],
+       "body": {
+        "stance": "stride",
+        "wear": [
+         "wrap",
+         "band",
+         [
+          "pauldrons",
+          1.0
+         ],
+         [
+          "cloak",
+          1.0,
+          "ice"
+         ]
+        ],
+        "under": null
+       }
+      }
+     ]
+    },
+    {
+     "id": "elemental-fathom",
+     "name": "Fathom",
+     "of": "one who goes further down into a thing than is comfortable",
+     "text": "The small god of deep water. It goes down into whatever you are not saying, and comes up slowly, and tells you how far it was.",
+     "sign": "Dark to the elbows and knees, long-limbed, with wide dark eyes and weed for hair that stands up as if under water.",
+     "habit": "It lowers a weighted thread into anything with a bottom: wells, cups, arguments.",
+     "leans": {
+      "quests": {
+       "deep-run": 1.0
+      }
+     },
+     "features": [
+      "dark-eyed"
+     ],
+     "body": {
+      "build": {
+       "arms": 1.06,
+       "legs": 1.12
+      },
+      "stance": "drift",
+      "flesh": [
+       "deep-limbs"
+      ],
+      "hair": [
+       "weed",
+       1.0
+      ],
+      "eyes": "dark",
+      "belt": [
+       "line",
+       1.0
+      ],
+      "around": [
+       [
+        "bubbles",
+        1.0
+       ]
+      ],
+      "under": [
+       "wave",
+       0.8,
+       "deep"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "elemental-deep-lamp",
+       "name": "Deep-lamp",
+       "of": "one who keeps a light on where nobody else will go",
+       "text": "Small god of the one light on the sea floor. It went down where the dark is the oldest thing there is, and hung a lamp, and stayed.",
+       "sign": "A lure of light hangs before its brow on a long stalk, and its ribs show like a lantern's bars. Small pale fish come to it and wait.",
+       "habit": "It sits up at the bottom of the stairs with its light on until everyone is in.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        }
+       },
+       "features": [
+        "glow"
+       ],
+       "body": {
+        "stance": "hang",
+        "flesh": [
+         "deep-limbs",
+         "ribs"
+        ],
+        "crown": [
+         "lure",
+         1.0
+        ],
+        "belt": null,
+        "around": [
+         [
+          "fish",
+          1.0
+         ]
+        ],
+        "under": null
+       }
+      },
+      {
+       "id": "elemental-wreck-warden",
+       "name": "Wreck-warden",
+       "of": "one who remembers where everything went down",
+       "text": "Small god of what the sea kept. It knows where each thing lies and who lost it, and now and then it brings one up, when it is wanted.",
+       "sign": "An anchor carried across its shoulders, a chain hanging from one arm, and barnacles to the elbow.",
+       "habit": "It puts lost things back on your table, wet. Some you lost years ago. One was not yours.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        }
+       },
+       "features": [
+        "chain"
+       ],
+       "body": {
+        "stance": "yoke",
+        "flesh": [
+         "deep-limbs",
+         "barnacles"
+        ],
+        "both": [
+         "anchor",
+         1.0
+        ],
+        "belt": null,
+        "around": null
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "elemental-squall",
+   "name": "Squall",
+   "of": "one who arrives all at once",
+   "text": "It learned from you that some things are best done before anyone has had time to object. There is no sign of it, and then it is the only thing in the sky.",
+   "sign": "Slight and wind-blown, the colour of a storm coming, with hair and a scarf that stream sideways in a wind nobody else can feel.",
+   "habit": "It is never seen to come into a room. The door bangs, and it is on the mantelpiece.",
+   "leans": {
+    "range": {
+     "far": 1.0
+    },
+    "pattern": {
+     "fires": 0.7
+    },
+    "ground": {
+     "wild": 0.5
+    }
+   },
+   "features": [
+    "standing-air"
+   ],
+   "body": {
+    "accent": "amethyst",
+    "coat": "slate",
+    "build": {
+     "wide": -0.6,
+     "shoulders": -0.3,
+     "limbs": 0.86,
+     "legs": 1.05,
+     "muscle": 0.55,
+     "weight": 0.3
+    },
+    "stance": "lean",
+    "hair": [
+     "wind",
+     1.0
+    ],
+    "wear": [
+     "wrap",
+     [
+      "scarf",
+      1.0
+     ]
+    ],
+    "under": [
+     "cloud",
+     1.0
+    ],
+    "around": null,
+    "face": "keen"
+   },
+   "prongs": [
+    {
+     "id": "elemental-gale",
+     "name": "Gale",
+     "of": "one who is gone before the door has stopped swinging",
+     "text": "The small god of the wind through one gap in one wall. It cannot be kept in and it cannot be kept out, and it has already been and gone.",
+     "sign": "Lean, stretched out along the wind as if lying on it, with a cloak longer than itself that never hangs down.",
+     "habit": "It turns the pages of whatever you are reading to the page it thinks you should be on.",
+     "leans": {
+      "orders": {
+       "free": 1.0
+      }
+     },
+     "features": [
+      "wing-cloak"
+     ],
+     "body": {
+      "stance": "fly",
+      "wear": [
+       "wrap",
+       [
+        "cloak",
+        1.3,
+        "wind"
+       ]
+      ],
+      "under": null
+     },
+     "finishes": [
+      {
+       "id": "elemental-north-wind",
+       "name": "North Wind",
+       "of": "one who clears a room by coming into it",
+       "text": "Small god of the wind that means it. It comes in with its cheeks full and its mind made up, and what was in the way is across the yard.",
+       "sign": "Cheeks blown round, brows down, a beard of cloud streaming back over one shoulder. Its breath goes out ahead of it, white.",
+       "habit": "It blows out every candle but yours when it thinks the evening has gone on long enough.",
+       "leans": {
+        "shape": {
+         "cast": 1.0
+        }
+       },
+       "features": [
+        "voice"
+       ],
+       "body": {
+        "build": {
+         "wide": -0.2,
+         "cheek-volume": 1.0
+        },
+        "stance": "blow",
+        "face": [
+         "stern",
+         "beard"
+        ],
+        "wear": [
+         "wrap",
+         [
+          "cloak",
+          0.8,
+          "wind"
+         ]
+        ],
+        "around": [
+         [
+          "breath",
+          1.0
+         ]
+        ],
+        "under": [
+         "cloud",
+         1.2
+        ]
+       }
+      },
+      {
+       "id": "elemental-fair-wind",
+       "name": "Fair Wind",
+       "of": "one at whose back everything goes a little easier",
+       "text": "Small god of the wind from behind. It does none of the work. Everyone who goes out with it gets home sooner and cannot say why.",
+       "sign": "It carries a small full sail on a yard across its shoulders, and its hair blows forward, the way you are going.",
+       "habit": "It leans on the door as you carry things through, so that the door is no trouble.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        }
+       },
+       "features": [
+        "wings"
+       ],
+       "body": {
+        "stance": "yoke",
+        "hair": [
+         "wind",
+         1.0,
+         "forward"
+        ],
+        "wear": [
+         "wrap",
+         [
+          "scarf",
+          0.7
+         ]
+        ],
+        "both": [
+         "sail",
+         1.0
+        ],
+        "under": [
+         "cloud",
+         0.8
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "id": "elemental-thunderhead",
+     "name": "Thunderhead",
+     "of": "one who builds all afternoon where everyone can see",
+     "text": "The small god of the cloud that is going to be a storm. It gives fair warning: you can watch it pile up for an hour before it says a word.",
+     "sign": "Dark-shouldered under a tower of cloud it wears like a headdress, flat on top. Small lightnings run in the cloud and nowhere else, yet.",
+     "habit": "It goes quiet and tall in the corner when it disagrees. Everyone has learned to ask it then, and not later.",
+     "leans": {
+      "pattern": {
+       "sworn": 1.0
+      }
+     },
+     "features": [
+      "smoke"
+     ],
+     "body": {
+      "stance": "brood",
+      "flesh": [
+       "storm-shoulders"
+      ],
+      "hair": null,
+      "crown": [
+       "anvil",
+       1.0
+      ],
+      "wear": [
+       "wrap",
+       [
+        "scarf",
+        0.6
+       ]
+      ],
+      "under": [
+       "cloud",
+       1.2,
+       "storm"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "elemental-thunderclap",
+       "name": "Thunderclap",
+       "of": "one who says it once",
+       "text": "Small god of the stroke. It waits for the one moment, says the one thing, and the argument is over and slightly on fire.",
+       "sign": "A forked bolt held like a spear, one arm drawn back to throw. Its hair stands straight up and crackles.",
+       "habit": "It finishes other people's long sentences for them, in one word, from the doorway.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        }
+       },
+       "features": [
+        "ring"
+       ],
+       "body": {
+        "stance": "throw",
+        "crown": null,
+        "hair": [
+         "spikes",
+         1.0
+        ],
+        "right": [
+         "bolt",
+         1.0
+        ],
+        "around": [
+         [
+          "sparks",
+          1.0
+         ]
+        ],
+        "under": [
+         "cloud",
+         1.0,
+         "storm"
+        ]
+       }
+      },
+      {
+       "id": "elemental-tempest",
+       "name": "Tempest",
+       "of": "one who is in every corner of the room at once",
+       "text": "Small god of the whole storm. It stopped being a person with weather round it. It is the weather now, with a face it keeps for your sake.",
+       "sign": "A turning storm the height of your arm, lit from inside, with a calm face high up in the cloud where the eye would be.",
+       "habit": "On still nights it circles the roof once, slowly, to see that everything is fastened down.",
+       "leans": {
+        "ground": {
+         "wild": 1.0
+        }
+       },
+       "features": [
+        "watching-eye"
+       ],
+       "body": {
+        "shape": "storm"
+       }
+      }
+     ]
+    },
+    {
+     "id": "elemental-daybreak",
+     "name": "Daybreak",
+     "of": "one who comes up every day whatever happened yesterday",
+     "text": "The small god of the first hour of light. Yesterday was what it was. It is up, it has opened the shutters, and it expects you to be up too.",
+     "sign": "Bright-eyed, arms open, with a low gold disc rising behind its shoulders and rays for hair.",
+     "habit": "It is awake before you every morning, sitting on the sill with its back to the window, waiting.",
+     "leans": {
+      "orders": {
+       "hunt": 1.0
+      }
+     },
+     "features": [
+      "glow"
+     ],
+     "body": {
+      "accent2": "gold",
+      "stance": "greet",
+      "hair": [
+       "rays",
+       1.0
+      ],
+      "wear": [
+       "wrap",
+       [
+        "scarf",
+        0.6
+       ]
+      ],
+      "back": [
+       [
+        "disc",
+        1.0,
+        "low"
+       ]
+      ],
+      "under": [
+       "cloud",
+       1.4,
+       "bank"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "elemental-high-noon",
+       "name": "High Noon",
+       "of": "one before whom nothing has a shadow to hide in",
+       "text": "Small god of the sun straight overhead. Stand near it and everything is exactly as it is: no long shadows, nothing behind anything.",
+       "sign": "A gold disc stands upright behind its head, and its robe falls straight to its feet. It casts no shadow. Its gaze is level.",
+       "habit": "It walks round a thing you are proud of, once, at midday, and you see the flaw yourself.",
+       "leans": {
+        "shape": {
+         "read": 1.0
+        }
+       },
+       "features": [
+        "far-eyes"
+       ],
+       "body": {
+        "stance": "hieratic",
+        "hair": [
+         "rays",
+         0.6
+        ],
+        "wear": [
+         [
+          "kilt",
+          1.7
+         ]
+        ],
+        "back": [
+         [
+          "disc",
+          1.25,
+          "high"
+         ]
+        ],
+        "under": null
+       }
+      },
+      {
+       "id": "elemental-sundown",
+       "name": "Sundown",
+       "of": "one who is kindest just before leaving",
+       "text": "Small god of the last light. Everything it looks at is better looking for a quarter of an hour, and then it has gone, and you remember the quarter of an hour.",
+       "sign": "It sits with one knee up, half turned away, a red-gold disc sunk low behind its shoulder and a long cloak the colour of the hour.",
+       "habit": "It says the kindest thing it has said all day at the door, on its way out, without turning round.",
+       "leans": {
+        "bonds": {
+         "shade": 1.0
+        }
+       },
+       "features": [
+        "old-eyes"
+       ],
+       "body": {
+        "accent2": "madder",
+        "stance": "knee-up",
+        "hair": [
+         "rays",
+         0.5
+        ],
+        "wear": [
+         "wrap",
+         [
+          "cloak",
+          1.0,
+          "dusk"
+         ]
+        ],
+        "back": [
+         [
+          "disc",
+          1.1,
+          "sunk"
+         ]
+        ],
+        "under": [
+         "cloud",
+         1.6,
+         "bank"
+        ],
+        "face": "soft"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "newFeatures": [
+  {
+   "id": "small-weather",
+   "slot": "light",
+   "label": "a small weather of its own"
+  }
+ ]
+}

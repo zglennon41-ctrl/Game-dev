@@ -1054,6 +1054,23 @@
         }
       }
     },
+    "elemental": {
+      "role": "harrier",
+      "paths": {
+        "elemental-cornerstone": {
+          "shade": "bulwark",
+          "text": "It stands where it stood: it takes the foe on itself."
+        },
+        "elemental-tideling": {
+          "shade": "harrier",
+          "text": "It always comes back at the foe: the guard is down longer."
+        },
+        "elemental-squall": {
+          "shade": "hunter",
+          "text": "It is suddenly there: it strikes hard into what it opened."
+        }
+      }
+    },
     "ember": {
       "role": "hunter",
       "paths": {
