@@ -3129,10 +3129,12 @@ func test_evolutions() -> void:
 		add_child(body)
 		built += 1
 		var ok := body.own_body == id and body.uses_art and body.parts_from_art.is_empty() and body._model.find_child("ref_top", true, false) != null
-		# it stands as tall as its stage says, by the crown of its head
+		# it stands as tall as its stage says for a body of its kind (a tortoise stands lower than
+		# a wolf: data/genius-bodies.json, artSize), by the crown of its head
 		var ref: Node3D = body._model.find_child("ref_top", true, false)
 		if ref:
-			ok = ok and absf(body._local_xf(ref).origin.y - body.stands) < 0.02
+			var art_size := float(Data.genius_bodies()["silhouettes"].get(String(f["silhouette"]), {}).get("artSize", 1.0))
+			ok = ok and absf(body._local_xf(ref).origin.y - body.stands * art_size) < 0.02
 		# a rigged form moves by its base body's clips
 		if not body._model.find_children("*", "Skeleton3D", true, false).is_empty() and ResourceLoader.exists(GeniusBody.BODY_DIR % String(f["silhouette"])):
 			ok = ok and body.anim != null and body.anim_names.has("idle") and body.anim.has_animation(body.anim_names["idle"])

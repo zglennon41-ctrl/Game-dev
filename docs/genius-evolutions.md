@@ -156,3 +156,67 @@ bash tools/genius-tree-page.sh wolf                 # the page of the whole tree
 4. **How strange a Final may be.** The Wolf's Finals stay wolves (a Wall-wolf is a wolf
    built like a wall). They could go further from the animal: say how far.
 5. **The Baby**: one for everyone, or one that already leans toward what it will be.
+
+## The Hawk and the Tortoise (`tools/blender/lines_beasts.py`)
+
+Neither is on the wolf's rig. A tortoise is its shell: one object the game walks, with a
+dome, a rim, four legs and a neck that comes out or stays in. A hawk is a body on the wing
+with two wings the game beats (`wing_l`, `wing_r`; it is built at the bottom of the stroke),
+or the same bird perched with its wings shut. The Harrier and its two Finals are ground
+hunters in the tree, so they are a hawk that runs, built on the wolf's rig (`"rig": "ground"`).
+
+The Tortoise:
+
+| Key | What it is | Styles |
+|---|---|---|
+| `build` | proportions against the stage's own | `width` `length` `dome` `legs` `girth` `neck` `head` `tail` `eyes` `beak` (multiples of 1); `round` `rim` `stance` `lift` (set outright); `flat` (under 1: the top is cut flat); `wedge` (the front stands higher) |
+| `shell` | the dome and its plates | `young` `dome` `stones` `ridges` `iron` `lit` `smooth` `worn` `map` `dial` `moss` `soft` |
+| `rim` | round the edge of the shell | `lip` `marginals` `ward` `plaques` `serrated` `spikes` `none` |
+| `legs` | | `stump` `set` `tucked` `web` `worn` |
+| `neck` | how the head is carried | `peek` `out` `in` `hidden` `high` `long` `low` |
+| `jaw` | | `hook` `gape` `chain` `horn` `lure` `old` `trumpet` `snorkel` `notched` |
+| `tail` | | `short` `long` `keel` |
+| `carry` | what rides on the shell | `pebbles` `cairn` `gnomon` `post` `milestone` `packs` `wagon` `hearth` `lamps` `balance` `dial` `salvage` `teeth` `garden` `reeds` `anvil` `stele` `ward` |
+| `marks` | on the hide | `dust` `mud` `soot` `straps` `hoop` `weeds` |
+| `coat` | | the shifts above, and one more, `moss` |
+
+Its three paths: the Stone-back's is stone and iron on a high dome, a warded rim, a jaw
+that waits (slate); the Cairn-back's is a flat back that carries things, a cairn first and
+then a post, a wagon, a hearth, a hall's candles (warm, then ash and moon); the Unhurried's
+is long legs and a high neck with a chart on its shell, or a prow of horn, or a flat soft
+shell low in the water (night, blood, moss).
+
+The Hawk:
+
+| Key | What it is | Styles |
+|---|---|---|
+| `build` | proportions against the stage's own | `size` `body` `chest` `head` `neck` `span` `chord` `tail` `legs` `feet` `beak` `eyes` `shoulders` (multiples of 1); `pitch` `look` (degrees, in place of the pose's) |
+| `pose` | how it holds itself | `fledge` `soar` `hover` `dive` `stoop` `perch` `mantle` `lean` |
+| `wings` | open, and the game beats them | `stub` `broad` `long` `pointed` `round` `kite` `soft` `swept` |
+| | shut, or worn | `folded` `tucked` `cloak` `shield` `ironshield` `shelter` `broken` |
+| `tips` `dihedral` `sweep` `wingpitch` | numbers for open wings | how many primaries are lit; how high the wings are held; how far back the whole wing is swept; how much of the body's pitch the wings share |
+| `tail` | | `short` `fan` `long` `fork` `square` `wedge` `spread` `streamers` |
+| `head` | | `call` `crest` `crown` `owl` `white` `plume` |
+| `eyes` | | `dark` `owl` `far` `old` |
+| `feet` | tucked in flight unless said | `down` `set` `grip` `strike` `dangle` |
+| `perch` | what it stands on | `stone` `iron` `tower` `glove` `shoulder` |
+| `carry` | what it has been given | `lamp` `case` `plate` `writ` `bright` `jesses` `rings` |
+| `aura` | | `smoke` `hush` `ring` `cold` `underwing` `flock` `dust` |
+| `sleek` `down` `iron` `stance` | | feathers laid flat; a nestling's down (a size); which wing is iron; how wide it stands |
+| on the ground rig | the wolf's `build`, and | `crest` `wings` `fan` `bill` (sizes); `tufts`; `grown`: `sickle` `brambles` |
+
+Its three paths: the High Circler's is the bird on the wing, told apart by the wing itself
+(long, pointed, round and owl-eyed, broad and white-headed); the Eyrie-holder's is the bird
+that stands, on a stone and then on iron, a tower or a shoulder, its wings a cloak or a
+shield; the Stooper's is the bird that falls and is flown, swept wings and struck feet, then
+the glove, the jesses, the message tied to its leg, and the Harrier that hunts on foot.
+
+Their gifts are parts of this file too (`python tools/blender/lines_beasts.py parts`, or
+with the rest by `genius_lines.py gifts`): the Hawk's `wings` and `talons`, the Tortoise's
+`shell` and `broad-chest`.
+
+A sheet's cells are measured before they are scaled, and a wide wing reaches into its
+neighbour's: look at the Hawk with `--cell=7`.
+
+Both lines are built, all thirty-one of each. An unrigged body here is under 120 KB; the
+three on the wolf's rig are under 200.

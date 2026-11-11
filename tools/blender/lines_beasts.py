@@ -1,5 +1,5 @@
 """WILDLINE genius lines, the beasts with bodies of their own: the Tortoise and the Hawk
-(docs/genius-evolutions.md, "The Tortoise and the Hawk"). Neither is on the wolf's rig: a
+(docs/genius-evolutions.md, "The Hawk and the Tortoise"). Neither is on the wolf's rig: a
 tortoise is its shell, built here plate by plate; a hawk is built along its spine in the
 pose it holds (on the wing, hovering, stooping, on a perch it carries), with two wings the
 game beats. The three forms of the Hawk that came down to run (the Harrier and its Finals)
@@ -224,9 +224,9 @@ def _scute_spots(S):
     return [(x * S.W / 0.235, S.cy + y * S.L / 0.3, r * (S.W / 0.235 + S.L / 0.3) / 2) for x, y, r in SCUTES]
 
 
-def _plate(S, x, y, r, h, sides=6, top=0.55, sink=0.012, squash=0.9):
-    """One scute: a low six-sided plate lying on the dome."""
-    geo = g.lathe([(r, -sink), (r * 0.94, h * 0.6), (r * top, h)], n=sides, phase=math.pi / sides)
+def _plate(S, x, y, r, h, sides=6, top=0.55, sink=0.012, squash=0.9, low=False):
+    """One scute: a low six-sided plate lying on the dome (low: one slope and its top, no more)."""
+    geo = g.lathe([(r, -sink), (r * top, h)] if low else [(r, -sink), (r * 0.94, h * 0.6), (r * top, h)], n=sides, phase=math.pi / sides)
     geo = ([Vector((p.x, p.y * squash, p.z)) for p in geo[0]], geo[1])
     return g.moved(geo, S.frame(x, y))
 
@@ -244,7 +244,7 @@ def tortoise_shell(S, items, style, size):
         sc, rg = None, None
         for x, y, r in spots:
             sc = g.merge(sc, _plate(S, x, y, r, 0.02 * size, top=0.6))
-            rg = g.merge(rg, shifted(_plate(S, x, y, r * 0.5, 0.012, top=0.5, sink=0.0), S.normal(x, y) * 0.02 * size))
+            rg = g.merge(rg, shifted(_plate(S, x, y, r * 0.5, 0.012, top=0.5, sink=0.0, low=True), S.normal(x, y) * 0.02 * size))
         items += [(sc, hide, False), (rg, mark("rings", hide), False)]
         if style == "lit":
             # a cold light between its plates: the seams of the shell are the field's
@@ -387,7 +387,7 @@ def tortoise_rim(S, items, style, size):
                 rim = g.merge(rim, g.cone(S.edge(a, 1.03, 0.022), S.edge(a, 1.03 + 0.26 * size, 0.05), 0.028, n=4))
         items.append((rim, hide, False))
         if lit:
-            items += [(lit, field("names", 1.6)), (carved, mat("bone_paint"), False)]
+            items += [(lit, field("names", 1.6)), (carved, mat("bone_paint"), True)]
         if style == "ward":
             # ward-lines cut round the rim, and they glow
             items.append((band((0, S.cy, S.rim + 0.045), S.W * 1.045, S.L * 1.045, 0.011 * size, n=28, v=Y, sides=4), field("ward", 2.0)))
@@ -539,7 +539,7 @@ def carry_cairn(S, items, size, where):
     hide, light = mat("stone_hide"), mat("stone_light")
     z = S.top
     for i, (r, dz) in enumerate(((0.078, 0.024), (0.058, 0.072), (0.043, 0.112), (0.03, 0.144), (0.02, 0.17))[: 3 + int(round(2 * (size - 1.0) + 0.01)) if size >= 1 else 2]):
-        items.append((_stone((0.006 * math.sin(i * 2.0), S.cy + 0.005 * math.cos(i * 1.3), z + dz * size), r * size, i, (1.0, 0.88, 0.5), sub=1 if i < 2 and size >= 1 else 0), light if i % 2 == 0 else hide, False))
+        items.append((_stone((0.006 * math.sin(i * 2.0), S.cy + 0.005 * math.cos(i * 1.3), z + dz * size), r * size, i, (1.0, 0.88, 0.5), sub=1 if i < 1 else 0), light if i % 2 == 0 else hide, False))
     items.append((g.ico((0.004, S.cy + 0.003, z + 0.05 * size), 0.02 * size, sub=0), field("core", 3.4)))
     where["top"] = z + 0.19 * size
 
@@ -2169,6 +2169,9 @@ def register(builders):
         m = sys.modules.get(name)
         if m is not None and getattr(m, "BUILDERS", None) is builders:
             GL = m
+    if GL is None:                 # registered by something else: the lines builder, then
+        import genius_lines
+        GL = genius_lines
     builders["tortoise"] = tortoise
     builders["hawk"] = hawk
     kit.PARTS.update(PARTS)        # the kit builds the gifts as these, too
