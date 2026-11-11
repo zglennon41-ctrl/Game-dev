@@ -6,7 +6,7 @@
 :root {
   --ink: #0d0b0a; --plate: #17130f; --plate-hi: #211a13; --rule: #3a2f20;
   --fg: #f2e8d6; --dim: #a99c8a; --faint: #766b5d;
-  --brass: #c79a4f; --brass-hi: #ffd175; --ember: #e07a4a; --shot: #070605;
+  --brass: #c79a4f; --brass-hi: #ffd175; --ember: #e07a4a; --shot: #070605; --good: #9cc487;
   --display: "Cinzel", "Trajan Pro", Georgia, serif;
   --body: "Alegreya", Georgia, "Times New Roman", serif;
   --ui: "Alegreya Sans", "Segoe UI", system-ui, sans-serif;
@@ -15,11 +15,11 @@
 @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
   --ink: #f4ede0; --plate: #fbf6ec; --plate-hi: #efe5d2; --rule: #cdbb9c;
   --fg: #2a2118; --dim: #6a5c49; --faint: #94866f;
-  --brass: #8a6220; --brass-hi: #6e4a0e; --ember: #a8481c; color-scheme: light } }
+  --brass: #8a6220; --brass-hi: #6e4a0e; --ember: #a8481c; --good: #3d7329; color-scheme: light } }
 :root[data-theme="light"] {
   --ink: #f4ede0; --plate: #fbf6ec; --plate-hi: #efe5d2; --rule: #cdbb9c;
   --fg: #2a2118; --dim: #6a5c49; --faint: #94866f;
-  --brass: #8a6220; --brass-hi: #6e4a0e; --ember: #a8481c; color-scheme: light }
+  --brass: #8a6220; --brass-hi: #6e4a0e; --ember: #a8481c; --good: #3d7329; color-scheme: light }
 * { box-sizing: border-box }
 body { background: var(--ink); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.45; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ink) }
@@ -119,6 +119,31 @@ __SPRITES__
 .kind dd em { color: var(--fg) }
 .kind .who { display: block; font-family: var(--ui); font-size: 13.5px; margin-top: 2px }
 .kind .who a { color: var(--fg) }
+/* the second pass, measured: three sums, then a row a line; struck through is before */
+.sums { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 10px 28px; margin: 0 0 16px; border-top: 1px solid var(--rule); padding-top: 12px }
+.sums div { min-width: 0 }
+.sums dt { font-family: var(--ui); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); font-weight: 700 }
+.sums dd { margin: 2px 0 0; font-family: var(--display); font-size: 30px; letter-spacing: .03em; font-variant-numeric: tabular-nums }
+.sums s, .meas s { color: var(--faint); text-decoration-thickness: 1px; font-weight: 400 }
+.sums s { font-size: 20px }
+.sums b { color: var(--brass-hi) }
+.tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-top: 3px solid var(--brass); background: var(--plate) }
+.meas { width: 100%; min-width: 520px; border-collapse: collapse; font-family: var(--ui); font-size: 15px; font-variant-numeric: tabular-nums }
+.meas th, .meas td { padding: 6px 12px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap }
+.meas thead th { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint) }
+.meas th:first-child { text-align: left }
+.meas tbody th { font-weight: 500 }
+.meas tbody th a { color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--rule) }
+.meas tbody th i { font-style: normal; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass); margin-left: 4px }
+.meas tr:last-child th, .meas tr:last-child td { border-bottom: 0 }
+.meas td.met b { color: var(--good) }
+.meas td.met b::after { content: " \2713"; font-weight: 400 }
+.meas td.unmet b { color: var(--ember) }
+.meas td.unmet b::after { content: " \00b7"; color: transparent }
+#measured > .sub { margin: 10px 0 0; max-width: 90ch }
+.newmark { font-family: var(--ui); font-size: 11px; letter-spacing: .12em; color: var(--ink); background: var(--brass-hi); padding: 1px 6px; border-radius: 2px; margin-right: 6px }
+.rail a.new { border-color: var(--brass) }
+.rail a.new::after { content: "new"; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--brass-hi); margin-left: 5px }
 .form.miss { opacity: .22 }
 .form.hit .fname { text-decoration: underline; text-decoration-color: var(--ember); text-underline-offset: 3px }
 dialog.look { border: 1px solid var(--brass); border-radius: 4px; background: var(--plate); color: var(--fg); padding: 14px; max-width: min(92vw, 460px); width: 100% }
