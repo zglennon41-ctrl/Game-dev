@@ -735,7 +735,7 @@ def _antler(sg, base, P, size, F):
     its beam, its tines (root, tip). F: (out, back, up) made a way in the world."""
     beam = _cr([V(base)] + [V(base) + F(sg * x, y, z) * size for x, y, z in P["beam"]], 3)
     cut = P.get("cut", {}).get(sg)
-    rb = 0.078 * P.get("thick", 1.0) * (0.55 + 0.45 * size)
+    rb = 0.094 * P.get("thick", 1.0) * (0.55 + 0.45 * size)
     n = len(beam)
     full = list(beam)
     radius = lambda t: rb * (1.0 - 0.7 * t ** 0.85) + 0.006           # noqa: E731
@@ -761,7 +761,7 @@ def _antler(sg, base, P, size, F):
         d = F(sg * x, y, z).normalized()
         tip = a + d * (L * size) + F(0, 0, 1) * (curl * L * size * 0.5)
         mid = a + d * (L * size * 0.55) - F(0, 0, 1) * (curl * L * size * 0.08)
-        rt = max(0.016, radius(t) * 0.78)
+        rt = max(0.02, radius(t) * 0.86)
         pts = _cr([a, mid, tip], 2)
         tgeo = g.merge(tgeo, g.tube(pts, [rt * (1.0 - 0.9 * (i / (len(pts) - 1)) ** 1.3) + 0.004 for i in range(len(pts))], n=5))
         tines.append((a, tip))
