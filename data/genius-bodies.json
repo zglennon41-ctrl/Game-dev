@@ -33,7 +33,8 @@
     "shadow-cloak": ["socket_head"],
     "bell": ["socket_throat"],
     "fletching": ["socket_back"],
-    "mist": ["socket_body"], "lurker-shadow-cloak": ["socket_back"]
+    "mist": ["socket_body"], "lurker-shadow-cloak": ["socket_back"],
+    "carp-fins": ["socket_back"]
   },
   "kinds": {
     "quadruped": { "model": "res://game/assets/quaternius/Wolf.glb", "anim": { "idle": "AnimalArmature|Idle", "walk": "AnimalArmature|Walk", "run": "AnimalArmature|Gallop" },

@@ -1087,6 +1087,23 @@
           "text": "It cannot be pinned: the guard is down longer."
         }
       }
+    },
+    "carp": {
+      "role": "bulwark",
+      "paths": {
+        "carp-weir-leaper": {
+          "shade": "bulwark",
+          "text": "It does not go round: it holds the foe longer."
+        },
+        "carp-still-water": {
+          "shade": "keeper",
+          "text": "It makes the place it stays in deep: it mends who rests by it."
+        },
+        "carp-silt-reader": {
+          "shade": "lookout",
+          "text": "It feels it in the floor: it calls the strike."
+        }
+      }
     }
   },
   "need": {
