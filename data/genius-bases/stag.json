@@ -340,7 +340,7 @@
          "nape": 1.3,
          "hooves": 1.4
         },
-        "stance": "tilt",
+        "stance": "low",
         "ears": null,
         "neck": [
          "mane",
@@ -402,8 +402,9 @@
          "waist": 0.76
         },
         "marks": [
-         "dorsal:light",
-         "socks:dark"
+         "dorsal",
+         "socks",
+         "blaze"
         ]
        }
       }
@@ -544,7 +545,7 @@
          "mane",
          1.3
         ],
-        "stance": "sky",
+        "stance": "bell",
         "marks": [
          "throat",
          "mane:dark",
@@ -752,9 +753,9 @@
          "hooves": 1.3
         },
         "marks": [
-         "blanket:deep",
-         "bands",
-         "blaze:dark"
+         "blanket:dark",
+         "saddle",
+         "blaze"
         ]
        }
       }
