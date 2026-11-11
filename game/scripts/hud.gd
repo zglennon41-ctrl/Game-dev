@@ -74,6 +74,7 @@ var _card_full_at := 0.0          # when its last line has arrived
 var _card_auto := 0.0             # it goes on by itself this long after that (0: it waits)
 var _card_state := ""             # "", arriving, waiting, leaving
 var _card_serial := 0
+var card_capture := false         # what comes after the card is play: the pointer is taken as the card is told to go
 var speech := Control.new()       # someone speaks: a plate across the foot of the screen
 var _speech_name := Label.new()
 var _speech_sub := Label.new()
@@ -699,10 +700,15 @@ var _banner_hold := 2.0
 
 func _build_banner() -> void:
 	# in the lower third: the words that rise off a blow stand over the heads, above it
-	_banner.set_anchors_preset(Control.PRESET_CENTER)
-	_banner.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	_banner.position = Vector2(0, 86)
-	_banner.custom_minimum_size = Vector2(1000, 0)
+	_banner.anchor_left = 0.5
+	_banner.anchor_right = 0.5
+	_banner.anchor_top = 0.5
+	_banner.anchor_bottom = 0.5
+	_banner.offset_left = -500
+	_banner.offset_right = 500
+	_banner.offset_top = 84
+	_banner.offset_bottom = 84
+	_banner.grow_vertical = Control.GROW_DIRECTION_END
 	_banner.add_theme_constant_override("separation", 2)
 	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_banner.visible = false
@@ -806,6 +812,7 @@ static func card_wait(line: String) -> float:
 ## auto: it goes on by itself this many seconds after its last line (0: it waits to be told).
 func show_card(lines: Array, next: Callable, style := "story", auto := 0.0) -> void:
 	_card_serial += 1
+	card_capture = false
 	for c in _card_box.get_children():
 		_card_box.remove_child(c)
 		c.queue_free()
@@ -868,8 +875,11 @@ func card_up() -> bool:
 	return card.visible and _card_state != ""
 
 ## The screen goes dark, `then` is called in the dark, and the dark lifts.
-func blackout(then: Callable) -> void:
+func blackout(then: Callable, capture := false) -> void:
 	show_card([], then, "title", 0.01)
+	if capture:
+		# (now, in the press itself: a browser gives the pointer only to a press)
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _card_frame(dt: float) -> void:
 	if not card.visible or _card_state == "" or _card_state == "leaving":
@@ -905,6 +915,10 @@ func _card_go() -> void:
 	if _card_state == "leaving":
 		return
 	_card_state = "leaving"
+	if card_capture:
+		# (now, in the press itself: a browser gives the pointer only to a press)
+		card_capture = false
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	var serial := _card_serial
 	var tw := card.create_tween()
 	tw.set_parallel(true)

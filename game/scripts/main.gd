@@ -514,16 +514,16 @@ func _title_screen() -> void:
 	var buttons: Array = []
 	if not saved.is_empty():
 		var where := (String(T.get("where_settled", "settled, ready for the line")) if saved.get("settled", false) else String(T.get("where_academy", "at the Academy"))) if saved.has("academy") else String(T.get("where_gate", "at the Academy's gate"))
-		buttons.append([String(T.get("continue", "Continue")), func(): hud.blackout(func(): hero = saved; enter_academy() if saved.has("academy") else _academy_gate()),
+		buttons.append([String(T.get("continue", "Continue")), func(): hud.blackout(func(): hero = saved; enter_academy() if saved.has("academy") else _academy_gate(), saved.has("academy") and not _args.has("bot")),
 			{ "primary": true, "sub": "%s  ·  %s %s  ·  %s" % [saved["name"], Data.by_id(Data.bloods, saved["blood"])["name"], String(saved["shape"]).capitalize(), where] }])
 		buttons.append([String(T.get("new", "New character")), func(): hud.blackout(new_character)])
-		buttons.append([String(T.get("yard", "Practice yard")), func(): hud.blackout(func(): hero = saved; start("fight"))])
+		buttons.append([String(T.get("yard", "Practice yard")), func(): hud.blackout(func(): hero = saved; start("fight"), not _args.has("bot"))])
 	else:
 		buttons.append([String(T.get("new", "New character")), func(): hud.blackout(new_character), { "primary": true }])
 	if saved.has("genius") and Genius.from_dict(saved["genius"]).is_born():
 		var sg := Genius.for_hero(saved)
 		buttons.append([String(T.get("genius", "Your genius: {name}")).format({ "name": sg.name if sg.name != "" else sg.form_name() }), func(): page.hero = saved; page.open(sg, World.SHAPE_COLORS.get(saved["shape"], Color.WHITE), 0, int(saved.get("academy", {}).get("record", {}).get("marks", 0)))])
-	buttons.append([String(T.get("tutorial", "Combat tutorial")), func(): hud.blackout(func(): hero = {}; start("tutorial"))])
+	buttons.append([String(T.get("tutorial", "Combat tutorial")), func(): hud.blackout(func(): hero = {}; start("tutorial"), not _args.has("bot"))])
 	buttons.append([String(T.get("settings", "Settings")), _settings_screen, { "row": true }])
 	buttons.append([String(T.get("credits", "Credits")), _credits_screen, { "row": true }])
 	if not OS.has_feature("web"):   # a browser's tab is closed by the browser
@@ -543,7 +543,7 @@ func _settings_screen() -> void:
 		[String(T.get("set_look", "Camera speed")), { "stepper": {
 			"value": func() -> String: return "%d%%" % roundi(Settings.option("look", 1.0) * 100.0),
 			"step": func(by: int): Settings.set_option("look", clampf(snappedf(Settings.option("look", 1.0) + 0.1 * by, 0.1), 0.3, 2.5)); _apply_options() } }],
-		[String(T.get("set_screen", "Whole screen")), { "stepper": {
+		[String(T.get("set_screen", "Full screen")), { "stepper": {
 			"value": func() -> String: return "On" if Settings.option("fullscreen", 0.0) > 0.5 else "Off",
 			"step": func(_by: int): Settings.set_option("fullscreen", 0.0 if Settings.option("fullscreen", 0.0) > 0.5 else 1.0); _apply_options() } }],
 	]
@@ -612,21 +612,21 @@ func _hero_made(h: Dictionary) -> void:
 	if Settings.settled_count() > 0 and not _args.has("answers"):
 		var adv: Dictionary = Data.academy.get("advanced", {}).get("offer", {})
 		hud.show_screen(adv.get("title", "A second life"), "", adv.get("text", ""), [
-			[adv.get("full", "The whole term"), func(): hero["advanced"] = false; Settings.save_hero(hero); _card(Data.story["cards"]["open"], _start_prologue)],
-			[adv.get("short", "Advanced standing"), func(): hero["advanced"] = true; Settings.save_hero(hero); _card(Data.story["cards"]["open"], _start_prologue)],
+			[adv.get("full", "The whole term"), func(): hero["advanced"] = false; Settings.save_hero(hero); _card(Data.story["cards"]["open"], _start_prologue, "story", 0.0, true)],
+			[adv.get("short", "Advanced standing"), func(): hero["advanced"] = true; Settings.save_hero(hero); _card(Data.story["cards"]["open"], _start_prologue, "story", 0.0, true)],
 		])
 		return
-	_card(Data.story["cards"]["open"], _start_prologue)
+	_card(Data.story["cards"]["open"], _start_prologue, "story", 0.0, true)
 
 ## A story card: the screen dark, the lines arriving one after another; a key or a click goes on.
 ## style "story" (a place, a time, what is happening) or "title" (a small line over a large one);
 ## auto: it goes on by itself that many seconds after its last line.
-func _card(lines: Array, next: Callable, style := "story", auto := 0.0) -> void:
+func _card(lines: Array, next: Callable, style := "story", auto := 0.0, capture := false) -> void:
 	mode = "story"
 	_show_preview = false
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var filled: Array = lines.map(func(l): return Prologue.fill(l, hero))
 	hud.show_card(filled, next, style, auto)
+	hud.card_capture = capture and not _args.has("bot")
 	if _args.has("answers"):
 		# automated checks: see the whole card, picture it, go on
 		while hud._card_state == "arriving":
@@ -739,6 +739,8 @@ func _recruiter() -> void:
 var _show_preview := false   # a story screen with the hero standing behind it
 
 func _recruiter_scene() -> void:
+	if mode != "prologue":
+		return   # left for the menu while the dark came down
 	mode = "scene"
 	Engine.time_scale = 1.0
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -781,6 +783,10 @@ func _recruiter_scene() -> void:
 	world.cine_look = b3 + Vector3(0, 1.4, 0) + side * 0.2
 	var go := func():
 		hud.hide_speech()
+		# (the pointer is taken now, in the press: the two cards go by themselves, and the
+		# Academy is walked into with no press for a browser to give it to)
+		if not _args.has("bot") and not _args.has("answers"):
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		# The year passes, the act is named, and the hero walks straight in: the Instructor is
 		# waiting inside. (The gate's own screen is for a character who comes back to it from
 		# the title; the automated checks stop at it.)
@@ -846,8 +852,8 @@ func _academy_gate() -> void:
 	_show_preview = true
 	music.play_track(String(Data.music.get("places", {}).get("gate", "gate")) if not Data.music.is_empty() else "gate")
 	hud.show_screen(a["title"], "%s  ·  %s  ·  %s" % [hero["name"], Data.by_id(Data.bloods, hero["blood"])["name"], String(hero["shape"]).capitalize()], a["text"], [
-		[String(a.get("enter", "Walk through the Gate")), func(): hud.blackout(func(): _show_preview = false; world.cine = false; enter_academy()), { "primary": true }],
-		[String(a.get("yard", "Practice yard")), func(): hud.blackout(func(): _show_preview = false; start("fight"))],
+		[String(a.get("enter", "Walk through the Gate")), func(): hud.blackout(func(): _show_preview = false; world.cine = false; enter_academy(), not _args.has("bot")), { "primary": true }],
+		[String(a.get("yard", "Practice yard")), func(): hud.blackout(func(): _show_preview = false; start("fight"), not _args.has("bot"))],
 		[String(a.get("menu", "Main menu")), func(): hud.blackout(func(): _show_preview = false; menu())],
 	], "left")
 	if _args.has("answers"):
@@ -1556,7 +1562,7 @@ func _input(event: InputEvent) -> void:
 
 ## Should the game have the pointer now? In play, with no card, menu or page up.
 func _wants_pointer() -> bool:
-	if _args.has("bot") or DisplayServer.get_name() == "headless" or hud.screen.visible or page.visible or builder.visible:
+	if _args.has("bot") or DisplayServer.get_name() == "headless" or hud.screen.visible or page.visible or builder.visible or hud.card.visible or hud.speech_up():
 		return false
 	if mode == "academy":
 		return not academy._naming and academy._choice_box == null and academy._reading_box == null
@@ -1748,10 +1754,10 @@ func _process(delta: float) -> void:
 		_next_shot = fight.now + float(_args.get("every", "5"))
 		_shot(mode)
 	# (and a picture of each of the night's great moments, with its name across the screen)
-	if _args.has("shots") and hud.banner_up() != _banner_seen:
-		_banner_seen = hud.banner_up()
+	if _args.has("shots") and (hud.banner_up() and hud._banner.modulate.a > 0.98) != _banner_seen:
+		_banner_seen = not _banner_seen
 		if _banner_seen:
-			_shot_moment()
+			_shot("moment")
 	if mode == "fight":
 		if fight.p_state == "down":
 			_results.call_deferred("down")
@@ -1760,9 +1766,6 @@ func _process(delta: float) -> void:
 			_results("time")
 
 var _banner_seen := false
-func _shot_moment() -> void:
-	await _wait(0.5)
-	await _shot("moment")
 
 func _sounds(events: Array) -> void:
 	for e in events:

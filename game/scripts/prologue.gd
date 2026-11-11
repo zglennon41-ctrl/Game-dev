@@ -21,6 +21,7 @@ var _walked := 0.0
 var _last_pos := Vector2.ZERO
 var _wake_left := 0.0      # the camera stays on the hero this long while the field wakes
 var _won := false
+var _wake_note := ""
 
 func _init(f: Fight, w: World, h: Dictionary) -> void:
 	fight = f
@@ -79,7 +80,8 @@ func _note(id: String) -> String:
 ## hero, the lamps of the platform catch one after another, the genius is born, and the wolf
 ## is thrown back and left open.
 func _wake(hud: Hud, how: String) -> void:
-	note = _note("wake_" + how)
+	_wake_note = _note("wake_" + how)
+	hud.set_prompt("", "")      # the moment has the screen to itself; the next step's words come after it
 	world.field_wakes(fight, hero)
 	world.set_lamps(1.0, 2.6)
 	var m: Dictionary = Data.story.get("moments", {}).get("wake", {})
@@ -124,6 +126,9 @@ func _enter(hud: Hud) -> void:
 
 func _next(hud: Hud) -> void:
 	beat += 1
+	# a step done is heard
+	if sfx and beat > 1:
+		sfx.play("ui-take", 1.0, -3.0)
 	if beat >= Data.story["beats"].size():
 		finished.emit()
 		return
@@ -134,6 +139,17 @@ func update(events: Array, dt: float, hud: Hud) -> void:
 		_wake_left -= dt
 		if _wake_left <= 0.0:
 			world.cine = false
+			if beat < Data.story["beats"].size() and _beat_data()["id"] == "hold":
+				_next(hud)
+				note = _wake_note
+		elif beat < Data.story["beats"].size() and _beat_data()["id"] == "hold":
+			# (a Pattern fired in this moment is seen to by the lines below)
+			var early := false
+			for e in events:
+				if e["type"] == "pattern-done":
+					early = true
+			if not early:
+				return
 	if beat >= Data.story["beats"].size():
 		return
 	_t += dt
@@ -176,7 +192,6 @@ func update(events: Array, dt: float, hud: Hud) -> void:
 			for e in events:
 				if e["type"] in ["parry", "block", "hurt", "evade", "turned"]:
 					_wake(hud, String(e["type"]))
-					_next(hud)
 					return
 		"woke":
 			var need := int(_beat_data().get("hits", 3))
