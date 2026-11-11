@@ -458,3 +458,28 @@ played the arc); barks stay as floating text. Still to be played rather than dec
     and Gauntlet, Hawk and Tortoise, the small people, the instruments, the weapons, Fiend
     and Ember. (l) **People's shape keys are packed** (`game/scripts/shapes.gd`) so the
     web game fits its page; it costs a moment when a new home's person first appears.
+
+88. **The Living Armor, in place of the Coat** (owner's direction, 2026-11-12: "Maybe
+    instead of coats living armors that are a tank type companion and keep equipment type
+    genius in the hand"; each of these mine, and yours to overrule). (a) **It is empty all
+    the way**: no dark body under the plate. The plates hang in the air with nothing
+    joining them and the helm stands over an empty collar; its face is a dark visor with
+    two lights and a brass brow. (b) **Its three Paths**: the **Sworn Plate** (a knight's
+    harness, `gold`: the few it is warm to), the **Siege-plate** (low and as wide as a
+    door, `madder`: it keeps itself to itself), the **Wayfarer's Harness** (tall, laced,
+    cloaked, `peacock`: dressed to leave). (c) **Its role**: a Bulwark, the fifth; the
+    Sworn Plate keeps to the Bulwark, the Siege-plate shades toward the Harrier (it breaks
+    the guard), the Wayfarer toward the Lookout. That makes twenty companions and five
+    items. Its numbers are the Bulwark's own; it has not had a balance run of its own.
+    (d) **It is written as a relic** (the Coat's Expression, kept, so the roster's
+    Expressions did not move) and its class is a creature. It could as well be an engine.
+    (e) **The play that earns each Path is new** (bonds with named people; being hurt and
+    holding; deep runs): the Coat's were a dodger's and do not suit a tank. (f) **A saved
+    Coat** loads as the form in the same place of the new tree: the Travelling Coat as the
+    Wayfarer's Harness, the Shadow-coat as the Siege-plate, the Listening Coat as the
+    Sworn Plate. (g) **Its gifts to a hybrid** are a helm and a pair of shoulder plates;
+    the two cloaks that were the Coat's stay as the cloaks every base shares. (h) **Nothing
+    is worn** now, but the code for a worn piece and the Coat's **Slip** (an effect an item
+    may have) are left in the game with nothing using them: say if they should go. (i) The
+    names of its forms are first drafts. (j) No heraldry: every shield, tabard and banner
+    is a plain field with one plain stripe.

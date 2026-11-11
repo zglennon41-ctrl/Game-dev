@@ -23,16 +23,14 @@ def register(kit):
     global gk
     gk = kit
     kit.BODIES.update({
-        "relic-buckle": buckle_body,
         "relic-knife": knife_body,
         "relic-blade": lambda: knife_body(long=True),
         "relic-glove": glove_body,
         "relic-gauntlet": lambda: glove_body(gauntlet=True),
         "relic-shield": shield_body,
-        "relic-coat": coat_body,
     })
     kit.PARTS.update({"grip": grip_part, "ledger": ledger_part, "broad-guard": broad_guard_part, "watching-eye": watching_eye_part, "shell": shell_part})
-    # the gifts of the Gauntlet and the Coat (and the Shield's two above), made to be known by
+    # the gifts of the Gauntlet (and the Shield's two above), and the two cloaks every base shares, made to be known by
     kit.PARTS.update({"small-hands": gloved_hands_part, "talon-grip": talon_grip_part, "wing-cloak": wing_cloak_part, "shadow-cloak": shadow_cloak_part})
     kit.KEEPSAKES.update({"collar": collar_keepsake, "ribbon": ribbon_keepsake, "charm": charm_keepsake, "bell": bell_keepsake})
 
@@ -92,52 +90,6 @@ def _eye(c, r, facing=(0, -1, 0), lids=None, slit=True):
 # ======================================================================================
 # The relics
 # ======================================================================================
-
-def buckle_body():
-    """The watch-buckle: a broad belt buckled round a waist that is not there. The buckle's
-    plate is an eye that opens; a line of the field beats along the leather; the free end
-    hangs past the keeper, tipped in brass."""
-    lea, dark, brass = gk.mat("leather"), gk.mat("leather_dark"), gk.mat("metal_brass")
-    zc, rx, ry = 0.44, 0.2, 0.15
-    items = []
-    items.append((strap(loop((0, 0, zc), rx, ry, n=20), 0.09, 0.016, closed=True), lea))
-    for dz in (0.034, -0.034):
-        items.append((ringtube((0, 0, zc + dz), rx + 0.009, ry + 0.009, 0.0035, n=20), gk.mark("stitch", lea)))
-    items.append((ringtube((0, 0, zc), rx + 0.0095, ry + 0.0095, 0.005, n=20), gk.field("pulse", 1.8)))
-    studs = None
-    for i in range(9):
-        a = math.radians(20 + 17.5 * i)
-        for dz in (0.018, -0.018):
-            studs = g.merge(studs, g.ico(((rx + 0.01) * math.cos(a), (ry + 0.01) * math.sin(a), zc + dz), 0.009, sub=0))
-    items.append((studs, gk.mark("studs", lea)))
-    # the buckle: a brass frame standing proud of the belt, the eye in it, the prong across
-    by = -ry - 0.02
-    frame = loop((0, by, zc), 0.098, 0.074, n=12, u=X, v=Z)
-    frame.append(frame[0])
-    items.append((g.tube(frame, [0.015] * len(frame), n=5, caps=False), brass))
-    items.append((g.ico((0, by + 0.012, zc), 0.07, sub=1, scale=(1.25, 0.2, 0.95)), dark))
-    items += _eye((0, by - 0.004, zc), 0.046, lids=lea)
-    items.append((g.tube([(-0.098, by - 0.014, zc - 0.058), (0.0, by - 0.02, zc - 0.066), (0.098, by - 0.014, zc - 0.058)], [0.006, 0.006, 0.004], n=4), brass))
-    # the keeper and the free end
-    items.append((strap([(0.118, by + 0.02, zc + 0.052), (0.126, by - 0.006, zc + 0.052), (0.126, by - 0.006, zc - 0.052), (0.118, by + 0.02, zc - 0.052)], 0.03, 0.012, up=X), dark))
-    tail = [(0.1, by + 0.004, zc), (0.165, by - 0.012, zc - 0.012), (0.2, by - 0.004, zc - 0.11), (0.192, by + 0.004, zc - 0.22), (0.186, by + 0.006, zc - 0.27)]
-    items.append((strap(tail, [0.08, 0.08, 0.078, 0.07, 0.03], 0.014, up=(0.3, -1, 0)), lea))
-    items.append((g.ico((0.186, by + 0.004, zc - 0.268), 0.022, sub=0, scale=(1.0, 0.5, 1.2)), brass))
-    holes = None
-    for k in range(3):
-        holes = g.merge(holes, g.ico((0.198 - 0.004 * k, by - 0.012, zc - 0.1 - 0.045 * k), 0.008, sub=0, scale=(1, 0.5, 1)))
-    items.append((holes, dark))
-    # a ring on its hip with nothing hung from it yet
-    items.append((ringtube((-rx - 0.012, 0.02, zc - 0.062), 0.006, 0.024, 0.005, n=10, u=X, v=Z), brass))
-    ob = g.pieces("buckle_body", items)
-    socks = gk._sockets({
-        "socket_head": [(0, 0, zc + 0.06)], "socket_eyes": [(0, by - 0.03, zc)], "socket_mouth": [(0, by - 0.02, zc - 0.07)], "socket_grip": [(0.19, by, zc - 0.28)],
-        "socket_throat": [(0, by, zc - 0.09)], "socket_light": [(0, 0, zc)], "socket_back": [(0, ry + 0.02, zc)], "socket_body": [(0, by - 0.01, zc - 0.11)],
-        "socket_tail": [(0, ry + 0.02, zc - 0.03)], "socket_arm_l": [(rx + 0.02, 0, zc)], "socket_arm_r": [(-rx - 0.02, 0, zc)],
-        "socket_limb_fl": [(0.1, -0.05, zc - 0.06)], "socket_limb_fr": [(-0.1, -0.05, zc - 0.06)], "socket_keepsake": [(-rx - 0.014, 0.02, zc - 0.088)],
-    })
-    return gk.Built([ob], socks)
-
 
 def knife_body(long=False):
     """The kept knife: a short knife riding point-down in its sheath, a hand's breadth drawn,
@@ -300,63 +252,6 @@ def shield_body():
     return gk.Built([ob], socks)
 
 
-def coat_body():
-    """The coat that listens: a long coat standing as if someone wore it, and no one does.
-    The collar is turned up high round nothing; the sleeves hang, the cuffs are empty; a
-    thread of the field runs in the weave at the hem and round the collar's edge."""
-    lea, dark, brass = gk.mat("leather"), gk.mat("leather_dark"), gk.mat("metal_brass")
-    lining = gk.mark("lining", dark)
-    prof = [(0.1, 0.2, 0.15, 0.015), (0.2, 0.175, 0.13, 0.012), (0.34, 0.135, 0.1, 0.005), (0.46, 0.118, 0.09, 0.0), (0.55, 0.15, 0.09, 0.0), (0.6, 0.1, 0.075, 0.0), (0.615, 0.07, 0.06, 0.0)]
-    rings = [g.ring((0, yo, z), rx, ryy, n=12, u=X, v=Y, phase=math.pi / 12) for z, rx, ryy, yo in prof]
-    coat = g.to_object("coat_shell", g.loft(rings), lea)
-    gk.paint(coat, lambda c, n, i: n.z < -0.9, gk.mat("void"))
-    gk.paint(coat, lambda c, n, i: abs(c.x) < 0.03 and c.y < 0 and abs(n.z) < 0.6 and c.z < 0.56, dark)
-    items = []
-    # the collar: a high ring, flared, its inside lined, nothing in it but a dark and a light
-    items.append((g.loft([g.ring((0, 0.004, z), rx, ryy, n=12, u=X, v=Y, phase=math.pi / 12) for z, rx, ryy in ((0.6, 0.088, 0.07), (0.69, 0.118, 0.098), (0.735, 0.128, 0.108))], caps=False), lea))
-    items.append((g.loft([g.ring((0, 0.004, z), rx, ryy, n=12, u=X, v=Y, phase=math.pi / 12) for z, rx, ryy in ((0.735, 0.124, 0.104), (0.69, 0.108, 0.088), (0.615, 0.07, 0.058))], caps=False), lining))
-    items.append((g.ico((0, 0.004, 0.622), 0.07, sub=1, scale=(1.0, 0.85, 0.25)), gk.mat("void")))
-    items.append((ringtube((0, 0.004, 0.737), 0.127, 0.107, 0.004, n=16), gk.field("weave", 1.8)))
-    items.append((g.ico((0, -0.01, 0.66), 0.022, sub=1, scale=(1.6, 0.7, 0.55)), gk.field("eyes", 2.5)))
-    # sleeves: hanging, a little bent, the cuffs turned back to show the lining
-    for s in (1, -1):
-        sh, el, cu = Vector((s * 0.15, 0.0, 0.55)), Vector((s * 0.215, -0.02, 0.41)), Vector((s * 0.205, -0.065, 0.275))
-        items.append((g.tube([sh, el, cu], [0.058, 0.05, 0.052], n=7), lea))
-        items.append((g.tube([cu + Vector((0, 0.006, 0.03)), cu + Vector((0, -0.004, -0.012))], [0.058, 0.06], n=7, caps=False), lining))
-        items.append((g.ico(cu + Vector((0, -0.004, -0.012)), 0.05, sub=1, scale=(1, 1, 0.2)), gk.mat("void")))
-    # lapels, buttons, a belt
-    for s in (1, -1):
-        items.append((g.blade((s * 0.02, -0.078, 0.6), (s * 0.085, -0.094, 0.47), 0.085, normal=(s * 0.3, -1, 0.1), belly=0.35), lining))
-    btn = None
-    for k in range(4):
-        z = 0.44 - 0.085 * k
-        btn = g.merge(btn, g.ico((0.045, -0.1 - 0.012 * k - 0.002 * k * k, z), 0.012, sub=0, scale=(1, 0.5, 1)))
-    items.append((btn, brass))
-    items.append((strap(loop((0, 0.002, 0.42), 0.128, 0.098, n=14), 0.034, 0.01, closed=True), dark))
-    items.append((g.box((-0.02, -0.1, 0.42), (0.05, 0.014, 0.046)), brass))
-    # stitching: the shoulder seams and down the back; the weave alight at the hem
-    st = None
-    for s in (1, -1):
-        st = g.merge(st, g.tube([(s * 0.1, 0.0, 0.606), (s * 0.152, 0.0, 0.556)], [0.004, 0.004], n=3), g.tube([(s * 0.07, -0.128, 0.2), (s * 0.085, -0.142, 0.11)], [0.004, 0.004], n=3))
-    st = g.merge(st, g.tube([(0, 0.092, 0.55), (0, 0.094, 0.46), (0, 0.11, 0.34), (0, 0.145, 0.2)], [0.004] * 4, n=3))
-    items.append((st, gk.mark("stitch", lea)))
-    items.append((ringtube((0, 0.015, 0.108), 0.203, 0.153, 0.005, n=18), gk.field("weave", 1.8)))
-    ob = g.join("coat_body", [coat, g.pieces("coat_dress", items)])
-    socks = gk._sockets({
-        "socket_head": [(0, 0.0, 0.745)], "socket_eyes": [(0, -0.09, 0.69)], "socket_mouth": [(0, -0.09, 0.63)], "socket_grip": [(-0.205, -0.07, 0.26)],
-        "socket_throat": [(0, -0.085, 0.585)], "socket_light": [(0.205, -0.07, 0.24)], "socket_back": [(0, 0.1, 0.5)], "socket_body": [(0, -0.105, 0.5)],
-        "socket_tail": [(0, 0.15, 0.2)], "socket_arm_l": [(0.19, 0, 0.56)], "socket_arm_r": [(-0.19, 0, 0.56)],
-        "socket_hand_l": [(0.205, -0.065, 0.27)], "socket_hand_r": [(-0.205, -0.065, 0.27)], "socket_limb_fl": [(0.08, -0.05, 0.11)], "socket_limb_fr": [(-0.08, -0.05, 0.11)],
-        "socket_keepsake": [(0.0, -0.105, 0.55)],
-    })
-    return gk.Built([ob], socks)
-
-
-# ======================================================================================
-# Parts added with these forms (frames: docs/genius-forms.md). The first three are Seed-marks
-# that had nothing to show for themselves on an art body.
-# ======================================================================================
-
 def grip_part():
     """A grip worn to the hand, on its back: a handle bound in leather, to lift it by."""
     arc = [(0, -0.055, 0.0), (0, -0.05, 0.035), (0, -0.02, 0.058), (0, 0.02, 0.058), (0, 0.05, 0.035), (0, 0.055, 0.0)]
@@ -478,7 +373,7 @@ def talon_grip_part():
 
 def wing_cloak_part():
     """Wings worn as a cloak, on its back: a cloak laid over it and hanging to either side, a
-    collar standing at the front of it, and the clasp it grew from, with its eye. The Coat's
+    collar standing at the front of it, and the clasp it grew from, with its eye. It was the Coat's
     gift. (One piece: a cloak hangs; it does not beat.)"""
     cloth, lining, brass = gk.mat("cloth_wool"), gk.mat("cloth_rag"), gk.mat("metal_brass")
     rings = []
@@ -519,7 +414,7 @@ def wing_cloak_part():
 
 def shadow_cloak_part():
     """A cloak of shadow, at its head: a cowl of dark standing behind the head and trailing
-    off down the neck in tatters; where a face would be, nothing. The Coat's gift."""
+    off down the neck in tatters; where a face would be, nothing."""
     shade, edge = gk.mat("shade"), gk.mat("shade_edge")
     c = Vector((0, 0.045, -0.02))
     hood = g.to_object("cowl", g.ico(c, 0.115, sub=2, scale=(0.95, 1.0, 1.05)), shade, smooth=True)

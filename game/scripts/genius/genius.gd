@@ -48,8 +48,49 @@ static func from_dict(d: Dictionary) -> Genius:
 			"own": d.get("own", d.get("features", [])), "heritage": [], "seedMark": d.get("seedMark", ""), "grafts": [], "adaptations": [] }
 		g.instar = maxi(1, int(d.get("instar", 1)))
 	g.instar = int(g.instar)
+	g._renamed()
 	g._onto_the_tree()
 	return g
+
+## A genius of a base that has been taken out of the tree is read as the base that stands in
+## its place (data/genius.json, renamed: the Coat became the Living Armor). Its form is the
+## form in the same place of the new tree, a hybrid's two bases and its form alike; it keeps
+## its name, its look, its age, its Seed-mark, what it had adapted and its grafts, and is made
+## of what the new form is made of.
+func _renamed() -> void:
+	var r: Dictionary = Data.genius().get("renamed", {})
+	var was := String(body.get("form", ""))
+	if r.is_empty() or was == "":
+		return
+	var bases: Dictionary = r.get("bases", {})
+	var forms: Dictionary = r.get("forms", {})
+	var pair := ""
+	var id := was
+	if was.contains(":"):
+		pair = was.get_slice(":", 0)
+		id = was.get_slice(":", 1)
+	var halves: Array = []
+	for b in pair.split("+", false):
+		halves.append(String(bases.get(b, b)))
+	var now := String(forms.get(id, id))
+	if not halves.is_empty():
+		now = "+".join(halves) + ":" + now
+	var sils: Dictionary = r.get("silhouettes", {})
+	if now == was and not sils.has(String(body.get("silhouette", ""))) and not sils.has(String(body.get("coatOf", ""))):
+		return
+	var f := Data.form(now)
+	if f.is_empty():        # (two bases that are now one: it settles again, as the tree has it)
+		body["silhouette"] = String(sils.get(String(body.get("silhouette", "")), body.get("silhouette", "")))
+		return
+	var kept: Array = []
+	for x in body.get("heritage", []):
+		if GeniusReading.is_adaptation(String(x)) and not kept.has(x):
+			kept.append(x)
+	body = { "form": f["id"], "base": f["base"], "expression": f["expression"], "silhouette": f["silhouette"], "coatOf": f["coatOf"],
+		"own": (f["features"] as Array).duplicate(), "heritage": kept, "seedMark": body.get("seedMark", ""),
+		"grafts": body.get("grafts", []), "adaptations": body.get("adaptations", []) }
+	history.append({ "instar": instar, "form": f["id"], "name": f["name"], "day": day, "by": "the tree", "renamed": was })
+	pending_reading = {}
 
 ## A genius saved before the genius tree (docs/genius-tree.md) is a form no tree has. It
 ## settles again, as the base nearest the body it wore, at the first level of that base's

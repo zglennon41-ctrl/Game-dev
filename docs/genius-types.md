@@ -18,15 +18,15 @@ genius's type") and `game/scripts/genius/genius_types.gd`. The older rules it si
 
 ## The rule
 
-**A genius's type is its base's.** Nothing is chosen: the 22 bases already say what they
+**A genius's type is its base's.** Nothing is chosen: the 28 bases already say what they
 are (`class` in `data/genius-bases/*.json`).
 
 | Type | Bases | What its partner does with it |
 |---|---|---|
 | **Weapon** | blade, bow, gun | Takes it in hand in place of the weapon they carry, and lets it go again |
-| **Defensive item** | shield, gauntlet, coat | Wears it. Something is always true while they do, and there is one thing they do with it |
+| **Defensive item** | shield, gauntlet | Has it on the arm or the hand. Something is always true while they do, and there is one thing they do with it |
 | **Ritual item** | lantern, astrolabe, bell | Carries it. The same rule: something always true, one thing done with it |
-| **Companion** | wolf, hawk, stag, tortoise, fox, imp, lurker, fiend, drake, sprite, homunculus, ember, fog | Gives it orders. It fights at their side in a **role** that supplies what they lack |
+| **Companion** | wolf, hawk, stag, tortoise, fox, imp, lurker, fiend, drake, sprite, homunculus, ember, fog, moth, octopus, carp, angel, demon, elemental, and the Living Armor (panoply) | Gives it orders. It fights at their side in a **role** that supplies what they lack |
 
 **One key.** The genius's key (**G**; left on a pad's d-pad) does what the type means: it
 takes a weapon in hand or lets it go, it uses an item, it steps a companion through its
@@ -90,18 +90,18 @@ true of it:
 2. **The key**: one thing its partner does with it, on a wait, paid for from the item's
    own Will. With too little Will the key does nothing.
 
-Each of its three paths bends one or the other. The six items, in a line each:
+Each of its three paths bends one or the other. The five items, in a line each (there were six: the Coat, the one genius that was worn on the
+body, became the Living Armor, a companion, on 2026-11-12, and nothing is worn any more):
 
 | Item | Always | The key |
 |---|---|---|
 | **Shield** (on the arm) | Blocked blows land for less and cost less Will | **Set the shield**: the next blow at you, from anywhere, it takes whole |
 | **Gauntlet** (on the hand) | The moment to parry is longer | **Catch it**: reach for a foe that is winding up and the strike is caught before it is thrown |
-| **Coat** (on the back) | A dodge costs less Will and covers a moment more | **Slip**: an instant untouchable step out of a swing, a reload or a flinch |
 | **Lantern** (at the side) | Blows you neither turned nor blocked land for a little less | **Set it down**: a lit circle where the moment to parry is half again as long |
 | **Astrolabe** (at the shoulder) | Each strike you parry, block or dodge is a measure of the foe; each measure adds to your blows on it | **Take a sight**: for seven seconds your blows in the foe's weak moment land much harder |
 | **Bell** (at the belt) | Your Pattern's chain moments are wider; a parry gives back a little more Will | **Toll**: every foe near you that is winding up is broken out of its strike |
 
-Shield and lantern have a great move, **The wall**. The gauntlet, the coat, the astrolabe
+Shield and lantern have a great move, **The wall**. The gauntlet, the astrolabe
 and the bell keep whichever great move their body already had (a call, below).
 
 ## Companions: five roles
@@ -153,7 +153,6 @@ Printed from the data by `python3 tools/genius-types-table.py` (run it again aft
 
 | Base | Always | The key | Its paths, and how each bends it |
 |---|---|---|---|
-| **Coat** (on your back) | **It hangs loose.** A dodge costs you less Will, and you are untouchable in it a moment longer. | **Slip.** The coat pulls you out: an instant step the way you steer, or round the foe if you steer nowhere, untouchable, out of a swing, a reload or a flinch. It costs you no Will. Every 8 seconds, for 8 of its Will. | **Travelling Coat**: The slip carries you nearly half as far again, gives you back Will, and you run faster for two and a half seconds after.<br>**Shadow-coat**: A blow you slip lands where you were, and the foe is left looking there: your next blow within two seconds lands half again as hard.<br>**Listening Coat**: It heard it coming. Slip within a third of a second after a blow lands, and most of that blow is taken back. |
 | **Gauntlet** (on your hand) | **A sure hand.** The moment to parry is longer. | **Catch it.** Reach for a foe that is winding up, from close: the strike is caught before it is thrown, and the foe flinches. Reach for nothing and the hand closes on air. Every 10 seconds, for 9 of its Will. | **Maker's Hand**: What it catches it takes apart: for two and a half seconds the foe's guard is down and every blow on it lands a sixth harder.<br>**Fighting Fist**: The catch is a blow: it strikes as it closes and throws the foe back. Between catches it strikes with you: every third blow of yours it adds one.<br>**Open Hand**: It reaches across the ground for a strike wound up at a classmate. And once a fight, when a blow would fell you, it catches you: you are left standing. |
 | **Shield** (on your arm) | **Shield arm.** A blow you block lands for less, and a blocked blow costs you less Will. | **Set the shield.** For a moment the shield is set: the next blow at you, from anywhere, it takes whole. Every 9 seconds, for 8 of its Will. | **Wall-shield**: It takes two blows, not one, and stays set nearly twice as long.<br>**Gate-shield**: It is set on the ground where you stand, as a door: for six seconds it takes the blows at you, and at any classmate, while you stand by it. Three blows.<br>**Shelter-shield**: Set, it covers whoever is struck first: you, or a classmate within eight metres. It is ready again a third sooner. |
 
@@ -169,7 +168,11 @@ Printed from the data by `python3 tools/genius-types-table.py` (run it again aft
 
 | Base | Role | Its paths, and the role each leans toward |
 |---|---|---|
+| **Angel** | Keeper | **Shoulder-angel** (keeps to the Keeper): It has chosen whose side it is on: it mends more.<br>**Clarion** (toward the Lookout): It says so before it happens: it calls the strike.<br>**Weigher** (toward the Hunter): It believes in what is deserved: heavier into every opening. |
+| **Carp** | Bulwark | **Weir-leaper** (keeps to the Bulwark): It does not go round: it holds the foe longer.<br>**Still-water Carp** (toward the Keeper): It makes the place it stays in deep: it mends who rests by it.<br>**Silt-reader** (toward the Lookout): It feels it in the floor: it calls the strike. |
+| **Demon** | Hunter | **Exile** (toward the Lookout): It stands a little apart, where it can see: it calls the strike.<br>**Advocate** (toward the Harrier): It puts the other side of it to the foe: the guard is down longer.<br>**Head-down** (keeps to the Hunter): It puts its head down and goes through: heavier into every opening. |
 | **Drake** | Bulwark | **Hoard-drake** (keeps to the Bulwark): It counts you among what it keeps: it holds the foe longer.<br>**Fire-drake** (toward the Hunter): It keeps the fire in until it is wanted: then into the opening, unstinted.<br>**Sky-drake** (toward the Lookout): From higher up it sees the strike coming, and calls it. |
+| **Elemental** | Harrier | **Cornerstone** (toward the Bulwark): It stands where it stood: it takes the foe on itself.<br>**Tideling** (keeps to the Harrier): It always comes back at the foe: the guard is down longer.<br>**Squall** (toward the Hunter): It is suddenly there: it strikes hard into what it opened. |
 | **Ember** | Hunter | **Kept Fire** (toward the Keeper): Near enough to warm: it mends.<br>**Rushlight** (toward the Lookout): A small light in a bad place: it calls the strike.<br>**Wildfire** (keeps to the Hunter): It spends the whole of itself: heavier into every opening. |
 | **Fiend** | Hunter | **Flare-up** (keeps to the Hunter): It does not come down until something has paid: heavier into every opening.<br>**Banked Coal** (toward the Harrier): It has a list: it worries the one it is waiting for.<br>**Grate-fiend** (toward the Keeper): It learned to be warm: it mends. |
 | **Fog** | Harrier | **Fog-shroud** (toward the Bulwark): It gets in the way gently: it takes the foe on itself.<br>**Lingering Mist** (toward the Lookout): It stays and listens: it calls the strike.<br>**Shifting Fog** (keeps to the Harrier): It cannot be pinned: the guard is down longer. |
@@ -178,14 +181,18 @@ Printed from the data by `python3 tools/genius-types-table.py` (run it again aft
 | **Homunculus** | Keeper | **Clay Apprentice** (keeps to the Keeper): It does the next thing before you have got to it: it mends more.<br>**Likeness** (toward the Hunter): It fights like you: it strikes into your openings.<br>**Clay Bearer** (toward the Bulwark): It chose your purpose: it takes the foe on itself. |
 | **Imp** | Harrier | **Debt-collector** (toward the Hunter): It goes and gets it: it strikes hard into what it opened.<br>**Stickler** (keeps to the Harrier): It holds the foe to the letter: the guard is down longer.<br>**Surety** (toward the Bulwark): It put its name under yours: it takes the foe on itself. |
 | **Lurker** | Lookout | **Back-stander** (toward the Bulwark): It fills the place behind you: it takes the foe onto itself.<br>**The One Who Sits Up** (toward the Keeper): It sits up with the hurt: it mends.<br>**The Unremarked** (keeps to the Lookout): It sees from where it is not seen: the moment to parry is longer still. |
+| **Moth** | Lookout | **Candle-moth** (toward the Hunter): It goes where the fire is: heavier into every opening.<br>**Emperor** (toward the Bulwark): It opens its eyes at the foe: the foe looks at it, and not at you.<br>**Moon-moth** (keeps to the Lookout): It keeps its one far light in view: the moment to parry is longer still. |
+| **Octopus** | Keeper | **Many-hands** (keeps to the Keeper): It has an arm for everyone: it mends more.<br>**Latch-lifter** (toward the Harrier): It finds where the foe is fastened: it worries the guard open.<br>**Sleeps-on-it** (toward the Lookout): It has dreamed the foe already: it calls the strike. |
+| **Living Armor** | Bulwark | **Sworn Plate** (keeps to the Bulwark): It has chosen its few and stands before them: it holds the foe longer.<br>**Siege-plate** (toward the Harrier): It goes through what is shut: it breaks the foe's guard.<br>**Wayfarer's Harness** (toward the Lookout): It keeps the watch at the edge: it calls the strike. |
 | **Sprite** | Keeper | **Hob** (keeps to the Keeper): Somebody has to mind the house: it mends more.<br>**Lore-sprite** (toward the Lookout): Knowing is a light too: it calls the strike.<br>**Pixy** (toward the Harrier): Other eyes go after it: it worries the foe. |
 | **Stag** | Bulwark | **Tilter** (toward the Hunter): Its head goes down: held, the foe is struck hard when it opens.<br>**Wood-walker** (toward the Harrier): It leads the foe a dance: it worries it between holds.<br>**Watch-hart** (keeps to the Bulwark): It walks at the back and stands between: it holds the foe longer. |
 | **Tortoise** | Bulwark | **Stone-back** (keeps to the Bulwark): It will not be moved: it holds the foe longer.<br>**Cairn-back** (toward the Keeper): It is a post that travels: it mends who rests by it.<br>**The Unhurried** (toward the Hunter): It arrives anyway: its few blows land in the openings. |
 | **Wolf** | Hunter | **Counting Wolf** (toward the Keeper): It counts heads between bites: it mends whoever is hurt.<br>**Third-day Wolf** (keeps to the Hunter): It does not let go: its blows in an opening are heavier still.<br>**Night-watch** (toward the Lookout): It does not sleep: it calls the strike you would not have seen. |
 
-Roles across the thirteen: three Bulwarks (stag, tortoise, drake), three Hunters (wolf,
-fiend, ember), three Harriers (fox, imp, fog), two Keepers (sprite, homunculus), two
-Lookouts (hawk, lurker). Every base has one path that keeps to its role.
+Roles across the twenty: five Bulwarks (stag, tortoise, drake, carp, the Living Armor), four
+Hunters (wolf, fiend, demon, ember), four Harriers (fox, imp, elemental, fog), four Keepers
+(sprite, homunculus, octopus, angel), three Lookouts (hawk, lurker, moth). Every base has one
+path that keeps to its role.
 
 ## What the genius learns from it
 
@@ -199,7 +206,7 @@ there (`tally` in the data):
   shoulder counts toward Free.
 - **An item.** Each use counts toward the line that use is for (the shield's toward Guard,
   the lantern's and a gate-shield's toward Hold, the bell's, the gauntlet's and the
-  astrolabe's toward Hunt, the coat's toward Free), and a blow landed just after a use
+  astrolabe's toward Hunt), and a blow landed just after a use
   counts a half toward Hunt.
 
 ## How it reads
@@ -210,8 +217,7 @@ there (`tally` in the data):
   model says the hand closes on it (an empty named `grip`), and the carried weapon is not
   drawn. An item is drawn where it is worn (`mounts` in the data, by its base's `worn`):
   a shield in the left hand, where a carried shield would be (and a carried one is not
-  drawn under it), and a gauntlet on that hand, each by its own `wear`; a coat down the
-  back; a lantern at the hip, a bell at the belt and an astrolabe afloat at the
+  drawn under it), and a gauntlet on that hand, each by its own `wear`; a lantern at the hip, a bell at the belt and an astrolabe afloat at the
   shoulder, each hung by its own ring (`carry`), upright whatever its partner's body does,
   at the height its form says it has in the hand (`held`) times the mount's `scale`.
   `godot --path . -- --fight --genius=<form id>:3 --near` (or `--near=back`) brings the
@@ -245,7 +251,6 @@ played by the game's own bots, which use the key. Six fights each.
 | **Gauntlet** | 61 | 63 | 65 (37 if never pressed) |
 | **Bell** | 57 | 70 | 89 |
 | **Lantern** | 41 | 57 | 79 |
-| **Coat** | 37 | 49 | 51 |
 | **Astrolabe** | 43 s, 39 health | 40 s, 45 | 40 s, 49 |
 
 Read plainly: Hunters and Harriers end the fight sooner; Bulwarks, Keepers and the
@@ -275,7 +280,7 @@ seldom use a ranged genius well.
 
 **4. A learner's First Form, against the Warden as it is.** A "learning" hand with a saber
 wins 3 of 6 alone. It wins 6 of 6 with any Bulwark, Keeper or Lookout, a shield, a gauntlet
-or a gun; 4 of 6 with a bell, a coat or a lantern; and still 3 of 6 with a Hunter, a
+or a gun; 4 of 6 with a bell or a lantern (and, when there was one, a coat); and still 3 of 6 with a Hunter, a
 Harrier, a blade, a bow or an astrolabe. A "new" hand, which does not parry or use the key,
 loses with everything, as before.
 
@@ -348,7 +353,7 @@ yours to change.
     practiced player a genius changes a hard fight by roughly a tenth to a half, most for
     Hunters. Is that the right size for "the pride of each player"?
 12. **Great moves.** Weapons keep The second hand; the shield and the lantern have The
-    wall; the gauntlet, the coat, the astrolabe and the bell have none written for them.
+    wall; the gauntlet, the astrolabe and the bell have none written for them.
 13. **Every number.** Waits, costs and strengths are first guesses tuned only until the
     tables above read sensibly.
 

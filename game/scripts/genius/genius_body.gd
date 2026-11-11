@@ -234,7 +234,7 @@ func _assemble(instar: int) -> void:
 			# A part made for a paired slot (limbs, arms) goes on every socket the body has for it;
 			# some features name their own sockets (a beak at the mouth, hands at the wrists).
 			# (a giver's own make of a part may hang somewhere of its own: the Lurker's cloak down
-			# the back where the Coat's is on the head; featureSockets, "<giver>-<feature>")
+			# the back where the cloak every base shares is on the head; featureSockets, "<giver>-<feature>")
 			var place_of: Dictionary = cfg.get("featureSockets", {})
 			var named: Array = place_of.get(own_key if part_path != PART_DIR % f and place_of.has(own_key) else f, []).filter(func(sn): return sockets.has(sn))
 			var targets: Array = named if not named.is_empty() else (socks.filter(func(sn): return sockets.has(sn)) if socks.size() > 1 else [socks[0]])

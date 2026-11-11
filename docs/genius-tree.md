@@ -69,10 +69,10 @@ A mix by class, each a thing with a will of its own.
 |---|---|
 | Animals | Wolf, Hawk, Stag, Tortoise, Fox |
 | Monsters | Imp, Lurker, Fiend, Drake |
-| Magical creatures | Sprite, Homunculus, Ember, Fog |
+| Magical creatures | Sprite, Homunculus, Ember, Fog, the Living Armor (it was the Coat, an armor, until 2026-11-12) |
 | Items of power | Lantern, Astrolabe, Bell |
 | Weapons | Blade, Gun, Bow |
-| Armors | Shield, Gauntlet, Coat |
+| Armors | Shield, Gauntlet |
 
 A settled form is the young or the small of its base (a wolf pup, a kept knife, a buckler),
 so that what it grows into is growth.

@@ -1,0 +1,1270 @@
+{
+ "id": "panoply",
+ "name": "Living Armor",
+ "class": "creature",
+ "expression": "relic",
+ "silhouette": "relic-panoply",
+ "soul": "The soul of someone who keeps themselves to themselves; who is always dressed to leave, and is warm to very few. Nobody is in the armor, and it stands between.",
+ "spark": "The mote gets between you and the door when someone knocks. It weighs nothing, and it does not step aside.",
+ "nature": {
+  "fights": {
+   "blocks": 0.8
+  },
+  "orders": {
+   "guard": 0.5
+  },
+  "company": {
+   "alone": 0.4
+  }
+ },
+ "calls": {
+  "seed": {
+   "stands-between": 0.6,
+   "i-can-hold": 0.4,
+   "remembers": 0.3,
+   "never-alive": 0.3
+  },
+  "shape": {
+   "anchor": 0.5,
+   "read": 0.4,
+   "bind": 0.4
+  },
+  "blood": {
+   "hollowfolk": 0.6,
+   "fogborn": 0.5,
+   "nightfolk": 0.5
+  }
+ },
+ "hybrid": {
+  "adj": "Armored",
+  "gift": [
+   "helm",
+   "pauldrons"
+  ],
+  "text": "It has started standing half a step in front of you, and there is nobody in the part of it that does."
+ },
+ "newFeatures": [
+  {
+   "id": "helm",
+   "slot": "head",
+   "label": "an empty helm, the field lit in its visor"
+  },
+  {
+   "id": "pauldrons",
+   "slot": "surface",
+   "label": "plates on its shoulders with nobody under them"
+  },
+  {
+   "id": "banner",
+   "slot": "surface",
+   "label": "a banner with no device on it"
+  },
+  {
+   "id": "empty-collar",
+   "slot": "surface",
+   "label": "a collar with nothing standing in it, and two lights above"
+  }
+ ],
+ "settled": {
+  "id": "panoply-squire",
+  "name": "Squire",
+  "text": "A child's breastplate and a helm too big for it, walking. Nobody is in them. The light in the visor is yours, and it has put itself between you and the door.",
+  "sign": "A helm that slips over one side, a small dented breastplate, two mitts and two boots, and nothing joining them. Two lights in the visor look up at you.",
+  "habit": "It pushes its helm straight with both mitts, and stands in front of you with a pot-lid for a shield.",
+  "features": [
+   "helm",
+   "iron-hide"
+  ],
+  "body": {
+   "helm": [
+    "pot",
+    1.0
+   ],
+   "brow": "raised",
+   "eyes": "two",
+   "plate": "child",
+   "left": [
+    "lid",
+    1.0
+   ],
+   "crest": [
+    [
+     "tuft",
+     1.0
+    ]
+   ]
+  }
+ },
+ "paths": [
+  {
+   "id": "panoply-sworn-plate",
+   "name": "Sworn Plate",
+   "of": "one who chose their few, once, and stands in front of them",
+   "text": "It learned from you that a side is taken once. It has grown into a knight's plate with nobody in it, and it carries its shield on the side you are on.",
+   "sign": "A knight's harness standing very straight, a gold plume on the helm and a plain gold shield. The visor is dark, with two steady lights.",
+   "habit": "When a stranger comes up to you it is already between, and it does not explain itself.",
+   "leans": {
+    "bonds": {
+     "named": 1.0
+    },
+    "fights": {
+     "blocks": 0.8
+    },
+    "orders": {
+     "guard": 0.5
+    }
+   },
+   "features": [
+    "shield-face"
+   ],
+   "body": {
+    "build": {
+     "wide": 0.15
+    },
+    "helm": [
+     "armet",
+     1.0
+    ],
+    "brow": "level",
+    "crest": [
+     [
+      "plume",
+      1.0
+     ]
+    ],
+    "plate": "full",
+    "chest": "keel",
+    "fauld": "tassets",
+    "pauldrons": [
+     "cups",
+     1.0
+    ],
+    "left": [
+     "heater",
+     1.0
+    ],
+    "over": [
+     "sash"
+    ],
+    "coat": "moon",
+    "accent": "gold"
+   },
+   "prongs": [
+    {
+     "id": "panoply-pavise",
+     "name": "Pavise",
+     "of": "one who would rather be leaned on than thanked",
+     "text": "Its shield has grown taller than it is. It sets the foot of it on the ground in front of you, and what was coming stops there.",
+     "sign": "A tower shield planted on its point with the helm just showing over the rim, and a gold stripe down the middle of the face.",
+     "habit": "It raps the rim twice with a gauntlet before it settles, as a carter tries a wheel.",
+     "leans": {
+      "fights": {
+       "blocks": 1.0
+      },
+      "orders": {
+       "hold": 0.5
+      }
+     },
+     "features": [
+      "tower-shield"
+     ],
+     "body": {
+      "left": [
+       "tower",
+       1.0
+      ],
+      "pauldrons": [
+       "cups",
+       1.15
+      ],
+      "crest": [
+       [
+        "comb",
+        1.0
+       ]
+      ],
+      "brow": "stern",
+      "over": null
+     },
+     "finishes": [
+      {
+       "id": "panoply-twin-wall",
+       "name": "Twin Wall",
+       "of": "one who is a whole line of defence, and does not mention it",
+       "text": "It carries a shield on each arm now, and closed together they are a wall with a slot to look through. It has not been gone round yet.",
+       "sign": "Two tower shields shut edge to edge, crenellated along the top, gold bands across both. Two lights look out through the gap.",
+       "habit": "It opens the two shields a hand's width to let you through, and shuts them behind you.",
+       "leans": {
+        "orders": {
+         "hold": 1.0
+        },
+        "fights": {
+         "blocks": 0.7
+        }
+       },
+       "features": [
+        "wall-plate"
+       ],
+       "body": {
+        "build": {
+         "wide": 0.4
+        },
+        "helm": [
+         "great",
+         1.0
+        ],
+        "crest": null,
+        "left": [
+         "wall",
+         1.0
+        ],
+        "right": [
+         "wall",
+         1.0
+        ],
+        "pauldrons": [
+         "cups",
+         1.3
+        ]
+       }
+      },
+      {
+       "id": "panoply-open-guard",
+       "name": "Open Guard",
+       "of": "one who lowers the shield for exactly one person",
+       "text": "It has slung the great shield on its back and lifted its visor. There is still nobody there. It holds out a hand to you all the same.",
+       "sign": "The visor is up over an empty dark with two lights in it. The shield rides on its back, and a gold cape hangs under it.",
+       "habit": "It keeps its visor shut for everyone else, and they take it for unfriendly.",
+       "leans": {
+        "bonds": {
+         "named": 1.0
+        },
+        "fights": {
+         "blocks": 0.5
+        }
+       },
+       "features": [
+        "broad-guard"
+       ],
+       "body": {
+        "helm": [
+         "armet-open",
+         1.0
+        ],
+        "brow": "soft",
+        "crest": [
+         [
+          "plume",
+          1.0
+         ]
+        ],
+        "left": null,
+        "back": [
+         "slung",
+         "cape"
+        ],
+        "pose": "offer"
+       }
+      }
+     ]
+    },
+    {
+     "id": "panoply-oath-plate",
+     "name": "Oath-plate",
+     "of": "one who said it once and has been keeping it since",
+     "text": "It has put the shield down and taken up a sword it holds point to the ground. It does not swing it much. It is a thing to stand behind.",
+     "sign": "A long sword held point down, a gold tabard over the breastplate, and tall guards on its shoulders that stand to the helm.",
+     "habit": "When you make a promise it sets the sword's point on the ground, and it does not lift it until the thing is done.",
+     "leans": {
+      "pattern": {
+       "sworn": 1.0
+      },
+      "fights": {
+       "parries": 0.5
+      }
+     },
+     "features": [
+      "edge"
+     ],
+     "body": {
+      "left": null,
+      "right": [
+       "sword-down",
+       1.0
+      ],
+      "over": [
+       "tabard"
+      ],
+      "pauldrons": [
+       "great",
+       1.0
+      ],
+      "crest": [
+       [
+        "plume",
+        1.2
+       ]
+      ]
+     },
+     "finishes": [
+      {
+       "id": "panoply-vigil",
+       "name": "Vigil",
+       "of": "one who stands the night through because they said they would",
+       "text": "It stands where it was put with a long cloak over its plate, a small flame of your light on its helm. It was there when you slept. It is there when you wake.",
+       "sign": "A cloak to the ground, the sword's point between its feet, and one small flame on the crown of the helm where a plume was.",
+       "habit": "It will not sit. You have found it in the morning exactly where it stood the night before.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "pattern": {
+         "sworn": 0.6
+        }
+       },
+       "features": [
+        "old-eyes"
+       ],
+       "body": {
+        "crest": [
+         [
+          "candle",
+          1.0
+         ]
+        ],
+        "back": [
+         "cloak"
+        ],
+        "brow": "soft"
+       }
+      },
+      {
+       "id": "panoply-champion",
+       "name": "Champion",
+       "of": "one who answers for someone else, in front of everyone",
+       "text": "It has stepped out in front. The sword is up, the plume is as tall again as the helm, and everyone watching knows whose side it is on.",
+       "sign": "The sword raised upright before its visor, a great gold plume streaming back, a short cape, and shoulder guards like wings.",
+       "habit": "It walks a pace ahead of you into any room where you are to be judged.",
+       "leans": {
+        "fights": {
+         "parries": 1.0
+        },
+        "quests": {
+         "writ": 0.5
+        }
+       },
+       "features": [
+        "crest"
+       ],
+       "body": {
+        "right": [
+         "sword-up",
+         1.0
+        ],
+        "crest": [
+         [
+          "plume",
+          1.9
+         ]
+        ],
+        "back": [
+         "cape"
+        ],
+        "pauldrons": [
+         "great",
+         1.35
+        ],
+        "brow": "stern"
+       }
+      }
+     ]
+    },
+    {
+     "id": "panoply-banner-harness",
+     "name": "Banner-harness",
+     "of": "one who carries the thing the others gather round",
+     "text": "A staff has grown from its backplate, and a banner on it with no device at all. It is easier to find across a field than you are.",
+     "sign": "A plain gold banner on a pole from its back, standing well above the helm, and the small shield still on its arm.",
+     "habit": "It turns so that the banner can be seen from wherever your friends are.",
+     "leans": {
+      "company": {
+       "party": 1.0
+      },
+      "bonds": {
+       "classmate": 0.6
+      }
+     },
+     "features": [
+      "banner"
+     ],
+     "body": {
+      "back": [
+       "banner"
+      ],
+      "left": [
+       "heater",
+       0.85
+      ],
+      "crest": [
+       [
+        "comb",
+        1.0
+       ]
+      ]
+     },
+     "finishes": [
+      {
+       "id": "panoply-standard",
+       "name": "Standard",
+       "of": "one the others look for when the line bends",
+       "text": "It carries the standard in its own hand now, a pole twice its height with a long gold flag. While that stands, nobody near it runs.",
+       "sign": "A great pole held upright in its right hand, a long swallow-tailed gold flag at the top, and a cape on its shoulders.",
+       "habit": "It grounds the pole when it stops, and you have seen tired people straighten at the sound.",
+       "leans": {
+        "company": {
+         "party": 1.0
+        },
+        "orders": {
+         "hold": 0.5
+        }
+       },
+       "features": [
+        "standing-air"
+       ],
+       "body": {
+        "back": [
+         "cape"
+        ],
+        "left": null,
+        "right": [
+         "standard",
+         1.0
+        ],
+        "crest": [
+         [
+          "plume",
+          1.0
+         ]
+        ],
+        "pauldrons": [
+         "great",
+         1.0
+        ]
+       }
+      },
+      {
+       "id": "panoply-cohorts-plate",
+       "name": "Cohort's Plate",
+       "of": "one who wears a ribbon for each of the few they let in",
+       "text": "A fan of small flags stands from its back, one for each of the people it has decided are its own. There are not many. It knows each by name.",
+       "sign": "Six small gold pennons fanned behind its shoulders like a hand of cards, and ribbons tied at each elbow.",
+       "habit": "It counts the pennons with one gauntlet whenever the company sets out, and again when it comes home.",
+       "leans": {
+        "bonds": {
+         "classmate": 1.0
+        },
+        "quests": {
+         "escort": 0.5
+        }
+       },
+       "features": [
+        "wing-cloak"
+       ],
+       "body": {
+        "back": [
+         "pennons"
+        ],
+        "over": [
+         "sash",
+         "ribbons"
+        ],
+        "crest": [
+         [
+          "plume",
+          0.8
+         ]
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "panoply-siege-plate",
+   "name": "Siege-plate",
+   "of": "one who is a shut door, and means it",
+   "text": "It learned from you how to be closed. It has grown low and heavy and as wide as a doorway, and whatever wants you must come through it.",
+   "sign": "A barrel of banded iron on short legs, its helm sunk between slab shoulders, red bands round its chest. Its fists hang to its knees.",
+   "habit": "It stands in doorways. People wait for it to move, and it has never once thought they meant it.",
+   "leans": {
+    "fights": {
+     "hurts": 1.0
+    },
+    "orders": {
+     "hold": 0.7
+    },
+    "range": {
+     "close": 0.5
+    }
+   },
+   "features": [
+    "broad-chest"
+   ],
+   "body": {
+    "build": {
+     "wide": 0.6,
+     "legs": 0.8,
+     "neck": -0.6,
+     "hands": 1.5,
+     "feet": 1.2,
+     "bow": 0.06,
+     "deep": 0.3
+    },
+    "helm": [
+     "great",
+     0.92
+    ],
+    "brow": "stern",
+    "plate": "heavy",
+    "chest": "hoops",
+    "fauld": "apron",
+    "pauldrons": [
+     "slab",
+     1.0
+    ],
+    "left": null,
+    "crest": null,
+    "coat": "iron",
+    "accent": "madder"
+   },
+   "prongs": [
+    {
+     "id": "panoply-ram",
+     "name": "Ram",
+     "of": "one who goes through, since nobody opened",
+     "text": "It has grown a ram's curled horns on its helm and a wedge of iron on its chest. It lowers its head, and then there is a way where there was a wall.",
+     "sign": "Two heavy horns curled at the sides of the helm, a red iron wedge standing from the breastplate, and its whole weight leaning forward.",
+     "habit": "It leans on a shut door for a moment before it tries the handle.",
+     "leans": {
+      "range": {
+       "close": 1.0
+      },
+      "orders": {
+       "hunt": 0.6
+      }
+     },
+     "features": [
+      "horn-brow"
+     ],
+     "body": {
+      "build": {
+       "bow": 0.16,
+       "hands": 1.25,
+       "legs": 1.12
+      },
+      "crest": [
+       [
+        "ram",
+        1.3
+       ]
+      ],
+      "chest": "prow",
+      "fauld": null,
+      "pauldrons": [
+       "slab",
+       0.78
+      ]
+     },
+     "finishes": [
+      {
+       "id": "panoply-breach",
+       "name": "Breach",
+       "of": "one who is the hole in the wall, walking",
+       "text": "The horns have swung forward and the wedge has grown to a prow. It does not look for the gate any more. It makes one.",
+       "sign": "Great horns pointing forward past its visor, spikes on its shoulders, and a prow like a ship's from throat to belt, red along the edge.",
+       "habit": "It walks to a thing in a straight line, and what is in the line is moved.",
+       "leans": {
+        "quests": {
+         "hunt": 1.0
+        },
+        "range": {
+         "close": 0.6
+        }
+       },
+       "features": [
+        "horns"
+       ],
+       "body": {
+        "build": {
+         "wide": 0.85,
+         "bow": 0.2
+        },
+        "crest": [
+         [
+          "horns",
+          1.6
+         ]
+        ],
+        "chest": [
+         "prow",
+         1.8
+        ],
+        "pauldrons": [
+         "spikes",
+         1.2
+        ]
+       }
+      },
+      {
+       "id": "panoply-hundred-dent",
+       "name": "Hundred-dent",
+       "of": "one who kept every blow that was meant for someone else",
+       "text": "It is dented all over and has lost a shoulder plate, and through a hole in its chest you can see there was never anyone to hurt.",
+       "sign": "Broken shafts standing from its back, one shoulder bare, and a torn hole in the breastplate with your light showing in the empty inside.",
+       "habit": "It turns the dented side toward whatever is coming, as if that side were used to it.",
+       "leans": {
+        "fights": {
+         "hurts": 1.0
+        },
+        "company": {
+         "party": 0.4
+        }
+       },
+       "features": [
+        "iron-hide"
+       ],
+       "body": {
+        "crest": null,
+        "chest": "hole",
+        "fauld": "apron",
+        "pauldrons": [
+         "slab-one",
+         1.0
+        ],
+        "back": [
+         "shafts"
+        ],
+        "brow": "soft"
+       }
+      }
+     ]
+    },
+    {
+     "id": "panoply-door-bearer",
+     "name": "Door-bearer",
+     "of": "one who brings the wall along",
+     "text": "Half a door has grown on its forearm, oak and iron. Where it sets it down there is a door in the road, and it is shut.",
+     "sign": "The tall leaf of an oak door on its left arm, banded with iron and painted red. Its right fist hangs free, and is the size of a bucket.",
+     "habit": "It sets the door down when you sleep in the open, and sits facing outward until it is light.",
+     "leans": {
+      "orders": {
+       "hold": 1.0
+      },
+      "quests": {
+       "escort": 0.6
+      }
+     },
+     "features": [
+      "door"
+     ],
+     "body": {
+      "left": [
+       "door",
+       1.0,
+       "shut"
+      ],
+      "chest": "hoops"
+     },
+     "finishes": [
+      {
+       "id": "panoply-barbican",
+       "name": "Barbican",
+       "of": "one who decides who comes in, and is rarely asked twice",
+       "text": "The second leaf has grown, and turrets on its shoulders, and battlements round its helm. It is a gate with a keep behind it, and it looks at everyone.",
+       "sign": "A round turret on each shoulder, a ring of battlements on the helm, a small red flag on one turret, and the two door-leaves below.",
+       "habit": "It lets your friends pass without looking, and looks at everyone else for a long time.",
+       "leans": {
+        "orders": {
+         "guard": 1.0
+        },
+        "ground": {
+         "line": 0.5
+        }
+       },
+       "features": [
+        "bastion"
+       ],
+       "body": {
+        "crest": [
+         [
+          "crenels",
+          1.0
+         ]
+        ],
+        "pauldrons": [
+         "towers",
+         1.0
+        ],
+        "back": [
+         "flag"
+        ],
+        "left": [
+         "door",
+         1.0,
+         "shut"
+        ],
+        "right": [
+         "door",
+         1.0,
+         "shut"
+        ]
+       }
+      },
+      {
+       "id": "panoply-lock-and-bar",
+       "name": "Lock and Bar",
+       "of": "one who was closed long ago and kept the key themselves",
+       "text": "The two leaves have closed into one door across its whole front, barred, with your light in the keyhole. It has the key. It has never said where.",
+       "sign": "One great barred door from its helm to its knees, a keyhole in the middle with light in it, and a ring of keys at its hip.",
+       "habit": "The keys chime when it walks. It has never used one where you could see.",
+       "leans": {
+        "company": {
+         "alone": 1.0
+        },
+        "ground": {
+         "quiet": 0.5
+        }
+       },
+       "features": [
+        "quiet-place"
+       ],
+       "body": {
+        "left": null,
+        "right": null,
+        "chest": "barred-door",
+        "helm": [
+         "great",
+         0.84
+        ],
+        "pauldrons": [
+         "slab",
+         0.8
+        ],
+        "belt": "keys"
+       }
+      }
+     ]
+    },
+    {
+     "id": "panoply-furnace-plate",
+     "name": "Furnace-plate",
+     "of": "one who keeps what they feel banked behind iron",
+     "text": "There is a fire in the empty of it now, behind a grate in its belly. That is where it keeps what it will not say, and it is warm to stand near.",
+     "sign": "A barred grate in its belly with your light behind the bars, and a stub of chimney standing from its back.",
+     "habit": "The grate glows a little brighter when you come back from somewhere. It turns that side away.",
+     "leans": {
+      "shape": {
+       "turn": 1.0
+      },
+      "pattern": {
+       "fires": 0.5
+      }
+     },
+     "features": [
+      "ember"
+     ],
+     "body": {
+      "chest": "grate",
+      "back": [
+       "stack"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "panoply-kiln",
+       "name": "Kiln",
+       "of": "one who is warm at last, to whoever stands close enough",
+       "text": "It has opened the grate. It is a walking kiln now, two chimneys and a wide door of light, and the few it lets near are never cold.",
+       "sign": "Two chimneys with smoke standing from them, a wide open furnace door in its belly, and red tiles laid over its shoulders.",
+       "habit": "It stands with its back to the wind and its open side to you.",
+       "leans": {
+        "pattern": {
+         "fires": 1.0
+        },
+        "bonds": {
+         "classmate": 0.4
+        }
+       },
+       "features": [
+        "smoke"
+       ],
+       "body": {
+        "build": {
+         "wide": 0.8,
+         "belly": 0.5
+        },
+        "chest": [
+         "grate",
+         1.5
+        ],
+        "back": [
+         "stacks"
+        ],
+        "pauldrons": [
+         "tiles",
+         1.0
+        ],
+        "brow": "soft"
+       }
+      },
+      {
+       "id": "panoply-banked",
+       "name": "Banked",
+       "of": "one who has gone cold on the outside on purpose",
+       "text": "It has shut the furnace door and drawn a hood over its helm. Only a line of light round the door says the fire was never let out.",
+       "sign": "A shut iron door on its belly with a thread of light round its edge, a red cloak shut all round it, a capped chimney, and a hood over the helm.",
+       "habit": "It lets you warm your hands at the seam of the door. It does not open it.",
+       "leans": {
+        "shape": {
+         "turn": 1.0
+        },
+        "fights": {
+         "hurts": 0.4
+        }
+       },
+       "features": [
+        "cold-core"
+       ],
+       "body": {
+        "chest": "shut-door",
+        "back": [
+         "wrap",
+         "stack"
+        ],
+        "helm": [
+         "hood",
+         1.1
+        ],
+        "crest": null,
+        "pauldrons": null
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "panoply-wayfarer",
+   "name": "Wayfarer's Harness",
+   "of": "one who is always dressed to leave",
+   "text": "It learned from you to keep its things by the door. It has grown tall and light, laced plates under a travelling cape, and it walks the edge of wherever you are.",
+   "sign": "A wide-brimmed iron hat over an empty dark, a blue-green cape and scarf, rows of small laced plates, and a staff.",
+   "habit": "It stands nearest the way out of any room, and it has always already seen where that is.",
+   "leans": {
+    "quests": {
+     "deep-run": 1.0
+    },
+    "orders": {
+     "free": 0.7
+    },
+    "company": {
+     "alone": 0.4
+    }
+   },
+   "features": [
+    "high-collar"
+   ],
+   "body": {
+    "build": {
+     "wide": -0.15,
+     "legs": 1.1,
+     "neck": 0.3
+    },
+    "helm": [
+     "kettle",
+     1.0
+    ],
+    "brow": "soft",
+    "plate": "lamellar",
+    "fauld": "skirt",
+    "pauldrons": [
+     "lames",
+     1.0
+    ],
+    "over": [
+     "scarf"
+    ],
+    "back": [
+     "cape"
+    ],
+    "right": [
+     "staff",
+     1.0
+    ],
+    "left": null,
+    "crest": null,
+    "coat": "ash",
+    "accent": "peacock"
+   },
+   "prongs": [
+    {
+     "id": "panoply-lantern-watch",
+     "name": "Lantern-watch",
+     "of": "one who walks the dark round so the others need not",
+     "text": "It has hung a lamp of your light on its staff, and it walks the bounds of the camp with it while everyone else is asleep.",
+     "sign": "A lantern swinging from a crook at the top of its staff, and the cape grown to a cloak that reaches its heels.",
+     "habit": "It walks round the place you sleep three times before it stands still.",
+     "leans": {
+      "ground": {
+       "night": 1.0
+      },
+      "orders": {
+       "guard": 0.5
+      }
+     },
+     "features": [
+      "lantern"
+     ],
+     "body": {
+      "right": [
+       "lamp-staff",
+       1.0
+      ],
+      "back": [
+       "cloak"
+      ]
+     },
+     "finishes": [
+      {
+       "id": "panoply-last-lamp",
+       "name": "Last Lamp",
+       "of": "one who is the light left on for whoever is still out",
+       "text": "It has no helm now. Where its head was there is a lantern, lit, and it stands at the gate until the last of you is in.",
+       "sign": "A six-sided lantern on its shoulders in place of a helm, alight, a long cloak, and the staff held like a gatepost.",
+       "habit": "It will not come in until it has counted everyone. It counts the dead as well.",
+       "leans": {
+        "ground": {
+         "night": 1.0
+        },
+        "bonds": {
+         "shade": 0.5
+        }
+       },
+       "features": [
+        "glow"
+       ],
+       "body": {
+        "helm": [
+         "lamp",
+         1.3
+        ],
+        "right": [
+         "staff",
+         1.15
+        ],
+        "pauldrons": [
+         "lames",
+         1.2
+        ]
+       }
+      },
+      {
+       "id": "panoply-dark-lantern",
+       "name": "Dark Lantern",
+       "of": "one who sees without being seen to look",
+       "text": "It has shuttered the lamp and closed its helm to one slit. It stands stooped in its cape at the edge of the light and misses nothing.",
+       "sign": "A cape drawn close, a smooth finned helm shut to one slit with a single light in it, and a shuttered lamp held out low on one arm.",
+       "habit": "It opens one shutter the width of a finger, toward the thing you ought to have noticed.",
+       "leans": {
+        "shape": {
+         "read": 1.0
+        },
+        "ground": {
+         "night": 0.6
+        }
+       },
+       "features": [
+        "dark-eyed"
+       ],
+       "body": {
+        "build": {
+         "bow": 0.1,
+         "small": 0.85
+        },
+        "helm": [
+         "sallet",
+         1.0
+        ],
+        "eyes": "one",
+        "brow": "level",
+        "back": [
+         "cape"
+        ],
+        "crest": [
+         [
+          "fin",
+          0.8
+         ]
+        ],
+        "right": [
+         "dark-lamp",
+         1.2
+        ],
+        "over": null,
+        "pauldrons": null
+       }
+      }
+     ]
+    },
+    {
+     "id": "panoply-outrider",
+     "name": "Outrider",
+     "of": "one who goes ahead to see, and comes back to say",
+     "text": "It has taken a spear with a pennon and a helm with a tail, and it is out ahead of you before you have decided which way to go.",
+     "sign": "A long spear with a blue-green pennon, a swept helm with a fin along the crown, and long legs under a short flying cape.",
+     "habit": "It comes back from ahead and stands where the bad footing is, so you will walk round it.",
+     "leans": {
+      "quests": {
+       "deep-run": 1.0
+      },
+      "ground": {
+       "line": 0.5
+      }
+     },
+     "features": [
+      "long-legged"
+     ],
+     "body": {
+      "build": {
+       "legs": 1.08
+      },
+      "helm": [
+       "sallet",
+       1.0
+      ],
+      "crest": [
+       [
+        "fin",
+        1.0
+       ]
+      ],
+      "right": [
+       "spear",
+       1.0
+      ],
+      "brow": "level"
+     },
+     "finishes": [
+      {
+       "id": "panoply-long-patrol",
+       "name": "Long Patrol",
+       "of": "one whose round is longer every year and still walked",
+       "text": "Its skirts and shoulders have grown broad with laced plates, and it carries a bedroll and a tall glaive. Its round takes a season. It has not missed one.",
+       "sign": "A tall glaive with a long pennon, a high fin on the helm, wide laced shoulder-plates and skirts, and a bedroll across its back.",
+       "habit": "It scratches a mark on the gatepost each time it comes home, and there are a great many.",
+       "leans": {
+        "ground": {
+         "line": 1.0
+        },
+        "quests": {
+         "linework": 0.6
+        }
+       },
+       "features": [
+        "far-eyes"
+       ],
+       "body": {
+        "crest": [
+         [
+          "fin",
+          1.7
+         ]
+        ],
+        "right": [
+         "glaive",
+         1.0
+        ],
+        "pauldrons": [
+         "lames",
+         1.5
+        ],
+        "fauld": [
+         "skirt",
+         1.4
+        ],
+        "back": [
+         "roll",
+         "cape"
+        ]
+       }
+      },
+      {
+       "id": "panoply-pathfinder",
+       "name": "Pathfinder",
+       "of": "one who travels light and is hard to follow",
+       "text": "It has left off every plate it could spare. What is left is a hat, a breast of lacing, a long scarf, and a way of being gone when looked for.",
+       "sign": "No shoulder plates and no skirts: a brimmed hat, a narrow laced breast, a scarf twice its own length flying behind, and a short staff.",
+       "habit": "It walks on the stones and the roots. You have never found a print of it.",
+       "leans": {
+        "ground": {
+         "wild": 1.0
+        },
+        "fights": {
+         "dodges": 0.6
+        }
+       },
+       "features": [
+        "sleek-coat"
+       ],
+       "body": {
+        "build": {
+         "wide": -0.3,
+         "legs": 1.12
+        },
+        "helm": [
+         "kettle",
+         0.9
+        ],
+        "crest": null,
+        "pauldrons": null,
+        "fauld": null,
+        "back": [
+         "pack"
+        ],
+        "over": [
+         [
+          "scarf",
+          2.2
+         ]
+        ],
+        "right": [
+         "staff",
+         0.8
+        ],
+        "brow": "raised"
+       }
+      }
+     ]
+    },
+    {
+     "id": "panoply-hermit-plate",
+     "name": "Hermit-plate",
+     "of": "one who keeps their own company and keeps it well",
+     "text": "It has pulled a hood over its helm and its cloak shut in front. It is not unfriendly. It has all the company it wants, and you are most of it.",
+     "sign": "A deep hood over the helm with two lights far back in it, the cloak closed to its shins, and a staff with a crook.",
+     "habit": "It sits a little apart from any fire, facing the dark, and listens to the talk.",
+     "leans": {
+      "company": {
+       "alone": 1.0
+      },
+      "ground": {
+       "quiet": 0.5
+      }
+     },
+     "features": [
+      "shadow-cloak"
+     ],
+     "body": {
+      "helm": [
+       "hood",
+       1.0
+      ],
+      "back": [
+       "wrap"
+      ],
+      "pauldrons": null,
+      "over": null,
+      "right": [
+       "crook",
+       1.0
+      ]
+     },
+     "finishes": [
+      {
+       "id": "panoply-waystone",
+       "name": "Waystone",
+       "of": "one who has stood in one place so long the road bends round them",
+       "text": "It stood still to think, and moss has come up its cloak and stones have been left on its hat by people passing. It is a mark on the map now.",
+       "sign": "A pile of flat stones on the brim of its hat, moss up the hem of a cloak that reaches the ground, and no staff. It stands like a stone.",
+       "habit": "Travellers leave a pebble on it for luck. It lets them, and keeps count.",
+       "leans": {
+        "ground": {
+         "wild": 1.0
+        },
+        "orders": {
+         "hold": 0.6
+        }
+       },
+       "features": [
+        "roots"
+       ],
+       "body": {
+        "build": {
+         "legs": 0.92
+        },
+        "helm": [
+         "kettle",
+         1.25
+        ],
+        "crest": [
+         [
+          "cairn",
+          1.0
+         ]
+        ],
+        "back": [
+         "wrap",
+         "moss"
+        ],
+        "right": null
+       }
+      },
+      {
+       "id": "panoply-empty-road",
+       "name": "Empty Road",
+       "of": "one who left even the helm behind and is still on their feet",
+       "text": "It has put down its helm somewhere and not gone back. Two lights hang over the empty collar where a face would be, and they still look at you first.",
+       "sign": "No helm at all: an empty iron collar with two small lights floating above it, a torn cloak blowing sideways, and a long staff.",
+       "habit": "It still tips its head to you, though there is no head. You have learned to tell.",
+       "leans": {
+        "quests": {
+         "salvage": 1.0
+        },
+        "company": {
+         "alone": 0.6
+        }
+       },
+       "features": [
+        "empty-collar"
+       ],
+       "body": {
+        "helm": [
+         "none",
+         1.0
+        ],
+        "back": [
+         "torn"
+        ],
+        "over": [
+         [
+          "scarf",
+          1.4
+         ]
+        ],
+        "right": [
+         "staff",
+         1.2
+        ],
+        "pauldrons": [
+         "lames",
+         1.0
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -146,7 +146,7 @@ made none, or the feature comes some other way (heritage, an adaptation, a graft
 the part every base shares, `parts/<feature>.glb`. A gift hangs where its feature hangs
 (`data/genius-bodies.json`, `featureSockets`), unless that table gives the giver's own make
 a place of its own under `<base>-<feature>` (the Lurker's cloak down the back, where the
-Coat's is on the head). A form carried into a hybrid's line from its second base wears the
+cloak every base shares is on the head). A form carried into a hybrid's line from its second base wears the
 first base's body in its place (`wears`), and a body never wears its own base's gift.
 
 **A gift made again for one base.** Where a giver's part sits badly on one kind of body it
@@ -190,6 +190,8 @@ bash tools/genius-tree-page.sh wolf                 # the page of the whole tree
 |---|---|
 | All twenty-eight | all thirty-one each: 868 models, one a form (the Moth, the Carp, the Octopus, the Angel, the Demon and the Elemental joined on 2026-11-11) |
 | Hybrids | each wears its first base's bodies and its second's gift (43 gift parts, two a base bar the Lantern, whose glow is the shared one; and the Hawk's two made again for the Shield) |
+| All twenty-eight | all thirty-one each: 868 models, one a form (the Moth, the Carp, the Octopus, the Angel, the Demon and the Elemental joined on 2026-11-11; the Coat's thirty-one were taken out and the Living Armor's built in their place on 2026-11-12) |
+| Hybrids | each wears its first base's bodies and its second's gift (43 gift parts, two a base bar the Lantern, whose glow is the shared one; the Living Armor gives a helm and a pair of shoulder plates) |
 | Baby | built: a small round thing of pale matter with a face, the field in its eyes, its belly and the tip of its tail (`python tools/blender/genius_lines.py baby`); it rides where the orb did until the rite |
 
 ## Calls that are the owner's
@@ -258,7 +260,6 @@ told apart at the size of a thumbnail before their shapes can.
 | Blade | Duelling Blade `lapis` · Cleaver `madder` · Scored Blade `gold` |
 | Bow | Hunting Bow `jade` · War Bow `madder` · Singing Bow `amethyst` |
 | Carp | Weir-leaper `jade` · Still-water Carp `madder` · Silt-reader `amethyst` |
-| Coat | Travelling Coat `marigold` · Shadow-coat `amethyst` · Listening Coat `peacock` |
 | Demon | Exile `amethyst` · Advocate `gold` · Head-down `madder` |
 | Drake | Hoard-drake `gold` · Fire-drake `madder` · Sky-drake `lapis` |
 | Elemental | Cornerstone `gold` · Tideling `peacock` · Squall `amethyst` |
@@ -272,6 +273,7 @@ told apart at the size of a thumbnail before their shapes can.
 | Homunculus | Clay Apprentice `marigold` · Likeness `rose` · Clay Bearer `peacock` |
 | Imp | Debt-collector `madder` · Stickler `lapis` · Surety `gold` |
 | Lantern | Wayfinder `peacock` · Watch-lamp `marigold` · Kept Flame `amethyst` |
+| Living Armor | Sworn Plate `gold` · Siege-plate `madder` · Wayfarer's Harness `peacock` |
 | Lurker | Back-stander `amethyst` · The One Who Sits Up `gold` · The Unremarked `lapis` |
 | Moth | Candle-moth `marigold` · Emperor `amethyst` · Moon-moth `jade` |
 | Octopus | Many-hands `marigold` · Latch-lifter `peacock` · Sleeps-on-it `amethyst` |
@@ -347,11 +349,10 @@ least one thing that moves; a form that is alive should not be perfectly still.
 A genius that is worn (`data/genius-types.json`, `mounts`) and whose body will not sit on a
 person as it is made has a piece for wearing: an empty named `worn` holding it
 (`genius_lines.worn`). Worn, the game shows that piece and nothing else of it; let go, the
-rest and not the piece. The Coat is the case: a whole garment cannot follow a body that
-has no bones for it, so a Coat is worn as a **mantle**: its own collar and a short cape
-across the shoulders, in its Path's colour, carrying its form's sign. The piece is made
-where it would sit on a person standing at the origin, facing the way the kit faces, and
-`worn` stands at the nape of the neck.
+rest and not the piece. The Coat was the case (a whole garment cannot follow a body that has
+no bones for it, so it was worn as a mantle), and it was the only line that had such a piece.
+The Coat became the Living Armor on 2026-11-12 and nothing is worn on the body any more: the
+rule and its code (`genius_lines.worn`, `GeniusBody.set_worn`) stand, with no line using them.
 
 ### The line check
 
@@ -374,11 +375,11 @@ Tortoise 48, the Shield 45, the Wolf 9, the Blade 8), **18 unchanged**, **37 dar
 Coat 9, the Lurker 7, the Hawk 5, the Imp 5), and the Paths **told by colour 57%** of the
 time (the Stag 23%, the Ember 27%, the Fox 40%).
 
-## The armors: the Shield, the Gauntlet, the Coat
+## The armors: the Shield and the Gauntlet
 
 `tools/blender/lines_armors.py` builds the Shield and loads the Gauntlet
-(`armors_hand.py`) and the Coat (`armors_coat.py`). These are the defensive items: a
-genius that is worn. Each is an object, not a rigged body. It floats at its partner's
+(`armors_hand.py`). (The Coat, the third, became the Living Armor, a companion, on 2026-11-12:
+its own section is below.) These are the defensive items: a genius on the arm or the hand. Each is an object, not a rigged body. It floats at its partner's
 shoulder like any relic, and it can be put on.
 
 **Size.** Every model is made at the size one of the game's people would wear it (a
@@ -397,7 +398,6 @@ because `wear` leans and turns with it.
 |---|---|---|
 | Shield | the middle of the grip, behind the boss | the model's own axes: on a hand slot it sits as the weapon kit's shields do (the grip along the fist, the face out of the back of the hand, the top up) |
 | Gauntlet | the middle of the wrist's opening; it is a left hand | as a hand slot is: in the game's axes +Y runs out of the thumb side, +Z out of the back of the hand, −X to the fingertips |
-| Coat | the nape: between the shoulders, at the base of the collar. A Coat is not worn by its `wear` any more: it has a piece for wearing, a mantle, and the empty `worn` is what the game brings to the place (below, "The Coat: the second pass") | the wearer's own: up, the wearer's left, the wearer's front |
 
 **Where each is alive.** A shield: the eye in its boss (or what took the boss's place: a
 mouth, a grille, a pair of eyes). A gauntlet: the pulse of light round its wrist. A coat:
@@ -431,154 +431,90 @@ The Gauntlet:
 | `long_first` `fingers_long` | the first finger's length; all of them | numbers |
 | `grown` | what it has grown, or holds | `loupe` `tools` `gears` `wrench` `pulse_palm` `wire` `wheels` `lever` `worn_tips` `rope` `phial` `lamp` `keys` `ring_wrist` `seams` `sixth` `ember_heel` `face_plate` `split` `scars` `shard` `chain` `roots` `nails` `tuft` `glow` `eye_back` `worn_palm` `loop` `warm` `bands` `tassels` `post` `lens` `pale_palm` `band_light` `ribbon` `cuff_other` `ghost` `wisps` `patch` `stripes` `spur` `rivets` |
 
-The Coat:
-
-| Key | What it is | Styles |
-|---|---|---|
-| `kind` | the Starter is only its clasp and the two scraps it still holds | `clasp` `coat` |
-| `length` `flare` `chest` `waist` `shoulders` | its cut: shoulders to hem, and how it spreads | numbers |
-| `open` `cut` | how far it stands open down the front; how far it is cut away toward the hem | numbers |
-| `taper` `bend` | its skirts drawn in to a wisp; `[side, front]`, a bow of its whole length | numbers |
-| `wave` `rag` `sweep` | a hem that moves; a hem that has been through things; `[side, back]`, the way the skirt is blown | numbers |
-| `lean` `turn` | how it holds itself: `[to its front, to its left]` in degrees, from its hem; and turned about its own height | numbers |
-| `sleeves` | a gesture, or `[left, right]`; `arm` is how thick | `hang` `flat` `trail` `reach` `grab` `spread` `back` `akimbo` `tuck` `raise` `cup` `throat` `point` `hold` `fold` `wrap` `heart` `behind` `low` `fore` `aft` `none` |
-| `hand` | which hand holds what it holds (a lamp, a staff, a candle) | `l` `r` |
-| `collar` | `[style, size]`; `ears` is `[left, right]`, how large each ear of an `ear` collar is | `turned` `stand` `high` `spread` `ear` `hood` `souwester` `fur` `cape` `whiskers` `frost` `none` |
-| `lining` | what shows where it is turned back and where it stands open: its Path's colour (`plain`, `red`); `field` and `storm` put the field's light on its lapels and seams (never on a whole collar or panel: an eighth of a body is the most); `fur` is pelt | `plain` `field` `storm` `red` `fur` |
-| `trim` | where its Path's colour is on its outside | `hem` `hem2` `dags` `facing` `piping` `yoke` `stripe` `spine` `cuffs` `bands` `collar` |
-| `tone` | the step of its Path's colour its broad trims take (the line beside them takes another) | `mid` `dark` `light` `pale` |
-| `mantle` `cape` | what its shoulder cape is made of, where that is not the coat's own stuff; how far the cape stands out at its edge | `oil` `dust` `wool`; number |
-| `clasp` `brow` | the size of the clasp at its throat; how the lid of its eye is set, in degrees | numbers |
-| `grown` | what it has grown, carries, or has had done to it | `belt` `buttons` `buttons2` `offices` `pack` `frame` `dust` `stamps` `pockets` `items` `candle` `pelt` `rime` `pads` `lamp` `handlamp` `smoke` `ghost_sleeve` `knife` `lapels` `spikes` `eyes` `stars` `wind` `scorch` `epaulettes` `chain` `sash` `stock` `oath` `tug` `hook` `patches` `figure` `tokens` `whiskers` `drops` `current` `mantle` `tails` `pool` `train` `fling` `cane` |
-| `worn` | its mantle (below): `cut`; how far it falls (`back` `side` `front`), parts (`gap` `part`) and folds (`fold` `folds` `flare`); a hem in points (`points` `dag`); its own `trim` and `tone`; `ends`, how far a tippet's ends hang; `signs`, what it carries of its form (left out: whatever of `grown` a mantle can carry); `grown`, what only the mantle has | cuts: `capelet` `cowl` `tippet` `yoke` `scarf`; trims: `hem` `hem2` `piping` `facing` `yoke` `points` `ends` |
-
-### The Coat: the second pass (`tools/blender/armors_coat.py`)
-
-**What it is (rule 5).** A magical choice, carried all the way: a garment with nobody in
-it, which holds itself as its wearer would. It stands on its hem, gestures with empty
-sleeves, leans, turns, folds its arms; where a head would be there is the dark of its
-collar or its hood. It looks out of the clasp at its throat: one eye of the field under a
-brass lid, in a dark socket, so that it shows whatever colour the field is. Nothing of it
-pretends to be a body.
-
-**Three Paths: three colours, and three values (rules 1 and 2).** A Path keeps one coat
-shift, so the three are told apart by how dark they are before their colour is seen: a
-brown coat, a black one, a pale one. (A shifted coat is still brought onto the ramps
-leather may wear, `data/style.json`: that is why `frost` comes out a pale tan and not a
-blue.)
-
-| Path | Colour | Coat | Where the colour is | What the Path keeps | Its Advancements' own step of it |
-|---|---|---|---|---|---|
-| Travelling Coat | `marigold` | `hearth` | the lining, a broad band at the hem, deep cuffs | a turned-up collar, a belt, something carried; it is always going somewhere | Oilskin `light`, two bands; Road-coat `pale`, a hem of points and a stripe down each side; Hide-coat bands on its arms |
-| Shadow-coat | `amethyst` | `night` | a bright line along every edge (`piping`: a black coat's outline), the lining | a hood or a collar full of dark; it never stands square | Slip-coat `light`, a stripe down its spine; Night-coat a hem of points and its collar; Turncoat its fronts faced, and its lining flung out |
-| Listening Coat | `peacock` | `frost` | the lining of its ears, the facing down its front, its cuffs | a collar shaped like two ears; it leans toward what it hears | Clerk's Coat `dark`, a yoke; Whisper-collar `light`, bands on its arms; Hand-me-down two bands at its hem |
-
-**Thirty-one outlines (rule 3).** No two coats stand alike, and what tells them apart is
-how each holds itself, which is its form's habit:
-
-| Form | How it stands |
-|---|---|
-| Clasp | a hook and an eye a hand across, the eye open; two scraps of the coat hang from it and two points of a collar stand up from it |
-| Travelling Coat | one sleeve reaching for the latch, a bedroll on its back |
-| Oilskin | a sou'wester and a bell of a cape, its sleeves held out to shake itself |
-| Pilot's Coat | leaning, its hem dragged aside by the current, one sleeve pointing the channel |
-| The Lent Coat | narrow in the shoulder, its sleeves empty and flat, open and bowed round someone who is not there |
-| Road-coat | leaning far into its stride, one sleeve swung forward and one back, its skirts swept out behind |
-| Thousand-mile Coat | tall under a pack-frame, a staff in its hand |
-| Many Pockets | short and broad, a fist on its hip, a candle end held out |
-| Hide-coat | broad, a pelt over its shoulders, its arms held away from it |
-| Winter Coat | a tent: hooded, wide in the skirt, its arms wrapped round itself |
-| Deep-coat | short and square, stone on its shoulders, a lamp held out level |
-| Shadow-coat | hooded and ragged, bowed aside, one cuff in a pocket |
-| Slip-coat | narrow, bent like an S, its sleeves swept back |
-| Empty Sleeve | one sleeve flat; the other stands apart from it, raised to ward |
-| Knife-coat | open to its lining, its lapels like blades and its shoulders cut to points |
-| Night-coat | long, its hands behind its back, two eyes in its collar, the night in a pool round its hem |
-| Collar-up | a short coat under a collar as large as itself, one cuff holding the collar shut |
-| Nobody's Coat | a hooded wisp with no sleeves and no hem, under a grey cape |
-| Turncoat | one front flung open to its lining |
-| Storm-lined | both fronts flung, and the weather coming out |
-| Scorched Hem | a short stiff jacket, arms folded, leaning away from the fire |
-| Listening Coat | one cuff cupped to an ear of its collar |
-| Clerk's Coat | a tailcoat, one hand behind it and one brushing its breast |
-| Coat of Offices | wide in the shoulder, a fist on its hip, a train behind it |
-| Sworn Cloth | one sleeve raised to swear and one on its breast |
-| Whisper-collar | short, under two ears larger than itself, one of them lifted |
-| The Warning Tug | one sleeve stretched out further than an arm goes |
-| Eavesdropper | hung from a hook, perfectly straight, its collar a dish |
-| Hand-me-down | too large for anyone: its sleeves past its hem, its hem in a heap |
-| Inherited Coat | tall and square, its hands behind its back, a head of light above its collar |
-| Coat of the Cohort | its arms held wide |
-
-**What moves (rule 6).** `blink_eye` (the iris and its slit, in the clasp) and `sway_tag`
-(the tag on the clasp's ring) on every form. A sleeve that only hangs (`hang`, `flat`,
-`trail`) is `sway_sleeve_l|r`. And by form: `sway_belt` (a belt's end), `sway_cup`,
-`sway_pan`, `sway_lamp` (what hangs from it), `sway_scrap_l|r` (the Starter's scraps),
-`sway_ghost` (the sleeve the Empty Sleeve left), `flick_flame` (Many Pockets' candle),
-`blink_eyes` (what looks out of a high collar). On the worn piece: `blink_weye`,
-`sway_wtag`, `sway_hood` (a cowl's hood), `sway_tassel_l|r` (a tippet's ends),
-`sway_wscrap_l|r` (the Starter's).
-
-**The worn piece: a mantle (rule 7).** A coat that is worn is not its whole body hung down
-a back. It is the coat's own collar and a short cape over the shoulders, in its Path's cut
-and colour, with its form's sign on it small, and its clasp at the wearer's throat.
-
-- *It is made on the bodies it is worn on.* `MANTLE_ROWS` is its section at each height
-  below the top of the shoulders: up the slope of the neck, flat across the shoulders,
-  round the point of the shoulder, down the blades and the breast. One piece is worn by
-  all twenty-six of the game's people, each brought to it by the chest bone, so the rows
-  are the least that clears every one of them in the tunic they wear (the women's backs
-  and napes stand furthest behind the bone and set its back; the men's chests set its
-  front). Its folds open toward its hem.
-- *It keeps clear of the arms.* It is longest down the back (never below the bottom of the
-  shoulder blades: 0.34 under the top of the shoulders), shortest over the arms (0.10 to
-  0.16), with its two ends down the breast.
-- *Where it sits.* `worn` stands at the nape of a person at the origin; the game brings it
-  to the chest bone, 0.4 up and 0.05 back (`data/genius-types.json`, `mounts.back`), and it
-  rides that bone. A great coat's blades of light (the fifth and sixth instars) stand
-  behind its wearer's head, from the mantle (`GeniusBody.set_worn`).
-
-| Cut | Whose | What it is |
-|---|---|---|
-| `capelet` | the Travelling Coat's | a traveller's shoulder cape, longest down the back, a broad band of marigold at its hem and its collar turned up; the bedroll lies across the top of the back |
-| `cowl` | the Shadow-coat's | a hood thrown back between the shoulders (it stirs), a hem cut in points, a bright line of amethyst on every edge |
-| `tippet` | the Listening Coat's | round and even with a yoke of peacock, two long banded ends down the breast with a tassel on each (they stir), and the ears of its collar standing behind its wearer's own |
-| `yoke` | the Slip-coat's | the least of them: no wider than a collar laid flat |
-| `scarf` | the Starter's | no cape yet: a band of its cloth round the neck, and two scraps down the front from the clasp |
-
-What a mantle carries of its form comes from the form's own `grown`, each sign made small
-for it (`ON_A_MANTLE`; or `worn.signs` says): the Oilskin's is oilcloth with water standing
-on it, the Pilot's has the current round its hem, the Hide-coat's a ruff of pelt, the
-Deep-coat's stone on the shoulders and its lamp at the collar, the Night-coat's a collar to
-the ears with its stars, Nobody's is plain grey, the Coat of Offices' has its epaulettes
-and its chain, the Sworn Cloth's its oath on one end, the Inherited Coat's a hand of light
-on one shoulder, the Cohort's its twelve tokens.
-
-**How it is built.** The game draws a face from its own side only, and inks the other
-(the toon shader culls back faces whatever the model says). So cloth here is made of
-faces that each look one way: `skin` (a shell's outside, and its lining only where the
-lining can be seen), `leaf` (a flat piece seen from both sides: two sheets back to back,
-each the other's ink line), `band_on` (a trim lying on the cloth), `sheet` (anything else
-already turned the right way out). The clasp is one mesh, set in two places: on the coat
-and on its mantle. Every model with its mantle in it is under 120 KB.
-
-**What is still weak.** The mantle is rigid: it rides the chest bone, so an arm lifted
-high passes through the lobe over its shoulder, and a wearer bent far forward carries it
-like a yoke. One cut for every body is a loose cut on some: on a man it stands three
-fingers off the back and the nape, where on a woman it lies close. The eye in the clasp is
-small at a distance (a thumbnail's width on a sheet): a coat's face is still its whole
-bearing. On the sheet the Starter is drawn smaller than its cell allows (the sheet's first
-measure misjudges a body under half a metre: `--cell=1.6 --only=coat-clasp` draws it
-right). The Coat's two gifts to a hybrid (`wing-cloak`, `shadow-cloak`) are as the first
-pass left them.
-
-All three take `stands` and `coat` (the shift), as above. A style may not be `null` (that
+Both take `stands` and `coat` (the shift), as above. A style may not be `null` (that
 takes the key off and the line's default comes back): say `none`.
 
 **Their gifts** (what a hybrid of another base wears to say it is half armor), as parts in
 `tools/blender/genius_relics.py`: the Shield's `broad-guard` (a small iron shield at the
 shoulder) and `shell` (a round shield across the back); the Gauntlet's `small-hands` (a
-pair of gloved hands) and `talon-grip`; the Coat's `wing-cloak` and `shadow-cloak`.
+pair of gloved hands) and `talon-grip`. (`wing-cloak` and `shadow-cloak` were the Coat's gifts;
+they are still the parts every base shares for those two features.)
+
+## The Living Armor (`tools/blender/lines_panoply.py`)
+
+> "Maybe instead of coats living armors that are a tank type companion and keep equipment
+> type genius in the hand." (owner, 2026-11-12)
+
+The Coat's place in the tree, and its soul (one who keeps themselves to themselves, dressed
+to leave, warm to very few), turned to armor: **nobody is in it, and it stands between.** Its
+base is `panoply`, its name the Living Armor; it is a **companion** and a **Bulwark**
+(`data/genius-types.json`, `companions`), and it walks on its own feet beside its partner.
+A saved Coat loads as the form in the same place of this tree (`data/genius.json`,
+`renamed`; `Genius._renamed`).
+
+**Its anatomy is a magical choice, carried all the way: an empty harness.** It is built on
+the small people's body (the Angel's, with its clips and its pieces that move), and then
+everything of that body that is not plate is taken away: the skin is pushed out into plate
+where it is armored (breast, upper arm, forearm, gauntlet, thigh, greave, boot) and the
+faces between are not made at all, so each plate ends on the dark inside it and **the
+plates hang in the air with nothing joining them**. The helm stands over an empty collar.
+Its face is its visor: a dark slit with two lights of the field in it that blink and look a
+little aside, and a brow of brass along the slit's upper edge (`level`, `stern`, `raised`,
+`soft`) that is its expression. Its plate is its partner's choice of metal (the roles
+`iron_plate`, `iron_plate_light`, `brass_trim` on the `iron` coats), with the hammered
+grain the style lays on plate.
+
+| Path | What it is at a glance, and what never changes down it | Colour | Coat |
+|---|---|---|---|
+| **Sworn Plate** | a knight's harness, upright: a pointed visor, a plume, a shield or a sword or a banner. It always carries the thing it stands behind | `gold`: plume, shield face, tabard, cape, banner | `moon` (pale steel) |
+| **Siege-plate** | low, heavy, as wide as a door: a barrel helm sunk between great round shoulders, fists to its knees, banded like a cask. It is always the widest thing in the room | `madder`: the hoops round its chest, its apron, the paint on its doors, its chimney caps | `iron` (dark) |
+| **Wayfarer's Harness** | tall and light: rows of small laced plates, a brimmed iron hat over an open dark, a cape, a staff. It always has something of the road on it | `peacock`: cape and cloak, scarf, the lacing of every row | `ash` (road-worn grey) |
+
+The Starter, the **Squire**, is a child's helm too big for it, a small breastplate, two
+mitts and two boots, and a pot-lid for a shield, with nothing between them.
+
+| Form | What makes its outline |
+|---|---|
+| Pavise · Twin Wall · Open Guard | a tower shield planted beside it; two leaves shut edge to edge with battlements, its helm looking through the notch; the shield slung on its back, its visor up over nothing, a hand held out |
+| Oath-plate · Vigil · Champion | a sword held point down, a tabard, guards that stand from its shoulders past its helm; a cloak to the ground and one flame of the field for a crest; the sword upright, a great plume, a cape |
+| Banner-harness · Standard · Cohort's Plate | a banner on a pole from its backplate; a swallow-tailed standard in its own hand; a fan of six pennons behind its shoulders |
+| Ram · Breach · Hundred-dent | a ram's curled horns and a wedge on its breast; great horns swung forward, spikes, a prow; broken shafts standing from its back, one shoulder bare, a hole in its breast with the field in the empty of it |
+| Door-bearer · Barbican · Lock and Bar | the leaf of an oak door on its arm; two leaves shut, a turret on each shoulder, battlements on its helm, a flag; one barred door across its whole front, a light in the keyhole, keys at its hip |
+| Furnace-plate · Kiln · Banked | a grate in its belly with the field behind the bars, a chimney; two chimneys that smoke, a wide open grate, roof tiles on its shoulders; a cloak shut all round, a hood, the furnace door shut with a thread of light round it |
+| Lantern-watch · Last Lamp · Dark Lantern | a lamp on a crook of its staff, a long cloak; a lantern where its helm was; stooped and small, a finned helm shut to one light, a shuttered lamp held out low |
+| Outrider · Long Patrol · Pathfinder | a spear with a pennon, a tailed helm with a fin; a glaive, a high fin, broad laced shoulders and skirts, a bedroll; no shoulder plates or skirts, a hat, a pack, a scarf longer than itself |
+| Hermit-plate · Waystone · Empty Road | a hood over its helm, its cloak shut, a crook; a cairn of flat stones on its hat, moss at its hem, no staff; no helm at all: two lights over an empty collar, a torn cloak |
+
+**What moves.** Every form blinks (the two lights in its visor are `blink_eye_l`, `_r`).
+Plumes, cloaks, capes, scarves, banners, pennons, lamps, ribbons and keys `sway`; the
+Vigil's flame `flick`s; the fire in a grate, the seam round a shut door, a keyhole, the
+light in a torn breast and a lantern's panes `pulse`; the Kiln's smoke `bob`s.
+
+**What a `body` may say** is at the top of `lines_panoply.py`: `helm`, `brow`, `eyes`,
+`gaze`, `crest`, `plate`, `chest`, `fauld`, `pauldrons`, `left`, `right`, `back`, `over`,
+`belt`, `pose`, and the small people's `build`.
+
+**Its gifts** to a hybrid (`python tools/blender/lines_panoply.py gifts`): `helm` (an
+open-faced helm that sits like a cap, with a plume in the wearer's Path's colour) on the
+head, and `pauldrons` (two cups of iron rimmed in that colour, a strap between) across the
+back, with nobody under them. Its own body with the clips its forms move by is
+`bodies/relic-panoply.glb` (`python tools/blender/lines_panoply.py body`).
+
+**The line check** (2026-11-12): the Coat was alike 64, unchanged 5, dark 9, Paths told by
+colour 60%. The Living Armor is **alike 0, unchanged 0, dark 0, colour 100%**.
+
+**What is still weak.** The Squire is small and made of five floating pieces: on a phone it
+is a helm and a lid. The Wayfarer's line is drawn small in its cells (the sheet fits the
+whole staff), and its scarf is stiff; of the three Paths it is the least bold. A tower
+shield, a wall and a door ride the chest, not the hand: they stand upright and do not
+follow the arm, and they slide when it walks. The Twin Wall and the Barbican hide most of
+the body behind their leaves (that is the point of them, but there is little face to see).
+The Ram's horns are small beside its shoulders. A plate ends on a flat dark cap, not on a
+true hollow you could look into. It moves by a person's clips: it does not yet walk like
+something heavy, or like something empty. The `offer` pose (the Open Guard's hand held
+out) reads as an arm across the breast. Whether it is a relic (as it is written: the
+Coat's Expression, kept) or an engine is the owner's (`docs/decisions-needed.md`, 88).
+
 ## The Hawk and the Tortoise (`tools/blender/lines_beasts.py`)
 
 Neither is on the wolf's rig. A tortoise is its shell: one object the game walks, with a
@@ -1363,10 +1299,8 @@ page.
   Harriers read as small griffins, not hawks on foot.
 - **Dark on dark.** A night coat on a dark ground: the Imp's
   Night-clerk, Lights-out Imp, Bondsman and Whipping-imp; the Drake's Lamp-hoarder,
-  Slag-jaw, Smoke-drake, Chimney-wyrm and Wing-shadow; the Coat's Shadow and Listening
-  paths on a black sample coat; bows and the Smoke-pole branch at night.
-- **Told apart by what they carry, not by outline.** Coat: the nine of the Listening path
-  (Whisper-collar and Warning Tug nearest). Shield: Wall-shield to Battered Shield; the
+  Slag-jaw, Smoke-drake, Chimney-wyrm and Wing-shadow; bows and the Smoke-pole branch at night.
+- **Told apart by what they carry, not by outline.** Shield: Wall-shield to Battered Shield; the
   Road-shield is plain. Gauntlet: Catching Hand and Iron Palm. Hawk: the eleven of the
   High Circler's path, all on the wing. Sprite and Homunculus: Shoulder-mender, Clay
   Stand-in, Ward-builder, Weather-sprite. Fox: Gone-away, Listening Fox, Snow-pouncer;
@@ -1382,8 +1316,7 @@ page.
 - **A face you cannot see.** The Writ-riddler's second face is at
   the back of the head; Hill-fire has none in view; the Whipping-imp's welts are on its
   back.
-- **Small in its cell or in the world.** The Clasp (the Coat's Starter) is the weakest of
-  the armors. The Mud-lier and the Bog-lure are low. Flight forms are scaled by their wings.
+- **Small in its cell or in the world.** The Mud-lier and the Bog-lure are low. Flight forms are scaled by their wings.
   The Salvor's ear-trumpet is near the ground.
 - **Leaves its Path's look.** Gun: Smoke-pole, Hot Barrel and Tinker's Piece have no wheel.
   Blade: Grave-blade, Heirloom and Night-edge are straight; the Wooden Sword branch is wood,

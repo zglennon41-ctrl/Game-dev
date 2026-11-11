@@ -1074,8 +1074,8 @@ def build_shield(form_id, level, spec, base):
 
 
 def register(builders):
-    """The three lines of armor. The Gauntlet and the Coat are files of their own beside this
-    one (armors_hand.py, armors_coat.py); they are loaded here, once this file is whole."""
+    """The two lines of armor (the Coat, the third, became the Living Armor on 2026-11-12:
+    lines_panoply.py). The Gauntlet is a file of its own beside this one (armors_hand.py); it
+    is loaded here, once this file is whole."""
     import armors_hand
-    import armors_coat
-    builders.update({"shield": build_shield, "gauntlet": armors_hand.build, "coat": armors_coat.build})
+    builders.update({"shield": build_shield, "gauntlet": armors_hand.build})
