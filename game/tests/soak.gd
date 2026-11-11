@@ -8,6 +8,7 @@
 ##                                     Commencement (the term is long: a quarter of an hour each)
 ##   npm run soak -- --count=6         the first six
 ##   npm run soak -- --only=17         one of them, by number (to look at a failure again)
+##   npm run soak -- --from=20         from that one on
 ##   npm run soak -- --debug           and say what the autopilot is doing
 ##
 ## The spread: every home (13), every weapon a school teaches as the weapon carried from the
@@ -156,6 +157,8 @@ func _next_character() -> void:
 			at = int(args["only"])
 		else:
 			at = cast.size()
+	if args.has("from") and at < int(args["from"]):
+		at = int(args["from"])
 	if at >= cast.size() or (args.has("count") and at >= int(args["count"])):
 		_finish()
 		return

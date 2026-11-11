@@ -1074,7 +1074,7 @@ func _academy_frame(delta: float, real_dt: float) -> void:
 						fight.input("lock")
 					if fight.dist() > want_d + 0.5:
 						move = (fight.w_pos - fight.p_pos).normalized()
-					elif fight.dist() < want_d - 0.1:
+					elif fight.dist() < want_d - 0.3:
 						move = _bot_back_off(delta)
 					else:
 						_bot_back_t = 0.0
@@ -1110,7 +1110,7 @@ var _bot_back_t := 0.0
 func _bot_back_off(dt: float) -> Vector2:
 	_bot_back_t += dt
 	var away := -(fight.w_pos - fight.p_pos).normalized()
-	return away.rotated(1.3) if _bot_back_t > 2.0 else away
+	return away.rotated([0.0, 1.4, -1.4, 2.4][int(_bot_back_t / 2.0) % 4])
 
 ## Automated checks in a lesson: keep near the genius, face it, and parry each bite.
 func _lesson_bot() -> Vector2:
@@ -1571,7 +1571,10 @@ func _bot() -> Vector2:
 		f.input("order")
 	if f.p_state == "draw" and f.p_draw >= f.draw_seconds():
 		f.input("attack-up")
-	if f.pattern_ready():
+	# (ending the night at the station it strikes: a Pattern that mends would be fired for ever)
+	var finishing: bool = mode == "prologue" and prologue != null and prologue.beat < Data.story["beats"].size() and Data.story["beats"][prologue.beat]["id"] == "finish"
+	# (and a Pattern that mends is for when it is hurt: fired whenever ready, nothing would ever fall)
+	if f.pattern_ready() and not finishing and (String(f.pattern_form().get("effect", "")) != "mend" or f.p_hp < 60.0 or mode == "prologue"):
 		f.input("pattern")
 	if f.p_state == "pattern" and not f.chain.is_empty():
 		var c: float = f.chain["cues"][f.chain["next"]]
