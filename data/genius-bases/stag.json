@@ -54,7 +54,20 @@
   "habit": "It freezes when a door opens, then steps in front of you as if that had been the plan.",
   "features": [
    "long-legs"
-  ]
+  ],
+  "body": {
+   "crown": [
+    "bumps",
+    1.0
+   ],
+   "back": [
+    "spots",
+    1.0
+   ],
+   "build": {
+    "legs": 1.08
+   }
+  }
  },
  "paths": [
   {
@@ -78,6 +91,25 @@
    "features": [
     "horn-brow"
    ],
+   "body": {
+    "crown": [
+     "spikes",
+     1.0
+    ],
+    "back": null,
+    "armor": [
+     "brow",
+     0.8
+    ],
+    "build": {
+     "nape": 1.2,
+     "chest": 1.1
+    },
+    "pose": [
+     "low",
+     0.9
+    ]
+   },
    "prongs": [
     {
      "id": "stag-locked-horn",
@@ -94,6 +126,25 @@
      "features": [
       "broad-chest"
      ],
+     "body": {
+      "crown": [
+       "lock",
+       1.0
+      ],
+      "build": {
+       "nape": 1.5,
+       "chest": 1.3,
+       "girth": 1.15
+      },
+      "neck": [
+       "mane",
+       0.9
+      ],
+      "pose": [
+       "low",
+       0.8
+      ]
+     },
      "finishes": [
       {
        "id": "stag-twelve-point",
@@ -112,7 +163,32 @@
        },
        "features": [
         "crown"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "royal",
+         1.0
+        ],
+        "hung": [
+         "points",
+         1.0
+        ],
+        "build": {
+         "nape": 1.4,
+         "chest": 1.3,
+         "girth": 1.1,
+         "legs": 1.05
+        },
+        "neck": [
+         "mane",
+         1.2
+        ],
+        "pose": [
+         "high",
+         0.8
+        ],
+        "armor": null
+       }
       },
       {
        "id": "stag-scarred-royal",
@@ -128,7 +204,37 @@
        },
        "features": [
         "iron-hide"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "broken",
+         1.0
+        ],
+        "coat": "iron",
+        "armor": [
+         [
+          "brow",
+          0.8
+         ],
+         [
+          "scars",
+          1.4
+         ]
+        ],
+        "build": {
+         "nape": 1.5,
+         "chest": 1.36,
+         "girth": 1.2
+        },
+        "ears": [
+         "torn",
+         1.0
+        ],
+        "pose": [
+         "low",
+         0.5
+        ]
+       }
       }
      ]
     },
@@ -150,6 +256,29 @@
      "features": [
       "long-legged"
      ],
+     "body": {
+      "crown": [
+       "swept",
+       1.0
+      ],
+      "build": {
+       "legs": 1.22,
+       "girth": 0.9,
+       "waist": 0.82,
+       "chest": 1.05,
+       "neck": 1.1,
+       "nape": 1.0
+      },
+      "pose": [
+       "low",
+       0.6
+      ],
+      "armor": null,
+      "ears": [
+       "laid",
+       0.8
+      ]
+     },
      "finishes": [
       {
        "id": "stag-break-line-stag",
@@ -165,7 +294,31 @@
        },
        "features": [
         "set-feet"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "plough",
+         1.1
+        ],
+        "chest": [
+         "plough",
+         1.0
+        ],
+        "legs": [
+         "feather",
+         1.0
+        ],
+        "build": {
+         "legs": 1.12,
+         "girth": 1.25,
+         "chest": 1.3,
+         "nape": 1.3
+        },
+        "pose": [
+         "low",
+         0.8
+        ]
+       }
       },
       {
        "id": "stag-ghost-runner",
@@ -184,7 +337,35 @@
        },
        "features": [
         "shadow-cloak"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "wisp",
+         1.0
+        ],
+        "horn": [
+         "pale",
+         1.0
+        ],
+        "coat": "ash",
+        "spine": [
+         "smoke",
+         1.0
+        ],
+        "paws": [
+         "shade",
+         1.2
+        ],
+        "breath": [
+         "wisp",
+         1.2
+        ],
+        "build": {
+         "legs": 1.3,
+         "girth": 0.82,
+         "waist": 0.76
+        }
+       }
       }
      ]
     },
@@ -203,6 +384,39 @@
      "features": [
       "voice"
      ],
+     "body": {
+      "crown": [
+       "lyre",
+       1.0
+      ],
+      "throat": [
+       "sac",
+       1.0
+      ],
+      "maw": [
+       "open",
+       0.8
+      ],
+      "neck": [
+       "mane",
+       0.8
+      ],
+      "build": {
+       "nape": 1.3,
+       "chest": 1.15
+      },
+      "pose": [
+       [
+        "high",
+        0.9
+       ],
+       [
+        "nod",
+        -0.9
+       ]
+      ],
+      "armor": null
+     },
      "finishes": [
       {
        "id": "stag-oath-crowned",
@@ -218,7 +432,33 @@
        },
        "features": [
         "ledger"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "pillar",
+         1.0
+        ],
+        "hung": [
+         [
+          "script",
+          1.0
+         ],
+         [
+          "ribbons",
+          0.8
+         ]
+        ],
+        "build": {
+         "neck": 1.1
+        },
+        "pose": [
+         "high",
+         0.6
+        ],
+        "maw": null,
+        "throat": null,
+        "coat": "night"
+       }
       },
       {
        "id": "stag-thunder-beller",
@@ -237,7 +477,36 @@
        },
        "features": [
         "ring"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "wide",
+         1.0
+        ],
+        "hung": [
+         [
+          "halo",
+          1.0
+         ],
+         [
+          "points",
+          1.2
+         ]
+        ],
+        "throat": [
+         "sac",
+         1.35
+        ],
+        "build": {
+         "nape": 1.5,
+         "chest": 1.35,
+         "girth": 1.15
+        },
+        "neck": [
+         "mane",
+         1.2
+        ]
+       }
       }
      ]
     }
@@ -264,6 +533,26 @@
    "features": [
     "roots"
    ],
+   "body": {
+    "crown": [
+     "branch",
+     0.9
+    ],
+    "horn": [
+     "wood",
+     1.0
+    ],
+    "hung": [
+     "moss",
+     1.0
+    ],
+    "legs": [
+     "mould",
+     1.0
+    ],
+    "back": null,
+    "coat": "hearth"
+   },
    "prongs": [
     {
      "id": "stag-ward-hart",
@@ -280,6 +569,29 @@
      "features": [
       "ring"
      ],
+     "body": {
+      "crown": [
+       "branch",
+       1.1
+      ],
+      "hung": [
+       [
+        "moss",
+        1.0
+       ],
+       [
+        "ring",
+        1.2
+       ]
+      ],
+      "neck": [
+       "ivy",
+       1.0
+      ],
+      "build": {
+       "chest": 1.1
+      }
+     },
      "finishes": [
       {
        "id": "stag-garden-crowned",
@@ -298,7 +610,43 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "branch",
+         1.4
+        ],
+        "hung": [
+         [
+          "flowers",
+          1.2
+         ],
+         [
+          "leaves",
+          1.0
+         ],
+         [
+          "ring",
+          1.0
+         ]
+        ],
+        "neck": [
+         "garland",
+         1.0
+        ],
+        "back": [
+         "moss",
+         1.0
+        ],
+        "build": {
+         "chest": 1.2,
+         "nape": 1.2
+        },
+        "aura": [
+         "motes",
+         1.0
+        ]
+       }
       },
       {
        "id": "stag-bridge-hart",
@@ -314,7 +662,37 @@
        },
        "features": [
         "webbed"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "palm",
+         1.1
+        ],
+        "hung": [
+         "weed",
+         1.2
+        ],
+        "legs": [
+         [
+          "wet",
+          1.0
+         ],
+         [
+          "feather",
+          0.8
+         ]
+        ],
+        "neck": null,
+        "build": {
+         "chest": 1.4,
+         "nape": 1.4,
+         "girth": 1.3,
+         "legs": 1.1,
+         "head": 1.1,
+         "muzzle": 1.15
+        },
+        "coat": "slate"
+       }
       }
      ]
     },
@@ -336,6 +714,36 @@
      "features": [
       "far-eyes"
      ],
+     "body": {
+      "crown": [
+       "slim",
+       1.0
+      ],
+      "horn": [
+       "pale",
+       1.0
+      ],
+      "hung": [
+       "points",
+       1.0
+      ],
+      "coat": "frost",
+      "legs": null,
+      "eyes": [
+       "far",
+       1.0
+      ],
+      "build": {
+       "legs": 1.1,
+       "girth": 0.9,
+       "waist": 0.86,
+       "neck": 1.12
+      },
+      "pose": [
+       "aside",
+       1.2
+      ]
+     },
      "finishes": [
       {
        "id": "stag-hart-of-omens",
@@ -354,7 +762,36 @@
        },
        "features": [
         "watching-eye"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "eye",
+         1.0
+        ],
+        "hung": [
+         [
+          "eye",
+          1.0
+         ],
+         [
+          "points",
+          1.0
+         ]
+        ],
+        "eyes": [
+         "third",
+         1.2
+        ],
+        "coat": "moon",
+        "build": {
+         "legs": 1.14,
+         "neck": 1.2
+        },
+        "pose": [
+         "high",
+         0.5
+        ]
+       }
       },
       {
        "id": "stag-quiet-hart",
@@ -370,7 +807,37 @@
        },
        "features": [
         "quiet-place"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "droop",
+         1.0
+        ],
+        "hung": [
+         "cloth",
+         1.0
+        ],
+        "coat": "ash",
+        "ears": [
+         "droop",
+         1.0
+        ],
+        "breath": [
+         "wisp",
+         0.9
+        ],
+        "eyes": [
+         "old",
+         0.8
+        ],
+        "pose": [
+         "low",
+         0.4
+        ],
+        "build": {
+         "chest": 1.1
+        }
+       }
       }
      ]
     },
@@ -389,6 +856,22 @@
      "features": [
       "plated"
      ],
+     "body": {
+      "crown": [
+       "gnarl",
+       1.0
+      ],
+      "hide": [
+       "bark",
+       1.0
+      ],
+      "hung": null,
+      "build": {
+       "chest": 1.25,
+       "girth": 1.3,
+       "nape": 1.3
+      }
+     },
      "finishes": [
       {
        "id": "stag-bramble-king",
@@ -407,7 +890,36 @@
        },
        "features": [
         "crown"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "briar",
+         1.0
+        ],
+        "hung": [
+         [
+          "briar",
+          1.0
+         ],
+         [
+          "birds",
+          1.0
+         ]
+        ],
+        "hide": [
+         "bark",
+         1.2
+        ],
+        "build": {
+         "chest": 1.34,
+         "girth": 1.35,
+         "nape": 1.4
+        },
+        "pose": [
+         "high",
+         0.5
+        ]
+       }
       },
       {
        "id": "stag-winter-hart",
@@ -426,7 +938,45 @@
        },
        "features": [
         "rime"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "rime",
+         1.0
+        ],
+        "horn": [
+         "ice",
+         1.0
+        ],
+        "hung": [
+         "icicles",
+         1.0
+        ],
+        "coat": "frost",
+        "hide": null,
+        "legs": null,
+        "paws": [
+         "frost",
+         1.0
+        ],
+        "breath": [
+         "trail",
+         1.0
+        ],
+        "neck": [
+         "mane",
+         1.0
+        ],
+        "spine": [
+         "frost",
+         0.9
+        ],
+        "build": {
+         "chest": 1.2,
+         "nape": 1.3,
+         "girth": 1.2
+        }
+       }
       }
      ]
     }
@@ -453,6 +1003,30 @@
    "features": [
     "tunnel-ear"
    ],
+   "body": {
+    "crown": [
+     "watch",
+     1.0
+    ],
+    "ears": [
+     "one",
+     1.2
+    ],
+    "back": null,
+    "pose": [
+     [
+      "high",
+      0.7
+     ],
+     [
+      "back",
+      0.6
+     ]
+    ],
+    "build": {
+     "neck": 1.1
+    }
+   },
    "prongs": [
     {
      "id": "stag-herd-hart",
@@ -472,6 +1046,29 @@
      "features": [
       "old-eyes"
      ],
+     "body": {
+      "crown": [
+       "crook",
+       1.0
+      ],
+      "eyes": [
+       "old",
+       1.0
+      ],
+      "neck": [
+       "bell",
+       1.0
+      ],
+      "build": {
+       "chest": 1.2,
+       "girth": 1.15,
+       "nape": 1.2
+      },
+      "pose": [
+       "back",
+       0.7
+      ]
+     },
      "finishes": [
       {
        "id": "stag-hart-of-the-cohort",
@@ -487,7 +1084,28 @@
        },
        "features": [
         "glow"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "crook",
+         1.15
+        ],
+        "hung": [
+         "ribbons",
+         1.0
+        ],
+        "flank": [
+         "hands",
+         1.0
+        ],
+        "build": {
+         "chest": 1.25
+        },
+        "pose": [
+         "high",
+         0.4
+        ]
+       }
       },
       {
        "id": "stag-fawn-minder",
@@ -503,7 +1121,30 @@
        },
        "features": [
         "broad-guard"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "roof",
+         1.0
+        ],
+        "hung": [
+         "fawnlight",
+         1.0
+        ],
+        "build": {
+         "chest": 1.4,
+         "girth": 1.3,
+         "nape": 1.5
+        },
+        "pose": [
+         "low",
+         0.9
+        ],
+        "neck": [
+         "mane",
+         1.0
+        ]
+       }
       }
      ]
     },
@@ -525,6 +1166,29 @@
      "features": [
       "lantern"
      ],
+     "body": {
+      "crown": [
+       "bracket",
+       1.0
+      ],
+      "hung": [
+       "lamp",
+       1.0
+      ],
+      "legs": [
+       "knees",
+       1.0
+      ],
+      "build": {
+       "legs": 1.08,
+       "neck": 1.12
+      },
+      "pose": [
+       "high",
+       1.0
+      ],
+      "ears": null
+     },
      "finishes": [
       {
        "id": "stag-lamp-crowned",
@@ -543,7 +1207,26 @@
        },
        "features": [
         "ember"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "cradle",
+         1.0
+        ],
+        "horn": [
+         "velvet",
+         1.0
+        ],
+        "hung": [
+         "flame",
+         1.2
+        ],
+        "build": {
+         "chest": 1.15,
+         "neck": 1.15
+        },
+        "coat": "hearth"
+       }
       },
       {
        "id": "stag-stone-hart",
@@ -562,7 +1245,38 @@
        },
        "features": [
         "stone-skin"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "stone",
+         1.0
+        ],
+        "horn": [
+         "stone",
+         1.0
+        ],
+        "hung": [
+         [
+          "lichen",
+          1.0
+         ],
+         [
+          "lamp",
+          0.9
+         ]
+        ],
+        "coat": "slate",
+        "back": [
+         "moss",
+         1.2
+        ],
+        "build": {
+         "girth": 1.5,
+         "chest": 1.3,
+         "nape": 1.4,
+         "legs": 0.94
+        }
+       }
       }
      ]
     },
@@ -581,6 +1295,34 @@
      "features": [
       "cold-core"
      ],
+     "body": {
+      "crown": [
+       "candles",
+       1.0
+      ],
+      "horn": [
+       "pale",
+       1.0
+      ],
+      "hung": [
+       "candles",
+       1.0
+      ],
+      "coat": "night",
+      "aura": [
+       "cold",
+       1.0
+      ],
+      "pose": [
+       "low",
+       1.3
+      ],
+      "build": {
+       "girth": 0.9,
+       "waist": 0.85
+      },
+      "ears": null
+     },
      "finishes": [
       {
        "id": "stag-trophy-rack",
@@ -596,7 +1338,38 @@
        },
        "features": [
         "chain"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "rack",
+         1.0
+        ],
+        "horn": [
+         "bone",
+         1.0
+        ],
+        "hung": [
+         "tokens",
+         1.0
+        ],
+        "neck": [
+         "teeth",
+         1.0
+        ],
+        "armor": [
+         "scars",
+         1.0
+        ],
+        "build": {
+         "chest": 1.3,
+         "nape": 1.3,
+         "girth": 1.15
+        },
+        "pose": [
+         "high",
+         0.5
+        ]
+       }
       },
       {
        "id": "stag-hearth-hart",
@@ -612,7 +1385,47 @@
        },
        "features": [
         "old-eyes"
-       ]
+       ],
+       "body": {
+        "crown": [
+         "elder",
+         1.0
+        ],
+        "horn": [
+         "bone",
+         1.0
+        ],
+        "hung": [
+         "points",
+         0.8
+        ],
+        "coat": "hearth",
+        "eyes": [
+         "old",
+         1.3
+        ],
+        "carry": [
+         "rug",
+         1.0
+        ],
+        "aura": [
+         "motes",
+         1.5
+        ],
+        "neck": [
+         "mane",
+         1.3
+        ],
+        "build": {
+         "chest": 1.34,
+         "girth": 1.25,
+         "nape": 1.5
+        },
+        "pose": [
+         "low",
+         0.3
+        ]
+       }
       }
      ]
     }
