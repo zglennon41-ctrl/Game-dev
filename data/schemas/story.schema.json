@@ -6,6 +6,52 @@
     "recruiter",
     "cards",
     "beats",
-    "recruiter_lines"
-  ]
+    "recruiter_lines",
+    "title",
+    "station",
+    "notes",
+    "moments",
+    "credits"
+  ],
+  "properties": {
+    "station": {
+      "type": "object",
+      "required": [
+        "name",
+        "size",
+        "spawn",
+        "style",
+        "furniture",
+        "doors"
+      ]
+    },
+    "title": {
+      "type": "object",
+      "required": [
+        "subtitle",
+        "continue",
+        "new",
+        "tutorial",
+        "settings",
+        "credits",
+        "back"
+      ]
+    },
+    "notes": {
+      "type": "object"
+    },
+    "moments": {
+      "type": "object",
+      "required": [
+        "wake",
+        "pattern"
+      ]
+    },
+    "credits": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
 }

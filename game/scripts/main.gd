@@ -56,6 +56,7 @@ func _ready() -> void:
 		# the tree's screens with (a turning needs a second base).
 		Data.use_bases(Data.load_bases() + Data.load_bases(str(_args["bases"])))
 	_setup_input()
+	_apply_options()
 	add_child(world)
 	add_child(hud)
 	add_child(sfx)
@@ -429,8 +430,23 @@ func _ready() -> void:
 	else:
 		menu()
 		if _args.has("shots") and _args.has("title"):
-			await get_tree().create_timer(2.0).timeout
-			_shot("title")
+			# --title=settings or --title=credits: that screen under the title
+			if str(_args["title"]) == "settings":
+				_settings_screen()
+			elif str(_args["title"]) == "credits":
+				_credits_screen()
+			if _args.has("lamps"):
+				# --title --lamps=0: the station with its lamps out, to look at
+				world.set_lamps(float(_args["lamps"]))
+				world.portrait_lights(false)
+			await _wait(3.0)
+			if _args.has("mouse"):
+				# --title --mouse="New character": click that button with the mouse, and say where it led
+				for words in str(_args["mouse"]).split(","):
+					await _click_button(words)
+					await _wait(1.5)
+					print("MOUSE: '%s' led to mode %s%s" % [words, mode, ", a screen under the title" if _title_sub else ""])
+			await _shot("title")
 			await get_tree().create_timer(0.3).timeout
 			get_tree().quit()
 
@@ -465,34 +481,95 @@ func _setup_input() -> void:
 
 func menu() -> void:
 	mode = "menu"
+	_show_preview = false
+	hud.hide_speech()
 	Engine.time_scale = 1.0
 	sfx.stop_ambience()
 	music.play_track(String(Data.music.get("places", {}).get("title", "title")) if not Data.music.is_empty() else "title")
 	music.set_fight(false)
 	creator.visible = false
 	academy.visible = false
-	world.set_place("cut")
+	# The title stands over the old station: the last hero made, under the lamps, the line behind.
+	world.set_place("station")
+	world.set_lamps(1.0)
+	world.portrait_lights(true)
+	world.cine = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var saved := Settings.hero()
-	# The title stands over the chamber: the last hero made, in the moonlight, the genius circling.
 	var h: Dictionary = saved if not saved.is_empty() else Fight.default_hero()
 	world.portrait_frame = ""
 	_preview_hero(h)
-	world.portrait_side = -2.0
-	world.portrait_dist = 5.6
-	var buttons: Array = [["New character", new_character]]
-	var body := "A real-time party RPG of a guild that keeps a rail junction alive.\n[color=#a59a8a][i]Mouse and keyboard, or a gamepad. Sound on.[/i][/color]"
+	var shot: Dictionary = Data.story["station"].get("title", {})
+	world.portrait_side = float(shot.get("side", -2.0))
+	world.portrait_dist = float(shot.get("dist", 5.6))
+	preview.p_facing = PI / 2.0 + deg_to_rad(float(shot.get("turn", 0.0)))
+	_title_screen()
+
+## The title's menu, over the station: what a returning player most likely wants first.
+func _title_screen() -> void:
+	mode = "menu"
+	_title_sub = false
+	var saved := Settings.hero()
+	var T: Dictionary = Data.story.get("title", {})
+	var buttons: Array = []
 	if not saved.is_empty():
-		var where := ("settled, ready for the line" if saved.get("settled", false) else "at the Academy") if saved.has("academy") else "at the Academy's gate"
-		buttons.append(["Continue as %s  (%s, %s, %s)" % [saved["name"], Data.by_id(Data.bloods, saved["blood"])["name"], String(saved["shape"]).capitalize(), where], func(): hero = saved; enter_academy() if saved.has("academy") else _academy_gate()])
-		buttons.append(["Practice yard: fight cut-wolves as %s  (two minutes)" % saved["name"], func(): hero = saved; start("fight")])
+		var where := (String(T.get("where_settled", "settled, ready for the line")) if saved.get("settled", false) else String(T.get("where_academy", "at the Academy"))) if saved.has("academy") else String(T.get("where_gate", "at the Academy's gate"))
+		buttons.append([String(T.get("continue", "Continue")), func(): hud.blackout(func(): hero = saved; enter_academy() if saved.has("academy") else _academy_gate(), saved.has("academy") and not _args.has("bot")),
+			{ "primary": true, "sub": "%s  ·  %s %s  ·  %s" % [saved["name"], Data.by_id(Data.bloods, saved["blood"])["name"], String(saved["shape"]).capitalize(), where] }])
+		buttons.append([String(T.get("new", "New character")), func(): hud.blackout(new_character)])
+		buttons.append([String(T.get("yard", "Practice yard")), func(): hud.blackout(func(): hero = saved; start("fight"), not _args.has("bot"))])
+	else:
+		buttons.append([String(T.get("new", "New character")), func(): hud.blackout(new_character), { "primary": true }])
 	if saved.has("genius") and Genius.from_dict(saved["genius"]).is_born():
 		var sg := Genius.for_hero(saved)
-		buttons.append(["Your genius: %s" % (sg.name if sg.name != "" else sg.form_name()), func(): page.hero = saved; page.open(sg, World.SHAPE_COLORS.get(saved["shape"], Color.WHITE), 0, int(saved.get("academy", {}).get("record", {}).get("marks", 0)))])
-	buttons.append(["Combat tutorial  (as an Anchor)", func(): hero = {}; start("tutorial")])
+		buttons.append([String(T.get("genius", "Your genius: {name}")).format({ "name": sg.name if sg.name != "" else sg.form_name() }), func(): page.hero = saved; page.open(sg, World.SHAPE_COLORS.get(saved["shape"], Color.WHITE), 0, int(saved.get("academy", {}).get("record", {}).get("marks", 0)))])
+	buttons.append([String(T.get("tutorial", "Combat tutorial")), func(): hud.blackout(func(): hero = {}; start("tutorial"), not _args.has("bot"))])
+	buttons.append([String(T.get("settings", "Settings")), _settings_screen, { "row": true }])
+	buttons.append([String(T.get("credits", "Credits")), _credits_screen, { "row": true }])
 	if not OS.has_feature("web"):   # a browser's tab is closed by the browser
-		buttons.append(["Quit", func(): get_tree().quit()])
-	hud.show_screen("WILDLINE", "The Cumberland Cut", body, buttons, "title")
+		buttons.append([String(T.get("quit", "Quit")), func(): get_tree().quit(), { "row": true }])
+	hud.show_screen("WILDLINE", String(T.get("subtitle", "The Cumberland Cut")), String(T.get("foot", "")), buttons, "title")
+
+## Settings: the sound, how fast the mouse turns the camera, the whole screen. Kept between sessions.
+var _title_sub := false      # a screen under the title is up (Settings, Credits): Esc goes back
+
+func _settings_screen() -> void:
+	_title_sub = true
+	var T: Dictionary = Data.story.get("title", {})
+	var rows: Array = [
+		[String(T.get("set_sound", "Sound")), { "stepper": {
+			"value": func() -> String: return "%d%%" % roundi(Settings.option("sound", 1.0) * 100.0),
+			"step": func(by: int): Settings.set_option("sound", clampf(snappedf(Settings.option("sound", 1.0) + 0.1 * by, 0.1), 0.0, 1.0)); _apply_options(); sfx.play("ui-take", 1.0, -6.0) } }],
+		[String(T.get("set_look", "Camera speed")), { "stepper": {
+			"value": func() -> String: return "%d%%" % roundi(Settings.option("look", 1.0) * 100.0),
+			"step": func(by: int): Settings.set_option("look", clampf(snappedf(Settings.option("look", 1.0) + 0.1 * by, 0.1), 0.3, 2.5)); _apply_options() } }],
+		[String(T.get("set_screen", "Full screen")), { "stepper": {
+			"value": func() -> String: return "On" if Settings.option("fullscreen", 0.0) > 0.5 else "Off",
+			"step": func(_by: int): Settings.set_option("fullscreen", 0.0 if Settings.option("fullscreen", 0.0) > 0.5 else 1.0); _apply_options() } }],
+	]
+	var buttons: Array = []
+	for r in rows:
+		buttons.append([r[0], func(): pass, r[1]])
+	buttons.append([String(T.get("back", "Back")), _title_screen])
+	hud.show_screen(String(T.get("settings", "Settings")).to_upper(), "", "", buttons, "left")
+
+func _credits_screen() -> void:
+	_title_sub = true
+	var T: Dictionary = Data.story.get("title", {})
+	hud.show_screen(String(T.get("credits", "Credits")).to_upper(), "", "\n\n".join(Data.story.get("credits", [])), [[String(T.get("back", "Back")), _title_screen]], "left")
+
+var _look_speed := 1.0
+## The player's settings, put to work: the sound's level, the camera's speed, the whole screen.
+func _apply_options() -> void:
+	var v := Settings.option("sound", 1.0)
+	AudioServer.set_bus_mute(0, v <= 0.001)
+	AudioServer.set_bus_volume_db(0, linear_to_db(maxf(v, 0.001)))
+	_look_speed = Settings.option("look", 1.0)
+	if DisplayServer.get_name() != "headless" and not _args.has("shots"):
+		var full := Settings.option("fullscreen", 0.0) > 0.5
+		var now_full := DisplayServer.window_get_mode() in [DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]
+		if full != now_full:
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if full else DisplayServer.WINDOW_MODE_WINDOWED)
 
 # --- The opening ---------------------------------------------------------------
 
@@ -516,7 +593,7 @@ func _preview_hero(h: Dictionary) -> void:
 	world.build_hero(h)
 	preview = Fight.new({ "hero": h, "passive": true, "respawn": false })
 	preview.w_state = "absent"
-	preview.p_pos = world.stage_spot() if world.place == "stage" else Vector2.ZERO
+	preview.p_pos = world.stage_spot() if world.place == "stage" else (world.station_spot() if world.place == "station" else Vector2.ZERO)
 	preview.p_facing = facing
 	preview.p_lock = false   # standing, not aiming: a gun or a crossbow rests in the hand
 	world.show_wolf = false
@@ -535,27 +612,125 @@ func _hero_made(h: Dictionary) -> void:
 	if Settings.settled_count() > 0 and not _args.has("answers"):
 		var adv: Dictionary = Data.academy.get("advanced", {}).get("offer", {})
 		hud.show_screen(adv.get("title", "A second life"), "", adv.get("text", ""), [
-			[adv.get("full", "The whole term"), func(): hero["advanced"] = false; Settings.save_hero(hero); _card(Data.story["cards"]["open"], _start_prologue)],
-			[adv.get("short", "Advanced standing"), func(): hero["advanced"] = true; Settings.save_hero(hero); _card(Data.story["cards"]["open"], _start_prologue)],
+			[adv.get("full", "The whole term"), func(): hero["advanced"] = false; Settings.save_hero(hero); _card(Data.story["cards"]["open"], _start_prologue, "story", 0.0, true)],
+			[adv.get("short", "Advanced standing"), func(): hero["advanced"] = true; Settings.save_hero(hero); _card(Data.story["cards"]["open"], _start_prologue, "story", 0.0, true)],
 		])
 		return
-	_card(Data.story["cards"]["open"], _start_prologue)
+	_card(Data.story["cards"]["open"], _start_prologue, "story", 0.0, true)
 
-## A title card: a few lines on black, and Continue.
-func _card(lines: Array, next: Callable) -> void:
+## A story card: the screen dark, the lines arriving one after another; a key or a click goes on.
+## style "story" (a place, a time, what is happening) or "title" (a small line over a large one);
+## auto: it goes on by itself that many seconds after its last line.
+func _card(lines: Array, next: Callable, style := "story", auto := 0.0, capture := false) -> void:
 	mode = "story"
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	_show_preview = false
 	var filled: Array = lines.map(func(l): return Prologue.fill(l, hero))
-	hud.show_screen(filled[0], "\n".join(filled.slice(1)), "", [["Continue", next]])
+	hud.show_card(filled, next, style, auto)
+	hud.card_capture = capture and not _args.has("bot")
 	if _args.has("answers"):
-		_shot.call_deferred("card")
-		next.call_deferred()
+		# automated checks: see the whole card, picture it, go on
+		while hud._card_state == "arriving":
+			await get_tree().process_frame
+		await _wait(0.6)
+		await _shot("card")
+		if _by_hand():
+			await _go_on()
+		else:
+			hud._card_go()
+
+## Automated checks (--mouse): a click of the mouse at a place on the screen, in the interface's
+## own coordinates, sent the way a real one arrives: so a button that the mouse cannot reach
+## (something lying over it) fails the check as it would fail a player.
+func _click(at: Vector2) -> void:
+	var p := get_viewport().get_final_transform() * at
+	var mv := InputEventMouseMotion.new()
+	mv.position = p
+	mv.global_position = p
+	Input.parse_input_event(mv)
+	await get_tree().process_frame
+	for down in [true, false]:
+		var e := InputEventMouseButton.new()
+		e.button_index = MOUSE_BUTTON_LEFT
+		e.pressed = down
+		e.position = p
+		e.global_position = p
+		Input.parse_input_event(e)
+		await get_tree().process_frame
+		await get_tree().process_frame
+
+## Automated checks: --mouse, --keys or --pad presses the opening's cards and buttons as a
+## player's hand would, by events sent the way real ones arrive.
+func _by_hand() -> bool:
+	return _args.has("mouse") or _args.has("keys") or _args.has("pad")
+
+## Automated checks: go on, by whichever hand was asked for: a click in the middle of the
+## screen, Enter, or a pad's A.
+func _go_on() -> void:
+	if _args.has("mouse"):
+		await _click(get_viewport().get_visible_rect().size / 2.0)
+		return
+	for down in [true, false]:
+		var e: InputEvent
+		if _args.has("pad"):
+			var j := InputEventJoypadButton.new()
+			j.button_index = JOY_BUTTON_A
+			j.pressed = down
+			e = j
+		else:
+			var k := InputEventKey.new()
+			k.physical_keycode = KEY_ENTER
+			k.keycode = KEY_ENTER
+			k.pressed = down
+			e = k
+		Input.parse_input_event(e)
+		await get_tree().process_frame
+		await get_tree().process_frame
+
+## Automated checks: the button of the screen that is up whose words begin so.
+func _button(words: String, under: Node = null) -> Button:
+	for c in (under if under else hud).get_children():
+		if c is Button and (c as Button).is_visible_in_tree():
+			var t := (c as Button).text
+			if t == "" and c.get_child_count() > 0:
+				var l := c.find_children("*", "Label", true, false)
+				t = (l[0] as Label).text if not l.is_empty() else ""
+			if t.begins_with(words):
+				return c
+		var found := _button(words, c)
+		if found:
+			return found
+	return null
+
+## Automated checks: click a button of the screen that is up, with the mouse.
+func _click_button(words: String) -> bool:
+	var b := _button(words)
+	if b == null:
+		print("MOUSE: no button '%s'" % words)
+		return false
+	await _click(b.get_global_rect().get_center())
+	return true
+
+## Automated checks: wait by the game's own frames (a slow machine's frames are capped, and a
+## timer by the wall's clock would run ahead of what is drawn).
+func _wait(seconds: float) -> void:
+	var t := 0.0
+	while t < seconds:
+		await get_tree().process_frame
+		t += get_process_delta_time()
 
 func _start_prologue() -> void:
-	world.set_place("cut")
+	# The old station, its lamps out: the night begins on the platform, looking down the line.
+	world.set_place("station")
+	world.set_lamps(0.0)
+	world.portrait_lights(false)
+	world.cine = false
 	world.portrait_frame = ""
+	var st: Dictionary = Data.story["station"]
 	fight = Fight.new({ "hero": hero, "beast": "cut-wolf", "seed": randi(), "respawn": false, "mercy": true,
-		"allow_breach": false, "beast_health": 220 })
+		"allow_breach": false, "beast_health": 220, "arena": Vector2(st["size"][0], st["size"][1]) })
+	fight.p_pos = Vector2(-3.0, 3.2)
+	fight.p_facing = 0.0
+	fight.w_pos = Vector2(float(st["size"][0]) / 2.0, 0.0)   # the tunnel's mouth: the camera looks that way
 	world.portrait = false
 	world.build_hero(hero)
 	world.reset_feedback()
@@ -568,42 +743,163 @@ func _start_prologue() -> void:
 	_next_shot = 0.0
 	if not _args.has("bot"):
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	# the line went quiet: no music until something comes
+	music.play_track("")
+	music.set_fight(false)
 	prologue = Prologue.new(fight, world, hero)
+	prologue.sfx = sfx
+	prologue.music = music
 	prologue.finished.connect(_recruiter)
 	prologue.start(hud)
 
+## The wolf is down. A held beat on it, the dark, and the recruiter is standing on the platform.
 func _recruiter() -> void:
-	mode = "story"
 	Engine.time_scale = 1.0
+	world.slowmo(0.9, 0.35)
 	sfx.play("done")
+	music.set_fight(false)
+	hud.set_prompt("", "")
+	await get_tree().create_timer(1.0 if _args.has("answers") else 2.2, true, false, true).timeout
+	if mode != "prologue":
+		return   # left for the menu meanwhile
+	hud.blackout(_recruiter_scene)
+
+var _show_preview := false   # a story screen with the hero standing behind it
+
+func _recruiter_scene() -> void:
+	if mode != "prologue":
+		return   # left for the menu while the dark came down
+	mode = "scene"
+	Engine.time_scale = 1.0
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	music.play_track(String(Data.music.get("places", {}).get("title", "title")) if not Data.music.is_empty() else "title")
 	var r: Dictionary = Data.story["recruiter"]
 	var b: Dictionary = Data.by_id(Data.bloods, hero["blood"])
 	var lines: Array = []
 	for l in Data.story["recruiter_lines"]:
 		var line: String = String(l).replace("{blood_line}", Data.story["blood_lines"][b["tier"]])
 		lines.append(Prologue.fill(line, hero))
-	hud.show_screen(String(r["name"]).to_upper(), r["title"], "\n\n".join(lines), [["Go with her", func(): _card(Data.story["cards"]["skip"], func(): _card(Data.story["cards"]["act1"], _academy_gate))]])
+	# The two of them on the platform under the lamps, the camera over the hero's shoulder.
+	var sc: Dictionary = Data.story.get("recruiter_scene", {})
+	var A := Vector2(float(sc.get("hero", [-1.3, 3.4])[0]), float(sc.get("hero", [-1.3, 3.4])[1]))
+	var B := Vector2(float(sc.get("recruiter", [1.3, 3.7])[0]), float(sc.get("recruiter", [1.3, 3.7])[1]))
+	world.set_lamps(1.0)
+	world.show_wolf = false
+	fight.w_state = "absent"
+	fight.p_pos = A
+	fight.p_facing = (B - A).angle()
+	fight.p_lock = false
+	fight.p_block_held = false
+	fight.p_state = "free"
+	world.lock_on = false
+	world.reset_feedback()
+	world.clear_floaters()
+	var who: Dictionary = Data.by_id(Data.academy["instructors"], String(r.get("id", "varga")))
+	var look: Dictionary = world.look_for(String(r["name"]))
+	look.merge({ "dress": "master", "headgear": true, "cape": false }, true)
+	look.merge(who.get("look", {}), true)
+	world.add_figure(String(who.get("body", "alexandria-f")), B, (A - B).angle(), "", "", "", Color(0, 0, 0, 0), look)
+	var a3 := world._v3(A)
+	var b3 := world._v3(B)
+	var along := (b3 - a3).normalized()
+	var side := Vector3(-along.z, 0, along.x)
+	world.cine = true
+	world.cine_speed = 0.35
+	world._cam_pos = a3 - along * 2.4 + side * 1.7 + Vector3(0, 1.75, 0)
+	world._cam_look = b3 + Vector3(0, 1.35, 0) + side * 0.25
+	world.cine_pos = a3 - along * 1.5 + side * 1.45 + Vector3(0, 1.66, 0)
+	world.cine_look = b3 + Vector3(0, 1.4, 0) + side * 0.2
+	var go := func():
+		hud.hide_speech()
+		# (the pointer is taken now, in the press: the two cards go by themselves, and the
+		# Academy is walked into with no press for a browser to give it to)
+		if not _args.has("bot") and not _args.has("answers"):
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		# The year passes, the act is named, and the hero walks straight in: the Instructor is
+		# waiting inside. (The gate's own screen is for a character who comes back to it from
+		# the title; the automated checks stop at it.)
+		_card(Data.story["cards"]["skip"], func():
+			_card(Data.story["cards"]["act1"], _academy_gate if _args.has("answers") else _walk_in, "title", 2.6), "title", 2.0)
+	hud.show_speech(String(r["name"]), String(r["title"]), lines, [[String(r.get("go", "Go with her")), go]])
 	if _args.has("answers"):
-		_shot.call_deferred("recruiter")
-		await get_tree().create_timer(0.6, true, false, true).timeout
-		_card(Data.story["cards"]["skip"], func(): _card(Data.story["cards"]["act1"], _academy_gate))
+		for i in lines.size():
+			await _wait(1.2)
+			if _by_hand():
+				await _go_on()
+			else:
+				hud._speech_t = 1.0
+				hud.speech_press()
+			if i == 0 or i == lines.size() - 1:
+				await _wait(0.3)
+				await _shot("recruiter")
+			if i < lines.size() - 1:
+				if _by_hand():
+					await _wait(0.3)
+					await _go_on()
+				else:
+					hud._speech_t = 1.0
+					hud.speech_press()
+		await _wait(0.8)
+		await _shot("recruiter-end")
+		if _by_hand():
+			if _args.has("mouse"):
+				await _click_button(String(r.get("go", "Go with her")))
+			else:
+				await _go_on()      # the button is the chosen one: Enter, or A, presses it
+			await _wait(0.5)
+			print("MOUSE: the recruiter's button %s" % ("works" if mode == "story" and hud.card_up() else "DID NOTHING"))
+		else:
+			go.call()
 
+func _walk_in() -> void:
+	world.cine = false
+	_show_preview = false
+	enter_academy()
+
+## The Academy's gate, a year on: the hero before the way in, and the choice to walk through.
 func _academy_gate() -> void:
 	mode = "story"
 	if hero.is_empty():
 		hero = Settings.hero()
 	var a: Dictionary = Data.story["academy"]
+	# the platform at Alexandria, the way in ahead
+	world.cine = false
+	world.set_place("gate-card", Data.academy["places"]["gate"])
+	world.set_lamps(1.0)
+	_preview_hero(hero)
+	var g: Dictionary = Data.story.get("gate_shot", {})
+	var at: Array = g.get("hero", [-8.0, 0.9])
+	preview.p_pos = Vector2(float(at[0]), float(at[1]))
+	preview.p_facing = deg_to_rad(float(g.get("facing", 180.0)))
+	world.portrait = false
+	world.cine = true
+	world.cine_speed = 0.25
+	var cf: Array = g.get("from", [-3.2, 2.3, -1.6])
+	var cl: Array = g.get("look", [-12.0, 2.5, 3.6])
+	world.cine_pos = Vector3(cf[0], cf[1], cf[2])
+	world.cine_look = Vector3(cl[0], cl[1], cl[2])
+	world._cam_pos = world.cine_pos + Vector3(0.9, 0.25, -0.3)
+	world._cam_look = world.cine_look
+	_show_preview = true
+	music.play_track(String(Data.music.get("places", {}).get("gate", "gate")) if not Data.music.is_empty() else "gate")
 	hud.show_screen(a["title"], "%s  ·  %s  ·  %s" % [hero["name"], Data.by_id(Data.bloods, hero["blood"])["name"], String(hero["shape"]).capitalize()], a["text"], [
-		["Walk through the Gate", enter_academy],
-		["Practice yard: fight cut-wolves  (two minutes)", func(): start("fight")],
-		["Main menu", menu],
-	])
+		[String(a.get("enter", "Walk through the Gate")), func(): hud.blackout(func(): _show_preview = false; world.cine = false; enter_academy(), not _args.has("bot")), { "primary": true }],
+		[String(a.get("yard", "Practice yard")), func(): hud.blackout(func(): _show_preview = false; start("fight"), not _args.has("bot"))],
+		[String(a.get("menu", "Main menu")), func(): hud.blackout(func(): _show_preview = false; menu())],
+	], "left")
 	if _args.has("answers"):
 		print("REACHED THE ACADEMY: %s, %s %s with a %s; Pattern %s" % [hero["name"], hero["blood"], hero["shape"], hero["weapon"], Builder.sentence(hero["pattern"])])
-		_shot.call_deferred("academy")
+		await _wait(2.5)
+		await _shot("academy")
+		if _by_hand():
+			if _args.has("mouse"):
+				await _click_button(String(a.get("enter", "Walk through the Gate")))
+			else:
+				await _go_on()
+			await _wait(2.0)
+			print("MOUSE: the gate's button %s" % ("works" if mode == "academy" else "DID NOTHING"))
 		if _args.has("quit"):
-			get_tree().create_timer(1.0, true, false, true).timeout.connect(get_tree().quit)
+			get_tree().create_timer(0.5, true, false, true).timeout.connect(get_tree().quit)
 
 ## For looking at a Reading: count play into a genius's Tally in the proportions of some leans.
 func _play_like(g: Genius, leans: Dictionary, n: int) -> void:
@@ -1129,7 +1425,7 @@ func _academy_frame(delta: float, real_dt: float) -> void:
 	if cam.length() < 0.15:
 		cam = Vector2.ZERO
 	if not fight.p_lock:
-		world.look(_cam_mouse)
+		world.look(_cam_mouse, 0.0032 * _look_speed)
 	_cam_mouse = Vector2.ZERO
 	world.draw(fight, real_dt, cam, move)
 	if academy.in_lesson():
@@ -1206,6 +1502,8 @@ func _pattern_built(spec: Dictionary) -> void:
 func start(which: String) -> void:
 	# The tutorial teaches with the starting Pattern; the fight uses the one you built.
 	var h: Dictionary = Fight.default_hero() if which == "tutorial" or hero.is_empty() else hero
+	world.set_place("cut")
+	world.cine = false
 	fight = Fight.new({ "hero": h, "beast": "yard-wolf" if which == "tutorial" else "cut-wolf", "seed": randi(),
 		"passive": which == "tutorial", "respawn": true,
 		"pattern_lost": false if which == "tutorial" else Settings.pattern_lost(),
@@ -1298,7 +1596,7 @@ func _input(event: InputEvent) -> void:
 
 ## Should the game have the pointer now? In play, with no card, menu or page up.
 func _wants_pointer() -> bool:
-	if _args.has("bot") or DisplayServer.get_name() == "headless" or hud.screen.visible or page.visible or builder.visible:
+	if _args.has("bot") or DisplayServer.get_name() == "headless" or hud.screen.visible or page.visible or builder.visible or hud.card.visible or hud.speech_up():
 		return false
 	if mode == "academy":
 		return not academy._naming and academy._choice_box == null and academy._reading_box == null
@@ -1368,6 +1666,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed("genius_page") or event.is_action_pressed("menu"):
 			page.hide_page()
 		return
+	if mode == "menu" and _title_sub and event.is_action_pressed("menu"):
+		_title_screen()
+		return
 	if event.is_action_pressed("show_step"):
 		hud.show_prompt_again()
 	if mode == "academy":
@@ -1430,8 +1731,11 @@ func _process(delta: float) -> void:
 	if mode == "gallery":
 		world.draw(Fight.new({ "passive": true }), real_dt, Vector2.ZERO, Vector2.ZERO)
 		return
-	if (mode == "creator" or mode == "menu") and preview:
+	if (mode == "creator" or mode == "menu" or (mode == "story" and _show_preview)) and preview:
 		world.draw(preview, real_dt, Vector2.ZERO, Vector2.ZERO)
+		return
+	if mode == "scene" and fight:
+		world.draw(fight, real_dt, Vector2.ZERO, Vector2.ZERO)
 		return
 	if mode != "tutorial" and mode != "fight" and mode != "prologue":
 		return
@@ -1446,6 +1750,7 @@ func _process(delta: float) -> void:
 			_breached = true
 			Settings.lose_pattern(e["sworn"])
 	_sounds(events)
+	_stings(events)
 	world.feedback(fight, events)
 	if tutorial:
 		tutorial.update(events, hud)
@@ -1459,7 +1764,7 @@ func _process(delta: float) -> void:
 	if cam.length() < 0.15:
 		cam = Vector2.ZERO
 	if not fight.p_lock:
-		world.look(_cam_mouse)
+		world.look(_cam_mouse, 0.0032 * _look_speed)
 	_cam_mouse = Vector2.ZERO
 	# --near[=back]: the camera close on the partner, to see what it wears (a genius on the arm,
 	# at the belt, down the back)
@@ -1482,12 +1787,19 @@ func _process(delta: float) -> void:
 	if _args.has("shots") and fight.now > _next_shot:
 		_next_shot = fight.now + float(_args.get("every", "5"))
 		_shot(mode)
+	# (and a picture of each of the night's great moments, with its name across the screen)
+	if _args.has("shots") and (hud.banner_up() and hud._banner.modulate.a > 0.98) != _banner_seen:
+		_banner_seen = not _banner_seen
+		if _banner_seen:
+			_shot("moment")
 	if mode == "fight":
 		if fight.p_state == "down":
 			_results.call_deferred("down")
 			mode = "results"
 		elif fight.now >= fight_end:
 			_results("time")
+
+var _banner_seen := false
 
 func _sounds(events: Array) -> void:
 	for e in events:

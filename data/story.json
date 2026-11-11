@@ -3,7 +3,9 @@
  "recruiter": {
   "name": "Instructor Ilse Varga",
   "title": "of the Academy at Alexandria",
-  "shape": "read"
+  "shape": "read",
+  "id": "varga",
+  "go": "Go with her"
  },
  "cards": {
   "open": [
@@ -23,7 +25,10 @@
   {
    "id": "quiet",
    "title": "The line went quiet",
-   "text": "The lamps along the platform are out. The night train did not come. Something is moving at the far end, where the tunnel opens. [b]WASD[/b] to move; the mouse to look."
+   "text": "The lamps along the platform are out. The night train did not come. Something is moving at the far end, where the tunnel opens. [b]WASD[/b] to move; the mouse to look.",
+   "walk": 2.5,
+   "least": 3.0,
+   "most": 12.0
   },
   {
    "id": "hold",
@@ -33,7 +38,8 @@
   {
    "id": "woke",
    "title": "Your field wakes",
-   "text": "Something in you answers. It feels like the floor rising under your feet. Fight back: {strike}."
+   "text": "Something in you answers. It feels like the floor rising under your feet. Fight back: {strike}.",
+   "hits": 3
   },
   {
    "id": "technique",
@@ -43,7 +49,8 @@
   {
    "id": "pattern",
    "title": "Your Pattern",
-   "text": "There is a shape your will wants to take, and it has conditions. {pattern}\n{trigger_hint} Then press [b]R[/b], and strike each time the gold ring closes."
+   "text": "There is a shape your will wants to take, and it has conditions. {pattern}\n{trigger_hint} Then press [b]R[/b], and strike each time the gold ring closes.",
+   "most": 60.0
   },
   {
    "id": "finish",
@@ -80,6 +87,280 @@
  },
  "academy": {
   "title": "THE ACADEMY AT ALEXANDRIA",
-  "text": "The thirteenth fortress, built around the Library. Dormitories by Shape, the quad, the yard, the hearth hall where the rite is held, and the Gate where graduates leave on the line. You walk in at the Thaw with the Hundred-and-Fourth Cohort.\n\n[color=#9e958a]Act One (the Academy: the rite, the lessons, the cohort, the Field Examination) is the next thing to build.[/color]"
+  "text": "The thirteenth fortress, built around the Library. Dormitories by Shape, the quad, the yard, the hearth hall where the rite is held, and the Gate where graduates leave on the line. You walk in at the Thaw with the Hundred-and-Fourth Cohort.",
+  "enter": "Walk through the Gate",
+  "yard": "Practice yard",
+  "menu": "Main menu"
+ },
+ "station": {
+  "comment": "The old station on the line: what stands behind the title, and where the field wakes. Built from the Academy's kit like the creator's platform (data/creation.json, stage), but walled all round, because a fight is fought here; its size is the fight room's (data/combat-room.json, arena). spawn is where the figure of the title stands and where the night begins. lights are the title's own (a key, a fill, a rim on the figure). title is the title's shot: side (where the figure stands across the screen: negative is right), dist, and turn (degrees the figure is turned from facing the camera).",
+  "name": "The old station",
+  "size": [
+   22,
+   14
+  ],
+  "doors": [],
+  "spawn": [
+   1.5,
+   3.6
+  ],
+  "title": {
+   "side": -2.3,
+   "dist": 5.2,
+   "turn": -28
+  },
+  "style": {
+   "kind": "court",
+   "floor": "floor_platform",
+   "ambient": 0.34,
+   "lamps": 0.8,
+   "moon": 0.42,
+   "track": {
+    "through": true
+   },
+   "sides": {
+    "n": {
+     "bays": [
+      "station_wall",
+      "station_bench",
+      "station_wall",
+      "station_clock",
+      "station_wall",
+      "station_bench"
+     ]
+    },
+    "s": {
+     "bays": [
+      "station_wall",
+      "station_bench",
+      "station_wall",
+      "station_wall",
+      "station_bench",
+      "station_wall"
+     ]
+    },
+    "w": {
+     "bays": [
+      "station_wall"
+     ],
+     "features": [
+      {
+       "piece": "line_arch",
+       "at": 0
+      }
+     ]
+    },
+    "e": {
+     "bays": [
+      "station_wall"
+     ],
+     "features": [
+      {
+       "piece": "line_arch",
+       "at": 0
+      }
+     ]
+    }
+   }
+  },
+  "furniture": [
+   {
+    "piece": "lamp_post",
+    "at": [
+     -7.0,
+     -7.0
+    ]
+   },
+   {
+    "piece": "lamp_post",
+    "at": [
+     1.0,
+     -7.0
+    ]
+   },
+   {
+    "piece": "lamp_post",
+    "at": [
+     9.0,
+     -7.0
+    ]
+   },
+   {
+    "piece": "lamp_post",
+    "at": [
+     -3.0,
+     7.0
+    ]
+   },
+   {
+    "piece": "lamp_post",
+    "at": [
+     6.0,
+     7.0
+    ]
+   },
+   {
+    "piece": "signal_lamp",
+    "at": [
+     11.2,
+     -2.9
+    ],
+    "rot": 90
+   },
+   {
+    "piece": "luggage",
+    "at": [
+     -10.6,
+     -6.9
+    ],
+    "rot": 25
+   },
+   {
+    "piece": "luggage",
+    "at": [
+     10.4,
+     6.9
+    ],
+    "rot": 200
+   },
+   {
+    "piece": "barrel",
+    "at": [
+     -11.0,
+     6.8
+    ]
+   }
+  ],
+  "lights": {
+   "key": {
+    "from": [
+     -1.9,
+     2.9,
+     2.6
+    ],
+    "aim": 1.45,
+    "color": [
+     1.0,
+     0.93,
+     0.82
+    ],
+    "energy": 0.42,
+    "angle": 30,
+    "range": 9,
+    "shadow": true
+   },
+   "fill": {
+    "from": [
+     2.4,
+     1.3,
+     2.8
+    ],
+    "color": [
+     0.702,
+     0.741,
+     0.902
+    ],
+    "energy": 0.16,
+    "range": 7,
+    "spot": false
+   },
+   "rim": {
+    "from": [
+     1.5,
+     2.7,
+     -2.6
+    ],
+    "aim": 1.5,
+    "color": [
+     0.702,
+     0.741,
+     0.902
+    ],
+    "energy": 0.5,
+    "angle": 32,
+    "range": 9
+   }
+  }
+ },
+ "title": {
+  "comment": "The title's words. foot is the quiet line under the menu.",
+  "subtitle": "The Cumberland Cut",
+  "foot": "Mouse and keyboard, or a gamepad  ·  Best with sound",
+  "continue": "Continue",
+  "new": "New character",
+  "yard": "Practice yard",
+  "genius": "Your genius: {name}",
+  "tutorial": "Combat tutorial",
+  "settings": "Settings",
+  "credits": "Credits",
+  "quit": "Quit",
+  "back": "Back",
+  "where_gate": "at the Academy's gate",
+  "where_academy": "at the Academy",
+  "where_settled": "settled, ready for the line",
+  "set_sound": "Sound",
+  "set_look": "Camera speed",
+  "set_screen": "Full screen"
+ },
+ "credits": [
+  "[b]WILDLINE[/b]\nA game of the line, ten thousand years after the Awakening.",
+  "[b]Placeholder art[/b]  (CC0)\nKayKit Adventurers and Dungeon Remastered, by Kay Lousberg  ·  the wolf of Ultimate Animated Animals, by Quaternius  ·  the base body and its shapes, by the MakeHuman team and community.",
+  "[b]Typefaces[/b]  (SIL Open Font License)\nCinzel, by Natanael Gama  ·  Alegreya and Alegreya Sans, by Huerta Tipográfica.",
+  "[b]Engine[/b]\nGodot Engine, by Juan Linietsky, Ariel Manzur and contributors."
+ ],
+ "notes": {
+  "comment": "What the night says back, under a step's words: wake_<how the first bite was met>, and what went wrong.",
+  "wake_parry": "You caught it clean.",
+  "wake_block": "You held it.",
+  "wake_hurt": "It got through, and something in you answered.",
+  "wake_evade": "",
+  "wake_turned": "",
+  "whiff": "Out of reach: step in closer.",
+  "no_will": "Out of Will: it comes back by itself in a moment.",
+  "not_ready": "Not yet: it needs a breath between uses.",
+  "pattern_slipped": "It slipped away from you. Meet the Trigger again and strike as the ring closes.",
+  "pattern_later": "It will come, one day. For now, fight.",
+  "pattern_bar": "Your Bar forbids it, here and now. Make it so it does not.",
+  "pattern_locked": "Not yet: {trigger}."
+ },
+ "moments": {
+  "comment": "The words across the screen at the night's two great moments.",
+  "wake": {
+   "title": "YOUR FIELD WAKES",
+   "sub": ""
+  },
+  "pattern": {
+   "title": "{pattern_name}",
+   "sub": "Your Pattern"
+  }
+ },
+ "recruiter_scene": {
+  "comment": "Where the two of them stand on the platform when she speaks.",
+  "hero": [
+   -1.3,
+   3.4
+  ],
+  "recruiter": [
+   1.3,
+   3.7
+  ]
+ },
+ "gate_shot": {
+  "comment": "The shot behind the Academy's gate screen, on the Gate's platform (data/academy.json, places.gate): where the hero stands and faces (degrees: 180 is west, toward the way in), where the camera stands and what it looks at.",
+  "hero": [
+   -8.0,
+   0.9
+  ],
+  "facing": 180,
+  "from": [
+   -3.2,
+   2.3,
+   -1.6
+  ],
+  "look": [
+   -12.0,
+   2.5,
+   3.6
+  ]
  }
 }

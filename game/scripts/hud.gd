@@ -10,8 +10,10 @@ static var RED: Color = Style.BLOOD
 static var BLUE: Color = Style.WILL
 static var GOLD: Color = Style.GOLD
 
-const SLOT_W := 72.0
-const SLOT_H := 62.0
+## (the interface is drawn for a screen 900 high and scaled to the window: at 720 a size of 14
+## is 11 pixels, which is the least that reads)
+const SLOT_W := 96.0
+const SLOT_H := 72.0
 
 var play_ui := Control.new()
 var _frame := PanelContainer.new()
@@ -61,6 +63,31 @@ var _prompt_acted := false        # the player has done the first thing the step
 var _progress_first := "\n"
 var _hint_until := 0.0
 var screen := Control.new()
+var card := Control.new()         # a story card: lines on black, one after another
+var _card_black := ColorRect.new()
+var _card_box := VBoxContainer.new()
+var _card_hint := Label.new()
+var _card_items: Array = []       # the lines, in the order they arrive
+var _card_next := Callable()
+var _card_t := 0.0                # seconds the card has been up
+var _card_full_at := 0.0          # when its last line has arrived
+var _card_auto := 0.0             # it goes on by itself this long after that (0: it waits)
+var _card_state := ""             # "", arriving, waiting, leaving
+var _card_serial := 0
+var card_capture := false         # what comes after the card is play: the pointer is taken as the card is told to go
+var speech := Control.new()       # someone speaks: a plate across the foot of the screen
+var _speech_name := Label.new()
+var _speech_sub := Label.new()
+var _speech_text := RichTextLabel.new()
+var _speech_hint := Label.new()
+var _speech_count := Label.new()
+var _speech_buttons := HBoxContainer.new()
+var _speech_bars: Array = []
+var _speech_lines: Array = []
+var _speech_i := 0
+var _speech_t := 0.0
+var _speech_end: Array = []       # the buttons after the last line
+var _speech_tween: Tween = null
 var _veil := ColorRect.new()
 var _center := CenterContainer.new()
 var _left := MarginContainer.new()
@@ -132,17 +159,17 @@ func _ready() -> void:
 	head.add_child(_sigil)
 	Style.label(_name_label, 17, FG, "title", 4)
 	head.add_child(_name_label)
-	Style.label(_shape_label, 12, DIM, "ui")
+	Style.label(_shape_label, 14, DIM.lerp(FG, 0.2), "ui")
 	_shape_label.size_flags_vertical = Control.SIZE_SHRINK_END
 	head.add_child(_shape_label)
 	me.add_child(_meter(hp_bar, hp_ghost, hp_text, RED, 14, 310))
 	me.add_child(_meter(will_bar, null, null, BLUE, 6, 310))
 	var srow := HBoxContainer.new()
 	me.add_child(srow)
-	Style.label(status, 12, ACCENT, "ui_bold", 3)
+	Style.label(status, 14, ACCENT, "ui_bold", 3)
 	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	srow.add_child(status)
-	Style.label(will_text, 11, BLUE.lightened(0.3), "ui", 3)
+	Style.label(will_text, 14, BLUE.lightened(0.3), "ui", 3)
 	srow.add_child(will_text)
 	# The genius: its name and form, its Will, its order (G changes it).
 	_g_row.add_theme_constant_override("separation", 3)
@@ -152,7 +179,7 @@ func _ready() -> void:
 	Style.label(_g_label, 13, FG, "title", 3)
 	_g_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grow.add_child(_g_label)
-	Style.label(_g_order, 11, GOLD, "ui_bold", 3)
+	Style.label(_g_order, 13, GOLD, "ui_bold", 3)
 	grow.add_child(_g_order)
 	_g_row.add_child(_meter(g_bar, null, null, Style.GOLD, 5, 310))
 	_g_row.visible = false
@@ -163,7 +190,7 @@ func _ready() -> void:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
 		var l := Label.new()
-		Style.label(l, 11, Style.DIM, "ui", 3)
+		Style.label(l, 13, Style.DIM, "ui", 3)
 		l.custom_minimum_size = Vector2(130, 0)
 		l.clip_text = true
 		row.add_child(l)
@@ -191,7 +218,7 @@ func _ready() -> void:
 	tv.add_child(trow)
 	Style.label(target_name, 16, FG, "title", 4)
 	trow.add_child(target_name)
-	Style.label(target_sub, 12, DIM, "ui", 3)
+	Style.label(target_sub, 14, DIM.lerp(FG, 0.2), "ui", 3)
 	target_sub.size_flags_vertical = Control.SIZE_SHRINK_END
 	trow.add_child(target_sub)
 	tv.add_child(_meter(target_bar, target_ghost, null, RED, 10, 400))
@@ -208,7 +235,7 @@ func _ready() -> void:
 	Style.label(timer_label, 36, FG, "title", 5)
 	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(timer_label)
-	Style.label(score_label, 15, DIM, "italic", 4)
+	Style.label(score_label, 17, DIM.lerp(FG, 0.25), "italic", 4)
 	score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(score_label)
 	var ogap := Control.new()
@@ -257,7 +284,7 @@ func _ready() -> void:
 	# Above the ability bar, clear of the gold ring at the hero's feet.
 	pattern_banner.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	pattern_banner.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	pattern_banner.position = Vector2(-450, -SLOT_H - 96)
+	pattern_banner.position = Vector2(-450, -SLOT_H - 100)
 	pattern_banner.custom_minimum_size = Vector2(900, 0)
 	pattern_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	play_ui.add_child(pattern_banner)
@@ -272,7 +299,7 @@ func _ready() -> void:
 	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	hint.add_theme_constant_override("outline_size", 4)
 	hint.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	hint.position = Vector2(-700, -25)
+	hint.position = Vector2(-700, -26)
 	hint.custom_minimum_size = Vector2(1400, 0)
 	play_ui.add_child(hint)
 	_write_hint(false, false)
@@ -334,6 +361,9 @@ func _ready() -> void:
 	screen_box.custom_minimum_size = Vector2(640, 0)
 	screen_box.add_theme_constant_override("separation", 10)
 	_center.add_child(screen_box)
+	_build_banner()
+	_build_speech()
+	_build_card()
 
 ## A meter: the groove, a lighter ghost that trails a loss (so the size of a hit reads), the fill.
 func _meter(b: ProgressBar, ghost: ProgressBar, text: Label, color: Color, h: int, w: int) -> Control:
@@ -365,15 +395,28 @@ func _meter(b: ProgressBar, ghost: ProgressBar, text: Label, color: Color, h: in
 ## The ability bar sits centred at the bottom; all four offsets are set so no layout pass can
 ## leave it at the origin.
 func _place_bar(n: int) -> void:
-	var w := (SLOT_W + 8) * n - 8
+	# as wide as reads best, and narrower when there are many: the bar keeps clear of the
+	# hero's frame at the left
+	_slot_w = slot_width(n)
+	for sl in slots.values():
+		(sl["panel"] as Control).custom_minimum_size.x = _slot_w
+		(sl["name"] as Control).custom_minimum_size.x = _slot_w - 10
+	var w := (_slot_w + 8) * n - 8
 	bar.anchor_left = 0.5
 	bar.anchor_right = 0.5
 	bar.anchor_top = 1.0
 	bar.anchor_bottom = 1.0
 	bar.offset_left = -w / 2.0
 	bar.offset_right = w / 2.0
-	bar.offset_top = -SLOT_H - 26
-	bar.offset_bottom = -26
+	bar.offset_top = -SLOT_H - 30
+	bar.offset_bottom = -30
+
+var _slot_w := SLOT_W
+const BAR_MOST := 860.0     # the widest the bar may stand, between the frames at either side
+
+## How wide a slot of the bar is when `n` of them show.
+static func slot_width(n: int) -> float:
+	return clampf(floorf((BAR_MOST + 8.0) / maxi(1, n) - 8.0), 64.0, SLOT_W)
 
 func _slot(s: Array) -> PanelContainer:
 	var p := PanelContainer.new()
@@ -384,12 +427,12 @@ func _slot(s: Array) -> PanelContainer:
 	v.add_theme_constant_override("separation", -1)
 	p.add_child(v)
 	var key := Label.new()
-	Style.label(key, 16, FG, "title", 4)
+	Style.label(key, 18, FG, "title", 4)
 	key.text = s[1]
 	key.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(key)
 	var name := Label.new()
-	Style.label(name, 11, DIM, "ui", 3)
+	Style.label(name, 14, DIM.lerp(FG, 0.25), "ui", 3)
 	name.text = s[2]
 	name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name.clip_text = true
@@ -397,7 +440,7 @@ func _slot(s: Array) -> PanelContainer:
 	name.custom_minimum_size = Vector2(SLOT_W - 10, 0)
 	v.add_child(name)
 	var cost := Label.new()
-	Style.label(cost, 10, BLUE.lightened(0.2), "ui", 3)
+	Style.label(cost, 13, BLUE.lightened(0.25), "ui", 3)
 	cost.text = ("%s Will" % s[3]) if s[3] != "" else " "
 	cost.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(cost)
@@ -470,13 +513,16 @@ func show_screen(title: String, subtitle: String, body: String, buttons: Array, 
 	for c in screen_box.get_children():
 		screen_box.remove_child(c)
 		c.queue_free()
+	# "title": the game's name, large, on the left with the world on the right. "left": any
+	# other screen that stands on the left the same way (the Academy's gate, the settings).
 	var is_title := layout == "title"
+	var on_left := layout in ["title", "left"]
 	screen_box.get_parent().remove_child(screen_box)
-	(_left if is_title else _center).add_child(screen_box)
+	(_left if on_left else _center).add_child(screen_box)
 	screen_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	screen_box.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	screen_box.custom_minimum_size = Vector2(560 if is_title else 660, 0)
-	(_veil.material as ShaderMaterial).set_shader_parameter("mode", 1.0 if is_title else 0.0)
+	screen_box.custom_minimum_size = Vector2(560 if on_left else 660, 0)
+	(_veil.material as ShaderMaterial).set_shader_parameter("mode", 1.0 if on_left else 0.0)
 	var items: Array = []
 	if is_title:
 		var kicker := Label.new()
@@ -505,7 +551,7 @@ func show_screen(title: String, subtitle: String, body: String, buttons: Array, 
 		s.autowrap_mode = TextServer.AUTOWRAP_WORD
 		screen_box.add_child(s)
 		items.append(s)
-	if body != "":
+	if body != "" and not is_title:
 		var b := RichTextLabel.new()
 		b.bbcode_enabled = true
 		b.fit_content = true
@@ -519,19 +565,115 @@ func show_screen(title: String, subtitle: String, body: String, buttons: Array, 
 	gap.custom_minimum_size = Vector2(0, 8)
 	screen_box.add_child(gap)
 	var first: Button = null
+	var row: HBoxContainer = null
 	for spec in buttons:
+		# a button: [words, what it does, { primary, quiet, row, sub }]. primary is the one a
+		# player most likely wants (lit, larger, chosen first); quiet ones are smaller; row
+		# puts the small ones side by side under the rest; sub is a second, dimmer line.
+		var o: Dictionary = spec[2] if spec.size() > 2 else {}
+		if o.has("stepper"):
+			# a setting: its name, and its value between two arrows
+			var st: Dictionary = o["stepper"]
+			var line := HBoxContainer.new()
+			line.add_theme_constant_override("separation", 10)
+			var nm := Label.new()
+			Style.label(nm, 20, Style.FG, "ui")
+			nm.text = spec[0]
+			nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			line.add_child(nm)
+			var val := Label.new()
+			Style.label(val, 20, Style.GOLD, "ui_bold")
+			val.custom_minimum_size = Vector2(96, 0)
+			val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			val.text = st["value"].call()
+			var less := Button.new()
+			var more := Button.new()
+			for pair in [[less, "‹", -1], [more, "›", 1]]:
+				var sb: Button = pair[0]
+				var by: int = pair[2]
+				sb.text = pair[1]
+				sb.custom_minimum_size = Vector2(52, 44)
+				Style.button(sb, false, 22)
+				sb.alignment = HORIZONTAL_ALIGNMENT_CENTER
+				sb.pressed.connect(func():
+					st["step"].call(by)
+					val.text = st["value"].call())
+			line.add_child(less)
+			line.add_child(val)
+			line.add_child(more)
+			screen_box.add_child(line)
+			items.append(line)
+			if first == null:
+				first = more
+			continue
 		var btn := Button.new()
-		btn.text = spec[0]
 		btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		btn.autowrap_mode = TextServer.AUTOWRAP_WORD
-		btn.custom_minimum_size = Vector2(0, 50)
-		Style.button(btn, false, 19)
+		var primary: bool = o.get("primary", false)
+		var quiet: bool = o.get("quiet", false) or o.get("row", false)
+		btn.custom_minimum_size = Vector2(0, 42 if quiet else 50)
+		Style.button(btn, primary, 17 if quiet else (21 if primary else 19))
+		if o.has("sub"):
+			# two lines: the words, and under them who or what
+			btn.custom_minimum_size = Vector2(0, 72)
+			btn.autowrap_mode = TextServer.AUTOWRAP_OFF
+			btn.clip_text = true
+			var v := VBoxContainer.new()
+			v.set_anchors_preset(Control.PRESET_FULL_RECT)
+			v.offset_left = 22
+			v.offset_right = -14
+			v.alignment = BoxContainer.ALIGNMENT_CENTER
+			v.add_theme_constant_override("separation", 0)
+			v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			var l1 := Label.new()
+			Style.label(l1, 22, Style.GOLD if primary else Style.FG, "ui")
+			l1.text = spec[0]
+			l1.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			v.add_child(l1)
+			var l2 := Label.new()
+			Style.label(l2, 16, Style.DIM.lerp(Style.FG, 0.35), "italic")
+			l2.text = String(o["sub"])
+			l2.clip_text = true
+			l2.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			l2.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			v.add_child(l2)
+			btn.add_child(v)
+		else:
+			btn.text = spec[0]
 		btn.pressed.connect(spec[1])
-		screen_box.add_child(btn)
-		items.append(btn)
-		if first == null:
+		if o.get("row", false):
+			if row == null:
+				row = HBoxContainer.new()
+				row.add_theme_constant_override("separation", 10)
+				screen_box.add_child(row)
+				items.append(row)
+			btn.alignment = HORIZONTAL_ALIGNMENT_CENTER
+			btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row.add_child(btn)
+		else:
+			screen_box.add_child(btn)
+			items.append(btn)
+		if first == null or (primary and not first.has_meta("primary")):
 			first = btn
+			if primary:
+				btn.set_meta("primary", true)
+	if is_title and body != "":
+		# the title's foot: a quiet line under the menu
+		var foot := RichTextLabel.new()
+		foot.bbcode_enabled = true
+		foot.fit_content = true
+		foot.scroll_active = false
+		foot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		foot.custom_minimum_size = Vector2(screen_box.custom_minimum_size.x, 0)
+		Style.rich(foot, 15, Style.DIM.lerp(Style.FG, 0.2), "ui")
+		foot.text = body
+		var fgap := Control.new()
+		fgap.custom_minimum_size = Vector2(0, 6)
+		screen_box.add_child(fgap)
+		screen_box.add_child(foot)
+		items.append(foot)
 	screen.visible = true
+	speech.visible = false
 	play_ui.visible = false
 	_veil.modulate.a = 0.0
 	screen.create_tween().tween_property(_veil, "modulate:a", 1.0, Style.t("arrive"))
@@ -544,8 +686,434 @@ func show_screen(title: String, subtitle: String, body: String, buttons: Array, 
 
 func hide_screen() -> void:
 	screen.visible = false
+	speech.visible = false
 	play_ui.visible = true
 	_play_time = 0.0
+
+# --- A moment's title, over the play ------------------------------------------------
+
+var _banner := VBoxContainer.new()
+var _banner_title := Label.new()
+var _banner_sub := Label.new()
+var _banner_from := 0.0
+var _banner_hold := 2.0
+
+func _build_banner() -> void:
+	# in the lower third: the words that rise off a blow stand over the heads, above it
+	_banner.anchor_left = 0.5
+	_banner.anchor_right = 0.5
+	_banner.anchor_top = 0.5
+	_banner.anchor_bottom = 0.5
+	_banner.offset_left = -500
+	_banner.offset_right = 500
+	_banner.offset_top = 84
+	_banner.offset_bottom = 84
+	_banner.grow_vertical = Control.GROW_DIRECTION_END
+	_banner.add_theme_constant_override("separation", 2)
+	_banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_banner.visible = false
+	add_child(_banner)
+	Style.label(_banner_title, 58, Style.FG, "title", 8)
+	_banner_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_banner_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_banner.add_child(_banner_title)
+	_banner.add_child(_mid_rule(320))
+	Style.label(_banner_sub, 24, Style.FG, "italic", 5)
+	_banner_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_banner_sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_banner.add_child(_banner_sub)
+
+## The title of a moment in play (the field wakes, the Pattern lands): it arrives, holds, and
+## goes, in real time, over whatever is happening. The step's words stand aside for it.
+func banner(title: String, sub: String, color: Color, hold := 2.2) -> void:
+	_banner_title.text = title
+	_banner_title.add_theme_color_override("font_color", color.lerp(Style.FG, 0.45))
+	_banner_sub.text = sub
+	_banner_sub.visible = sub != ""
+	_banner.visible = true
+	_banner.modulate.a = 0.0
+	_banner_from = Time.get_ticks_msec() / 1000.0
+	_banner_hold = hold
+
+## (by the wall's clock, not the game's: time slows under it)
+func _banner_frame() -> void:
+	if not _banner.visible:
+		return
+	var t := Time.get_ticks_msec() / 1000.0 - _banner_from
+	var a_in := Style.t("arrive")
+	var a_out := Style.t("ceremony")
+	if t < a_in:
+		_banner.modulate.a = t / a_in
+	elif t < a_in + _banner_hold:
+		_banner.modulate.a = 1.0
+	elif t < a_in + _banner_hold + a_out:
+		_banner.modulate.a = 1.0 - (t - a_in - _banner_hold) / a_out
+	else:
+		_banner.visible = false
+
+func banner_up() -> bool:
+	return _banner.visible
+
+# --- Story cards -------------------------------------------------------------------
+
+func _build_card() -> void:
+	card.set_anchors_preset(Control.PRESET_FULL_RECT)
+	card.mouse_filter = Control.MOUSE_FILTER_STOP
+	card.visible = false
+	add_child(card)
+	_card_black.color = Style.ramp_at("ink", 0) if Style.ramp("ink").size() > 0 else Color(0.012, 0.01, 0.01)
+	_card_black.color.a = 1.0
+	_card_black.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_card_black.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(_card_black)
+	var c := CenterContainer.new()
+	c.set_anchors_preset(Control.PRESET_FULL_RECT)
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(c)
+	_card_box.custom_minimum_size = Vector2(1180, 0)
+	_card_box.alignment = BoxContainer.ALIGNMENT_CENTER
+	_card_box.add_theme_constant_override("separation", 22)
+	_card_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	c.add_child(_card_box)
+	Style.label(_card_hint, 18, Style.DIM.lerp(Style.FG, 0.45), "ui")
+	_card_hint.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_card_hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_card_hint.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_card_hint.position = Vector2(0, -54)
+	_card_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_card_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(_card_hint)
+
+## The brass rule for words that stand centred: the lozenge in the middle, a line fading to
+## either side.
+static func _mid_rule(width: float) -> Control:
+	var c := Control.new()
+	c.custom_minimum_size = Vector2(width, 14)
+	c.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	c.draw.connect(func():
+		var w := c.size.x
+		var y := c.size.y / 2.0
+		var m := w / 2.0
+		c.draw_colored_polygon(PackedVector2Array([Vector2(m, y - 5), Vector2(m + 5, y), Vector2(m, y + 5), Vector2(m - 5, y)]), Style.BRASS)
+		c.draw_polyline_colors(PackedVector2Array([Vector2(m + 11, y), Vector2(w, y)]), PackedColorArray([Color(Style.BRASS, 0.85), Color(Style.BRASS, 0.0)]), 1.0)
+		c.draw_polyline_colors(PackedVector2Array([Vector2(m - 11, y), Vector2(0, y)]), PackedColorArray([Color(Style.BRASS, 0.85), Color(Style.BRASS, 0.0)]), 1.0))
+	return c
+
+## How long a card's line waits for the line before it: time to read that line, and a breath.
+static func card_wait(line: String) -> float:
+	return clampf(0.7 + 0.2 * line.split(" ", false).size(), 1.0, 3.2)
+
+## A story card: the whole screen goes dark and the lines arrive one after another. Any key,
+## a click or a pad's button brings the rest at once, and then goes on; `next` is called with
+## the screen still dark, and the dark lifts off whatever `next` has put there.
+## style "story": a place and a time, then what is happening (the last line the largest).
+## style "title": a small line over a large one (ACT ONE / THE ACADEMY), or one large line.
+## auto: it goes on by itself this many seconds after its last line (0: it waits to be told).
+func show_card(lines: Array, next: Callable, style := "story", auto := 0.0) -> void:
+	_card_serial += 1
+	card_capture = false
+	for c in _card_box.get_children():
+		_card_box.remove_child(c)
+		c.queue_free()
+	_card_items.clear()
+	_card_next = next
+	_card_auto = auto
+	_card_t = 0.0
+	var at := 0.5
+	for i in lines.size():
+		var l := Label.new()
+		var last := i == lines.size() - 1
+		if style == "title":
+			if last:
+				Style.label(l, 64 if lines.size() > 1 else 46, Style.FG, "title")
+				l.add_theme_color_override("font_shadow_color", Color(1.0, 0.68, 0.3, 0.22))
+				l.add_theme_constant_override("shadow_offset_x", 0)
+				l.add_theme_constant_override("shadow_offset_y", 0)
+				l.add_theme_constant_override("shadow_outline_size", 14)
+			else:
+				Style.label(l, 20, Style.BRASS, "title_light")
+		elif last and lines.size() > 1:
+			Style.label(l, 34, Style.FG, "body")
+		elif i == 0:
+			Style.label(l, 21, Style.BRASS, "title_light")
+		else:
+			Style.label(l, 24, Style.DIM.lerp(Style.FG, 0.3), "italic")
+		l.text = String(lines[i]).to_upper() if (style == "story" and i == 0 and lines.size() > 1) else String(lines[i])
+		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD
+		l.custom_minimum_size = Vector2(1180, 0)
+		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		l.modulate.a = 0.0
+		_card_box.add_child(l)
+		_card_items.append({ "node": l, "at": at })
+		if style == "title" and not last:
+			var r := _mid_rule(300)
+			r.modulate.a = 0.0
+			_card_box.add_child(r)
+			_card_items.append({ "node": r, "at": at + 0.2 })
+		at += card_wait(String(lines[i])) if style == "story" else 0.9
+	# (with no lines it is only the dark between two places: it holds until the dark is whole)
+	_card_full_at = (float(_card_items[-1]["at"]) + Style.t("ceremony")) if not _card_items.is_empty() else Style.t("arrive")
+	_card_hint.text = _go_on_words()
+	_card_hint.modulate.a = 0.0
+	_card_state = "arriving"
+	if not card.visible:
+		card.visible = true
+		_card_black.modulate.a = 0.0
+		card.create_tween().tween_property(_card_black, "modulate:a", 1.0, Style.t("arrive"))
+	else:
+		_card_black.modulate.a = 1.0
+	screen.visible = false
+	speech.visible = false
+	play_ui.visible = false
+
+func _go_on_words() -> String:
+	return "A   to go on" if pad else "Enter or click   to go on"
+
+func card_up() -> bool:
+	return card.visible and _card_state != ""
+
+## The screen goes dark, `then` is called in the dark, and the dark lifts.
+func blackout(then: Callable, capture := false) -> void:
+	show_card([], then, "title", 0.01)
+	if capture:
+		# (now, in the press itself: a browser gives the pointer only to a press)
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+func _card_frame(dt: float) -> void:
+	if not card.visible or _card_state == "" or _card_state == "leaving":
+		return
+	_card_t += dt
+	var fade := Style.t("ceremony")
+	for it in _card_items:
+		var n: CanvasItem = it["node"]
+		n.modulate.a = 1.0 if _card_state == "waiting" else clampf((_card_t - float(it["at"])) / fade, 0.0, 1.0)
+	if _card_state == "arriving" and _card_t >= _card_full_at:
+		_card_state = "waiting"
+		_card_t = _card_full_at
+	if _card_state == "waiting":
+		var since := _card_t - _card_full_at
+		if _card_auto > 0.0:
+			if since >= _card_auto:
+				_card_go()
+		else:
+			_card_hint.modulate.a = clampf((since - 0.4) / 0.5, 0.0, 1.0) * (0.72 + 0.28 * sin(_card_t * 2.6))
+
+## A key, a click, a button: the rest of the lines at once, and at the next one, on.
+func card_press() -> void:
+	if _card_state == "arriving" and _card_t > 0.3:
+		if _card_auto > 0.0:
+			_card_go()
+		else:
+			_card_state = "waiting"
+			_card_t = _card_full_at
+	elif _card_state == "waiting" and _card_t > _card_full_at + 0.15:
+		_card_go()
+
+func _card_go() -> void:
+	if _card_state == "leaving":
+		return
+	_card_state = "leaving"
+	if card_capture:
+		# (now, in the press itself: a browser gives the pointer only to a press)
+		card_capture = false
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	var serial := _card_serial
+	var tw := card.create_tween()
+	tw.set_parallel(true)
+	for it in _card_items:
+		tw.tween_property(it["node"], "modulate:a", 0.0, Style.t("leave"))
+	tw.tween_property(_card_hint, "modulate:a", 0.0, Style.t("leave"))
+	tw.set_parallel(false)
+	tw.tween_interval(0.05)
+	tw.tween_callback(func():
+		var next := _card_next
+		_card_next = Callable()
+		if next.is_valid():
+			next.call()
+		if serial != _card_serial:
+			return   # another card came up in its place: the dark stays
+		_card_state = ""
+		var out := card.create_tween()
+		out.tween_property(_card_black, "modulate:a", 0.0, Style.t("ceremony"))
+		out.tween_callback(func():
+			if serial == _card_serial:
+				card.visible = false))
+
+# --- Someone speaks ---------------------------------------------------------------------
+
+func _build_speech() -> void:
+	speech.set_anchors_preset(Control.PRESET_FULL_RECT)
+	speech.mouse_filter = Control.MOUSE_FILTER_STOP
+	speech.visible = false
+	add_child(speech)
+	# the bars of a scene, top and bottom
+	for top in [true, false]:
+		var b := ColorRect.new()
+		b.color = Color(0.012, 0.01, 0.01, 1.0)
+		b.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.set_anchors_preset(Control.PRESET_TOP_WIDE if top else Control.PRESET_BOTTOM_WIDE)
+		b.grow_vertical = Control.GROW_DIRECTION_END if top else Control.GROW_DIRECTION_BEGIN
+		b.custom_minimum_size = Vector2(0, 64)
+		speech.add_child(b)
+		_speech_bars.append(b)
+	var plate := PanelContainer.new()
+	plate.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	plate.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	plate.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	plate.custom_minimum_size = Vector2(900, 190)
+	plate.position = Vector2(0, -30)
+	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var ps := Style.plate(Color(0.045, 0.038, 0.034, 0.94), Style.BRASS, 1, 18)
+	ps.border_width_left = 4
+	ps.content_margin_left = 26
+	ps.content_margin_right = 24
+	plate.add_theme_stylebox_override("panel", ps)
+	speech.add_child(plate)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 6)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	plate.add_child(v)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 14)
+	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(head)
+	Style.label(_speech_name, 21, Style.GOLD, "title")
+	head.add_child(_speech_name)
+	Style.label(_speech_sub, 17, Style.DIM.lerp(Style.FG, 0.25), "italic")
+	_speech_sub.size_flags_vertical = Control.SIZE_SHRINK_END
+	_speech_sub.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(_speech_sub)
+	Style.label(_speech_count, 15, Style.DIM, "ui")
+	_speech_count.size_flags_vertical = Control.SIZE_SHRINK_END
+	head.add_child(_speech_count)
+	_speech_text.bbcode_enabled = true
+	_speech_text.fit_content = true
+	_speech_text.scroll_active = false
+	_speech_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_speech_text.custom_minimum_size = Vector2(850, 92)
+	_speech_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	Style.rich(_speech_text, 23, Style.FG, "body")
+	v.add_child(_speech_text)
+	var foot := HBoxContainer.new()
+	foot.alignment = BoxContainer.ALIGNMENT_END
+	foot.add_theme_constant_override("separation", 12)
+	foot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_child(foot)
+	Style.label(_speech_hint, 17, Style.DIM.lerp(Style.FG, 0.45), "ui")
+	_speech_hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_speech_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	foot.add_child(_speech_hint)
+	_speech_buttons.add_theme_constant_override("separation", 10)
+	foot.add_child(_speech_buttons)
+
+## Someone speaks, a line at a time, across the foot of the screen with the world behind. A
+## key, a click or a pad's button brings the whole of a line and then the next; after the
+## last line the buttons stand ([words, what it does], the first one chosen).
+func show_speech(speaker: String, sub: String, lines: Array, buttons: Array) -> void:
+	_speech_name.text = speaker
+	_speech_sub.text = sub
+	_speech_lines = lines
+	_speech_end = buttons
+	_speech_i = -1
+	for c in _speech_buttons.get_children():
+		_speech_buttons.remove_child(c)
+		c.queue_free()
+	speech.visible = true
+	speech.modulate.a = 0.0
+	speech.create_tween().tween_property(speech, "modulate:a", 1.0, Style.t("arrive"))
+	screen.visible = false
+	play_ui.visible = false
+	_speech_next()
+
+func speech_up() -> bool:
+	return speech.visible
+
+func hide_speech() -> void:
+	speech.visible = false
+
+func _speech_next() -> void:
+	_speech_i += 1
+	_speech_t = 0.0
+	var line := String(_speech_lines[_speech_i])
+	_speech_text.text = for_device(line)
+	_speech_text.visible_ratio = 0.0
+	_speech_count.text = "%d / %d" % [_speech_i + 1, _speech_lines.size()]
+	if _speech_tween and _speech_tween.is_valid():
+		_speech_tween.kill()
+	# the words come at the pace of speech, quicker than they are read
+	_speech_tween = speech.create_tween()
+	_speech_tween.tween_property(_speech_text, "visible_ratio", 1.0, clampf(line.length() / 70.0, 0.4, 2.6))
+	_speech_tween.tween_callback(_speech_line_out)
+	_speech_hint.text = ""
+
+func _speech_line_out() -> void:
+	_speech_text.visible_ratio = 1.0
+	if _speech_i >= _speech_lines.size() - 1:
+		_speech_hint.text = ""
+		if _speech_buttons.get_child_count() == 0:
+			for spec in _speech_end:
+				var btn := Button.new()
+				btn.text = spec[0]
+				btn.custom_minimum_size = Vector2(220, 46)
+				Style.button(btn, _speech_buttons.get_child_count() == 0, 19)
+				btn.pressed.connect(spec[1])
+				_speech_buttons.add_child(btn)
+				Style.arrive(btn)
+				# (a moment before it can be pressed: someone hurrying the lines along with a
+				# key does not take the choice by accident)
+				btn.disabled = true
+				btn.create_tween().tween_callback(func(): btn.disabled = false).set_delay(0.45)
+			if _speech_buttons.get_child_count() > 0:
+				(_speech_buttons.get_child(0) as Button).call_deferred("grab_focus")
+	else:
+		_speech_hint.text = _go_on_words()
+
+func speech_press() -> void:
+	if not speech.visible or _speech_t < 0.2:
+		return
+	if _speech_text.visible_ratio < 1.0:
+		if _speech_tween and _speech_tween.is_valid():
+			_speech_tween.kill()
+		_speech_line_out()
+		_speech_t = 0.0
+	elif _speech_i < _speech_lines.size() - 1:
+		_speech_next()
+
+func _process(dt: float) -> void:
+	_banner_frame()
+	_card_frame(dt)
+	if speech.visible:
+		_speech_t += dt
+		if _speech_hint.text != "":
+			_speech_hint.modulate.a = 0.72 + 0.28 * sin(Time.get_ticks_msec() / 380.0)
+
+## A card or a speech is up: a key, a click or a pad's button goes on, and nothing under it
+## hears the press.
+func _input(event: InputEvent) -> void:
+	var up_card := card_up()
+	var up_speech := speech.visible and not up_card
+	if not up_card and not up_speech:
+		return
+	var go := false
+	if event is InputEventKey and event.pressed and not event.echo:
+		go = event.physical_keycode in [KEY_ENTER, KEY_KP_ENTER, KEY_SPACE, KEY_E, KEY_ESCAPE]
+		if up_speech and event.physical_keycode == KEY_ESCAPE:
+			go = false
+	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		go = true
+	elif event is InputEventJoypadButton and event.pressed:
+		go = event.button_index in [JOY_BUTTON_A, JOY_BUTTON_X, JOY_BUTTON_START]
+	if not go:
+		return
+	if up_card:
+		card_press()
+		get_viewport().set_input_as_handled()
+	elif _speech_buttons.get_child_count() == 0:
+		# (once the buttons stand, a press is theirs)
+		speech_press()
+		get_viewport().set_input_as_handled()
 
 ## The step. Its words stand in the middle top of the screen until they have been read and the
 ## first thing they ask has been done (or, for someone standing reading, a good while longer);
@@ -624,6 +1192,10 @@ func set_device(is_pad: bool) -> void:
 		(slots[sl[0]]["key"] as Label).text = String(PAD_KEYS.get(sl[0], sl[1])) if pad else String(sl[1])
 	prompt_text.text = for_device(_prompt_raw)
 	_write_hint(_hint_reload, _hint_genius)
+	if _card_hint.text != "":
+		_card_hint.text = _go_on_words()
+	if _speech_hint.text != "":
+		_speech_hint.text = _go_on_words()
 
 const PAD_KEYS := { "attack": "X", "block": "RB", "dodge": "A", "technique": "Y", "tech1": "D↓", "tech2": "D→", "tech3": "LT", "stance": "LB", "pattern": "B", "genius": "D←" }
 ## The words a lesson uses for the keyboard and the mouse, and the gamepad's for the same thing.
@@ -831,7 +1403,7 @@ func _set_slot(id: String, cooldown: float, usable: bool, active: bool, glow := 
 	var s: Dictionary = slots[id]
 	var cd: ColorRect = s["cd"]
 	var k := clampf(cooldown, 0.0, 1.0)
-	cd.size = Vector2(SLOT_W - 4, (SLOT_H - 4) * k)
+	cd.size = Vector2(_slot_w - 4, (SLOT_H - 4) * k)
 	cd.position = Vector2(2, 2 + (SLOT_H - 4) - cd.size.y)
 	(s["cd_text"] as Label).text = ("%d" % ceili(seconds)) if seconds > 0.05 else ""
 	# Only rebuild the plate when the slot's look changes.
