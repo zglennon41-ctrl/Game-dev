@@ -292,6 +292,142 @@ def more():
     keep("rock", level(smooth(rock, 0.6, 0.6), 0.075))
 
 
+# --- what a place is built of (data/style.json, materials.places) -------------------------------
+# The third pass (docs/graphics-comparison.md): a floor, a wall and a roof wear grains made as
+# carefully as a body's. They are 512 square: a place's grain is laid a metre or two to the
+# picture, and the camera stands on it. Where a kit models its joints (the Academy's flags, its
+# boards) the grain is the SURFACE of the thing (tooling, pits, figure); where a kit leaves a
+# broad plane (a wall of stone, a roof, the wild's ground) the grain carries the joints too.
+
+P = 512
+
+
+def angled(n, su, sv, angle):
+    """Noise drawn out into streaks su wide and sv long, lying at an angle; of unit spread."""
+    f = np.fft.fft2(rng2.standard_normal((n, n)))
+    fy = np.fft.fftfreq(n)[:, None]
+    fx = np.fft.fftfreq(n)[None, :]
+    c, s = np.cos(angle), np.sin(angle)
+    a = np.real(np.fft.ifft2(f * np.exp(-2.0 * np.pi ** 2 * (((fx * c + fy * s) * su) ** 2 + ((-fx * s + fy * c) * sv) ** 2))))
+    return a / a.std()
+
+
+def coursed(n, rows, least, most, bond=None):
+    """Courses of blocks: `rows` courses to the picture, each cut into blocks between `least`
+    and `most` of the picture wide (or, with bond, that many equal blocks a course, every other
+    course half a block along). For every pixel: how far the nearest joint is (in pixels), and
+    a number of its own for the block it is in (0 to 1). Each course wraps, so it tiles."""
+    y, x = np.mgrid[0:n, 0:n].astype(float)
+    h = n / float(rows)
+    row = np.floor(y / h).astype(int)
+    dy = np.minimum(y - row * h, (row + 1) * h - y)
+    dx = np.full((n, n), 1e9)
+    tone = np.zeros((n, n))
+    for r in range(rows):
+        if bond:
+            w = n / float(bond)
+            cuts = (np.arange(bond) * w + (0.5 * w if r % 2 else 0.0)) % n
+        else:
+            cuts = [rng2.uniform(0, n)]
+            while True:
+                nxt = cuts[-1] + rng2.uniform(least, most) * n
+                if nxt > cuts[0] + n - least * n:
+                    break
+                cuts.append(nxt)
+            cuts = np.array(cuts) % n
+        cuts = np.sort(cuts)
+        tones = rng2.random(len(cuts))
+        xs = x[r == row[:, 0]][0]
+        idx = (np.searchsorted(cuts, xs, side="right") - 1) % len(cuts)
+        lo = cuts[idx]
+        hi = cuts[(idx + 1) % len(cuts)]
+        d = np.minimum((xs - lo) % n, (hi - xs) % n)
+        sel = row[:, 0] == r
+        dx[sel, :] = d[None, :]
+        tone[sel, :] = tones[idx][None, :]
+    return np.minimum(dx, dy), tone
+
+
+def places():
+    v, u = np.mgrid[0:P, 0:P] / float(P)
+    # flagstone: the face of a worn paving stone (the joints are the kit's): a mottle, the mason's
+    # tooling, pits, a crack here and there, polished pale where feet have gone
+    fresh("flagstone")
+    f1, f2 = cells(P, 3, 1.0)
+    g1, g2 = cells(P, 26, 1.0)
+    pick = smooth(rng2.random((P, P)), 9.0, 9.0)
+    pits = (1.0 - step(0.04, 0.24, g1)) * step(0.0, 0.004, pick - np.median(pick))
+    crack = (1.0 - step(0.0, 0.03, f2 - f1)) * step(0.3, 0.9, cloud(P, 2.0))
+    tool = np.tanh(1.3 * angled(P, 1.3, 16.0, 0.55))
+    flag = 0.5 + 0.2 * cloud(P, 1.6) + 0.085 * tool + 0.06 * streaks(P, 1.0, 1.0) - 0.34 * pits - 0.42 * crack
+    keep("flagstone", level(smooth(flag, 0.7, 0.7), 0.085))
+    # ashlar: a wall of dressed stone in courses: every block its own tone, its face tooled, its
+    # arrises worn, the joints dark and fine
+    fresh("ashlar")
+    d, tone = coursed(P, 4, 0.2, 0.42)
+    joint = 1.0 - step(1.0, 5.0, d)
+    arris = step(4.0, 16.0, d)
+    tool = np.tanh(1.2 * angled(P, 1.4, 12.0, -0.5))
+    ashlar = 0.5 + 0.34 * (tone - 0.5) + 0.1 * (arris - 0.7) + 0.09 * cloud(P, 1.5) + 0.06 * tool - 0.62 * joint
+    keep("ashlar", level(smooth(ashlar, 0.7, 0.7), 0.09))
+    # brick: a running bond, the bricks of one clay and many firings, the mortar raked back
+    fresh("brick")
+    d, tone = coursed(P, 8, 0, 0, bond=4)
+    joint = 1.0 - step(1.5, 5.0, d)
+    brick = 0.5 + 0.4 * (tone - 0.5) + 0.08 * cloud(P, 1.2) + 0.05 * streaks(P, 5.0, 1.0) - 0.5 * joint
+    keep("brick", level(smooth(brick, 0.7, 0.7), 0.09))
+    # plaster: limewash over rubble: the sweep of the float, blotches where damp has been, hairline cracks
+    fresh("plaster")
+    f1, f2 = cells(P, 4, 1.0)
+    crack = (1.0 - step(0.0, 0.02, f2 - f1)) * step(0.6, 1.3, cloud(P, 2.0))
+    sweep = 0.6 * np.tanh(angled(P, 3.0, 40.0, 0.3)) + 0.4 * np.tanh(angled(P, 3.0, 34.0, -0.9))
+    plaster = 0.5 + 0.24 * cloud(P, 2.0) + 0.1 * sweep + 0.04 * streaks(P, 1.0, 1.0) - 0.5 * crack
+    keep("plaster", level(smooth(plaster, 0.6, 0.6), 0.08))
+    # planks: sawn boards (the joints are the kit's): the figure in long bands ACROSS the picture
+    # (a floor's boards run that way), pores, a knot or two
+    fresh("planks")
+    k1, k2 = cells(P, 3, 1.0)
+    knot = 1.0 - step(0.0, 0.16, k1)
+    figure = (0.5 + 0.5 * np.sin((v * 7.0 + 0.3 * streaks(P, 120.0, 26.0) + 0.35 * knot) * 2.0 * np.pi)) ** 1.4
+    planks = 0.5 * (figure - figure.mean()) / figure.std() + 0.42 * np.tanh(1.5 * streaks(P, 64.0, 1.2)) + 0.3 * streaks(P, 180.0, 8.0) - 0.5 * step(0.55, 1.0, knot)
+    keep("planks", level(planks, 0.085))
+    # slate: riven slate (a roof, a dark floor): the cleft's fine steps like the lines of a map,
+    # and the nicks along them
+    fresh("slate")
+    lay = cloud(P, 2.3)
+    cleft = np.abs(((lay * 2.6) % 1.0) - 0.5) * 2.0
+    slate = 0.5 + 0.07 * lay + 0.1 * cloud(P, 1.2) - 0.3 * (1.0 - step(0.0, 0.16, cleft)) + 0.08 * np.tanh(angled(P, 1.0, 9.0, 0.2)) + 0.05 * streaks(P, 1.0, 1.0)
+    keep("slate", level(smooth(slate, 0.7, 0.7), 0.08))
+    # cobble: small stones set close (the bed of the line, a lane): each one domed and worn pale on top
+    fresh("cobble")
+    f1, f2 = cells(P, 12, 0.9)
+    tone = smooth(rng2.random((P, P)), 5.0, 5.0)
+    cobble = 0.5 + 0.26 * (1.0 - step(0.0, 0.55, f1)) - 0.44 * (1.0 - step(0.0, 0.16, f2 - f1)) + 2.2 * (tone - tone.mean()) + 0.05 * streaks(P, 1.0, 1.0)
+    keep("cobble", level(smooth(cobble, 0.9, 0.9), 0.09))
+    # earth: trodden ground: grit, a scatter of small stones each with its shadow, the hollows of old prints
+    fresh("earth")
+    g1, g2 = cells(P, 20, 1.0)
+    pick = smooth(rng2.random((P, P)), 7.0, 7.0)
+    stone = (1.0 - step(0.08, 0.3, g1)) * step(0.0, 0.006, pick - np.median(pick))
+    lit = np.roll(stone, 2, axis=0) - stone
+    earth = 0.5 + 0.22 * cloud(P, 1.7) + 0.1 * streaks(P, 1.1, 1.1) + 0.3 * stone - 0.3 * np.maximum(lit, 0.0) + 0.07 * np.tanh(angled(P, 2.0, 14.0, 1.1))
+    keep("earth", level(smooth(earth, 0.6, 0.6), 0.085))
+    # grass: turf from above: blades lying every way in tufts, light tips over the dark between
+    fresh("grass")
+    f1, f2 = cells(P, 9, 1.0)
+    way = cloud(P, 2.4)
+    blades = np.zeros((P, P))
+    for i, ang in enumerate((0.2, 0.9, 1.6, 2.3, 2.9)):
+        blades += np.tanh(1.8 * angled(P, 1.0, 10.0, ang)) * np.exp(-((way - (i - 2) * 0.7) / 0.6) ** 2)
+    grass = 0.5 + 0.3 * blades + 0.14 * (1.0 - step(0.0, 0.6, f1)) - 0.16 * (1.0 - step(0.0, 0.2, f2 - f1)) + 0.12 * cloud(P, 1.6)
+    keep("grass", level(smooth(grass, 0.6, 0.6), 0.09))
+
+
 if __name__ == "__main__":
-    main()
-    more()
+    import sys
+    if "--places" in sys.argv:
+        places()      # the first twenty stay as they were made
+    else:
+        main()
+        more()
+        places()

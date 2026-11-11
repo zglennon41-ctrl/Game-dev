@@ -179,9 +179,15 @@ func _build_environment() -> void:
 	moon.rotation_degrees = Vector3(-62, -35, 0)
 	moon.light_color = Style.light("moon")
 	moon.shadow_enabled = true
-	moon.directional_shadow_max_distance = 40.0
-	moon.shadow_blur = 2.0
-	moon.shadow_normal_bias = 1.5
+	# two cascades and not four: half the passes, and the near one holds the whole of a fight
+	moon.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	moon.directional_shadow_split_1 = 0.22
+	moon.directional_shadow_blend_splits = true
+	moon.directional_shadow_max_distance = 48.0
+	moon.directional_shadow_fade_start = 0.9
+	moon.shadow_blur = 1.1
+	moon.shadow_bias = 0.06
+	moon.shadow_normal_bias = 1.2
 	moon.light_energy = 0.42
 	add_child(moon)
 	_moon = moon
@@ -226,7 +232,7 @@ func _build_chamber() -> void:
 		bm.size = Vector3(0.3, 0.12, 2.4)
 		b.mesh = bm
 		b.position = Vector3(tx, 0.1, 0)
-		b.material_override = tie
+		_made(b, "wood_timber", Color(0.22, 0.15, 0.1))
 		_place_root.add_child(b)
 		tx += 0.8
 	for rz in [-0.72, 0.72]:
@@ -235,7 +241,7 @@ func _build_chamber() -> void:
 		rm.size = Vector3(hw * 2.0, 0.12, 0.1)
 		r.mesh = rm
 		r.position = Vector3(0, 0.2, rz)
-		r.material_override = rail
+		_made(r, "iron_metal", Color(0.42, 0.4, 0.38))
 		_place_root.add_child(r)
 	# Walls on the long sides, with pillars, arches, and torches.
 	var kinds := ["wall", "wall_pillar", "wall_cracked", "wall_arched", "wall", "wall_broken", "wall_pillar"]
@@ -258,6 +264,8 @@ func _build_chamber() -> void:
 				light.position = Vector3(0, 0.6, 0.25)
 				t.add_child(light)
 				_torches.append(light)
+				if _halo_n("strength") > 0.0:
+					_halo(t, Style.light("fire", "color"), _halo_n("size", 2.6) * 1.2, _halo_n("strength"), light.position)
 		wx += 4.0
 		k += 1
 	# The ends of the chamber: where the line enters and leaves, dark arches.
@@ -289,6 +297,7 @@ func build_hero(hero: Dictionary) -> void:
 	_player = load(_person_model(hero.get("body", "Knight"))).instantiate()
 	add_child(_player)
 	toonify(_player)
+	_contact_under(_player)
 	dress(_player, hero.get("look", {}), hero)
 	var skel: Skeleton3D = _player.find_child("Skeleton3D", true, false)
 	var w: Dictionary = Data.by_id(Data.weapons, hero.get("weapon", "saber"))
@@ -447,6 +456,7 @@ func set_foe(spec: Dictionary) -> void:
 				_attach(skel, "handslot.l", _weapon_model(w["offhand"]))
 	add_child(_wolf)
 	toonify(_wolf)
+	_contact_under(_wolf)
 	_w_anim = _wolf.find_child("AnimationPlayer", true, false)
 	for key in ["idle", "walk", "gallop", "windup", "stagger", "flinch"]:
 		if _w_anim.has_animation(_w_anims[key]):
@@ -840,6 +850,7 @@ func _build_wolf() -> void:
 		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		l.no_depth_test = true
 		l.pixel_size = 0.004
+		_crisp.call_deferred(l)
 		l.outline_size = 10
 		l.outline_modulate = Color(0, 0, 0, 0.85)
 		add_child(l)
@@ -847,6 +858,7 @@ func _build_wolf() -> void:
 	_wolf_label.font = Style.font("title")
 	_wolf_label.fixed_size = true
 	_wolf_label.pixel_size = 0.0012
+	_crisp.call_deferred(_wolf_label)
 	_wolf_label.modulate = C_DIM
 	_alert.font_size = 120
 	_alert.text = "!"
@@ -918,7 +930,7 @@ uniform float bands = 3.0;
 uniform vec4 shadow_tint : source_color = vec4(0.5, 0.55, 0.78, 1.0);
 uniform vec4 emission : source_color = vec4(0.0);
 uniform float emission_energy = 0.0;
-uniform sampler2D detail_tex : hint_default_white, filter_linear_mipmap, repeat_enable;
+uniform sampler2D detail_tex : hint_default_white, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform float detail_scale = 6.0;
 uniform float detail_strength = 0.0;
 uniform bool detail_local = false;      // lay the grain in the body's own space, not the world's
@@ -935,11 +947,34 @@ uniform float rim_power = 3.0;
 uniform vec4 rim_color : source_color = vec4(0.85, 0.9, 1.0, 1.0);
 uniform float ao_strength = 0.8;
 uniform bool use_ao = false;
+// The third pass (docs/graphics-comparison.md). Every one of these is nothing at its default.
+// A place: broad patches of lighter and darker stone over the whole of it, so that no wall or
+// floor is one flat colour (macro: one soft picture read twice, at two sizes); the dark at the
+// foot of whatever stands on the ground, where rain and boots have been (foot); and the wind in
+// what grows and what hangs (sway: metres, from sway_from up, or down for a banner).
+uniform sampler2D macro_tex : hint_default_white, filter_linear_mipmap, repeat_enable;
+uniform float macro_strength = 0.0;
+uniform float macro_scale = 0.09;
+uniform float foot_strength = 0.0;
+uniform float foot_height = 0.8;
+uniform float sway = 0.0;
+uniform float sway_from = 0.0;
+uniform float sway_way = 1.0;
+// A body: the key light along its edge (the lamp's amber on the side the lamp is, the moon's
+// pale on the moon's), so that a dark figure stands off a dark ground.
+uniform float key_rim = 0.0;
 varying vec3 world_pos;
 varying vec3 world_nrm;
 varying float ao;
 varying float grain;      // what a body's grain makes of this fragment (1.0: nothing), for its highlight
 void vertex() {
+	if (sway > 0.0) {
+		vec3 wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		float k = min(max((wp.y - sway_from) * sway_way, 0.0), 2.0);
+		float gust = sin(TIME * 1.1 + wp.x * 0.35 + wp.z * 0.27) * 0.6 + sin(TIME * 2.7 + wp.x * 1.3 - wp.z * 0.9) * 0.4;
+		VERTEX.x += gust * sway * k;
+		VERTEX.z += cos(TIME * 0.9 + wp.x * 0.3 + wp.z * 0.5) * sway * k * 0.6;
+	}
 	if (detail_local) {
 		vec3 p = VERTEX;
 		vec3 n = NORMAL;
@@ -989,6 +1024,13 @@ void fragment() {
 		// by their shine, and a coat near black by nothing else); a place's highlight is as it was
 		grain = detail_local ? g : 1.0;
 	}
+	if (macro_strength > 0.0 || foot_strength > 0.0) {
+		vec2 at = world_pos.xz + world_pos.y * vec2(0.62, 0.78);
+		float m = texture(macro_tex, at * macro_scale).r + texture(macro_tex, at * macro_scale * 0.31 + vec2(0.37, 0.61)).r - 1.0;
+		col *= 1.0 + m * 2.0 * macro_strength;
+		float up = 1.0 - smoothstep(0.35, 0.75, abs(world_nrm.y));
+		col *= 1.0 - foot_strength * up * (1.0 - smoothstep(0.0, foot_height * (1.0 + m * 2.0), world_pos.y));
+	}
 	float occ = mix(1.0, ao, ao_strength);
 	ALBEDO = col * occ;
 	EMISSION = emission.rgb * emission_energy;
@@ -1007,6 +1049,10 @@ void light() {
 	float s = pow(max(dot(NORMAL, h), 0.0), spec_gloss) * grain * grain;
 	float sb = s > 0.5 ? 1.0 : (s > 0.2 ? 0.4 : 0.0);
 	SPECULAR_LIGHT += sb * grain * spec_strength * LIGHT_COLOR * ATTENUATION * (stepped > 0.0 ? 1.0 : 0.3);
+	if (key_rim > 0.0) {
+		float edge = smoothstep(0.52, 0.62, pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), rim_power * 0.6) * smoothstep(-0.25, 0.35, ndl));
+		DIFFUSE_LIGHT += edge * key_rim * mix(vec3(1.0), ALBEDO, 0.5) * LIGHT_COLOR * ATTENUATION;
+	}
 }
 """
 
@@ -1017,6 +1063,7 @@ const GRAIN_DOWN := Basis(Vector3(1, 0, 0), Vector3(0, -1, 0), Vector3(0, 0, -1)
 var _toon_shader: Shader = null
 var _detail_cache: Dictionary = {}
 var _grain_as := ""       # -- --grain=world or none (toonify)
+var _place_kit := ""      # the kit of the piece of a place being given its look ("wild"; "" for the others)
 
 ## Which class a material is, by its name (data/style.json, materials): skin, coat, cloth,
 ## leather, wood, stone, iron, brass, bone, glass, growth, earth, water, eye, ink, the field's
@@ -1059,16 +1106,58 @@ func _surface_look(t: ShaderMaterial, cls: String, mi: MeshInstance3D, body = nu
 				t.set_shader_parameter("rest_width", int(rest["width"]))
 				t.set_shader_parameter("rest_rows", int(rest["rows"]))
 	else:
-		var grain := String(spec.get("grain", ""))
-		if grain != "" and grain != "none" and float(spec.get("wear", 0.0)) > 0.0:
-			var tex := _detail(grain, false)
+		# a place: what it is built of by its material's name (materials.places), in the world's
+		# space; and the third pass: broad patches over the whole of it, the dark at the foot of
+		# what stands, the wind in what grows and what hangs (shading.place)
+		var pg: Dictionary = Style.place_grain(String(t.resource_name), cls, _place_kit)
+		if not pg.is_empty():
+			var tex := _detail(String(pg["grain"]), true)
 			if tex != null:
 				t.set_shader_parameter("detail_tex", tex)
-				t.set_shader_parameter("detail_scale", float(spec.get("grainScale", 4.0)))
-				t.set_shader_parameter("detail_strength", float(spec["wear"]))
+				t.set_shader_parameter("detail_scale", float(pg["scale"]))
+				t.set_shader_parameter("detail_strength", float(pg["strength"]))
+		var pl: Dictionary = sh.get("place", {})
+		if not pl.is_empty() and cls not in ["field", "lit", "eye", "glass", "water"]:
+			t.set_shader_parameter("macro_tex", _detail(String(pl.get("macroGrain", "fog")), true))
+			t.set_shader_parameter("macro_strength", float(pl.get("macro", 0.0)))
+			t.set_shader_parameter("macro_scale", float(pl.get("macroScale", 0.09)))
+			t.set_shader_parameter("foot_strength", float(pl.get("foot", 0.0)))
+			t.set_shader_parameter("foot_height", float(pl.get("footHeight", 0.8)))
+			var lname := String(t.resource_name).to_lower()
+			if cls == "growth" and float(pl.get("sway", 0.0)) > 0.0:
+				t.set_shader_parameter("sway", float(pl["sway"]))
+				t.set_shader_parameter("sway_from", 0.08)
+			elif cls == "cloth" and float(pl.get("sway", 0.0)) > 0.0:
+				# cloth that hangs taller than a table's (a banner) hangs from its top: the wind has its foot
+				var span := _surface_span(mi, surface)
+				if span.y - span.x > 1.2:
+					var base := mi.global_transform if mi.is_inside_tree() else mi.transform
+					t.set_shader_parameter("sway", float(pl["sway"]) * 0.5)
+					t.set_shader_parameter("sway_from", base.origin.y + span.y * base.basis.y.length() - 0.2)
+					t.set_shader_parameter("sway_way", -1.0)
+	if body is Dictionary:
+		t.set_shader_parameter("key_rim", float(sh.get("keyRim", 0.0)))
 	t.set_shader_parameter("ao_strength", float(sh.get("occlusion", 0.8)))
 	var has_color := mi.mesh != null and mi.mesh is ArrayMesh and (mi.mesh as ArrayMesh).surface_get_format(0) & Mesh.ARRAY_FORMAT_COLOR
 	t.set_shader_parameter("use_ao", bool(has_color))
+
+## How low and how high one surface of a mesh reaches, in the mesh's own space (x: its foot,
+## y: its top): kept on the mesh.
+func _surface_span(mi: MeshInstance3D, surface: int) -> Vector2:
+	if not (mi.mesh is ArrayMesh):
+		var box := mi.get_aabb()
+		return Vector2(box.position.y, box.end.y)
+	var key := "span_%d" % surface
+	if not mi.mesh.has_meta(key):
+		var lo := INF
+		var hi := -INF
+		var arrays := (mi.mesh as ArrayMesh).surface_get_arrays(surface)
+		if arrays.size() > Mesh.ARRAY_VERTEX and arrays[Mesh.ARRAY_VERTEX] is PackedVector3Array:
+			for v in (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array):
+				lo = minf(lo, v.y)
+				hi = maxf(hi, v.y)
+		mi.mesh.set_meta(key, Vector2(lo, hi) if hi >= lo else Vector2.ZERO)
+	return mi.mesh.get_meta(key, Vector2.ZERO)
 
 ## A grain's texture (game/assets/textures/detail/<name>.png). For a body it is given its
 ## smaller copies, so that at a fight's distance a pattern fades to its mid-grey and does not
@@ -1234,6 +1323,7 @@ func toonify(node: Node, place := false, kind := "") -> void:
 				_grain_as = a.get_slice("=", 1)
 	if _grain_as == "world":
 		place = true
+	_place_kit = kind if place else ""
 	var meshes := node.find_children("*", "MeshInstance3D", true, false)
 	if node is MeshInstance3D:
 		meshes.append(node)
@@ -1328,12 +1418,17 @@ render_mode unshaded, cull_front, shadows_disabled, depth_draw_opaque;
 uniform vec4 ink : source_color = vec4(0.045, 0.03, 0.028, 1.0);
 uniform float width = 2.0;
 uniform float screen = 900.0;
+// beyond thin_from metres the line thins with the figure it is on, to no less than thin_least of
+// itself: a line of the same weight round a figure a thumb high was a blot
+uniform float thin_from = 1000.0;
+uniform float thin_least = 0.5;
 void vertex() {
 	vec4 clip = PROJECTION_MATRIX * (MODELVIEW_MATRIX * vec4(VERTEX, 1.0));
 	vec3 n = (MODELVIEW_MATRIX * vec4(NORMAL, 0.0)).xyz;
 	vec2 off = (PROJECTION_MATRIX * vec4(n, 0.0)).xy;
 	off = off / max(length(off), 1e-4);
-	clip.xy += off * width * (VIEWPORT_SIZE.y / screen) * 2.0 / VIEWPORT_SIZE * clip.w;
+	float thin = clamp(thin_from / max(clip.w, 0.01), thin_least, 1.0);
+	clip.xy += off * width * thin * (VIEWPORT_SIZE.y / screen) * 2.0 / VIEWPORT_SIZE * clip.w;
 	POSITION = clip;
 }
 void fragment() {
@@ -1348,11 +1443,16 @@ render_mode unshaded, blend_add, cull_disabled, depth_draw_never, shadows_disabl
 uniform vec4 tint : source_color = vec4(0.55, 0.62, 0.95, 1.0);
 uniform float strength = 0.17;
 uniform float half_height = 7.0;
+uniform bool down = false;      // a lamp's cone: brightest at the lamp, gone by the ground
 varying float h;
 void vertex() { h = VERTEX.y; }
 void fragment() {
 	float edge = pow(abs(dot(NORMAL, VIEW)), 2.0);
 	float fade = smoothstep(-half_height, -half_height + 1.2, h) * (1.0 - smoothstep(half_height * 0.1, half_height, h));
+	if (down) {
+		float k = clamp((h + half_height) / (2.0 * half_height), 0.0, 1.0);
+		fade = k * k * (1.0 - smoothstep(0.92, 1.0, k));
+	}
 	float shimmer = 0.85 + 0.15 * sin(TIME * 0.5 + h * 0.9);
 	ALBEDO = tint.rgb;
 	ALPHA = clamp(strength * edge * fade * shimmer, 0.0, 1.0);
@@ -1367,9 +1467,12 @@ uniform vec4 tint : source_color = vec4(1.0);
 uniform float strength = 1.0;
 uniform float falloff = 2.2;
 uniform bool billboard = true;
+uniform float toward = 0.0;     // metres toward the camera, so a halo is not cut by the wall its lamp hangs on
 void vertex() {
 	if (billboard) {
 		MODELVIEW_MATRIX = VIEW_MATRIX * mat4(INV_VIEW_MATRIX[0], INV_VIEW_MATRIX[1], INV_VIEW_MATRIX[2], MODEL_MATRIX[3]);
+		float away = length(MODELVIEW_MATRIX[3].xyz);
+		MODELVIEW_MATRIX[3].xyz *= max(away - toward, away * 0.5) / max(away, 0.001);
 	}
 }
 void fragment() {
@@ -1379,6 +1482,121 @@ void fragment() {
 }
 """
 
+const CONTACT := """
+shader_type spatial;
+// The soft dark under whatever stands on the ground, so that nothing floats: darkest under the
+// thing (inner: the part of the quad it stands on) and gone by the quad's edge.
+render_mode unshaded, blend_mix, cull_back, depth_draw_never, shadows_disabled;
+uniform float strength = 0.5;
+uniform vec2 inner = vec2(0.25, 0.25);
+void fragment() {
+	vec2 p = abs(UV - 0.5) * 2.0;
+	vec2 d = max(p - inner, vec2(0.0)) / max(vec2(1.0) - inner, vec2(0.001));
+	float a = 1.0 - clamp(length(d), 0.0, 1.0);
+	ALBEDO = vec3(0.012, 0.01, 0.016);
+	ALPHA = strength * a * a * (3.0 - 2.0 * a);
+}
+"""
+
+## How much of the ground a thing stands on: half its width and half its depth, in its own space.
+func _footprint(node: Node3D) -> Vector2:
+	var box := AABB()
+	var first := true
+	for m in node.find_children("*", "MeshInstance3D", true, false):
+		var mi: MeshInstance3D = m
+		if mi.mesh == null or not mi.visible:
+			continue
+		var b: AABB = _made_xf(mi, node) * mi.get_aabb()
+		box = b if first else box.merge(b)
+		first = false
+	if first:
+		return Vector2(0.4, 0.4)
+	return Vector2(maxf(absf(box.position.x), absf(box.end.x)), maxf(absf(box.position.z), absf(box.end.z)))
+
+## The contact shadow under a thing that stands on the ground (data/style.json,
+## shading.contact: "people" for whatever walks, "props" for whatever stands): one soft quad,
+## the thing's own, so it goes where the thing goes.
+func _contact_under(node: Node3D, kind := "people") -> void:
+	var strength := float(Style.data()["shading"].get("contact", {}).get(kind, 0.0))
+	if strength <= 0.0 or node == null or node.position.y > 0.2:
+		return
+	var foot := _footprint(node)
+	var reach := 0.3 if kind == "people" else 0.45
+	var half := Vector2(clampf(foot.x, 0.25, 2.4), clampf(foot.y, 0.25, 2.4))
+	if kind == "people":
+		half = Vector2(clampf(foot.x * 0.8, 0.3, 1.2), clampf(foot.y * 0.8, 0.3, 1.6))
+	var up := maxf(node.scale.y, 0.01)
+	var q := MeshInstance3D.new()
+	var pm := PlaneMesh.new()
+	pm.size = (half + Vector2(reach, reach) / up) * 2.0
+	q.mesh = pm
+	var cm := _shader_mat(CONTACT)
+	cm.set_shader_parameter("strength", strength)
+	cm.set_shader_parameter("inner", Vector2(half.x / (half.x + reach / up), half.y / (half.y + reach / up)) * (0.35 if kind == "people" else 0.8))
+	cm.render_priority = -2
+	q.material_override = cm
+	q.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	q.position = Vector3(0, 0.035 / up, 0)
+	q.name = "Contact"
+	node.add_child(q)
+
+## The glow about a flame or a lamp: what the eye sees round a light in the dark, and what a
+## camera's bloom would draw (this renderer has none). One quad that faces the camera, in the
+## light's own colour. Returns its material, for whatever flickers to flicker it.
+func _halo(parent: Node3D, color: Color, size: float, strength: float, at := Vector3.ZERO) -> ShaderMaterial:
+	var q := MeshInstance3D.new()
+	var qm := QuadMesh.new()
+	qm.size = Vector2(size, size)
+	q.mesh = qm
+	var gm := _shader_mat(GLOW)
+	gm.set_shader_parameter("tint", color)
+	gm.set_shader_parameter("strength", strength)
+	gm.set_shader_parameter("falloff", 2.4)
+	gm.set_shader_parameter("toward", 0.45)
+	q.material_override = gm
+	q.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	q.position = at
+	q.name = "Halo"
+	parent.add_child(q)
+	return gm
+
+## The numbers of the lamps' glow (data/style.json, lights.halo): strength, size (metres across,
+## for a lamp of the common reach), shaft (the lit dust in the cone under a lamp on a post), pool
+## (the pool on the ground under it), window (the light a lit window lays on the ground).
+func _halo_n(key: String, fallback := 0.0) -> float:
+	return float(Style.data()["lights"].get("halo", {}).get(key, fallback))
+
+## A pool of light lying on the ground (under a lamp, before a lit window).
+func _pool(at: Vector3, size: Vector2, color: Color, strength: float, rot_deg := 0.0) -> void:
+	if strength <= 0.0:
+		return
+	var pm := MeshInstance3D.new()
+	var plane := PlaneMesh.new()
+	plane.size = size
+	pm.mesh = plane
+	var gm := _shader_mat(GLOW)
+	gm.set_shader_parameter("billboard", false)
+	gm.set_shader_parameter("tint", color)
+	gm.set_shader_parameter("strength", strength)
+	gm.set_shader_parameter("falloff", 1.7)
+	pm.material_override = gm
+	pm.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	pm.position = Vector3(at.x, 0.1, at.z)
+	pm.rotation_degrees.y = rot_deg
+	_place_root.add_child(pm)
+
+## Text that stands in the world, drawn from a picture three times the size it was, with its
+## smaller copies: sharp close to and on a large screen, and still at a distance.
+func _crisp(l: Label3D) -> void:
+	if not is_instance_valid(l) or l.has_meta("crisp"):
+		return
+	l.set_meta("crisp", true)
+	l.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	if l.font_size >= 90:
+		return
+	l.font_size *= 3
+	l.outline_size *= 3
+	l.pixel_size /= 3.0
 
 ## The sword trail, the screen's edge, and the effects that go with hits.
 func _build_effects() -> void:
@@ -1521,6 +1739,15 @@ func impact(at: Vector3, color: Color, size := 0.7) -> void:
 	tw.set_parallel(true)
 	tw.tween_property(mi, "scale", Vector3.ONE * size, secs).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
 	tw.tween_property(m, "albedo_color:a", 0.0, secs * 1.1)
+	# the blow lights what is about it for as long as its star lasts
+	var lit := OmniLight3D.new()
+	lit.light_color = color
+	lit.light_energy = 2.2 * size
+	lit.omni_range = 3.2 + size
+	lit.omni_attenuation = 1.6
+	lit.shadow_enabled = false
+	mi.add_child(lit)
+	tw.tween_property(lit, "light_energy", 0.0, secs * 1.6).set_ease(Tween.EASE_OUT)
 	tw.chain().tween_callback(mi.queue_free)
 
 ## Dust kicked up: a few soft blots, in the dust's colour, that swell and thin.
@@ -1674,6 +1901,7 @@ func floater(at: Vector3, text: String, color: Color, size := 56, life := 0.9, r
 	l.font = Style.font("title")
 	l.fixed_size = true
 	l.pixel_size = 0.0009
+	_crisp.call_deferred(l)
 	l.modulate = color
 	l.outline_size = int(Style.fx_n("word", "outline", 12))
 	l.outline_modulate = Color(Style.ink_color(), 0.85)
@@ -2209,6 +2437,8 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 		var lm: Dictionary = _lamps[idx]
 		var fl := 1.0 if lm["steady"] else 1.0 + fd * (0.65 * sin(_clock * fw + idx * 1.9) + 0.35 * sin(_clock * fw * 2.6 + idx))
 		(lm["light"] as OmniLight3D).light_energy = float(lm["base"]) * fl * lerpf(1.0, 0.1, _torch_dim)
+		if lm.has("halo"):
+			(lm["halo"] as ShaderMaterial).set_shader_parameter("strength", float(lm["halo_base"]) * (1.0 + (fl - 1.0) * 2.0) * lerpf(1.0, 0.15, _torch_dim))
 	_update_cutaway()
 
 	# Floaters rise and fade (in real time, so they read during hit-stop).
@@ -2439,6 +2669,8 @@ func _ink(category = "people") -> ShaderMaterial:
 	m.set_shader_parameter("width", Style.ink_width(String(category) if category is String else "people"))
 	m.set_shader_parameter("screen", float(Style.data()["ink"].get("screen", 900)))
 	m.set_shader_parameter("ink", Style.ink_color())
+	m.set_shader_parameter("thin_from", float(Style.data()["ink"].get("thinFrom", 1000.0)))
+	m.set_shader_parameter("thin_least", float(Style.data()["ink"].get("thinLeast", 0.5)))
 	return m
 
 ## The chamber's air: motes of field drifting in the dark, and moonlight falling through the
@@ -2973,6 +3205,7 @@ func _build_academy_place(spec: Dictionary) -> void:
 		l.font = Style.font("title")
 		l.font_size = 26
 		l.pixel_size = 0.006
+		_crisp.call_deferred(l)
 		l.modulate = Color(1.0, 0.85, 0.6)
 		l.outline_size = 8
 		l.outline_modulate = Color(0, 0, 0, 0.8)
@@ -2992,6 +3225,7 @@ func _build_academy_place(spec: Dictionary) -> void:
 	if wild:
 		_furnish_wild(spec)
 		_light_place("wild")
+		_build_sky()
 		_moonlight([[Vector3(-arena.x * 0.2, 0, -arena.y * 0.15), 1.4], [Vector3(arena.x * 0.28, 0, arena.y * 0.2), 1.0], [Vector3(0, 0, 0), 0.8]])
 		return
 	_light_place("court", { "ambientEnergy": 0.34, "fogDensity": 0.012, "moon": 0.28 })
@@ -3023,8 +3257,9 @@ var _lamp_scale := 1.0     # a place's own level for its lamps (style.lamps)
 
 const SKY := """
 shader_type spatial;
-// The sky over the Academy at dusk: night above, the last of the day along the horizon,
-// stars, a moon. A dome drawn behind everything.
+// The sky over the Academy and the line at dusk: night above, the last of the day along the
+// horizon, stars of two sizes, cloud drifting and silvered where the moon is behind it, the
+// moon with its seas and its ring. A dome drawn behind everything; nothing of it is lit.
 render_mode unshaded, cull_disabled, depth_draw_never, fog_disabled, shadows_disabled;
 uniform vec3 moon_dir = vec3(0.35, 0.55, -0.75);
 uniform vec3 top : source_color = vec3(0.075, 0.094, 0.14);
@@ -3034,32 +3269,69 @@ uniform vec3 ember : source_color = vec3(0.48, 0.29, 0.2);
 uniform vec3 stars : source_color = vec3(0.8, 0.83, 0.92);
 uniform vec3 moon : source_color = vec3(0.87, 0.89, 0.95);
 uniform vec3 halo : source_color = vec3(0.23, 0.26, 0.38);
+uniform vec3 cloud : source_color = vec3(0.2, 0.22, 0.3);
+uniform vec3 tint = vec3(1.0);       // a zone's own night over the Academy's
+uniform float cloud_cover = 0.5;     // 0: a clear night; 1: overcast
 varying vec3 dir;
 float hash(vec3 p) {
 	p = fract(p * 0.3183099 + 0.1);
 	p *= 17.0;
 	return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
 }
+float hash2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float noise(vec2 p) {
+	vec2 i = floor(p);
+	vec2 f = fract(p);
+	f = f * f * (3.0 - 2.0 * f);
+	return mix(mix(hash2(i), hash2(i + vec2(1.0, 0.0)), f.x), mix(hash2(i + vec2(0.0, 1.0)), hash2(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+float fbm(vec2 p) {
+	float a = 0.5;
+	float v = 0.0;
+	for (int i = 0; i < 4; i++) {
+		v += a * noise(p);
+		p = p * 2.03 + vec2(17.0, 9.0);
+		a *= 0.5;
+	}
+	return v;
+}
 void vertex() { dir = normalize(VERTEX); }
 void fragment() {
 	vec3 d = normalize(dir);
 	float h = d.y;
-	vec3 col = mix(mid, top, smoothstep(0.12, 0.8, h));
-	col = mix(low, col, smoothstep(0.0, 0.3, h));
+	vec3 col = mix(mid, top, smoothstep(0.1, 0.75, h));
+	col = mix(low, col, smoothstep(0.0, 0.28, h));
 	// the last light, in the west only
 	float west = smoothstep(0.2, 1.0, dot(normalize(vec3(d.x, 0.0, d.z) + vec3(0.0001)), normalize(vec3(-0.8, 0.0, 0.6))));
-	col = mix(col, ember, west * (1.0 - smoothstep(0.0, 0.16, h)) * 0.8);
-	// stars, thinning toward the horizon
-	vec3 gp = d * 170.0;
-	vec3 g = floor(gp);
-	float r = hash(g);
-	float star = step(0.992, r) * smoothstep(0.08, 0.4, h) * smoothstep(0.3, 0.05, length(fract(gp) - 0.5));
-	col += stars * star * (0.5 + 0.5 * sin(TIME * (1.0 + r * 3.0) + r * 40.0)) * 0.9;
-	// the moon and its halo
+	col = mix(col, ember, west * (1.0 - smoothstep(0.0, 0.18, h)) * 0.8);
+	col *= tint;
 	float m = dot(d, normalize(moon_dir));
-	col += moon * smoothstep(0.99965, 0.9998, m);
-	col += halo * pow(max(m, 0.0), 220.0);
-	if (h < 0.0) { col = mix(low * 0.35, vec3(0.008, 0.008, 0.012), smoothstep(0.0, -0.08, h)); }
+	// stars, thinning toward the horizon: many small, a few large
+	vec3 gp = d * 170.0;
+	float r = hash(floor(gp));
+	float star = step(0.992, r) * smoothstep(0.3, 0.05, length(fract(gp) - 0.5));
+	gp = d * 61.0;
+	float r2 = hash(floor(gp) + 7.0);
+	star += step(0.994, r2) * smoothstep(0.42, 0.02, length(fract(gp) - 0.5)) * 1.6;
+	vec3 night = stars * star * smoothstep(0.06, 0.4, h) * (0.55 + 0.45 * sin(TIME * (1.0 + r * 3.0) + r * 40.0)) * 0.9;
+	// the moon: its disc, its seas, its ring
+	float disc = smoothstep(0.99955, 0.9997, m);
+	vec3 md = normalize(moon_dir);
+	vec3 mx = normalize(cross(md, vec3(0.0, 1.0, 0.0)));
+	vec2 face = vec2(dot(d, mx), dot(d, cross(mx, md))) * 60.0;
+	float seas = smoothstep(0.42, 0.62, fbm(face * 1.4 + 3.0));
+	night += moon * disc * (1.0 - 0.22 * seas);
+	// cloud: long bars low in the sky, broken higher up, drifting; dark against the sky, silver where the moon is behind
+	float cl = 0.0;
+	if (h > 0.0 && cloud_cover > 0.0) {
+		vec2 cp = d.xz / (h + 0.22) * vec2(1.0, 2.2) + vec2(TIME * 0.006, 0.0);
+		float f = fbm(cp * 1.3) * 0.7 + fbm(cp * 3.1 + 5.0) * 0.3;
+		cl = smoothstep(1.0 - cloud_cover * 0.62, 1.12 - cloud_cover * 0.5, f + 0.38) * smoothstep(0.0, 0.1, h);
+	}
+	vec3 lining = cloud * tint * (0.55 + 0.45 * smoothstep(0.2, 0.9, h)) + halo * 1.6 * pow(max(m, 0.0), 24.0) + moon * 0.35 * pow(max(m, 0.0), 400.0);
+	col = mix(col + night, lining, cl * 0.85);
+	col += halo * (pow(max(m, 0.0), 220.0) + 0.3 * pow(max(m, 0.0), 26.0)) * (1.0 - cl * 0.6);
+	if (h < 0.0) { col = mix(low * tint * 0.35, vec3(0.008, 0.008, 0.012), smoothstep(0.0, -0.08, h)); }
 	ALBEDO = col;
 }
 """
@@ -3098,8 +3370,43 @@ func _kit_piece(name: String, pos: Vector3, rot_deg := 0.0, scale := Vector3.ONE
 		light.omni_attenuation = 1.4
 		light.shadow_enabled = false
 		(c as Node3D).add_child(light)
-		_lamps.append({ "light": light, "base": float(k[1]) * _lamp_scale, "steady": kind in ["stain", "cool"] })
+		var entry := { "light": light, "base": float(k[1]) * _lamp_scale, "steady": kind in ["stain", "cool"] }
+		if kind != "stain" and _halo_n("strength") > 0.0:
+			var reach := light.omni_range / float(k[2])
+			var glow_size := _halo_n("size", 2.6) * reach * (1.7 if kind == "fire" else 1.0)
+			entry["halo"] = _halo(c as Node3D, Style.light(kind if kind != "cool" else "moon", "color"), glow_size, _halo_n("strength"))
+			entry["halo_base"] = _halo_n("strength")
+			if name in ["lamp_post", "signal_lamp"]:
+				_lamp_cone(c as Node3D, Style.light("lamp", "color"))
+		_lamps.append(entry)
 	return n
+
+## Under a lamp on a post: the lit dust in its cone, and its pool on the ground.
+func _lamp_cone(at_node: Node3D, color: Color) -> void:
+	var top := at_node.global_position
+	if top.y < 1.0:
+		return
+	if _halo_n("shaft") > 0.0:
+		var cone := MeshInstance3D.new()
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.12
+		cm.bottom_radius = top.y * 0.62
+		cm.height = top.y
+		cm.cap_top = false
+		cm.cap_bottom = false
+		cm.radial_segments = 20
+		cm.rings = 1
+		cone.mesh = cm
+		var sm := _shader_mat(SHAFT)
+		sm.set_shader_parameter("half_height", top.y / 2.0)
+		sm.set_shader_parameter("tint", color)
+		sm.set_shader_parameter("strength", _halo_n("shaft"))
+		sm.set_shader_parameter("down", true)
+		cone.material_override = sm
+		cone.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		cone.position = Vector3(top.x, top.y / 2.0, top.z)
+		_place_root.add_child(cone)
+	_pool(top, Vector2(top.y * 2.2, top.y * 2.2), color, _halo_n("pool"))
 
 ## A place built from the Academy's kit by its style (data/academy.json): a floor, four sides
 ## of wall bays with a door piece at every door, corners, trusses indoors, and the furniture.
@@ -3206,8 +3513,11 @@ func _build_kit_place(spec: Dictionary) -> void:
 	for f in spec.get("furniture", []):
 		var at := Vector3(float(f["at"][0]), float(f.get("y", 0.0)), float(f["at"][1]))
 		var sc := float(f.get("scale", 1.0))
-		if _kit_piece(String(f["piece"]), at, float(f.get("rot", 0.0)), Vector3.ONE * sc) == null:
+		var fn := _kit_piece(String(f["piece"]), at, float(f.get("rot", 0.0)), Vector3.ONE * sc)
+		if fn == null:
 			continue
+		if not String(f["piece"]) in ["rug", "chandelier"]:
+			_contact_under(fn, "props")
 		if f.has("solid"):
 			obstacles.append(Vector3(at.x, at.z, float(f["solid"])))
 		for so in f.get("solids", []):
@@ -3224,6 +3534,7 @@ func _build_kit_place(spec: Dictionary) -> void:
 		l.font = Style.font("title")
 		l.font_size = 26
 		l.pixel_size = 0.006
+		_crisp.call_deferred(l)
 		l.modulate = Color(1.0, 0.85, 0.6)
 		l.outline_size = 8
 		l.outline_modulate = Color(0, 0, 0, 0.8)
@@ -3242,21 +3553,7 @@ func _build_kit_place(spec: Dictionary) -> void:
 		_light_place("hall", { "ambientEnergy": _ambient_lit })
 	else:
 		_light_place("court", { "ambientEnergy": _ambient_lit, "moon": float(style.get("moon", Style.place_light("court")["moon"])) })
-		_sky_dome = MeshInstance3D.new()
-		var sm := SphereMesh.new()
-		sm.radius = 260.0
-		sm.height = 520.0
-		sm.radial_segments = 24
-		sm.rings = 12
-		_sky_dome.mesh = sm
-		var sky_mat := _shader_mat(SKY)
-		var sky_cols: Dictionary = Style.data()["lights"]["sky"]
-		for k in ["top", "mid", "low", "ember", "stars", "moon", "halo"]:
-			sky_mat.set_shader_parameter(k, Color(String(sky_cols[k])))
-		_sky_dome.material_override = sky_mat
-		_sky_dome.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		_sky_dome.extra_cull_margin = 1000.0
-		_place_root.add_child(_sky_dome)
+		_build_sky()
 		for pool in style.get("pools", []):
 			# the Library's glass on the paving: a pool of coloured light
 			var pm := MeshInstance3D.new()
@@ -3273,6 +3570,38 @@ func _build_kit_place(spec: Dictionary) -> void:
 			pm.position = Vector3(float(pool[0]), 0.14, float(pool[1]))
 			_place_root.add_child(pm)
 
+## The sky over a place out of doors (data/style.json, lights.sky): a dome behind everything.
+## `night` is a zone's own night: the colour its dark is, against the Academy's (its sky is the
+## Academy's sky in that colour).
+func _build_sky(night := Color(-1, -1, -1), cover := -1.0) -> void:
+	if _sky_dome != null and is_instance_valid(_sky_dome):
+		return
+	_sky_dome = MeshInstance3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = 260.0
+	sm.height = 520.0
+	sm.radial_segments = 32
+	sm.rings = 16
+	_sky_dome.mesh = sm
+	var sky_mat := _shader_mat(SKY)
+	var sky_cols: Dictionary = Style.data()["lights"]["sky"]
+	for k in ["top", "mid", "low", "ember", "stars", "moon", "halo", "cloud"]:
+		if sky_cols.has(k):
+			sky_mat.set_shader_parameter(k, Color(String(sky_cols[k])))
+	var tint := Vector3.ONE
+	if night.r >= 0.0:
+		# the zone's dark against the common dark of the wild, kept near it: a warm night, a green one
+		var base := Color(String(Style.place_light("wild")["sky"]))
+		var lum := maxf(0.001, (night.r + night.g + night.b) / 3.0)
+		var blum := maxf(0.001, (base.r + base.g + base.b) / 3.0)
+		tint = Vector3(clampf(night.r / lum / (base.r / blum), 0.7, 1.4), clampf(night.g / lum / (base.g / blum), 0.7, 1.4), clampf(night.b / lum / (base.b / blum), 0.7, 1.4))
+	sky_mat.set_shader_parameter("tint", tint)
+	sky_mat.set_shader_parameter("cloud_cover", cover if cover >= 0.0 else float(Style.data()["lights"].get("cloudCover", 0.5)))
+	_sky_dome.material_override = sky_mat
+	_sky_dome.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_sky_dome.extra_cull_margin = 1000.0
+	_place_root.add_child(_sky_dome)
+
 ## A wall piece on a side, and its upper part entered for the cutaway.
 func _kit_wall(name: String, t: float, fixed: float, along_x: bool, rot: float, out: Vector3, stretch: float) -> void:
 	var at := Vector3(t, 0, fixed) if along_x else Vector3(fixed, 0, t)
@@ -3283,6 +3612,21 @@ func _kit_wall(name: String, t: float, fixed: float, along_x: bool, rot: float, 
 		return
 	if n.has_node("Upper"):
 		_cut_walls.append({ "upper": n.get_node("Upper"), "at": at, "out": out, "out2": Vector3.ZERO })
+	# a lit window lays its light on the ground before it: the lamp's amber out of a lit room,
+	# the moon's pale into a hall
+	if _halo_n("window") > 0.0 and (name.contains("window") or name.contains("bay")):
+		var lit := ""
+		for m in n.find_children("*", "MeshInstance3D", true, false):
+			var mi: MeshInstance3D = m
+			for i in (mi.mesh.get_surface_count() if mi.mesh != null else 0):
+				var mat := mi.get_active_material(i)
+				var mn := String(mat.resource_name).to_lower() if mat != null else ""
+				if mn.contains("glass_night"):
+					lit = "moon"
+				elif mn.contains("glass") and mn.contains("_lit") and lit == "":
+					lit = "lamp"
+		if lit != "":
+			_pool(at - out * 2.3, Vector2(2.8, 4.4) if along_x else Vector2(4.4, 2.8), Style.light(lit, "color"), _halo_n("window") * (1.4 if lit == "moon" else 1.0))
 
 ## A rectangle of the floor laid again in another tile (the lawns), a little proud of it.
 func _kit_rect(name: String, x0: float, z0: float, x1: float, z1: float, y: float) -> void:
@@ -3307,6 +3651,15 @@ func _update_cutaway() -> void:
 			hide = hide or rel.dot(w["out2"]) > -1.4
 		(w["upper"] as Node3D).visible = not hide
 
+## A piece the game makes itself (a tie, a rail), given the same look as the kits': a named
+## material, so that it is of its class, on its ramp, banded and grained like everything else.
+func _made(mi: MeshInstance3D, material: String, color: Color) -> void:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = color
+	m.resource_name = material
+	(mi.mesh as PrimitiveMesh).material = m
+	toonify(mi, true)
+
 ## The line itself: ties and two rails across the place.
 func _rails(hw: float, from := -INF) -> void:
 	var tie := _mat(Color(0.22, 0.15, 0.1))
@@ -3321,7 +3674,7 @@ func _rails(hw: float, from := -INF) -> void:
 		var b := MeshInstance3D.new()
 		b.mesh = bm
 		b.position = Vector3(tx, 0.1, 0)
-		b.material_override = tie
+		_made(b, "wood_timber", Color(0.22, 0.15, 0.1))
 		_place_root.add_child(b)
 		tx += 0.8
 	for rz in [-0.72, 0.72]:
@@ -3330,7 +3683,7 @@ func _rails(hw: float, from := -INF) -> void:
 		var r := MeshInstance3D.new()
 		r.mesh = rm
 		r.position = Vector3((hw + x0) / 2.0, 0.2, rz)
-		r.material_override = rail
+		_made(r, "iron_metal", Color(0.42, 0.4, 0.38))
 		_place_root.add_child(r)
 
 func _torch(at: Vector3, rot: float) -> void:
@@ -3344,6 +3697,8 @@ func _torch(at: Vector3, rot: float) -> void:
 	light.position = Vector3(0, 0.6, 0.25)
 	t.add_child(light)
 	_torches.append(light)
+	if _halo_n("strength") > 0.0:
+		_halo(t, Style.light("fire", "color"), _halo_n("size", 2.6) * 1.2, _halo_n("strength"), light.position)
 
 ## Where a door is: a soft ring of light on the floor and its name above, dim if it is shut.
 func _door_marker(at: Vector3, label: String, locked: bool) -> void:
@@ -3364,6 +3719,7 @@ func _door_marker(at: Vector3, label: String, locked: bool) -> void:
 	l.font = Style.font("title")
 	l.font_size = 30
 	l.pixel_size = 0.006
+	_crisp.call_deferred(l)
 	l.modulate = Color(0.75, 0.72, 0.68, 0.55) if locked else Color(1.0, 0.85, 0.6)
 	l.outline_size = 8
 	l.outline_modulate = Color(0, 0, 0, 0.8)
@@ -3417,6 +3773,9 @@ func _build_post(pa: Vector3) -> void:
 		lamp.omni_range = 8.0
 		lamp.position = pa + Vector3(0, lamp_y, 0)
 		_place_root.add_child(lamp)
+		if _halo_n("strength") > 0.0:
+			_halo(_place_root, Style.light("lamp", "color"), _halo_n("size", 2.6) * 1.3, _halo_n("strength"), pa + Vector3(0, flame_y, 0))
+			_pool(pa, Vector2(7.0, 7.0), Style.light("lamp", "color"), _halo_n("pool"))
 		var flame := MeshInstance3D.new()
 		var sm := SphereMesh.new()
 		sm.radius = 0.2
@@ -3442,7 +3801,9 @@ func _wild_piece(name: String, pos: Vector3, rot_deg := 0.0, scale := 1.0) -> No
 		n.rotation_degrees.y = rot_deg
 		n.scale = Vector3.ONE * scale
 		_place_root.add_child(n)
-		toonify(n, true)
+		toonify(n, true, "wild")
+		if not (name.begins_with("ground_") or name.begins_with("edge_")):
+			_contact_under(n, "props")
 		return n
 	var sub := "rubble_half"
 	var sub_scale := scale
@@ -3589,6 +3950,7 @@ func _furnish_zone(spec: Dictionary) -> void:
 	if L.has("moonColor"):
 		over["moonColor"] = Color(L["moonColor"][0], L["moonColor"][1], L["moonColor"][2]).to_html(false)
 	_light_place("wild", over)
+	_build_sky(Color(L["sky"][0], L["sky"][1], L["sky"][2]), float(L.get("cloud", -1.0)))
 	_moonlight([[Vector3(-arena.x * 0.2, 0, -arena.y * 0.15), 1.4], [Vector3(arena.x * 0.28, 0, arena.y * 0.2), 1.0], [Vector3(0, 0, 0), 0.8]])
 
 func _furnish_quad() -> void:
@@ -3679,6 +4041,7 @@ func _pack_make(fo: Foe) -> Dictionary:
 	n.scale = Vector3.ONE * WOLF_SCALE * float(fo.beast.get("modelScale", 1.0))
 	add_child(n)
 	toonify(n)
+	_contact_under(n)
 	var ap: AnimationPlayer = n.find_child("AnimationPlayer", true, false)
 	for key in ["idle", "walk", "gallop", "windup", "stagger", "flinch"]:
 		if ap.has_animation(WOLF_ANIMS[key]):
@@ -3693,6 +4056,7 @@ func _pack_make(fo: Foe) -> Dictionary:
 	l.font_size = 22
 	l.fixed_size = true
 	l.pixel_size = 0.0011
+	_crisp.call_deferred(l)
 	l.modulate = C_DIM
 	l.outline_size = 8
 	l.outline_modulate = Color(0, 0, 0, 0.85)
@@ -3706,6 +4070,7 @@ func _pack_make(fo: Foe) -> Dictionary:
 	al.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	al.no_depth_test = true
 	al.pixel_size = 0.004
+	_crisp.call_deferred(al)
 	al.outline_size = 10
 	al.outline_modulate = Color(0, 0, 0, 0.85)
 	al.visible = false
@@ -3852,6 +4217,7 @@ func set_allies(specs: Array) -> void:
 		var n: Node3D = load(_person_model(sp.get("body", "Knight"))).instantiate()
 		add_child(n)
 		toonify(n)
+		_contact_under(n)
 		dress(n, sp["look"] if not sp.get("look", {}).is_empty() else look_for(String(sp.get("name", ""))))
 		var skel: Skeleton3D = n.find_child("Skeleton3D", true, false)
 		var w: Dictionary = Data.by_id(Data.weapons, sp.get("weapon", "saber"))
@@ -3872,6 +4238,7 @@ func set_allies(specs: Array) -> void:
 		l.font_size = 22
 		l.fixed_size = true
 		l.pixel_size = 0.001
+		_crisp.call_deferred(l)
 		l.modulate = Color(0.8, 0.9, 1.0, 0.85)
 		l.outline_size = 8
 		l.outline_modulate = Color(0, 0, 0, 0.8)
@@ -4023,6 +4390,7 @@ func add_figure(body: String, at: Vector2, facing: float, title: String, sub: St
 	var n: Node3D = load(_person_model(body)).instantiate()
 	_place_root.add_child(n)
 	toonify(n)
+	_contact_under(n)
 	dress(n, look if not look.is_empty() else look_for(title), partner)
 	if partner.get("genius", {}) is Dictionary and not partner.get("genius", {}).is_empty():
 		_figure_genius(n, partner["genius"], _shape_color(String(partner.get("shape", "anchor"))))
@@ -4050,6 +4418,7 @@ func add_figure(body: String, at: Vector2, facing: float, title: String, sub: St
 	l.font_size = 26
 	l.fixed_size = true
 	l.pixel_size = 0.0011
+	_crisp.call_deferred(l)
 	l.modulate = Color(0.95, 0.91, 0.84, 0.0)
 	l.outline_size = 8
 	l.outline_modulate = Color(0, 0, 0, 0.0)
@@ -4137,6 +4506,8 @@ func _furnish_hearth(kit := false) -> void:
 	bowl_light.omni_range = 9.0
 	bowl_light.position = BOWL + Vector3(0, 2.0, 0)
 	_place_root.add_child(bowl_light)
+	if _halo_n("strength") > 0.0:
+		_halo(bowl_flame, Style.light("fire", "color"), 4.5, _halo_n("strength") * 0.8)
 	# A ring on the floor round the bowl, where the student stands.
 	var ring := MeshInstance3D.new()
 	var rt := TorusMesh.new()
@@ -4193,6 +4564,7 @@ func sigils(show: bool, lit := "", turn := 0.0) -> void:
 			l.font = Style.font("title")
 			l.font_size = 22
 			l.pixel_size = 0.006
+			_crisp.call_deferred(l)
 			l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 			l.modulate = Color(SHAPE_COLORS[s], 0.5)
 			l.outline_size = 6

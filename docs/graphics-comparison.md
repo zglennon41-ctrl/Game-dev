@@ -86,6 +86,32 @@ look's decision. A bug found on the way: the game had been hiding the eyes, nose
 lips of every kit body since they arrived (the look's show-and-hide loop treated them as
 headgear); that is fixed and tested.
 
+## The third pass of the picture: light, ground and air (the owner, 2026-11-11: "graphics improved dramatically and upgraded resolution")
+
+(The pass above was the bodies'. This one is everything round them. All of it runs in the
+Compatibility renderer and on the web; the numbers are in `data/style.json`.)
+
+| What | Was | Is | Costs |
+|---|---|---|---|
+| Walls, floors, roofs, ground | one flat colour a material, under a faint blocky grain | nine grains made for places at 512 (`tools/textures.py --places`: flagstone, ashlar, brick, plaster, planks, slate, cobble, earth, grass), chosen by the material's name (`materials.places`), with their smaller copies and anisotropic filtering; broad patches of lighter and darker over the whole place; the dark at the foot of whatever stands | two more texture reads a fragment of a place (`shading.place`) |
+| The sky | a flat dark with a disc | a gradient, stars of two sizes, drifting cloud silvered by the moon, the moon's seas and ring; the zones of the line have it too, in their own night | a few noise reads on the sky's pixels only |
+| Lamps and fires | a light and a flat pane | a glow about each (one quad that faces the camera, flickering with its light), the lit dust in the cone under a lamp on a post, a pool on the ground, the light a lit window lays before it (`lights.halo`) | one to three small additive quads a lamp; no light added |
+| Depth | far walls faded to black | they fade toward a paler, bluer dark out of doors and a warm haze in a hall (`lights.kinds`: `fog`) | none |
+| Shadows | four cascades, soft and thin | two cascades (half the shadow passes: the quad draws about a fifth fewer objects than before with everything here added), a crisper edge, a stronger moon in a court | less than before |
+| Standing on the ground | figures and props floated where the moon did not reach | a soft contact shadow under every person, beast and prop (`shading.contact`) | one quad each |
+| People and beasts | a pale rim all round | also the key light along the edge on the side the light is: amber by a lamp, pale under the moon (`shading.keyRim`); the ink line thins with distance (`ink.thinFrom`) | a few operations a light |
+| Wind | none | grass, leaves and hung banners move (`shading.place.sway`) | a few operations a vertex |
+| A blow | a star | the star lights what is about it for as long as it lasts | one light for a fifth of a second |
+| Text in the world | drawn from a small picture | from one three times the size, with its smaller copies | a little memory |
+| The line's rails and ties | plain boxes outside the style | of the style: named, on their ramps, banded, grained | none |
+| Settings | | 8x anisotropic filtering, hi-dpi on, 4096 shadow map, 4x MSAA as before | |
+
+Still short of a shipped game: the trees' crowns and other round things are still cut in few
+facets (the kits want rebuilding with more segments, and soft crowns); the Cut is still the
+borrowed dungeon tiles; there is no day (every place is dusk or night); lamps cast no shadows of
+their own; there is no true bloom, depth of field or ambient occlusion in corners; water does
+not move; the ground beyond a place's walls is bare.
+
 ## What it will not do
 
 It will not reach DW9's character fidelity: that is sculpted art and motion capture. What
