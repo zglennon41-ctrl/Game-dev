@@ -33,14 +33,15 @@ TAGS = ("plain", "formal", "master")
 GARMENTS = ("tunic", "vest", "jacket", "coat", "robe", "kaftan", "kilt", "wrapskirt", "cuirass", "hakama", "trousers", "apron")
 # Pieces seated after everything is cut: a band is let out until it clears the cloth under it,
 # a solid thing is moved out until it rests on it.
-SEAT_SOFT = ("belt", "sash", "obi", "strap", "wrap", "patch", "collar", "scarf", "furcollar", "beads", "chain", "tabard", "panel")
-SEAT_HARD = ("buttons", "badge", "sashknot", "toolloop", "pteruges", "coil", "roll", "disc", "satchel", "bow", "tassel", "brooch", "wings")
+SEAT_SOFT = ("belt", "sash", "obi", "strap", "wrap", "patch", "collar", "scarf", "furcollar", "chain", "tabard", "panel")
+SEAT_HARD = ("beads", "buttons", "badge", "sashknot", "toolloop", "pteruges", "coil", "roll", "disc", "satchel", "bow", "tassel", "brooch", "wings")
 # What lies over what: a piece is seated on, and must stay outside, every piece of a lower
 # layer worn with it (the fit check reads the same table).
 LAYER = {"trousers": 1, "hakama": 1, "boots": 1, "greaves": 1, "sandals": 1, "puttees": 1, "gloves": 1, "shoes": 1,
          "tunic": 2, "jacket": 2, "kilt": 2, "wrapskirt": 2,
          "coat": 2.5, "robe": 2.5, "kaftan": 2.5,
          "cuirass": 3, "vest": 3, "apron": 3, "panel": 3, "tabard": 3, "patch": 3, "wrap": 3,
+         "buttons": 3.5, "badge": 3.5,       # sewn to the garment: a strap or a belt lies over them
          "belt": 4, "sash": 4, "obi": 4, "collar": 4, "scarf": 4, "strap": 4, "furcollar": 4.5,
          "mantle": 6, "cloak": 7, "cape": 7}
 HARD_LAYER = 5          # buttons, a badge, a holster, a roll, a string of beads: the small things on top
@@ -69,8 +70,18 @@ def worn_together(a, b):
     return True
 
 
-# Hard pieces that hang below the hip: they swing with the thigh beside them (weigh, "dangle").
+# Solid pieces that hang at the hip or on the thigh: they take the weights of the body beside
+# them, as the skirt they hang against does, so a stride moves both alike.
 DANGLE = ("sashknot", "toolloop", "pteruges", "coil", "disc", "satchel", "tassel")
+# Small solid things sewn or pinned to the cloth: they take the body's weights too, so a bend
+# of the chest carries them on the cloth's surface instead of sinking them in its crease.
+PINNED = ("buttons", "badge", "brooch")
+# The shells cut from the neck and shoulders: let out vertex by vertex over a collar beneath.
+DRAPED = ("collar", "furcollar", "scarf")
+# Bands laid on the body and a chain: let out vertex by vertex too, looking out from the trunk's axis.
+LAID = ("chain", "strap", "wrap", "patch")
+# Strings of separate things: each seated on its own, so the string follows what it lies on.
+STRUNG = ("beads", "buttons")
 METALS = ("metal", "brass", "gold", "bronze", "steel", "iron", "copper")
 
 
@@ -82,9 +93,9 @@ WITH_CUT = False        # the fit check may build what is cut from the game, to 
 
 
 def pieces_for(D, sex):
-    """What one sex wears of a home's dress. A piece marked `cut` (with the reason) is out of
+    """What one sex wears of a home's dress. A piece marked `cutUntilFits` (with the reason) is out of
     the game until it fits (docs/dress-fit.md): the cutter is kept, the piece is not built."""
-    return [p for p in D.get("pieces", []) if p.get("sex", sex) == sex and (WITH_CUT or not p.get("cut"))]
+    return [p for p in D.get("pieces", []) if p.get("sex", sex) == sex and (WITH_CUT or not p.get("cutUntilFits"))]
 
 
 def headgear_for(D, sex):
@@ -93,7 +104,7 @@ def headgear_for(D, sex):
         return []
     if isinstance(hg, dict):
         hg = [hg]
-    return [h for h in hg if h.get("sex", sex) == sex and (WITH_CUT or not h.get("cut"))]
+    return [h for h in hg if h.get("sex", sex) == sex and (WITH_CUT or not h.get("cutUntilFits"))]
 
 
 def under_for(D, sex):
@@ -281,6 +292,38 @@ def _thicken(ob, t=0.012):
         poly.use_smooth = True
 
 
+def _even_rim(ob, rounds=3):
+    """A shell cut from the body ends along the body's own faces, in steps: its edge is evened
+    (each vertex of the edge drawn toward the two beside it)."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    rim = {}
+    for e in bm.edges:
+        if len(e.link_faces) == 1:
+            a, b = e.verts
+            rim.setdefault(a, []).append(b)
+            rim.setdefault(b, []).append(a)
+    for _ in range(rounds):
+        new = {v: (v.co * 2 + nb[0].co + nb[1].co) / 4 for v, nb in rim.items() if len(nb) == 2}
+        for v, co in new.items():
+            v.co = co
+    bm.to_mesh(ob.data)
+    bm.free()
+
+
+def _rim_faces(ob, keep):
+    """The faces along a shell's edge, where keep(vertex position) says so: a hem's border."""
+    bm = bmesh.new()
+    bm.from_mesh(ob.data)
+    rim = set()
+    for e in bm.edges:
+        if len(e.link_faces) == 1:
+            rim.update(v for v in e.verts if keep(v.co))
+    out = [f.index for f in bm.faces if any(v in rim for v in f.verts)]
+    bm.free()
+    return out
+
+
 def _line(ob, t=0.012):
     """A shell given an inside: every vertex doubled a cloth's thickness in along its normal,
     and the edge closed. (A solidify scales the offset by the fold of the faces round a vertex,
@@ -368,6 +411,82 @@ def _band(ob, where):
             poly.material_index = 1
 
 
+def _seat_each(ob, under, tr, human):
+    """A string of beads, a row of buttons: each one moved out on its own until only its back
+    is in the cloth."""
+    me = ob.data
+    M = ob.matrix_world
+    Mi = M.inverted()
+    near = [[] for _ in me.vertices]
+    for e in me.edges:
+        a, b = e.vertices
+        near[a].append(b)
+        near[b].append(a)
+    seen = [False] * len(me.vertices)
+    for start in range(len(me.vertices)):
+        if seen[start]:
+            continue
+        isle, todo = [], [start]
+        seen[start] = True
+        while todo:
+            i = todo.pop()
+            isle.append(i)
+            for j in near[i]:
+                if not seen[j]:
+                    seen[j] = True
+                    todo.append(j)
+        pts = [M @ me.vertices[i].co for i in isle]
+        c = sum(pts, Vector()) / len(pts)
+        yo = human._row(tr, c.z)[3]
+        d = Vector((c.x, c.y - yo, 0.0))
+        d = d.normalized() if d.length > 1e-5 else Vector((0, -1, 0))
+        deep = 0.0
+        for p in pts:
+            o, far, left = p + d * 1e-4, 0.0, 0.14
+            while left > 0.0:
+                hit = under.ray_cast(o, d, left)
+                if hit[0] is None:
+                    break
+                far += hit[3] + 1e-4
+                left -= hit[3] + 1e-4
+                o = hit[0] + d * 1e-4
+            deep = max(deep, far)
+        span = max(p.dot(d) for p in pts) - min(p.dot(d) for p in pts)
+        move = deep - min(0.006, span * 0.2)
+        if move > 0.0:
+            for i, p in zip(isle, pts):
+                me.vertices[i].co = Mi @ (p + d * move)
+    me.update()
+
+
+def _draw_in(ob, surface, tr, human):
+    """A solid piece that hangs in the air is drawn in until it touches what it lies on."""
+    M = ob.matrix_world
+    pts = [M @ v.co for v in ob.data.vertices]
+    if not pts or surface is None:
+        return
+    c = sum(pts, Vector()) / len(pts)
+    yo = human._row(tr, c.z)[3]
+    d = Vector((c.x, c.y - yo, 0.0))
+    if d.length < 1e-5:
+        return
+    d.normalize()
+    gap = None
+    for p in pts:
+        hit = surface.ray_cast(p, -d, 0.2)
+        if hit[0] is None:
+            continue
+        if surface.ray_cast(p + d * 1e-4, d, 0.14)[0] is not None:
+            return      # already in the cloth somewhere
+        gap = hit[3] if gap is None else min(gap, hit[3])
+    if gap is None or gap < 0.008:
+        return
+    Mi = M.inverted()
+    for v, p in zip(ob.data.vertices, pts):
+        v.co = Mi @ (p - d * (gap - 0.003))
+    ob.data.update()
+
+
 def _seat(ob, under, tr, hard, memo, human, margin=0.008, drape=False):
     """Seat a piece on the cloth beneath it. Each vertex looks outward from the trunk's axis:
     how far under the cloth is it? A band (soft) is let out by that much all round; a solid
@@ -380,7 +499,7 @@ def _seat(ob, under, tr, hard, memo, human, margin=0.008, drape=False):
     dirs, deep = [], []
     R = M.to_3x3()
     for i, p in enumerate(pts):
-        if drape:       # a shell cut from the body looks out along its own surface's normal
+        if drape is True:       # a shell cut from the body looks out along its own surface's normal
             d = (R @ ob.data.vertices[i].normal).normalized()
         else:
             yo = human._row(tr, p.z)[3]
@@ -517,7 +636,7 @@ def dress_pieces(body, objs, build, slot):
         if finish:
             finish(ob)
         made.append({"name": name, "ob": ob, "type": now["type"], "tags": now["tags"], "layer": now["layer"],
-                     "hard": isinstance(weights, str) or (isinstance(weights, tuple) and weights[0] == "dangle")})
+                     "hard": isinstance(weights, str) or now["type"] in DANGLE or now["type"] in PINNED})
         return ob
 
     def hard(name, bms, bone, cname, trim=None, soft=False):
@@ -525,17 +644,15 @@ def dress_pieces(body, objs, build, slot):
         bone; one that hangs below the hip swings with the thigh beside it; a soft one (a
         string of beads) lies on the body and takes its weights."""
         ob = _merge(name, bms)
-        w = None if soft else (("dangle", 0.85) if (bone == "hips" and now["type"] in DANGLE) else bone)
+        w = None if (soft or now["type"] in DANGLE or now["type"] in PINNED) else bone
         return put(name, ob, "trunk", cname, trim, fit=False, weights=w)
 
-    def trim_edge(ob, key, below=None, band=0.035):
-        """The faces along a shell's lower edge in the trim: chosen on the first build, the
-        same faces on the others."""
+    def trim_edge(ob, key, below):
+        """The faces along a shell's edge under `below` in the trim (a hem's border, not the
+        neck's): chosen on the first build, the same faces on the others."""
         memo = body.dress_memo.setdefault(ob.name + key, {})
         if "faces" not in memo:
-            zs = [p.center.z for p in ob.data.polygons]
-            z0 = min(zs) if below is None else below
-            memo["faces"] = [i for i, z in enumerate(zs) if z < z0 + band]
+            memo["faces"] = _rim_faces(ob, lambda co: co.z < below)
         for i in memo["faces"]:
             ob.data.polygons[i].material_index = 1
 
@@ -565,8 +682,12 @@ def dress_pieces(body, objs, build, slot):
     def seat_on(ob, margin=0.008, hard=False, drape=False):
         """Seat a piece on what is worn beneath it."""
         under = beneath()
-        if under is not None:
+        if under is not None and now["type"] in STRUNG:
+            _seat_each(ob, under, tr, human)
+        elif under is not None:
             _seat(ob, under, tr, hard, {}, human, margin, drape)
+        if hard and now["type"] not in STRUNG:
+            _draw_in(ob, beneath(with_body=True), tr, human)
 
     def mantle(base, piece, cname, trim):
         """A short cape over both shoulders, cut from the body itself: the shoulders, the top
@@ -583,7 +704,7 @@ def dress_pieces(body, objs, build, slot):
             return (v[:, 2] > z_lo) & (np.abs(v[:, 0]) < reach) & (v[:, 2] < z_nb + 0.03 * k * np.clip(1.0 - r / (0.12 * k), 0.0, 1.0)) & (nf[:, 2] > -0.2)
         ob = human.shell(base, mask, build, clear)
         put(base, ob, "trunk", cname, trim, fit=False,
-            finish=lambda ob: (seat_on(ob, 0.012, drape=True), (trim_edge(ob, "hem", band=0.045 * k) if trim else None), _line(ob, 0.012)))
+            finish=lambda ob: (_even_rim(ob), seat_on(ob, 0.012, drape=True), (trim_edge(ob, "hem", z_nb - 0.05 * k) if trim else None), _line(ob, 0.012)))
 
     def cloak(base, piece, cname, trim, mat=None):
         """A cloak that hangs from the shoulders: a yoke cut from the body's own upper back and
@@ -603,7 +724,7 @@ def dress_pieces(body, objs, build, slot):
             return (v[:, 2] > z_y) & (v[:, 2] < z_nb) & (np.abs(v[:, 0]) < x_in) & (back | top) & ~is_arm & one
         dressed = beneath(hard_too=True, with_body=True)
         yoke = human.shell(base + "_0", mask, build, 0.02 * k)
-        put(base + "_0", yoke, "trunk", cname, trim, fit=False, finish=lambda ob: (seat_on(ob, 0.014, drape=True), _line(ob, 0.012)))
+        put(base + "_0", yoke, "trunk", cname, trim, fit=False, finish=lambda ob: (_even_rim(ob), seat_on(ob, 0.014, drape=True), _line(ob, 0.012)))
         if mat is not None:
             _slots(yoke, [mat, mat])
         # the fall: rows from under the yoke's edge to the hem, columns round the back
@@ -611,6 +732,11 @@ def dress_pieces(body, objs, build, slot):
         z_top = tr[6][0] + 0.05 * k
         rows_n = 9
         cols_n = 12
+        wide = float(piece.get("widen", 7.0))        # degrees each side the fall opens by its hem
+
+        def ang(j, t):
+            lo, hi = a0 - wide * t, a1 + wide * t
+            return math.radians(lo + (hi - lo) * j / cols_n)
         bm = bmesh.new()
         grid = []
         prev = None
@@ -621,18 +747,18 @@ def dress_pieces(body, objs, build, slot):
             c_i = 0.012 * k + (g_hem - 0.012 * k) * _ease(t)
             rs = []
             for j in range(cols_n + 1):
-                a = math.radians(a0 + (a1 - a0) * j / cols_n)
+                a = ang(j, t)
                 d = Vector((math.cos(a), math.sin(a), 0.0))
                 hit = dressed.ray_cast(Vector((0, yo, z)) + d * 2.0, -d)[0]
                 r_s = (hit - Vector((0, yo, z))).length if hit is not None else 0.0
                 rs.append(r_s + c_i)
             rs = [max(r, (rs[max(0, j - 1)] + rs[min(cols_n, j + 1)]) / 2) for j, r in enumerate(rs)]
             if prev is not None:        # plumb: never back in under what stands out above it
-                rs = [max(r, pr[0] - (yo - pr[1]) * math.sin(math.radians(a0 + (a1 - a0) * j / cols_n))) for j, (r, pr) in enumerate(zip(rs, prev))]
+                rs = [max(r, pr[0] - (yo - pr[1]) * math.sin(ang(j, t))) for j, (r, pr) in enumerate(zip(rs, prev))]
             prev = [(r, yo) for r in rs]
             row = []
             for j, r in enumerate(rs):
-                a = math.radians(a0 + (a1 - a0) * j / cols_n)
+                a = ang(j, t)
                 fold = 0.012 * k * _ease(t) * (1.0 + math.sin(j * math.pi * 6 / cols_n + 0.6)) / 2      # folds that only open outward
                 row.append(bm.verts.new(Vector(((r + fold) * math.cos(a), yo + (r + fold) * math.sin(a), z))))
             grid.append(row)
@@ -695,7 +821,7 @@ def dress_pieces(body, objs, build, slot):
         for side, sign in (("l", 1), ("r", -1)):
             rings = []
             for i, (x, hd, hz) in enumerate(ar[:kk + 1]):
-                g = 0.02 + bell * _ease(max(0.0, (i - from_i) / max(1.0, kk - from_i))) ** 1.5
+                g = float(piece.get("sleeveGrow", 0.02)) + bell * _ease(max(0.0, (i - from_i) / max(1.0, kk - from_i))) ** 1.5
                 rings.append((x, hd + g, hz + g))
             x_e, hd_e, hz_e = rings[-1]
             tb = ()
@@ -834,7 +960,7 @@ def dress_pieces(body, objs, build, slot):
         elif t == "apron":
             # A bib over the chest and a skirt to the shin: the front of a coat's shell, cut at the sides.
             bib = piece.get("bib", True)
-            top = bk._shell(tr, 0.036, 2, 6 if bib else 3)
+            top = bk._shell(tr, float(piece.get("grow", 0.036)), 2, 6 if bib else 3)
             z2, hw2, hd2, yo2 = top[0]
             skirt = bk._skirt(z2, hw2, hd2, yo2, low(float(piece.get("hem", 0.6)) * k), 1.08)
             table = skirt[::-1][:-1] + top
@@ -929,14 +1055,16 @@ def dress_pieces(body, objs, build, slot):
             # cut from the body: a band at the neck's base, out over the shoulders when it is broad
             z2, hw2 = body.rings("trunk", "fit")[9][:2]      # the cut is the fit body's, on every build
             ob = human.shell("Dress_%d_collar" % n, human.neck_mask(z2 - 0.045 * wide * k, z2 + 0.03 * k, hw2 + 0.035 * k + 0.11 * (wide - 1) * k), build, 0.014 * k)
-            put("Dress_%d_collar" % n, ob, "trunk", cname, fit=False)
+            put("Dress_%d_collar" % n, ob, "trunk", cname, fit=False, finish=_even_rim)
         elif t == "scarf":
             zf, hwf = body.rings("trunk", "fit")[9][:2]
             ring = human.shell("Dress_%d_scarf" % n, human.neck_mask(zf - 0.05 * k, zf + 0.035 * k, hwf + 0.05 * k), build, 0.02 * k)
-            put("Dress_%d_scarf" % n, ring, "trunk", cname, fit=False)
+            put("Dress_%d_scarf" % n, ring, "trunk", cname, fit=False, finish=_even_rim)
             z9 = tr[9][0]
             # the ends: bands laid on the body (down the back over one shoulder, or down the breast)
             behind = piece.get("tails", "front") == "back"
+            if piece.get("tails") == "none":        # knotted close: no ends
+                continue
             tb = bmesh.new()
             for dx, ln in (((-0.07, 0.5), (0.03, 0.4)) if behind else ((0.055, 0.3),)):
                 z_a = z9 - 0.03 * k
@@ -1141,7 +1269,7 @@ def dress_pieces(body, objs, build, slot):
         elif t == "disc":
             # an instrument hung from the belt: a brass disc with its rule (an astrolabe), on a chain
             z2, hw2, hd2, yo2 = tr[2]
-            x, zc = float(piece.get("x", -0.12)), z2 - 0.13
+            x, zc = float(piece.get("x", -0.12)), z2 - float(piece.get("hang", 0.13))
             y = front(x, z2, 0.045)
             bms = [(_cyl_bm(Vector((x, y - 0.006, zc)), Vector((x, y + 0.008, zc)), 0.065, seg=14), 0),
                    (_ring_bm(Vector((x, y - 0.01, zc)), 0.05, 0.007, n=14), 1),
@@ -1183,7 +1311,7 @@ def dress_pieces(body, objs, build, slot):
             # roll of fleece that lies on them (it was a stiff ring that hung in the air round the neck)
             zf, hwf = trf[9][:2]
             ob = human.shell("Dress_%d_furcollar" % n, human.neck_mask(zf - 0.075 * k, zf + 0.02 * k, hwf + 0.085 * k), build, r * 0.7 * k)
-            put("Dress_%d_furcollar" % n, ob, "trunk", cname, fit=False)
+            put("Dress_%d_furcollar" % n, ob, "trunk", cname, fit=False, finish=_even_rim)
         elif t == "wings":
             # stiff shoulders that stand out past the arms, and the two bands down to the sash
             z7 = tr[7][0]
@@ -1215,7 +1343,13 @@ def dress_pieces(body, objs, build, slot):
         if m["type"] not in SEAT_SOFT and m["type"] not in SEAT_HARD:
             continue
         now = {"type": m["type"], "tags": m["tags"], "layer": m["layer"]}
-        seat_on(m["ob"], hard=m["type"] in SEAT_HARD)
+        tail = m["name"].split("__in_")[0].endswith("_tail")
+        how = False
+        if m["type"] in LAID or tail:
+            how = "radial"
+        elif m["type"] in DRAPED:
+            how = True
+        seat_on(m["ob"], margin=0.012 if how else 0.008, hard=m["type"] in SEAT_HARD, drape=how)
 
     # --- then the shoulder capes and the cloaks, over all of it -----------------------------
     for t, base, piece, cname, trim, sfx, now in sorted(deferred, key=lambda d: d[0] != "mantle"):
@@ -1506,6 +1640,14 @@ def _headgear(body, D, hg):
         parts.append(ring(z0 + hh * 0.76, hw * 1.14, hd * 1.12, 0.009, G, seg=5))
         for sg in (1, -1):
             parts.append((_ring_bm(Vector((cx + sg * hw * 0.45, y0 - 0.016, z0 + hh * 0.78)), 0.034, 0.01), J))
+    if not WITH_CUT:
+        # Cut until it fits: what hangs from headgear below the chin (a veil's fall, a turban's
+        # tail, a head-cloth's lappets) rides the head alone and passes through the neck, the
+        # shoulders and the back when the head turns. It stops at the chin.
+        for bm, _ in parts:
+            for v in bm.verts:
+                if v.co.z < z0:
+                    v.co.z = z0
     name = "Headgear_%s%s" % (t, suffix(hg))
     ob = _merge(name, parts)
     _slots(ob, [material(home, D, nme) for nme in names])

@@ -215,7 +215,8 @@
    "sockets": [
     "socket_throat"
    ],
-   "shapeColor": "trim"
+   "shapeColor": "trim",
+   "cutUntilFits": "Hung on the head's socket at the throat, a stiff piece made for a bare neck: on a dressed body a third to a half of it is under the collar, the scarf or the shoulder cape, and it turns with the head, not the shoulders (docs/dress-fit.md)."
   },
   "cloak-genius": {
    "slot": "cape",
@@ -255,7 +256,8 @@
    "sockets": [
     "socket_throat"
    ],
-   "color": "genius"
+   "color": "genius",
+   "cutUntilFits": "Hung on the head's socket at the throat, a stiff piece made for a bare neck: on a dressed body a third to a half of it is under the collar, the scarf or the shoulder cape, and it turns with the head, not the shoulders (docs/dress-fit.md)."
   },
   "echo-charm": {
    "slot": "collar",
@@ -265,7 +267,8 @@
    "sockets": [
     "socket_throat"
    ],
-   "color": "genius"
+   "color": "genius",
+   "cutUntilFits": "Hung on the head's socket at the throat, a stiff piece made for a bare neck: on a dressed body a third to a half of it is under the collar, the scarf or the shoulder cape, and it turns with the head, not the shoulders (docs/dress-fit.md)."
   },
   "echo-gorget": {
    "slot": "collar",
@@ -275,7 +278,8 @@
    "sockets": [
     "socket_throat"
    ],
-   "color": "genius"
+   "color": "genius",
+   "cutUntilFits": "Hung on the head's socket at the throat, a stiff piece made for a bare neck: on a dressed body a third to a half of it is under the collar, the scarf or the shoulder cape, and it turns with the head, not the shoulders (docs/dress-fit.md)."
   },
   "echo-brand": {
    "slot": "chest",

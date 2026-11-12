@@ -106,14 +106,15 @@
             "color": "tabard",
             "trim": "brass",
             "band2": true,
-            "hem": 0.5,
+            "hem": 0.74,
             "border": 0.035,
             "sex": "f"
           },
           {
             "type": "belt",
             "color": "leather",
-            "trim": "brass"
+            "trim": "brass",
+            "cutUntilFits": "Over the tabard at the waist: in a run the tabard's skirt rides over it (a tenth of the belt sunk, 0.07 deep)."
           },
           {
             "type": "badge",
@@ -314,7 +315,14 @@
           },
           {
             "type": "scarf",
-            "color": "red"
+            "color": "red",
+            "sex": "m"
+          },
+          {
+            "type": "scarf",
+            "color": "red",
+            "sex": "f",
+            "tails": "none"
           },
           {
             "type": "belt",
@@ -327,7 +335,15 @@
           {
             "type": "holster",
             "color": "leather",
-            "trim": "brass"
+            "trim": "brass",
+            "sex": "m"
+          },
+          {
+            "type": "holster",
+            "color": "leather",
+            "trim": "brass",
+            "sex": "f",
+            "cutUntilFits": "On the women's long split skirt the holster and its strap sink into the cloth at a walk (38% sunk, 0.069 deep). The men's, on the leg, fits."
           },
           {
             "type": "boots",
@@ -357,7 +373,7 @@
             "type": "sashknot",
             "color": "red",
             "side": "l",
-            "length": 0.4,
+            "length": 0.3,
             "in": [
               "formal",
               "master"
@@ -973,7 +989,18 @@
             "count": 5,
             "in": [
               "formal"
-            ]
+            ],
+            "sex": "m"
+          },
+          {
+            "type": "buttons",
+            "color": "brass",
+            "count": 5,
+            "in": [
+              "formal"
+            ],
+            "sex": "f",
+            "cutUntilFits": "On the women's waistcoat the lower buttons sink into the tunic's flare in a strafe (8-13% sunk, 0.064-0.084 deep). The men's fit."
           },
           {
             "type": "apron",
@@ -994,7 +1021,8 @@
               "plain",
               "master"
             ],
-            "sex": "f"
+            "sex": "f",
+            "cutUntilFits": "Over the women's flared tunic the apron's skirt sinks into the tunic's and the thighs come through it in a run or a dodge (10-21% sunk, 0.045 deep). The men's, over a plain tunic, fits."
           },
           {
             "type": "belt",
@@ -1054,11 +1082,32 @@
             "sleeves": 6,
             "trim": "brass",
             "border": 0.03,
-            "grow": 0.05,
+            "grow": 0.06,
             "cuffs": "brass",
             "in": [
               "master"
-            ]
+            ],
+            "sleeveGrow": 0.045,
+            "sex": "m"
+          },
+          {
+            "type": "coat",
+            "color": "dark",
+            "hem": 0.38,
+            "flare": 1.18,
+            "open": 0.14,
+            "openTo": "chest",
+            "sleeves": 6,
+            "trim": "brass",
+            "border": 0.03,
+            "grow": 0.06,
+            "cuffs": "brass",
+            "in": [
+              "master"
+            ],
+            "sleeveGrow": 0.045,
+            "sex": "f",
+            "cutUntilFits": "Over the women's flared tunic and waistcoat the Foreman's coat sinks into them at a walk and in a dodge (8-13% sunk, 0.036-0.045 deep, just over the limit). The men's fits."
           },
           {
             "type": "chain",
@@ -1220,7 +1269,8 @@
             "trim": "bronze",
             "count": 12,
             "length": 0.27,
-            "sex": "m"
+            "sex": "m",
+            "cutUntilFits": "Leather strips hung round the hips: a dodge or a run puts the thighs and the tunic's skirt through them (44% sunk, 0.085 deep)."
           },
           {
             "type": "tunic",
@@ -1461,7 +1511,8 @@
               0.05
             ],
             "border": 0.04,
-            "sex": "m"
+            "sex": "m",
+            "cutUntilFits": "A cloth hung in front between the legs: a stride or a dodge puts the thighs through it (sunk 16-20%, 0.05-0.065 deep, running)."
           },
           {
             "type": "robe",
@@ -1486,12 +1537,20 @@
             "color": "green",
             "trim": "gold",
             "side": "front",
-            "length": 0.45
+            "length": 0.45,
+            "cutUntilFits": "The sash's long ends hang down the front between the legs: a stride puts the thighs through them (28-42% sunk, 0.075 deep)."
           },
           {
             "type": "collar",
             "color": "gold",
-            "wide": 1.9
+            "wide": 1.9,
+            "sex": "m"
+          },
+          {
+            "type": "collar",
+            "color": "gold",
+            "wide": 1.5,
+            "sex": "f"
           },
           {
             "type": "armlets",
@@ -1693,7 +1752,8 @@
           {
             "type": "disc",
             "color": "gold",
-            "trim": "dark"
+            "trim": "dark",
+            "cutUntilFits": "The brass disc hangs from the belt in front of the thigh: a run or a dodge puts the leg through it (39-41% sunk, 0.085 deep)."
           },
           {
             "type": "patch",
@@ -1883,7 +1943,8 @@
             ],
             "pleats": 14,
             "folds": 0.012,
-            "sex": "m"
+            "sex": "m",
+            "cutUntilFits": "A cloth hung in front between the legs: a stride or a dodge puts the thighs through it (sunk 16-20%, 0.05-0.065 deep, running)."
           },
           {
             "type": "wrap",
@@ -2190,13 +2251,15 @@
             "side": "front",
             "at": 5,
             "length": 0.55,
-            "sex": "f"
+            "sex": "f",
+            "cutUntilFits": "The ends hang against a full skirt and sink into it in a strafe (22% sunk, 0.067 deep; drift 0.08)."
           },
           {
             "type": "tassel",
             "color": "jade",
             "trim": "white",
-            "x": 0.11
+            "x": 0.11,
+            "cutUntilFits": "Hangs in front of the thigh: a run or a dodge puts the leg through it (43-62% sunk, 0.07-0.08 deep)."
           },
           {
             "type": "patch",
@@ -2396,7 +2459,8 @@
           {
             "type": "furcollar",
             "color": "fur",
-            "radius": 0.042
+            "radius": 0.042,
+            "cutUntilFits": "Round the neck over the crossed kaftan a tenth of it is sunk in the cloth standing or moving (10-12% sunk, 0.07 deep). Lunden's, on a plain collar, fits."
           },
           {
             "type": "sash",
@@ -2622,7 +2686,14 @@
           {
             "type": "collar",
             "color": "gold",
-            "wide": 1.35
+            "wide": 1.35,
+            "sex": "m"
+          },
+          {
+            "type": "collar",
+            "color": "gold",
+            "wide": 1.12,
+            "sex": "f"
           },
           {
             "type": "strap",
@@ -2646,8 +2717,7 @@
             "radius": 0.045,
             "flip": true,
             "in": [
-              "formal",
-              "master"
+              "formal"
             ]
           },
           {
@@ -2796,7 +2866,10 @@
             "type": "wings",
             "color": "grey",
             "reach": 0.15,
-            "sex": "m"
+            "sex": "m",
+            "in": [
+              "plain"
+            ]
           },
           {
             "type": "tunic",
@@ -2847,7 +2920,7 @@
           {
             "type": "coat",
             "color": "hakama",
-            "hem": 0.6,
+            "hem": 1.05,
             "flare": 1.15,
             "open": 0.13,
             "openTo": "neck",
@@ -2855,12 +2928,13 @@
             "bell": 0.09,
             "trim": "grey",
             "border": 0.03,
-            "grow": 0.05,
+            "grow": 0.07,
             "in": [
               "formal",
               "master"
             ],
-            "cuffTrim": false
+            "cuffTrim": false,
+            "sleeveGrow": 0.045
           }
         ],
         "headgear": [

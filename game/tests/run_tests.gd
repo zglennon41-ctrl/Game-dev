@@ -102,6 +102,7 @@ func _run() -> void:
 	Data.use_types(game_types)
 	test_blood_marks()
 	test_life_features()
+	test_one_cloak_at_a_time()
 	test_bots()
 	test_opening()
 	print("%d passed, %d failed" % [passes, failures])
@@ -2321,15 +2322,12 @@ func test_life_features() -> void:
 		check(feats.has(f), "the life writes %s" % f)
 	w.build_hero(hero)
 	var skel: Skeleton3D = w._player.find_child("Skeleton3D", true, false)
-	var trim: Node = skel.find_child("feature_trim-journeyman_socket_throat", false, false)
-	check(trim != null and trim.get_child_count() > 0, "the trim hangs at the collar")
-	var tms := trim.find_children("*", "MeshInstance3D", true, false) if trim else []
-	var tm: MeshInstance3D = tms[0] if not tms.is_empty() else null
-	check(tm != null and (tm.get_active_material(0) as ShaderMaterial).get_shader_parameter("albedo").is_equal_approx(World.SHAPE_COLORS["turn"]), "the trim takes the Shape's colour")
-	var cape: Node = skel.find_child("feature_cape_socket_back", false, false)
-	check(cape != null and cape.get_child_count() > 0, "the cloak hangs from the back")
-	var cms := cape.find_children("*", "MeshInstance3D", true, false) if cape else []
-	var cm: MeshInstance3D = cms[0] if not cms.is_empty() else null
+	# the trim at the collar is cut until it fits a dressed neck (docs/dress-fit.md): written, not hung
+	check(Data.people_features["trim-journeyman"].has("cutUntilFits") and skel.find_child("feature_trim-journeyman_socket_throat", false, false) == null, "the trim is cut from the collar until it fits")
+	# the cloak is the body's own mesh, cut on its back and shoulders, not a stiff part on a socket
+	check(skel.find_child("feature_cape_socket_back", false, false) == null, "no stiff cloak hangs from the back socket")
+	var cm: MeshInstance3D = w._player.find_child("Cape", true, false) as MeshInstance3D
+	check(cm != null and cm.visible and cm.skin != null, "the cloak is the body's own, and moves with its bones")
 	var cape_col: Color = (cm.get_active_material(0) as ShaderMaterial).get_shader_parameter("albedo") if cm else Color.BLACK
 	check(not cape_col.is_equal_approx(Color(0.5, 0.42, 0.36)) and cape_col.r > 0.6, "the genius's colour threads the plain cloak")
 	# the iris is a surface of the eyeball, by its material's name
@@ -2347,7 +2345,8 @@ func test_life_features() -> void:
 	hero["look"]["cape"] = false
 	w.build_hero(hero)
 	skel = w._player.find_child("Skeleton3D", true, false)
-	check(skel.find_child("feature_cape_socket_back", false, false) == null, "no cloak when the look says none")
+	cm = w._player.find_child("Cape", true, false) as MeshInstance3D
+	check(cm != null and not cm.visible, "no cloak when the look says none")
 	w.queue_free()
 
 ## The body moves over the ground at the pace the clip's feet cross it (data/rules.json, motion).
@@ -2440,10 +2439,10 @@ func test_creator() -> void:
 	w.redress(c.hero)
 	var skel: Skeleton3D = w._player.find_child("Skeleton3D", true, false)
 	var cloaks := 0
-	for ch in skel.get_children():
-		if String(ch.name).begins_with("feature_cape"):
+	for ch in w._player.find_children("Cape*", "MeshInstance3D", true, false):
+		if (ch as MeshInstance3D).visible:
 			cloaks += 1
-	check(cloaks == 1, "dressed twice, the figure still wears one cloak (%d)" % cloaks)
+	check(cloaks == 1 and skel != null, "dressed twice, the figure still wears one cloak (%d)" % cloaks)
 	for leaf in ["body", "face", "dress", "reading"]:
 		c._set_tab(leaf)
 		check(got["framed"] == Creator.TAB_FRAMES[leaf], "the %s leaf frames the figure %s" % [leaf, Creator.TAB_FRAMES[leaf]])
@@ -2623,17 +2622,37 @@ func test_ages() -> void:
 	hero["look"] = { "cape": true, "cape_color": "plain", "skin": "tan" }
 	w.build_hero(hero)
 	var skel: Skeleton3D = w._player.find_child("Skeleton3D", true, false)
+	# The pieces worn at the collar are cut until they fit a dressed neck (docs/dress-fit.md):
+	# the echo is still written on the partner, and nothing stiff is hung at the throat.
 	var ruff: Node3D = skel.find_child("feature_echo-ruff_socket_throat", false, false)
-	check(ruff != null, "the ruff hangs at the partner's collar")
+	check(ruff == null and Data.people_features["echo-ruff"].has("cutUntilFits"), "the ruff is cut from the collar until it fits")
 	var coat := w.genius_coat(g, Color.WHITE)
 	check(not coat.is_equal_approx(Color.WHITE), "the echo is drawn in the genius's own coat")
-	var s3 := (ruff.get_child(0) as Node3D).scale.x if ruff and ruff.get_child_count() > 0 else 0.0
-	g["instar"] = 6
-	w.build_hero(hero)
-	skel = w._player.find_child("Skeleton3D", true, false)
-	ruff = skel.find_child("feature_echo-ruff_socket_throat", false, false)
-	var s6 := (ruff.get_child(0) as Node3D).scale.x if ruff and ruff.get_child_count() > 0 else 0.0
-	check(s6 > s3 and s3 > 0.0, "and it grows as the genius does (%.2f at the Third Form, %.2f at Apex)" % [s3, s6])
+	var grow: Dictionary = Data.genius()["echo"]["grow"]
+	check(float(grow.get("6", 1.0)) > float(grow.get("3", 1.0)), "and the echo's size still grows with the genius in the data, for when it comes back")
+	w.queue_free()
+
+## One cloak at a time (docs/dress-fit.md): the look's cloak is worn in place of the home's own
+## cloak and its shoulder cape, and what is slung on the back goes under a cloak, unseen.
+func test_one_cloak_at_a_time() -> void:
+	var w := World.new()
+	add_child(w)
+	w.set_place("cut")
+	for spec in [["tiber-m", "", true], ["tiber-m", "", false], ["alexandria-f", "formal", true], ["alexandria-f", "formal", false], ["kazan-m", "master", false], ["kazan-m", "", true]]:
+		var hero := Fight.default_hero()
+		hero["body"] = spec[0]
+		hero["look"] = { "cape": spec[2], "cape_color": "plain", "skin": "tan", "dress": spec[1] }
+		w.build_hero(hero)
+		var shown := {}
+		for m in w._player.find_children("*", "MeshInstance3D", true, false):
+			var n := String(m.name)
+			if (m as MeshInstance3D).visible and (n == "Cape" or n.begins_with("Dress_cloak") or n.begins_with("Dress_mantle") or n.begins_with("Dress_roll")):
+				shown[n.get_slice("__", 0)] = true
+		var cloaks := int(shown.has("Cape")) + int(shown.has("Dress_cloak"))
+		check(cloaks <= 1, "%s %s: one cloak at a time (%s)" % [spec[0], spec[1], str(shown.keys())])
+		check(shown.has("Cape") == spec[2], "%s: the look's cloak shows when the look says so" % spec[0])
+		check(not (shown.has("Cape") and shown.has("Dress_mantle")), "%s: no shoulder cape under the look's cloak" % spec[0])
+		check(not (cloaks > 0 and shown.has("Dress_roll")), "%s: what is slung on the back is under the cloak, unseen (%s)" % [spec[0], str(shown.keys())])
 	w.queue_free()
 
 ## A genius always keeps its kind (docs/genius-tree.md): a refinement offers nothing outside

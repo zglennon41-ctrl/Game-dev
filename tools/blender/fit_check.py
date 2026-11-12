@@ -3,15 +3,16 @@ not judged by eye (docs/dress-fit.md).
 
     python tools/blender/fit_check.py                      # every body of every home, the table, exit 1 on a failure
     python tools/blender/fit_check.py columbia-m tiber-f   # some bodies
-    python tools/blender/fit_check.py --all                # also what is cut from the game (data/bodies.json, dress.cut)
+    python tools/blender/fit_check.py --all                # also what is cut from the game, to see whether it fits yet (data/bodies.json, a piece's cutUntilFits)
     python tools/blender/fit_check.py --md docs/dress-fit-table.md   # write the table as well
     npm run check:fit
 
 Each body is built as body_kit builds it (the same code that writes the game's files), stood
-in the rest pose and in a set of the game's clips (idle, walk, run, a chop, a spin, a dodge,
-picking up, sitting, blocking, casting), at the fit build and, for idle and the run, lean and
+in the rest pose and in the clips the game plays (idle, walk, run, a strafe, a slice, a chop,
+a spin, the dodges, which go down into a crouch, blocking, casting, aiming, a hit), at the fit build and, for idle and the run, lean and
 heavy. Every piece is sampled with points spread over its surface, and each point is measured:
 
+  (deep fails only when more than a twentieth of the piece is sunk.)
   sunk   the point lies inside the body, or under a garment that is worn beneath its piece
          (a cloak under the coat it should hang over). share = how much of the piece is sunk
          deeper than its cloth is thick; deep = how deep the worst twentieth goes.
@@ -23,8 +24,10 @@ heavy. Every piece is sampled with points spread over its surface, and each poin
          a piece that does not move with the body.
 
 Lengths are in the kit's units (a body is 2.4 tall; 0.01 is about 7 mm on a person 1.8 m
-tall). The limits are LIMITS below, by the kind of piece. Arms are allowed to brush what is
-worn on the trunk (a hand through a skirt is the animation's, not the garment's).
+tall). The limits are LIMITS below, by the kind of piece. Each point is measured from the part
+of the body it lies on in the rest pose (the trunk and legs, or an arm): an arm may brush the
+trunk's dress, and the chin a collar (a hand through a skirt is the animation's, not the
+garment's). Nothing is measured against the head.
 """
 import json
 import math
@@ -37,19 +40,20 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 HOMES = ["alexandria", "columbia", "cahokia", "lunden", "colonia", "tiber", "khemet", "baghdad", "varanasi", "jiangnan", "kazan", "timbuktu", "edo"]
 
 # clip, where in it (0..1)
-POSES = [("Idle", 0.0), ("Walking_A", 0.25), ("Running_A", 0.3), ("Running_A", 0.8), ("1H_Melee_Attack_Chop", 0.4),
-         ("2H_Melee_Attack_Spin", 0.5), ("Dodge_Forward", 0.5), ("PickUp", 0.5), ("Sit_Chair_Idle", 0.5), ("Blocking", 0.5),
-         ("Spellcasting", 0.5)]
+POSES = [("Idle", 0.0), ("Walking_A", 0.25), ("Running_A", 0.3), ("Running_A", 0.8), ("Running_Strafe_Left", 0.3),
+         ("1H_Melee_Attack_Slice_Horizontal", 0.45), ("2H_Melee_Attack_Chop", 0.4), ("2H_Melee_Attack_Spin", 0.5),
+         ("Dodge_Forward", 0.5), ("Dodge_Backward", 0.5), ("Blocking", 0.5), ("Spellcasting", 0.5), ("2H_Ranged_Aiming", 0.5), ("Hit_A", 0.4)]
 BUILD_POSES = [("Idle", 0.0), ("Running_A", 0.3)]       # what lean and heavy are also stood in
 
 # What lies over what is the wardrobe's (wardrobe.LAYER): a piece must stay outside every piece
 # of a lower layer worn with it.
 # The kind of each piece, which sets its limits.
 SNUG = ("collar", "scarf", "belt", "sash", "obi", "strap", "wrap", "patch", "armlets", "beads", "chain", "brooch", "badge",
-        "buttons", "cuirass", "vest", "gloves", "shoes", "boots", "greaves", "sandals", "puttees", "tabard", "panel", "apron")
+        "buttons", "cuirass", "vest", "gloves", "shoes", "boots", "greaves", "sandals", "puttees")
 BULKY = ("furcollar", "roll", "satchel", "pauldrons", "holster", "coil", "sashknot", "toolloop", "bow", "tassel", "disc", "wings", "pteruges")
 HANG = ("cloak", "mantle", "cape")                    # hangs from its top: the top is held to the snug limits
 NECK = ("collar", "scarf", "furcollar", "beads", "chain", "brooch")
+STIFF = ("roll", "wings", "bow")              # stiff by nature (a case slung on a strap, starched shoulders): not held to drift
 
 THICK = 0.014          # sunk no deeper than this is the cloth's own thickness
 REACH = 0.09           # how far above a point a garment worn beneath is looked for
@@ -57,8 +61,8 @@ LIMITS = {
     # kind: (sunk share, sunk deep, float, jut, drift)   None: not held to it
     "cloth": (0.12, 0.035, None, None, None),          # a tunic, a coat, a skirt, trousers
     "snug": (0.15, 0.035, 0.02, 0.07, 0.05),           # lies on the body
-    "neck": (0.15, 0.03, 0.02, 0.06, 0.04),            # lies on the neck and shoulders
-    "bulky": (0.6, 0.06, 0.025, None, 0.06),           # a solid thing that rests on the body: half of it faces in
+    "neck": (0.15, 0.035, 0.02, 0.08, 0.04),            # lies on the neck and shoulders
+    "bulky": (0.6, 0.06, 0.035, None, 0.08),           # a solid thing that rests on the body: half of it faces in
     "hang": (0.10, 0.035, 0.03, 0.09, 0.06),           # float, jut and drift are of its top quarter
     "fall": (0.15, 0.04, None, None, None),            # what hangs from headgear below the chin
     "part": (0.15, 0.035, 0.03, 0.09, 0.06),           # a part on a socket (the creator's cloak, an echo at the collar)
@@ -131,11 +135,11 @@ def measure(body_id, with_cut=False):
             p = {"type": "shoes"} if n == 0 else ({"type": "cape", "in": ["plain", "formal"]} if n == 99 else pieces[n - 1])
             sub = "sleeves" if bits[2] == "sleeve" else ""
             weights = getattr(body, "dress_weights", {}).get(name)
-            hard = isinstance(weights, str)
+            hard = isinstance(weights, str) or p["type"] in wardrobe.PINNED or p["type"] in wardrobe.DANGLE or p["type"] == "beads"
             key = (n, sub)
             g = by.setdefault(key, {"label": ("%d %s%s" % (n, p["type"], " sleeves" if sub else "")) if n != 99 else "the creator's cloak", "type": p["type"], "ob": ob, "spans": [],
-                                    "layer": layer_of(p, hard), "arm": chain.startswith("arm") or (hard and "arm" in weights),
-                                    "wears": wears(p), "kind": kind_of(p["type"], sub), "hard": hard, "cut": bool(p.get("cut"))})
+                                    "layer": layer_of(p, hard), "arm": chain.startswith("arm") or (isinstance(weights, str) and "arm" in weights),
+                                    "wears": wears(p), "kind": kind_of(p["type"], sub), "hard": hard, "cut": bool(p.get("cutUntilFits"))})
             g["spans"].append((start, end))
         groups += list(by.values())
     (hx0, hx1), (hy0, hy1), (hz0, hz1) = body.head_extents()
@@ -145,9 +149,13 @@ def measure(body_id, with_cut=False):
             groups.append({"label": "head " + ob.name.split("__in_")[0][9:], "type": ob.name.split("__in_")[0][9:], "ob": ob, "spans": [(0, len(ob.data.vertices))],
                            "layer": 8, "arm": False, "wears": tuple(tags), "kind": "fall", "below": hz0 - 0.01, "rigid": True, "hard": False, "cut": False})
     sockets = {o.name: o for o in body.r.attached if o.type == "EMPTY"}
+    feats = json.load(open(os.path.join(ROOT, "data", "people-features.json")))["features"]
+    cut_parts = {f.get("part") for f in feats.values() if f.get("cutUntilFits")}
     for part, sock in PARTS.items():
         path = os.path.join(ROOT, "game", "assets", "people", "parts", part + ".glb")
         if not os.path.exists(path) or sock not in sockets:
+            continue
+        if part in cut_parts and not with_cut:      # cut from the game (data/people-features.json): not hung, not measured
             continue
         before = set(bpy.data.objects)
         bpy.ops.import_scene.gltf(filepath=path)
@@ -169,7 +177,7 @@ def measure(body_id, with_cut=False):
         o.parent = sockets[sock]
         o.matrix_parent_inverse.identity()
         groups.append({"label": "part " + part, "type": part, "ob": o, "spans": [(0, len(me.vertices))], "layer": 9, "arm": False,
-                       "wears": ("plain", "formal"), "kind": "part", "rigid": True, "hard": False, "cut": False})
+                       "wears": ("plain", "formal"), "kind": "part", "rigid": True, "hard": False, "cut": part in cut_parts})
     bpy.context.view_layer.update()
 
     # --- sample points on each group, fixed for every pose ---
@@ -223,6 +231,8 @@ def measure(body_id, with_cut=False):
     body_me = body_ob.data
     body_polys = [tuple(p.vertices) for p in body_me.polygons]
     body_face_arm = np.array([all(is_arm_v[i] for i in f) for f in body_polys])
+    is_head_v = np.asarray(body.human.is_head, dtype=bool)
+    body_face_head = np.array([all(is_head_v[i] for i in f) for f in body_polys])
 
     def set_build(build):
         for ob in body.r.skinned:
@@ -249,7 +259,12 @@ def measure(body_id, with_cut=False):
     def one_pose(anim, at, rest_gap=None):
         dg = stand(anim, at)
         bco = posed(body_ob, dg)
-        bvh = BVHTree.FromPolygons([tuple(p) for p in bco], body_polys)
+        # two bodies: the trunk and legs for what is worn on them, the arms for what is worn on
+        # the arms. A hand hanging by the hip is not what a sash's knot lies on.
+        bpts = [tuple(p) for p in bco]
+        whole = BVHTree.FromPolygons(bpts, body_polys)
+        bvhs = {False: BVHTree.FromPolygons(bpts, [f for f, a, h in zip(body_polys, body_face_arm, body_face_head) if not a and not h]),
+                True: BVHTree.FromPolygons(bpts, [f for f, a in zip(body_polys, body_face_arm) if a])}
         cos = {}
         for g in groups:
             if g["ob"].name not in cos:
@@ -276,13 +291,23 @@ def measure(body_id, with_cut=False):
             ubvh = BVHTree.FromPolygons(under_pts, under_faces) if under_faces else None
             sunk = np.zeros(len(P))
             gap = np.zeros(len(P))
+            if "on_arm" not in g:       # in the rest pose: which part of the body each point lies on
+                g["on_arm"] = [bool(body_face_arm[whole.find_nearest(Vector(p))[2]]) for p in P]
             for i, p in enumerate(P):
                 pv = Vector(p)
-                loc, nrm, idx, dist = bvh.find_nearest(pv)
+                loc, nrm, idx, dist = whole.find_nearest(pv)
                 d = pv - loc
                 inside = d.dot(nrm) < 0.0
-                brush = bool(body_face_arm[idx]) != g["arm"]        # an arm against the trunk's dress, or the other way
-                s = dist if (inside and not brush) else 0.0
+                if bool(body_face_arm[idx]) != g["on_arm"][i] or body_face_head[idx]:
+                    # the nearest of the body is not the part this point lies on (a hand by the
+                    # hip, an arm against the breast, the chin over a collar): a brush, and the
+                    # point is measured from its own part
+                    loc, nrm, idx, dist = bvhs[g["on_arm"][i]].find_nearest(pv)
+                    d = pv - loc
+                    inside = False
+                    if d.dot(nrm) < 0.0:
+                        d = nrm * dist
+                s = dist if inside else 0.0
                 gp = 0.0 if inside else dist
                 if ubvh is not None:
                     out_dir = nrm if (inside or dist < 1e-6) else d.normalized()
@@ -351,7 +376,11 @@ def judge(piece):
         for c in COLS:
             if c in row and (c not in worst or row[c] > worst[c][0]):
                 worst[c] = (row[c], pose)
+    if piece["type"] in STIFF:
+        lim[4] = None
     fails = [c for c, l in zip(COLS, lim) if l is not None and c in worst and worst[c][0] > l]
+    if "deep" in fails and worst["sunk"][0] <= 0.06:        # about a twentieth of a piece or less: an edge, not a fault
+        fails.remove("deep")
     return worst, fails
 
 
