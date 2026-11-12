@@ -177,32 +177,42 @@ by part, `tools/glb-parts.py`):
 | One cut of the dress | about 0.2 MB, and its keys | 3,000 points |
 | One headgear | 5 to 40 KB | |
 
-Measured, all 26 people together as the web build carries them:
+Measured, all 26 people together as the web build carries them (the people, and the whole
+game's data file, `build/web/index.pck`):
 
-| State | People | Against the ceiling |
+| State | People | The game's data |
 | --- | --- | --- |
-| Before this pass | 108 MB | the build at 210 of 256 |
+| Before this pass | 108 MB | 210 of 256 |
 | With the four build keys | 124 MB (+16) | about 226 |
-| With both cuts on every body | TBD | TBD |
+| With both cuts on every body | about 131 MB (+7) | about 233 |
+| With five hair styles and two coverings (after they were lightened; they were +16 at first) | 139 MB (+8) | 243.6, measured |
+| Merged with the dress that fits (every body's own cloak, the fitted pieces) | 146 MB | 251.4, measured |
+| With the shadow copies taken out of the people's files (below) | **128 MB** | **233.6, measured** |
 
 So the prices are: **a shape key on everything costs about 4 MB** over the 26 people (keys are
 kept as only the points that move, but a build moves nearly all of them); **a cut of dress on
-every body about TBD MB**; **a hair style about 1 to 2 MB**; **a covering about 1 MB**.
+every body about 7 MB**; **a hair style 1 to 2 MB**; **a covering about 1 MB**.
 
-The target does not fit under the ceiling as the files are laid out now: four outfits for each
-home would be about TBD MB of dress alone. Three things buy the room, in order of worth:
+One saving was taken in this pass: Godot keeps a second copy of every mesh for casting shadows.
+For people that was a fifth of each file (twenty hair styles, of which one is worn), and the
+mesh itself casts the same shadow: `game/assets/people/people_import.gd` drops the copies,
+18 MB back.
+
+The target still does not fit as the files are laid out: four outfits for each home would be
+about 28 MB of dress, and the build keys they carry more. Three things buy the room, in order
+of worth:
 
 1. **One set of animations for everyone** instead of a copy in each of the 26 files: about
    25 MB back. The clips are the same; only the rest pose's joint places differ by body, and
    the clips' rotations do not depend on them. The risk is the baked translations (the hips'
    bounce), which were scaled per body.
 2. **Hair as its own files**, loaded for the style a person wears: the 26 files carry every
-   style for every person now (about 19 MB), and a scene of thirty people needs perhaps ten.
+   style for every person now, and a scene of thirty people needs perhaps ten styles.
    It also takes hair out of the price of every new style.
 3. **Garments shared between homes where the cut is the same** (a plain tunic, trousers,
    boots, sandals), dyed and trimmed by the home.
 
-Until the first of these is done, the budget for new meshes is about 25 MB: every build key
+Until the first of these is done, the budget for new meshes is about 20 MB: every build key
 and every cut is weighed against it.
 
 ## 5. Order of work
@@ -286,7 +296,14 @@ Built in the first pass, each playable:
   home (`look.anySkin`); the home's hair styles are shown first.
 - **Hair and coverings.** Five more styles (Afro, Long braids, Coiled knots, Faded sides,
   Thinning) and two coverings on every head of every home (Head wrap, Headscarf), in the
-  home's cloth. A few classmates cover their hair.
+  home's cloth. A few classmates cover their hair. The headscarf is skinned like the body
+  under it (the neck's part bends with the neck) and carries every build.
+- **On the dress that fits** (`docs/dress-fit.md`, merged the same day): both cuts are built
+  by the fitted wardrobe, each piece seated on its own cut; `npm run check:fit` measures both
+  cuts on both bodies and the coverings on the neck (417 pieces on 26 bodies, all good).
+  Three pieces fit only the body they were cut for and are kept off the other
+  (`cutOnBody` in `data/bodies.json`: Lunden's fleece collar, Colonia's waistcoat buttons,
+  Edo's great bow).
 
 Still weak, and next:
 
