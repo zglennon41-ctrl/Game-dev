@@ -75,9 +75,12 @@ def worn_together(a, b):
 DANGLE = ("sashknot", "toolloop", "pteruges", "coil", "disc", "satchel", "tassel")
 # Small solid things sewn or pinned to the cloth: they take the body's weights too, so a bend
 # of the chest carries them on the cloth's surface instead of sinking them in its crease.
-PINNED = ("buttons", "badge", "brooch")
+PINNED = ("buttons", "badge", "brooch", "bow")
 # The shells cut from the neck and shoulders: let out vertex by vertex over a collar beneath.
 DRAPED = ("collar", "furcollar", "scarf")
+# The body's garments that hang over what is worn on the legs (a coat's skirt over full
+# trousers): let out where the legs' cloth stands out past them.
+SKIRTED = ("tunic", "jacket", "coat", "robe", "kaftan", "vest")
 # Bands laid on the body and a chain: let out vertex by vertex too, looking out from the trunk's axis.
 LAID = ("chain", "strap", "wrap", "patch")
 # Strings of separate things: each seated on its own, so the string follows what it lies on.
@@ -1340,16 +1343,18 @@ def dress_pieces(body, objs, build, slot):
 
     # --- seated: every band and every solid thing on what is worn under it, the lowest first --
     for m in sorted(made, key=lambda m: (m["layer"], m["hard"])):
-        if m["type"] not in SEAT_SOFT and m["type"] not in SEAT_HARD:
+        if m["type"] not in SEAT_SOFT and m["type"] not in SEAT_HARD and m["type"] not in SKIRTED:
+            continue
+        if "_sleeve_" in m["name"]:
             continue
         now = {"type": m["type"], "tags": m["tags"], "layer": m["layer"]}
         tail = m["name"].split("__in_")[0].endswith("_tail")
         how = False
-        if m["type"] in LAID or tail:
+        if m["type"] in LAID or m["type"] in SKIRTED or tail:
             how = "radial"
         elif m["type"] in DRAPED:
             how = True
-        seat_on(m["ob"], margin=0.012 if how else 0.008, hard=m["type"] in SEAT_HARD, drape=how)
+        seat_on(m["ob"], margin=0.03 if m["type"] in SKIRTED else (0.012 if how else 0.008), hard=m["type"] in SEAT_HARD, drape=how)
 
     # --- then the shoulder capes and the cloaks, over all of it -----------------------------
     for t, base, piece, cname, trim, sfx, now in sorted(deferred, key=lambda d: d[0] != "mantle"):

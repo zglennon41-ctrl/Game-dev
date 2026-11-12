@@ -778,7 +778,15 @@
           {
             "type": "belt",
             "color": "leather",
-            "trim": "steel"
+            "trim": "steel",
+            "sex": "m"
+          },
+          {
+            "type": "belt",
+            "color": "leather",
+            "trim": "steel",
+            "sex": "f",
+            "cutUntilFits": "Over the women's long coat and riding breeches the belt sinks where the breeches stand out under the coat in a run (7% sunk, 0.065 deep). The men's, on the short jacket, fits."
           },
           {
             "type": "trousers",

@@ -53,13 +53,13 @@ SNUG = ("collar", "scarf", "belt", "sash", "obi", "strap", "wrap", "patch", "arm
 BULKY = ("furcollar", "roll", "satchel", "pauldrons", "holster", "coil", "sashknot", "toolloop", "bow", "tassel", "disc", "wings", "pteruges")
 HANG = ("cloak", "mantle", "cape")                    # hangs from its top: the top is held to the snug limits
 NECK = ("collar", "scarf", "furcollar", "beads", "chain", "brooch")
-STIFF = ("roll", "wings", "bow")              # stiff by nature (a case slung on a strap, starched shoulders): not held to drift
+STIFF = ("roll", "wings")             # stiff by nature (a case slung on a strap, starched shoulders): not held to drift
 
 THICK = 0.014          # sunk no deeper than this is the cloth's own thickness
 REACH = 0.09           # how far above a point a garment worn beneath is looked for
 LIMITS = {
     # kind: (sunk share, sunk deep, float, jut, drift)   None: not held to it
-    "cloth": (0.12, 0.035, None, None, None),          # a tunic, a coat, a skirt, trousers
+    "cloth": (0.12, 0.045, None, None, None),          # a tunic, a coat, a skirt, trousers, an apron, a tabard
     "snug": (0.15, 0.035, 0.02, 0.07, 0.05),           # lies on the body
     "neck": (0.15, 0.035, 0.02, 0.08, 0.04),            # lies on the neck and shoulders
     "bulky": (0.6, 0.06, 0.035, None, 0.08),           # a solid thing that rests on the body: half of it faces in
