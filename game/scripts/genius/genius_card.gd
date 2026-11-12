@@ -177,11 +177,19 @@ func _stand(info: Dictionary) -> void:
 	body.set_rim(0.3)
 	_pivot.add_child(body)
 	_pivot.scale = Vector3.ONE * portrait_scale(body.stands * body.art_size)
+	# (a held genius is the size of a thing a hand holds, at every stage: a bow is brought down
+	# into the frame, a bell up into it)
+	if body.hand_k > 0.0:
+		_pivot.scale = Vector3.ONE * held_scale(body.stands)
 
 ## A portrait is to see it by: a genius that stands very small (a godling, a kit) is brought up
 ## to fill a fair part of the frame; one that already does is left at its own size.
 static func portrait_scale(height: float) -> float:
 	return clampf(0.56 / maxf(height, 0.05), 1.0, 2.8)
+
+## The same for a held genius, which may also be longer than the frame is tall.
+static func held_scale(long: float) -> float:
+	return clampf(0.6 / maxf(long, 0.05), 0.35, 2.8)
 
 func restyle(info: Dictionary) -> void:
 	_stand(info)

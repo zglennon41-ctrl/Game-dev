@@ -668,7 +668,7 @@
       "arms": {
         "name": "Arms",
         "one": "Arm",
-        "text": "A living thing in the shape of a weapon or a shield. You fight with it in your hand or on your arm.",
+        "text": "A living thing in the shape of a weapon or a shield.",
         "bases": [
           "blade",
           "bow",
@@ -680,7 +680,7 @@
       "regalia": {
         "name": "Regalia",
         "one": "Regalia",
-        "text": "A living thing in the shape of an instrument of office: a lamp, a glass, a bell. You carry it, and it changes the ground you fight on.",
+        "text": "A living thing in the shape of an instrument of office: a lamp, a glass, a bell.",
         "bases": [
           "lantern",
           "astrolabe",
