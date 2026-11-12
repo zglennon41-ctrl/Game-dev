@@ -662,6 +662,83 @@
       }
     }
   },
+  "equipment": {
+    "$comment": "The equipment geniuses (owner, 2026-11-12): a genius held, carried or worn is a living thing in that shape, and it is sized to the hand at every stage. It does not grow as a creature does: what a stage gives it is secondary characteristics (eyes, sinew, breath, colour), never size. categories: the three kinds, in the player's words, and the bases sorted into them (a base in none is a companion). This is a name over the types of data/genius-types.json, which still say what each does in a fight. hand: for each base, how long it is in the hand, in the game's units (a person stands about 2.4, a hand is 0.26 long). measure says what is measured: box (the longest side of the whole thing as it is held) or bulk (the breadth of a glove, from its body's bulk; its long is then counted in hands, and 1 is a hand). Every form is brought into long, give or take tolerance, whatever stage it is: a Final is never larger than its Starter by more than that (game/tests/check_items.gd fails on it). most: with what it has grown, nothing of it reaches further than this. afloat: how large it floats at its partner's side against its size in the hand (1: the same thing, let go). augments: the proof of one worn on the body (docs/genius-types.md, 'Augments'); nothing here is a rule of a fight.",
+    "categories": {
+      "arms": {
+        "name": "Arms",
+        "one": "Arm",
+        "text": "A living thing in the shape of a weapon or a shield. You fight with it in your hand or on your arm.",
+        "bases": [
+          "blade",
+          "bow",
+          "gun",
+          "shield",
+          "gauntlet"
+        ]
+      },
+      "regalia": {
+        "name": "Regalia",
+        "one": "Regalia",
+        "text": "A living thing in the shape of an instrument of office: a lamp, a glass, a bell. You carry it, and it changes the ground you fight on.",
+        "bases": [
+          "lantern",
+          "astrolabe",
+          "bell"
+        ]
+      },
+      "augments": {
+        "name": "Augments",
+        "one": "Augment",
+        "text": "A living thing that is part of you: wings at your back, a tail, a light under the skin.",
+        "bases": []
+      }
+    },
+    "tolerance": 0.08,
+    "afloat": 1.0,
+    "hand": {
+      "blade": {
+        "long": 1.15,
+        "measure": "box",
+        "most": 1.25
+      },
+      "bow": {
+        "long": 1.45,
+        "measure": "box",
+        "most": 1.57
+      },
+      "gun": {
+        "long": 0.6,
+        "measure": "box",
+        "most": 0.65
+      },
+      "shield": {
+        "long": 0.95,
+        "measure": "box",
+        "most": 1.03
+      },
+      "gauntlet": {
+        "long": 1.0,
+        "measure": "bulk",
+        "most": 0.7
+      },
+      "lantern": {
+        "long": 0.46,
+        "measure": "box",
+        "most": 0.5
+      },
+      "astrolabe": {
+        "long": 0.36,
+        "measure": "box",
+        "most": 0.39
+      },
+      "bell": {
+        "long": 0.36,
+        "measure": "box",
+        "most": 0.39
+      }
+    }
+  },
   "renamed": {
     "$comment": "A base that was taken out of the tree and what stands in its place (the Coat became the Living Armor on 2026-11-12: nothing is worn any more). A saved genius of the old base is read as the new one (Genius.from_dict): bases maps a base's id, forms each form's id (a hybrid's two bases and its form alike), silhouettes the body it wore. It keeps its name, its look, its age, its Seed-mark and what it had kept; what it is made of is the new form's.",
     "bases": {

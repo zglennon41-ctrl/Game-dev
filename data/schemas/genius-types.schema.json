@@ -722,24 +722,37 @@
        "held": {
         "type": "object",
         "required": [
-         "length"
+         "hand"
         ],
         "additionalProperties": false,
         "properties": {
-         "length": {
+         "hand": {
+          "type": "string",
+          "enum": [
+           "l",
+           "r"
+          ]
+         },
+         "rest": {
+          "type": "array",
+          "items": {
+           "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+         },
+         "aims": {
+          "type": "boolean"
+         },
+         "cant": {
+          "type": "number"
+         },
+         "draws": {
+          "type": "boolean"
+         },
+         "drawLength": {
           "type": "number",
           "exclusiveMinimum": 0
-         },
-         "grip": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
-         },
-         "flip": {
-          "type": "boolean"
-         },
-         "upright": {
-          "type": "boolean"
          }
         }
        },
@@ -2612,6 +2625,14 @@
       "enum": [
        "offhand"
       ]
+     },
+     "along": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2
+     },
+     "upright": {
+      "type": "boolean"
      }
     }
    }
