@@ -42,19 +42,13 @@ POSES = [("Idle", 0.0), ("Walking_A", 0.25), ("Running_A", 0.3), ("Running_A", 0
          ("Spellcasting", 0.5)]
 BUILD_POSES = [("Idle", 0.0), ("Running_A", 0.3)]       # what lean and heavy are also stood in
 
-# What lies over what: a piece must stay outside every piece of a lower layer worn with it.
-LAYER = {"trousers": 1, "hakama": 1, "boots": 1, "greaves": 1, "sandals": 1, "puttees": 1, "gloves": 1, "shoes": 1,
-         "tunic": 2, "jacket": 2, "kilt": 2, "wrapskirt": 2,
-         "coat": 2.5, "robe": 2.5, "kaftan": 2.5,
-         "cuirass": 3, "vest": 3, "apron": 3, "panel": 3, "tabard": 3, "patch": 3, "wrap": 3,
-         "belt": 4, "sash": 4, "obi": 4, "collar": 4, "scarf": 4, "strap": 4,
-         "mantle": 6, "cloak": 7}
-HARD_LAYER = 5          # buttons, a badge, a holster, a roll: whatever rides one bone
+# What lies over what is the wardrobe's (wardrobe.LAYER): a piece must stay outside every piece
+# of a lower layer worn with it.
 # The kind of each piece, which sets its limits.
 SNUG = ("collar", "scarf", "belt", "sash", "obi", "strap", "wrap", "patch", "armlets", "beads", "chain", "brooch", "badge",
         "buttons", "cuirass", "vest", "gloves", "shoes", "boots", "greaves", "sandals", "puttees", "tabard", "panel", "apron")
 BULKY = ("furcollar", "roll", "satchel", "pauldrons", "holster", "coil", "sashknot", "toolloop", "bow", "tassel", "disc", "wings", "pteruges")
-HANG = ("cloak", "mantle")                    # hangs from its top: the top is held to the snug limits
+HANG = ("cloak", "mantle", "cape")                    # hangs from its top: the top is held to the snug limits
 NECK = ("collar", "scarf", "furcollar", "beads", "chain", "brooch")
 
 THICK = 0.014          # sunk no deeper than this is the cloth's own thickness
@@ -70,7 +64,7 @@ LIMITS = {
     "part": (0.15, 0.035, 0.03, 0.09, 0.06),           # a part on a socket (the creator's cloak, an echo at the collar)
 }
 HARD_SUNK = 0.6        # a solid piece on one bone sits half in the cloth: only held to not being swallowed
-PARTS = {"cape": "socket_back", "echo-ruff": "socket_throat", "echo-charm": "socket_throat", "echo-gorget": "socket_throat", "trim": "socket_throat"}
+PARTS = {"echo-ruff": "socket_throat", "echo-charm": "socket_throat", "echo-gorget": "socket_throat", "trim": "socket_throat"}
 COLS = ("sunk", "deep", "float", "jut", "drift")
 
 
@@ -117,17 +111,10 @@ def measure(body_id, with_cut=False):
     def wears(p):
         return tuple(p.get("in", wardrobe.TAGS))
 
-    always_under = any(p["type"] in ("tunic", "jacket", "coat", "robe", "kaftan") and "in" not in p for p in pieces)
-
     def layer_of(p, hard):
-        t = p["type"]
-        if p.get("under"):      # worn beneath the body garment by design (a belt under an open coat)
-            return 1.5
-        if hard:
-            return HARD_LAYER
-        if t in ("coat", "robe", "kaftan") and "in" in p and always_under:
-            return 3.5          # an over-coat, worn over the home's everyday dress
-        return LAYER.get(t, HARD_LAYER)
+        if p["type"] in ("shoes", "cape"):
+            return wardrobe.LAYER[p["type"]]
+        return wardrobe.layer_of(D, sex, p)
 
     body_ob = body.parts["Body"]
     is_arm_v = np.asarray(body.human.is_arm, dtype=bool)
@@ -140,12 +127,13 @@ def measure(body_id, with_cut=False):
         for name, start, end, chain in spans:
             bits = name.split("__in_")[0].split("_")
             n = int(bits[1])
-            p = pieces[n - 1] if n > 0 else {"type": "shoes"}       # 0: the shoes every body wears unless it goes bare
+            # 0: the shoes every body wears unless it goes bare; 99: the cloak the creator offers every body
+            p = {"type": "shoes"} if n == 0 else ({"type": "cape", "in": ["plain", "formal"]} if n == 99 else pieces[n - 1])
             sub = "sleeves" if bits[2] == "sleeve" else ""
             weights = getattr(body, "dress_weights", {}).get(name)
             hard = isinstance(weights, str)
             key = (n, sub)
-            g = by.setdefault(key, {"label": "%d %s%s" % (n, p["type"], " sleeves" if sub else ""), "type": p["type"], "ob": ob, "spans": [],
+            g = by.setdefault(key, {"label": ("%d %s%s" % (n, p["type"], " sleeves" if sub else "")) if n != 99 else "the creator's cloak", "type": p["type"], "ob": ob, "spans": [],
                                     "layer": layer_of(p, hard), "arm": chain.startswith("arm") or (hard and "arm" in weights),
                                     "wears": wears(p), "kind": kind_of(p["type"], sub), "hard": hard, "cut": bool(p.get("cut"))})
             g["spans"].append((start, end))
@@ -275,7 +263,7 @@ def measure(body_id, with_cut=False):
             under_pts, under_faces = [], []
             base = 0
             for u in groups:
-                if u is g or u["layer"] >= g["layer"] or not set(u["wears"]) & set(g["wears"]):
+                if u is g or u["layer"] >= g["layer"] or not set(u["wears"]) & set(g["wears"]) or not wardrobe.worn_together(g["type"], u["type"]):
                     continue
                 if u["arm"] != g["arm"]:
                     continue
