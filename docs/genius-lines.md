@@ -730,9 +730,10 @@ it: the lantern's ring, the ring on the astrolabe's throne, the bell's handle or
 on its stock. `carry` is never turned and the instrument always hangs *below* it, upright,
 facing the way the body faces; so the game hangs any form of any of the three from a hand,
 a belt or a bracket by putting `carry` there, without knowing which form it is. How tall
-it is in the hand is the form's `held` (metres, in its `body`: a pocket astrolabe 0.14, a
-Tenor 0.55); as a body in the world it stands at its stage's height by `ref_top` like any
-other.
+it is in the hand was the form's `held`; since 2026-11-12 it is its base's one length at
+every stage (`data/genius.json`, `equipment.hand`: a lantern 0.46, an astrolabe or a bell
+0.36), and it floats at that size too. `held` is still written in the bodies and is no
+longer read.
 
 **The Lantern's body** (a lamp, and how it holds itself up):
 
@@ -797,6 +798,15 @@ a hilt long enough for two, a long gun's fore-end, the nock of a bowstring). To 
 in a hand, give the model the inverse of `grip`'s transform under the hand slot, at scale 1,
 and from there treat it as the kit's own model of that type (guns and bows take the same
 quarter turn the kit's do, `World.RANGED_MODELS`).
+
+**Its size (2026-11-12).** A held genius is sized to the hand at every stage
+(`data/genius.json`, `equipment`; `docs/genius-types.md`, "The rule of the hand"): the
+builders squeeze a form's own `len` or `barrel` into its base's length, so a Final is made
+no larger than its Starter, and the game holds and floats every form at that size. What is
+said below about a Starter floating a third larger, and `show`, no longer changes how large
+it is seen. A form's eye, a bow's string (`string`) and arrow (`pulse_arrow`), and the
+sinews and gills of its stage are pieces of their own; a bow also has `tip_up` and `tip_lo`,
+the ends of its string.
 
 **Floating.** It stands the way its base did: a blade hangs point-down (the wooden swords
 point-up, the Lunge at a slant, the Bar crosswise, the Wall of One planted in the ground), a

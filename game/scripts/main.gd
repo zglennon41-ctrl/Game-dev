@@ -1907,6 +1907,11 @@ func _study() -> void:
 		fight.w_state = "absent"
 		if fight.g_type == "weapon" and not _args.has("free"):
 			fight._take_in_hand()
+		# --augment=wings --stage=0..4: an Augment worn on the body (a proof, to look at)
+		var aug: Augment = null
+		if _args.has("augment"):
+			world.genius_visible = false
+			aug = world.wear_augment(str(_args["augment"]), int(_args.get("stage", "1")), World.SHAPE_COLORS.get(String(hero.get("shape", "anchor")), Color.WHITE))
 		if _args.has("rest") and fight.g_weapon.has("held"):
 			fight.g_weapon["held"] = (fight.g_weapon["held"] as Dictionary).duplicate()
 			fight.g_weapon["held"]["rest"] = Array(str(_args["rest"]).split(",")).map(func(x): return float(x))
@@ -1933,6 +1938,8 @@ func _study() -> void:
 				"run": clip = "Running_A"
 				"block": clip = "Blocking"
 			world.study_pose(clip, at)
+			if aug:
+				aug.spread = { "run": 0.35, "attack": 1.0 }.get(pose, 0.0)
 			for i in 8:
 				await get_tree().process_frame
 			for view in views:

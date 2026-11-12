@@ -3501,6 +3501,21 @@ func test_equipment() -> void:
 		if sizes.size() >= 2:
 			check(float(sizes.max()) <= float(sizes[0]) * (1.0 + tol) / (1.0 - tol) + 0.005 and float(sizes.min()) >= float(E["hand"][base]["long"]) * (1.0 - tol) - 0.005,
 				"down the %s's line from Starter to Final it stays the size of a thing a hand holds (%s)" % [base, ", ".join(sizes.map(func(x): return "%.2f" % x))])
+	# an Augment (the proof: living wings): five stages, one size, made to its wearer's shoulders
+	var wings: Dictionary = E.get("augments", {}).get("wings", {})
+	check((wings.get("stages", []) as Array).size() == 5, "the wings have their five stages, Baby to Final")
+	check(Augment.stage_of(-1, 5) == 0 and Augment.stage_of(9, 5) == 4 and Augment.stage_of(2, 5) == 2, "a stage is kept inside the five")
+	check(is_equal_approx(Augment.fit(0.375, 0.375), 1.0) and Augment.fit(0.3, 0.375) < 1.0 and Augment.fit(0.45, 0.375) > 1.0 and Augment.fit(5.0, 0.375) <= 1.25 and Augment.fit(0.01, 0.375) >= 0.8, "wings are made to the breadth of their wearer's shoulders, within reason")
+	var spans: Array = []
+	for st in 5:
+		if not ResourceLoader.exists(Augment.DIR % ["wings", st]):
+			continue
+		var wm: Node3D = (load(Augment.DIR % ["wings", st]) as PackedScene).instantiate()
+		var wbox := GeniusEquip.held_box(wm, "")
+		spans.append(maxf(wbox.size.x, wbox.size.y))
+		check(wm.find_child("wing_l", true, false) != null and wm.find_child("wing_r", true, false) != null, "the wings of stage %d are two wings, each a piece of its own" % st)
+		wm.free()
+	check(spans.size() == 5 and float(spans.max()) <= float(spans.min()) * (1.0 + tol) + 0.005, "the wings are the same size at every stage (%s)" % ", ".join(spans.map(func(x): return "%.2f" % x)))
 	# the page names the category
 	var bow := Genius.at_form("bow-hunting")
 	check(String(GeniusTypes.says(bow)["title"]) == "ARMS" and String((GeniusTypes.says(bow)["lines"] as Array)[0]).begins_with(String(E["categories"]["arms"]["text"])), "a Bow's page says it is of the Arms, in the category's own words")

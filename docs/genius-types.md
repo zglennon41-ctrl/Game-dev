@@ -51,6 +51,99 @@ and pays them back.
 written** in `data/genius-types.json` fights as every genius did before (a companion with
 no role), so a base added later works before anyone has written its type.
 
+## Arms, Regalia, Augments: the equipment geniuses
+
+> "The item type geniuses need to be fixed to actually make narrative sense and mechanical
+> scale. A giant bow or misaimed/held firearm is incredibly awkward." ... "They should
+> manifest secondary characteristics but stay the same size. It can be a pure aesthetic
+> companion form and/or more complex animations for their attacks and design."
+> (owner, 2026-11-12)
+
+A genius that is held, carried or worn is **a living thing in that shape**, not a made
+object with a soul in it. There are three kinds of them, in the player's words
+(`data/genius.json`, `equipment.categories`):
+
+| Category | What it is | Bases now |
+|---|---|---|
+| **Arms** | A living thing in the shape of a weapon or a shield: melee, ranged, shields | blade, bow, gun, shield, gauntlet |
+| **Regalia** | A living thing in the shape of an instrument of office: relics, staffs, crowns | lantern, astrolabe, bell |
+| **Augments** | A living thing that is part of its partner: wings, a tail, a light under the skin | none on the tree yet: one proof, below |
+
+**A category is a name over the types, and changes nothing in a fight.** A weapon and a
+defensive item are Arms; a ritual item is Regalia; a companion is in none. What each base
+does is still its type's, below. The genius's page heads "What it does beside you" with the
+category and opens with the category's own sentence; a card says the category before the
+kind ("Arms · Bow · Relic · First Form"). A saved genius needs no mapping: its category is
+read from its base, which the `renamed` table already carries from old saves.
+
+**The rule of the hand** (`equipment.hand`, `equipment.tolerance`; `GeniusEquip` in
+`game/scripts/genius/genius_equip.gd`). A held genius is sized to the hand **at every
+stage**. Each base has one length in the hand; every form of it, from Starter to Final, is
+brought into that length give or take the tolerance (8%), and with everything it has grown
+it reaches no further than `most`. It floats at its partner's shoulder at the same size
+(`afloat`). So it does not grow as a creature does: the ages still make it worth more
+(`ages`), and what a stage gives it to *show* is secondary characteristics.
+
+| Base | In the hand (a person stands about 2.4) | Measured |
+|---|---|---|
+| Blade | 1.15 | the whole of it |
+| Bow | 1.45 | the whole of it |
+| Gun | 0.60 | the whole of it: every form is a thing held in one hand |
+| Shield | 0.95 | the whole of it |
+| Gauntlet | a hand (its `bulk` brought to 1) | the glove; its cuff and what it holds reach no further than 0.7 |
+| Lantern | 0.46 | the whole of it |
+| Astrolabe, Bell | 0.36 | the whole of it |
+
+`godot --headless --path . -s res://game/tests/check_items.gd` fails if any form of any
+stage is outside its base's length, reaches past `most`, or is larger than its line's
+Starter by more than the tolerance; `-s res://game/tests/measure_held.gd` prints the table.
+The Blade, the Bow and the Gun are *made* at that size (`tools/blender/lines_weapons.py`
+squeezes a form's own length into the rule: a long gun is cut down to its stock and its
+lens, a child's bow is strung to the length of any other); the Shield, the Gauntlet and the
+three Regalia are made as they were and brought to the rule when the game builds them.
+
+**How each is held** (`data/genius-types.json`, `weapon.bases.*.held` and `mounts`):
+
+- **A bow** is held by its grip in the left hand and drawn with the right. Aimed (drawing,
+  loosing, or locked on to a foe), the bow hand is put out from its own shoulder along the
+  line to the foe, the bow stands upright on that line a little canted, the string comes
+  back to the corner of the jaw with the drawing hand on it (elbow up behind), and the
+  arrow of light lies from that hand through the grip. At rest it hangs upright at the side.
+- **A gun** is held in the right hand; aimed or fired, its barrel lies along the line to
+  the foe with its top to the sky, whatever the wrist is doing.
+- **A blade** sits in the right hand as the carried one did.
+- **A shield** sits up the forearm (not in the fist) with its top to the sky, so a tall one
+  does not hang on its side from an arm at rest.
+- A thing held in the left hand or in both puts the carried shield away while it is held.
+
+**Living things.** Every form of the Blade, the Bow and the Gun has an eye that blinks (a
+gun's lens is its eye). From the Path it has sinews of the field along it that breathe;
+from the Advancement, strings of sinew that sway (a blade, a bow) or gills at the breech (a
+gun); at the Final, gills (a blade, a bow) or a string of sinew from the butt (a gun). A
+bow's arrow of light breathes on the string. These are pieces of the model moved by name
+(`docs/genius-lines.md`, "What moves"). Colour by Path was already the coat's.
+
+**Augments: a first proof.** One line, living wings, is built to be looked at and nothing
+more (`tools/blender/augment_wings.py`, `game/scripts/genius/augment.gd`,
+`equipment.augments.wings`): five models, one a stage, the same size at all five, hung on
+the bone between the shoulder blades and made to the breadth of the wearer's shoulders.
+They fold at rest, lift as their partner runs, open on a strike, and breathe.
+
+| Stage | What it shows |
+|---|---|
+| Baby | down on the arm of the wing, bare quills where the flight feathers will be |
+| Starter | plain flight feathers; an eye at each wrist that blinks |
+| Path | a second row, banded dark; sinews of the field down the arm |
+| Advancement | coverts over the shoulder; an eye of the field on every third feather |
+| Final | every feather edged with the field; strings of sinew; a third eye; gills that breathe |
+
+`godot --path . -- --study=wings --augment=wings --stage=4 --body=kazan-f --poses=idle,run,attack --views=back,side --shots=DIR`
+There is no Augment on the tree, the rite does not offer one, and **how an Augment fights
+is not decided**: see the calls.
+
+`--study=<form>[,<form>]` takes pictures of any held genius on its partner (idle, aiming,
+attacking, running; from the quarter, the side, the back): `game/scripts/main.gd`, `_study`.
+
 ## Weapons: the blade, the bow, the gun
 
 A weapon genius is a weapon of its own. It has two places.
@@ -316,6 +409,26 @@ types; and Fog down its first road is the weakest companion in table 1.
 | The tables | `game/tests/balance.gd` (`--types`), `tools/genius-types-table.py` |
 
 ## The calls that are the owner's
+
+**On the equipment geniuses (2026-11-12):**
+
+- **How an Augment fights.** Nothing is built. The options: (a) it is a fourth type with a
+  key of its own (wings: a leap or a glide out of a strike; a tail: a third hand that
+  catches or trips; tattoos: a charge that is spent); (b) it has no key and only an
+  "always" (wings: a longer dodge; a tail: balance, so less knockback), so the G key is
+  free for something else; (c) it borrows the companion's roles (wings a Lookout, a tail a
+  Harrier) without leaving the body; (d) it changes its partner's own moves (the dodge
+  becomes a short flight) rather than adding one.
+- **Where an Augment comes from.** A new base on the tree offered at the rite like any
+  other (then each needs 31 forms and their words), or something a person already has from
+  their blood that a genius wakes.
+- **The Gauntlet's category.** It is sorted into Arms (it catches a strike; it is worn like
+  a shield). It could as well be an Augment (a living hand).
+- **The Starters' names.** At one size the Kept Knife is as long as a sword and the Pocket
+  Piece as long as a horse-pistol: their names say something smaller. Rename them, or make
+  the Blade's and the Gun's hand-size the knife's and the pocket pistol's.
+- **Staffs and crowns** (Regalia) are not built: proposals are in the worker's report.
+- **A cloak and a pair of wings want the same place** on a back.
 
 These are built the obvious way so the game is playable; each is a design decision and is
 yours to change.

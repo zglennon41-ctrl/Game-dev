@@ -1960,6 +1960,23 @@ func _build_markers() -> void:
 
 # --- Animation ----------------------------------------------------------------
 
+## An Augment worn on the partner, to look at (docs/genius-types.md, "Augments": a proof; how
+## one fights is not decided, and nothing in a fight puts one on). level: 0 Baby to 4 Final.
+var _augment: Augment = null
+func wear_augment(kind: String, level: int, tint: Color) -> Augment:
+	if _augment and is_instance_valid(_augment):
+		_augment.get_parent().queue_free()
+	_augment = null
+	var rule: Dictionary = Data.genius().get("equipment", {}).get("augments", {}).get(kind, {})
+	if rule.is_empty() or _p_skel == null:
+		return null
+	_augment = Augment.wear(_p_skel, kind, rule, level, tint)
+	if _augment:
+		toonify(_augment)
+		for m in _augment.find_children("*", "MeshInstance3D", true, false):
+			(m as MeshInstance3D).material_overlay = _ink("people")
+	return _augment
+
 ## The partner held still at one moment of one clip (main.gd, --study).
 func study_pose(clip: String, at: float) -> void:
 	if _p_anim == null or not _p_anim.has_animation(clip):

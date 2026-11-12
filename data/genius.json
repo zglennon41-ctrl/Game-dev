@@ -737,6 +737,41 @@
         "measure": "box",
         "most": 0.39
       }
+    },
+    "augments": {
+      "$comment": "Living wings, the proof (tools/blender/augment_wings.py; game/scripts/genius/augment.gd; look at one with --study --augment=wings --stage=0..4 --body=<person>). bone: the bone of its partner's rig it rides; at: where from that bone, in its partner's own left, up and front; madeFor: the breadth of shoulders its model was made on (it is made broader or narrower with its partner, within reason). stages: what each stage shows, for the people who make it; it is the same size at all five. None of this is a rule of a fight.",
+      "wings": {
+        "name": "Living wings",
+        "bone": "chest",
+        "at": [
+          0.0,
+          0.2,
+          -0.1
+        ],
+        "madeFor": 0.375,
+        "stages": [
+          {
+            "stage": "Baby",
+            "shows": "Down on the arm of the wing, and bare quills where the flight feathers will be."
+          },
+          {
+            "stage": "Starter",
+            "shows": "The quills have their vanes: plain flight feathers. An eye opens at each wrist, and blinks."
+          },
+          {
+            "stage": "Path",
+            "shows": "A second row over the first, banded dark. Sinews of the field down the arm, breathing."
+          },
+          {
+            "stage": "Advancement",
+            "shows": "Coverts over the shoulder. An eye of the field on every third feather, as on a moth's wing."
+          },
+          {
+            "stage": "Final",
+            "shows": "Every feather edged with the field. Strings of sinew from the last feathers. A third eye between the wings, and gills at their roots that breathe."
+          }
+        ]
+      }
     }
   },
   "renamed": {
