@@ -23,6 +23,18 @@ import hair as hr
 
 # The three builds the player's slider blends: (muscle, weight) on MakeHuman's scales.
 BUILD_FORMS = {"lean": (0.32, 0.36), "fit": (0.62, 0.5), "heavy": (0.98, 0.68)}
+
+
+def extra_builds():
+    """The builds beyond lean and heavy, each a shape key of its own (data/bodies.json, builds.keys;
+    docs/representation-plan.md): a point on MakeHuman's muscle and weight scales, with details
+    over the home's own and an age."""
+    try:
+        return json.load(open(os.path.join(pk.ROOT, "data", "bodies.json"))).get("builds", {}).get("keys", {})
+    except OSError:
+        return {}
+
+
 ARM_BONES = ("upperarm", "lowerarm", "hand", "index", "middle", "ring", "pinky", "thumb")
 LEG_BONES = ("thigh", "calf", "foot", "ball")
 
@@ -153,6 +165,54 @@ class HumanBody:
         self._landmarks()
         # the face: its shapes as keys, its finish, and what sits on it (faces.py)
         self.visage = fc.Faces(self, ancestry, details, BUILD_FORMS["fit"])
+        # the other builds (thin, stout, broad, old): each a body of its own, kept on the fit
+        # body's joints and skull, so the rig, the hair and the hats fit every one of them
+        self.build_joints = {}
+        for b, spec in extra_builds().items():
+            self.humans[b] = self._extra_build(b, spec, ancestry, details, H)
+
+    def _extra_build(self, name, spec, ancestry, details, H):
+        """Another build of this person as a body the shape of the fit one. MakeHuman's forms
+        move the joints (a broad frame sets the shoulders wider, age shortens the limbs and
+        bows the back), and the game's bones do not move with a shape key: so each part of the
+        body is brought back onto its own bone (what the joints did is written to
+        build_joints, for the game to give back by moving the bones), and the skull under the
+        hair is left as it was (the face, the jaw and the neck change)."""
+        fit = self.humans["fit"]
+        d = dict(details)
+        for k, x in spec.get("details", {}).items():
+            d[k] = max(-1.6, min(1.6, float(d.get(k, 0.0)) + float(x)))
+        build = (float(spec.get("muscle", BUILD_FORMS["fit"][0])), float(spec.get("weight", BUILD_FORMS["fit"][1])))
+        h = hu.Human(self.body.sex, ancestry, d, build, height=H, like=None if spec.get("ownPose") else fit, age=float(spec.get("age", 0.5)))
+        n = hu.BODY_VERTS
+        delta = h.v - fit.v
+        J1 = h.rig_joints()
+        moved = {b: np.array(J1[b] - self.J[b]) for b in self.J}
+        self.build_joints[name] = {b: [round(float(x), 4) for x in m] for b, m in moved.items() if np.abs(m).max() > 0.002}
+        shift = np.zeros((n, 3))
+        total = np.zeros(n)
+        for bone, w in fit.rig_weights().items():
+            if bone in moved:
+                shift += w[:, None] * moved[bone]
+                total += w
+        delta[:n] -= shift / np.maximum(total, 1e-9)[:, None]
+        delta[n:] -= moved["head"]
+        # the eyes move and grow with their sockets (before the skull is held)
+        eyes = {}
+        for s in ("l", "r"):
+            c0, c1 = fit.joint("joint-%s-eye" % s), h.joint("joint-%s-eye" % s)
+            g = h.group("helper-%s-eye" % s)
+            eyes[s] = (c1 - c0 - moved["head"], float(np.linalg.norm(g - g.mean(axis=0), axis=1).mean()) / self.eye_r)
+        v = fit.v[:n]
+        Hh, c = self.head_h, self.visage.c
+        face = fc._nsmooth((c.z + 0.37 * Hh - v[:, 2]) / (0.13 * Hh)) * fc._nsmooth((c.y + 0.17 * Hh - v[:, 1]) / (0.17 * Hh))
+        skull = (1.0 - face) * fc._nsmooth((v[:, 2] - self.chin_z) / (0.2 * Hh))
+        delta[:n] *= (1.0 - skull)[:, None]
+        delta[np.linalg.norm(delta, axis=1) < 0.00012] = 0.0
+        h.v = fit.v + delta
+        self.visage.builds[name] = delta
+        self.visage.build_eyes[name] = eyes
+        return h
 
     # --- landmarks ----------------------------------------------------------------------
 

@@ -605,9 +605,9 @@ func _leaf_body(v: VBoxContainer) -> void:
 	_section(v, "THE FACE OF %s" % String(hero["city"]).to_upper(), "")
 	if home.has("brief"):
 		_line(v, String(home["brief"]))
-	_line(v, "Your home gives the cast of the face and the frame. The rest is yours.", DIM)
+	_line(v, "Your home gives the cast of the face. The body is yours.", DIM)
 
-	_section(v, "FRAME", "")
+	_section(v, "BODY", "")
 	var sexes := _flow(v, "")
 	for sx in L.get("sexes", {}):
 		var sid: String = sx
@@ -617,13 +617,40 @@ func _leaf_body(v: VBoxContainer) -> void:
 			hero.erase("body_override")
 			changed.emit(hero)
 			_draw_reveal(), String(look.get("sex", "m")) == sid)
-	var builds: Dictionary = L.get("builds", { "fit": 0.0 })
-	_slider(v, "Build", "builds", builds, 0.05, float(look.get("build", 0.0)), func(x: float):
-		look["build"] = x
-		look_changed.emit(hero))
+
+	# The build: a row of builds by name, each a setting of the three measures under it, which
+	# stay the player's to move (data/creation.json, look.frame.presets).
+	var presets: Array = L.get("frame", {}).get("presets", [])
+	_section(v, "BUILD", "")
+	var prow := _flow(v, "")
+	var chips := {}
+	var relight := func():
+		var now := build_preset(look)
+		for pid in chips:
+			_chip_style(chips[pid], pid == now)
+	for pr in presets:
+		var pid := String(pr["id"])
+		var set_to: Dictionary = pr
+		chips[pid] = _chip(prow, _label("buildPresets", pid), func():
+			for k in ["build", "weight", "frame"]:
+				look[k] = float(set_to.get(k, 0.0))
+			look_changed.emit(hero)
+			_draw_reveal(), build_preset(look) == pid)
+	for m in [["Muscle", "builds", "build"], ["Weight", "weights", "weight"], ["Frame", "frames", "frame"]]:
+		var key: String = m[2]
+		_slider(v, m[0], m[1], L.get(m[1], { "even": 0.0 }), 0.05, float(look.get(key, 0.0)), func(x: float):
+			look[key] = x
+			relight.call()
+			look_changed.emit(hero))
+	_line(v, "Your home's dress is cut to whatever body you make.", DIM)
+
+	_section(v, "STATURE AND YEARS", "")
 	var sts: Dictionary = L.get("statures", { "middling": 1.0 })
 	_slider(v, "Stature", "statures", sts, 0.01, float(look.get("stature", 1.0)), func(x: float):
 		look["stature"] = x
+		look_changed.emit(hero))
+	_slider(v, "Years", "ages", L.get("ages", { "young": 0.0 }), 0.05, float(look.get("age", 0.0)), func(x: float):
+		look["age"] = x
 		look_changed.emit(hero))
 
 	var skin := String(look.get("skin", "olive"))
@@ -994,6 +1021,13 @@ func _button(parent: Control, t: String, cb: Callable, primary := false) -> Butt
 func _chip(parent: Control, t: String, cb: Callable, on := false) -> Button:
 	var b := Button.new()
 	b.text = t
+	_chip_style(b, on)
+	b.pressed.connect(func(): _click(); cb.call())
+	parent.add_child(b)
+	return b
+
+## A chip as it is drawn: lit when it is the one chosen.
+func _chip_style(b: Button, on: bool) -> void:
 	_style(b, on, 15, "ui")
 	for st in ["normal", "hover", "focus", "pressed", "hover_pressed"]:
 		var sb := b.get_theme_stylebox(st) as StyleBoxFlat
@@ -1001,9 +1035,18 @@ func _chip(parent: Control, t: String, cb: Callable, on := false) -> Button:
 		sb.content_margin_right = 12
 		sb.content_margin_top = 6
 		sb.content_margin_bottom = 6
-	b.pressed.connect(func(): _click(); cb.call())
-	parent.add_child(b)
-	return b
+
+## The named build a look's three measures are set to (data/creation.json, look.frame.presets);
+## "" when they are the player's own.
+static func build_preset(look: Dictionary) -> String:
+	for pr in Data.creation.get("look", {}).get("frame", {}).get("presets", []):
+		var same := true
+		for k in ["build", "weight", "frame"]:
+			if absf(float(look.get(k, 0.0)) - float(pr.get(k, 0.0))) > 0.026:
+				same = false
+		if same:
+			return String(pr["id"])
+	return ""
 
 ## A row that wraps: chips or swatches, with a small label before them.
 func _flow(parent: Control, label: String) -> HFlowContainer:

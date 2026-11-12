@@ -369,6 +369,10 @@ static func random_look(rng: RandomNumberGenerator, city := "") -> Dictionary:
 		"hair": hairs[rng.randi() % hairs.size()], "beard": (beards[rng.randi() % beards.size()] if rng.randf() < 0.35 else beards[0]) if sex == "m" else beards[0],
 		"hair_color": cols[rng.randi() % cols.size()], "stature": sts[rng.randi() % sts.size()],
 		"sex": sex, "skin": tones[rng.randi() % tones.size()], "build": builds[rng.randi() % builds.size()] })
+	# and a weight and a frame of their own, drawn apart so the cohort's other draws stay as they were
+	var apart := RandomNumberGenerator.new()
+	apart.seed = rng.state
+	face.merge(Creation.frame_of(apart))
 	return face
 
 static func _shuffle(a: Array, rng: RandomNumberGenerator) -> void:
@@ -495,7 +499,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 		var at := Vector2(ins["at"][0], ins["at"][1])
 		# an Instructor wears their home's dress as a master of it does, hat and all
 		var ilook: Dictionary = world.look_for(String(data["name"]))
-		ilook.merge({ "dress": "master", "headgear": true, "cape": false }, true)
+		ilook.merge({ "dress": "master", "headgear": true, "cape": false, "age": World.elder_age(String(data["name"])) }, true)
 		ilook.merge(data.get("look", {}), true)
 		var fig := world.add_figure(data["body"], at, (spawn - at).angle(), data["name"], data.get("title", ""), "", Color(0, 0, 0, 0), ilook)
 		fig["lead"] = true    # an Instructor's name shows before a classmate's beside them

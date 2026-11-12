@@ -75,6 +75,15 @@ func _run() -> void:
 		base["dress"] = kv["dress"]
 	if kv.has("rank"):
 		base["rank"] = kv["rank"]
+	# the body's measures and anything else of the look, on every figure: weight=1 frame=0.5 age=1 hair=locs
+	for k in ["build", "weight", "frame", "age", "stature"]:
+		if kv.has(k):
+			base[k] = float(kv[k])
+	for k in ["hair", "hair_color", "beard", "skin"]:
+		if kv.has(k):
+			base[k] = kv[k]
+	if kv.has("headgear"):
+		base["headgear"] = kv["headgear"] == "1"
 	var cell := Vector2(1.25, 2.3)
 	var cols := 13
 	var rows := 4
@@ -91,6 +100,61 @@ func _run() -> void:
 					look["skin"] = tones[tones.size() / 2]
 					look["hair"] = "crop" if sex == "m" else "tail"
 					_figure("%s-%s" % [HOMES[i], sex], look, i, r, cols, rows, FRONT if r % 2 == 0 else BACK, anim, at, cell)
+		"hair":
+			# every hair style the creator offers, bare-headed: one home's men and women from the
+			# front and from behind (home=<id>), in the home's own most common hair colour
+			var hhome := String(kv.get("home", "timbuktu"))
+			var styles: Array = Data.creation["look"]["hair"]
+			cols = styles.size()
+			cell = Vector2(0.62, 0.78)
+			var htones: Array = Data.bodies[hhome].get("palette", ["olive"])
+			for i in styles.size():
+				for r in 4:
+					var sex := "m" if r < 2 else "f"
+					var look := base.duplicate()
+					look.merge({ "skin": htones[htones.size() / 2], "hair": styles[i], "headgear": false,
+						"hair_color": kv.get("hair_color", (Data.bodies[hhome].get("hairColors", ["black"]) as Array)[0]) }, true)
+					_figure("%s-%s" % [hhome, sex], look, i, r, cols, rows, FRONT if r % 2 == 0 else BACK, anim, at, cell)
+					(bodies[-1] as Node3D).position.y -= 1.52      # the head, not the feet, in the cell
+					(bodies[-1] as Node3D).position.z = r * 2.0     # each row nearer than the last, a screen behind it
+			for r in rows + 1:
+				var screen := MeshInstance3D.new()
+				var quad := QuadMesh.new()
+				quad.size = Vector2(cols * cell.x + 4.0, cell.y)
+				var flat := StandardMaterial3D.new()
+				flat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+				flat.albedo_color = Color(0.085, 0.08, 0.075)
+				quad.material = flat
+				screen.mesh = quad
+				screen.position = Vector3(0, HIGH - r * cell.y - 0.03, r * 2.0 - 1.0)
+				world.add_child(screen)
+		"builds":
+			# one home's people in every build the creator names, then old, then old and heavy:
+			# the men from the front and behind, the women from the front and behind (home=<id>)
+			var bhome := String(kv.get("home", "alexandria"))
+			var named: Array = (Data.creation["look"].get("frame", {}).get("presets", []) as Array).duplicate()
+			named.append({ "id": "old", "age": 1.0 })
+			named.append({ "id": "old-heavy", "age": 1.0, "weight": 1.0 })
+			named.append({ "id": "short", "stature": 0.88, "weight": 0.5 })
+			named.append({ "id": "tall", "stature": 1.12, "weight": -0.5 })
+			if kv.has("pick"):      # only these builds, larger: pick=heavy,big,old
+				var want := String(kv["pick"]).split(",")
+				named = named.filter(func(b): return want.has(String(b["id"])))
+			cols = named.size()
+			cell = Vector2(1.45, 2.75)
+			var btones: Array = Data.bodies[bhome].get("palette", ["olive"])
+			for i in named.size():
+				for r in 4:
+					var sex := "m" if r < 2 else "f"
+					var look := base.duplicate()
+					look["skin"] = btones[btones.size() / 2]
+					for k in ["build", "weight", "frame", "age", "stature"]:
+						look[k] = float(named[i].get(k, base.get(k, 0.0 if k != "stature" else 1.0)))
+					if not kv.has("hair"):
+						look["hair"] = "crop" if sex == "m" else "tail"
+					if float(look["age"]) > 0.5 and not kv.has("hair_color"):
+						look["hair_color"] = "grey"
+					_figure("%s-%s" % [bhome, sex], look, i, r, cols, rows, FRONT if r % 2 == 0 else BACK, anim, at, cell)
 		"masters":
 			var ins: Array = Data.academy["instructors"]
 			cols = ins.size()
@@ -141,7 +205,7 @@ func _run() -> void:
 	world.add_child(cam)
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
 	var vp := get_viewport().get_visible_rect().size
-	var mid := Vector3(0, HIGH - (rows - 1) / 2.0 * cell.y + 0.98, 0)
+	var mid := Vector3(0, HIGH - (rows - 1) / 2.0 * cell.y + (0.98 if what != "hair" else -0.03), 0)
 	cam.size = maxf(rows * cell.y, cols * cell.x * vp.y / vp.x)
 	cam.far = 400.0
 	cam.position = mid + Vector3(0, 0.0, 60.0)

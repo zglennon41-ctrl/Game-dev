@@ -209,7 +209,19 @@ static func look_of(city: String, spark: int) -> Dictionary:
 		"build": snappedf(rng.randf_range(float(b[0]), float(b[1])), 0.05),
 		"stature": snappedf(rng.randf_range(float(h[0]), float(h[1])), 0.01) }
 	look.merge(face_of(rng, city))
+	look.merge(frame_of(rng))
 	return look
+
+## A body's weight and frame drawn at random between the least and the greatest a life starts
+## with (data/creation.json, look.start): for a new life and for everyone the player did not make.
+static func frame_of(rng: RandomNumberGenerator) -> Dictionary:
+	var st: Dictionary = Data.creation.get("look", {}).get("start", {})
+	var w: Array = st.get("weight", [0.0, 0.0])
+	var f: Array = st.get("frame", [0.0, 0.0])
+	# two draws each: most people are near the middle, a few at either end
+	var weight := (rng.randf_range(float(w[0]), float(w[1])) + rng.randf_range(float(w[0]), float(w[1]))) / 2.0
+	var frame := (rng.randf_range(float(f[0]), float(f[1])) + rng.randf_range(float(f[0]), float(f[1]))) / 2.0
+	return { "weight": snappedf(weight, 0.05), "frame": snappedf(frame, 0.05), "age": 0.0 }
 
 ## A face drawn at random, from what the home's people most often have (data/bodies.json: eyes,
 ## marks) and from every shape, brow and feature the bodies carry (data/creation.json, look):

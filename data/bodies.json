@@ -2959,6 +2959,15 @@
       ]
     }
   },
+  "builds": {
+    "comment": "The builds every body carries as shape keys beyond lean and heavy (tools/blender/human_kit.py; docs/representation-plan.md). Each is a point on MakeHuman's muscle and weight scales (0 to 1; the fit body is 0.62 and 0.5), with details laid over the home's own (-1 to 1) and an age (0.5 a young adult, 1 the oldest). ownPose: the form is posed and sized on its own joints (age shortens and bows a body; the look's age gives the bow back with the bones). The creator's sliders that blend them are in data/creation.json (look.weights, look.frames, look.ages). Every number is the owner's to change; the bodies are built again after (python tools/blender/body_kit.py all).",
+    "keys": {
+      "thin": { "muscle": 0.25, "weight": 0.0 },
+      "stout": { "muscle": 0.1, "weight": 1.0 },
+      "broad": { "muscle": 0.66, "weight": 0.55, "details": { "torso-scale-horiz": 0.8, "measure-shoulder-dist": 0.9, "torso-scale-depth": 0.3, "hip-scale-horiz": 0.45, "neck-scale-horiz": 0.6, "torso-muscle-dorsi": 0.4 }, "ownPose": true },
+      "old": { "muscle": 0.35, "weight": 0.5, "age": 0.9, "ownPose": true }
+    }
+  },
   "faces": {
     "presets": [
       {

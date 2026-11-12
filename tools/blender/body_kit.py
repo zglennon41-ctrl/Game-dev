@@ -763,7 +763,7 @@ class Body:
         """Three builds of every mesh with the same topology: fit is the base, lean and heavy
         its shape keys."""
         fit = self.build_meshes("fit")
-        for build in ("lean", "heavy"):
+        for build in ["lean", "heavy"] + ([b for b in self.human.humans if b not in BUILDS] if self.HUMAN else []):
             other = self.build_meshes(build)
             for name, ob in fit.items():
                 if not ob.data.shape_keys:
@@ -900,6 +900,7 @@ class Body:
             self.r.measured["body"] = self.id
             (_, _), (_, _), (hz0, hz1) = self.head_extents()
             self.r.measured["heads_tall"] = round(self.r.extent([self.parts["Body"]])[1] / (hz1 - hz0), 2)
+            self.r.measured["build_joints"] = self.human.build_joints      # what data/creation.json, look.frame gives back with the bones
             return self
         if self.ANATOMY:
             self.hang([(e, "head") for e in self.head_pieces])

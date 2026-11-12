@@ -104,8 +104,102 @@ func _run() -> void:
 	test_life_features()
 	test_bots()
 	test_opening()
+	test_builds()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
+
+## The body's builds (docs/representation-plan.md): weight, frame and years are measures of the
+## look beside the build, each blending shape keys every body and its dress carry; a frame's
+## joints are given back with the bones; the creator names builds, and a classmate has one.
+func test_builds() -> void:
+	var L: Dictionary = Data.creation["look"]
+	var F: Dictionary = L["frame"]
+	var plain := World.build_keys({})
+	var none := true
+	for k in plain:
+		none = none and is_zero_approx(float(plain[k]))
+	check(none and plain.size() == 6, "a look that names no build is the fit body: no key drawn")
+	var heavy := World.build_keys({ "weight": 1.0, "build": -1.0, "frame": -0.6, "age": 0.5 })
+	check(heavy["stout"] == 1.0 and heavy["thin"] == 0.0 and heavy["lean"] == 1.0 and heavy["heavy"] == 0.0, "weight and build each draw one key of their pair")
+	check(is_equal_approx(heavy["broad"], -0.6) and is_equal_approx(heavy["old"], 0.5), "a narrow frame is the broad key drawn backwards; years draw the old key")
+	check(World.build_keys({ "weight": 7.0, "age": -3.0 })["stout"] == 1.0 and World.build_keys({ "age": -3.0 })["old"] == 0.0, "the measures are held to their ends")
+	# the joints a frame moves, mirrored for the two sides
+	check(World.frame_moves({}).is_empty(), "the fit body moves no bone")
+	var moves := World.frame_moves({ "frame": 1.0 })
+	check(moves.has("upperarm.l") and moves.has("upperarm.r") and (moves["upperarm.l"] as Vector3).x > 0.03 and is_equal_approx((moves["upperarm.l"] as Vector3).x, -(moves["upperarm.r"] as Vector3).x),
+		"a broad frame sets the two shoulders apart by the same measure")
+	var half := World.frame_moves({ "frame": 0.5 })
+	check(is_equal_approx((half["upperarm.l"] as Vector3).x * 2.0, (moves["upperarm.l"] as Vector3).x), "half a frame moves them half as far")
+	var old := World.frame_moves({ "age": 1.0 })
+	check(old.has("head") and (old["head"] as Vector3).z > 0.0, "years carry the head forward")
+	check(World.stature_of({ "stature": 1.0, "age": 1.0 }) < 1.0 and is_equal_approx(World.stature_of({ "stature": 1.06 }), 1.06), "the old stand a little shorter; the young as tall as their stature")
+	# what the creator names
+	var unlabelled: Array = []
+	for kind in ["weights", "frames", "ages"]:
+		for id in L[kind]:
+			if not L["labels"].get(kind, {}).has(id):
+				unlabelled.append("%s/%s" % [kind, id])
+	var ids := {}
+	for pr in F["presets"]:
+		ids[String(pr["id"])] = true
+		if not L["labels"].get("buildPresets", {}).has(String(pr["id"])):
+			unlabelled.append("buildPresets/%s" % pr["id"])
+		check(Creator.build_preset(pr) == String(pr["id"]), "the build named %s is known by its measures" % pr["id"])
+	check(unlabelled.is_empty(), "every build, weight, frame and age has a name to show (%s)" % ", ".join(unlabelled))
+	check(ids.has("slight") and ids.has("average") and ids.has("heavy") and ids.has("broad"), "the creator offers slight, average, heavy and broad by name")
+	check(Creator.build_preset({ "build": 0.1, "weight": 0.33, "frame": 0.0 }) == "", "measures set by hand are no named build")
+	var sts: Array = L["statures"].values()
+	check(float(sts.min()) <= 0.9 and float(sts.max()) >= 1.1, "stature runs from short to towering")
+	check(float((L["ages"].values() as Array).max()) == 1.0 and float((L["ages"].values() as Array).min()) == 0.0, "years run from young to old")
+	# the keys' bodies are in the data the kit builds from
+	var kit: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/bodies.json")).get("builds", {}).get("keys", {})
+	var built := true
+	for k in plain:
+		built = built and (k in ["lean", "heavy"] or kit.has(k))
+	for k in F["bones"]:
+		built = built and plain.has(k)
+	check(built, "every key the game draws is a build the kit makes, and every bone's move belongs to one")
+	# a new life and a classmate start with a weight and a frame of their own, within the data's ends
+	var seen := {}
+	var within := true
+	for sp in range(1, 60):
+		var lk := Creation.look_of("khemet", sp * 7919)
+		seen["%.2f/%.2f" % [lk["weight"], lk["frame"]]] = true
+		within = within and float(lk["weight"]) >= float(L["start"]["weight"][0]) and float(lk["weight"]) <= float(L["start"]["weight"][1])
+		within = within and float(lk["frame"]) >= float(L["start"]["frame"][0]) and float(lk["frame"]) <= float(L["start"]["frame"][1]) and float(lk["age"]) == 0.0
+	check(seen.size() >= 25 and within, "sixty sparks start with many weights and frames, all within the data's ends (%d)" % seen.size())
+	check(Creation.look_of("khemet", 99) == Creation.look_of("khemet", 99), "and the same spark with the same")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var mate := Academy.random_look(rng, "kazan")
+	check(mate.has("weight") and mate.has("frame"), "a classmate has a weight and a frame")
+	check(World.elder_age("Instructor Vale") >= float(L["ages"]["grown"]) and World.elder_age("Instructor Vale") == World.elder_age("Instructor Vale"), "an Instructor has years, the same every time")
+	# on the body: every home's people carry the keys, on the body and on its dress
+	var w := World.new()
+	add_child(w)
+	for body in ["timbuktu-f", "tiber-m"]:
+		var n: Node3D = Shapes.wake(load(w._person_model(body)).instantiate())
+		add_child(n)
+		w.dress(n, { "weight": 1.0, "frame": 1.0, "age": 0.4 })
+		var bm: MeshInstance3D = n.find_child("Body", true, false)
+		var has_all := bm != null
+		for k in ["thin", "stout", "broad", "old", "lean", "heavy"]:
+			has_all = has_all and bm.find_blend_shape_by_name(k) >= 0
+		check(has_all, "%s carries every build's key" % body)
+		if has_all:
+			check(is_equal_approx(bm.get_blend_shape_value(bm.find_blend_shape_by_name("stout")), 1.0) and is_equal_approx(bm.get_blend_shape_value(bm.find_blend_shape_by_name("old")), 0.4), "%s is drawn in the look's weight and years" % body)
+		var dressed := 0
+		for m in n.find_children("Dress_*", "MeshInstance3D", true, false):
+			var mi: MeshInstance3D = m
+			if mi.find_blend_shape_by_name("stout") >= 0 and is_equal_approx(mi.get_blend_shape_value(mi.find_blend_shape_by_name("stout")), 1.0):
+				dressed += 1
+		check(dressed > 0, "%s's dress follows the body's weight" % body)
+		var fr: Frame = n.find_child("Frame", true, false)
+		check(fr != null and fr.active and fr.get_parent() is Skeleton3D, "%s's broad frame moves its bones" % body)
+		w.dress(n, {})
+		check(fr != null and not fr.active, "and a fit look gives them back")
+		n.queue_free()
+	w.queue_free()
 
 ## The opening: the title, the cards, the night at the station, the recruiter (data/story.json).
 func test_opening() -> void:

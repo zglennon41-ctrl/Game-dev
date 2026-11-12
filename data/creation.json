@@ -1183,11 +1183,48 @@
       "strong": 0.5,
       "heavy": 1.0
     },
+    "weights": {
+      "slight": -1.0,
+      "slim": -0.5,
+      "even": 0.0,
+      "full": 0.5,
+      "heavy": 1.0
+    },
+    "frames": {
+      "narrow": -0.6,
+      "even": 0.0,
+      "broad": 1.0
+    },
+    "ages": {
+      "young": 0.0,
+      "grown": 0.35,
+      "greying": 0.7,
+      "old": 1.0
+    },
+    "frame": {
+      "comment": "The body's shapes (docs/representation-plan.md): build (look.builds) blends the lean and heavy shape keys, weight (look.weights) the thin and stout ones, frame (look.frames) the broad one (below even it is drawn backwards: narrow), age (look.ages) the old one. A shape key cannot move a joint, so what a shape does to the joints is given back with the bones: bones names each bone and how far it moves at the whole of a shape (the body's own units, 2.4 tall: across to the body's left, up, forward; a bone named without a side is both arms or legs, mirrored). ageStature is how much shorter the oldest stand. presets are the builds offered by name: each sets the sliders, which stay the player's to move.",
+      "bones": {
+        "broad": { "upperarm": [0.066, 0.0, 0.0], "upperleg": [0.013, 0.0, 0.0] },
+        "old": { "head": [0.0, -0.007, 0.04], "upperarm": [0.008, -0.003, 0.041] }
+      },
+      "ageStature": 0.975,
+      "presets": [
+        { "id": "slight", "build": -0.4, "weight": -1.0, "frame": -0.4 },
+        { "id": "lean", "build": -0.8, "weight": -0.3, "frame": 0.0 },
+        { "id": "average", "build": 0.0, "weight": 0.0, "frame": 0.0 },
+        { "id": "strong", "build": 0.8, "weight": 0.0, "frame": 0.3 },
+        { "id": "broad", "build": 0.3, "weight": 0.2, "frame": 1.0 },
+        { "id": "full", "build": -0.2, "weight": 0.5, "frame": 0.2 },
+        { "id": "heavy", "build": 0.0, "weight": 1.0, "frame": 0.4 },
+        { "id": "big", "build": 0.9, "weight": 0.6, "frame": 0.8 }
+      ]
+    },
     "sexes": {
       "m": "masculine",
       "f": "feminine"
     },
     "statures": {
+      "short": 0.88,
       "slight": 0.94,
       "middling": 1.0,
       "tall": 1.06,
@@ -1248,10 +1285,39 @@
         "spare": "Spare",
         "fit": "Fit",
         "strong": "Strong",
+        "heavy": "Powerful"
+      },
+      "weights": {
+        "slight": "Slight",
+        "slim": "Slim",
+        "even": "Even",
+        "full": "Full",
         "heavy": "Heavy"
       },
-      "statures": {
+      "frames": {
+        "narrow": "Narrow",
+        "even": "Even",
+        "broad": "Broad"
+      },
+      "ages": {
+        "young": "Young",
+        "grown": "Grown",
+        "greying": "Greying",
+        "old": "Old"
+      },
+      "buildPresets": {
         "slight": "Slight",
+        "lean": "Lean",
+        "average": "Average",
+        "strong": "Strong",
+        "broad": "Broad",
+        "full": "Full",
+        "heavy": "Heavy",
+        "big": "Big"
+      },
+      "statures": {
+        "short": "Short",
+        "slight": "Small",
         "middling": "Middling",
         "tall": "Tall",
         "towering": "Towering"
@@ -1359,7 +1425,7 @@
       }
     },
     "start": {
-      "comment": "What a new life starts with, drawn by its spark from what its home's people most often have (data/bodies.json: hair, hairColors, eyes); all of it is the player's to change. hair and hairColors here are for a home that names none. markChance is how often a life starts with a mark; faceSlider is how far a feature may start from even.",
+      "comment": "What a new life starts with, drawn by its spark from what its home's people most often have (data/bodies.json: hair, hairColors, eyes); all of it is the player's to change. hair and hairColors here are for a home that names none. build, weight, frame and stature are the least and the greatest a life (and a classmate) may start with. markChance is how often a life starts with a mark; faceSlider is how far a feature may start from even.",
       "hair": [
         "crop",
         "long",
@@ -1385,8 +1451,16 @@
         0.45
       ],
       "stature": [
-        0.96,
-        1.07
+        0.93,
+        1.08
+      ],
+      "weight": [
+        -0.6,
+        0.7
+      ],
+      "frame": [
+        -0.4,
+        0.6
       ],
       "markChance": 0.3,
       "faceSlider": 0.45,

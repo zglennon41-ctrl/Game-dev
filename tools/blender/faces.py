@@ -103,6 +103,8 @@ class Faces:
         self._anchor = (self.mask[:n] < 0.01) & (fit.v[:n, 2] > hb.chin_z + 0.15 * self.H)
         self.keys = {}      # name -> the offsets of every vertex (the helpers too)
         self.eyes = {}      # name -> {side: (the eye's move, its growth)}
+        self.builds = {}    # the builds beyond lean and heavy (human_kit._extra_build): carried here, keyed on the body there
+        self.build_eyes = {}
         sp = spec()
         for p in sp.get("presets", []):
             d = dict(p.get("details", {}))
@@ -166,7 +168,7 @@ class Faces:
                 idx[i, j] = self._near[k]
                 w[i, j] = 1.0 / (dist + 0.002) ** 2
         w /= w.sum(axis=1, keepdims=True)
-        for name, d in self.keys.items():
+        for name, d in list(self.keys.items()) + list(self.builds.items()):
             off = (d[idx] * w[:, :, None]).sum(axis=1)
             if np.abs(off).max() > least:
                 off[np.linalg.norm(off, axis=1) < 0.00015] = 0.0
@@ -176,7 +178,7 @@ class Faces:
         """An eye (the ball, the lid over it) moves and grows with its socket."""
         co = coords_of(ob)
         c = np.array(self.hb.eye[side])
-        for name, eyes in self.eyes.items():
+        for name, eyes in list(self.eyes.items()) + list(self.build_eyes.items()):
             move, grow = eyes[side]
             if np.abs(move).max() > 0.0002 or abs(grow - 1.0) > 0.004:
                 add_key(ob, name, c + move + (co - c) * grow)
