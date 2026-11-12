@@ -42,7 +42,7 @@ LAYER = {"trousers": 1, "hakama": 1, "boots": 1, "greaves": 1, "sandals": 1, "pu
          "coat": 2.5, "robe": 2.5, "kaftan": 2.5,
          "cuirass": 3, "vest": 3, "apron": 3, "panel": 3, "tabard": 3, "patch": 3, "wrap": 3,
          "buttons": 3.5, "badge": 3.5,       # sewn to the garment: a strap or a belt lies over them
-         "belt": 4, "sash": 4, "obi": 4, "collar": 4, "scarf": 4, "strap": 4, "furcollar": 4.5,
+         "belt": 4, "sash": 4, "obi": 4, "collar": 4, "scarf": 4, "strap": 4, "furcollar": 3.8,     # a strap and a scarf lie over a fur collar
          "mantle": 6, "cloak": 7, "cape": 7}
 HARD_LAYER = 5          # buttons, a badge, a holster, a roll, a string of beads: the small things on top
 OVER_COAT = 5.5         # a coat worn only sometimes, over the home's everyday dress and all that is on it
@@ -295,6 +295,85 @@ def _thicken(ob, t=0.012):
         poly.use_smooth = True
 
 
+def _cut_shell(human, name, build, thickness, memo, keep, band=None):
+    """A garment cut from the body itself along clean lines. `keep(v)` gives a number for each
+    vertex of the fit body: the cloth is where it is above zero, and a face the line crosses
+    is cut along it (a face is not taken or left whole, which ends a cape in steps). `band(v)`
+    likewise: where it is below zero the cloth is in the trim (a hem's border), cut as cleanly.
+    Each new vertex is a mix of the body's own, found once on the fit body (memo) and the same
+    on every build, so the builds stay one mesh's shape keys; every vertex stands `thickness`
+    off the body along the body's normals."""
+    if "idx" not in memo:
+        fitv = human.humans["fit"].body()
+        K = np.asarray(keep(fitv), dtype=float).copy()
+        K[np.asarray(human.is_head, dtype=bool)] = -1.0
+        B = np.asarray(band(fitv), dtype=float) if band is not None else np.ones(len(fitv))
+        pool, verts, faces, mats = {}, [], [], []
+
+        def vert(w):
+            key = tuple(sorted((i, round(x, 5)) for i, x in w.items() if x > 1e-6))
+            if key not in pool:
+                pool[key] = len(verts)
+                verts.append(key)
+            return pool[key]
+
+        def mix(p, q, t):
+            w = {}
+            for i, x in p[0].items():
+                w[i] = w.get(i, 0.0) + x * (1.0 - t)
+            for i, x in q[0].items():
+                w[i] = w.get(i, 0.0) + x * t
+            return (w, p[1] + (q[1] - p[1]) * t, p[2] + (q[2] - p[2]) * t)
+
+        def clip(poly, at, sign):
+            out = []
+            for a in range(len(poly)):
+                p, q = poly[a], poly[(a + 1) % len(poly)]
+                fp, fq = p[at] * sign, q[at] * sign
+                if fp > 0:
+                    out.append(p)
+                if (fp > 0) != (fq > 0):
+                    out.append(mix(p, q, fp / (fp - fq)))
+            return out
+
+        for f in human.face_idx:
+            k = K[f]
+            if (k <= 0).all():
+                continue
+            poly = clip([({int(i): 1.0}, float(K[i]), float(B[i])) for i in f], 1, 1.0)
+            for sign, m in ((1.0, 0), (-1.0, 1)):
+                part = clip(poly, 2, sign) if band is not None else (poly if m == 0 else [])
+                ids = []
+                for pt in part:
+                    i = vert(pt[0])
+                    if i not in ids:
+                        ids.append(i)
+                if len(ids) >= 3:
+                    faces.append(ids)
+                    mats.append(m)
+        n = max(len(v) for v in verts) if verts else 1
+        idx = np.zeros((len(verts), n), dtype=np.int64)
+        wts = np.zeros((len(verts), n))
+        for r, key in enumerate(verts):
+            for c, (i, x) in enumerate(key):
+                idx[r, c] = i
+                wts[r, c] = x
+        wts /= np.maximum(wts.sum(axis=1, keepdims=True), 1e-9)
+        memo.update(idx=idx, wts=wts, faces=faces, mats=mats)
+    v = human.humans[build].body() + human.normals(build) * thickness
+    pts = (v[memo["idx"]] * memo["wts"][:, :, None]).sum(axis=1)
+    bm = bmesh.new()
+    bv = [bm.verts.new(Vector(p)) for p in pts]
+    for ids, m in zip(memo["faces"], memo["mats"]):
+        try:
+            f = bm.faces.new([bv[i] for i in ids])
+        except ValueError:
+            continue
+        f.material_index = m
+        f.smooth = True
+    return _ob(name, bm, smooth=False)
+
+
 def _even_rim(ob, rounds=3):
     """A shell cut from the body ends along the body's own faces, in steps: its edge is evened
     (each vertex of the edge drawn toward the two beside it)."""
@@ -501,9 +580,18 @@ def _seat(ob, under, tr, hard, memo, human, margin=0.008, drape=False):
         return
     dirs, deep = [], []
     R = M.to_3x3()
+    normals = None
+    if drape is True:
+        nbm = bmesh.new()
+        nbm.from_mesh(ob.data)
+        nbm.normal_update()
+        normals = [v.normal.copy() for v in nbm.verts]
+        nbm.free()
     for i, p in enumerate(pts):
         if drape is True:       # a shell cut from the body looks out along its own surface's normal
-            d = (R @ ob.data.vertices[i].normal).normalized()
+            d = (R @ normals[i]).normalized()
+            if d.length < 0.5:
+                d = Vector((p.x, p.y, 0.0)).normalized()
         else:
             yo = human._row(tr, p.z)[3]
             d = Vector((p.x, p.y - yo, 0.0))
@@ -692,6 +780,15 @@ def dress_pieces(body, objs, build, slot):
         if hard and now["type"] not in STRUNG:
             _draw_in(ob, beneath(with_body=True), tr, human)
 
+    def neck_shell(name, z_lo, z_hi, reach, thickness):
+        """A band cut from the body round the neck's base, between two heights and within
+        `reach` of the neck's axis (a broad collar lies out on the shoulders)."""
+        def keep(v):
+            f = np.minimum.reduce([v[:, 2] - z_lo, z_hi - v[:, 2], reach - np.hypot(v[:, 0], v[:, 1] - y_neck)])
+            f[is_arm] = -0.01
+            return f
+        return _cut_shell(human, name, build, thickness, body.dress_memo.setdefault("cut" + name + sfx, {}), keep)
+
     def mantle(base, piece, cname, trim):
         """A short cape over both shoulders, cut from the body itself: the shoulders, the top
         of the arms, the breast and the back down to its hem, stood off over the dress beneath;
@@ -701,13 +798,18 @@ def dress_pieces(body, objs, build, slot):
         z_lo = trf[7][0] - drop
         z_nb = trf[9][0] - 0.012 * k
 
-        def mask(v):
+        reach = body.joint("upperarm.l", "x") + drop * 0.8          # the arms are level in the body's rest
+        edge = 0.035 * k
+
+        def keep(v):
             r = np.hypot(v[:, 0], v[:, 1] - y_neck)
-            reach = body.joint("upperarm.l", "x") + drop * 0.8          # the arms are level in the body's rest
-            return (v[:, 2] > z_lo) & (np.abs(v[:, 0]) < reach) & (v[:, 2] < z_nb + 0.03 * k * np.clip(1.0 - r / (0.12 * k), 0.0, 1.0)) & (nf[:, 2] > -0.2)
-        ob = human.shell(base, mask, build, clear)
-        put(base, ob, "trunk", cname, trim, fit=False,
-            finish=lambda ob: (_even_rim(ob), seat_on(ob, 0.012, drape=True), (trim_edge(ob, "hem", z_nb - 0.05 * k) if trim else None), _line(ob, 0.012)))
+            top = z_nb + 0.03 * k * np.clip(1.0 - r / (0.12 * k), 0.0, 1.0)
+            return np.minimum.reduce([v[:, 2] - z_lo, reach - np.abs(v[:, 0]), top - v[:, 2], (nf[:, 2] + 0.2) * 0.1])
+
+        def border(v):
+            return np.minimum(v[:, 2] - z_lo - edge, reach - np.abs(v[:, 0]) - edge)
+        ob = _cut_shell(human, base, build, clear, body.dress_memo.setdefault("cut" + base + sfx, {}), keep, border if trim else None)
+        put(base, ob, "trunk", cname, trim, fit=False, finish=lambda ob: (seat_on(ob, 0.012, drape=True), _line(ob, 0.012)))
 
     def cloak(base, piece, cname, trim, mat=None):
         """A cloak that hangs from the shoulders: a yoke cut from the body's own upper back and
@@ -720,14 +822,19 @@ def dress_pieces(body, objs, build, slot):
         z_nb = trf[9][0] - 0.012 * k
         x_in = body.joint("upperarm.l", "x") + 0.01 * k
 
-        def mask(v):
-            back = nf[:, 1] > 0.05
-            top = (nf[:, 2] > 0.55) & (v[:, 1] > y_neck - 0.035 * k)
-            one = (v[:, 0] > -0.03 * k) if piece.get("side") == "l" else ((v[:, 0] < 0.03 * k) if piece.get("side") == "r" else True)
-            return (v[:, 2] > z_y) & (v[:, 2] < z_nb) & (np.abs(v[:, 0]) < x_in) & (back | top) & ~is_arm & one
+        def keep(v):
+            back = (nf[:, 1] - 0.05) * 0.1
+            top = np.minimum((nf[:, 2] - 0.55) * 0.1, v[:, 1] - (y_neck - 0.035 * k))
+            f = np.minimum.reduce([v[:, 2] - z_y, z_nb - v[:, 2], x_in - np.abs(v[:, 0]), np.maximum(back, top)])
+            if piece.get("side") == "l":
+                f = np.minimum(f, v[:, 0] + 0.03 * k)
+            elif piece.get("side") == "r":
+                f = np.minimum(f, 0.03 * k - v[:, 0])
+            f[is_arm] = -0.01
+            return f
         dressed = beneath(hard_too=True, with_body=True)
-        yoke = human.shell(base + "_0", mask, build, 0.02 * k)
-        put(base + "_0", yoke, "trunk", cname, trim, fit=False, finish=lambda ob: (_even_rim(ob), seat_on(ob, 0.014, drape=True), _line(ob, 0.012)))
+        yoke = _cut_shell(human, base + "_0", build, 0.02 * k, body.dress_memo.setdefault("cut" + base + "_0" + sfx, {}), keep)
+        put(base + "_0", yoke, "trunk", cname, trim, fit=False, finish=lambda ob: (seat_on(ob, 0.014, drape=True), _line(ob, 0.012)))
         if mat is not None:
             _slots(yoke, [mat, mat])
         # the fall: rows from under the yoke's edge to the hem, columns round the back
@@ -1057,12 +1164,12 @@ def dress_pieces(body, objs, build, slot):
             wide = (1.8 if w else 1.0) if isinstance(w, bool) else float(w)
             # cut from the body: a band at the neck's base, out over the shoulders when it is broad
             z2, hw2 = body.rings("trunk", "fit")[9][:2]      # the cut is the fit body's, on every build
-            ob = human.shell("Dress_%d_collar" % n, human.neck_mask(z2 - 0.045 * wide * k, z2 + 0.03 * k, hw2 + 0.035 * k + 0.11 * (wide - 1) * k), build, 0.014 * k)
-            put("Dress_%d_collar" % n, ob, "trunk", cname, fit=False, finish=_even_rim)
+            ob = neck_shell("Dress_%d_collar" % n, z2 - 0.045 * wide * k, z2 + 0.03 * k, hw2 + 0.035 * k + 0.11 * (wide - 1) * k, 0.014 * k)
+            put("Dress_%d_collar" % n, ob, "trunk", cname, fit=False)
         elif t == "scarf":
             zf, hwf = body.rings("trunk", "fit")[9][:2]
-            ring = human.shell("Dress_%d_scarf" % n, human.neck_mask(zf - 0.05 * k, zf + 0.035 * k, hwf + 0.05 * k), build, 0.02 * k)
-            put("Dress_%d_scarf" % n, ring, "trunk", cname, fit=False, finish=_even_rim)
+            ring = neck_shell("Dress_%d_scarf" % n, zf - 0.05 * k, zf + 0.035 * k, hwf + 0.05 * k, 0.02 * k)
+            put("Dress_%d_scarf" % n, ring, "trunk", cname, fit=False)
             z9 = tr[9][0]
             # the ends: bands laid on the body (down the back over one shoulder, or down the breast)
             behind = piece.get("tails", "front") == "back"
@@ -1151,7 +1258,8 @@ def dress_pieces(body, objs, build, slot):
                 bm = _cyl_bm(Vector((x, front(x, z2, 0.04), z2)), Vector((x, front(x, z2, 0.026), z2)), 0.03, seg=12)
             hard("Dress_%d_badge" % n, [(bm, 0)], "chest", cname)
         elif t == "sashknot":
-            z2, hw2, hd2, yo2 = tr[int(piece.get("at", 3))]
+            at = float(piece.get("at", 3))
+            z2, hw2, hd2, yo2 = tr[int(at)] if at == int(at) else tuple(a + (b - a) * (at % 1.0) for a, b in zip(tr[int(at)], tr[int(at) + 1]))
             ln = float(piece.get("length", 0.3)) * k
             side = piece.get("side", "l")
             bms = []
@@ -1313,8 +1421,8 @@ def dress_pieces(body, objs, build, slot):
             # cut from the body round the neck's base and out on the shoulders, and stood well off: a
             # roll of fleece that lies on them (it was a stiff ring that hung in the air round the neck)
             zf, hwf = trf[9][:2]
-            ob = human.shell("Dress_%d_furcollar" % n, human.neck_mask(zf - 0.075 * k, zf + 0.02 * k, hwf + 0.085 * k), build, r * 0.7 * k)
-            put("Dress_%d_furcollar" % n, ob, "trunk", cname, fit=False, finish=_even_rim)
+            ob = neck_shell("Dress_%d_furcollar" % n, zf - 0.06 * k, zf + 0.02 * k, hwf + 0.07 * k, r * 0.7 * k)
+            put("Dress_%d_furcollar" % n, ob, "trunk", cname, fit=False)
         elif t == "wings":
             # stiff shoulders that stand out past the arms, and the two bands down to the sash
             z7 = tr[7][0]

@@ -84,6 +84,7 @@ and JSON Schema for data. The rules a designer tunes live in `data/` and are sha
 - `npm run validate` — schema-check every file in `data/`
 - `npm run balance:game` — play every weapon type, technique and temperament headlessly and print the tables
 - `npm run check:style` — fail on anything off the game's one style (`docs/style.md`, `data/style.json`)
+- `npm run check:fit` — measure how every piece of dress sits on every body, standing and moving; fail on what does not fit (`docs/dress-fit.md`; needs Blender's Python module)
 
 ## Layout
 

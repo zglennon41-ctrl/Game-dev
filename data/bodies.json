@@ -367,7 +367,19 @@
               "formal",
               "master"
             ],
-            "height": 0.05
+            "height": 0.05,
+            "sex": "m"
+          },
+          {
+            "type": "sash",
+            "color": "red",
+            "in": [
+              "formal",
+              "master"
+            ],
+            "height": 0.05,
+            "sex": "f",
+            "at": 3.5
           },
           {
             "type": "sashknot",
@@ -377,7 +389,20 @@
             "in": [
               "formal",
               "master"
-            ]
+            ],
+            "sex": "m"
+          },
+          {
+            "type": "sashknot",
+            "color": "red",
+            "side": "l",
+            "length": 0.3,
+            "in": [
+              "formal",
+              "master"
+            ],
+            "sex": "f",
+            "at": 3.5
           },
           {
             "type": "cloak",
@@ -767,7 +792,14 @@
           },
           {
             "type": "furcollar",
-            "color": "fleece"
+            "color": "fleece",
+            "sex": "m",
+            "cutUntilFits": "On the men's jacket a fifth of the fleece collar is sunk in the jacket's collar and the strap over the shoulder, standing and moving (20% sunk, 0.065 deep). The women's, on the long coat, fits."
+          },
+          {
+            "type": "furcollar",
+            "color": "fleece",
+            "sex": "f"
           },
           {
             "type": "scarf",
