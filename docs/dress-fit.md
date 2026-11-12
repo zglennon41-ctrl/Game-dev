@@ -51,7 +51,7 @@ A solid thing rests half in the cloth by nature, so it is held only to not being
 (60%). A roll slung on a strap and starched shoulder wings are stiff by nature and are not
 held to drift.
 
-## What was wrong, measured (before: 26 bodies, 413 pieces, 248 failing)
+## What was wrong, measured (before: 26 bodies, 413 pieces, 248 failing; after: 285 pieces, none failing)
 
 - **The creator's cloak** (the Cloak chip; six in ten classmates wore one) was one stiff
   board hung from a socket on the chest bone: 67% of it sunk on the median body, 0.09 deep,
@@ -116,7 +116,7 @@ take the key away and `npm run check:fit` says whether it fits yet.
 | The sash's long ends | Khemet; Jiangnan women | hang down the front between the legs, or against a full skirt (22 to 42%, 0.07) | shorter ends, to the side |
 | Tassel | Jiangnan | hangs in front of the thigh (43 to 62%, 0.07 to 0.08) | |
 | The brass disc (the astrolabe) | Baghdad | hangs from the belt in front of the thigh (39 to 41%, 0.085) | worn at the side of the hip, or on the breast |
-| Fur collar | Kazan | over the crossed kaftan a tenth of it is sunk standing or moving (10 to 12%, 0.07) | Lunden's fits on a plain collar: the kaftan's crossed front needs to pass under it |
+| Fur collar | Kazan; Lunden men | Kazan: over the crossed kaftan a tenth of it is sunk standing or moving (10 to 12%, 0.07). Lunden men: a fifth of it is sunk in the jacket's collar and under the shoulder strap (20%, 0.065) | Lunden's women's fits on the long coat: the collar wants the strap and the crossed front to pass under it |
 
 Worn less, so the rest fits (not cut): Edo's stiff shoulder wings are worn in plain dress only
 (under the over-coat of visiting dress they came through it); Timbuktu's scroll case is worn in
