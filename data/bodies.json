@@ -63,7 +63,8 @@
               "plain",
               "formal"
             ],
-            "sex": "m"
+            "sex": "m",
+            "name": "Tunic"
           },
           {
             "type": "tunic",
@@ -77,7 +78,8 @@
               "plain",
               "formal"
             ],
-            "sex": "f"
+            "sex": "f",
+            "name": "Flared tunic"
           },
           {
             "type": "coat",
@@ -201,7 +203,10 @@
         "long",
         "tail",
         "braid",
-        "knot"
+        "knot",
+        "fade",
+        "plaits",
+        "afro"
       ],
       "marks": [
         "kohl"
@@ -433,7 +438,9 @@
         "tail",
         "long",
         "braid",
-        "curls"
+        "curls",
+        "fade",
+        "coils"
       ],
       "marks": []
     },
@@ -510,7 +517,8 @@
             "color": "main",
             "trim": "ochre",
             "drop": 0.22,
-            "sex": "m"
+            "sex": "m",
+            "name": "Rain cape"
           },
           {
             "type": "tunic",
@@ -538,7 +546,8 @@
             "trim": "red",
             "drop": 0.32,
             "reach": 0.12,
-            "sex": "f"
+            "sex": "f",
+            "name": "Woven shawl"
           },
           {
             "type": "sash",
@@ -657,7 +666,8 @@
         "braid",
         "tail",
         "crest",
-        "crop"
+        "crop",
+        "plaits"
       ],
       "marks": [
         "chin-lines",
@@ -952,7 +962,8 @@
             "color": "main",
             "sleeves": 3,
             "roll": "cream",
-            "sex": "m"
+            "sex": "m",
+            "name": "Tunic"
           },
           {
             "type": "tunic",
@@ -961,7 +972,8 @@
             "roll": "cream",
             "hem": 0.85,
             "flare": 1.22,
-            "sex": "f"
+            "sex": "f",
+            "name": "Flared tunic"
           },
           {
             "type": "vest",
@@ -988,7 +1000,8 @@
               "plain",
               "master"
             ],
-            "sex": "m"
+            "sex": "m",
+            "name": "Bib apron"
           },
           {
             "type": "apron",
@@ -999,7 +1012,8 @@
               "plain",
               "master"
             ],
-            "sex": "f"
+            "sex": "f",
+            "name": "Short apron"
           },
           {
             "type": "belt",
@@ -1142,7 +1156,8 @@
         "crest",
         "tail",
         "braid",
-        "knot"
+        "knot",
+        "fade"
       ],
       "marks": []
     },
@@ -1204,21 +1219,24 @@
             "flare": 1.18,
             "trim": "white",
             "border": 0.035,
-            "sex": "m"
+            "sex": "m",
+            "name": "Short tunic"
           },
           {
             "type": "cuirass",
             "color": "bronze",
             "trim": "leather",
             "lo": 4,
-            "sex": "m"
+            "sex": "m",
+            "name": "Bronze cuirass"
           },
           {
             "type": "pauldrons",
             "color": "bronze",
             "trim": "leather",
             "layers": 3,
-            "sex": "m"
+            "sex": "m",
+            "name": "Shoulder plates"
           },
           {
             "type": "pteruges",
@@ -1237,14 +1255,16 @@
             "trim": "white",
             "band2": true,
             "border": 0.035,
-            "sex": "f"
+            "sex": "f",
+            "name": "Long tunic"
           },
           {
             "type": "cuirass",
             "color": "leather",
             "trim": "bronze",
             "lo": 5,
-            "sex": "f"
+            "sex": "f",
+            "name": "Leather cuirass"
           },
           {
             "type": "pauldrons",
@@ -1252,7 +1272,8 @@
             "trim": "leather",
             "layers": 2,
             "side": "l",
-            "sex": "f"
+            "sex": "f",
+            "name": "One shoulder plate"
           },
           {
             "type": "belt",
@@ -1598,7 +1619,9 @@
         "crop",
         "bob",
         "braid",
-        "curls"
+        "curls",
+        "plaits",
+        "afro"
       ],
       "marks": [
         "kohl",
@@ -1706,7 +1729,8 @@
           {
             "type": "disc",
             "color": "gold",
-            "trim": "dark"
+            "trim": "dark",
+            "name": "Astrolabe"
           },
           {
             "type": "patch",
@@ -1880,7 +1904,8 @@
             "flare": 1.15,
             "pleats": 9,
             "band": "white",
-            "sex": "m"
+            "sex": "m",
+            "name": "Wrapped cloth"
           },
           {
             "type": "panel",
@@ -1925,7 +1950,8 @@
             "pleats": 9,
             "trim": "white",
             "band2": true,
-            "sex": "f"
+            "sex": "f",
+            "name": "Long wrapped skirt"
           },
           {
             "type": "wrap",
@@ -1988,7 +2014,8 @@
             "at": [
               2
             ],
-            "sex": "m"
+            "sex": "m",
+            "name": "Bead armlets"
           },
           {
             "type": "armlets",
@@ -1996,7 +2023,8 @@
             "at": [
               5
             ],
-            "sex": "f"
+            "sex": "f",
+            "name": "Gold armlets"
           },
           {
             "type": "mantle",
@@ -2399,7 +2427,8 @@
             "trim": "fur",
             "border": 0.08,
             "front": "cross",
-            "sex": "m"
+            "sex": "m",
+            "name": "Riding kaftan"
           },
           {
             "type": "kaftan",
@@ -2411,7 +2440,8 @@
             "trim": "fur",
             "border": 0.08,
             "front": "cross",
-            "sex": "f"
+            "sex": "f",
+            "name": "Long kaftan"
           },
           {
             "type": "vest",
@@ -2498,7 +2528,7 @@
           },
           {
             "type": "furhat",
-            "name": "Fur hat",
+            "name": "Fur hat with flaps",
             "color": "fur",
             "trim": "red",
             "crown": true,
@@ -2754,7 +2784,10 @@
         "rows",
         "crop",
         "curls",
-        "braid"
+        "braid",
+        "afro",
+        "plaits",
+        "coilknots"
       ],
       "marks": [
         "cheek-cuts",
@@ -2822,7 +2855,8 @@
             "bell": 0.06,
             "front": "cross",
             "trim": "grey",
-            "sex": "m"
+            "sex": "m",
+            "name": "Jacket"
           },
           {
             "type": "wings",
@@ -2838,7 +2872,8 @@
             "bellFrom": 2,
             "front": "cross",
             "trim": "red",
-            "sex": "f"
+            "sex": "f",
+            "name": "Wide-sleeved jacket"
           },
           {
             "type": "strap",
@@ -2856,7 +2891,8 @@
             "type": "obi",
             "color": "red",
             "height": 0.06,
-            "sex": "m"
+            "sex": "m",
+            "name": "Sash"
           },
           {
             "type": "sashknot",
@@ -2870,7 +2906,8 @@
             "color": "red",
             "height": 0.085,
             "at": 3.4,
-            "sex": "f"
+            "sex": "f",
+            "name": "Broad sash"
           },
           {
             "type": "bow",
@@ -2962,10 +2999,33 @@
   "builds": {
     "comment": "The builds every body carries as shape keys beyond lean and heavy (tools/blender/human_kit.py; docs/representation-plan.md). Each is a point on MakeHuman's muscle and weight scales (0 to 1; the fit body is 0.62 and 0.5), with details laid over the home's own (-1 to 1) and an age (0.5 a young adult, 1 the oldest). ownPose: the form is posed and sized on its own joints (age shortens and bows a body; the look's age gives the bow back with the bones). The creator's sliders that blend them are in data/creation.json (look.weights, look.frames, look.ages). Every number is the owner's to change; the bodies are built again after (python tools/blender/body_kit.py all).",
     "keys": {
-      "thin": { "muscle": 0.25, "weight": 0.0 },
-      "stout": { "muscle": 0.1, "weight": 1.0 },
-      "broad": { "muscle": 0.66, "weight": 0.55, "details": { "torso-scale-horiz": 0.8, "measure-shoulder-dist": 0.9, "torso-scale-depth": 0.3, "hip-scale-horiz": 0.45, "neck-scale-horiz": 0.6, "torso-muscle-dorsi": 0.4 }, "ownPose": true },
-      "old": { "muscle": 0.35, "weight": 0.5, "age": 0.9, "ownPose": true }
+      "thin": {
+        "muscle": 0.25,
+        "weight": 0.0
+      },
+      "stout": {
+        "muscle": 0.1,
+        "weight": 1.0
+      },
+      "broad": {
+        "muscle": 0.66,
+        "weight": 0.55,
+        "details": {
+          "torso-scale-horiz": 0.8,
+          "measure-shoulder-dist": 0.9,
+          "torso-scale-depth": 0.3,
+          "hip-scale-horiz": 0.45,
+          "neck-scale-horiz": 0.6,
+          "torso-muscle-dorsi": 0.4
+        },
+        "ownPose": true
+      },
+      "old": {
+        "muscle": 0.35,
+        "weight": 0.5,
+        "age": 0.9,
+        "ownPose": true
+      }
     }
   },
   "faces": {

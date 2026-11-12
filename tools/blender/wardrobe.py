@@ -38,13 +38,45 @@ def pieces_for(D, sex):
     return [p for p in D.get("pieces", []) if p.get("sex", sex) == sex]
 
 
+# Where each kind of piece is worn (docs/representation-plan.md, "Slots and cuts"): the creator
+# offers a home's dress slot by slot, and a body may take either cut of any slot. What is not
+# named here is an extra (a belt, a sash, a satchel, beads).
+SLOTS = {
+    "top": ("tunic", "vest", "jacket", "coat", "robe", "kaftan", "cuirass"),
+    "legs": ("kilt", "wrapskirt", "hakama", "trousers", "pteruges", "panel"),
+    "feet": ("boots", "sandals", "greaves", "puttees"),
+    "outer": ("cloak", "mantle", "tabard", "apron", "wings", "furcollar", "pauldrons", "wrap"),
+}
+
+
+def _slots_data():
+    """The slots as the data names them (data/creation.json, look.slots.kinds); SLOTS if it names none."""
+    import json
+    import os
+    try:
+        kinds = json.load(open(os.path.join(pk.ROOT, "data", "creation.json")))["look"]["slots"]["kinds"]
+        return {s: tuple(k) for s, k in kinds.items()}
+    except (KeyError, OSError):
+        return SLOTS
+
+
+def slot_of(piece):
+    return piece.get("slot") or next((s for s, kinds in _slots_data().items() if piece.get("type") in kinds), "extra")
+
+
+def pieces_all(D, sex):
+    """Every piece of a home's dress, for a body of one sex: its own cut first (as it was built
+    before there were cuts), then the other's, so either may be worn on it."""
+    return pieces_for(D, sex) + [p for p in D.get("pieces", []) if p.get("sex", sex) != sex]
+
+
 def headgear_for(D, sex):
     hg = D.get("headgear")
     if not hg:
         return []
     if isinstance(hg, dict):
         hg = [hg]
-    return [h for h in hg if h.get("sex", sex) == sex]
+    return [h for h in hg if h.get("sex", sex) == sex] + [h for h in hg if h.get("sex", sex) != sex]
 
 
 def under_for(D, sex):
@@ -322,6 +354,9 @@ def dress_pieces(body, objs, build, slot):
     trunk_bvh = human.bvh("trunk", build)
     n = 0
     sfx = ""
+    where = ("extra", "")       # the slot and the cut (m, f, or "" for both) of the piece being made
+    if not hasattr(body, "dress_where"):
+        body.dress_where = {}
 
     def low(z):
         """A height written on a body 2.4 tall with its knee at 0.57 and its hip at 1.11 (a hem), on this body's legs."""
@@ -344,6 +379,7 @@ def dress_pieces(body, objs, build, slot):
     def put(name, ob, chain, cname, trim=None, fit=True, weights=None, finish=None, third=None):
         name += sfx
         ob.name = name
+        body.dress_where[name] = where
         base = mats.get(cname, body.mats["tunic"])
         _slots(ob, [base, mats.get(trim, base)] + ([mats.get(third, base)] if third else []))
         objs[name] = ob
@@ -452,11 +488,12 @@ def dress_pieces(body, objs, build, slot):
         """Weights for cloth that hangs from the trunk: share(p) of the body's own under it."""
         return ("hang", share)
 
-    for piece in pieces_for(D, sex):
+    for piece in pieces_all(D, sex):
         n += 1
         t, cname = piece["type"], piece["color"]
         trim = piece.get("trim")
         sfx = suffix(piece)
+        where = (slot_of(piece), piece.get("sex", ""))
         hem = low(float(piece.get("hem", 0.5)) * k)
         z_waist = tr[3][0]
         z_neck = tr[9][0]
@@ -941,19 +978,24 @@ def dress_pieces(body, objs, build, slot):
         cname = next((p["color"] for p in pieces_for(D, sex) if p.get("type") in ("boots", "greaves")), under_for(D, sex).get("shoes"))
         for name, ob in human.shoes(build, mats.get(cname, body.mats["boots"])).items():
             objs[name] = ob
+            body.dress_where[name] = ("feet", "")
             body.chains[name] = "leg." + name[-1]
 
 
 def join_dress(body, objs):
-    """Every piece of one way of wearing the dress as one mesh (Dress_all, and Dress_some__in_<tags>
-    for what is not always worn); body.dress_ranges remembers which vertices want which weights."""
+    """Every piece of one slot, one cut and one way of wearing the dress as one mesh:
+    Dress_<slot>[_<cut>][__in_<tags>] (Dress_top_m, Dress_legs_f, Dress_extra,
+    Dress_outer__in_formal_master), so the game can show a slot's cut and hide the other;
+    body.dress_ranges remembers which vertices want which weights."""
     groups = {}
+    where = getattr(body, "dress_where", {})
     for name in sorted(n for n in objs if n.startswith("Dress_")):
         tag = name[name.index("__in_"):] if "__in_" in name else ""
-        groups.setdefault(tag, []).append(name)
+        slot, cut = where.get(name, ("extra", ""))
+        groups.setdefault((slot, cut, tag), []).append(name)
     body.dress_ranges = {}
-    for tag, names in groups.items():
-        joined = "Dress_some" + tag if tag else "Dress_all"
+    for (slot, cut, tag), names in groups.items():
+        joined = "Dress_" + slot + ("_" + cut if cut else "") + tag
         mats = []
         bm = bmesh.new()
         ranges = []
@@ -1196,7 +1238,7 @@ def _headgear(body, D, hg):
         parts.append(ring(z0 + hh * 0.76, hw * 1.14, hd * 1.12, 0.009, G, seg=5))
         for sg in (1, -1):
             parts.append((_ring_bm(Vector((cx + sg * hw * 0.45, y0 - 0.016, z0 + hh * 0.78)), 0.034, 0.01), J))
-    name = "Headgear_%s%s" % (t, suffix(hg))
+    name = "Headgear_%s%s%s" % (t, "_" + hg["sex"] if hg.get("sex") else "", suffix(hg))
     ob = _merge(name, parts)
     _slots(ob, [material(home, D, nme) for nme in names])
     return ob

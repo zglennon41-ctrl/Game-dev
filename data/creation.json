@@ -945,7 +945,7 @@
     "edo-f"
   ],
   "look": {
-    "comment": "The look: what shows on the body and is chosen at creation. Hair styles and beards are pieces hung from the head bone of every body (tools/blender/people_kit.py); a cap hides under headgear, a fall hangs from under it. Colours are linear RGB. Bodies are <home>-<sex> (tools/blender/body_kit.py); build blends the lean and heavy shape keys; the skin tone tints the skin material. Labels are what the creator shows for each id. Build and stature are set on a slider between the least and the greatest of the named values; the names mark where a value falls. openHeadgear names the headgear that leaves the crown bare: the hair's cap shows under it. faces: the face shapes a body carries as shape keys (own is the home's face as it is; the rest are data/bodies.json, faces.presets); faceStrength is how far a shape is drawn, on a slider; faceSliders are the features set one by one (data/bodies.json, faces.sliders), each from its least to its greatest. brows are the brow's shapes (soft is the brow as built). eyeColors and lipColors are linear RGB (lips: bare is the skin's own); lipStrength is how far a lip colour covers the skin's. marks are what every home may wear on the face; a home's own are in data/bodies.json (homes.<id>.marks).",
+    "comment": "The look: what shows on the body and is chosen at creation. Hair styles and beards are pieces hung from the head bone of every body (tools/blender/people_kit.py); a cap hides under headgear, a fall hangs from under it. Colours are linear RGB. Bodies are <home>-<sex> (tools/blender/body_kit.py); build blends the lean and heavy shape keys; the skin tone tints the skin material. Labels are what the creator shows for each id. Build and stature are set on a slider between the least and the greatest of the named values; the names mark where a value falls. coverings: cloth worn over the hair that any head of any home may take, beside its home's own headgear (tools/blender/coverings.py builds each on every body, in the home's cloth; follows: it lies on the jaw and neck and goes with the face and the build). anySkin: a life may take any skin tone, not only its home's palette (the creator shows the home's own first, then the others as from elsewhere); false keeps every life to its home's palette. openHeadgear names the headgear that leaves the crown bare: the hair's cap shows under it. faces: the face shapes a body carries as shape keys (own is the home's face as it is; the rest are data/bodies.json, faces.presets); faceStrength is how far a shape is drawn, on a slider; faceSliders are the features set one by one (data/bodies.json, faces.sliders), each from its least to its greatest. brows are the brow's shapes (soft is the brow as built). eyeColors and lipColors are linear RGB (lips: bare is the skin's own); lipStrength is how far a lip colour covers the skin's. marks are what every home may wear on the face; a home's own are in data/bodies.json (homes.<id>.marks).",
     "hair": [
       "bare",
       "crop",
@@ -961,7 +961,12 @@
       "twins",
       "knot",
       "topknot",
-      "crest"
+      "crest",
+      "afro",
+      "plaits",
+      "coilknots",
+      "fade",
+      "thin"
     ],
     "beards": [
       "none",
@@ -1252,7 +1257,12 @@
         "twins": "Two braids",
         "knot": "Knotted",
         "topknot": "Topknot",
-        "crest": "Crest"
+        "crest": "Crest",
+        "afro": "Afro",
+        "plaits": "Long braids",
+        "coilknots": "Coiled knots",
+        "fade": "Faded sides",
+        "thin": "Thinning"
       },
       "beards": {
         "none": "None",
@@ -1331,6 +1341,39 @@
         "city": "Your home's",
         "blood": "Your blood's",
         "plain": "Plain cloth"
+      },
+      "slots": {
+        "head": "On the head",
+        "top": "Top",
+        "legs": "Legs",
+        "feet": "Feet",
+        "outer": "Over it",
+        "extra": "Worn and carried"
+      },
+      "wearNone": {
+        "head": "Bare-headed",
+        "top": "Shirt only",
+        "legs": "Trousers",
+        "feet": "Shoes",
+        "outer": "Nothing over it",
+        "extra": "Nothing"
+      },
+      "wearBare": {
+        "top": "Bare chest",
+        "legs": "Bare legs",
+        "feet": "Barefoot"
+      },
+      "pieces": {
+        "tunic": "Tunic", "vest": "Vest", "jacket": "Jacket", "coat": "Coat", "robe": "Robe", "kaftan": "Kaftan",
+        "cuirass": "Cuirass", "kilt": "Kilt", "wrapskirt": "Wrapped skirt", "hakama": "Pleated trousers",
+        "trousers": "Trousers", "pteruges": "Strap skirt", "panel": "", "boots": "Boots", "sandals": "Sandals",
+        "greaves": "Greaves", "puttees": "Bound calves", "cloak": "Cloak", "mantle": "Mantle", "tabard": "Tabard",
+        "apron": "Apron", "wings": "Stiff shoulders", "furcollar": "Fur collar", "pauldrons": "Shoulder plates",
+        "wrap": "Shoulder cloth", "belt": "Belt", "sash": "Sash", "obi": "Broad sash", "collar": "Broad collar",
+        "scarf": "Scarf", "strap": "Strap", "patch": "", "gloves": "Gloves", "buttons": "", "badge": "Badge",
+        "sashknot": "", "toolloop": "Tools", "holster": "Holster", "coil": "Sounding line", "roll": "Roll",
+        "armlets": "Armlets", "beads": "Beads", "chain": "Chain", "disc": "Disc", "satchel": "Satchel",
+        "bow": "Tied bow", "tassel": "Tassel", "brooch": ""
       },
       "headgear": {
         "hat": "Hat",
@@ -1466,9 +1509,27 @@
       "faceSlider": 0.45,
       "beardChance": 0.35
     },
+    "anySkin": true,
+    "coverings": [
+      { "id": "wrap", "name": "Head wrap", "follows": false },
+      { "id": "scarf", "name": "Headscarf", "follows": true }
+    ],
     "openHeadgear": [
       "headband"
-    ]
+    ],
+    "slots": {
+      "comment": "A home's dress is worn slot by slot (docs/representation-plan.md): on the head, the top, the legs, the feet, what goes over it, and what is worn and carried. kinds says which kinds of piece (data/bodies.json, dress.pieces, type) belong to each slot; any other kind is an extra. A home's dress has two cuts (the pieces marked m and the pieces marked f in the data): a body starts in the cut made for it and may take the other in any slot, so no piece is one sex's (look.wear: slot -> m, f or none). optional names the slots that may be left off. otherCutChance is how often a classmate wears the other cut of a slot; coverChance how often one covers their hair (look.coverings).",
+      "order": ["head", "top", "legs", "feet", "outer", "extra"],
+      "kinds": {
+        "top": ["tunic", "vest", "jacket", "coat", "robe", "kaftan", "cuirass"],
+        "legs": ["kilt", "wrapskirt", "hakama", "trousers", "pteruges", "panel"],
+        "feet": ["boots", "sandals", "greaves", "puttees"],
+        "outer": ["cloak", "mantle", "tabard", "apron", "wings", "furcollar", "pauldrons", "wrap"]
+      },
+      "optional": ["head", "outer", "extra"],
+      "otherCutChance": 0.3,
+      "coverChance": 0.12
+    }
   },
   "names": {
     "columbia": [

@@ -324,7 +324,7 @@ func _reveal() -> void:
 	if not hero.has("look"):
 		hero["look"] = { "headgear": true, "cape": false, "cape_color": "shape" }
 	# a skin of another home's palette does not follow the character to a new home
-	var palette: Array = _palette()
+	var palette: Array = _palette() + _other_tones()
 	if not palette.is_empty() and not palette.has(String(hero["look"].get("skin", ""))):
 		hero["look"]["skin"] = Creation.skin_of(hero["city"], spark)
 	changed.emit(hero)
@@ -336,6 +336,15 @@ func _reveal() -> void:
 	_field_k = 0.0
 	field.emit(_field_col, 0.0, 1.0 if first else 0.0)
 	_draw_reveal(first)
+
+## The tones beyond the home's own, where the data lets a life wear any of them
+## (data/creation.json, look.anySkin): people come to every city from every other.
+func _other_tones() -> Array:
+	var L: Dictionary = Data.creation.get("look", {})
+	if not L.get("anySkin", false):
+		return []
+	var mine := _palette()
+	return (L.get("skinTones", {}).keys() as Array).filter(func(t): return not mine.has(t))
 
 ## The home's skin tones (data/bodies.json); every tone if the home names none.
 func _palette() -> Array:
@@ -660,6 +669,14 @@ func _leaf_body(v: VBoxContainer) -> void:
 		var tid: String = tn
 		var c: Array = L.get("skinTones", {}).get(tid, [0.6, 0.45, 0.33])
 		_swatch(srow, Color(c[0], c[1], c[2]), skin == tid, _label("skinTones", tid), func(): _look_set("skin", tid))
+	var others := _other_tones()
+	if not others.is_empty():
+		var orow := _flow(v, "From elsewhere")
+		for tn in others:
+			var tid: String = tn
+			var c: Array = L.get("skinTones", {}).get(tid, [0.6, 0.45, 0.33])
+			_swatch(orow, Color(c[0], c[1], c[2]), skin == tid, _label("skinTones", tid), func(): _look_set("skin", tid))
+		_line(v, "The first are the tones %s's people most often have. People come to every city from every other." % String(home.get("name", hero["city"])), DIM)
 	var b := Creation.blood(hero["blood"])
 	if String(b.get("shows", "")) != "":
 		_line(v, "Your blood shows as %s." % b["shows"], DIM)
@@ -673,6 +690,7 @@ func _leaf_face(v: VBoxContainer) -> void:
 		var rng := RandomNumberGenerator.new()
 		rng.randomize()
 		var keep := { "sex": look.get("sex", "m"), "skin": look.get("skin", ""), "build": look.get("build", 0.0), "stature": look.get("stature", 1.0),
+			"weight": look.get("weight", 0.0), "frame": look.get("frame", 0.0), "age": look.get("age", 0.0), "wear": look.get("wear", {}), "dress": look.get("dress", ""),
 			"headgear": false, "cape": look.get("cape", true), "cape_color": look.get("cape_color", "shape") }
 		var fresh := Creation.look_of(String(hero["city"]), rng.randi() % 100000)
 		fresh.merge(keep, true)
@@ -747,10 +765,18 @@ func _leaf_face(v: VBoxContainer) -> void:
 
 	var hair := String(look.get("hair", "crop"))
 	_section(v, "HAIR", _label("hair", hair))
-	var hrow := _flow(v, "")
-	for hs in L.get("hair", []):
+	# the home's own styles first, then every other: all of them are anyone's
+	var own_hair: Array = (_home().get("hair", []) as Array).filter(func(h): return (L.get("hair", []) as Array).has(h))
+	var hrow := _flow(v, "Worn in %s" % String(_home().get("name", hero["city"])) if not own_hair.is_empty() else "")
+	for hs in own_hair:
 		var hid: String = hs
 		_chip(hrow, _label("hair", hid), func(): _look_set("hair", hid), hair == hid)
+	var rest: Array = (L.get("hair", []) as Array).filter(func(h): return not own_hair.has(h))
+	if not rest.is_empty():
+		var hrow2 := _flow(v, "And" if not own_hair.is_empty() else "")
+		for hs in rest:
+			var hid: String = hs
+			_chip(hrow2, _label("hair", hid), func(): _look_set("hair", hid), hair == hid)
 	var hc_now := String(look.get("hair_color", "brown"))
 	var hcrow := _flow(v, "")
 	for hc in L.get("hairColors", {}):
@@ -761,7 +787,7 @@ func _leaf_face(v: VBoxContainer) -> void:
 	if _headgear_name() != "" and look.get("headgear", true) and _headgear_covers():
 		var cover := _flow(v, "")
 		_chip(cover, "Take off the %s" % _headgear_name().to_lower(), func(): _look_set("headgear", false))
-		_line(v, "It covers the crown; only the fall of the hair shows under it.", DIM)
+		_line(v, "It covers the hair." if String(_headgear().get("type", "")) == "cover" else "It covers the crown; only the fall of the hair shows under it.", DIM)
 
 	var beard := String(look.get("beard", "none"))
 	_section(v, "BEARD", _label("beards", beard))
@@ -795,8 +821,27 @@ func _leaf_dress(v: VBoxContainer) -> void:
 			var oid := String(o["id"])
 			_chip(orow, String(o.get("name", oid)), func(): _look_set("dress", oid), String(now.get("id", "")) == oid)
 		_line(v, String(now.get("text", "")))
+	# Piece by piece: each slot of the dress in either of the home's cuts, on any body
+	# (Creation.wear_options; data/creation.json, look.slots).
+	var sex := String(hero.get("body", "")).get_slice("-", 1)
+	var way := String(World.dress_option(String(hero.get("city", "")), look).get("wear", "plain"))
+	var rows := 0
+	for slot in L.get("slots", {}).get("order", []):
+		var sid: String = slot
+		var choices: Array = Creation.wear_options(String(hero.get("city", "")), sid, sex, way)
+		if choices.is_empty():
+			continue
+		if rows == 0:
+			_section(v, "PIECE BY PIECE", "")
+			_line(v, "Every piece of your home's dress goes on any body. Take each as you like.", DIM)
+		rows += 1
+		var now := wear_now(sid)
+		var srow := _flow(v, _label("slots", sid))
+		for o in choices:
+			var oid := String(o["id"])
+			_chip(srow, String(o["name"]), func(): _wear_set(sid, oid), now == oid)
 	var wear := _flow(v, "Wearing")
-	if _headgear_name() != "":
+	if rows == 0 and _headgear_name() != "":
 		_chip(wear, _headgear_name(), func(): _look_set("headgear", not look.get("headgear", true)), look.get("headgear", true))
 	_chip(wear, "Cloak", func(): _look_set("cape", not look.get("cape", true)), look.get("cape", true))
 
@@ -813,6 +858,29 @@ func _leaf_dress(v: VBoxContainer) -> void:
 	_line(v, String(w["text"]))
 	_weapon_chips(v)
 
+## The choice a slot of the dress is worn in now: a cut (m, f) or none. The head is bare when
+## the look's headgear is off.
+func wear_now(slot: String) -> String:
+	var look: Dictionary = hero.get("look", {})
+	if slot == "head" and not look.get("headgear", true):
+		return "none"
+	if slot == "head" and Creation.cover_of(look) != "":
+		return Creation.cover_of(look)
+	var way := String(World.dress_option(String(hero.get("city", "")), look).get("wear", "plain"))
+	return Creation.wear_choice(String(hero.get("city", "")), slot, look, String(hero.get("body", "")).get_slice("-", 1), way)
+
+## Take a slot of the dress in another cut, or leave it off.
+func _wear_set(slot: String, id: String) -> void:
+	var look: Dictionary = hero["look"]
+	var w: Dictionary = (look["wear"] as Dictionary).duplicate() if look.get("wear") is Dictionary else {}      # a look once shared is not changed under another
+	if slot == "head":
+		look["headgear"] = id != "none"
+		if id != "none":
+			w[slot] = id
+	else:
+		w[slot] = id
+	_look_set("wear", Creation.wear_settle(String(hero.get("city", "")), w, String(hero.get("body", "")).get_slice("-", 1)))
+
 ## What the home wears on the head, by name; "" where it wears nothing.
 func _headgear_name() -> String:
 	var hg := _headgear()
@@ -827,10 +895,15 @@ func _headgear() -> Dictionary:
 		hgs = [hgs]
 	if not (hgs is Array):
 		return {}
+	var worn_cover := Creation.cover_of(hero.get("look", {}))
+	for cv in Data.creation.get("look", {}).get("coverings", []):
+		if String(cv["id"]) == worn_cover:
+			return { "type": "cover", "name": String(cv.get("name", worn_cover)) }
 	var body := String(hero.get("body", ""))
 	var wear := String(World.dress_option(String(hero.get("city", "")), hero.get("look", {})).get("wear", "plain"))
+	var cut := Creation.wear_of(hero.get("look", {}), "head", body.get_slice("-", 1))      # the cut of the head the look wears
 	for h in hgs:
-		if String(h.get("sex", body.get_slice("-", 1))) == body.get_slice("-", 1) and (not h.has("in") or (h["in"] as Array).has(wear)):
+		if String(h.get("sex", cut)) == cut and (not h.has("in") or (h["in"] as Array).has(wear)):
 			return h
 	return {}
 

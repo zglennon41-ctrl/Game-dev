@@ -20,6 +20,7 @@ import human as hu
 import head as hd
 import faces as fc
 import hair as hr
+import coverings as cv
 
 # The three builds the player's slider blends: (muscle, weight) on MakeHuman's scales.
 BUILD_FORMS = {"lean": (0.32, 0.36), "fit": (0.62, 0.5), "heavy": (0.98, 0.68)}
@@ -539,6 +540,7 @@ class HumanBody:
         (x0, x1), (y0, y1), (z0, z1) = self.head_box
         centre = Vector((0.0, (y0 + y1) / 2 + 0.01, z0 + 0.5 * self.head_h))
         pieces = hr.hair(surf, centre, self.body.sex, self.head_h, mat, back_y=lambda z: self.front_y(0.0, z, back=True))
+        pieces += cv.coverings(self, centre)        # cloth over the hair, for any head (coverings.py)
         bpy.data.objects.remove(surf)
         for p in pieces:
             if p.name.startswith("Beard_"):

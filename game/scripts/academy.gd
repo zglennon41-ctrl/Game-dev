@@ -373,6 +373,20 @@ static func random_look(rng: RandomNumberGenerator, city := "") -> Dictionary:
 	var apart := RandomNumberGenerator.new()
 	apart.seed = rng.state
 	face.merge(Creation.frame_of(apart))
+	# and, now and then, a slot of their home's dress in its other cut (data/creation.json, look.slots)
+	var chance := float(L.get("slots", {}).get("otherCutChance", 0.0))
+	var other := "f" if sex == "m" else "m"
+	var wear := {}
+	for slot in L.get("slots", {}).get("order", []):
+		if Creation.wear_options(city, slot, sex).any(func(o): return o["id"] == other) and apart.randf() < chance:
+			wear[slot] = other
+	# and a few cover their hair (look.coverings)
+	var cloths: Array = L.get("coverings", [])
+	if not cloths.is_empty() and apart.randf() < float(L.get("slots", {}).get("coverChance", 0.0)):
+		wear["head"] = String(cloths[apart.randi() % cloths.size()]["id"])
+		face["headgear"] = true
+	if not wear.is_empty():
+		face["wear"] = Creation.wear_settle(city, wear, sex)
 	return face
 
 static func _shuffle(a: Array, rng: RandomNumberGenerator) -> void:
