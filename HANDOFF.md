@@ -669,6 +669,24 @@ interface redesign (M7); finished art (the kits are placeholders in the right sh
   the night the field wakes, the recruiter, the year, the gate and the first lesson are
   what a new player judges the game by, and get their own pass for presentation, pacing,
   clarity and feel. Words changed in that pass are drafts for the owner to rewrite.
+- **Dress, equipment geniuses and representation** (owner, 2026-11-12): "Right now cloaks
+  cut awkwardly through the back and neck ware juts out inorganically. The item type
+  geniuses need to be fixed to actually make narrative sense and mechanical scale. A giant
+  bow or misaimed/held firearm is incredibly awkward... I also want everyone to feel
+  represented in the game and the variety of outfits, cultures, and body types is crucial."
+  The owner's answers to five questions:
+  - **Three categories of equipment genius:** Arms (melee weapons, ranged weapons, shields),
+    Regalia (relics, staffs, crowns), Augments (living wings, a prehensile tail, glowing
+    tattoos on the body). Each progresses in stages as creatures do.
+  - **Size:** "They should manifest secondary characteristics but stay the same size. It
+    can be a pure aesthetic companion form and/or more complex animations for their attacks
+    and design." A held genius is sized to the hand at every stage.
+  - **Fiction:** a held genius is a living thing in a weapon's shape, not a made object
+    with a soul in it.
+  - **Clothing that fights the body:** cut what fails; a piece comes back when it fits.
+  - **Representation:** body builds, hair and head coverings, outfit choice across cultures,
+    disability and age, and "diversity of style and individuality. Maybe the ability to mix
+    and match from three to five core outfits and hairstyles for each culture."
 
 ## 10. What good looks like
 
