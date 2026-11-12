@@ -807,10 +807,15 @@ func _dress_home(node: Node3D, look: Dictionary) -> String:
 	var dyes: Dictionary = opt.get("colors", {})
 	var prefix := "dress_%s_" % home
 	var sex := body_sex(node)
+	# whatever a look says, nobody is drawn undressed (Creation.wear_settle)
+	var worn := look
+	if look.get("wear") is Dictionary and not (look["wear"] as Dictionary).is_empty():
+		worn = look.duplicate()
+		worn["wear"] = Creation.wear_settle(home, look["wear"], sex)
 	for m in meshes:
 		var mi: MeshInstance3D = m
 		if String(mi.name).begins_with("Dress_"):
-			mi.visible = dress_worn(String(mi.name), wear) and cut_worn(String(mi.name), look, sex)
+			mi.visible = dress_worn(String(mi.name), wear) and cut_worn(String(mi.name), worn, sex)
 		if mi.mesh == null:
 			continue
 		for i in mi.mesh.get_surface_count():
