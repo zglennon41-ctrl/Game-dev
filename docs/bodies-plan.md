@@ -293,6 +293,9 @@ chord of its own (two colours and a metal, from the style's ramps, worn in the s
 a signature piece that says what the home does. `data/bodies.json` (`dress`) is the design and
 `tools/blender/wardrobe.py` cuts it; every line is the owner's to rewrite.
 
+Whether a piece sits on the body and moves with it is measured, not judged by eye: `npm run
+check:fit` and `docs/dress-fit.md`, which also lists what is cut from the game until it fits.
+
 | Home | Silhouette | Chord | Signature |
 | --- | --- | --- | --- |
 | Alexandria | a tabard hanging square before and behind over a high collar | slate grey, ink, brass | the cohort's brass tag; an Instructor's chain |

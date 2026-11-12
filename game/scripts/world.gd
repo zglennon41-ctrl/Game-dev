@@ -565,7 +565,8 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 				a.queue_free()
 		for fid in feats:
 			var f: Dictionary = Data.people_features.get(fid, {})
-			if String(f.get("kind", "")) != "part":
+			# a part marked cut does not fit the dressed body yet (docs/dress-fit.md): it is not hung
+			if String(f.get("kind", "")) != "part" or f.has("cutUntilFits"):
 				continue
 			for sock in f.get("sockets", []):
 				if skel.find_bone(sock) < 0:
@@ -585,15 +586,19 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 						_recolor_named(m2, "echo_glow", shape_col, shape_col, 1.6)
 					if att.get_child_count() > 0:
 						(att.get_child(0) as Node3D).scale *= echo_grow
-		# A kit body's cloak is a part on the back socket, in the colour the look names, and
-		# threaded with the bonded genius's colour once there is one.
-		if look.get("cape", true) and skel.find_bone("socket_back") >= 0:
-			var cape := _attach(skel, "socket_back", "res://game/assets/people/parts/cape.glb")
-			cape.name = "feature_cape_socket_back"
-			var col := cape_color_for(hero, String(look.get("cape_color", "shape")))
+	# The cloak is the body's own (the mesh Cape, cut on its back and shoulders and moving with
+	# them: tools/blender/wardrobe.py), in the colour the look names, and threaded with the
+	# bonded genius's colour once there is one. (It was a stiff part on the back socket, which
+	# cut through the back: docs/dress-fit.md.)
+	var cape_mi := node.find_child("Cape", true, false) as MeshInstance3D
+	var caped: bool = cape_mi != null and look.get("cape", true)
+	if cape_mi != null:
+		cape_mi.visible = caped
+		if caped:
+			var ccol := cape_color_for(hero, String(look.get("cape_color", "shape")))
 			if cape_thread > 0.0:
-				col = col.lerp(g_coat, cape_thread)
-			_recolor(cape, col)
+				ccol = ccol.lerp(g_coat, cape_thread)
+			_recolor(cape_mi, ccol)
 	if glow_k > 0.0 and node == _player:
 		if _glow_light == null:
 			_glow_light = OmniLight3D.new()
@@ -606,6 +611,19 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 	var beard := String(look.get("beard", "none"))
 	var col := hair_color(String(look.get("hair_color", "brown")))
 	var wear := _dress_home(node, look)      # how the home's dress is worn: plain, formal, or as a master
+	# One cloak at a time: the look's cloak is worn in place of the home's own cloak and of its
+	# shoulder cape, and what is slung on the back is under a cloak, unseen (they do not fit
+	# together: docs/dress-fit.md).
+	var cloaked := caped
+	for m in node.find_children("Dress_*", "MeshInstance3D", true, false):
+		var dn := String(m.name)
+		if caped and (dn.begins_with("Dress_cloak") or dn.begins_with("Dress_mantle")):
+			(m as MeshInstance3D).visible = false
+		elif dn.begins_with("Dress_cloak") and (m as MeshInstance3D).visible:
+			cloaked = true
+	if cloaked:
+		for m in node.find_children("Dress_roll*", "MeshInstance3D", true, false):
+			(m as MeshInstance3D).visible = false
 	# A headband leaves the crown bare (data/creation.json, look.openHeadgear): the hair shows under it.
 	var covers := headgear
 	if headgear:
@@ -872,7 +890,10 @@ func look_for(name: String) -> Dictionary:
 ## brought onto the ramps of what it is (cloth, unless said).
 func _recolor(att: Node, col: Color, cls := "cloth") -> void:
 	col = Style.conform(col, cls)
-	for m in att.find_children("*", "MeshInstance3D", true, false):
+	var all: Array = att.find_children("*", "MeshInstance3D", true, false)
+	if att is MeshInstance3D:
+		all.append(att)
+	for m in all:
 		var mi: MeshInstance3D = m
 		if mi.mesh == null:
 			continue
