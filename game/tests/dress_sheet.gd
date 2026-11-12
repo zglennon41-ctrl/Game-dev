@@ -6,7 +6,9 @@ extends Node
 ## what: homes (default: a row each for the men from the front, the men from behind, the women
 ## from the front and from behind), masters (the Academy's instructors, front and behind),
 ## options (each home's dress options side by side), motion (one home in a walk, a swing and a
-## dodge, from behind: home=<id>).
+## dodge, from behind: home=<id>), fit (one body close, to judge how its dress sits: from behind,
+## from the side and three-quarter, standing, running, striking and bent down: home=<id> sex=<m|f>
+## and dress=<option id> or rank=master, cape=1 for the creator's cloak, build=<-1..1>).
 ## It saves sheet.png and mask.png (the same as white shapes on black: the test of a silhouette).
 ## Keys: dress=<option id> (every figure wears it), rank=<rank>, anim=<clip>, at=<0..1>,
 ## home=<id>, sex=<m|f>.
@@ -137,6 +139,26 @@ func _run() -> void:
 					if kv.has("cape"):
 						look["cape"] = true
 					_figure("%s-%s" % [home, sex], look, i, r, cols, rows, BACK if r % 2 == 0 else FRONT, String(clips[i][0]), float(clips[i][1]), cell)
+		"fit":
+			var home := String(kv.get("home", "columbia"))
+			var sex := String(kv.get("sex", "m"))
+			var clips := [["Idle", 0.0], ["Running_A", 0.3], ["Running_A", 0.8], ["1H_Melee_Attack_Chop", 0.4], ["PickUp", 0.5], ["Sit_Chair_Idle", 0.5]]
+			var turns := [PI, PI / 2.0, PI - 0.75, 0.6]
+			cols = clips.size()
+			rows = turns.size()
+			cell = Vector2(2.0, 2.3)
+			var tones: Array = Data.bodies[home].get("palette", ["olive"])
+			for i in clips.size():
+				for r in turns.size():
+					var look := base.duplicate()
+					look["skin"] = tones[tones.size() / 2]
+					look["hair"] = "crop" if sex == "m" else "tail"
+					look["cape"] = kv.has("cape")
+					look["cape_color"] = "plain"
+					look["build"] = float(kv.get("build", "0"))
+					if kv.has("rank"):
+						look["dress"] = kv["rank"]
+					_figure("%s-%s" % [home, sex], look, i, r, cols, rows, turns[r], String(clips[i][0]), float(clips[i][1]), cell)
 	var cam := Camera3D.new()
 	world.add_child(cam)
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL

@@ -33,9 +33,13 @@ METALS = ("metal", "brass", "gold", "bronze", "steel", "iron", "copper")
 # The data
 # ======================================================================================
 
+WITH_CUT = False        # the fit check may build what is cut from the game, to see whether it fits yet
+
+
 def pieces_for(D, sex):
-    """What one sex wears of a home's dress."""
-    return [p for p in D.get("pieces", []) if p.get("sex", sex) == sex]
+    """What one sex wears of a home's dress. A piece marked `cut` (with the reason) is out of
+    the game until it fits (docs/dress-fit.md): the cutter is kept, the piece is not built."""
+    return [p for p in D.get("pieces", []) if p.get("sex", sex) == sex and (WITH_CUT or not p.get("cut"))]
 
 
 def headgear_for(D, sex):
@@ -44,7 +48,7 @@ def headgear_for(D, sex):
         return []
     if isinstance(hg, dict):
         hg = [hg]
-    return [h for h in hg if h.get("sex", sex) == sex]
+    return [h for h in hg if h.get("sex", sex) == sex and (WITH_CUT or not h.get("cut"))]
 
 
 def under_for(D, sex):
@@ -952,11 +956,13 @@ def join_dress(body, objs):
         tag = name[name.index("__in_"):] if "__in_" in name else ""
         groups.setdefault(tag, []).append(name)
     body.dress_ranges = {}
+    body.dress_spans = {}       # every piece's vertices in the joined mesh, for the fit check (fit_check.py)
     for tag, names in groups.items():
         joined = "Dress_some" + tag if tag else "Dress_all"
         mats = []
         bm = bmesh.new()
         ranges = []
+        spans = []
         for name in names:
             ob = objs.pop(name)
             me = ob.data
@@ -974,6 +980,7 @@ def join_dress(body, objs):
             w = getattr(body, "dress_weights", {}).get(name)
             if w is not None:
                 ranges.append((start, len(bm.verts), w))
+            spans.append((name, start, len(bm.verts), body.chains.get(name, "trunk")))
             bpy.data.objects.remove(ob)
             body.chains.pop(name, None)
         me = bpy.data.meshes.new(joined)
@@ -986,6 +993,7 @@ def join_dress(body, objs):
         objs[joined] = ob
         body.chains[joined] = "trunk"
         body.dress_ranges[joined] = ranges
+        body.dress_spans[joined] = spans
 
 
 def weigh(body, name, ob):
