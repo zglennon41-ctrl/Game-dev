@@ -514,6 +514,31 @@ class HumanBody:
                     groups[n] = ob.vertex_groups.new(name=n)
                 groups[n].add([vert.index], w / total, "REPLACE")
 
+    def carry_builds(self, ob):
+        """A piece that lies on the body below the face (a scarf on the neck) takes every build
+        from the skin under it: each vertex moves as the three nearest of the body's do."""
+        fit = self.humans["fit"].body()
+        if not hasattr(self, "_kd"):
+            self._kd = KDTree(len(fit))
+            for i, p in enumerate(fit):
+                self._kd.insert(Vector(p), i)
+            self._kd.balance()
+        co = fc.coords_of(ob)
+        idx = np.zeros((len(co), 3), dtype=np.int64)
+        w = np.zeros((len(co), 3))
+        for i, p in enumerate(co):
+            for j, (_, k, dist) in enumerate(self._kd.find_n(Vector(p), 3)):
+                idx[i, j] = k
+                w[i, j] = 1.0 / (dist + 0.002) ** 2
+        w /= w.sum(axis=1, keepdims=True)
+        for build, h in self.humans.items():
+            if build == "fit":
+                continue
+            d = h.body() - fit
+            off = (d[idx] * w[:, :, None]).sum(axis=1)
+            off[np.linalg.norm(off, axis=1) < 0.00015] = 0.0
+            fc.add_key(ob, build, co + off)
+
     # --- what hangs from the head ---------------------------------------------------------
 
     def head_pieces(self, mats):

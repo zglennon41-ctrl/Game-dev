@@ -9,4 +9,6 @@ func _post_import(scene: Node) -> Object:
 		var mi: MeshInstance3D = m
 		if mi.mesh is ArrayMesh:
 			mi.mesh = Shapes.pack(mi.mesh)
+		if String(mi.name) == "Cape":      # the cloak every body has: off until a look puts it on (world.gd, dress)
+			mi.visible = false
 	return scene

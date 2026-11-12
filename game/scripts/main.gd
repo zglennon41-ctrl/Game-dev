@@ -402,6 +402,8 @@ func _ready() -> void:
 		new_character()
 	elif _args.has("tutorial"):
 		start("tutorial")
+	elif _args.has("study"):
+		_study()
 	elif _args.has("fight"):
 		if _args.has("saved"):
 			hero = Settings.hero()
@@ -1734,7 +1736,7 @@ func _process(delta: float) -> void:
 	if (mode == "creator" or mode == "menu" or (mode == "story" and _show_preview)) and preview:
 		world.draw(preview, real_dt, Vector2.ZERO, Vector2.ZERO)
 		return
-	if mode == "scene" and fight:
+	if (mode == "scene" or mode == "study") and fight:
 		world.draw(fight, real_dt, Vector2.ZERO, Vector2.ZERO)
 		return
 	if mode != "tutorial" and mode != "fight" and mode != "prologue":
@@ -1873,6 +1875,88 @@ func _sounds(events: Array) -> void:
 			"genius-held-blow": sfx.play("block", 1.1, -3.0)
 			"genius-mend", "genius-took-back": sfx.play("cue-hit", 1.2, -8.0)
 			"genius-not-ready": sfx.play("deny", 1.2, -6.0)
+
+## --study=<form>[,<form>...]: a held genius on its partner, to look at how it is held. One
+## picture for each form, pose and view, named <form>-<pose>-<view>.png in --shots.
+##   --poses=idle,aim,attack,run,block   (aim and attack are the form's own weapon's; default idle,aim,attack)
+##   --views=front,side,back,quarter     (default quarter,side,back)
+##   --body=<person model>               (default the yard's hero)
+##   --free                              a weapon genius stays at the shoulder, not in the hand
+##   --rest=x,y,z                        try another turn of the thing in the resting hand (degrees)
+##   --tag=<word>                        added to the pictures' names
+func _study() -> void:
+	var poses: PackedStringArray = str(_args.get("poses", "idle,aim,attack")).split(",")
+	var views: PackedStringArray = str(_args.get("views", "quarter,side,back")).split(",")
+	var turns := { "front": 0.0, "quarter": 0.7, "side": PI / 2.0, "back": 2.6, "left": -PI / 2.0, "farside": -0.9 }
+	for form_id in str(_args["study"]).split(","):
+		var tg := Genius.at_form(form_id, int(_args.get("instar", "0")))
+		hero = Fight.default_hero().duplicate(true)
+		hero["name"] = "Study"
+		if _args.has("body"):
+			hero["body"] = str(_args["body"])
+		if _args.has("weapon"):
+			hero["weapon"] = str(_args["weapon"])
+		if tg.is_born():
+			tg.look = GeniusLook.born(4711)
+			tg.save_to(hero)
+		start("fight")
+		mode = "study"
+		hud.play_ui.visible = false
+		world.show_wolf = false
+		fight.w_pos = fight.p_pos + Vector2.from_angle(fight.p_facing) * 60.0
+		fight.w_state = "absent"
+		if fight.g_type == "weapon" and not _args.has("free"):
+			fight._take_in_hand()
+		# --augment=wings --stage=0..4: an Augment worn on the body (a proof, to look at)
+		var aug: Augment = null
+		if _args.has("augment"):
+			world.genius_visible = false
+			aug = world.wear_augment(str(_args["augment"]), int(_args.get("stage", "1")), World.SHAPE_COLORS.get(String(hero.get("shape", "anchor")), Color.WHITE))
+		if _args.has("rest") and fight.g_weapon.has("held"):
+			fight.g_weapon["held"] = (fight.g_weapon["held"] as Dictionary).duplicate()
+			fight.g_weapon["held"]["rest"] = Array(str(_args["rest"]).split(",")).map(func(x): return float(x))
+		var ranged: bool = fight.ranged
+		var two: bool = int(fight.style.get("hands", 1)) == 2
+		for pose in poses:
+			var clip := "Idle"
+			var at := 0.3
+			fight.p_lock = false
+			match pose:
+				"aim":
+					if not ranged:
+						continue
+					clip = "2H_Ranged_Aiming" if two else "1H_Ranged_Aiming"
+					fight.p_lock = true
+					if fight.style.has("draw"):
+						fight.p_state = "draw"
+						fight.p_draw = float(_args.get("draw", "1.1"))
+				"attack":
+					var sw: Dictionary = fight.combo[0]
+					clip = String(sw.get("anim", "1H_Melee_Attack_Chop"))
+					at = float(_args.get("at", "0.25" if ranged else "0.45"))
+					fight.p_state = "attack"
+				"run": clip = "Running_A"
+				"block": clip = "Blocking"
+			world.study_pose(clip, at)
+			if aug:
+				aug.spread = { "run": 0.35, "attack": 1.0 }.get(pose, 0.0)
+			for i in 8:
+				await get_tree().process_frame
+			for view in views:
+				var turn := fight.p_facing + float(turns.get(view, 0.7))
+				world.cine = true
+				world.cine_look = world._v3(fight.p_pos, float(_args.get("lookat", "1.15")))
+				world.cine_pos = world._v3(fight.p_pos + Vector2.from_angle(turn) * float(_args.get("dist", "3.6")), 1.5)
+				world._cam_pos = world.cine_pos
+				world._cam_look = world.cine_look
+				for i in 3:
+					await get_tree().process_frame
+				await RenderingServer.frame_post_draw
+				get_viewport().get_texture().get_image().save_png("%s/%s%s-%s-%s.png" % [_args["shots"], form_id.replace(":", "_"), str(_args.get("tag", "")), pose, view])
+			fight.p_state = "free"
+			fight.p_lock = false
+	print("STUDY done")
+	get_tree().quit()
 
 func _shot(label: String) -> void:
 	if not _args.has("shots"):

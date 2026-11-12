@@ -87,6 +87,7 @@ var own_body := ""                 # the form whose own body it wears ("" when i
 var nearness := 0.0                # how near its next Reading is (Genius.readiness), 0 to 1
 var molt := 0.0                    # the molt lines showing for it, 0 to 1
 var stands := 0.6                  # how tall it stands now, in metres
+var hand_k := 0.0                   # a held genius: the scale that sizes it to the hand (0: it is not one)
 var art_size := 1.0                # and how tall its art body is against that (its silhouette's artSize)
 var age := "grown"                 # young, half-grown, grown, prime, great, apex (by instar)
 var lines := 0.0                   # the steady light along its body at the later instars, 0 to 1
@@ -191,6 +192,16 @@ func _assemble(instar: int) -> void:
 	var h1 := float(sizes.get(str(mini(6, maxi(1, instar) + 1)), h0))
 	stands = h0 + (h1 - h0) * float(prog.get("growth", 0.0)) * nearness
 	_fit_height(stands, proportions)
+	# A held genius does not grow as a creature does: it is sized to the hand at every stage
+	# (data/genius.json, equipment), and floats at that size when it is let go.
+	if own_body != "" and _model:
+		var equip: Dictionary = Data.genius().get("equipment", {})
+		var own := Data.form(own_body)
+		var sizing := GeniusEquip.sizing(equip, own, String(Data.base(String(own.get("base", ""))).get("class", "")), _model)
+		if not sizing.is_empty():
+			hand_k = float(sizing["k"])
+			_model.scale = Vector3.ONE * hand_k * float(equip.get("afloat", 1.0))
+			stands = clampf(float(sizing["long"]), 0.3, 1.6)
 	# Parts, on the sockets for their slots.
 	var feats: Array = info.get("features", [])
 	var slot_count := {}

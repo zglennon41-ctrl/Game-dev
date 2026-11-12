@@ -566,7 +566,8 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 				a.queue_free()
 		for fid in feats:
 			var f: Dictionary = Data.people_features.get(fid, {})
-			if String(f.get("kind", "")) != "part":
+			# a part marked cut does not fit the dressed body yet (docs/dress-fit.md): it is not hung
+			if String(f.get("kind", "")) != "part" or f.has("cutUntilFits"):
 				continue
 			for sock in f.get("sockets", []):
 				if skel.find_bone(sock) < 0:
@@ -586,15 +587,19 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 						_recolor_named(m2, "echo_glow", shape_col, shape_col, 1.6)
 					if att.get_child_count() > 0:
 						(att.get_child(0) as Node3D).scale *= echo_grow
-		# A kit body's cloak is a part on the back socket, in the colour the look names, and
-		# threaded with the bonded genius's colour once there is one.
-		if look.get("cape", true) and skel.find_bone("socket_back") >= 0:
-			var cape := _attach(skel, "socket_back", "res://game/assets/people/parts/cape.glb")
-			cape.name = "feature_cape_socket_back"
-			var col := cape_color_for(hero, String(look.get("cape_color", "shape")))
+	# The cloak is the body's own (the mesh Cape, cut on its back and shoulders and moving with
+	# them: tools/blender/wardrobe.py), in the colour the look names, and threaded with the
+	# bonded genius's colour once there is one. (It was a stiff part on the back socket, which
+	# cut through the back: docs/dress-fit.md.)
+	var cape_mi := node.find_child("Cape", true, false) as MeshInstance3D
+	var caped: bool = cape_mi != null and look.get("cape", true)
+	if cape_mi != null:
+		cape_mi.visible = caped
+		if caped:
+			var ccol := cape_color_for(hero, String(look.get("cape_color", "shape")))
 			if cape_thread > 0.0:
-				col = col.lerp(g_coat, cape_thread)
-			_recolor(cape, col)
+				ccol = ccol.lerp(g_coat, cape_thread)
+			_recolor(cape_mi, ccol)
 	if glow_k > 0.0 and node == _player:
 		if _glow_light == null:
 			_glow_light = OmniLight3D.new()
@@ -606,7 +611,23 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 	var hair := String(look.get("hair", "crop"))
 	var beard := String(look.get("beard", "none"))
 	var col := hair_color(String(look.get("hair_color", "brown")))
+	# a covering that comes down over the neck is a mesh of the body's own (it bends with the neck)
+	for m in node.find_children("Cover_*", "MeshInstance3D", true, false):
+		(m as MeshInstance3D).visible = headgear and String(m.name) == "Cover_" + cover
 	var wear := _dress_home(node, look)      # how the home's dress is worn: plain, formal, or as a master
+	# One cloak at a time: the look's cloak is worn in place of the home's own cloak and of its
+	# shoulder cape, and what is slung on the back is under a cloak, unseen (they do not fit
+	# together: docs/dress-fit.md).
+	var cloaked := caped
+	for m in node.find_children("Dress_*", "MeshInstance3D", true, false):
+		var dn := String(m.name)
+		if caped and (dn.begins_with("Dress_cloak") or dn.begins_with("Dress_mantle")):
+			(m as MeshInstance3D).visible = false
+		elif dn.begins_with("Dress_cloak") and (m as MeshInstance3D).visible:
+			cloaked = true
+	if cloaked:
+		for m in node.find_children("Dress_roll*", "MeshInstance3D", true, false):
+			(m as MeshInstance3D).visible = false
 	# A headband leaves the crown bare (data/creation.json, look.openHeadgear): the hair shows under it.
 	var covers := headgear
 	if headgear:
@@ -712,7 +733,12 @@ static func dress_slot(name: String) -> Array:
 		return ["", ""]
 	if parts[0] == "Headgear":
 		return ["head", parts[2] if parts.size() > 2 and parts[2] in ["m", "f"] else ""]
-	return [parts[1], parts[2] if parts.size() > 2 and parts[2] in ["m", "f"] else ""]
+	# a cloak, a shoulder cape and a roll on the back are meshes of their own, named for the
+	# piece (Dress_cloak__in_master): each is of the slot its kind of piece is worn in
+	var slot := String(parts[1])
+	if not (Data.creation.get("look", {}).get("slots", {}).get("order", []) as Array).has(slot):
+		slot = Creation.slot_of({ "type": slot })
+	return [slot, parts[2] if parts.size() > 2 and parts[2] in ["m", "f"] else ""]
 
 ## Whether a look wears a piece's cut on a body of one sex (look.wear: slot -> m, f or none;
 ## a slot it does not name is worn in the body's own cut).
@@ -957,7 +983,10 @@ static func elder_age(name: String) -> float:
 ## brought onto the ramps of what it is (cloth, unless said).
 func _recolor(att: Node, col: Color, cls := "cloth") -> void:
 	col = Style.conform(col, cls)
-	for m in att.find_children("*", "MeshInstance3D", true, false):
+	var all: Array = att.find_children("*", "MeshInstance3D", true, false)
+	if att is MeshInstance3D:
+		all.append(att)
+	for m in all:
 		var mi: MeshInstance3D = m
 		if mi.mesh == null:
 			continue
@@ -2045,6 +2074,34 @@ func _build_markers() -> void:
 
 # --- Animation ----------------------------------------------------------------
 
+## An Augment worn on the partner, to look at (docs/genius-types.md, "Augments": a proof; how
+## one fights is not decided, and nothing in a fight puts one on). level: 0 Baby to 4 Final.
+var _augment: Augment = null
+func wear_augment(kind: String, level: int, tint: Color) -> Augment:
+	if _augment and is_instance_valid(_augment):
+		_augment.get_parent().queue_free()
+	_augment = null
+	var rule: Dictionary = Data.genius().get("equipment", {}).get("augments", {}).get(kind, {})
+	if rule.is_empty() or _p_skel == null:
+		return null
+	_augment = Augment.wear(_p_skel, kind, rule, level, tint)
+	if _augment:
+		toonify(_augment)
+		for m in _augment.find_children("*", "MeshInstance3D", true, false):
+			(m as MeshInstance3D).material_overlay = _ink("people")
+	return _augment
+
+## The partner held still at one moment of one clip (main.gd, --study).
+func study_pose(clip: String, at: float) -> void:
+	if _p_anim == null or not _p_anim.has_animation(clip):
+		push_warning("study: no clip %s" % clip)
+		return
+	_p_oneshot_until = INF
+	_p_anim.play(clip, 0.0)
+	_p_anim.seek(_p_anim.get_animation(clip).length * at, true)
+	_p_anim.speed_scale = 0.0
+	_p_current = clip
+
 func _play(ap: AnimationPlayer, name: String, speed := 1.0, blend := 0.12) -> void:
 	if not ap.has_animation(name):
 		return
@@ -2568,7 +2625,7 @@ func draw(f: Fight, dt: float, cam_input: Vector2, move_input: Vector2) -> void:
 						var clip := gait_for(v)
 						_loop(_p_anim, clip, stride_scale(clip, v) * (0.9 if f.p_stance else 1.0))
 				elif f.ranged and f.p_lock:
-					_loop(_p_anim, "2H_Ranged_Aiming" if f.weapon["style"] == "gun-heavy" else "1H_Ranged_Aiming")
+					_loop(_p_anim, "2H_Ranged_Aiming" if int(f.style.get("hands", 1)) == 2 else "1H_Ranged_Aiming")
 				else:
 					_loop(_p_anim, "Idle")
 			"down":
@@ -5162,50 +5219,199 @@ func _held_at(what: String) -> Node3D:
 		_held_nodes[what] = _g_body.worn_piece if what == "wear" and _g_body.worn_piece else _g_body._model.find_child(what, true, false)
 	return _held_nodes[what] as Node3D
 
+## Where a hand of the partner is, in the world: its slot's place, and its frame squared.
+func _hand_slot(left: bool) -> Transform3D:
+	var bone := _p_skel.find_bone("handslot.l" if left else "handslot.r") if _p_skel else -1
+	if bone < 0:
+		return _sword.global_transform.orthonormalized() if _sword else Transform3D.IDENTITY
+	return (_p_skel.global_transform * _p_skel.get_bone_global_pose(bone)).orthonormalized()
+
+## Whether the partner is aiming what they hold: drawing, loosing or firing, or standing
+## locked on to a foe with a thing that shoots.
+func _aiming(f: Fight) -> bool:
+	return f.ranged and (f.p_state in ["draw", "attack"] or (f.p_state == "free" and f.p_lock and not f.p_block_held))
+
+## The line a shot flies along, level: from the partner to the foe they are locked on to, or
+## the way they face.
+func aim_line(f: Fight) -> Vector3:
+	var to := Vector2.from_angle(f.p_facing)
+	if f.p_lock and f.w_state not in ["down", "absent"] and f.w_pos.distance_to(f.p_pos) > 0.5:
+		to = (f.w_pos - f.p_pos).normalized()
+	return (_v3(to, 0.0) - _v3(Vector2.ZERO, 0.0)).normalized()
+
+var _aim_k := 0.0
+
+## A bow that is its partner's genius, drawn: the string comes back to the hand that draws it,
+## and the arrow of light lies from that hand through the grip along the aim. The model's own
+## string and arrow (pieces named string and pulse_arrow) are not drawn meanwhile.
+var _string: MeshInstance3D = null
+func _draw_string(f: Fight, held: Dictionary, grip_at: Vector3, frame: Basis) -> void:
+	var drawn := 0.0
+	if not held.is_empty() and held.get("draws", false) and f.g_in_hand:
+		if f.p_state == "draw":
+			drawn = clampf(f.p_draw / maxf(0.05, f.draw_seconds()), 0.0, 1.0)
+			drawn = 0.25 + 0.75 * drawn
+	var own: Array = []
+	if _g_body and is_instance_valid(_g_body) and _g_body._model:
+		for name in ["string", "pulse_arrow"]:
+			var n := _held_at(name)
+			if n:
+				own.append(n)
+	var tip_a := _held_at("tip_up") if drawn > 0.0 else null
+	var tip_b := _held_at("tip_lo") if drawn > 0.0 else null
+	if tip_a == null or tip_b == null:
+		for n in own:
+			(n as Node3D).visible = true
+		if _string:
+			_string.visible = false
+		_reach_hand(not (String(held.get("hand", "r")) == "l") if not held.is_empty() else false, Vector3.ZERO, 0.0)
+		return
+	for n in own:
+		(n as Node3D).visible = false
+	if _string == null:
+		_string = MeshInstance3D.new()
+		_string.mesh = ImmediateMesh.new()
+		_string.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_string.material_override = _mat(_g_tint.lightened(0.45), 2.6, true, 1.0)
+		(_string.material_override as StandardMaterial3D).cull_mode = BaseMaterial3D.CULL_DISABLED
+		add_child(_string)
+	_string.visible = true
+	_string.global_transform = Transform3D.IDENTITY
+	# the nock: at full draw at the hand that draws (the corner of the jaw), and never further
+	# from the grip than an arm can take it
+	# (the corner of the jaw is where the head is, a little below and to the drawing side)
+	var rest_nock := (tip_a.global_position + tip_b.global_position) * 0.5
+	var right := String(held.get("hand", "r")) == "l"
+	var back := -frame.z
+	var jaw := grip_at + back * float(held.get("drawLength", 0.75))
+	if _p_skel and _head_bone >= 0:
+		var head := (_p_skel.global_transform * _p_skel.get_bone_global_pose(_head_bone)).origin
+		jaw = head + Vector3.UP * 0.1 + frame.x * (-0.1 if right else 0.1)
+	var reach := clampf((jaw - grip_at).dot(back), 0.3, float(held.get("drawLength", 0.75)))
+	var full := grip_at + back * reach
+	var nock := rest_nock.lerp(full, drawn)
+	# and the hand that draws goes to the nock, its elbow out and up behind it
+	_reach_hand(not right, nock, 1.0, back + Vector3.UP * 0.5 + frame.x * (-0.6 if right else 0.6))
+	var im := _string.mesh as ImmediateMesh
+	im.clear_surfaces()
+	var side := frame.x * 0.006
+	im.surface_begin(Mesh.PRIMITIVE_TRIANGLES)
+	for seg in [[tip_a.global_position, nock, 0.006, 0.006], [nock, tip_b.global_position, 0.006, 0.006], [nock, grip_at + frame.z * 0.28, 0.011, 0.011]]:
+		var a: Vector3 = seg[0]
+		var b: Vector3 = seg[1]
+		for axis in [frame.x, frame.y if absf((b - a).normalized().dot(frame.y)) < 0.9 else frame.z]:
+			var w: Vector3 = (axis as Vector3) * float(seg[2])
+			for v in [a - w, a + w, b + w, a - w, b + w, b - w]:
+				im.surface_add_vertex(v)
+	# the head of the arrow of light
+	var head := grip_at + frame.z * 0.28
+	for axis in [frame.x, frame.y]:
+		var w: Vector3 = (axis as Vector3) * 0.035
+		for v in [head - w, head + w, head + frame.z * 0.12]:
+			im.surface_add_vertex(v)
+	im.surface_end()
+
+## One hand of the partner brought to a place in the world, over whatever its clip is doing
+## (the hand that draws a bow goes to the string; the hand that holds it is raised to the
+## aim): the upper arm and the forearm are turned so that the hand's slot is there. The elbow
+## bends the way it already bends, or toward `elbow` (a way in the world) where one is given.
+## k: how much (0 lets the arm go back to its clip).
+var _reached := {}
+func _reach_hand(left: bool, to: Vector3, k: float, elbow := Vector3.ZERO) -> void:
+	if _p_skel == null:
+		return
+	var side := "l" if left else "r"
+	var upper := _p_skel.find_bone("upperarm." + side)
+	var lower := _p_skel.find_bone("lowerarm." + side)
+	var wrist := _p_skel.find_bone("wrist." + side)
+	var slot := _p_skel.find_bone("handslot." + side)
+	if upper < 0 or lower < 0 or wrist < 0:
+		return
+	if k <= 0.0:
+		if _reached.has(side):
+			_p_skel.set_bone_global_pose_override(upper, Transform3D.IDENTITY, 0.0, false)
+			_p_skel.set_bone_global_pose_override(lower, Transform3D.IDENTITY, 0.0, false)
+			_reached.erase(side)
+		return
+	_reached[side] = true
+	# (from the clip's own pose, not from where the arm was put last frame)
+	var inv := _p_skel.global_transform.affine_inverse()
+	var up_t := _p_skel.get_bone_global_pose_no_override(upper)
+	var lo_t := _p_skel.get_bone_global_pose_no_override(lower)
+	var wr := _p_skel.get_bone_global_pose_no_override(wrist).origin
+	# the place is for the hand's slot (where a thing is held): the wrist stops short of it
+	var target := inv * to
+	if slot >= 0:
+		target -= (_p_skel.get_bone_global_pose_no_override(slot).origin - wr)
+	var s0 := up_t.origin
+	var e0 := lo_t.origin
+	var a := (e0 - s0).length()
+	var b := (wr - e0).length()
+	var d := clampf((target - s0).length(), absf(a - b) + 0.01, a + b - 0.005)
+	var along := (target - s0).normalized()
+	var bend := (e0 - s0) if elbow == Vector3.ZERO else inv.basis * elbow
+	var pole := bend - along * bend.dot(along)
+	pole = pole.normalized() if pole.length() > 0.01 else Vector3.DOWN
+	var x := (a * a - b * b + d * d) / (2.0 * d)
+	var h := sqrt(maxf(0.0, a * a - x * x))
+	var e1 := s0 + along * x + pole * h
+	var w1 := s0 + along * d
+	var turn_up := Quaternion((e0 - s0).normalized(), (e1 - s0).normalized())
+	var turn_lo := Quaternion((wr - e0).normalized(), (w1 - e1).normalized())
+	_p_skel.set_bone_global_pose_override(upper, Transform3D(Basis(turn_up) * up_t.basis, s0), k, true)
+	_p_skel.set_bone_global_pose_override(lower, Transform3D(Basis(turn_lo) * lo_t.basis, e1), k, true)
+
 func _update_form(f: Fight, dt: float) -> void:
 	_genius.visible = false
 	_g_trail.emitting = false
 	_genius_ground(f)
-	# A weapon genius in the hand is the weapon: it sits where the weapon put away sat, at the
-	# length a hand holds (data/genius-types.json, weapon.bases.*.held), and that one is not drawn.
+	# A weapon genius in the hand is the weapon: it is seated by its own grip in the hand its
+	# kind is held in (data/genius-types.json, weapon.bases.*.held), at the size of a thing a
+	# hand holds (data/genius.json, equipment), and the weapon put away is not drawn.
 	if _sword:
 		_sword.visible = not f.g_in_hand
-	if f.g_in_hand and _sword and _g_form:
-		# length: how long it is in the hand, in metres. grip: how far along that length, from its
-		# foot, the hand takes it. flip: its foot is its point (a blade that floats point down).
+	var in_hand := f.g_in_hand and _sword != null and _g_form != null and _g_body != null and is_instance_valid(_g_body) and _held_at("grip") != null
+	_aim_k = move_toward(_aim_k, 1.0 if in_hand and _aiming(f) else 0.0, dt * (9.0 if in_hand and _aiming(f) else 6.0))
+	if in_hand:
 		var held: Dictionary = f.g_weapon.get("held", {})
-		var long := float(held.get("length", 1.0))
-		var k := long / maxf(0.2, _g_body.stands if _g_body else 1.0)
-		var slot := _sword.global_transform.basis.orthonormalized()
-		var hb := slot
-		var at := _sword.global_position - slot.y * long * float(held.get("grip", 0.0))
-		if held.get("upright", false):
-			# a thing held level (a gun): upright, turned the way its partner faces
-			hb = Basis(Vector3.UP, _yaw(f.p_facing))
-			at = _sword.global_position - Vector3.UP * long * float(held.get("grip", 0.0))
-		elif held.get("flip", false):
-			hb = slot * Basis(Vector3.RIGHT, PI)
-			at = _sword.global_position + slot.y * long * float(held.get("grip", 0.0))
-		_g_form.global_transform = Transform3D(hb * Basis.from_scale(Vector3.ONE * k), at)
-		# A weapon with a model of its own says where the hand closes on it (an empty named
-		# grip, turned as a weapon is turned in the hand): it is seated there, whatever its form.
-		# Such a model is made in the weapon kit's frame and at its size (docs/genius-lines.md,
-		# "The weapons"): the size it floats at is undone, and a gun or a bow takes the quarter
-		# turn the kit's own take in the hand.
-		var grip := _held_at("grip")
-		if grip:
-			# (one that will not sit in a hand as it floats, a gun on its legs, has a piece for the
-			# hand: docs/genius-lines.md, "A worn piece")
-			_g_body.set_worn(true)
-			var g := _g_body._local_xf(grip)
-			var made := 1.0 / maxf(0.001, _g_body._model.scale.y)
-			var quarter := Basis(Vector3.UP, PI / 2.0) if String(f.g_weapon.get("style", "")) in ["gun", "bow"] else Basis.IDENTITY
-			var fb := slot * quarter * g.basis.orthonormalized().inverse() * Basis.from_scale(Vector3.ONE * made)
-			_g_form.global_transform = Transform3D(fb, _sword.global_position - fb * g.origin)
-		_g_form_pos = _sword.global_position
-		if _g_body:
-			_g_body.move_at(0.0)
+		# (one that will not sit in a hand as it floats has a piece for the hand:
+		# docs/genius-lines.md, "A worn piece")
+		_g_body.set_worn(true)
+		var left := String(held.get("hand", "r")) == "l"
+		# a thing held in the other hand, or in both, leaves no hand for a shield
+		if _offhand and is_instance_valid(_offhand):
+			_offhand.visible = not (left or int(f.style.get("hands", 1)) == 2)
+		# raise: aimed, the hand that holds it is put out along the aim from its own shoulder,
+		# that far, so that the arrow lies at the height of the jaw
+		if held.has("raise"):
+			var sh := _p_skel.find_bone("upperarm.l" if left else "upperarm.r") if _p_skel else -1
+			if sh >= 0 and _aim_k > 0.0:
+				var from := (_p_skel.global_transform * _p_skel.get_bone_global_pose_no_override(sh)).origin
+				_reach_hand(left, from + aim_line(f) * float(held["raise"]) + Vector3.UP * 0.02, smoothstep(0.0, 1.0, _aim_k), Vector3.DOWN)
+			else:
+				_reach_hand(left, Vector3.ZERO, 0.0)
+		var slot := _hand_slot(left)
+		var g := _g_body._local_xf(_held_at("grip"))
+		var gb := g.basis.orthonormalized()
+		# at rest it lies in the hand as it is carried: turned from the hand's own frame
+		var turn: Array = held.get("rest", [0, 0, 0])
+		var want := slot.basis * Basis.from_euler(Vector3(deg_to_rad(turn[0]), deg_to_rad(turn[1]), deg_to_rad(turn[2])))
+		# aimed, its own front (a barrel, an arrow) lies along the line to what is aimed at,
+		# its top to the sky (a bow a little canted), whatever the wrist is doing
+		if _aim_k > 0.0 and held.get("aims", false):
+			var dir := aim_line(f)
+			var up := Vector3.UP.rotated(dir, deg_to_rad(float(held.get("cant", 0.0))))
+			var aimed := Basis(up.cross(dir).normalized(), up, dir)
+			want = Basis(Quaternion(want).slerp(Quaternion(aimed), smoothstep(0.0, 1.0, _aim_k)))
+		var fb := want * gb.inverse()
+		_g_form.global_transform = Transform3D(fb, slot.origin - fb * g.origin)
+		_g_form_pos = slot.origin
+		_draw_string(f, held, slot.origin, want)
+		_g_body.move_at(0.0)
 		return
+	_draw_string(f, {}, Vector3.ZERO, Basis.IDENTITY)
+	for sd in _reached.keys():
+		_reach_hand(sd == "l", Vector3.ZERO, 0.0)
 	# A worn or carried genius sits on its partner where its kind is worn (data/genius-types.json,
 	# mounts), by the empty its own model has for that, at the size it was made.
 	if _offhand and is_instance_valid(_offhand):
@@ -5224,15 +5430,23 @@ func _update_form(f: Fight, dt: float) -> void:
 			var turn: Array = mount["turn"]
 			# plumb: it hangs upright from its place whatever the bone does, facing as its partner faces
 			var frame := Basis(Vector3.UP, _yaw(f.p_facing)) if mount.get("plumb", false) else bt.basis.orthonormalized()
-			var place := Transform3D(frame, bt.origin) * Transform3D(Basis.from_euler(Vector3(deg_to_rad(turn[0]), deg_to_rad(turn[1]), deg_to_rad(turn[2]))), Vector3(at[0], at[1], at[2]))
+			# along: it sits part of the way from that bone to another (a shield up the forearm)
+			var origin := bt.origin
+			if mount.has("along"):
+				var other := _p_skel.find_bone(String(mount["along"][0]))
+				if other >= 0:
+					origin = origin.lerp((_p_skel.global_transform * _p_skel.get_bone_global_pose(other)).origin, float(mount["along"][1]))
+			var place := Transform3D(frame, origin) * Transform3D(Basis.from_euler(Vector3(deg_to_rad(turn[0]), deg_to_rad(turn[1]), deg_to_rad(turn[2]))), Vector3(at[0], at[1], at[2]))
+			# upright: it keeps its face where the arm turns it and its top to the sky (a tall
+			# shield does not hang on its side from a hand at rest)
+			if mount.get("upright", false):
+				var face := place.basis.z.normalized()
+				var up := Vector3.UP - face * Vector3.UP.dot(face)
+				if up.length() > 0.25:
+					place.basis = Basis(face, place.basis.y.signed_angle_to(up.normalized(), face)) * place.basis
+			# (at the size it has in the hand, which is the size it floats at: data/genius.json, equipment)
 			var g := _g_body._local_xf(held)
-			var k := float(mount["scale"]) / maxf(0.001, _g_body._model.scale.y)
-			# a form that says how tall it is in the hand (held, in its body) is brought to that
-			var tall := float(Data.form(_g_body.own_body).get("body", {}).get("held", 0.0)) if _g_body.own_body != "" else 0.0
-			var crown := _held_at("ref_top")
-			if tall > 0.0 and crown:
-				k = float(mount["scale"]) * tall / maxf(0.001, _g_body._local_xf(crown).origin.y)
-			var fb := place.basis * g.basis.orthonormalized().inverse() * Basis.from_scale(Vector3.ONE * k)
+			var fb := place.basis * g.basis.orthonormalized().inverse()
 			_g_form.global_transform = Transform3D(fb, place.origin - fb * g.origin)
 			_g_form_pos = place.origin
 			_g_body.move_at(0.0)

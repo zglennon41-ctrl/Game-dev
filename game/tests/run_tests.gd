@@ -94,6 +94,7 @@ func _run() -> void:
 	var game_types := Data.genius_types()
 	_all_types()
 	test_types_data()
+	test_equipment()
 	test_types_weapon()
 	test_types_items()
 	test_types_roles()
@@ -102,6 +103,7 @@ func _run() -> void:
 	Data.use_types(game_types)
 	test_blood_marks()
 	test_life_features()
+	test_one_cloak_at_a_time()
 	test_bots()
 	test_opening()
 	test_builds()
@@ -157,7 +159,7 @@ func test_hair_and_coverings() -> void:
 			check(not cloth.visible and n.find_child("Hair_long_fall", true, false).visible, "taken off, the hair shows again")
 		world.dress(n, { "headgear": true, "hair": "long" })
 		var any_cloth := false
-		for a in n.find_children("Cover_*", "BoneAttachment3D", true, false):
+		for a in n.find_children("Cover_*", "", true, false):
 			any_cloth = any_cloth or (a as Node3D).visible
 		check(not any_cloth and n.find_child("Hair_long_fall", true, false).visible, "%s wears no covering unless the look names one" % body)
 		n.queue_free()
@@ -169,6 +171,7 @@ func test_wear() -> void:
 	var L: Dictionary = Data.creation["look"]
 	check(World.dress_slot("Dress_top_m__in_plain_formal") == ["top", "m"] and World.dress_slot("Dress_extra") == ["extra", ""] and World.dress_slot("Dress_outer__in_master") == ["outer", ""],
 		"a piece of dress is known by its name: its slot and its cut")
+	check(World.dress_slot("Dress_cloak__in_master") == ["outer", ""] and World.dress_slot("Dress_mantle_f") == ["outer", "f"] and World.dress_slot("Dress_roll") == ["extra", ""], "a cloak, a shoulder cape and a roll are of the slots their kinds are worn in")
 	check(World.dress_slot("Headgear_furhat_f") == ["head", "f"] and World.dress_slot("Headgear_helm__in_master") == ["head", ""], "and a headgear the same")
 	check(World.cut_worn("Dress_top_m", {}, "m") and not World.cut_worn("Dress_top_f", {}, "m") and World.cut_worn("Dress_feet", {}, "f"), "a look that names no cut wears its body's own, and what both cuts wear")
 	var mixed := { "wear": { "top": "f", "outer": "none" } }
@@ -2581,15 +2584,12 @@ func test_life_features() -> void:
 		check(feats.has(f), "the life writes %s" % f)
 	w.build_hero(hero)
 	var skel: Skeleton3D = w._player.find_child("Skeleton3D", true, false)
-	var trim: Node = skel.find_child("feature_trim-journeyman_socket_throat", false, false)
-	check(trim != null and trim.get_child_count() > 0, "the trim hangs at the collar")
-	var tms := trim.find_children("*", "MeshInstance3D", true, false) if trim else []
-	var tm: MeshInstance3D = tms[0] if not tms.is_empty() else null
-	check(tm != null and (tm.get_active_material(0) as ShaderMaterial).get_shader_parameter("albedo").is_equal_approx(World.SHAPE_COLORS["turn"]), "the trim takes the Shape's colour")
-	var cape: Node = skel.find_child("feature_cape_socket_back", false, false)
-	check(cape != null and cape.get_child_count() > 0, "the cloak hangs from the back")
-	var cms := cape.find_children("*", "MeshInstance3D", true, false) if cape else []
-	var cm: MeshInstance3D = cms[0] if not cms.is_empty() else null
+	# the trim at the collar is cut until it fits a dressed neck (docs/dress-fit.md): written, not hung
+	check(Data.people_features["trim-journeyman"].has("cutUntilFits") and skel.find_child("feature_trim-journeyman_socket_throat", false, false) == null, "the trim is cut from the collar until it fits")
+	# the cloak is the body's own mesh, cut on its back and shoulders, not a stiff part on a socket
+	check(skel.find_child("feature_cape_socket_back", false, false) == null, "no stiff cloak hangs from the back socket")
+	var cm: MeshInstance3D = w._player.find_child("Cape", true, false) as MeshInstance3D
+	check(cm != null and cm.visible and cm.skin != null, "the cloak is the body's own, and moves with its bones")
 	var cape_col: Color = (cm.get_active_material(0) as ShaderMaterial).get_shader_parameter("albedo") if cm else Color.BLACK
 	check(not cape_col.is_equal_approx(Color(0.5, 0.42, 0.36)) and cape_col.r > 0.6, "the genius's colour threads the plain cloak")
 	# the iris is a surface of the eyeball, by its material's name
@@ -2607,7 +2607,8 @@ func test_life_features() -> void:
 	hero["look"]["cape"] = false
 	w.build_hero(hero)
 	skel = w._player.find_child("Skeleton3D", true, false)
-	check(skel.find_child("feature_cape_socket_back", false, false) == null, "no cloak when the look says none")
+	cm = w._player.find_child("Cape", true, false) as MeshInstance3D
+	check(cm != null and not cm.visible, "no cloak when the look says none")
 	w.queue_free()
 
 ## The body moves over the ground at the pace the clip's feet cross it (data/rules.json, motion).
@@ -2700,10 +2701,10 @@ func test_creator() -> void:
 	w.redress(c.hero)
 	var skel: Skeleton3D = w._player.find_child("Skeleton3D", true, false)
 	var cloaks := 0
-	for ch in skel.get_children():
-		if String(ch.name).begins_with("feature_cape"):
+	for ch in w._player.find_children("Cape*", "MeshInstance3D", true, false):
+		if (ch as MeshInstance3D).visible:
 			cloaks += 1
-	check(cloaks == 1, "dressed twice, the figure still wears one cloak (%d)" % cloaks)
+	check(cloaks == 1 and skel != null, "dressed twice, the figure still wears one cloak (%d)" % cloaks)
 	for leaf in ["body", "face", "dress", "reading"]:
 		c._set_tab(leaf)
 		check(got["framed"] == Creator.TAB_FRAMES[leaf], "the %s leaf frames the figure %s" % [leaf, Creator.TAB_FRAMES[leaf]])
@@ -2883,17 +2884,37 @@ func test_ages() -> void:
 	hero["look"] = { "cape": true, "cape_color": "plain", "skin": "tan" }
 	w.build_hero(hero)
 	var skel: Skeleton3D = w._player.find_child("Skeleton3D", true, false)
+	# The pieces worn at the collar are cut until they fit a dressed neck (docs/dress-fit.md):
+	# the echo is still written on the partner, and nothing stiff is hung at the throat.
 	var ruff: Node3D = skel.find_child("feature_echo-ruff_socket_throat", false, false)
-	check(ruff != null, "the ruff hangs at the partner's collar")
+	check(ruff == null and Data.people_features["echo-ruff"].has("cutUntilFits"), "the ruff is cut from the collar until it fits")
 	var coat := w.genius_coat(g, Color.WHITE)
 	check(not coat.is_equal_approx(Color.WHITE), "the echo is drawn in the genius's own coat")
-	var s3 := (ruff.get_child(0) as Node3D).scale.x if ruff and ruff.get_child_count() > 0 else 0.0
-	g["instar"] = 6
-	w.build_hero(hero)
-	skel = w._player.find_child("Skeleton3D", true, false)
-	ruff = skel.find_child("feature_echo-ruff_socket_throat", false, false)
-	var s6 := (ruff.get_child(0) as Node3D).scale.x if ruff and ruff.get_child_count() > 0 else 0.0
-	check(s6 > s3 and s3 > 0.0, "and it grows as the genius does (%.2f at the Third Form, %.2f at Apex)" % [s3, s6])
+	var grow: Dictionary = Data.genius()["echo"]["grow"]
+	check(float(grow.get("6", 1.0)) > float(grow.get("3", 1.0)), "and the echo's size still grows with the genius in the data, for when it comes back")
+	w.queue_free()
+
+## One cloak at a time (docs/dress-fit.md): the look's cloak is worn in place of the home's own
+## cloak and its shoulder cape, and what is slung on the back goes under a cloak, unseen.
+func test_one_cloak_at_a_time() -> void:
+	var w := World.new()
+	add_child(w)
+	w.set_place("cut")
+	for spec in [["tiber-m", "", true], ["tiber-m", "", false], ["alexandria-f", "formal", true], ["alexandria-f", "formal", false], ["kazan-m", "master", false], ["kazan-m", "", true]]:
+		var hero := Fight.default_hero()
+		hero["body"] = spec[0]
+		hero["look"] = { "cape": spec[2], "cape_color": "plain", "skin": "tan", "dress": spec[1] }
+		w.build_hero(hero)
+		var shown := {}
+		for m in w._player.find_children("*", "MeshInstance3D", true, false):
+			var n := String(m.name)
+			if (m as MeshInstance3D).visible and (n == "Cape" or n.begins_with("Dress_cloak") or n.begins_with("Dress_mantle") or n.begins_with("Dress_roll")):
+				shown[n.get_slice("__", 0).trim_suffix("_m").trim_suffix("_f")] = true      # whichever cut it is of
+		var cloaks := int(shown.has("Cape")) + int(shown.has("Dress_cloak"))
+		check(cloaks <= 1, "%s %s: one cloak at a time (%s)" % [spec[0], spec[1], str(shown.keys())])
+		check(shown.has("Cape") == spec[2], "%s: the look's cloak shows when the look says so" % spec[0])
+		check(not (shown.has("Cape") and shown.has("Dress_mantle")), "%s: no shoulder cape under the look's cloak" % spec[0])
+		check(not (cloaks > 0 and shown.has("Dress_roll")), "%s: what is slung on the back is under the cloak, unseen (%s)" % [spec[0], str(shown.keys())])
 	w.queue_free()
 
 ## A genius always keeps its kind (docs/genius-tree.md): a refinement offers nothing outside
@@ -3575,7 +3596,11 @@ func test_lines() -> void:
 		var ref: Node3D = body._model.find_child("ref_top", true, false)
 		if ref:
 			var art_size := float(Data.genius_bodies()["silhouettes"].get(String(f["silhouette"]), {}).get("artSize", 1.0))
-			ok = ok and absf(body._local_xf(ref).origin.y - body.stands * art_size) < 0.02
+			if body.hand_k > 0.0:
+				# (a held genius does not stand by its stage: it is the size of a thing a hand holds)
+				ok = ok and is_equal_approx(body._model.scale.y, body.hand_k * float(Data.genius()["equipment"]["afloat"]))
+			else:
+				ok = ok and absf(body._local_xf(ref).origin.y - body.stands * art_size) < 0.02
 		# a rigged form moves by its base body's clips
 		if not body._model.find_children("*", "Skeleton3D", true, false).is_empty() and ResourceLoader.exists(GeniusBody.BODY_DIR % String(f["silhouette"])):
 			ok = ok and body.anim != null and body.anim_names.has("idle") and body.anim.has_animation(body.anim_names["idle"])
@@ -3711,6 +3736,72 @@ func _first_hit(evs: Array) -> Dictionary:
 	return {}
 
 ## The game's own bases: every one has a type by its class, and the data is whole.
+## The equipment geniuses (data/genius.json, equipment): three categories over the types, and
+## the rule of the hand.
+func test_equipment() -> void:
+	var E: Dictionary = Data.genius()["equipment"]
+	var tol := float(E["tolerance"])
+	var unsorted: Array = []
+	var missized: Array = []
+	for b in Data.load_bases():
+		var id := String(b["id"])
+		var type := GeniusTypes.type_of_class(String(b["class"]))
+		var cat := GeniusEquip.category_of(E, id)
+		# a weapon and a defensive item are Arms, a ritual item is Regalia, a companion is neither
+		var want: String = { "weapon": "arms", "defense": "arms", "ritual": "regalia" }.get(type, "")
+		if cat != want:
+			unsorted.append("%s is %s, wanted %s" % [id, cat, want])
+		if (cat != "") != (not GeniusEquip.hand(E, id).is_empty()):
+			missized.append(id)
+	check(unsorted.is_empty(), "every held base is sorted into Arms or Regalia by what it is, and no companion is (%s)" % ", ".join(unsorted))
+	check(missized.is_empty(), "every base in a category has a size in the hand, and no other has (%s)" % ", ".join(missized))
+	check(E["categories"].has("augments") and String(E["categories"]["augments"]["name"]) == "Augments", "the third category, Augments, is named")
+	check(GeniusEquip.category(E, "bow").get("name", "") == "Arms" and GeniusEquip.category(E, "bell").get("name", "") == "Regalia" and GeniusEquip.category(E, "wolf").is_empty(), "a bow is of the Arms, a bell of the Regalia, a wolf of neither")
+	# the rule of the hand: whatever size a thing was made, it is brought to its base's length
+	var long := float(E["hand"]["bow"]["long"])
+	check(is_equal_approx(GeniusEquip.fit(0.4, long, tol), long * (1.0 - tol)) and is_equal_approx(GeniusEquip.fit(9.0, long, tol), long * (1.0 + tol)) and is_equal_approx(GeniusEquip.fit(long, long, tol), long), "a thing too small is brought up to the rule, one too large down to it, one that fits is left")
+	var small := GeniusEquip.scale_for(E, "bow", 0.9, 0.9) * 0.9
+	var large := GeniusEquip.scale_for(E, "bow", 2.7, 2.7) * 2.7
+	check(large <= small * (1.0 + tol) / (1.0 - tol) + 0.001 and large <= float(E["hand"]["bow"]["most"]) + 0.001, "a Final made three times its Starter's size is held at no more than the tolerance over it (%.2f, %.2f)" % [small, large])
+	check(GeniusEquip.scale_for(E, "wolf", 1.0, 1.0) == 1.0, "a companion is not sized to the hand")
+	# a glove is measured by its hand, and what it has grown is still kept inside `most`
+	var glove := GeniusEquip.scale_for(E, "gauntlet", 1.9, 1.05)
+	check(glove * 1.9 <= 1.0 + tol + 0.001 and glove * 1.05 <= float(E["hand"]["gauntlet"]["most"]) + 0.001, "a gauntlet nearly two hands broad is brought to a hand")
+	# on the body: a held form is the size the rule gives it, at every stage of its line
+	for base in ["bow", "gun"]:
+		var sizes: Array = []
+		for f in Genius.road_of(base, [1, 0, 0]):
+			if not ResourceLoader.exists(GeniusBody.FORM_DIR % String(f["id"])):
+				continue
+			var body := GeniusBody.build({ "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": f["features"], "instar": int(f["level"]), "look": GeniusLook.born(3) }, Color.ORANGE, int(f["level"]))
+			add_child(body)
+			var box := GeniusEquip.held_box(body._model, "grip")
+			sizes.append(maxf(box.size.x, maxf(box.size.y, box.size.z)) * body._model.scale.y)
+			body.queue_free()
+		if sizes.size() >= 2:
+			check(float(sizes.max()) <= float(sizes[0]) * (1.0 + tol) / (1.0 - tol) + 0.005 and float(sizes.min()) >= float(E["hand"][base]["long"]) * (1.0 - tol) - 0.005,
+				"down the %s's line from Starter to Final it stays the size of a thing a hand holds (%s)" % [base, ", ".join(sizes.map(func(x): return "%.2f" % x))])
+	# an Augment (the proof: living wings): five stages, one size, made to its wearer's shoulders
+	var wings: Dictionary = E.get("augments", {}).get("wings", {})
+	check((wings.get("stages", []) as Array).size() == 5, "the wings have their five stages, Baby to Final")
+	check(Augment.stage_of(-1, 5) == 0 and Augment.stage_of(9, 5) == 4 and Augment.stage_of(2, 5) == 2, "a stage is kept inside the five")
+	check(is_equal_approx(Augment.fit(0.375, 0.375), 1.0) and Augment.fit(0.3, 0.375) < 1.0 and Augment.fit(0.45, 0.375) > 1.0 and Augment.fit(5.0, 0.375) <= 1.25 and Augment.fit(0.01, 0.375) >= 0.8, "wings are made to the breadth of their wearer's shoulders, within reason")
+	var spans: Array = []
+	for st in 5:
+		if not ResourceLoader.exists(Augment.DIR % ["wings", st]):
+			continue
+		var wm: Node3D = (load(Augment.DIR % ["wings", st]) as PackedScene).instantiate()
+		var wbox := GeniusEquip.held_box(wm, "")
+		spans.append(maxf(wbox.size.x, wbox.size.y))
+		check(wm.find_child("wing_l", true, false) != null and wm.find_child("wing_r", true, false) != null, "the wings of stage %d are two wings, each a piece of its own" % st)
+		wm.free()
+	check(spans.size() == 5 and float(spans.max()) <= float(spans.min()) * (1.0 + tol) + 0.005, "the wings are the same size at every stage (%s)" % ", ".join(spans.map(func(x): return "%.2f" % x)))
+	# the page names the category
+	var bow := Genius.at_form("bow-hunting")
+	check(String(GeniusTypes.says(bow)["title"]) == "ARMS" and String((GeniusTypes.says(bow)["lines"] as Array)[0]).begins_with(String(E["categories"]["arms"]["text"])), "a Bow's page says it is of the Arms, in the category's own words")
+	check(String(GeniusTypes.says(Genius.at_form("bell-hand"))["title"]) == "REGALIA", "a Bell's page says it is of the Regalia")
+	check(String(GeniusTypes.says(Genius.at_form("wolf-counting-wolf"))["title"]) != "ARMS", "a wolf's page still names its role")
+
 func test_types_data() -> void:
 	var T := Data.genius_types()
 	var game := Data.load_bases()

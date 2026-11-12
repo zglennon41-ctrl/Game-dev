@@ -194,6 +194,8 @@ def coverings(hb, centre):
         ob = wardrobe._merge("Cover_%s" % cv["id"], make(hb, centre, hb.head_h))
         wardrobe._slots(ob, mats)
         if cv.get("follows", False):        # it lies on the jaw and the neck: it goes where they go
-            hb.visage.carry(ob)
+            hb.visage.carry(ob, builds=False)      # the face's shapes
+            hb.carry_builds(ob)                    # and every build of the body
+            ob["follows"] = True            # and is skinned like the body under it (body_kit.py)
         out.append(ob)
     return out

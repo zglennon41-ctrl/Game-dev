@@ -285,8 +285,8 @@ static func wear_options(home: String, slot: String, sex := "m", wear := "plain"
 		entries = (dress.get("pieces", []) as Array).filter(func(p): return slot_of(p) == slot)
 	var any := false
 	for e in entries:
-		if e.has("in") and not (e["in"] as Array).has(wear):
-			continue
+		if (e.has("in") and not (e["in"] as Array).has(wear)) or e.has("cutUntilFits") or (e.get("cutOnBody", {}) as Dictionary).has(sex):
+			continue        # not worn this way, or out of the game (or off this body) until it fits (docs/dress-fit.md)
 		any = true
 		var label := String(e.get("name", labels.get("headgear" if slot == "head" else "pieces", {}).get(String(e["type"]), String(e["type"]).capitalize())))
 		var cut := String(e.get("sex", ""))
@@ -327,9 +327,9 @@ static func wear_choice(home: String, slot: String, look: Dictionary, sex: Strin
 	return "none" if opts.any(func(o): return o["id"] == "none") else String(opts[0]["id"])
 
 ## Whether a cut of a home's dress has anything of its own or of both cuts' to wear in a slot.
-static func cut_has(home: String, slot: String, cut: String, wear := "plain") -> bool:
+static func cut_has(home: String, slot: String, cut: String, wear := "plain", sex := "") -> bool:
 	for p in Data.bodies.get(home, {}).get("dress", {}).get("pieces", []):
-		if slot_of(p) == slot and String(p.get("sex", cut)) == cut and (not p.has("in") or (p["in"] as Array).has(wear)):
+		if slot_of(p) == slot and String(p.get("sex", cut)) == cut and (not p.has("in") or (p["in"] as Array).has(wear)) and not p.has("cutUntilFits") and not (p.get("cutOnBody", {}) as Dictionary).has(sex):
 			return true
 	return false
 
@@ -342,11 +342,11 @@ static func wear_settle(home: String, wear: Dictionary, sex: String) -> Dictiona
 		return out
 	var top := String(out.get("top", sex))
 	var legs := String(out.get("legs", sex))
-	if not cut_has(home, "top", top) and not cut_has(home, "legs", legs):
+	if not cut_has(home, "top", top, "plain", sex) and not cut_has(home, "legs", legs, "plain", sex):
 		var other := "f" if legs == "m" else "m"
-		if cut_has(home, "legs", other):
+		if cut_has(home, "legs", other, "plain", sex):
 			out["legs"] = other
-		elif cut_has(home, "top", "f" if top == "m" else "m"):
+		elif cut_has(home, "top", "f" if top == "m" else "m", "plain", sex):
 			out["top"] = "f" if top == "m" else "m"
 	return out
 

@@ -895,6 +895,16 @@ class Body:
             self.hang(self.human.sockets())
             self.r.head_box = self.head_extents()
             pieces, self.head_centre = self.human.hair(self.mats["hair"])
+            # a covering that comes down over the neck (coverings.py, follows) is skinned like the
+            # body under it, so the neck's part bends with the neck and does not ride the head
+            # through the shoulders (docs/dress-fit.md); the rest hangs from the head
+            worn = [h for h in pieces if getattr(h, "get", None) and h.get("follows")]
+            for ob in worn:
+                self.human.weight_like_body(ob)
+                skin_to(ob, self.r.arm)
+                self.r.skinned.append(ob)
+                self.parts[ob.name] = ob
+            pieces = [h for h in pieces if h not in worn]
             self.hang([(h, "head") for h in pieces])
             self.r.measured["hair"] = len(pieces)
             self.r.measured["body"] = self.id

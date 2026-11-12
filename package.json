@@ -12,6 +12,7 @@
     "test:game": "godot --headless --path . res://game/tests/tests.tscn",
     "balance:game": "godot --headless --path . res://game/tests/balance.tscn",
     "check:style": "godot --headless --path . res://game/tests/style_check.tscn",
+    "check:fit": "python tools/blender/fit_check.py",
     "soak": "bash tools/soak.sh"
   },
   "devDependencies": {

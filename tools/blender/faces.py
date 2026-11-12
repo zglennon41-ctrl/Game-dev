@@ -150,7 +150,7 @@ class Faces:
         for name, d in self.keys.items():
             add_key(ob, name, base + d[:hu.BODY_VERTS])
 
-    def carry(self, ob, least=0.0005):
+    def carry(self, ob, least=0.0005, builds=True):
         """A piece on the face takes each key from the skin under it (the four nearest
         vertices of the face); a key that does not move it is left out."""
         if self._kd is None:
@@ -168,7 +168,7 @@ class Faces:
                 idx[i, j] = self._near[k]
                 w[i, j] = 1.0 / (dist + 0.002) ** 2
         w /= w.sum(axis=1, keepdims=True)
-        for name, d in list(self.keys.items()) + list(self.builds.items()):
+        for name, d in list(self.keys.items()) + (list(self.builds.items()) if builds else []):
             off = (d[idx] * w[:, :, None]).sum(axis=1)
             if np.abs(off).max() > least:
                 off[np.linalg.norm(off, axis=1) < 0.00015] = 0.0
