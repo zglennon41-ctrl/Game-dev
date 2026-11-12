@@ -156,7 +156,7 @@ func _ready() -> void:
 				if parts.size() == 2 and parts[0] == "blood":
 					creator.blood_choice = parts[1]
 				elif parts.size() == 2:
-					creator.hero["look"][parts[0]] = (parts[1] == "1") if parts[0] in ["headgear", "cape"] else (float(parts[1]) if parts[0] in ["stature", "build"] else parts[1])
+					creator.hero["look"][parts[0]] = (parts[1] == "1") if parts[0] in ["headgear", "cape"] else (float(parts[1]) if parts[0] in ["stature", "build", "weight", "frame", "age"] else parts[1])
 			creator._reveal()
 			world.redress(creator.hero)
 		# --turn=DEGREES turns the figure; every leaf of the reveal is shot in its own framing.

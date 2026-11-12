@@ -324,7 +324,7 @@ func _reveal() -> void:
 	if not hero.has("look"):
 		hero["look"] = { "headgear": true, "cape": false, "cape_color": "shape" }
 	# a skin of another home's palette does not follow the character to a new home
-	var palette: Array = _palette()
+	var palette: Array = _palette() + _other_tones()
 	if not palette.is_empty() and not palette.has(String(hero["look"].get("skin", ""))):
 		hero["look"]["skin"] = Creation.skin_of(hero["city"], spark)
 	changed.emit(hero)
@@ -336,6 +336,15 @@ func _reveal() -> void:
 	_field_k = 0.0
 	field.emit(_field_col, 0.0, 1.0 if first else 0.0)
 	_draw_reveal(first)
+
+## The tones beyond the home's own, where the data lets a life wear any of them
+## (data/creation.json, look.anySkin): people come to every city from every other.
+func _other_tones() -> Array:
+	var L: Dictionary = Data.creation.get("look", {})
+	if not L.get("anySkin", false):
+		return []
+	var mine := _palette()
+	return (L.get("skinTones", {}).keys() as Array).filter(func(t): return not mine.has(t))
 
 ## The home's skin tones (data/bodies.json); every tone if the home names none.
 func _palette() -> Array:
@@ -605,9 +614,9 @@ func _leaf_body(v: VBoxContainer) -> void:
 	_section(v, "THE FACE OF %s" % String(hero["city"]).to_upper(), "")
 	if home.has("brief"):
 		_line(v, String(home["brief"]))
-	_line(v, "Your home gives the cast of the face and the frame. The rest is yours.", DIM)
+	_line(v, "Your home gives the cast of the face. The body is yours.", DIM)
 
-	_section(v, "FRAME", "")
+	_section(v, "BODY", "")
 	var sexes := _flow(v, "")
 	for sx in L.get("sexes", {}):
 		var sid: String = sx
@@ -617,13 +626,40 @@ func _leaf_body(v: VBoxContainer) -> void:
 			hero.erase("body_override")
 			changed.emit(hero)
 			_draw_reveal(), String(look.get("sex", "m")) == sid)
-	var builds: Dictionary = L.get("builds", { "fit": 0.0 })
-	_slider(v, "Build", "builds", builds, 0.05, float(look.get("build", 0.0)), func(x: float):
-		look["build"] = x
-		look_changed.emit(hero))
+
+	# The build: a row of builds by name, each a setting of the three measures under it, which
+	# stay the player's to move (data/creation.json, look.frame.presets).
+	var presets: Array = L.get("frame", {}).get("presets", [])
+	_section(v, "BUILD", "")
+	var prow := _flow(v, "")
+	var chips := {}
+	var relight := func():
+		var now := build_preset(look)
+		for pid in chips:
+			_chip_style(chips[pid], pid == now)
+	for pr in presets:
+		var pid := String(pr["id"])
+		var set_to: Dictionary = pr
+		chips[pid] = _chip(prow, _label("buildPresets", pid), func():
+			for k in ["build", "weight", "frame"]:
+				look[k] = float(set_to.get(k, 0.0))
+			look_changed.emit(hero)
+			_draw_reveal(), build_preset(look) == pid)
+	for m in [["Muscle", "builds", "build"], ["Weight", "weights", "weight"], ["Frame", "frames", "frame"]]:
+		var key: String = m[2]
+		_slider(v, m[0], m[1], L.get(m[1], { "even": 0.0 }), 0.05, float(look.get(key, 0.0)), func(x: float):
+			look[key] = x
+			relight.call()
+			look_changed.emit(hero))
+	_line(v, "Your home's dress is cut to whatever body you make.", DIM)
+
+	_section(v, "STATURE AND YEARS", "")
 	var sts: Dictionary = L.get("statures", { "middling": 1.0 })
 	_slider(v, "Stature", "statures", sts, 0.01, float(look.get("stature", 1.0)), func(x: float):
 		look["stature"] = x
+		look_changed.emit(hero))
+	_slider(v, "Years", "ages", L.get("ages", { "young": 0.0 }), 0.05, float(look.get("age", 0.0)), func(x: float):
+		look["age"] = x
 		look_changed.emit(hero))
 
 	var skin := String(look.get("skin", "olive"))
@@ -633,6 +669,14 @@ func _leaf_body(v: VBoxContainer) -> void:
 		var tid: String = tn
 		var c: Array = L.get("skinTones", {}).get(tid, [0.6, 0.45, 0.33])
 		_swatch(srow, Color(c[0], c[1], c[2]), skin == tid, _label("skinTones", tid), func(): _look_set("skin", tid))
+	var others := _other_tones()
+	if not others.is_empty():
+		var orow := _flow(v, "From elsewhere")
+		for tn in others:
+			var tid: String = tn
+			var c: Array = L.get("skinTones", {}).get(tid, [0.6, 0.45, 0.33])
+			_swatch(orow, Color(c[0], c[1], c[2]), skin == tid, _label("skinTones", tid), func(): _look_set("skin", tid))
+		_line(v, "The first are the tones %s's people most often have. People come to every city from every other." % String(home.get("name", hero["city"])), DIM)
 	var b := Creation.blood(hero["blood"])
 	if String(b.get("shows", "")) != "":
 		_line(v, "Your blood shows as %s." % b["shows"], DIM)
@@ -646,6 +690,7 @@ func _leaf_face(v: VBoxContainer) -> void:
 		var rng := RandomNumberGenerator.new()
 		rng.randomize()
 		var keep := { "sex": look.get("sex", "m"), "skin": look.get("skin", ""), "build": look.get("build", 0.0), "stature": look.get("stature", 1.0),
+			"weight": look.get("weight", 0.0), "frame": look.get("frame", 0.0), "age": look.get("age", 0.0), "wear": look.get("wear", {}), "dress": look.get("dress", ""),
 			"headgear": false, "cape": look.get("cape", true), "cape_color": look.get("cape_color", "shape") }
 		var fresh := Creation.look_of(String(hero["city"]), rng.randi() % 100000)
 		fresh.merge(keep, true)
@@ -720,10 +765,18 @@ func _leaf_face(v: VBoxContainer) -> void:
 
 	var hair := String(look.get("hair", "crop"))
 	_section(v, "HAIR", _label("hair", hair))
-	var hrow := _flow(v, "")
-	for hs in L.get("hair", []):
+	# the home's own styles first, then every other: all of them are anyone's
+	var own_hair: Array = (_home().get("hair", []) as Array).filter(func(h): return (L.get("hair", []) as Array).has(h))
+	var hrow := _flow(v, "Worn in %s" % String(_home().get("name", hero["city"])) if not own_hair.is_empty() else "")
+	for hs in own_hair:
 		var hid: String = hs
 		_chip(hrow, _label("hair", hid), func(): _look_set("hair", hid), hair == hid)
+	var rest: Array = (L.get("hair", []) as Array).filter(func(h): return not own_hair.has(h))
+	if not rest.is_empty():
+		var hrow2 := _flow(v, "And" if not own_hair.is_empty() else "")
+		for hs in rest:
+			var hid: String = hs
+			_chip(hrow2, _label("hair", hid), func(): _look_set("hair", hid), hair == hid)
 	var hc_now := String(look.get("hair_color", "brown"))
 	var hcrow := _flow(v, "")
 	for hc in L.get("hairColors", {}):
@@ -734,7 +787,7 @@ func _leaf_face(v: VBoxContainer) -> void:
 	if _headgear_name() != "" and look.get("headgear", true) and _headgear_covers():
 		var cover := _flow(v, "")
 		_chip(cover, "Take off the %s" % _headgear_name().to_lower(), func(): _look_set("headgear", false))
-		_line(v, "It covers the crown; only the fall of the hair shows under it.", DIM)
+		_line(v, "It covers the hair." if String(_headgear().get("type", "")) == "cover" else "It covers the crown; only the fall of the hair shows under it.", DIM)
 
 	var beard := String(look.get("beard", "none"))
 	_section(v, "BEARD", _label("beards", beard))
@@ -768,8 +821,27 @@ func _leaf_dress(v: VBoxContainer) -> void:
 			var oid := String(o["id"])
 			_chip(orow, String(o.get("name", oid)), func(): _look_set("dress", oid), String(now.get("id", "")) == oid)
 		_line(v, String(now.get("text", "")))
+	# Piece by piece: each slot of the dress in either of the home's cuts, on any body
+	# (Creation.wear_options; data/creation.json, look.slots).
+	var sex := String(hero.get("body", "")).get_slice("-", 1)
+	var way := String(World.dress_option(String(hero.get("city", "")), look).get("wear", "plain"))
+	var rows := 0
+	for slot in L.get("slots", {}).get("order", []):
+		var sid: String = slot
+		var choices: Array = Creation.wear_options(String(hero.get("city", "")), sid, sex, way)
+		if choices.is_empty():
+			continue
+		if rows == 0:
+			_section(v, "PIECE BY PIECE", "")
+			_line(v, "Every piece of your home's dress goes on any body. Take each as you like.", DIM)
+		rows += 1
+		var now := wear_now(sid)
+		var srow := _flow(v, _label("slots", sid))
+		for o in choices:
+			var oid := String(o["id"])
+			_chip(srow, String(o["name"]), func(): _wear_set(sid, oid), now == oid)
 	var wear := _flow(v, "Wearing")
-	if _headgear_name() != "":
+	if rows == 0 and _headgear_name() != "":
 		_chip(wear, _headgear_name(), func(): _look_set("headgear", not look.get("headgear", true)), look.get("headgear", true))
 	_chip(wear, "Cloak", func(): _look_set("cape", not look.get("cape", true)), look.get("cape", true))
 
@@ -786,6 +858,29 @@ func _leaf_dress(v: VBoxContainer) -> void:
 	_line(v, String(w["text"]))
 	_weapon_chips(v)
 
+## The choice a slot of the dress is worn in now: a cut (m, f) or none. The head is bare when
+## the look's headgear is off.
+func wear_now(slot: String) -> String:
+	var look: Dictionary = hero.get("look", {})
+	if slot == "head" and not look.get("headgear", true):
+		return "none"
+	if slot == "head" and Creation.cover_of(look) != "":
+		return Creation.cover_of(look)
+	var way := String(World.dress_option(String(hero.get("city", "")), look).get("wear", "plain"))
+	return Creation.wear_choice(String(hero.get("city", "")), slot, look, String(hero.get("body", "")).get_slice("-", 1), way)
+
+## Take a slot of the dress in another cut, or leave it off.
+func _wear_set(slot: String, id: String) -> void:
+	var look: Dictionary = hero["look"]
+	var w: Dictionary = (look["wear"] as Dictionary).duplicate() if look.get("wear") is Dictionary else {}      # a look once shared is not changed under another
+	if slot == "head":
+		look["headgear"] = id != "none"
+		if id != "none":
+			w[slot] = id
+	else:
+		w[slot] = id
+	_look_set("wear", Creation.wear_settle(String(hero.get("city", "")), w, String(hero.get("body", "")).get_slice("-", 1)))
+
 ## What the home wears on the head, by name; "" where it wears nothing.
 func _headgear_name() -> String:
 	var hg := _headgear()
@@ -800,10 +895,15 @@ func _headgear() -> Dictionary:
 		hgs = [hgs]
 	if not (hgs is Array):
 		return {}
+	var worn_cover := Creation.cover_of(hero.get("look", {}))
+	for cv in Data.creation.get("look", {}).get("coverings", []):
+		if String(cv["id"]) == worn_cover:
+			return { "type": "cover", "name": String(cv.get("name", worn_cover)) }
 	var body := String(hero.get("body", ""))
 	var wear := String(World.dress_option(String(hero.get("city", "")), hero.get("look", {})).get("wear", "plain"))
+	var cut := Creation.wear_of(hero.get("look", {}), "head", body.get_slice("-", 1))      # the cut of the head the look wears
 	for h in hgs:
-		if String(h.get("sex", body.get_slice("-", 1))) == body.get_slice("-", 1) and (not h.has("in") or (h["in"] as Array).has(wear)):
+		if String(h.get("sex", cut)) == cut and (not h.has("in") or (h["in"] as Array).has(wear)):
 			return h
 	return {}
 
@@ -994,6 +1094,13 @@ func _button(parent: Control, t: String, cb: Callable, primary := false) -> Butt
 func _chip(parent: Control, t: String, cb: Callable, on := false) -> Button:
 	var b := Button.new()
 	b.text = t
+	_chip_style(b, on)
+	b.pressed.connect(func(): _click(); cb.call())
+	parent.add_child(b)
+	return b
+
+## A chip as it is drawn: lit when it is the one chosen.
+func _chip_style(b: Button, on: bool) -> void:
 	_style(b, on, 15, "ui")
 	for st in ["normal", "hover", "focus", "pressed", "hover_pressed"]:
 		var sb := b.get_theme_stylebox(st) as StyleBoxFlat
@@ -1001,9 +1108,18 @@ func _chip(parent: Control, t: String, cb: Callable, on := false) -> Button:
 		sb.content_margin_right = 12
 		sb.content_margin_top = 6
 		sb.content_margin_bottom = 6
-	b.pressed.connect(func(): _click(); cb.call())
-	parent.add_child(b)
-	return b
+
+## The named build a look's three measures are set to (data/creation.json, look.frame.presets);
+## "" when they are the player's own.
+static func build_preset(look: Dictionary) -> String:
+	for pr in Data.creation.get("look", {}).get("frame", {}).get("presets", []):
+		var same := true
+		for k in ["build", "weight", "frame"]:
+			if absf(float(look.get(k, 0.0)) - float(pr.get(k, 0.0))) > 0.026:
+				same = false
+		if same:
+			return String(pr["id"])
+	return ""
 
 ## A row that wraps: chips or swatches, with a small label before them.
 func _flow(parent: Control, label: String) -> HFlowContainer:

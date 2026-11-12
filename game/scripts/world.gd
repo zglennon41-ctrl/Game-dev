@@ -496,11 +496,13 @@ func _has_skin(node: Node) -> bool:
 ## names and the hair's colour, the cape's colour, and the stature. The hair's cap hides under
 ## headgear and under a hood; its fall hangs from under them either way.
 func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
-	var has_headgear := node.find_child("*Helmet*", true, false) != null or node.find_child("*Hat*", true, false) != null or node.find_child("Headgear_*", true, false) != null
+	var has_headgear := node.find_child("*Helmet*", true, false) != null or node.find_child("*Hat*", true, false) != null or node.find_child("Headgear_*", true, false) != null or node.find_child("Cover_*", true, false) != null
+	var cover := Creation.cover_of(look)       # cloth over the hair (Cover_<id>), in place of the home's headgear
 	var headgear: bool = look.get("headgear", true) and has_headgear
 	var hooded := node.find_child("*Hooded*", true, false) != null
-	# The build blends the body's lean and heavy shape keys; the skin takes the chosen tone.
-	var build := clampf(float(look.get("build", 0.0)), -1.0, 1.0)
+	# The build, the weight, the frame and the age blend the body's shape keys (build_keys);
+	# the skin takes the chosen tone.
+	var shapes := build_keys(look)
 	var tone := skin_color(String(look.get("skin", "")))
 	# The features: the blood's marks and whatever else the character carries
 	# (data/people-features.json). Tints blend into the skin; eyes colour the iris; parts hang
@@ -540,12 +542,11 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 	var skel: Skeleton3D = node.find_child("Skeleton3D", true, false)
 	for m in node.find_children("*", "MeshInstance3D", true, false):
 		var mi: MeshInstance3D = m
-		var li := mi.find_blend_shape_by_name("lean")
-		var hi := mi.find_blend_shape_by_name("heavy")
-		if li >= 0:
-			mi.set_blend_shape_value(li, maxf(0.0, -build))
-		if hi >= 0:
-			mi.set_blend_shape_value(hi, maxf(0.0, build))
+		# the body, its dress and what sits on its face all carry the build's keys
+		for key in shapes:
+			var ki := mi.find_blend_shape_by_name(key)
+			if ki >= 0:
+				mi.set_blend_shape_value(ki, float(shapes[key]))
 		# the face's shape, the features set one by one and the brow are shape keys too (look.face...)
 		if mi.mesh != null and not face.is_empty():
 			for bi in mi.get_blend_shape_count():
@@ -610,6 +611,9 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 	var hair := String(look.get("hair", "crop"))
 	var beard := String(look.get("beard", "none"))
 	var col := hair_color(String(look.get("hair_color", "brown")))
+	# a covering that comes down over the neck is a mesh of the body's own (it bends with the neck)
+	for m in node.find_children("Cover_*", "MeshInstance3D", true, false):
+		(m as MeshInstance3D).visible = headgear and String(m.name) == "Cover_" + cover
 	var wear := _dress_home(node, look)      # how the home's dress is worn: plain, formal, or as a master
 	# One cloak at a time: the look's cloak is worn in place of the home's own cloak and of its
 	# shoulder cape, and what is slung on the back is under a cloak, unseen (they do not fit
@@ -629,13 +633,25 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 	if headgear:
 		var open_kinds: Array = Data.creation.get("look", {}).get("openHeadgear", [])
 		var worn := node.find_children("Headgear_*", "", true, false)
-		if not worn.is_empty():
-			covers = false
+		var cloths := node.find_children("Cover_*", "", true, false)
+		if not worn.is_empty() or not cloths.is_empty():
+			# a body of the game's own kit: only what is truly worn on it covers the crown
+			covers = cover != "" and node.find_child("Cover_" + cover, true, false) != null
 			for hg in worn:
 				var kind := String(hg.name).trim_prefix("Headgear_").get_slice("_", 0)
-				if dress_worn(String(hg.name), wear) and not open_kinds.has(kind):
+				if dress_worn(String(hg.name), wear) and cut_worn(String(hg.name), look, body_sex(node)) and not open_kinds.has(kind):
 					covers = true
-	node.scale = Vector3.ONE * clampf(float(look.get("stature", 1.0)), 0.85, 1.2)
+	node.scale = Vector3.ONE * stature_of(look)
+	# what the frame and the age do to the joints is given back with the bones (frame.gd)
+	if skel:
+		var moves := frame_moves(look)
+		var fr: Frame = skel.get_node_or_null("Frame")
+		if fr == null and not moves.is_empty():
+			fr = Frame.new()
+			fr.name = "Frame"
+			skel.add_child(fr)
+		if fr != null:
+			fr.set_moves(moves)
 	if node.get_node_or_null("Blink") == null and node.find_child("Lid_l", true, false) != null:
 		var blink := Blink.new()
 		blink.name = "Blink"
@@ -644,8 +660,11 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 		var n := String(a.name)
 		if n.begins_with("feature_") or n.begins_with("socket_"):
 			continue
-		if n.begins_with("Hair_"):
-			a.visible = n.begins_with("Hair_%s_" % hair) and not hooded and (n.ends_with("_fall") or not covers)
+		if n.begins_with("Cover_"):
+			a.visible = headgear and n == "Cover_" + cover
+		elif n.begins_with("Hair_"):
+			# a covering hides all the hair; a hat hides the cap and leaves the fall
+			a.visible = n.begins_with("Hair_%s_" % hair) and not hooded and (n.ends_with("_fall") or not covers) and not (headgear and cover != "")
 			if a.visible:
 				_recolor(a, col, "coat")
 		elif n.begins_with("Beard_"):
@@ -664,11 +683,76 @@ func dress(node: Node3D, look: Dictionary, hero: Dictionary = {}) -> void:
 			var head := n.contains("Helmet") or n.contains("Hat") or n.contains("Hood") or n.begins_with("Headgear_")
 			var cape := n.contains("Cape")
 			if head:
-				a.visible = headgear and dress_worn(n, wear)
+				a.visible = headgear and dress_worn(n, wear) and (not n.begins_with("Headgear_") or cut_worn(n, look, body_sex(node)))
 			elif cape:
 				a.visible = look.get("cape", true)
 				if a.visible and not hero.is_empty():
 					_tint_cape(a, hero, String(look.get("cape_color", "shape")))
+
+## The shape keys a look's body is drawn with (data/creation.json, look.frame): the build
+## blends lean and heavy, the weight thin and stout, the frame broad (below even it is drawn
+## backwards: narrow), the age old. Every body, its dress and what sits on its face carry them.
+static func build_keys(look: Dictionary) -> Dictionary:
+	var build := clampf(float(look.get("build", 0.0)), -1.0, 1.0)
+	var weight := clampf(float(look.get("weight", 0.0)), -1.0, 1.0)
+	return { "lean": maxf(0.0, -build), "heavy": maxf(0.0, build), "thin": maxf(0.0, -weight), "stout": maxf(0.0, weight),
+		"broad": clampf(float(look.get("frame", 0.0)), -1.0, 1.0), "old": clampf(float(look.get("age", 0.0)), 0.0, 1.0) }
+
+## What a look's frame and age do to the joints: bone name -> how far it moves, in the body's
+## own space (data/creation.json, look.frame.bones; a bone named without a side is both, mirrored).
+static func frame_moves(look: Dictionary) -> Dictionary:
+	var bones: Dictionary = Data.creation.get("look", {}).get("frame", {}).get("bones", {})
+	var keys := build_keys(look)
+	var out := {}
+	for key in bones:
+		var k := float(keys.get(key, 0.0))
+		if is_zero_approx(k):
+			continue
+		for bone in bones[key]:
+			var m: Array = bones[key][bone]
+			var v := Vector3(m[0], m[1], m[2]) * k
+			if bone in ["head", "hips", "spine", "chest"]:
+				out[bone] = out.get(bone, Vector3.ZERO) + v
+			else:
+				out[bone + ".l"] = out.get(bone + ".l", Vector3.ZERO) + v
+				out[bone + ".r"] = out.get(bone + ".r", Vector3.ZERO) + v * Vector3(-1, 1, 1)
+	return out
+
+## How tall a look stands: its stature, a little less with age.
+static func stature_of(look: Dictionary) -> float:
+	var shrink := float(Data.creation.get("look", {}).get("frame", {}).get("ageStature", 1.0))
+	return clampf(float(look.get("stature", 1.0)), 0.85, 1.2) * lerpf(1.0, shrink, clampf(float(look.get("age", 0.0)), 0.0, 1.0))
+
+## The slot and the cut of a piece of dress by its name (tools/blender/wardrobe.py):
+## Dress_top_m__in_plain is the top's m cut, Dress_extra everyone's extras, Headgear_furhat_f the
+## head's f cut. [slot, cut]; the cut is "" for what both cuts wear.
+static func dress_slot(name: String) -> Array:
+	var at := name.find("__in_")
+	var parts := (name.substr(0, at) if at >= 0 else name).split("_")
+	if parts.size() < 2:
+		return ["", ""]
+	if parts[0] == "Headgear":
+		return ["head", parts[2] if parts.size() > 2 and parts[2] in ["m", "f"] else ""]
+	# a cloak, a shoulder cape and a roll on the back are meshes of their own, named for the
+	# piece (Dress_cloak__in_master): each is of the slot its kind of piece is worn in
+	var slot := String(parts[1])
+	if not (Data.creation.get("look", {}).get("slots", {}).get("order", []) as Array).has(slot):
+		slot = Creation.slot_of({ "type": slot })
+	return [slot, parts[2] if parts.size() > 2 and parts[2] in ["m", "f"] else ""]
+
+## Whether a look wears a piece's cut on a body of one sex (look.wear: slot -> m, f or none;
+## a slot it does not name is worn in the body's own cut).
+static func cut_worn(name: String, look: Dictionary, sex: String) -> bool:
+	var sc := dress_slot(name)
+	var choice := Creation.wear_of(look, String(sc[0]), sex)
+	if sc[0] == "head" and not (choice in ["m", "f"]):
+		return false        # bare-headed, or under a covering (Cover_<id>): not the home's headgear
+	return choice != "none" and (sc[1] == "" or sc[1] == choice)
+
+## The sex of the body a person's node was made from (alexandria-f.glb): the cut it wears
+## where its look names none.
+static func body_sex(node: Node) -> String:
+	return "f" if node.scene_file_path.get_basename().ends_with("-f") else "m"
 
 ## Whether a piece of a home's dress is worn this way: a piece named ..__in_formal_master is
 ## worn in formal dress and by a master, and one with no such mark always.
@@ -722,10 +806,16 @@ func _dress_home(node: Node3D, look: Dictionary) -> String:
 	var wear := String(opt.get("wear", "plain"))
 	var dyes: Dictionary = opt.get("colors", {})
 	var prefix := "dress_%s_" % home
+	var sex := body_sex(node)
+	# whatever a look says, nobody is drawn undressed (Creation.wear_settle)
+	var worn := look
+	if look.get("wear") is Dictionary and not (look["wear"] as Dictionary).is_empty():
+		worn = look.duplicate()
+		worn["wear"] = Creation.wear_settle(home, look["wear"], sex)
 	for m in meshes:
 		var mi: MeshInstance3D = m
 		if String(mi.name).begins_with("Dress_"):
-			mi.visible = dress_worn(String(mi.name), wear)
+			mi.visible = dress_worn(String(mi.name), wear) and cut_worn(String(mi.name), worn, sex)
 		if mi.mesh == null:
 			continue
 		for i in mi.mesh.get_surface_count():
@@ -884,7 +974,15 @@ func look_for(name: String) -> Dictionary:
 		"hair": hairs[h % hairs.size()], "beard": beards[(h / 3) % beards.size()] if (h / 13) % 3 == 0 else beards[0],
 		"hair_color": cols[(h / 5) % cols.size()], "stature": sts[(h / 17) % sts.size()],
 		"skin": tones[(h / 19) % tones.size()], "build": builds[(h / 23) % builds.size()] })
+	out.merge(Creation.frame_of(rng))
 	return out
+
+## How old someone the player did not make looks, the same every time for the same name: an
+## Instructor has years on a first-year (data/creation.json, look.ages: from grown to old).
+static func elder_age(name: String) -> float:
+	var ages: Dictionary = Data.creation.get("look", {}).get("ages", {})
+	var lo := float(ages.get("grown", 0.35))
+	return snappedf(lerpf(lo, 1.0, float(absi((name + "'s years").hash()) % 1000) / 999.0), 0.05)
 
 ## Recolour an attachment's meshes, keeping the cel shading when it has it. The colour is
 ## brought onto the ramps of what it is (cloth, unless said).

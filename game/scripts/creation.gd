@@ -209,7 +209,19 @@ static func look_of(city: String, spark: int) -> Dictionary:
 		"build": snappedf(rng.randf_range(float(b[0]), float(b[1])), 0.05),
 		"stature": snappedf(rng.randf_range(float(h[0]), float(h[1])), 0.01) }
 	look.merge(face_of(rng, city))
+	look.merge(frame_of(rng))
 	return look
+
+## A body's weight and frame drawn at random between the least and the greatest a life starts
+## with (data/creation.json, look.start): for a new life and for everyone the player did not make.
+static func frame_of(rng: RandomNumberGenerator) -> Dictionary:
+	var st: Dictionary = Data.creation.get("look", {}).get("start", {})
+	var w: Array = st.get("weight", [0.0, 0.0])
+	var f: Array = st.get("frame", [0.0, 0.0])
+	# two draws each: most people are near the middle, a few at either end
+	var weight := (rng.randf_range(float(w[0]), float(w[1])) + rng.randf_range(float(w[0]), float(w[1]))) / 2.0
+	var frame := (rng.randf_range(float(f[0]), float(f[1])) + rng.randf_range(float(f[0]), float(f[1]))) / 2.0
+	return { "weight": snappedf(weight, 0.05), "frame": snappedf(frame, 0.05), "age": 0.0 }
 
 ## A face drawn at random, from what the home's people most often have (data/bodies.json: eyes,
 ## marks) and from every shape, brow and feature the bodies carry (data/creation.json, look):
@@ -232,6 +244,127 @@ static func face_of(rng: RandomNumberGenerator, city: String) -> Dictionary:
 		if not marks.is_empty():
 			out["marks"] = [marks[rng.randi() % marks.size()]]
 	return out
+
+## The slot a piece of a home's dress is worn in (data/creation.json, look.slots.kinds): the
+## top, the legs, the feet, over it, or an extra.
+static func slot_of(piece: Dictionary) -> String:
+	if piece.has("slot"):
+		return String(piece["slot"])
+	var kinds: Dictionary = Data.creation.get("look", {}).get("slots", {}).get("kinds", {})
+	for s in kinds:
+		if (kinds[s] as Array).has(String(piece.get("type", ""))):
+			return s
+	return "extra"
+
+## What is painted on a body beneath its home's dress (data/bodies.json, dress.under): a colour's
+## name for the shirt, the legs and the shoes, or "bare"; a sex may have its own.
+static func under_of(home: String, sex: String) -> Dictionary:
+	var u: Dictionary = (Data.bodies.get(home, {}).get("dress", {}).get("under", {}) as Dictionary).duplicate()
+	if u.get(sex) is Dictionary:
+		u.merge(u[sex], true)
+	u.erase("m")
+	u.erase("f")
+	return u
+
+## What a home's dress offers in one slot, on a body of one sex, worn one way (plain, formal,
+## master): each choice { id, name }. A home's dress has two cuts (the pieces its data marks m
+## and f); the id is the cut, or "none" where the slot may be left off. A cut is named for its
+## own pieces, or for what both cuts wear there, or for what the body shows without (trousers,
+## bare legs, a shirt, a bare chest). Two cuts that are the same are one choice; a slot with
+## nothing to choose offers nothing.
+static func wear_options(home: String, slot: String, sex := "m", wear := "plain") -> Array:
+	var L: Dictionary = Data.creation.get("look", {})
+	var labels: Dictionary = L.get("labels", {})
+	var dress: Dictionary = Data.bodies.get(home, {}).get("dress", {})
+	var names := { "m": [], "f": [], "": [] }
+	var entries: Array = []
+	if slot == "head":
+		var hgs: Variant = dress.get("headgear", [])
+		entries = [hgs] if hgs is Dictionary else (hgs as Array)
+	else:
+		entries = (dress.get("pieces", []) as Array).filter(func(p): return slot_of(p) == slot)
+	var any := false
+	for e in entries:
+		if (e.has("in") and not (e["in"] as Array).has(wear)) or e.has("cutUntilFits") or (e.get("cutOnBody", {}) as Dictionary).has(sex):
+			continue        # not worn this way, or out of the game (or off this body) until it fits (docs/dress-fit.md)
+		any = true
+		var label := String(e.get("name", labels.get("headgear" if slot == "head" else "pieces", {}).get(String(e["type"]), String(e["type"]).capitalize())))
+		var cut := String(e.get("sex", ""))
+		if label != "" and not (names[cut] as Array).has(label):
+			(names[cut] as Array).append(label)
+	if not any and not (slot == "head" and not (L.get("coverings", []) as Array).is_empty()):
+		return []
+	var under := String(under_of(home, sex).get({ "top": "shirt", "legs": "legs", "feet": "feet" }.get(slot, ""), ""))
+	var none_name := String(labels.get("wearBare" if under == "bare" else "wearNone", {}).get(slot, labels.get("wearNone", {}).get(slot, "None")))
+	var named := func(list: Array) -> String:
+		return " and ".join(list) if list.size() <= 2 else "%s, %s and more" % [list[0], list[1]]
+	var out: Array = []
+	for cut in ["m", "f"]:
+		var mine: Array = names[cut] if not (names[cut] as Array).is_empty() else names[""]
+		if slot == "head" and mine.is_empty():
+			continue        # a cut with no headgear is the bare head, offered once below
+		var name: String = named.call(mine) if not mine.is_empty() else none_name
+		if not out.any(func(o): return o["name"] == name):
+			out.append({ "id": cut, "name": name })
+	if slot == "head":      # and the cloths any head may wear over its hair (look.coverings)
+		for cv in L.get("coverings", []):
+			out.append({ "id": String(cv["id"]), "name": String(cv.get("name", String(cv["id"]).capitalize())) })
+	if (L.get("slots", {}).get("optional", []) as Array).has(slot) and not out.any(func(o): return o["name"] == none_name):
+		out.append({ "id": "none", "name": none_name })
+	return out if out.size() > 1 else []
+
+## The choice of a slot a look wears on a body of one sex, as one of the home's choices for it:
+## the look's own (look.wear), else the body's cut; a cut the home does not tell apart is the
+## first choice.
+static func wear_choice(home: String, slot: String, look: Dictionary, sex: String, wear := "plain") -> String:
+	var opts := wear_options(home, slot, sex, wear)
+	var want := wear_of(look, slot, sex)
+	if opts.is_empty() or opts.any(func(o): return o["id"] == want):
+		return want
+	for o in opts:
+		if String(o["id"]) in ["m", "f"]:
+			return String(o["id"])
+	return "none" if opts.any(func(o): return o["id"] == "none") else String(opts[0]["id"])
+
+## Whether a cut of a home's dress has anything of its own or of both cuts' to wear in a slot.
+static func cut_has(home: String, slot: String, cut: String, wear := "plain", sex := "") -> bool:
+	for p in Data.bodies.get(home, {}).get("dress", {}).get("pieces", []):
+		if slot_of(p) == slot and String(p.get("sex", cut)) == cut and (not p.has("in") or (p["in"] as Array).has(wear)) and not p.has("cutUntilFits") and not (p.get("cutOnBody", {}) as Dictionary).has(sex):
+			return true
+	return false
+
+## A look's choices of cut, settled so the body is dressed: where a home goes bare-legged under
+## its dress (data/bodies.json, dress.under), a cut with nothing on the legs is worn only with
+## a top (its own long robe); with a cut that has no top either, the legs take the other cut.
+static func wear_settle(home: String, wear: Dictionary, sex: String) -> Dictionary:
+	var out := wear.duplicate()
+	if String(under_of(home, sex).get("legs", "")) != "bare":
+		return out
+	var top := String(out.get("top", sex))
+	var legs := String(out.get("legs", sex))
+	if not cut_has(home, "top", top, "plain", sex) and not cut_has(home, "legs", legs, "plain", sex):
+		var other := "f" if legs == "m" else "m"
+		if cut_has(home, "legs", other, "plain", sex):
+			out["legs"] = other
+		elif cut_has(home, "top", "f" if top == "m" else "m", "plain", sex):
+			out["top"] = "f" if top == "m" else "m"
+	return out
+
+## The covering a look wears over its hair (data/creation.json, look.coverings): its id, or ""
+## when the head wears its home's own headgear or nothing.
+static func cover_of(look: Dictionary) -> String:
+	var w: Variant = look.get("wear", {})
+	var id := String((w as Dictionary).get("head", "")) if w is Dictionary else ""
+	for cv in Data.creation.get("look", {}).get("coverings", []):
+		if String(cv["id"]) == id:
+			return id
+	return ""
+
+## The cut of a slot a look wears on a body of one sex: its own unless the look says another
+## (look.wear: slot -> m, f or none).
+static func wear_of(look: Dictionary, slot: String, sex: String) -> String:
+	var w: Variant = look.get("wear", {})
+	return String((w as Dictionary).get(slot, sex)) if w is Dictionary else sex
 
 static func weapon(id: String) -> Dictionary:
 	return Data.by_id(Data.weapons, id)

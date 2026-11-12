@@ -106,8 +106,266 @@ func _run() -> void:
 	test_one_cloak_at_a_time()
 	test_bots()
 	test_opening()
+	test_builds()
+	test_wear()
+	test_hair_and_coverings()
 	print("%d passed, %d failed" % [passes, failures])
 	get_tree().quit(1 if failures > 0 else 0)
+
+## Hair and head coverings (docs/representation-plan.md): every style the creator names is on
+## every body; a covering is a choice of any head in any home, worn in place of the home's own
+## headgear and over all the hair.
+func test_hair_and_coverings() -> void:
+	var L: Dictionary = Data.creation["look"]
+	var covers: Array = L.get("coverings", [])
+	check(covers.size() >= 2, "any head may take at least two coverings (%d)" % covers.size())
+	for style in ["coils", "locs", "rows", "afro", "plaits", "coilknots", "fade", "thin"]:
+		check((L["hair"] as Array).has(style) and L["labels"]["hair"].has(style), "the creator offers %s by name" % style)
+	var every := true
+	for home in Data.bodies:
+		for sex in ["m", "f"]:
+			var opts := Creation.wear_options(home, "head", sex)
+			for cv in covers:
+				every = every and opts.any(func(o): return o["id"] == cv["id"] and o["name"] == cv["name"])
+			every = every and opts.any(func(o): return o["id"] == "none")
+	check(every, "every home offers every covering, and a bare head, to either body")
+	check(Creation.cover_of({ "wear": { "head": "scarf" } }) == "scarf" and Creation.cover_of({ "wear": { "head": "f" } }) == "" and Creation.cover_of({}) == "", "a look wears a covering by its id")
+	check(not World.cut_worn("Headgear_gele_f", { "wear": { "head": "wrap" } }, "f") and not World.cut_worn("Headgear_hat", { "wear": { "head": "wrap" } }, "m"), "under a covering the home's own headgear is not worn")
+	var world := World.new()
+	add_child(world)
+	for body in ["alexandria-m", "baghdad-f"]:
+		var n: Node3D = Shapes.wake(load(world._person_model(body)).instantiate())
+		add_child(n)
+		var lost: Array = []
+		for style in L["hair"]:
+			if style != "bare" and n.find_child("Hair_%s_*" % style, true, false) == null:
+				lost.append(style)
+		check(lost.is_empty(), "%s carries every hair style (%s)" % [body, ", ".join(lost)])
+		for cv in covers:
+			var id := String(cv["id"])
+			var cloth: Node3D = n.find_child("Cover_" + id, true, false)
+			check(cloth != null, "%s carries the %s" % [body, cv["name"]])
+			if cloth == null:
+				continue
+			world.dress(n, { "headgear": true, "hair": "long", "wear": { "head": id } })
+			var hair_shown := false
+			for a in n.find_children("Hair_*", "BoneAttachment3D", true, false):
+				hair_shown = hair_shown or (a as Node3D).visible
+			var hats_shown := false
+			for a in n.find_children("Headgear_*", "BoneAttachment3D", true, false):
+				hats_shown = hats_shown or (a as Node3D).visible
+			check(cloth.visible and not hair_shown and not hats_shown, "%s in the %s: the cloth shows, the hair and the home's headgear do not" % [body, cv["name"]])
+			world.dress(n, { "headgear": false, "hair": "long", "wear": { "head": id } })
+			check(not cloth.visible and n.find_child("Hair_long_fall", true, false).visible, "taken off, the hair shows again")
+		world.dress(n, { "headgear": true, "hair": "long" })
+		var any_cloth := false
+		for a in n.find_children("Cover_*", "", true, false):
+			any_cloth = any_cloth or (a as Node3D).visible
+		check(not any_cloth and n.find_child("Hair_long_fall", true, false).visible, "%s wears no covering unless the look names one" % body)
+		n.queue_free()
+	world.queue_free()
+
+## Mix and match (docs/representation-plan.md): a home's dress is worn slot by slot, in either of
+## its two cuts on any body; the look keeps the choice and every drawing of the person wears it.
+func test_wear() -> void:
+	var L: Dictionary = Data.creation["look"]
+	check(World.dress_slot("Dress_top_m__in_plain_formal") == ["top", "m"] and World.dress_slot("Dress_extra") == ["extra", ""] and World.dress_slot("Dress_outer__in_master") == ["outer", ""],
+		"a piece of dress is known by its name: its slot and its cut")
+	check(World.dress_slot("Dress_cloak__in_master") == ["outer", ""] and World.dress_slot("Dress_mantle_f") == ["outer", "f"] and World.dress_slot("Dress_roll") == ["extra", ""], "a cloak, a shoulder cape and a roll are of the slots their kinds are worn in")
+	check(World.dress_slot("Headgear_furhat_f") == ["head", "f"] and World.dress_slot("Headgear_helm__in_master") == ["head", ""], "and a headgear the same")
+	check(World.cut_worn("Dress_top_m", {}, "m") and not World.cut_worn("Dress_top_f", {}, "m") and World.cut_worn("Dress_feet", {}, "f"), "a look that names no cut wears its body's own, and what both cuts wear")
+	var mixed := { "wear": { "top": "f", "outer": "none" } }
+	check(World.cut_worn("Dress_top_f", mixed, "m") and not World.cut_worn("Dress_top_m", mixed, "m") and World.cut_worn("Dress_legs_m", mixed, "m"), "a body takes the other cut of one slot and keeps the rest")
+	check(not World.cut_worn("Dress_outer", mixed, "m") and not World.cut_worn("Dress_outer_m__in_plain", mixed, "m"), "a slot left off shows none of its pieces")
+	check(Creation.slot_of({ "type": "robe" }) == "top" and Creation.slot_of({ "type": "wrapskirt" }) == "legs" and Creation.slot_of({ "type": "satchel" }) == "extra" and Creation.slot_of({ "type": "satchel", "slot": "outer" }) == "outer",
+		"every kind of piece has a slot; a piece may name its own")
+	# what the homes offer
+	var bad: Array = []
+	var choosing := 0
+	var covers: Array = (L.get("coverings", []) as Array).map(func(c): return String(c["id"]))
+	for home in Data.bodies:
+		var slots_with := 0
+		for slot in L["slots"]["order"]:
+			for sex in ["m", "f"]:
+				var opts := Creation.wear_options(home, slot, sex)
+				var seen := {}
+				for o in opts:
+					if not (String(o["id"]) in ["m", "f", "none"] or (slot == "head" and covers.has(String(o["id"])))) or String(o["name"]) == "" or seen.has(o["name"]):
+						bad.append("%s/%s/%s" % [home, slot, o["name"]])
+					seen[o["name"]] = true
+				if opts.size() == 1:
+					bad.append("%s/%s: one choice is no choice" % [home, slot])
+				if sex == "m" and opts.size() > 1:
+					slots_with += 1
+				# whatever the look says, the creator has a choice to light
+				if not opts.is_empty():
+					var now := Creation.wear_choice(home, slot, {}, sex)
+					if not opts.any(func(o): return o["id"] == now):
+						bad.append("%s/%s on %s: wears %s, which is not offered" % [home, slot, sex, now])
+		if slots_with >= 2:
+			choosing += 1
+	check(bad.is_empty(), "every choice of every slot of every home has a name of its own (%s)" % ", ".join(bad))
+	check(choosing == Data.bodies.size(), "every home's dress can be mixed in at least two slots (%d of %d)" % [choosing, Data.bodies.size()])
+	var tb: Array = Creation.wear_options("timbuktu", "top", "m")
+	check(tb.size() == 2 and tb[0]["id"] == "m" and tb[1]["id"] == "f", "Timbuktu's top comes in both its cuts, on either body")
+	check(Creation.wear_options("khemet", "top", "m")[0]["name"] == L["labels"]["wearBare"]["top"] and Creation.wear_options("khemet", "top", "f")[0]["name"] == L["labels"]["wearNone"]["top"],
+		"a top left off is a bare chest on a body that goes bare, a shirt on one that does not")
+	check(Creation.wear_options("columbia", "head", "f").any(func(o): return o["id"] == "none"), "any head may go bare")
+	check(Creation.wear_choice("columbia", "head", { "wear": { "head": "f" } }, "m") == "m", "a cut the home does not tell apart is its one choice")
+	# nobody is left undressed: Khemet goes bare-legged under a long robe, and bare-chested over a kilt
+	check(Creation.wear_settle("khemet", { "legs": "f" }, "m").get("legs") == "m", "a cut with no top and a cut with nothing on the legs are not worn together")
+	check(Creation.wear_settle("khemet", { "top": "m" }, "f").get("legs") == "m", "the same when it is the top that changes")
+	check(Creation.wear_settle("khemet", { "top": "f", "legs": "f" }, "m") == { "top": "f", "legs": "f" } and Creation.wear_settle("columbia", { "legs": "m" }, "f") == { "legs": "m" },
+		"a robe over bare legs stands, and so do trousers under any top")
+	# classmates: some wear the other cut of a slot, none a cut their home does not have
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77
+	var varied := 0
+	var valid := true
+	for i in 120:
+		var lk := Academy.random_look(rng, ["timbuktu", "kazan", "lunden", "edo"][i % 4])
+		var w: Dictionary = lk.get("wear", {})
+		if not w.is_empty():
+			varied += 1
+		for slot in w:
+			valid = valid and Creation.wear_options(["timbuktu", "kazan", "lunden", "edo"][i % 4], slot, String(lk["sex"])).any(func(o): return o["id"] == w[slot])
+	check(varied > 20 and varied < 110 and valid, "some classmates wear another cut of a slot, and only cuts their home has (%d of 120)" % varied)
+	# on the body
+	var world := World.new()
+	add_child(world)
+	for body in ["timbuktu-m", "lunden-f"]:
+		var n: Node3D = Shapes.wake(load(world._person_model(body)).instantiate())
+		add_child(n)
+		var sex: String = String(body).get_slice("-", 1)
+		var other: String = "f" if sex == "m" else "m"
+		check(World.body_sex(n) == sex, "%s knows the cut it was made for" % body)
+		world.dress(n, { "headgear": true })
+		var own_top: MeshInstance3D = n.find_child("Dress_top_%s" % sex, true, false)
+		var other_top: MeshInstance3D = n.find_child("Dress_top_%s" % other, true, false)
+		check(own_top != null and other_top != null, "%s carries both cuts of its home's top" % body)
+		if own_top == null or other_top == null:
+			n.queue_free()
+			continue
+		check(own_top.visible and not other_top.visible, "%s starts in its own cut" % body)
+		var hat_own: Node3D = n.find_child("Headgear_*_%s" % sex, true, false)
+		var hat_other: Node3D = n.find_child("Headgear_*_%s" % other, true, false)
+		check(hat_own != null and hat_other != null and hat_own.visible and not hat_other.visible, "%s wears its own cut's headgear" % body)
+		world.dress(n, { "headgear": true, "wear": { "top": other, "head": other } })
+		check(other_top.visible and not own_top.visible, "%s takes the other cut's top" % body)
+		check(hat_own != null and hat_other != null and hat_other.visible and not hat_own.visible, "and the other cut's headgear")
+		check(other_top.find_blend_shape_by_name("stout") >= 0, "the other cut's top follows the body's build too")
+		world.dress(n, { "headgear": true })
+		check(own_top.visible and not other_top.visible, "and its own again when the look names none")
+		n.queue_free()
+	# the creator: a slot's choice is kept on the look, and the head's choice with the headgear
+	var c := Creator.new()
+	add_child(c)
+	c.hero = Creation.generate([0, 1, 2, 0, 1, 0, 1, 2, 0, 1], "", 4)
+	c.hero["city"] = "timbuktu"
+	c.hero["body"] = "timbuktu-m"
+	c.hero["look"]["sex"] = "m"
+	c.hero["name"] = "T"
+	c._wear_set("top", "f")
+	check(c.hero["look"]["wear"]["top"] == "f" and c.wear_now("top") == "f", "the creator keeps a slot's choice on the look")
+	c._wear_set("head", "none")
+	check(c.hero["look"]["headgear"] == false and c.wear_now("head") == "none", "a bare head is the headgear taken off")
+	c._wear_set("head", "f")
+	check(c.hero["look"]["headgear"] == true and c.wear_now("head") == "f" and c._headgear_name() == "Head-tie", "and the other cut's headgear is worn by name")
+	c.queue_free()
+	world.queue_free()
+
+## The body's builds (docs/representation-plan.md): weight, frame and years are measures of the
+## look beside the build, each blending shape keys every body and its dress carry; a frame's
+## joints are given back with the bones; the creator names builds, and a classmate has one.
+func test_builds() -> void:
+	var L: Dictionary = Data.creation["look"]
+	var F: Dictionary = L["frame"]
+	var plain := World.build_keys({})
+	var none := true
+	for k in plain:
+		none = none and is_zero_approx(float(plain[k]))
+	check(none and plain.size() == 6, "a look that names no build is the fit body: no key drawn")
+	var heavy := World.build_keys({ "weight": 1.0, "build": -1.0, "frame": -0.6, "age": 0.5 })
+	check(heavy["stout"] == 1.0 and heavy["thin"] == 0.0 and heavy["lean"] == 1.0 and heavy["heavy"] == 0.0, "weight and build each draw one key of their pair")
+	check(is_equal_approx(heavy["broad"], -0.6) and is_equal_approx(heavy["old"], 0.5), "a narrow frame is the broad key drawn backwards; years draw the old key")
+	check(World.build_keys({ "weight": 7.0, "age": -3.0 })["stout"] == 1.0 and World.build_keys({ "age": -3.0 })["old"] == 0.0, "the measures are held to their ends")
+	# the joints a frame moves, mirrored for the two sides
+	check(World.frame_moves({}).is_empty(), "the fit body moves no bone")
+	var moves := World.frame_moves({ "frame": 1.0 })
+	check(moves.has("upperarm.l") and moves.has("upperarm.r") and (moves["upperarm.l"] as Vector3).x > 0.03 and is_equal_approx((moves["upperarm.l"] as Vector3).x, -(moves["upperarm.r"] as Vector3).x),
+		"a broad frame sets the two shoulders apart by the same measure")
+	var half := World.frame_moves({ "frame": 0.5 })
+	check(is_equal_approx((half["upperarm.l"] as Vector3).x * 2.0, (moves["upperarm.l"] as Vector3).x), "half a frame moves them half as far")
+	var old := World.frame_moves({ "age": 1.0 })
+	check(old.has("head") and (old["head"] as Vector3).z > 0.0, "years carry the head forward")
+	check(World.stature_of({ "stature": 1.0, "age": 1.0 }) < 1.0 and is_equal_approx(World.stature_of({ "stature": 1.06 }), 1.06), "the old stand a little shorter; the young as tall as their stature")
+	# what the creator names
+	var unlabelled: Array = []
+	for kind in ["weights", "frames", "ages"]:
+		for id in L[kind]:
+			if not L["labels"].get(kind, {}).has(id):
+				unlabelled.append("%s/%s" % [kind, id])
+	var ids := {}
+	for pr in F["presets"]:
+		ids[String(pr["id"])] = true
+		if not L["labels"].get("buildPresets", {}).has(String(pr["id"])):
+			unlabelled.append("buildPresets/%s" % pr["id"])
+		check(Creator.build_preset(pr) == String(pr["id"]), "the build named %s is known by its measures" % pr["id"])
+	check(unlabelled.is_empty(), "every build, weight, frame and age has a name to show (%s)" % ", ".join(unlabelled))
+	check(ids.has("slight") and ids.has("average") and ids.has("heavy") and ids.has("broad"), "the creator offers slight, average, heavy and broad by name")
+	check(Creator.build_preset({ "build": 0.1, "weight": 0.33, "frame": 0.0 }) == "", "measures set by hand are no named build")
+	var sts: Array = L["statures"].values()
+	check(float(sts.min()) <= 0.9 and float(sts.max()) >= 1.1, "stature runs from short to towering")
+	check(float((L["ages"].values() as Array).max()) == 1.0 and float((L["ages"].values() as Array).min()) == 0.0, "years run from young to old")
+	# the keys' bodies are in the data the kit builds from
+	var kit: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/bodies.json")).get("builds", {}).get("keys", {})
+	var built := true
+	for k in plain:
+		built = built and (k in ["lean", "heavy"] or kit.has(k))
+	for k in F["bones"]:
+		built = built and plain.has(k)
+	check(built, "every key the game draws is a build the kit makes, and every bone's move belongs to one")
+	# a new life and a classmate start with a weight and a frame of their own, within the data's ends
+	var seen := {}
+	var within := true
+	for sp in range(1, 60):
+		var lk := Creation.look_of("khemet", sp * 7919)
+		seen["%.2f/%.2f" % [lk["weight"], lk["frame"]]] = true
+		within = within and float(lk["weight"]) >= float(L["start"]["weight"][0]) and float(lk["weight"]) <= float(L["start"]["weight"][1])
+		within = within and float(lk["frame"]) >= float(L["start"]["frame"][0]) and float(lk["frame"]) <= float(L["start"]["frame"][1]) and float(lk["age"]) == 0.0
+	check(seen.size() >= 25 and within, "sixty sparks start with many weights and frames, all within the data's ends (%d)" % seen.size())
+	check(Creation.look_of("khemet", 99) == Creation.look_of("khemet", 99), "and the same spark with the same")
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 5
+	var mate := Academy.random_look(rng, "kazan")
+	check(mate.has("weight") and mate.has("frame"), "a classmate has a weight and a frame")
+	check(World.elder_age("Instructor Vale") >= float(L["ages"]["grown"]) and World.elder_age("Instructor Vale") == World.elder_age("Instructor Vale"), "an Instructor has years, the same every time")
+	# on the body: every home's people carry the keys, on the body and on its dress
+	var w := World.new()
+	add_child(w)
+	for body in ["timbuktu-f", "tiber-m"]:
+		var n: Node3D = Shapes.wake(load(w._person_model(body)).instantiate())
+		add_child(n)
+		w.dress(n, { "weight": 1.0, "frame": 1.0, "age": 0.4 })
+		var bm: MeshInstance3D = n.find_child("Body", true, false)
+		var has_all := bm != null
+		for k in ["thin", "stout", "broad", "old", "lean", "heavy"]:
+			has_all = has_all and bm.find_blend_shape_by_name(k) >= 0
+		check(has_all, "%s carries every build's key" % body)
+		if has_all:
+			check(is_equal_approx(bm.get_blend_shape_value(bm.find_blend_shape_by_name("stout")), 1.0) and is_equal_approx(bm.get_blend_shape_value(bm.find_blend_shape_by_name("old")), 0.4), "%s is drawn in the look's weight and years" % body)
+		var dressed := 0
+		for m in n.find_children("Dress_*", "MeshInstance3D", true, false):
+			var mi: MeshInstance3D = m
+			if mi.find_blend_shape_by_name("stout") >= 0 and is_equal_approx(mi.get_blend_shape_value(mi.find_blend_shape_by_name("stout")), 1.0):
+				dressed += 1
+		check(dressed > 0, "%s's dress follows the body's weight" % body)
+		var fr: Frame = n.find_child("Frame", true, false)
+		check(fr != null and fr.active and fr.get_parent() is Skeleton3D, "%s's broad frame moves its bones" % body)
+		w.dress(n, {})
+		check(fr != null and not fr.active, "and a fit look gives them back")
+		n.queue_free()
+	w.queue_free()
 
 ## The opening: the title, the cards, the night at the station, the recruiter (data/story.json).
 func test_opening() -> void:
@@ -2193,10 +2451,13 @@ func test_look() -> void:
 		var hooded := String(body).contains("Hooded")
 		check(vis.get("Hair_long_fall", false) == (not hooded), "%s: the long fall hangs under the helmet, unless hooded" % body)
 		var has_gear: bool = w._player.find_child("*Helmet*", true, false) != null or w._player.find_child("*Hat*", true, false) != null
-		for hgn in w._player.find_children("Headgear_*", "BoneAttachment3D", true, false):
-			has_gear = has_gear or World.dress_worn(String(hgn.name), "plain")      # not what only a master wears
 		# a headband is headgear that leaves the crown bare (look.openHeadgear)
-		var open_gear: bool = w._player.find_child("Headgear_headband*", true, false) != null
+		var open_gear := false
+		for hgn in w._player.find_children("Headgear_*", "BoneAttachment3D", true, false):
+			# not what only a master wears, nor the other cut's (a body carries both cuts of its home's dress)
+			var worn: bool = World.dress_worn(String(hgn.name), "plain") and World.cut_worn(String(hgn.name), hero["look"], World.body_sex(w._player))
+			has_gear = has_gear or worn
+			open_gear = open_gear or (worn and String(hgn.name).begins_with("Headgear_headband"))
 		check(vis.get("Hair_long_cap", true) == (not has_gear or open_gear), "%s: the cap hides under headgear that covers the crown, when the body has any" % body)
 		check(vis.get("Beard_full", false) and not vis.get("Beard_short", true), "%s: the full beard shows, the short one not" % body)
 		check(not vis.get("Hair_braid_fall", true) and not vis.get("Hair_knot_fall", true), "%s: no other style shows" % body)
@@ -2648,7 +2909,7 @@ func test_one_cloak_at_a_time() -> void:
 		for m in w._player.find_children("*", "MeshInstance3D", true, false):
 			var n := String(m.name)
 			if (m as MeshInstance3D).visible and (n == "Cape" or n.begins_with("Dress_cloak") or n.begins_with("Dress_mantle") or n.begins_with("Dress_roll")):
-				shown[n.get_slice("__", 0)] = true
+				shown[n.get_slice("__", 0).trim_suffix("_m").trim_suffix("_f")] = true      # whichever cut it is of
 		var cloaks := int(shown.has("Cape")) + int(shown.has("Dress_cloak"))
 		check(cloaks <= 1, "%s %s: one cloak at a time (%s)" % [spec[0], spec[1], str(shown.keys())])
 		check(shown.has("Cape") == spec[2], "%s: the look's cloak shows when the look says so" % spec[0])

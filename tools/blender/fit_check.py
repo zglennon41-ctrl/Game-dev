@@ -107,7 +107,7 @@ def measure(body_id, with_cut=False):
     body = bk.Body(home, sex).build()
     arm = body.r.arm
     D = bk.home_dress(home)
-    pieces = wardrobe.pieces_for(D, sex)
+    pieces = wardrobe.pieces_all(D, sex)       # both cuts of the home's dress: a body may wear either (docs/representation-plan.md)
     rng = np.random.default_rng(7)
     scene = bpy.context.scene
     k = body.k
@@ -118,7 +118,7 @@ def measure(body_id, with_cut=False):
     def layer_of(p, hard):
         if p["type"] in ("shoes", "cape"):
             return wardrobe.LAYER[p["type"]]
-        return wardrobe.layer_of(D, sex, p)
+        return wardrobe.layer_of(D, p.get("sex", sex), p)
 
     body_ob = body.parts["Body"]
     is_arm_v = np.asarray(body.human.is_arm, dtype=bool)
@@ -137,7 +137,8 @@ def measure(body_id, with_cut=False):
             weights = getattr(body, "dress_weights", {}).get(name)
             hard = isinstance(weights, str) or p["type"] in wardrobe.PINNED or p["type"] in wardrobe.DANGLE or p["type"] == "beads"
             key = (n, sub)
-            g = by.setdefault(key, {"label": ("%d %s%s" % (n, p["type"], " sleeves" if sub else "")) if n != 99 else "the creator's cloak", "type": p["type"], "ob": ob, "spans": [],
+            other = " (the %s cut)" % p["sex"] if p.get("sex", sex) != sex else ""
+            g = by.setdefault(key, {"label": ("%d %s%s%s" % (n, p["type"], " sleeves" if sub else "", other)) if n != 99 else "the creator's cloak", "type": p["type"], "ob": ob, "spans": [], "of": p.get("sex", ""),
                                     "layer": layer_of(p, hard), "arm": chain.startswith("arm") or (isinstance(weights, str) and "arm" in weights),
                                     "wears": wears(p), "kind": kind_of(p["type"], sub), "hard": hard, "cut": bool(p.get("cutUntilFits"))})
             g["spans"].append((start, end))
@@ -148,6 +149,11 @@ def measure(body_id, with_cut=False):
             tags = ob.name.split("__in_")[1].split("_") if "__in_" in ob.name else list(wardrobe.TAGS)
             groups.append({"label": "head " + ob.name.split("__in_")[0][9:], "type": ob.name.split("__in_")[0][9:], "ob": ob, "spans": [(0, len(ob.data.vertices))],
                            "layer": 8, "arm": False, "wears": tuple(tags), "kind": "fall", "below": hz0 - 0.01, "rigid": True, "hard": False, "cut": False})
+    # a covering over the hair (coverings.py): what of it lies below the chin, on the neck
+    for ob in list(body.r.attached) + list(body.r.skinned):
+        if ob.type == "MESH" and ob.name.startswith("Cover_"):
+            groups.append({"label": "cover " + ob.name[6:], "type": ob.name[6:], "ob": ob, "spans": [(0, len(ob.data.vertices))],
+                           "layer": 0, "arm": False, "wears": tuple(wardrobe.TAGS), "kind": "fall", "below": hz0 - 0.01, "rigid": ob in body.r.attached, "hard": False, "cut": False})
     sockets = {o.name: o for o in body.r.attached if o.type == "EMPTY"}
     feats = json.load(open(os.path.join(ROOT, "data", "people-features.json")))["features"]
     cut_parts = {f.get("part") for f in feats.values() if f.get("cutUntilFits")}
@@ -241,6 +247,8 @@ def measure(body_id, with_cut=False):
                 for kb in keys.key_blocks:
                     if kb.name in ("lean", "heavy"):
                         kb.value = 1.0 if kb.name == build else 0.0
+                    elif kb.name != "Basis":
+                        kb.value = 0.0      # the other builds and the face's shapes: not drawn here
 
     def stand(anim, at):
         if anim is None:
@@ -278,6 +286,9 @@ def measure(body_id, with_cut=False):
             under_pts, under_faces = [], []
             base = 0
             for u in groups:
+                # a piece lies on its own cut's pieces and on what both cuts wear; what both wear, on this body's cut
+                if u.get("of") and u["of"] != (g.get("of") or sex):
+                    continue
                 if u is g or u["layer"] >= g["layer"] or not set(u["wears"]) & set(g["wears"]) or not wardrobe.worn_together(g["type"], u["type"]):
                     continue
                 if u["arm"] != g["arm"]:

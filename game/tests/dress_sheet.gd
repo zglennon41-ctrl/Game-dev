@@ -46,6 +46,15 @@ func _run() -> void:
 	for a in args:
 		if a.contains("="):
 			kv[a.get_slice("=", 0)] = a.get_slice("=", 1)
+	if what == "wear":      # what every home offers slot by slot, in words (no picture)
+		for h in HOMES:
+			for slot in Data.creation["look"]["slots"]["order"]:
+				for sx in ["m", "f"]:
+					var names: Array = Creation.wear_options(h, slot, sx).map(func(o): return "%s=%s" % [o["id"], o["name"]])
+					if not names.is_empty():
+						print("%-11s %-6s on %s: %s" % [h, slot, sx, " | ".join(names)])
+		get_tree().quit()
+		return
 	DirAccess.make_dir_recursive_absolute(out)
 	world = World.new()
 	root.add_child(world)
@@ -77,6 +86,20 @@ func _run() -> void:
 		base["dress"] = kv["dress"]
 	if kv.has("rank"):
 		base["rank"] = kv["rank"]
+	# the body's measures and anything else of the look, on every figure: weight=1 frame=0.5 age=1 hair=locs
+	for k in ["build", "weight", "frame", "age", "stature"]:
+		if kv.has(k):
+			base[k] = float(kv[k])
+	for k in ["hair", "hair_color", "beard", "skin"]:
+		if kv.has(k):
+			base[k] = kv[k]
+	if kv.has("headgear"):
+		base["headgear"] = kv["headgear"] == "1"
+	if kv.has("wear"):      # wear=head:scarf,top:f
+		var w := {}
+		for pair in String(kv["wear"]).split(","):
+			w[pair.get_slice(":", 0)] = pair.get_slice(":", 1)
+		base["wear"] = w
 	var cell := Vector2(1.25, 2.3)
 	var cols := 13
 	var rows := 4
@@ -93,6 +116,94 @@ func _run() -> void:
 					look["skin"] = tones[tones.size() / 2]
 					look["hair"] = "crop" if sex == "m" else "tail"
 					_figure("%s-%s" % [HOMES[i], sex], look, i, r, cols, rows, FRONT if r % 2 == 0 else BACK, anim, at, cell)
+		"covers":
+			# every home's people in each covering any head may wear (data/creation.json,
+			# look.coverings): the men then the women, from the front
+			# (back=1: from behind; side=1: from the side)
+			var cvs: Array = (Data.creation["look"].get("coverings", []) as Array).map(func(c): return String(c["id"]))
+			rows = cvs.size() * 2
+			cell = Vector2(1.25, 2.3)
+			for i in HOMES.size():
+				var tones: Array = Data.bodies[HOMES[i]].get("palette", ["olive"])
+				for r in rows:
+					var sex := "m" if r < cvs.size() else "f"
+					var look := base.duplicate()
+					look.merge({ "skin": tones[tones.size() / 2], "hair": "long", "headgear": true, "wear": { "head": cvs[r % cvs.size()] } }, true)
+					_figure("%s-%s" % [HOMES[i], sex], look, i, r, cols, rows, (PI - 0.6 if kv.has("back") else (1.5 if kv.has("side") else FRONT)), anim, at, cell)
+		"hair", "heads":
+			# heads, close: one row of one home's people (home=<id> sex=<m|f>), from the front, or
+			# back=1 from behind, or side=1. hair: every hair style the creator offers, bare-headed
+			# (first=10 count=10 for some of them). heads: everything the home may wear on the head
+			# (its own headgear in both cuts, the coverings, bare), over hair=<style>.
+			# The body hangs out of the picture: a window about 2600x420 fits ten.
+			var hhome := String(kv.get("home", "timbuktu"))
+			var hsex := String(kv.get("sex", "f"))
+			var htones: Array = Data.bodies[hhome].get("palette", ["olive"])
+			var looks: Array = []
+			if what == "hair":
+				var styles: Array = Data.creation["look"]["hair"]
+				if kv.has("first"):
+					styles = styles.slice(int(kv["first"]), int(kv["first"]) + int(kv.get("count", "10")))
+				for st in styles:
+					looks.append({ "hair": st, "headgear": false })
+			else:
+				for o in Creation.wear_options(hhome, "head", hsex):
+					looks.append({ "headgear": String(o["id"]) != "none", "wear": { "head": String(o["id"]) } })
+			cols = looks.size()
+			rows = 1
+			cell = Vector2(0.66, 0.84)
+			for i in looks.size():
+				var look := base.duplicate()
+				look.merge({ "skin": kv.get("skin", htones[htones.size() / 2]), "hair_color": kv.get("hair_color", (Data.bodies[hhome].get("hairColors", ["black"]) as Array)[0]) }, true)
+				look.merge(looks[i], true)
+				_figure("%s-%s" % [hhome, hsex], look, i, 0, cols, rows, (PI - 0.6 if kv.has("back") else (1.5 if kv.has("side") else FRONT)), anim, at, cell)
+				(bodies[-1] as Node3D).position.y -= 1.95      # the head, not the feet, in the picture
+		"cuts":
+			# every home's two cuts mixed (docs/representation-plan.md): each body in its own cut,
+			# then with the other cut's top, the other's legs and feet, and the whole other cut;
+			# the men then the women (back=1 for behind)
+			rows = 8
+			cell = Vector2(1.25, 2.3)
+			var mixes := [[], ["top"], ["legs", "feet"], ["head", "top", "legs", "feet", "outer", "extra"]]
+			for i in HOMES.size():
+				var tones: Array = Data.bodies[HOMES[i]].get("palette", ["olive"])
+				for r in 8:
+					var sex := "m" if r < 4 else "f"
+					var look := base.duplicate()
+					look["skin"] = tones[tones.size() / 2]
+					look["hair"] = "crop" if sex == "m" else "tail"
+					var w := {}
+					for slot in mixes[r % 4]:
+						w[slot] = "f" if sex == "m" else "m"
+					look["wear"] = w
+					_figure("%s-%s" % [HOMES[i], sex], look, i, r, cols, rows, FRONT if not kv.has("back") else BACK, anim, at, cell)
+		"builds":
+			# one home's people in every build the creator names, then old, then old and heavy:
+			# the men from the front and behind, the women from the front and behind (home=<id>)
+			var bhome := String(kv.get("home", "alexandria"))
+			var named: Array = (Data.creation["look"].get("frame", {}).get("presets", []) as Array).duplicate()
+			named.append({ "id": "old", "age": 1.0 })
+			named.append({ "id": "old-heavy", "age": 1.0, "weight": 1.0 })
+			named.append({ "id": "short", "stature": 0.88, "weight": 0.5 })
+			named.append({ "id": "tall", "stature": 1.12, "weight": -0.5 })
+			if kv.has("pick"):      # only these builds, larger: pick=heavy,big,old
+				var want := String(kv["pick"]).split(",")
+				named = named.filter(func(b): return want.has(String(b["id"])))
+			cols = named.size()
+			cell = Vector2(1.45, 2.75)
+			var btones: Array = Data.bodies[bhome].get("palette", ["olive"])
+			for i in named.size():
+				for r in 4:
+					var sex := "m" if r < 2 else "f"
+					var look := base.duplicate()
+					look["skin"] = btones[btones.size() / 2]
+					for k in ["build", "weight", "frame", "age", "stature"]:
+						look[k] = float(named[i].get(k, base.get(k, 0.0 if k != "stature" else 1.0)))
+					if not kv.has("hair"):
+						look["hair"] = "crop" if sex == "m" else "tail"
+					if float(look["age"]) > 0.5 and not kv.has("hair_color"):
+						look["hair_color"] = "grey"
+					_figure("%s-%s" % [bhome, sex], look, i, r, cols, rows, FRONT if r % 2 == 0 else BACK, anim, at, cell)
 		"masters":
 			var ins: Array = Data.academy["instructors"]
 			cols = ins.size()
@@ -163,7 +274,7 @@ func _run() -> void:
 	world.add_child(cam)
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
 	var vp := get_viewport().get_visible_rect().size
-	var mid := Vector3(0, HIGH - (rows - 1) / 2.0 * cell.y + 0.98, 0)
+	var mid := Vector3(0, HIGH - (rows - 1) / 2.0 * cell.y + (0.98 if not (what in ["hair", "heads"]) else 0.25), 0)
 	cam.size = maxf(rows * cell.y, cols * cell.x * vp.y / vp.x)
 	cam.far = 400.0
 	cam.position = mid + Vector3(0, 0.0, 60.0)

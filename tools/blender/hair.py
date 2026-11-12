@@ -19,7 +19,8 @@ from mathutils import Vector, Matrix
 
 import people_kit as pk
 
-HAIR_STYLES = ["crop", "short", "curls", "coils", "rows", "locs", "bob", "long", "tail", "braid", "twins", "knot", "topknot", "crest"]
+HAIR_STYLES = ["crop", "short", "curls", "coils", "rows", "locs", "bob", "long", "tail", "braid", "twins", "knot", "topknot", "crest",
+               "afro", "plaits", "coilknots", "fade", "thin"]
 BEARD_STYLES = ["stubble", "moustache", "goatee", "short", "full"]
 
 
@@ -385,6 +386,70 @@ def hair(surf_ob, centre, sex, H, mat, back_y=None):
         top = Vector((c.x + 0.3 * H * math.sin(a), c.y + 0.02 * H + 0.33 * H * math.cos(a), c.z - 0.2 * H))
         _tube(bm, [top + Vector((0, -0.02 * H, 0.05 * H)), top, top + Vector((0, 0.02 * H, -0.16 * H)), top + Vector((0, 0.03 * H, -0.3 * H))], [0.02 * H, 0.024 * H, 0.02 * H, 0.008 * H], segments=5)
     out.append(_ob("Hair_rows_fall", bm, mat))
+
+    # more textures and cuts (docs/representation-plan.md) --------------------------------
+    # afro: a full round of hair about the head, standing well off it
+    ac = c + Vector((0.0, 0.04 * H, 0.16 * H))
+
+    def lift_afro(p, n, f, R=0.6):
+        q = (p - c) * (24.0 / H)
+        g = math.sin(q.x + 1.3) * math.sin(q.y * 1.13 + 2.1) * math.sin(q.z * 0.94 + 0.7) + 0.5 * math.sin(q.x * 2.1 + q.z * 1.7) * math.sin(q.y * 2.3 + 0.4)
+        return 0.0016 + _smooth(f / (0.17 * H)) * max(0.05 * H, R * H - (p - ac).length) * (1.0 + 0.05 * g)
+    # these caps are cut from the head's own mesh, not made finer: a quarter of the points
+    # (every style is in every person's file; the web build has a ceiling)
+    C = Scalp(surf_ob, centre, H, fine=False)
+
+    def cap_light(style, field, lift):
+        out.append(C.shell("Hair_%s_cap" % style, field, lift, mat))
+    cap_light("afro", lambda p, n: hairline(p, n, front=-0.012, jag=0.0), lift_afro)
+
+    # plaits: many long thin braids, in rows on the scalp and down past the shoulders
+    cap_light("plaits", lambda p, n: hairline(p, n, jag=0.0), lift_whorl(0.012, 0.0, 20))
+    rnd2 = random.Random(23)
+    bm = bmesh.new()
+    for i, (p, n) in enumerate(zip(S.P, S.N)):
+        if i % 9 != 0 or hairline(p, n, jag=0.0) < 0.03 * H:
+            continue
+        a = math.atan2(abs(p.x - c.x), -(p.y - c.y)) / math.pi
+        if a < 0.36:
+            continue    # none over the face
+        out_dir = Vector((p.x - c.x, p.y - c.y, 0.0))
+        out_dir = out_dir.normalized() if out_dir.length > 1e-4 else Vector((0, 1, 0))
+        end_z = c.z - (0.55 + 0.85 * a + rnd2.uniform(-0.06, 0.06)) * H
+        r_out = max(0.46 * H, math.hypot(p.x - c.x, p.y - c.y) + 0.03 * H)
+        pts = [p + n * 0.01 * H]
+        for t in (0.3, 0.65, 1.0):
+            z = p.z + (end_z - p.z) * t
+            reach = r_out * (1.0 - 0.14 * t) * (0.8 if z < c.z - 0.35 * H else 1.0)
+            y = c.y + 0.03 * H + out_dir.y * reach + rnd2.uniform(-0.008, 0.008) * H
+            if back_y is not None and z < c.z - 0.5 * H and out_dir.y > 0.2:
+                y = max(y, back_y(z) + 0.03 * H)       # down the back, clear of it
+            pts.append(Vector((c.x + out_dir.x * reach, y, z)))
+        _tube(bm, pts, [0.022 * H, 0.022 * H, 0.02 * H, 0.012 * H], segments=4)
+    out.append(_ob("Hair_plaits_fall", bm, mat))
+
+    # coilknots: the hair parted in sections, each wound into a small knot on the scalp
+    cap_light("coilknots", lambda p, n: hairline(p, n, jag=0.0), lift_whorl(0.012, 0.0, 22))
+    bm = bmesh.new()
+    spots = []
+    for i, (p, n) in enumerate(zip(S.P, S.N)):
+        if hairline(p, n, jag=0.0) < 0.07 * H or any((p - q).length < 0.23 * H for q in spots):
+            continue
+        spots.append(p)
+        base = p + n * 0.012 * H
+        up = n.lerp(Vector((0, 0, 1)), 0.25).normalized()
+        _ball(bm, base + up * 0.022 * H, 0.078 * H, 0.078 * H, 0.05 * H, u=8, v=5)
+        _ball(bm, base + up * 0.052 * H, 0.056 * H, 0.056 * H, 0.04 * H, u=8, v=4)
+    out.append(_ob("Hair_coilknots_top", bm, mat))
+
+    # fade: full on top, the sides and the back cut down to the skin
+    def fade_field(p, n):
+        a = math.atan2(abs(p.x - c.x), -(p.y - c.y)) / math.pi
+        return min(hairline(p, n, jag=0.008), p.z - (c.z + (0.22 + 0.06 * a) * H))
+    cap("fade", fade_field, lift_noise(0.05, 0.3, 30.0, reach=0.16))
+
+    # thin: gone from the crown, kept round the sides and the back
+    cap_light("thin", lambda p, n: min(hairline(p, n, jag=0.0), (c.z + 0.3 * H) - p.z), lift_whorl(0.013, 0.0, 26))
 
     # the beards -----------------------------------------------------------------------
     chin_z = c.z - 0.5 * H

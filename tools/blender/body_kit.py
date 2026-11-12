@@ -763,7 +763,7 @@ class Body:
         """Three builds of every mesh with the same topology: fit is the base, lean and heavy
         its shape keys."""
         fit = self.build_meshes("fit")
-        for build in ("lean", "heavy"):
+        for build in ["lean", "heavy"] + ([b for b in self.human.humans if b not in BUILDS] if self.HUMAN else []):
             other = self.build_meshes(build)
             for name, ob in fit.items():
                 if not ob.data.shape_keys:
@@ -895,11 +895,22 @@ class Body:
             self.hang(self.human.sockets())
             self.r.head_box = self.head_extents()
             pieces, self.head_centre = self.human.hair(self.mats["hair"])
+            # a covering that comes down over the neck (coverings.py, follows) is skinned like the
+            # body under it, so the neck's part bends with the neck and does not ride the head
+            # through the shoulders (docs/dress-fit.md); the rest hangs from the head
+            worn = [h for h in pieces if getattr(h, "get", None) and h.get("follows")]
+            for ob in worn:
+                self.human.weight_like_body(ob)
+                skin_to(ob, self.r.arm)
+                self.r.skinned.append(ob)
+                self.parts[ob.name] = ob
+            pieces = [h for h in pieces if h not in worn]
             self.hang([(h, "head") for h in pieces])
             self.r.measured["hair"] = len(pieces)
             self.r.measured["body"] = self.id
             (_, _), (_, _), (hz0, hz1) = self.head_extents()
             self.r.measured["heads_tall"] = round(self.r.extent([self.parts["Body"]])[1] / (hz1 - hz0), 2)
+            self.r.measured["build_joints"] = self.human.build_joints      # what data/creation.json, look.frame gives back with the bones
             return self
         if self.ANATOMY:
             self.hang([(e, "head") for e in self.head_pieces])

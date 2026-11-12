@@ -369,6 +369,24 @@ static func random_look(rng: RandomNumberGenerator, city := "") -> Dictionary:
 		"hair": hairs[rng.randi() % hairs.size()], "beard": (beards[rng.randi() % beards.size()] if rng.randf() < 0.35 else beards[0]) if sex == "m" else beards[0],
 		"hair_color": cols[rng.randi() % cols.size()], "stature": sts[rng.randi() % sts.size()],
 		"sex": sex, "skin": tones[rng.randi() % tones.size()], "build": builds[rng.randi() % builds.size()] })
+	# and a weight and a frame of their own, drawn apart so the cohort's other draws stay as they were
+	var apart := RandomNumberGenerator.new()
+	apart.seed = rng.state
+	face.merge(Creation.frame_of(apart))
+	# and, now and then, a slot of their home's dress in its other cut (data/creation.json, look.slots)
+	var chance := float(L.get("slots", {}).get("otherCutChance", 0.0))
+	var other := "f" if sex == "m" else "m"
+	var wear := {}
+	for slot in L.get("slots", {}).get("order", []):
+		if Creation.wear_options(city, slot, sex).any(func(o): return o["id"] == other) and apart.randf() < chance:
+			wear[slot] = other
+	# and a few cover their hair (look.coverings)
+	var cloths: Array = L.get("coverings", [])
+	if not cloths.is_empty() and apart.randf() < float(L.get("slots", {}).get("coverChance", 0.0)):
+		wear["head"] = String(cloths[apart.randi() % cloths.size()]["id"])
+		face["headgear"] = true
+	if not wear.is_empty():
+		face["wear"] = Creation.wear_settle(city, wear, sex)
 	return face
 
 static func _shuffle(a: Array, rng: RandomNumberGenerator) -> void:
@@ -495,7 +513,7 @@ func go(place_id: String, quiet := false, from := "") -> void:
 		var at := Vector2(ins["at"][0], ins["at"][1])
 		# an Instructor wears their home's dress as a master of it does, hat and all
 		var ilook: Dictionary = world.look_for(String(data["name"]))
-		ilook.merge({ "dress": "master", "headgear": true, "cape": false }, true)
+		ilook.merge({ "dress": "master", "headgear": true, "cape": false, "age": World.elder_age(String(data["name"])) }, true)
 		ilook.merge(data.get("look", {}), true)
 		var fig := world.add_figure(data["body"], at, (spawn - at).angle(), data["name"], data.get("title", ""), "", Color(0, 0, 0, 0), ilook)
 		fig["lead"] = true    # an Instructor's name shows before a classmate's beside them
