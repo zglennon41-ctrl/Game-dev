@@ -104,7 +104,7 @@
     }
   },
   "weapon": {
-    "$comment": "A weapon genius (blade, gun, bow). In hand its partner fights with it: a weapon type of the twelve (data/combat-room.json, styles), its blows worth inHand at its age, each blow started costing it willPerBlow of its own Will; it gets no Will back while it is held, and at the shoulder its Will comes back `rest` times as fast as a companion's. Emptied, it leaves the hand of itself and cannot be taken up again until it has `retake` of its Will. take.drawCut: the first blow after it is taken in hand, if it rested `rest` seconds first, starts in `startup` of its time (a bow draws in that much) and lands for `damage`. with: out of hand, every so many of its partner's blows it adds one (a multiple of the Hunt's damage, by Expression and Resonance, at its age's worth). A gun genius has no magazine: its rounds are its Will. great: the move only the great have (it stays what a worn relic's was). held: how it sits in the hand: its length there in metres, grip (how far along that length from its foot the hand takes it), flip (its foot is its point) or upright (it is held level, a gun: upright, turned the way its partner faces). paths: the one signature property a path gives it, from these: damage (every blow in hand), parryWindow (the moment to parry while it is held), heavyOn (that cut of its combo throws the foe back and makes it flinch), afterParry { seconds, damage, free } (the next blow after a parry made with it), score { per, max } (each blow its partner takes is scored; the next blow that lands with it pays them all), firstFullDraw { damage, rest } (the first arrow from a full draw each time it is taken up, after that much rest), onWindup { weaken } (an arrow that lands while the foe winds up weakens that strike), fullDraw { slow, seconds } (an arrow from a full draw slows the foe's time), shot { ... } (laid over the type's shot), far { from, to, damage } (more the farther the foe), everyNth { n, damage } (every nth shot in a row), still { seconds, damage } (struck from a stand).",
+    "$comment": "A weapon genius (blade, gun, bow). In hand its partner fights with it: a weapon type of the twelve (data/combat-room.json, styles), its blows worth inHand at its age, each blow started costing it willPerBlow of its own Will; it gets no Will back while it is held, and at the shoulder its Will comes back `rest` times as fast as a companion's. Emptied, it leaves the hand of itself and cannot be taken up again until it has `retake` of its Will. take.drawCut: the first blow after it is taken in hand, if it rested `rest` seconds first, starts in `startup` of its time (a bow draws in that much) and lands for `damage`. with: out of hand, every so many of its partner's blows it adds one (a multiple of the Hunt's damage, by Expression and Resonance, at its age's worth). A gun genius has no magazine: its rounds are its Will. great: the move only the great have (it stays what a worn relic's was). held: how it sits in the hand (its size there is data/genius.json, equipment.hand). hand: which hand takes it by its grip (r, or l: a bow is held in the left and drawn with the right). rest: how it lies in that hand when it is not aimed, turned from the hand's own frame, in degrees. aims: aimed (drawing, loosing, firing, or locked on), its front lies along the line to the foe and its top to the sky, whatever the wrist does; cant: leaned that many degrees about that line. raise: aimed, the hand that holds it is put out that far along the aim from its own shoulder (the arrow at the height of the jaw). draws: its string comes back to the other hand as it is drawn, no further than drawLength from the grip. paths: the one signature property a path gives it, from these: damage (every blow in hand), parryWindow (the moment to parry while it is held), heavyOn (that cut of its combo throws the foe back and makes it flinch), afterParry { seconds, damage, free } (the next blow after a parry made with it), score { per, max } (each blow its partner takes is scored; the next blow that lands with it pays them all), firstFullDraw { damage, rest } (the first arrow from a full draw each time it is taken up, after that much rest), onWindup { weaken } (an arrow that lands while the foe winds up weakens that strike), fullDraw { slow, seconds } (an arrow from a full draw slows the foe's time), shot { ... } (laid over the type's shot), far { from, to, damage } (more the farther the foe), everyNth { n, damage } (every nth shot in a row), still { seconds, damage } (struck from a stand).",
     "inHand": {
       "young": 1.2,
       "half-grown": 1.4,
@@ -139,9 +139,12 @@
         "style": "blade",
         "willPerBlow": 2.5,
         "held": {
-          "length": 0.95,
-          "grip": 0.86,
-          "flip": true
+          "hand": "r",
+          "rest": [
+            0,
+            0,
+            0
+          ]
         },
         "inHand": "A blade: three cuts, the third wide.",
         "paths": {
@@ -176,8 +179,17 @@
         "style": "bow",
         "willPerBlow": 4.0,
         "held": {
-          "length": 1.3,
-          "grip": 0.5
+          "hand": "l",
+          "rest": [
+            -90,
+            -90,
+            0
+          ],
+          "aims": true,
+          "cant": -12,
+          "draws": true,
+          "drawLength": 0.8,
+          "raise": 0.62
         },
         "inHand": "A bow: hold to draw, and a full draw hits three times as hard.",
         "paths": {
@@ -210,9 +222,13 @@
         "style": "pistol",
         "willPerBlow": 3.5,
         "held": {
-          "length": 0.34,
-          "grip": 0.55,
-          "upright": true
+          "hand": "r",
+          "rest": [
+            0,
+            90,
+            0
+          ],
+          "aims": true
         },
         "inHand": "A gun with no magazine: its rounds are its Will, so it is never reloaded.",
         "paths": {
@@ -566,7 +582,7 @@
     }
   },
   "mounts": {
-    "$comment": "Where a worn or carried genius sits on its partner (items.<base>.worn names one of these): the bone of the partner's rig it rides, which empty of the genius's own model is brought there (wear for a piece of armor, carry for an instrument: docs/genius-lines.md), where on the bone in metres and turned how in degrees, and how large against the size it was made. plumb: it hangs upright from that place whatever the bone does (a lamp on a hook), and 'at' is then counted in its partner's own left, up and front. A form that says how tall it is in the hand (held, in its body) is brought to that height, times scale. hides: what its partner carries there is not drawn while it is worn (offhand: a shield in the other hand). A genius whose model has no such empty, or whose place is not here, floats at its partner's side as before.",
+    "$comment": "Where a worn or carried genius sits on its partner (items.<base>.worn names one of these): the bone of the partner's rig it rides, which empty of the genius's own model is brought there (wear for a piece of armor, carry for an instrument: docs/genius-lines.md), where on the bone in metres and turned how in degrees. It is worn at the size it has in the hand (data/genius.json, equipment.hand); scale is no longer read. along: it sits that part of the way from its bone to another (a shield up the forearm, not in the fist). upright: it keeps its face where the bone turns it and its top to the sky. plumb: it hangs upright from that place whatever the bone does (a lamp on a hook), and 'at' is then counted in its partner's own left, up and front. hides: what its partner carries there is not drawn while it is worn (offhand: a shield in the other hand). A genius whose model has no such empty, or whose place is not here, floats at its partner's side as before.",
     "arm": {
       "bone": "handslot.l",
       "by": "wear",
@@ -581,7 +597,12 @@
         0
       ],
       "scale": 1.0,
-      "hides": "offhand"
+      "hides": "offhand",
+      "along": [
+        "lowerarm.l",
+        0.45
+      ],
+      "upright": true
     },
     "hand": {
       "bone": "handslot.l",

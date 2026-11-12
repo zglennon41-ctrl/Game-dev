@@ -11,7 +11,8 @@
     "witness",
     "tally",
     "size",
-    "fight"
+    "fight",
+    "equipment"
   ],
   "properties": {
     "orders": {
@@ -87,6 +88,98 @@
             "will",
             "byKind"
           ]
+        }
+      }
+    },
+    "equipment": {
+      "type": "object",
+      "description": "The equipment geniuses: the three categories, and the size of a held one (docs/genius-types.md).",
+      "required": [
+        "categories",
+        "tolerance",
+        "afloat",
+        "hand"
+      ],
+      "properties": {
+        "categories": {
+          "type": "object",
+          "required": [
+            "arms",
+            "regalia",
+            "augments"
+          ],
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "name",
+              "one",
+              "text",
+              "bases"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "one": {
+                "type": "string",
+                "minLength": 1
+              },
+              "text": {
+                "type": "string",
+                "minLength": 10
+              },
+              "bases": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "uniqueItems": true
+              }
+            }
+          }
+        },
+        "tolerance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.25
+        },
+        "afloat": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "hand": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "long",
+              "measure",
+              "most"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "long": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "measure": {
+                "type": "string",
+                "enum": [
+                  "box",
+                  "bulk"
+                ]
+              },
+              "most": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          }
+        },
+        "augments": {
+          "type": "object"
         }
       }
     }

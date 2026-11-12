@@ -94,6 +94,7 @@ func _run() -> void:
 	var game_types := Data.genius_types()
 	_all_types()
 	test_types_data()
+	test_equipment()
 	test_types_weapon()
 	test_types_items()
 	test_types_roles()
@@ -3315,7 +3316,11 @@ func test_lines() -> void:
 		var ref: Node3D = body._model.find_child("ref_top", true, false)
 		if ref:
 			var art_size := float(Data.genius_bodies()["silhouettes"].get(String(f["silhouette"]), {}).get("artSize", 1.0))
-			ok = ok and absf(body._local_xf(ref).origin.y - body.stands * art_size) < 0.02
+			if body.hand_k > 0.0:
+				# (a held genius does not stand by its stage: it is the size of a thing a hand holds)
+				ok = ok and is_equal_approx(body._model.scale.y, body.hand_k * float(Data.genius()["equipment"]["afloat"]))
+			else:
+				ok = ok and absf(body._local_xf(ref).origin.y - body.stands * art_size) < 0.02
 		# a rigged form moves by its base body's clips
 		if not body._model.find_children("*", "Skeleton3D", true, false).is_empty() and ResourceLoader.exists(GeniusBody.BODY_DIR % String(f["silhouette"])):
 			ok = ok and body.anim != null and body.anim_names.has("idle") and body.anim.has_animation(body.anim_names["idle"])
@@ -3451,6 +3456,72 @@ func _first_hit(evs: Array) -> Dictionary:
 	return {}
 
 ## The game's own bases: every one has a type by its class, and the data is whole.
+## The equipment geniuses (data/genius.json, equipment): three categories over the types, and
+## the rule of the hand.
+func test_equipment() -> void:
+	var E: Dictionary = Data.genius()["equipment"]
+	var tol := float(E["tolerance"])
+	var unsorted: Array = []
+	var missized: Array = []
+	for b in Data.load_bases():
+		var id := String(b["id"])
+		var type := GeniusTypes.type_of_class(String(b["class"]))
+		var cat := GeniusEquip.category_of(E, id)
+		# a weapon and a defensive item are Arms, a ritual item is Regalia, a companion is neither
+		var want: String = { "weapon": "arms", "defense": "arms", "ritual": "regalia" }.get(type, "")
+		if cat != want:
+			unsorted.append("%s is %s, wanted %s" % [id, cat, want])
+		if (cat != "") != (not GeniusEquip.hand(E, id).is_empty()):
+			missized.append(id)
+	check(unsorted.is_empty(), "every held base is sorted into Arms or Regalia by what it is, and no companion is (%s)" % ", ".join(unsorted))
+	check(missized.is_empty(), "every base in a category has a size in the hand, and no other has (%s)" % ", ".join(missized))
+	check(E["categories"].has("augments") and String(E["categories"]["augments"]["name"]) == "Augments", "the third category, Augments, is named")
+	check(GeniusEquip.category(E, "bow").get("name", "") == "Arms" and GeniusEquip.category(E, "bell").get("name", "") == "Regalia" and GeniusEquip.category(E, "wolf").is_empty(), "a bow is of the Arms, a bell of the Regalia, a wolf of neither")
+	# the rule of the hand: whatever size a thing was made, it is brought to its base's length
+	var long := float(E["hand"]["bow"]["long"])
+	check(is_equal_approx(GeniusEquip.fit(0.4, long, tol), long * (1.0 - tol)) and is_equal_approx(GeniusEquip.fit(9.0, long, tol), long * (1.0 + tol)) and is_equal_approx(GeniusEquip.fit(long, long, tol), long), "a thing too small is brought up to the rule, one too large down to it, one that fits is left")
+	var small := GeniusEquip.scale_for(E, "bow", 0.9, 0.9) * 0.9
+	var large := GeniusEquip.scale_for(E, "bow", 2.7, 2.7) * 2.7
+	check(large <= small * (1.0 + tol) / (1.0 - tol) + 0.001 and large <= float(E["hand"]["bow"]["most"]) + 0.001, "a Final made three times its Starter's size is held at no more than the tolerance over it (%.2f, %.2f)" % [small, large])
+	check(GeniusEquip.scale_for(E, "wolf", 1.0, 1.0) == 1.0, "a companion is not sized to the hand")
+	# a glove is measured by its hand, and what it has grown is still kept inside `most`
+	var glove := GeniusEquip.scale_for(E, "gauntlet", 1.9, 1.05)
+	check(glove * 1.9 <= 1.0 + tol + 0.001 and glove * 1.05 <= float(E["hand"]["gauntlet"]["most"]) + 0.001, "a gauntlet nearly two hands broad is brought to a hand")
+	# on the body: a held form is the size the rule gives it, at every stage of its line
+	for base in ["bow", "gun"]:
+		var sizes: Array = []
+		for f in Genius.road_of(base, [1, 0, 0]):
+			if not ResourceLoader.exists(GeniusBody.FORM_DIR % String(f["id"])):
+				continue
+			var body := GeniusBody.build({ "form": f["id"], "silhouette": f["silhouette"], "expression": f["expression"], "features": f["features"], "instar": int(f["level"]), "look": GeniusLook.born(3) }, Color.ORANGE, int(f["level"]))
+			add_child(body)
+			var box := GeniusEquip.held_box(body._model, "grip")
+			sizes.append(maxf(box.size.x, maxf(box.size.y, box.size.z)) * body._model.scale.y)
+			body.queue_free()
+		if sizes.size() >= 2:
+			check(float(sizes.max()) <= float(sizes[0]) * (1.0 + tol) / (1.0 - tol) + 0.005 and float(sizes.min()) >= float(E["hand"][base]["long"]) * (1.0 - tol) - 0.005,
+				"down the %s's line from Starter to Final it stays the size of a thing a hand holds (%s)" % [base, ", ".join(sizes.map(func(x): return "%.2f" % x))])
+	# an Augment (the proof: living wings): five stages, one size, made to its wearer's shoulders
+	var wings: Dictionary = E.get("augments", {}).get("wings", {})
+	check((wings.get("stages", []) as Array).size() == 5, "the wings have their five stages, Baby to Final")
+	check(Augment.stage_of(-1, 5) == 0 and Augment.stage_of(9, 5) == 4 and Augment.stage_of(2, 5) == 2, "a stage is kept inside the five")
+	check(is_equal_approx(Augment.fit(0.375, 0.375), 1.0) and Augment.fit(0.3, 0.375) < 1.0 and Augment.fit(0.45, 0.375) > 1.0 and Augment.fit(5.0, 0.375) <= 1.25 and Augment.fit(0.01, 0.375) >= 0.8, "wings are made to the breadth of their wearer's shoulders, within reason")
+	var spans: Array = []
+	for st in 5:
+		if not ResourceLoader.exists(Augment.DIR % ["wings", st]):
+			continue
+		var wm: Node3D = (load(Augment.DIR % ["wings", st]) as PackedScene).instantiate()
+		var wbox := GeniusEquip.held_box(wm, "")
+		spans.append(maxf(wbox.size.x, wbox.size.y))
+		check(wm.find_child("wing_l", true, false) != null and wm.find_child("wing_r", true, false) != null, "the wings of stage %d are two wings, each a piece of its own" % st)
+		wm.free()
+	check(spans.size() == 5 and float(spans.max()) <= float(spans.min()) * (1.0 + tol) + 0.005, "the wings are the same size at every stage (%s)" % ", ".join(spans.map(func(x): return "%.2f" % x)))
+	# the page names the category
+	var bow := Genius.at_form("bow-hunting")
+	check(String(GeniusTypes.says(bow)["title"]) == "ARMS" and String((GeniusTypes.says(bow)["lines"] as Array)[0]).begins_with(String(E["categories"]["arms"]["text"])), "a Bow's page says it is of the Arms, in the category's own words")
+	check(String(GeniusTypes.says(Genius.at_form("bell-hand"))["title"]) == "REGALIA", "a Bell's page says it is of the Regalia")
+	check(String(GeniusTypes.says(Genius.at_form("wolf-counting-wolf"))["title"]) != "ARMS", "a wolf's page still names its role")
+
 func test_types_data() -> void:
 	var T := Data.genius_types()
 	var game := Data.load_bases()

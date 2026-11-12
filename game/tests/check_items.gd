@@ -3,6 +3,13 @@
 ## must carry what the game and the contract rely on (docs/genius-lines.md): `ref_top`
 ## at the kit's height, `carry` (where a hand or a hook takes it), the usual sockets, a light
 ## of the field somewhere on it; it must stand on the ground and weigh under 120 KB.
+##
+## And the rule of the hand, for every genius that is held (data/genius.json, equipment.hand:
+## the blade, the bow, the gun, the shield, the gauntlet and the three above): at the size the
+## game holds it (GeniusEquip), every form is as long as its base says, give or take the
+## tolerance; with all it has grown it reaches no further than `most`; and no form of any
+## stage is larger than the line's Starter by more than the tolerance either way. A held
+## genius grows by what it shows, never by how big it is.
 ## Run: godot --headless --path . -s res://game/tests/check_items.gd
 extends SceneTree
 
@@ -71,7 +78,61 @@ func _init() -> void:
 				printerr(id, ": ", ", ".join(said))
 			inst.free()
 	print("items: %d forms, %s" % [count, "all good" if ok else "PROBLEMS"])
-	quit(0 if ok else 1)
+	var sized := _check_hand()
+	quit(0 if ok and sized else 1)
+
+
+## The rule of the hand: every held form, at the size the game gives it.
+func _check_hand() -> bool:
+	var rules: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/genius.json"))["equipment"]
+	var tol := float(rules["tolerance"])
+	var ok := true
+	var count := 0
+	for base: String in rules["hand"]:
+		var h: Dictionary = rules["hand"][base]
+		var b: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/genius-bases/%s.json" % base))
+		if GeniusEquip.category_of(rules, base) == "":
+			printerr(base, ": held, and in no category")
+			ok = false
+		var ids: Array = []
+		_walk(b["settled"], ids)
+		for p in b["paths"]:
+			_walk(p, ids)
+		var starter := 0.0
+		var lo := INF
+		var hi := 0.0
+		for entry in ids:
+			var id := String(entry[0])
+			if not ResourceLoader.exists(DIR % id):
+				printerr(id, ": no model")
+				ok = false
+				continue
+			var inst: Node3D = (load(DIR % id) as PackedScene).instantiate()
+			var m := GeniusEquip.sizing(rules, { "base": base, "body": entry[1] }, String(b["class"]), inst)
+			inst.free()
+			count += 1
+			# what the rule measures of it, at the game's scale: its whole length, or its glove
+			var size := float(m["natural"]) * float(m["k"])
+			var said: Array[String] = []
+			if float(m["long"]) > float(h["most"]) + 0.005:
+				said.append("reaches %.2f, further than %.2f" % [m["long"], h["most"]])
+			if size > float(h["long"]) * (1.0 + tol) + 0.005:
+				said.append("is %.2f, larger than %.2f and the tolerance" % [size, h["long"]])
+			# (smaller only where what it has grown had to be brought inside `most`)
+			if size < float(h["long"]) * (1.0 - tol) - 0.005 and float(m["long"]) < float(h["most"]) - 0.005:
+				said.append("is %.2f, smaller than %.2f and the tolerance" % [size, h["long"]])
+			if starter == 0.0:
+				starter = size
+			elif size > starter * (1.0 + tol) / (1.0 - tol) + 0.005:
+				said.append("is %.2f, and its Starter %.2f" % [size, starter])
+			lo = minf(lo, size)
+			hi = maxf(hi, size)
+			if not said.is_empty():
+				ok = false
+				printerr(id, ": ", ", ".join(said))
+		print("%-10s in the hand: its Starter %.2f, every form %.2f to %.2f (the rule: %.2f, give or take %d%%; nothing past %.2f)" % [base, starter, lo, hi, h["long"], roundi(tol * 100.0), h["most"]])
+	print("held: %d forms, %s" % [count, "all good" if ok else "PROBLEMS"])
+	return ok
 
 
 ## Every form under a node, with the body it wears (its own keys over its parent's).

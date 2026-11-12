@@ -93,6 +93,24 @@ def log(*a):
     print("[lines_weapons]", *a)
 
 
+# A held genius is sized to the hand at every stage (data/genius.json, equipment): a form's
+# own length in its body is squeezed into its base's length, give or take the tolerance, so
+# that a Final is made no larger than its Starter. What a stage gives it is what it shows.
+with open(os.path.join(ROOT, "data", "genius.json")) as _f:
+    EQUIP = json.load(_f)["equipment"]
+
+
+def _hand(base):
+    """(the length a base is in the hand, the tolerance)."""
+    return float(EQUIP["hand"][base]["long"]), float(EQUIP["tolerance"])
+
+
+def _squeeze(v, lo_in, hi_in, lo_out, hi_out):
+    """v, somewhere between lo_in and hi_in, brought the same way between lo_out and hi_out."""
+    t = min(1.0, max(0.0, (v - lo_in) / (hi_in - lo_in)))
+    return lo_out + (hi_out - lo_out) * t
+
+
 def _gl():
     """genius_lines, as it is already loaded (it loads this file, so this file must not load it)."""
     m = sys.modules.get("genius_lines")
@@ -189,9 +207,18 @@ class Weapon:
         self.wings = {}         # "wing_l" / "wing_r" -> ([(geometry, material)], pivot)
         self.marks = {}         # named places in the kit's frame, for sockets
         self.off = None         # where the second hand goes, in the kit's frame
+        self.into = None        # while set, what is made of light goes into this list (a piece of its own)
+        self.empties = {}       # name -> a place in the kit's frame the game looks for (a bow's tips)
+        self.eyes = 0
+
+    def piece(self, name, items, pivot):
+        """A piece of its own, moved by the game by its name (docs/genius-lines.md, "What moves"):
+        blink_*, pulse_*, sway_*; or looked for by name (a bow's string)."""
+        if items:
+            self.wings[name] = (items, tuple(pivot))
 
     def light(self, geo, name="glow", strength=2.6):
-        self.hard.append((geo, gk.field(name, strength)))
+        (self.into if self.into is not None else self.hard).append((geo, gk.field(name, strength)))
 
     def bead(self, mat, r, at, scale=(1, 1, 1), sub=1, rot=None):
         """A small round thing (a stud, a knee, a lump of mud), shaded round: twelve points
@@ -213,12 +240,16 @@ class Weapon:
             # a lens gone dark as a pupil: the dark over the light, a thin ring of it left
             c, f = V(at), V(facing).normalized()
             items.append((g.ico(c + f * (r * 0.22), r * 0.8, sub=1, scale=(1.0, 1.0, 1.0)), gk.mat("eye_dark")))
+        brow = []
         if look == "old":
             # heavy lids, and a brow over it
             c, f = V(at), V(facing).normalized()
             side = f.cross(Z).normalized() if abs(f.dot(Z)) < 0.9 else X
-            items.append((g.tongue([c - side * (r * 1.4) + Z * (r * 0.9), c + Z * (r * 1.25) + f * (r * 0.6), c + side * (r * 1.4) + Z * (r * 0.9)], [r * 0.3, r * 0.9, r * 0.3], thick=0.6, normal=f + Z * 0.4), lm))
-        self.hard += items
+            brow.append((g.tongue([c - side * (r * 1.4) + Z * (r * 0.9), c + Z * (r * 1.25) + f * (r * 0.6), c + side * (r * 1.4) + Z * (r * 0.9)], [r * 0.3, r * 0.9, r * 0.3], thick=0.6, normal=f + Z * 0.4), lm))
+        self.hard += brow
+        # it is alive: the eye is a piece of its own, and it blinks
+        self.eyes += 1
+        self.piece("blink_eye%s" % ("" if self.eyes == 1 else chr(96 + self.eyes)), items, at)
 
     def finish(self, F, ref, extra_sockets=None, mid=None):
         """Join it, pose it by F (the kit's frame to where it floats), and write its sockets:
@@ -275,8 +306,27 @@ class Weapon:
             bpy.context.collection.objects.link(off)
             off.matrix_world = F @ Matrix.Translation(V(self.off))
             socks["grip_off"] = off
+        for ename, at in self.empties.items():
+            e = bpy.data.objects.new(ename, None)
+            e.empty_display_size = 0.03
+            bpy.context.collection.objects.link(e)
+            e.matrix_world = F @ Matrix.Translation(V(at))
+            socks[ename] = e
         socks.update(extra_sockets or {})
         return out, socks, ref
+
+
+def _vein(pts, r=0.0045):
+    """A sinew of the field laid along the thing."""
+    return g.tube([V(q) for q in pts], r, n=3)
+
+
+def _tendril(root, down, length, sway=0.03, r=0.006):
+    """A string of sinew hanging from it, a bead of the field at its end: [(geometry, material)]."""
+    root, down = V(root), V(down).normalized()
+    side = down.cross(Y).normalized() if abs(down.dot(Y)) < 0.9 else X
+    pts = [root, root + down * length * 0.4 + side * sway, root + down * length * 0.75 - side * sway * 0.6, root + down * length]
+    return [(g.tube(pts, [r, r * 0.8, r * 0.6, r * 0.4], n=4), _round("sinew")), (g.ico(pts[-1], r * 1.9, sub=0), gk.field("vein", 2.4))]
 
 
 def _export(form_id, objects, sockets, ref):
@@ -284,7 +334,7 @@ def _export(form_id, objects, sockets, ref):
     path = os.path.join(gl.OUT, form_id + ".glb")
     tris = gl.export_objects(objects, sockets, path, ref=ref)
     kb = os.path.getsize(path) // 1024
-    if kb > 80:
+    if kb > 104:               # (80 before its eye, its string and its sinews were pieces of their own)
         log("OVER BUDGET: %s is %d KB (%d triangles)" % (form_id, kb, tris))
     return tris
 
@@ -464,6 +514,12 @@ def build_blade(form_id, level, spec, base):
     dn = (Rp.to_3x3().transposed() @ Vector((0, 0, -1))).normalized()      # which way is down for it, in its own frame
     B = dict({"kind": "sword", "len": 0.8, "width": 0.03, "thick": 0.011, "curve": 0.0, "tip": 0.2, "taper": 0.8, "flare": 0.0, "fuller": True, "steel": "steel"}, **spec.get("blade", {}))
     H = dict({"len": 0.21, "wrap": "leather", "metal": "brass"}, **spec.get("hilt", {}))
+    # the hand's size: hilt and steel together come to the Blade's length, whatever the stage
+    long, tol = _hand("blade")
+    made = float(B["len"]) + float(H["len"]) + 0.07
+    steel = _squeeze(made, 0.5, 2.1, long * (1 - tol) + 0.02, long * (1 + tol * 0.4)) - float(H["len"]) - 0.07
+    B["width"] = float(B["width"]) * min(1.6, max(0.85, math.sqrt(steel / float(B["len"]))))
+    B["len"] = steel
     mats = STEEL[B["steel"]]
     metal = H["metal"]
     glen = float(H["len"])
@@ -723,6 +779,23 @@ def build_blade(form_id, level, spec, base):
         w.marks["arm_l"], w.marks["arm_r"] = w.marks["arm_r"], w.marks["arm_l"]
     if glen >= 0.36:
         w.off = (0, 0, -glen + 0.09)
+    # what it shows of its stage (it does not grow): a sinew of the field up the flat that
+    # breathes, strings of sinew from the pommel, gills at the guard
+    if level >= 2:
+        reach = (0.0, 0.0, 0.34, 0.55, 0.78)[level]
+        geo = None
+        for sy in (-1, 1):
+            geo = g.merge(geo, _vein([(mid_x(0.04 + reach * k / 5.0) + 0.006 * math.sin(k * 2.1), sy * (T + 0.004), z0 + L * (0.04 + reach * k / 5.0)) for k in range(6)]))
+        w.piece("pulse_vein", [(geo, gk.field("vein", 2.2))], (0, 0, z0))
+    if level >= 3:
+        for k in range(level - 2):
+            w.piece("sway_sinew%s" % "ab"[k], _tendril((0.012 * (1 - 2 * k), 0.0, -glen - 0.02), dn, 0.15 + 0.04 * k, sway=0.02 * (1 - 2 * k)), (0, 0, -glen - 0.02))
+    if level >= 4:
+        geo = None
+        for sy in (-1, 1):
+            for k in range(3):
+                geo = g.merge(geo, g.box(Vector((-0.02 + 0.02 * k, sy * 0.021, zg - 0.012)), (0.008, 0.004, 0.03)))
+        w.piece("pulse_breath", [(geo, gk.field("breath", 2.0))], (0, 0, zg))
     objs, socks, ref = w.finish(F, _ref(base, form_id, level, float(spec.get("show", 1.0))))
     _export(form_id, objs, socks, ref)
 
@@ -754,11 +827,14 @@ def _scope(w, y_back, y_front, z, r, look="open", rim="brass", hood=0.0, back_le
         p.box("steel_dark", (0.014, 0.02, r + 0.03), (x, y, z - r * 0.5 - 0.015))
         _sleeve(p, "steel_dark", y + 0.008, y - 0.008, r * 1.12, z, x=x)
     c = Vector((x, y_front - 0.003, z))
-    w.hard.append((g.ico(c, r * 0.84, sub=1, scale=(1.0, 0.35, 1.0)), gk.field("eyes", 3.6)))
+    lens = [(g.ico(c, r * 0.84, sub=1, scale=(1.0, 0.35, 1.0)), gk.field("eyes", 3.6))]
     if look == "dark":         # gone dark as a pupil: a ring of light round the dark
-        w.hard.append((g.ico(c + Vector((0, -r * 0.2, 0)), r * 0.62, sub=1, scale=(1.0, 0.35, 1.0)), gk.mat("eye_dark")))
+        lens.append((g.ico(c + Vector((0, -r * 0.2, 0)), r * 0.62, sub=1, scale=(1.0, 0.35, 1.0)), gk.mat("eye_dark")))
     else:
-        w.hard.append((g.ico(c + Vector((0, -r * 0.26, 0)), r * 0.3, sub=0, scale=(0.5, 0.4, 1.6)), gk.mat("eye_dark")))
+        lens.append((g.ico(c + Vector((0, -r * 0.26, 0)), r * 0.3, sub=0, scale=(0.5, 0.4, 1.6)), gk.mat("eye_dark")))
+    # its lens is its eye, and it blinks
+    w.eyes += 1
+    w.piece("blink_lens%s" % ("" if w.eyes == 1 else chr(96 + w.eyes)), lens, c)
     if hood:
         p.cone("steel_dark", r * 1.08, r * 1.3, hood, (x, y_front + 0.002, z), rot=(HPI, 0, 0), segs=8)
     if back_lens:
@@ -866,6 +942,14 @@ def build_gun(form_id, level, spec, base):
     w = Weapon(form_id)
     p = w.p
     G = dict({"frame": "pocket", "barrel": 0.2, "bore": 0.02, "barrels": 1, "muzzle": 1.0, "butt": 1.0}, **spec.get("gun", {}))
+    # the hand's size: every form of the Gun is a thing held in one hand. A long gun keeps its
+    # stock and its lens and is cut down to them; the pocket piece is given barrel enough.
+    long, tol = _hand("gun")
+    G["barrel"] = {"pocket": _squeeze(float(G["barrel"]), 0.15, 0.5, 0.42, 0.48), "revolver": _squeeze(float(G["barrel"]), 0.2, 1.2, 0.24, 0.32),
+                   "rifle": _squeeze(float(G["barrel"]), 0.6, 1.7, 0.3, 0.38), "carbine": _squeeze(float(G["barrel"]), 0.5, 1.3, 0.28, 0.34),
+                   "pole": _squeeze(float(G["barrel"]), 0.3, 1.2, 0.3, 0.4), "wall": _squeeze(float(G["barrel"]), 0.5, 1.6, 0.4, 0.5)}.get(G["frame"], float(G["barrel"]))
+    if G["frame"] in ("rifle", "carbine"):
+        G["butt"] = min(float(G["butt"]), 0.5)
     bm, trim = "iron", "brass"
     wood = G.get("wood", "walnut")
     frame = G["frame"]
@@ -988,7 +1072,7 @@ def build_gun(form_id, level, spec, base):
         _scope(w, y0 - 0.12, y0 + 0.08, zs, 0.034 * ss, look=look, back_lens=False)
         w.marks["eye"] = Vector((0, y0 - 0.35, zs))
     # what it has grown or been given
-    H = float(spec.get("height", 0.0))
+    H = min(float(spec.get("height", 0.0)), 0.3)      # one that stands, stands on legs a hand long
     feet = []
     for style, s in each(spec.get("grows")):
         if style in ("bipod", "stride", "level", "wheels", "tripod"):
@@ -1211,6 +1295,22 @@ def build_gun(form_id, level, spec, base):
             for k in range(3):
                 b0 = Vector((0.03 * math.sin(k * 2.0), y0 - 0.05 - 0.12 * k, zb + 0.08))
                 w.soft.append((g.tongue([b0, b0 + Vector((0.03, 0.06, 0.1)) * s, b0 + Vector((-0.03, 0.16, 0.22)) * s, b0 + Vector((0.02, 0.22, 0.36)) * s], [0.06, 0.07, 0.045, 0.008], thick=0.4, normal=X), gk.mat("shade_edge")))
+    # what it shows of its stage (it does not grow): sinews of the field along the barrel that
+    # breathe, gills at the breech, a string of sinew from the butt
+    if level >= 2:
+        reach = (0.0, 0.0, 0.45, 0.7, 0.95)[level]
+        geo = None
+        for sx in (-1, 1):
+            geo = g.merge(geo, _vein([(sx * (r + 0.004) * (1.0 - 0.25 * (k % 2)), y0 - 0.03 - Lb * reach * k / 4.0, zb + r * 0.5 * (k % 2)) for k in range(5)], 0.004))
+        w.piece("pulse_vein", [(geo, gk.field("vein", 2.2))], (0, y0, zb))
+    if level >= 3:
+        geo = None
+        for sx in (-1, 1):
+            for k in range(3):
+                geo = g.merge(geo, g.box(Vector((sx * (r * 1.28 + 0.012), y0 + 0.012 + 0.016 * k, zb)), (0.004, 0.007, r * 1.5), rot=(0.0, 0.0, 0.0)))
+        w.piece("pulse_breath", [(geo, gk.field("breath", 2.0))], (0, y0, zb))
+    if level >= 4:
+        w.piece("sway_sinew", _tendril((0, rear * 0.7, low * 0.75), (0, 0.25, -1), 0.16), (0, rear * 0.7, low * 0.75))
     # its pose, floating level (or standing on what it has grown)
     k_show = LARGER[level] * float(spec.get("show", 1.0))
     front, back = ym - 0.05, rear
@@ -1261,6 +1361,9 @@ def build_bow(form_id, level, spec, base):
     p = w.p
     B = dict({"len": 0.45, "bend": 0.2, "recurve": 0.0, "width": 0.034, "thick": 0.02, "wood": "wood", "belly": None, "grip": 0.2, "lower": 1.0,
               "shoulders": 1.0, "rough": 0.0, "wrap": "dark", "tips": "mark_tips"}, **spec.get("bow", {}))
+    # the hand's size: every form of the Bow is the same bow's length, whatever the stage
+    long, tol = _hand("bow")
+    B["len"] = _squeeze(float(B["len"]), 0.45, 1.25, long * (1 - tol) / 2 + 0.012, long / 2)
     half, bend, rec = float(B["len"]), float(B["bend"]), float(B["recurve"])
     wood, belly = B["wood"], B["belly"] or B["wood"]
     gl = float(B["grip"])
@@ -1322,6 +1425,9 @@ def build_bow(form_id, level, spec, base):
     sy = (up.y + lo.y) / 2 + draw
     nock = Vector((0, sy, 0.0))
     smat = {"dark": "crepe", "wires": "steel"}.get(sstyle, "gut")
+    # (the string is a piece of its own, named string: drawn, the game takes it back to the hand)
+    string = []
+    w.into = string
     if sstyle in ("plain", "wrapped", "dark", "ring", "tremble", "twitch", "hair"):
         r_s = 0.0045 if sstyle != "hair" else 0.0025
         mids = [Vector((0, sy, lo.z * 0.5)), Vector((0, sy, up.z * 0.5))]
@@ -1333,11 +1439,11 @@ def build_bow(form_id, level, spec, base):
         if sstyle == "hair":       # not gut or wire: a hair, or a thread from a sleeve
             w.light(g.tube(pts, r_s * 1.6, n=3), "oath", 2.2)
         else:
-            p.tube(smat, pts, r_s, segs=3)
-            p.cone("cloth_red" if sstyle != "dark" else "crepe", 0.008, 0.008, 0.09, (0, sy, -0.045), segs=4)
+            string.append((g.tube(pts, r_s, n=3), _round(smat)))
+            string.append((g.tube([(0, sy, -0.045), (0, sy, 0.045)], 0.008, n=4), _round("cloth_red" if sstyle != "dark" else "crepe")))
         if sstyle == "wrapped":    # wrapped where it would otherwise slap
             for z in (lo.z * 0.72, up.z * 0.72):
-                w.soft.append((g.ico((0, sy * 0.72 + (up.y if z > 0 else lo.y) * 0.28, z), 0.035 * ss, sub=1, scale=(1.0, 1.0, 1.5)), gk.mat("fur_ruff")))
+                string.append((g.ico((0, sy * 0.72 + (up.y if z > 0 else lo.y) * 0.28, z), 0.035 * ss, sub=1, scale=(1.0, 1.0, 1.5)), gk.mat("fur_ruff")))
             for sz, tp in ((1, up), (-1, lo)):
                 p.cone("rag", 0.02, 0.016, 0.1, (tp.x, tp.y, tp.z - sz * 0.13 if sz == 1 else tp.z + 0.03), segs=5)
         elif sstyle == "ring":     # a soft ring of light round the middle of the string
@@ -1347,11 +1453,15 @@ def build_bow(form_id, level, spec, base):
         w.light(g.tube([lo + Vector((0, 0.004, 0)), Vector((0, sy, 0)), up + Vector((0, 0.004, 0))], 0.011 * ss, n=4), "vigil", 2.6)
     elif sstyle == "wires":        # it hums with the line's wires
         for k in (-1, 0, 1):
-            p.tube("steel", [lo + Vector((k * 0.02, 0.004, 0)), Vector((k * 0.02, sy, 0)), up + Vector((k * 0.02, 0.004, 0))], 0.003, segs=3)
+            string.append((g.tube([lo + Vector((k * 0.02, 0.004, 0)), Vector((k * 0.02, sy, 0)), up + Vector((k * 0.02, 0.004, 0))], 0.003, n=3), _round("steel")))
         for sz, tp in ((1, up), (-1, lo)):
             p.lathe(["paper", "paper"], [(0.012, -0.03), (0.03, -0.012), (0.03, 0.012), (0.012, 0.03)], segs=6, loc=(tp.x, tp.y, tp.z - sz * 0.05), rot=(0, HPI, 0))
     w.off = tuple(nock)
-    # the arrow of light on the string
+    w.piece("string", string, nock)
+    w.empties.update({"tip_up": up + Vector((0, 0.004, 0)), "tip_lo": lo + Vector((0, 0.004, 0))})
+    # the arrow of light on the string (a piece of its own: it breathes)
+    arrow = []
+    w.into = arrow
     astyle, asz = opt(spec.get("arrow", "light"))
     La = (0.5 + 0.35 * half) * asz
     arrow_tip = nock + Vector((0, -La, 0))
@@ -1369,6 +1479,8 @@ def build_bow(form_id, level, spec, base):
         th = [nock, nock + Vector((0.05, 0.06, -0.1)), nock + Vector((-0.04, 0.1, -0.24)), nock + Vector((0.06, 0.07, -0.4)), nock + Vector((-0.02, 0.12, -0.55)), nock + Vector((0.03, 0.1, -0.7 * half - 0.2))]
         w.light(g.tube(th, 0.0045, n=3), "thread", 2.0)
         w.light(g.tube([arrow_tip, arrow_tip + Vector((0.05, 0.1, -0.12)), arrow_tip + Vector((-0.03, 0.22, -0.3))], 0.004, n=3), "thread", 2.0)
+    w.into = None
+    w.piece("pulse_arrow", arrow, nock)
     # the eye in its grip, looking down the arrow
     estyle, er = opt(spec.get("eye", "grip"))
     er *= 1.0 + 0.2 * (level - 1)
@@ -1550,6 +1662,29 @@ def build_bow(form_id, level, spec, base):
         elif style == "cloth":     # a strip of red, to be found by
             c = at(-1, 0.75)
             w.soft.append((g.tongue([c, c + Vector((0.05, 0.03, -0.1)), c + Vector((0.07, 0.05, -0.28)) * s], [0.04, 0.045, 0.012], thick=0.15, normal=Y), gk.mat("cloth_rag")))
+    # what it shows of its stage (it does not grow): sinews of the field up the back of each
+    # limb that breathe, strings of sinew from under the grip, gills beside it
+    if level >= 2:
+        reach = (0.0, 0.0, 0.34, 0.6, 0.9)[level]
+        geo = None
+        for sz in (1, -1):
+            for sx in (-1, 1):
+                pts = []
+                for k in range(6):
+                    t = 0.04 + reach * k / 5.0
+                    c = at(sz, t)
+                    pts.append((c.x + sx * width_at(t) * 0.45, c.y - B["thick"] * (1 - 0.45 * t) - 0.004, c.z))
+                geo = g.merge(geo, _vein(pts, 0.004))
+        w.piece("pulse_vein", [(geo, gk.field("vein", 2.2))], (0, 0, 0))
+    if level >= 3:
+        for k in range(level - 2):
+            w.piece("sway_sinew%s" % "ab"[k], _tendril((0.016 * (1 - 2 * k), 0.006, -gl / 2 - 0.03), (0, 0, -1), 0.17 + 0.05 * k, sway=0.022 * (1 - 2 * k)), (0, 0, -gl / 2 - 0.03))
+    if level >= 4:
+        geo = None
+        for sx in (-1, 1):
+            for k in range(3):
+                geo = g.merge(geo, g.box(Vector((sx * 0.03, -0.006, gl / 2 - 0.03 - 0.03 * k)), (0.004, 0.03, 0.01)))
+        w.piece("pulse_breath", [(geo, gk.field("breath", 2.0))], (0, 0, 0))
     # its pose: upright, its arrow to the front
     gap = 0.1
     F = Matrix.Translation((0, 0, -min(lo.z, -half * float(B["lower"])) + 0.06 + gap))
