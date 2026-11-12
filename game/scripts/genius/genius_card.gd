@@ -86,6 +86,10 @@ func _build(info: Dictionary, color: Color, title: String) -> void:
 	var instar := int(info.get("instar", 1))
 	var fm := Data.form(form)
 	sub.text = "%s  ·  %s  ·  %s" % [String(fm.get("kind", _form_name(form))), String(info.get("expression", "")).capitalize(), GeniusResonance.instar_rule(maxi(1, instar)).get("name", "")]
+	# a held genius says which of the three kinds it is (data/genius.json, equipment)
+	var cat := GeniusEquip.category(Data.genius().get("equipment", {}), String(fm.get("base", "")).get_slice("+", 0))
+	if not cat.is_empty():
+		sub.text = "%s  ·  %s" % [String(cat["name"]), sub.text]
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(sub)
 	var r := Style.rule(W - 40, Style.BRASS_DIM)

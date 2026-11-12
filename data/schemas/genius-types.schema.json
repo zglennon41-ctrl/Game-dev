@@ -753,6 +753,10 @@
          "drawLength": {
           "type": "number",
           "exclusiveMinimum": 0
+         },
+         "raise": {
+          "type": "number",
+          "exclusiveMinimum": 0
          }
         }
        },

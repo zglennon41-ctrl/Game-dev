@@ -5133,6 +5133,7 @@ func _draw_string(f: Fight, held: Dictionary, grip_at: Vector3, frame: Basis) ->
 			(n as Node3D).visible = true
 		if _string:
 			_string.visible = false
+		_reach_hand(not (String(held.get("hand", "r")) == "l") if not held.is_empty() else false, Vector3.ZERO, 0.0)
 		return
 	for n in own:
 		(n as Node3D).visible = false
@@ -5147,12 +5148,19 @@ func _draw_string(f: Fight, held: Dictionary, grip_at: Vector3, frame: Basis) ->
 	_string.global_transform = Transform3D.IDENTITY
 	# the nock: at full draw at the hand that draws (the corner of the jaw), and never further
 	# from the grip than an arm can take it
+	# (the corner of the jaw is where the head is, a little below and to the drawing side)
 	var rest_nock := (tip_a.global_position + tip_b.global_position) * 0.5
-	var hand := _hand_slot(String(held.get("hand", "r")) != "l").origin
+	var right := String(held.get("hand", "r")) == "l"
 	var back := -frame.z
-	var reach := clampf((hand - grip_at).dot(back), 0.25, float(held.get("drawLength", 0.75)))
-	var full := grip_at + back * reach + Vector3.UP * (hand.y - grip_at.y) * 0.0
+	var jaw := grip_at + back * float(held.get("drawLength", 0.75))
+	if _p_skel and _head_bone >= 0:
+		var head := (_p_skel.global_transform * _p_skel.get_bone_global_pose(_head_bone)).origin
+		jaw = head + Vector3.UP * 0.1 + frame.x * (-0.1 if right else 0.1)
+	var reach := clampf((jaw - grip_at).dot(back), 0.3, float(held.get("drawLength", 0.75)))
+	var full := grip_at + back * reach
 	var nock := rest_nock.lerp(full, drawn)
+	# and the hand that draws goes to the nock, its elbow out and up behind it
+	_reach_hand(not right, nock, 1.0, back + Vector3.UP * 0.5 + frame.x * (-0.6 if right else 0.6))
 	var im := _string.mesh as ImmediateMesh
 	im.clear_surfaces()
 	var side := frame.x * 0.006
@@ -5171,6 +5179,56 @@ func _draw_string(f: Fight, held: Dictionary, grip_at: Vector3, frame: Basis) ->
 		for v in [head - w, head + w, head + frame.z * 0.12]:
 			im.surface_add_vertex(v)
 	im.surface_end()
+
+## One hand of the partner brought to a place in the world, over whatever its clip is doing
+## (the hand that draws a bow goes to the string; the hand that holds it is raised to the
+## aim): the upper arm and the forearm are turned so that the hand's slot is there. The elbow
+## bends the way it already bends, or toward `elbow` (a way in the world) where one is given.
+## k: how much (0 lets the arm go back to its clip).
+var _reached := {}
+func _reach_hand(left: bool, to: Vector3, k: float, elbow := Vector3.ZERO) -> void:
+	if _p_skel == null:
+		return
+	var side := "l" if left else "r"
+	var upper := _p_skel.find_bone("upperarm." + side)
+	var lower := _p_skel.find_bone("lowerarm." + side)
+	var wrist := _p_skel.find_bone("wrist." + side)
+	var slot := _p_skel.find_bone("handslot." + side)
+	if upper < 0 or lower < 0 or wrist < 0:
+		return
+	if k <= 0.0:
+		if _reached.has(side):
+			_p_skel.set_bone_global_pose_override(upper, Transform3D.IDENTITY, 0.0, false)
+			_p_skel.set_bone_global_pose_override(lower, Transform3D.IDENTITY, 0.0, false)
+			_reached.erase(side)
+		return
+	_reached[side] = true
+	# (from the clip's own pose, not from where the arm was put last frame)
+	var inv := _p_skel.global_transform.affine_inverse()
+	var up_t := _p_skel.get_bone_global_pose_no_override(upper)
+	var lo_t := _p_skel.get_bone_global_pose_no_override(lower)
+	var wr := _p_skel.get_bone_global_pose_no_override(wrist).origin
+	# the place is for the hand's slot (where a thing is held): the wrist stops short of it
+	var target := inv * to
+	if slot >= 0:
+		target -= (_p_skel.get_bone_global_pose_no_override(slot).origin - wr)
+	var s0 := up_t.origin
+	var e0 := lo_t.origin
+	var a := (e0 - s0).length()
+	var b := (wr - e0).length()
+	var d := clampf((target - s0).length(), absf(a - b) + 0.01, a + b - 0.005)
+	var along := (target - s0).normalized()
+	var bend := (e0 - s0) if elbow == Vector3.ZERO else inv.basis * elbow
+	var pole := bend - along * bend.dot(along)
+	pole = pole.normalized() if pole.length() > 0.01 else Vector3.DOWN
+	var x := (a * a - b * b + d * d) / (2.0 * d)
+	var h := sqrt(maxf(0.0, a * a - x * x))
+	var e1 := s0 + along * x + pole * h
+	var w1 := s0 + along * d
+	var turn_up := Quaternion((e0 - s0).normalized(), (e1 - s0).normalized())
+	var turn_lo := Quaternion((wr - e0).normalized(), (w1 - e1).normalized())
+	_p_skel.set_bone_global_pose_override(upper, Transform3D(Basis(turn_up) * up_t.basis, s0), k, true)
+	_p_skel.set_bone_global_pose_override(lower, Transform3D(Basis(turn_lo) * lo_t.basis, e1), k, true)
 
 func _update_form(f: Fight, dt: float) -> void:
 	_genius.visible = false
@@ -5192,6 +5250,15 @@ func _update_form(f: Fight, dt: float) -> void:
 		# a thing held in the other hand, or in both, leaves no hand for a shield
 		if _offhand and is_instance_valid(_offhand):
 			_offhand.visible = not (left or int(f.style.get("hands", 1)) == 2)
+		# raise: aimed, the hand that holds it is put out along the aim from its own shoulder,
+		# that far, so that the arrow lies at the height of the jaw
+		if held.has("raise"):
+			var sh := _p_skel.find_bone("upperarm.l" if left else "upperarm.r") if _p_skel else -1
+			if sh >= 0 and _aim_k > 0.0:
+				var from := (_p_skel.global_transform * _p_skel.get_bone_global_pose_no_override(sh)).origin
+				_reach_hand(left, from + aim_line(f) * float(held["raise"]) + Vector3.UP * 0.02, smoothstep(0.0, 1.0, _aim_k), Vector3.DOWN)
+			else:
+				_reach_hand(left, Vector3.ZERO, 0.0)
 		var slot := _hand_slot(left)
 		var g := _g_body._local_xf(_held_at("grip"))
 		var gb := g.basis.orthonormalized()
@@ -5212,6 +5279,8 @@ func _update_form(f: Fight, dt: float) -> void:
 		_g_body.move_at(0.0)
 		return
 	_draw_string(f, {}, Vector3.ZERO, Basis.IDENTITY)
+	for sd in _reached.keys():
+		_reach_hand(sd == "l", Vector3.ZERO, 0.0)
 	# A worn or carried genius sits on its partner where its kind is worn (data/genius-types.json,
 	# mounts), by the empty its own model has for that, at the size it was made.
 	if _offhand and is_instance_valid(_offhand):

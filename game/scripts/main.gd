@@ -1882,6 +1882,8 @@ func _sounds(events: Array) -> void:
 ##   --views=front,side,back,quarter     (default quarter,side,back)
 ##   --body=<person model>               (default the yard's hero)
 ##   --free                              a weapon genius stays at the shoulder, not in the hand
+##   --rest=x,y,z                        try another turn of the thing in the resting hand (degrees)
+##   --tag=<word>                        added to the pictures' names
 func _study() -> void:
 	var poses: PackedStringArray = str(_args.get("poses", "idle,aim,attack")).split(",")
 	var views: PackedStringArray = str(_args.get("views", "quarter,side,back")).split(",")
@@ -1905,11 +1907,15 @@ func _study() -> void:
 		fight.w_state = "absent"
 		if fight.g_type == "weapon" and not _args.has("free"):
 			fight._take_in_hand()
+		if _args.has("rest") and fight.g_weapon.has("held"):
+			fight.g_weapon["held"] = (fight.g_weapon["held"] as Dictionary).duplicate()
+			fight.g_weapon["held"]["rest"] = Array(str(_args["rest"]).split(",")).map(func(x): return float(x))
 		var ranged: bool = fight.ranged
 		var two: bool = int(fight.style.get("hands", 1)) == 2
 		for pose in poses:
 			var clip := "Idle"
 			var at := 0.3
+			fight.p_lock = false
 			match pose:
 				"aim":
 					if not ranged:
@@ -1939,7 +1945,7 @@ func _study() -> void:
 				for i in 3:
 					await get_tree().process_frame
 				await RenderingServer.frame_post_draw
-				get_viewport().get_texture().get_image().save_png("%s/%s-%s-%s.png" % [_args["shots"], form_id.replace(":", "_"), pose, view])
+				get_viewport().get_texture().get_image().save_png("%s/%s%s-%s-%s.png" % [_args["shots"], form_id.replace(":", "_"), str(_args.get("tag", "")), pose, view])
 			fight.p_state = "free"
 			fight.p_lock = false
 	print("STUDY done")

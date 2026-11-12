@@ -210,7 +210,14 @@ static func says(g: Genius, hero: Dictionary = {}) -> Dictionary:
 	if not what["written"]:
 		return { "type": "companion", "title": "", "lines": lines }
 	var title := String(t.get("name", "")).to_upper()
-	lines.append(String(t.get("says", "")))
+	# a held genius is named by its category (Arms, Regalia: data/genius.json, equipment), in
+	# the category's own words, and then by what its type does
+	var cat := GeniusEquip.category(Data.genius().get("equipment", {}), String(what["base"]))
+	if cat.is_empty():
+		lines.append(String(t.get("says", "")))
+	else:
+		title = String(cat["name"]).to_upper()
+		lines.append("%s %s" % [String(cat["text"]), String(t.get("says", ""))])
 	match type:
 		"weapon":
 			var w := weapon_spec(String(what["base"]), String(what["path"]))
